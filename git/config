@@ -1,0 +1,85 @@
+# vim:expandtab:shiftwidth=8:tabstop=8:softtabstop=8:ft=gitconfig
+[user]
+        # Tôi ra đây có phải xưng danh không nhỉ?
+        name = Trần Đức Nam
+        email = dynamo.foss@gmail.com
+        # Signing GPG key
+        signingkey = "4EBAE1BF12EFDA5B"
+[commit]
+        gpgsign = true
+[merge]
+        # Merge with vim
+        tool = nvimdiff
+        conflictstyle = diff3
+[diff]
+        # Diff with vim
+        tool = nvimdiff
+        # Not show a/, b/ when diff, I'm angry with this
+        noprefix = true
+        # Use extended form of Bram Cohen's patience diff algorithm
+        algorithm = histogram
+[mergetool]
+        # Not prompt launch apps, I have no time to confirm that don't think why I used it
+        prompt = false
+        # Not generate .orig files
+        keepBackup = false
+[difftool]
+        # Not prompt launch apps, I have no time to confirm that don't think why I used it
+        prompt = false
+        tool = nvimdiff
+[difftool "nvimdiff"]
+        # Nvim diff 2 files
+        cmd = "nvim -d $LOCAL $REMOTE"
+[difftool "kitty"]
+        # Use kitten of kitty to diff each hunk
+        cmd = "kitty +kitten diff $LOCAL $REMOTE"
+[mergetool "nvimdiff"]
+        # Nvim diff 4 files
+        cmd = "nvim -d $BASE $LOCAL $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'"
+[help]
+        # Okay sometimes I type so f*cking bad
+        autocorrect = 1
+[color]
+        # Be careful with pipe when redirected output
+        ui = auto
+[color "status"]
+        # I don't like default color
+        added = green
+        changed = blue
+        untracked = magenta
+        deleted = red
+[color "diff"]
+        # I don't like default color
+        meta = white reverse
+        frag = magenta bold
+        old = red
+        new = blue
+[core]
+        # Some Windows programmer in team, so no auto convert CRLF
+        autocrlf = false
+        # Work with standard or convention
+        whitespace = trailing-space,space-before-tab,tab-in-indent,cr-at-eol
+        # Use neovim to edit message
+        editor = nvim
+[apply]
+        # Auto fix white space
+        whitespace = fix
+[alias]
+        # Graph log view
+        graph = log --graph --abbrev-commit
+        # Meaning stash
+        snapshot = !git stash save "Snapshot: $(date)"
+        # Rename stash
+        stash-rename = "!_() { rev=$(git rev-parse $1) && git stash drop $1 || exit 1 ; git diff-index --quiet HEAD; s=$?; [ $s != 0 ] && git stash save \"tmp stash from stash-rename\"; git stash apply $rev && shift && git stash save \"$@\" && [ $s != 0 ] && git stash pop stash@{1}; }; _"
+        # Find commits with source code
+        find-source = "!_() { git log --pretty=format:'%C(yellow)%h %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; _"
+        # Find commits with message
+        find-message = "!_() { git log --pretty=format:'%C(yellow)%h %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; _"
+        # Find branches containing commit
+        find-branch = "!_() { git branch -a --contains $1; }; _"
+[push]
+        # Only push current branch to same name branch
+        default = current
+[gc]
+        # Don't auto git gc, with large project can slow when working
+        auto = 0

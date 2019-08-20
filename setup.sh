@@ -1,0 +1,24 @@
+#!/bin/bash
+
+SETUP_DIR=$(dirname "$(readlink -f "$0")")
+
+_link() {
+  if [[ -e "$2" || -L "$2" ]]; then
+    if test "$1" -ef "$(readlink -f "$2")"; then
+      echo "${2} linked"
+      return
+    else
+      rm -rf "$2"
+    fi
+  fi
+  mkdir -p "$(dirname "$2")"
+  ln -sv "$1" "$2"
+}
+
+_install() {
+  # Basic service
+  _link "$SETUP_DIR/git" ~/.git
+  _link "$SETUP_DIR/git/config" ~/.gitconfig
+}
+
+_install
