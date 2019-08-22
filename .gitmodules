@@ -1,0 +1,3 @@
+[submodule "font/files"]
+	path = font/files
+	url = git@gitlab.com:dynamo-config/font-collector.git

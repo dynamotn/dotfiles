@@ -1,5 +1,4 @@
 #!/bin/bash
-
 SETUP_DIR=$(dirname "$(readlink -f "$0")")
 
 _link() {
@@ -16,6 +15,9 @@ _link() {
 }
 
 _install() {
+  # Basic UI
+  _link "$SETUP_DIR/font/files" ~/.local/share/fonts
+
   # Basic service
   _link "$SETUP_DIR/git" ~/.git
   _link "$SETUP_DIR/git/config" ~/.gitconfig
