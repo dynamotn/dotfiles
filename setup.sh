@@ -19,6 +19,9 @@ _install() {
   # Basic service
   _link "$SETUP_DIR/git" ~/.git
   _link "$SETUP_DIR/git/config" ~/.gitconfig
+
+  # Become a hacker
+  _link "$SETUP_DIR/kitty/config" ~/.config/kitty/kitty.conf
 }
 
 _install
