@@ -24,6 +24,9 @@ _install() {
 
   # Become a hacker
   _link "$SETUP_DIR/kitty/config" ~/.config/kitty/kitty.conf
+
+  # Terminal application
+  _link "$SETUP_DIR/tmux/config" ~/.tmux.conf
 }
 
 _install
