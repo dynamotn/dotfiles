@@ -30,3 +30,4 @@ _install() {
 }
 
 _install
+git submodule update --init --recursive --remote
