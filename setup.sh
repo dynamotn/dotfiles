@@ -22,6 +22,7 @@ _install() {
 
   # Terminal application
   _link "$SETUP_DIR/tmux/config" ~/.tmux.conf
+  _link "$SETUP_DIR/htop" ~/.config/htop
 }
 
 _install
