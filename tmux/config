@@ -8,6 +8,7 @@ bind C-a send-prefix
 
 # Display 256 colors
 set -g default-terminal "tmux-256color"
+set -ga terminal-overrides ",*256col*:Tc"
 
 # Set window and pane index to 1
 set -g base-index 1
