@@ -31,4 +31,4 @@ _install() {
 }
 
 _install
-git submodule update --init --recursive --remote
+git --work-tree=$SETUP_DIR submodule update --init --recursive --remote
