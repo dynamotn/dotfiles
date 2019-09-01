@@ -24,6 +24,7 @@ _install() {
 
   # Become a hacker
   _link "$SETUP_DIR/kitty/config" ~/.config/kitty/kitty.conf
+  _link "$SETUP_DIR/vim" ~/.config/nvim
 
   # Terminal application
   _link "$SETUP_DIR/tmux/config" ~/.tmux.conf
