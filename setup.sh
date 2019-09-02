@@ -24,6 +24,8 @@ _install() {
 
   # Become a hacker
   _link "$SETUP_DIR/kitty/config" ~/.config/kitty/kitty.conf
+  _link "$SETUP_DIR/fish" ~/.config/fish # Must setup fish shell before vim
+  $SETUP_DIR/fish/setup.fish
   _link "$SETUP_DIR/vim" ~/.config/nvim
 
   # Terminal application
