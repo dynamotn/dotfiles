@@ -30,5 +30,5 @@ _install() {
   _link "$SETUP_DIR/htop" ~/.config/htop
 }
 
-_install
 git --work-tree=$SETUP_DIR submodule update --init --recursive --remote
+_install
