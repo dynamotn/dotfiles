@@ -60,7 +60,7 @@ set -g status-interval 2
 set -g status-fg colour231
 set -g status-bg colour234
 set -g status-justify "centre"
-set -g status-left "#[fg=colour254,bg=colour25] #H #[fg=colour25,bg=colour254]#[fg=colour16,bg=colour254] #(uptime | awk -F'[a-z]:' '{ print $2}') #[fg=colour254,bg=colour234]"
+set -g status-left "#[fg=colour254,bg=colour25] #H #[fg=colour25,bg=colour254]#[fg=colour16,bg=colour254] #(uptime | awk -F'[a-z]: ' '{ print $2 }') #[fg=colour254,bg=colour234]"
 set -g status-left-length 60
 set -g status-right "#[fg=colour2,bg=colour234]#[fg=colour231,bg=colour2] #(date '+%H:%M') "
 set -g window-status-format "#[fg=colour244,bg=colour234]   #I #[fg=colour240] #[fg=colour249]#W   "
