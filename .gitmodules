@@ -7,3 +7,6 @@
 [submodule "fish"]
 	path = fish
 	url = git@gitlab.com:dynamo-config/fish.git
+[submodule "bin"]
+	path = bin
+	url = git@gitlab.com:dynamo-config/bin.git
