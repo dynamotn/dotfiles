@@ -50,10 +50,12 @@
         deleted = red
 [color "diff"]
         # I don't like default color
-        meta = white reverse
+        meta = cyan
         frag = magenta bold
         old = red
         new = blue
+        commit = yellow bold
+        whitespace = red reverse
 [core]
         # Some Windows programmer in team, so no auto convert CRLF
         autocrlf = false
