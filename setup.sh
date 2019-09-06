@@ -28,6 +28,7 @@ _install() {
   # Terminal application
   _link "$SETUP_DIR/tmux/config" ~/.tmux.conf
   _link "$SETUP_DIR/htop" ~/.config/htop
+  _link "$SETUP_DIR/bat" ~/.config/bat
 }
 
 git --work-tree=$SETUP_DIR submodule update --init --recursive --remote
