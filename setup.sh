@@ -45,6 +45,9 @@ _install() {
   # WM and compositor
   _link "$SETUP_DIR/awesome" ~/.config/awesome
   _link "$SETUP_DIR/compton/config" ~/.config/compton.conf
+
+  # X11 miscelaneous
+  _link "$SETUP_DIR/redshift/config" ~/.config/redshift/redshift.conf
 }
 
 while getopts "hs" arg; do
