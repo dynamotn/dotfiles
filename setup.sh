@@ -41,6 +41,10 @@ _install() {
   _link "$SETUP_DIR/tmux/config" ~/.tmux.conf
   _link "$SETUP_DIR/htop" ~/.config/htop
   _link "$SETUP_DIR/bat" ~/.config/bat
+
+  # WM and compositor
+  _link "$SETUP_DIR/awesome" ~/.config/awesome
+  _link "$SETUP_DIR/compton/config" ~/.config/compton.conf
 }
 
 while getopts "hs" arg; do

@@ -10,3 +10,6 @@
 [submodule "bin"]
 	path = bin
 	url = git@gitlab.com:dynamo-config/bin.git
+[submodule "awesome"]
+	path = awesome
+	url = git@gitlab.com:dynamo-config/awesome.git
