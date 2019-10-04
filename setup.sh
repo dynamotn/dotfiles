@@ -48,6 +48,7 @@ _install() {
 
   # X11 miscelaneous
   _link "$SETUP_DIR/redshift/config" ~/.config/redshift/redshift.conf
+  _link "$SETUP_DIR/copyq/config" ~/.config/copyq/copyq.conf
 }
 
 while getopts "hs" arg; do
