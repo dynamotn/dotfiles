@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SETUP_DIR=$(dirname "$(readlink -f "$0")")
+LINK_ONLY=false
 
 _usage() {
   echo "$0 usage:" && grep " .)\\ #" $0 | sed -e 's/\(.\)) #/-\1/g'
@@ -31,7 +32,9 @@ _install() {
 
   # Become a hacker
   _link "$SETUP_DIR/fish" ~/.config/fish # Must setup fish shell before vim
-  $SETUP_DIR/fish/setup.fish
+  if ! $LINK_ONLY; then
+    $SETUP_DIR/fish/setup.fish
+  fi
   _link "$SETUP_DIR/vim" ~/.config/nvim
 
   # Terminal application
@@ -40,10 +43,13 @@ _install() {
   _link "$SETUP_DIR/bat" ~/.config/bat
 }
 
-while getopts "hs" arg; do
+while getopts "hls" arg; do
   case $arg in
     s) # Update git submodule before setup
       git --work-tree=$SETUP_DIR submodule update --init --recursive --remote
+      ;;
+    l) # Create link only
+      LINK_ONLY=true
       ;;
     h) # Display help
       _usage
