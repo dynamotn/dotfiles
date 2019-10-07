@@ -1,0 +1,37 @@
+#########################
+# Files and directories #
+#########################
+playlist_directory "~/.config/mpd/playlists"
+db_file            "~/.config/mpd/database"
+log_file           "~/.config/mpd/log"
+pid_file           "~/.config/mpd/pid"
+state_file         "~/.config/mpd/state"
+sticker_file       "~/.config/mpd/sticker"
+
+##########
+# Deamon #
+##########
+bind_to_address "localhost"
+port            "6600"
+
+#########
+# Input #
+#########
+input {
+  plugin "curl"
+}
+
+################
+# Audio Output #
+################
+audio_output {
+  type "pulse"
+  name "Pulse Audio"
+}
+
+audio_output {
+  type   "fifo"
+  name   "Visualizers"
+  path   "/tmp/mpd.fifo"
+  format "44100:16:2"
+}

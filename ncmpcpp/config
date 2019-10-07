@@ -1,0 +1,68 @@
+############################
+# Directory and connection #
+############################
+mpd_host = localhost
+mpd_port = 6600
+mpd_connection_timeout = 5
+mpd_crossfade_time = 5
+ 
+###############
+# Visualizers #
+###############
+visualizer_fifo_path = /tmp/mpd.fifo
+visualizer_output_name = my_fifo
+visualizer_sync_interval = 30
+visualizer_in_stereo = no
+visualizer_type = wave_filled
+visualizer_color = 41, 83, 119, 155, 185, 215, 209, 203, 197, 161
+
+###########
+# Display #
+###########
+song_columns_list_format = (6f)[magenta]{l} (25)[green]{t|f} (40)[cyan]{a} (30)[yellow]{b}
+playlist_display_mode = columns
+browser_display_mode = columns
+search_engine_display_mode = columns
+playlist_editor_display_mode = columns
+progressbar_look = ─╼
+autocenter_mode = yes
+centered_cursor = yes
+display_remaining_time = no
+user_interface = alternative
+header_visibility = yes
+statusbar_visibility = yes
+titles_visibility = yes
+header_text_scrolling = yes
+follow_now_playing_lyrics = yes
+clock_display_seconds = yes
+display_bitrate = yes
+colors_enabled = yes
+empty_tag_color = white
+header_window_color = cyan
+volume_color = blue
+state_line_color = white
+state_flags_color = white
+main_window_color = blue
+current_item_prefix = $(green)$r
+current_item_suffix = $/r$(end)
+progressbar_color = black
+progressbar_elapsed_color = cyan
+statusbar_color = red
+alternative_ui_separator_color = white
+window_border_color = green
+active_window_border = red
+
+#########
+# Lyric #
+#########
+lyrics_directory = ~/Multimedia/Lyrics
+lyrics_fetchers = chiasenhac,internet
+
+#################
+# Miscellaneous #
+#################
+incremental_seeking = yes
+default_tag_editor_pattern = %t
+ignore_leading_the = yes
+external_editor = vim
+use_console_editor = yes

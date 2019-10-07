@@ -49,6 +49,11 @@ _install() {
   _link "$SETUP_DIR/awesome" ~/.config/awesome
   _link "$SETUP_DIR/compton/config" ~/.config/compton.conf
 
+  # Multimedia
+  _link "$SETUP_DIR/mpd/config" ~/.config/mpd/mpd.conf
+  mkdir -p ~/.config/mpd/playlists
+  _link "$SETUP_DIR/ncmpcpp" ~/.ncmpcpp
+
   # X11 miscelaneous
   _link "$SETUP_DIR/redshift/config" ~/.config/redshift/redshift.conf
   _link "$SETUP_DIR/copyq/config" ~/.config/copyq/copyq.conf
