@@ -56,6 +56,11 @@
         new = blue
         commit = yellow bold
         whitespace = red reverse
+[color "diff-highlight"]
+        oldNormal = red bold
+        oldHighLight = red bold 52
+        newNormal = blue bold
+        newHighLight = blue bold 45
 [core]
         # Some Windows programmer in team, so no auto convert CRLF
         autocrlf = false
@@ -64,6 +69,8 @@
         # Use neovim to edit message
         editor = nvim
         excludesfile = ~/.git/ignore
+        # Use diff-so-fancy to prettier diff
+        pager = diff-so-fancy | less --tabs=4 -RFX
 [apply]
         # Auto fix white space
         whitespace = fix
