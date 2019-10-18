@@ -25,7 +25,7 @@ _link() {
 
 _install() {
   # Basic UI
-  _link "$SETUP_DIR/font/files" ~/.local/share/fonts
+  _link "$SETUP_DIR/X/font/files" ~/.local/share/fonts
 
   # Basic service
   _link "$SETUP_DIR/git" ~/.git

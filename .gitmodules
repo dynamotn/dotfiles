@@ -1,5 +1,5 @@
 [submodule "font/files"]
-	path = font/files
+	path = X/font/files
 	url = git@gitlab.com:dynamo-config/font-collector.git
 [submodule "vim"]
 	path = vim
