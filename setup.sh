@@ -19,6 +19,9 @@ _install() {
   # Basic service
   _link "$SETUP_DIR/git" ~/.git
   _link "$SETUP_DIR/git/config" ~/.gitconfig
+
+  # Terminal application
+  _link "$SETUP_DIR/tmux/config" ~/.tmux.conf
 }
 
 _install

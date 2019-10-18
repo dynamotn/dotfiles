@@ -1,0 +1,76 @@
+# vim:filetype=tmux
+# Core
+# Default prefix: Ctrl+A
+unbind C-b
+set-option -g prefix C-a
+unbind C-a
+bind C-a send-prefix
+
+# Display 256 colors
+set -g default-terminal "tmux-256color"
+
+# Set window and pane index to 1
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Scrollback history
+set -g history-limit 50000
+
+# Faster escape
+set -sg escape-time 1
+
+# Titles
+set -g set-titles on
+set -g set-titles-string "#T"
+
+# Notification
+setw -g monitor-activity on
+
+# Split
+bind | split-window -h
+bind - split-window -v
+unbind '"'
+unbind %
+
+# Friendly vim
+set -g mode-keys vi
+bind Escape copy-mode
+unbind p
+bind -T copy-mode-vi 'v' send-keys -X begin-selection
+bind -T copy-mode-vi 'y' send-keys -X copy-pipe-and-cancel "xsel -i -p && xsel -o -p | xsel -i -b"
+bind p run "xsel -o | tmux load-buffer - ; tmux paste-buffer"
+
+# Resource config
+bind r source-file ~/.tmux.conf \; display-message " Config reloaded.."
+
+# Window
+set -gw xterm-keys on
+bind -n C-Down new-window
+bind -n C-Right next-window
+bind -n C-Left previous-window
+bind -n C-Up command-prompt "rename-window '%%'"
+
+# Mouse
+set -g mouse on
+
+# Powerline status
+set -g status on
+set -g status-interval 2
+set -g status-fg colour231
+set -g status-bg colour234
+set -g status-justify "centre"
+set -g status-left "#[fg=colour254,bg=colour25] #H #[fg=colour25,bg=colour254]#[fg=colour16,bg=colour254] #(uptime | awk -F'[a-z]:' '{ print $2}') #[fg=colour254,bg=colour234]"
+set -g status-left-length 60
+set -g status-right "#[fg=colour2,bg=colour234]#[fg=colour231,bg=colour2] #(date '+%H:%M') "
+set -g window-status-format "#[fg=colour244,bg=colour234]   #I #[fg=colour240] #[fg=colour249]#W   "
+set -g window-status-current-format "#[fg=colour234,bg=colour31] #[fg=colour117,bg=colour31] #I  #[fg=colour231,bold]#W #[fg=colour31,bg=colour234,nobold] "
+
+# Message
+set -g message-style "fg=colour255 bg=colour4 bold"
+
+# Mode
+set -g mode-style "fg=colour231 bg=colour5"
+
+# Pane
+set -g pane-border-fg colour0
+set -g pane-active-border-fg colour4
