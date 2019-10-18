@@ -26,6 +26,7 @@ _link() {
 
 _install() {
   # Basic UI
+  _link "$SETUP_DIR/X/resources" ~/.Xresources
   _link "$SETUP_DIR/X/font/files" ~/.local/share/fonts
   _link "$SETUP_DIR/X/theme/gtk" ~/.local/share/themes
   _link "$SETUP_DIR/X/theme/icon" ~/.local/share/icons
