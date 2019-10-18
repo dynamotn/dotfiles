@@ -21,6 +21,8 @@ _install() {
   _link "$SETUP_DIR/git/config" ~/.gitconfig
 
   # Become a hacker
+  _link "$SETUP_DIR/fish" ~/.config/fish # Must setup fish shell before vim
+  $SETUP_DIR/fish/setup.fish
   _link "$SETUP_DIR/vim" ~/.config/nvim
 
   # Terminal application

@@ -1,3 +1,6 @@
 [submodule "vim"]
 	path = vim
 	url = https://gitlab.com/dynamo-config/vim.git
+[submodule "fish"]
+	path = fish
+	url = https://gitlab.com/dynamo-config/fish.git
