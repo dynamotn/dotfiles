@@ -19,3 +19,6 @@
 [submodule "X/theme/icon"]
 	path = X/theme/icon/Dynamo
 	url = git@gitlab.com:dynamo-theme/icon.git
+[submodule "X/theme/cursor/Dynamo-Cursor"]
+	path = X/theme/cursor/Dynamo-Cursor
+	url = git@gitlab.com:dynamo-theme/cursor.git

@@ -29,6 +29,7 @@ _install() {
   _link "$SETUP_DIR/X/font/files" ~/.local/share/fonts
   _link "$SETUP_DIR/X/theme/gtk" ~/.local/share/themes
   _link "$SETUP_DIR/X/theme/icon" ~/.local/share/icons
+  _link "$SETUP_DIR/X/theme/cursor" ~/.icons
   _link "$SETUP_DIR/gtk/2/rc" ~/.gtkrc-2.0
   _link "$SETUP_DIR/gtk/3/settings.ini" ~/.config/gtk-3.0/settings.ini
 
