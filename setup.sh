@@ -16,7 +16,7 @@ _link() {
       rm -rf "$2"
     fi
   else
-    if [[ -d $1 && $HOME != "$(dirname "$2")" ]]; then
+    if [[ -d $1 && $HOME != "$(dirname "$2")" && ! -d "$(dirname "$2")" ]]; then
       rm -rf "$(dirname "$2")"
     fi
   fi
