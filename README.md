@@ -1,9 +1,7 @@
 Purpose
 =======
 
-This is branch for my user-specific application configuration for my Gentoo PC.
-
-For other environments to use on office, let's see in other corresponding branch.
+This is branch for my user-specific application configuration for development or operation on server.
 
 Installation
 =======
