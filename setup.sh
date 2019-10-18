@@ -20,6 +20,9 @@ _install() {
   _link "$SETUP_DIR/git" ~/.git
   _link "$SETUP_DIR/git/config" ~/.gitconfig
 
+  # Become a hacker
+  _link "$SETUP_DIR/vim" ~/.config/nvim
+
   # Terminal application
   _link "$SETUP_DIR/tmux/config" ~/.tmux.conf
   _link "$SETUP_DIR/htop" ~/.config/htop
