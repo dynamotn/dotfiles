@@ -17,8 +17,8 @@
 	path = X/theme/gtk/Dynamo
 	url = git@gitlab.com:dynamo-theme/gtk.git
 [submodule "X/theme/icon"]
-	path = X/theme/icon/Dynamo
+	path = X/theme/icon-cursor/Dynamo
 	url = git@gitlab.com:dynamo-theme/icon.git
 [submodule "X/theme/cursor/Dynamo-Cursor"]
-	path = X/theme/cursor/Dynamo-Cursor
+	path = X/theme/icon-cursor/Dynamo-Cursor
 	url = git@gitlab.com:dynamo-theme/cursor.git
