@@ -32,6 +32,7 @@ _install() {
   _link "$SETUP_DIR/X/theme/icon-cursor" ~/.icons
   _link "$SETUP_DIR/gtk/2/rc" ~/.gtkrc-2.0
   _link "$SETUP_DIR/gtk/3/settings.ini" ~/.config/gtk-3.0/settings.ini
+  _link "$SETUP_DIR/qt/config" ~/.config/Trolltech.conf
 
   # Basic service
   _link "$SETUP_DIR/git" ~/.git
@@ -63,6 +64,7 @@ _install() {
   _link "$SETUP_DIR/redshift/config" ~/.config/redshift/redshift.conf
   _link "$SETUP_DIR/copyq/config" ~/.config/copyq/copyq.conf
   _link "$SETUP_DIR/X/xdg/user-dirs.dirs" ~/.config/user-dirs.dirs
+  _link "$SETUP_DIR/X/profile" ~/.xprofile
 }
 
 while getopts "hls" arg; do

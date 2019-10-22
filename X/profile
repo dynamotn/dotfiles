@@ -1,0 +1,2 @@
+# QT5 theme
+export QT_QPA_PLATFORMTHEME=gtk2
