@@ -65,6 +65,11 @@ _install() {
   _link "$SETUP_DIR/copyq/config" ~/.config/copyq/copyq.conf
   _link "$SETUP_DIR/X/xdg/user-dirs.dirs" ~/.config/user-dirs.dirs
   _link "$SETUP_DIR/X/profile" ~/.xprofile
+  _link "$SETUP_DIR/ibus/bamboo/config.json" ~/.config/ibus-bamboo/ibus-bamboo.config.json
+  if command -v dconf > /dev/null 2>&1; then
+    dconf load / < "$SETUP_DIR/dconf/config"
+    echo "Loaded dconf"
+  fi
 }
 
 while getopts "hls" arg; do
