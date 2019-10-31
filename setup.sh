@@ -45,6 +45,9 @@ _install() {
     $SETUP_DIR/fish/setup.fish
   fi
   _link "$SETUP_DIR/vim" ~/.config/nvim
+  if ! $LINK_ONLY && command -v nvim > /dev/null 2>&1; then
+    nvim +PlugInstall +UpdateRemotePlugins +qa
+  fi
 
   # Terminal application
   _link "$SETUP_DIR/tmux/config" ~/.tmux.conf
