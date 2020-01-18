@@ -1,2 +1,4 @@
 tags
 .tool-versions
+.vim
+config/solargraph.rb
