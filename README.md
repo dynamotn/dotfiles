@@ -9,7 +9,7 @@ Installation
 =============
 ```
 git clone https://gitlab.com/dynamo-config/dotfiles --branch PC --single-branch
-cd dotfiles && setup.sh
+cd dotfiles && setup.sh -s
 ```
 License
 ========
