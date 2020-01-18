@@ -55,7 +55,7 @@ _install() {
 while getopts "hls" arg; do
   case $arg in
     s) # Update git submodule before setup
-      git --work-tree=$SETUP_DIR submodule update --init --recursive --remote
+      git -C $SETUP_DIR submodule update --init --recursive --remote
       ;;
     l) # Create link only
       LINK_ONLY=true
