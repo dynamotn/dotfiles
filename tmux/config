@@ -57,20 +57,21 @@ set -g mouse on
 # Powerline status
 set -g status on
 set -g status-interval 2
-set -g status-fg colour231
-set -g status-bg colour234
+set -g status-fg "#fafafa"
+set -g status-bg "#212121"
 set -g status-justify "centre"
-set -g status-left "#[fg=colour254,bg=colour25] #H #[fg=colour25,bg=colour254]#[fg=colour16,bg=colour254] #(uptime | awk -F'[a-z]: ' '{ print $2 }') #[fg=colour254,bg=colour234]"
+set -g status-left "#[fg=#e1f5fe,bg=#01579b,bold] #H #[fg=#01579b,bg=#006064,nobold]#[fg=#{E:status-fg},bg=#006064] Session: #S #[fg=#006064,bg=#311b92]#[fg=#ede7f6,bg=#311b92] Uptime: #(uptime | awk -F'[a-z]: ' '{ print $2 }') #[fg=#311b92,bg=#{E:status-bg}]"
 set -g status-left-length 60
-set -g status-right "#[fg=colour2,bg=colour234]#[fg=colour231,bg=colour2] #(date '+%H:%M') "
-set -g window-status-format "#[fg=colour244,bg=colour234]   #I #[fg=colour240] #[fg=colour249]#W   "
-set -g window-status-current-format "#[fg=colour234,bg=colour31] #[fg=colour117,bg=colour31] #I  #[fg=colour231,bold]#W #[fg=colour31,bg=colour234,nobold] "
+set -g status-right "#[fg=#bf360c,bg=#{E:status-bg}]#[fg=#{E:status-fg},bg=#bf360c] #(date '+%H:%M') "
+set -g window-status-format "#{?window_start_flag,#{?window_activity_flag,#[fg=#424242 bg=#{E:status-bg}],#[fg=#{E:status-bg} bg=#424242]},}#{?window_activity_flag,#[fg=#00c853]#[bg=#424242]#[bg=#{E:status-fg}],#[bg=#{E:status-bg}]#[fg=#424242]#[fg=#757575]} #I  #W #{?window_activity_flag,#[fg=#424242 bg=#00c853],#[fg=#{E:status-bg} bg=#424242]}#{?window_end_flag,#{?window_activity_flag,#[fg=#{E:status-bg} bg=#424242],#[fg=#424242 bg=#{E:status-bg}]},}"
+set -g window-status-current-format "#{?window_start_flag,#[fg=#{E:status-bg} bg=#424242],}#[fg=#424242,bg=#0091ea]#[fg=#{E:status-fg},bg=#0091ea] #I  #W #[fg=#0091ea bg=#424242]#{?window_end_flag,#[fg=#424242 bg=#{E:status-bg}],}"
+set -g window-status-separator ""
 
 # Message
-set -g message-style "fg=colour255 bg=colour4 bold"
+set -g message-style "fg=colour255,bg=colour4,bold"
 
 # Mode
-set -g mode-style "fg=colour231 bg=colour5"
+set -g mode-style "fg=colour231,bg=colour5"
 
 # Pane
 set -g pane-border-style "fg=colour0"
