@@ -1,10 +1,10 @@
 # vim:filetype=tmux
 # Core
-# Default prefix: Ctrl+A
+# Default prefix: Ctrl+S
 unbind C-b
-set-option -g prefix C-a
-unbind C-a
-bind C-a send-prefix
+set-option -g prefix C-s
+unbind C-s
+bind C-s send-prefix
 
 # Display 256 colors
 set -g default-terminal "tmux-256color"
@@ -60,11 +60,11 @@ set -g status-interval 2
 set -g status-fg "#fafafa"
 set -g status-bg "#212121"
 set -g status-justify "centre"
-set -g status-left "#[fg=#e1f5fe,bg=#01579b,bold] #H #[fg=#01579b,bg=#006064,nobold]#[fg=#{E:status-fg},bg=#006064] Session: #S #[fg=#006064,bg=#311b92]#[fg=#ede7f6,bg=#311b92] Uptime: #(uptime | awk -F'[a-z]: ' '{ print $2 }') #[fg=#311b92,bg=#{E:status-bg}]"
+set -g status-left "#[fg=#e1f5fe,bg=#01579b,bold] #H #[fg=#01579b,bg=#006064,nobold]#[fg=#fafafa,bg=#006064] Session: #S #[fg=#006064,bg=#311b92]#[fg=#ede7f6,bg=#311b92] Uptime: #(uptime | awk -F'[a-z]: ' '{ print $2 }') #[fg=#311b92,bg=#212121]"
 set -g status-left-length 60
-set -g status-right "#[fg=#bf360c,bg=#{E:status-bg}]#[fg=#{E:status-fg},bg=#bf360c] #(date '+%H:%M') "
-set -g window-status-format "#{?window_start_flag,#{?window_activity_flag,#[fg=#424242 bg=#{E:status-bg}],#[fg=#{E:status-bg} bg=#424242]},}#{?window_activity_flag,#[fg=#00c853]#[bg=#424242]#[bg=#{E:status-fg}],#[bg=#{E:status-bg}]#[fg=#424242]#[fg=#757575]} #I  #W #{?window_activity_flag,#[fg=#424242 bg=#00c853],#[fg=#{E:status-bg} bg=#424242]}#{?window_end_flag,#{?window_activity_flag,#[fg=#{E:status-bg} bg=#424242],#[fg=#424242 bg=#{E:status-bg}]},}"
-set -g window-status-current-format "#{?window_start_flag,#[fg=#{E:status-bg} bg=#424242],}#[fg=#424242,bg=#0091ea]#[fg=#{E:status-fg},bg=#0091ea] #I  #W #[fg=#0091ea bg=#424242]#{?window_end_flag,#[fg=#424242 bg=#{E:status-bg}],}"
+set -g status-right "#[fg=#bf360c,bg=#212121]#[fg=#fafafa,bg=#bf360c] #(date '+%H:%M') "
+set -g window-status-format "#{?window_start_flag,#{?window_activity_flag,#[fg=#424242 bg=#212121],#[fg=#212121 bg=#424242]},}#{?window_activity_flag,#[fg=#00c853]#[bg=#424242]#[bg=#fafafa],#[bg=#212121]#[fg=#424242]#[fg=#757575]} #I  #W #{?window_activity_flag,#[fg=#424242 bg=#00c853],#[fg=#212121 bg=#424242]}#{?window_end_flag,#{?window_activity_flag,#[fg=#212121 bg=#424242],#[fg=#424242 bg=#212121]},}"
+set -g window-status-current-format "#{?window_start_flag,#[fg=#212121 bg=#424242],}#[fg=#424242,bg=#0091ea]#[fg=#fafafa,bg=#0091ea] #I  #W #[fg=#0091ea bg=#424242]#{?window_end_flag,#[fg=#424242 bg=#212121],}"
 set -g window-status-separator ""
 
 # Message
