@@ -28,8 +28,8 @@ set -g set-titles-string "#T"
 setw -g monitor-activity on
 
 # Split
-bind | split-window -h
-bind - split-window -v
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
 unbind '"'
 unbind %
 
@@ -46,7 +46,7 @@ bind r source-file ~/.tmux.conf \; display-message " Config reloaded.."
 
 # Window
 set -gw xterm-keys on
-bind -n C-Down new-window
+bind -n C-Down new-window -c "#{pane_current_path}"
 bind -n C-Right next-window
 bind -n C-Left previous-window
 bind -n C-Up command-prompt "rename-window '%%'"
