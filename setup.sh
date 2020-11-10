@@ -56,7 +56,7 @@ _install() {
 
   # WM and compositor
   _link "$SETUP_DIR/awesome" ~/.config/awesome
-  _link "$SETUP_DIR/compton/config" ~/.config/compton.conf
+  _link "$SETUP_DIR/picom/config" ~/.config/picom/picom.conf
 
   # Multimedia
   _link "$SETUP_DIR/mpd/config" ~/.config/mpd/mpd.conf
