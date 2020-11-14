@@ -26,6 +26,10 @@ _link() {
 }
 
 _install() {
+  if ! $LINK_ONLY; then
+    bash $SETUP_DIR/distros/install_linux_package.sh
+  fi
+
   # Basic service
   _link "$SETUP_DIR/git" ~/.git
   _link "$SETUP_DIR/git/config" ~/.gitconfig
