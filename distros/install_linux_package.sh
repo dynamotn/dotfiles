@@ -35,7 +35,7 @@ _gentoo_run() {
     $is_first_file && is_first_file=false && continue
 
     if [ -z "$repo" ]; then
-      layman -l | grep " $repo " ||
+      layman -l | grep -qis " $repo " ||
         if [ "$repo" = "dynamo" ]; then
           layman -o https://raw.githubusercontent.com/dynamotn/overlay/master/repositories.xml -f -a dynamo
         else
