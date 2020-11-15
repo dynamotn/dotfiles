@@ -77,6 +77,11 @@ _install() {
     dconf load / < "$SETUP_DIR/dconf/config"
     echo "Loaded dconf"
   fi
+
+  # GUI application
+  if ! $LINK_ONLY; then
+    $SETUP_DIR/firefox/setup.sh
+  fi
 }
 
 while getopts "hls" arg; do

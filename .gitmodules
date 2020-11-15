@@ -22,3 +22,6 @@
 [submodule "X/theme/cursor/Dynamo-Cursor"]
 	path = X/theme/icon-cursor/Dynamo-Cursor
 	url = git@gitlab.com:dynamo-theme/cursor.git
+[submodule "firefox"]
+	path = firefox
+	url = git@gitlab.com:dynamo-config/firefox.git
