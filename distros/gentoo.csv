@@ -5,3 +5,4 @@ dev-vcs/git
 app-misc/tmux
 sys-apps/bat
 sys-process/htop
+app-emulation/docker
