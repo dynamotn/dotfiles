@@ -15,4 +15,5 @@ x11-misc/unclutter
 app-admin/keepassxc
 x11-misc/copyq
 x11-misc/xsel
+x11-misc/rofi
 app-emulation/docker
