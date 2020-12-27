@@ -32,6 +32,7 @@ _install() {
   # Basic UI
   _link "$SETUP_DIR/X/resources" ~/.Xresources
   _link "$SETUP_DIR/X/font/files" ~/.local/share/fonts
+  _link "$SETUP_DIR/X/font/config" ~/.config/fontconfig/conf.d
   _link "$SETUP_DIR/X/theme/gtk" ~/.themes
   _link "$SETUP_DIR/X/theme/icon-cursor" ~/.icons
   _link "$SETUP_DIR/gtk/2/rc" ~/.gtkrc-2.0
