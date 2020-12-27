@@ -18,6 +18,8 @@
         noprefix = true
         # Use extended form of Bram Cohen's patience diff algorithm
         algorithm = histogram
+[diff "sopsdiffer"]
+        textconv = sops -d
 [mergetool]
         # Not prompt launch apps, I have no time to confirm that don't think why I used it
         prompt = false
@@ -93,3 +95,8 @@
 [gc]
         # Don't auto git gc, with large project can slow when working
         auto = 0
+[filter "lfs"]
+        clean = git-lfs clean -- %f
+        smudge = git-lfs smudge -- %f
+        process = git-lfs filter-process
+        required = true
