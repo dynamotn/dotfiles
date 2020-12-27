@@ -25,3 +25,9 @@
 [submodule "firefox"]
 	path = firefox
 	url = git@gitlab.com:dynamo-config/firefox.git
+[submodule "X/font/scripts/liga"]
+	path = X/font/scripts/liga
+	url = https://github.com/ToxicFrog/Ligaturizer.git
+[submodule "X/font/scripts/FiraCode"]
+	path = X/font/scripts/FiraCode
+	url = https://github.com/tonsky/FiraCode
