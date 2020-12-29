@@ -74,8 +74,18 @@
         # Use neovim to edit message
         editor = nvim
         excludesfile = ~/.git/ignore
-        # Use diff-so-fancy to prettier diff
-        pager = diff-so-fancy | less --tabs=4 -RFX
+        # Use delta to prettier diff
+        pager = delta
+[interactive]
+        # Use delta to show diff when interactive each hunks
+        diffFilter = delta --color-only
+[delta]
+        # Use delta with base16 theme
+        syntax-theme = "OneHalfDark"
+        # Show line number & Two side
+        features = side-by-side line-numbers
+        # Style of whitespace error
+        whitespace-error-style = red reverse
 [apply]
         # Auto fix white space
         whitespace = fix
