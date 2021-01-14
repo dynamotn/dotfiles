@@ -1,6 +1,3 @@
-[submodule "font/files"]
-	path = X/font/files
-	url = git@gitlab.com:dynamo-config/font-collector.git
 [submodule "vim"]
 	path = vim
 	url = git@gitlab.com:dynamo-config/vim.git
@@ -25,9 +22,6 @@
 [submodule "firefox"]
 	path = firefox
 	url = git@gitlab.com:dynamo-config/firefox.git
-[submodule "X/font/scripts/liga"]
-	path = X/font/scripts/liga
-	url = https://github.com/ToxicFrog/Ligaturizer.git
-[submodule "X/font/scripts/FiraCode"]
-	path = X/font/scripts/FiraCode
-	url = https://github.com/tonsky/FiraCode
+[submodule "X/font"]
+	path = X/font
+	url = git@gitlab.com:dynamo-config/font.git
