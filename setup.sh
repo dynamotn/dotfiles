@@ -44,6 +44,7 @@ _install() {
   _link "$SETUP_DIR/git/config" ~/.gitconfig
 
   # Become a hacker
+  _link "$SETUP_DIR/kitty" ~/.config/kitty
   _link "$SETUP_DIR/kitty/config" ~/.config/kitty/kitty.conf
   _link "$SETUP_DIR/fish" ~/.config/fish # Must setup fish shell before vim
   if ! $LINK_ONLY; then

@@ -1,0 +1,67 @@
+# vim:fileencoding=utf-8 filetype=conf
+# If enabled, the window size will be remembered so that new
+# instances of kitty will have the same size as the previous
+# instance. If disabled, the window will initially have size
+# configured by initial_window_width/height, in pixels. You can use a
+# suffix of "c" on the width/height values to have them interpreted
+# as number of cells instead of pixels.
+remember_window_size  yes
+initial_window_width  640
+initial_window_height 400
+
+# The enabled window layouts. A comma separated list of layout names.
+# The special value all means all layouts. The first listed layout
+# will be used as the startup layout. For a list of available
+# layouts, see the
+# https://sw.kovidgoyal.net/kitty/index.html#layouts.
+enabled_layouts *
+
+# The step size (in units of cell width/cell height) to use when
+# resizing windows. The cells value is used for horizontal resizing
+# and the lines value for vertical resizing.
+window_resize_step_cells 2
+window_resize_step_lines 2
+
+# The width (in pts) of window borders. Will be rounded to the
+# nearest number of pixels based on screen resolution. Note that
+# borders are displayed only when more than one window is visible.
+# They are meant to separate multiple windows.
+window_border_width 1.0
+
+# Draw only the minimum borders needed. This means that only the
+# minimum needed borders for inactive windows are drawn. That is only
+# the borders that separate the inactive window from a neighbor. Note
+# that setting a non-zero window margin overrides this and causes all
+# borders to be drawn.
+draw_minimal_borders yes
+
+# The window margin (in pts) (blank area outside the border)
+window_margin_width 0.0
+
+# The window margin (in pts) to use when only a single window is
+# visible. Negative values will cause the value of
+# window_margin_width to be used instead.
+single_window_margin_width -1000.0
+
+# The window padding (in pts) (blank area between the text and the
+# window border)
+window_padding_width 0.0
+
+# The color for the border of the active window
+active_border_color #31a354
+
+# The color for the border of inactive windows
+inactive_border_color #0c0d0e
+
+# The color for the border of inactive windows in which a bell has
+# occurred
+bell_border_color #e31a1c
+
+# Fade the text in inactive windows by the specified amount (a number
+# between zero and one, with zero being fully faded).
+inactive_text_alpha 1.0
+
+# Hide the window decorations (title-bar and window borders). Whether
+# this works and exactly what effect it has depends on the window
+# manager/operating system.
+hide_window_decorations no

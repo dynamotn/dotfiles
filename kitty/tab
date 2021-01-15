@@ -1,0 +1,37 @@
+# vim:fileencoding=utf-8 filetype=conf
+# Which edge to show the tab bar on, top or bottom
+tab_bar_edge top
+
+# The margin to the left and right of the tab bar (in pts)
+tab_bar_margin_width 0.0
+
+# The tab bar style, can be one of: fade, separator or hidden. In the
+# fade style, each tab's edges fade into the background color, in the
+# separator style, tabs are separated by a configurable separator.
+tab_bar_style fade
+
+# Control how each tab fades into the background when using fade for
+# the tab_bar_style. Each number is an alpha (between zero and one)
+# that controls how much the corresponding cell fades into the
+# background, with zero being no fade and one being full fade. You
+# can change the number of cells used by adding/removing entries to
+# this list.
+tab_fade 0.6 0.8 1
+
+# The separator between tabs in the tab bar when using separator as
+# the tab_bar_style.
+tab_separator " | "
+
+# A template to render the tab title. The default just renders the
+# title. If you wish to include the tab-index as well, use something
+# like: {index}: {title}. Useful if you have shortcuts mapped for
+# goto_tab N.
+tab_title_template {index}: {title}
+
+# Tab bar colors and styles
+active_tab_foreground   #fcfdfe
+active_tab_background   #44c0dd
+active_tab_font_style   bold-italic
+inactive_tab_foreground #fcfdfe
+inactive_tab_background #425059
+inactive_tab_font_style normal

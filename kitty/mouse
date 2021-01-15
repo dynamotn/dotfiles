@@ -1,0 +1,44 @@
+# vim:fileencoding=utf-8 filetype=conf
+# The color and style for highlighting URLs on mouse-over. url_style
+# can be one of: none, single, double, curly
+url_color #3182bd
+url_style single
+
+# The modifier keys to press when clicking with the mouse on URLs to
+# open the URL
+open_url_modifiers kitty_mod
+
+# The program with which to open URLs that are clicked on. The
+# special value default means to use the operating system's default
+# URL handler.
+open_url_with default
+
+# Copy to clipboard on select. With this enabled, simply selecting
+# text with the mouse will cause the text to be copied to clipboard.
+# Useful on platforms such as macOS that do not have the concept of
+# primary selections. Note that this is a security risk, as all
+# programs, including websites open in your browser can read the
+# contents of the clipboard.
+copy_on_select no
+
+# The modifiers to use rectangular selection (i.e. to select text in
+# a rectangular block with the mouse)
+rectangle_select_modifiers alt
+
+# Characters considered part of a word when double clicking. In
+# addition to these characters any character that is marked as an
+# alpha-numeric character in the unicode database will be matched.
+select_by_word_characters :@-./_~?&=%+#
+
+# The interval between successive clicks to detect double/triple
+# clicks (in seconds). Negative numbers will use the system default
+# instead, if available, or fallback to 0.5.
+click_interval -1.0
+
+# Hide mouse cursor after the specified number of seconds of the
+# mouse not being used. Set to zero to disable mouse cursor hiding.
+mouse_hide_wait 3.0
+
+# Set the active window to the window under the mouse when moving the
+# mouse around
+focus_follows_mouse no
