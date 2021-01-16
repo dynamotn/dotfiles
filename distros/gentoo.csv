@@ -3,6 +3,5 @@ app-editors/neovim,dynamo
 app-shells/fish
 dev-vcs/git
 app-misc/tmux
-sys-apps/bat
 sys-process/htop
 app-emulation/docker
