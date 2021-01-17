@@ -48,7 +48,7 @@ _gentoo_run() {
 }
 
 _arch_repo_sync() {
-  if ! type yay > /dev/null; then
+  if ! command -v yay > /dev/null; then
     sudo pacman -Sy
   else
     yay -Sy
@@ -56,16 +56,17 @@ _arch_repo_sync() {
 }
 
 _arch_install() {
-  yay -S $1
+  yay --noconfirm -S --needed --answerclean All --answerdiff None $1
 }
 
 _arch_init() {
   _arch_repo_sync
-  if ! type yay; then
+  if ! command -v yay > /dev/null; then
     sudo pacman -S --needed git base-devel
     git clone https://aur.archlinux.org/yay.git /tmp/yay
     cd /tmp/yay
-    sudo makepkg -si
+    makepkg -si --noconfirm
+    rm -rf /tmp/yay
   fi
 }
 

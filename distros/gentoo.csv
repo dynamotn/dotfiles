@@ -1,4 +1,5 @@
 package,repo
+sys-apps/man-db
 app-editors/neovim,dynamo
 app-shells/fish
 dev-vcs/git
