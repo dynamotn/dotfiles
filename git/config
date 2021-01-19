@@ -114,3 +114,6 @@
         smudge = git-lfs smudge -- %f
         process = git-lfs filter-process
         required = true
+[includeIf "gitdir/i:~/Working/enterprise/**"]
+        # Include config file from enterprise projects
+        path = ~/Working/enterprise/.gitconfig

@@ -45,6 +45,7 @@ _install() {
   # Basic service
   _link "$SETUP_DIR/git" ~/.git
   _link "$SETUP_DIR/git/config" ~/.gitconfig
+  _create ~/Working/{personal,community,enterprise}/
 
   # Become a hacker
   _link "$SETUP_DIR/fish" ~/.config/fish # Must setup fish shell before vim
