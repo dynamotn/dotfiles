@@ -17,3 +17,4 @@ rofi
 docker-ce,https://download.docker.com/linux/ubuntu,,,stable,9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 docker-ce-cli
 containerd.io
+ibus-bamboo,http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu,,,main,5AD2E0B68A0409AD907D462D36ED424E9659D014
