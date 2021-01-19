@@ -35,7 +35,7 @@ _link() {
 
 # Create empty folder
 _create() {
-  mkdir -p "$*"
+  mkdir -p $*
 }
 
 _install() {
