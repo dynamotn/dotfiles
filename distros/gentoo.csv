@@ -5,6 +5,7 @@ app-shells/fish
 dev-vcs/git
 app-misc/tmux
 sys-process/htop
+app-misc/task
 x11-terms/kitty
 x11-wm/awesome,dynamo
 x11-misc/xdg-user-dirs-gtk

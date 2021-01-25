@@ -5,6 +5,7 @@ fish,http://ppa.launchpad.net/fish-shell/release-3/ubuntu,,,main,59FDA1CE1B84B3F
 git
 tmux
 htop
+taskwarrior
 kitty
 xfonts-terminus
 redshift
