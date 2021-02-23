@@ -5,5 +5,8 @@ app-shells/fish
 dev-vcs/git
 app-misc/tmux
 sys-process/htop
+sys-process/glances
+sys-power/powertop
+app-emulation/docker
 app-misc/task
 app-emulation/docker

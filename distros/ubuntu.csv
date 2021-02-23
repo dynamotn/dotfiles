@@ -5,7 +5,9 @@ fish,http://ppa.launchpad.net/fish-shell/release-3/ubuntu,,,main,59FDA1CE1B84B3F
 git
 tmux
 htop
-taskwarrior
+glances
+powertop
 docker-ce,https://download.docker.com/linux/ubuntu,,,stable,9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 docker-ce-cli
 containerd.io
+taskwarrior

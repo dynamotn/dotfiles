@@ -5,5 +5,8 @@ fish
 git
 tmux
 htop
+glances
+powertop
+docker
 task
 docker
