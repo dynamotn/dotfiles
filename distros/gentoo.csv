@@ -5,6 +5,9 @@ app-shells/fish
 dev-vcs/git
 app-misc/tmux
 sys-process/htop
+sys-process/glances
+sys-power/powertop
+app-emulation/docker
 app-misc/task
 x11-terms/kitty
 x11-wm/awesome,dynamo
@@ -18,5 +21,4 @@ x11-misc/copyq
 x11-misc/xsel
 x11-misc/rofi
 media-gfx/maim
-app-emulation/docker
 app-i18n/ibus-bamboo,dynamo
