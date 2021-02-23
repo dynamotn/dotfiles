@@ -102,6 +102,8 @@
         find-message = "!_() { git log --pretty=format:'%C(yellow)%h %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; _"
         # Find branches containing commit
         find-branch = "!_() { git branch -a --contains $1; }; _"
+        # Show root level directory
+        root = "!_() { git rev-parse --show-toplevel; }; _"
 [push]
         # Only push current branch to same name branch
         default = current
