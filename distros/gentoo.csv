@@ -17,5 +17,6 @@ app-admin/keepassxc
 x11-misc/copyq
 x11-misc/xsel
 x11-misc/rofi
+media-gfx/maim
 app-emulation/docker
 app-i18n/ibus-bamboo,dynamo
