@@ -12,7 +12,6 @@ task
 kitty
 awesome-git
 xdg-user-dirs
-terminus-font
 redshift-minimal
 picom-git
 unclutter
@@ -21,4 +20,9 @@ copyq
 xsel
 rofi
 maim
+pavucontrol
+mpd
+mpc
+ncmpcpp
+telegram-desktop
 ibus-bamboo

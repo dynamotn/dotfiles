@@ -12,7 +12,6 @@ app-misc/task
 x11-terms/kitty
 x11-wm/awesome,dynamo
 x11-misc/xdg-user-dirs-gtk
-media-fonts/terminus-font
 x11-misc/redshift
 x11-misc/picom
 x11-misc/unclutter
@@ -21,4 +20,9 @@ x11-misc/copyq
 x11-misc/xsel
 x11-misc/rofi
 media-gfx/maim
+media-sound/pavucontrol
+media-sound/mpd
+media-sound/mpc
+media-sound/ncmpcpp
+net-im/telegram-desktop-bin
 app-i18n/ibus-bamboo,dynamo
