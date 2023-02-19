@@ -1,8 +1,8 @@
 <div align="center">
 
-    ### Dynamo's dotfiles :house:&nbsp;
+### Dynamo's dotfiles :house:&nbsp;
 
-    #### \> Managed with chezmoi :robot:&nbsp;
+#### \> Managed with chezmoi :robot:&nbsp;
 </div>
 
 <p align="center">
