@@ -9,3 +9,6 @@ templateSymlinks = true
 
 [diff]
 pager = "delta"
+
+[gpg]
+recipient = "dynamo"
