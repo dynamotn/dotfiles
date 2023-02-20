@@ -3,6 +3,7 @@ set -e
 
 SETUP_DIR=$(dirname "$(readlink -f "$0")")
 BIN_DIR="$HOME/.local/bin"
+DEBUG="${1:-false}"
 
 _install_chezmoi() {
   if [ ! "$(command -v chezmoi)" ]; then
@@ -18,10 +19,21 @@ _install_chezmoi() {
 }
 
 _main() {
+  mkdir -p "$BIN_DIR"
+  export PATH="$BIN_DIR":"$PATH"
   _install_chezmoi
 
-  export PATH="$BIN_DIR":"$PATH"
-  chezmoi init -S "$SETUP_DIR" && chezmoi apply
+  local chezmoi_params=""
+  if [ "$DEBUG" = "true" ]; then
+    chezmoi_params="$chezmoi_params --debug"
+  fi
+  chezmoi init $chezmoi_params -S "$SETUP_DIR" && \
+    chezmoi apply $chezmoi_params
 }
 
-_main
+if [ "$DEBUG" = "true" ]; then
+  set -x
+  _main
+else
+  _main >/dev/null 2>&1
+fi
