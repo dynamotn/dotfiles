@@ -1,3 +1,3 @@
 [submodule "external_modules/neovim"]
-	path = external_modules/neovim
+	path = home/dot_config/external_nvim
 	url = git@gitlab.com:dynamo-config/neovim.git
