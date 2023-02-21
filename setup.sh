@@ -19,14 +19,19 @@ _install_chezmoi() {
 }
 
 _main() {
+  # Install chezmoi
   mkdir -p "$BIN_DIR"
   export PATH="$BIN_DIR":"$PATH"
   _install_chezmoi
 
+  # Run chezmoi in debug mode
   local chezmoi_params=""
   if [ "$DEBUG" = "true" ]; then
     chezmoi_params="$chezmoi_params --debug"
   fi
+
+  # Modify source directory of chezmoi, manipulate chezmoi config and generate
+  # to chezmoi's default config template
   echo "sourceDir = \"$SETUP_DIR\"" > $SETUP_DIR/home/.chezmoi.toml.tmpl
   cat $SETUP_DIR/.chezmoi.toml.tmpl >> $SETUP_DIR/home/.chezmoi.toml.tmpl
   chezmoi init $chezmoi_params -S "$SETUP_DIR" && \
