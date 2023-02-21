@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd {{ .chezmoi.sourceDir }}/..
+git submodule update --init --remote --recursive
