@@ -1,13 +1,14 @@
-encryption = "gpg"
+encryption = "age"
 format = "yaml"
 mode = "symlink"
 progress = true
 
 [add]
-templateSymlinks = true
+    templateSymlinks = true
+
+[age]
+    identity = "~/.config/chezmoi/key"
+    recipient = "age1fzajmt2yy4naas2wtcn3v2vjea3f5rgvmz2elp02zvvmdtcgwcdsqxnd5a"
 
 [diff]
-pager = "delta"
-
-[gpg]
-recipient = "dynamo"
+    pager = "delta"
