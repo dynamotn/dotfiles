@@ -27,6 +27,8 @@ _main() {
   if [ "$DEBUG" = "true" ]; then
     chezmoi_params="$chezmoi_params --debug"
   fi
+  echo "sourceDir = \"$SETUP_DIR\"" > $SETUP_DIR/home/.chezmoi.toml.tmpl
+  cat $SETUP_DIR/.chezmoi.toml.tmpl >> $SETUP_DIR/home/.chezmoi.toml.tmpl
   chezmoi init $chezmoi_params -S "$SETUP_DIR" && \
     chezmoi apply $chezmoi_params
 }
