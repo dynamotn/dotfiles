@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eou pipefail
 
 SETUP_DIR=$(dirname "$(readlink -f "$0")")
 BIN_DIR="$HOME/.local/bin"
@@ -18,11 +18,33 @@ _install_chezmoi() {
   fi
 }
 
+_install_age() {
+  if [ ! "$(command -v age)" ]; then
+    local temp=$(mktemp)
+    if [ "$(command -v curl)" ]; then
+      curl -sSL -o $temp https://dl.filippo.io/age/latest?for=linux/amd64
+    elif [ "$(command -v wget)" ]; then
+      wget -qO $temp https://dl.filippo.io/age/latest?for=linux/amd64
+    else
+      echo "To install age, you must have curl or wget installed." >&2
+      exit 1
+    fi
+
+    if [ "$(command -v tar)" ]; then
+      tar -C $BIN_DIR -xzf $temp --strip=1 age/age
+    else
+      echo "To install age, you must have tar and gzip installed." >&2
+    fi
+    rm -rf $temp
+  fi
+}
+
 _main() {
-  # Install chezmoi
+  # Install chezmoi and age
   mkdir -p "$BIN_DIR"
   export PATH="$BIN_DIR":"$PATH"
   _install_chezmoi
+  _install_age
 
   # Run chezmoi in debug mode
   local chezmoi_params=""
@@ -34,13 +56,13 @@ _main() {
   # to chezmoi's default config template
   echo "sourceDir = \"$SETUP_DIR\"" > $SETUP_DIR/home/.chezmoi.toml.tmpl
   cat $SETUP_DIR/.chezmoi.toml.tmpl >> $SETUP_DIR/home/.chezmoi.toml.tmpl
-  chezmoi init $chezmoi_params -S "$SETUP_DIR" && \
-    chezmoi apply $chezmoi_params
+  chezmoi init $chezmoi_params -S "$SETUP_DIR" \
+    && chezmoi apply $chezmoi_params
 }
 
 if [ "$DEBUG" = "true" ]; then
   set -x
   _main
 else
-  _main >/dev/null 2>&1
+  _main > /dev/null 2>&1
 fi
