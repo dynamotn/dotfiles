@@ -21,7 +21,14 @@ Please note that this is my own personal dotfiles.
 TODO: List all screenshots
 
 ## :inbox_tray:&nbsp; Installation
-TODO: Installation Guide
+You must install `git`, `curl` package to your system.
+After that, clone this repository into your host machine, and run setup script:
+
+```sh
+git clone https://github.com/dynamotn/dotfiles.git # or git clone https://gitlab.com/dynamo-config/dotfiles.git
+cd dotfiles
+./setup.sh
+```
 
 ## :scroll:&nbsp; Cheatsheet
 TODO: Link to another configs' cheatsheet
