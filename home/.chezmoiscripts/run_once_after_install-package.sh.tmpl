@@ -1,7 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-DIR=$(dirname "$(readlink -f "$0")")
 DISTRO=
 
 _detect_distro() {
@@ -19,7 +18,10 @@ _gentoo_repo_sync() {
 }
 
 _gentoo_install() {
-  emerge -uDN --noreplace "$1"
+  if [ ! -x '/usr/bin/qlist' ]; then
+    echo >&2 ":: Error: Must install app-portage/portage-utils first."
+  fi
+  qlist -I "$1" 2&>1 || emerge --ask n -uDN --noreplace "$1"
 }
 
 _gentoo_init() {
@@ -55,7 +57,7 @@ _arch_repo_sync() {
 }
 
 _arch_install() {
-  yay --noconfirm -S --needed --answerclean All --answerdiff None "$1"
+  pacman -Qi "$1" 2&>1 || yay --noconfirm -S --needed --answerclean All --answerdiff None "$1"
 }
 
 _arch_init() {
@@ -82,7 +84,7 @@ _ubuntu_repo_sync() {
 }
 
 _ubuntu_install() {
-  apt install -y "$1"
+  dpkg-query -s "$1" 2&>1 || apt install -y "$1"
 }
 
 _ubuntu_init() {
