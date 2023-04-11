@@ -1,2 +1,3 @@
 package,repo,repo_name,distro_version,repo_version,key
 neovim,http://ppa.launchpad.net/neovim-ppa/unstable/ubuntu,,,main,9DBB0BE9366964F134855E2255F96FCF8231B6DD
+fish,http://ppa.launchpad.net/fish-shell/release-3/ubuntu,,,main,59FDA1CE1B84B3FAD89366C027557F056DC33CA5

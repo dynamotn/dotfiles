@@ -1,2 +1,3 @@
 package,repo
 app-editors/neovim,
+app-shells/fish
