@@ -1,2 +1,4 @@
 github_repo,version,asset_file,output_file,has_helper,must_needed
-dandavison/delta,,delta-${version}-x86_64-unknown-linux-gnu.tar.gz,delta,true,true
+twpayne/chezmoi,,chezmoi-linux-amd64,chezmoi,,
+FiloSottile/age,,age-v1.1.1-linux-amd64.tar.gz,age,true,true
+dandavison/delta,,delta-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,delta,true,true
