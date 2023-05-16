@@ -1,0 +1,11 @@
+# Tags generate by ctags
+tags
+
+# ASDF version file
+.tool-versions
+
+# Vim configuration for project
+.vim
+
+# Direnv
+.envrc

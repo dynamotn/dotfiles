@@ -1,4 +1,5 @@
 package,repo
+dev-vcs/git,
 app-editors/neovim,
 app-shells/fish,
 app-misc/tmux,

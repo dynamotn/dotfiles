@@ -1,0 +1,149 @@
+# vim:expandtab:shiftwidth=8:tabstop=8:softtabstop=8:ft=gitconfig
+[user]
+        # Tôi ra đây có phải xưng danh không nhỉ?
+        name = Trần Đức Nam
+        email = dynamo.foss@gmail.com
+        # Signing SSH key
+        signingkey = ~/.ssh/key/Dynamo-Linux_ed25519.pub
+[gpg]
+        # Use SSH instead of GPG to sign
+        format = ssh
+[commit]
+        gpgsign = true
+[merge]
+        # Merge with vim
+        tool = nvimdiff
+        conflictstyle = diff3
+[diff]
+        # Diff with vim
+        tool = nvimdiff
+        # Not show a/, b/ when diff, I'm angry with this
+        noprefix = true
+        # Use extended form of Bram Cohen's patience diff algorithm
+        algorithm = histogram
+        # Detect move blocks
+        colorMoved = default
+[diff "sopsdiffer"]
+        # A differ for secret encoded
+        textconv = sops -d
+[mergetool]
+        # Not prompt launch apps, I have no time to confirm that don't think why I used it
+        prompt = false
+        # Not generate .orig files
+        keepBackup = false
+[difftool]
+        # Not prompt launch apps, I have no time to confirm that don't think why I used it
+        prompt = false
+[difftool "nvimdiff"]
+        # Nvim diff 2 files
+        cmd = "nvim -d $LOCAL $REMOTE"
+[difftool "kitty"]
+        # Use kitten of kitty to diff each hunk
+        cmd = "kitty +kitten diff $LOCAL $REMOTE"
+[mergetool "nvimdiff"]
+        # Nvim diff 4 files
+        cmd = "nvim -d $BASE $LOCAL $REMOTE $MERGED -c '$wincmd w' -c 'wincmd J'"
+[help]
+        # Okay sometimes I type so f*cking bad
+        autocorrect = 1
+[color]
+        # Be careful with pipe when redirected output
+        ui = auto
+[color "status"]
+        # I don't like default color
+        added = green
+        changed = blue
+        untracked = magenta
+        deleted = red
+[color "diff"]
+        # I don't like default color
+        meta = cyan
+        frag = magenta bold
+        old = red
+        new = blue
+        commit = yellow bold
+        whitespace = red reverse
+[color "diff-highlight"]
+        oldNormal = red bold
+        oldHighLight = red bold 52
+        newNormal = blue bold
+        newHighLight = blue bold 45
+[core]
+        # Some Windows programmer in team, so no auto convert CRLF
+        autocrlf = false
+        # Work with standard or convention
+        whitespace = trailing-space,space-before-tab,tab-in-indent,cr-at-eol
+        # Use neovim to edit message
+        editor = nvim
+        excludesfile = ~/.config/git/ignore
+        # Use delta to prettier diff
+        pager = delta
+[interactive]
+        # Use delta to show diff when interactive each hunks
+        diffFilter = delta --color-only
+[delta]
+        # Use delta with catppuccin theme
+        syntax-theme = "catppuccin"
+        # Show line number & Two side
+        features = side-by-side line-numbers decorations
+        # Style of whitespace error
+        whitespace-error-style = red reverse
+[delta "decorations"]
+        commit-decoration-style = bold yellow box ul
+        file-style = bold yellow ul
+        file-decoration-style = green ul
+        hunk-header-decoration-style = yellow box
+        minus-style = syntax "#69485a"
+        minus-emph-style = syntax red
+        minus-empty-line-marker-style = syntax magenta
+        plus-style = syntax "#516559"
+        plus-emph-style = syntax green
+        plus-empty-line-marker-style = syntax cyan
+[apply]
+        # Auto fix white space
+        whitespace = fix
+[rebase]
+        instructionFormat = "[%an - %ar] %s"
+[alias]
+        # Graph log view
+        graph = log --graph --abbrev-commit
+        # Meaning stash
+        snapshot = !git stash save "Snapshot: $(date)"
+        # Rename stash
+        stash-rename = "!_() { rev=$(git rev-parse $1) && git stash drop $1 || exit 1 ; git diff-index --quiet HEAD; s=$?; [ $s != 0 ] && git stash save \"tmp stash from stash-rename\"; git stash apply $rev && shift && git stash save \"$@\" && [ $s != 0 ] && git stash pop stash@{1}; }; _"
+        # Find commits with source code
+        find-source = "!_() { git log --pretty=format:'%C(yellow)%h %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; _"
+        # Find commits with message
+        find-message = "!_() { git log --pretty=format:'%C(yellow)%h %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; _"
+        # Find branches containing commit
+        find-branch = "!_() { git branch -a --contains $1; }; _"
+        # Stop tracking a file that already in staged but keep in worktree
+        stop-track = "!_() { git update-index --assume-unchanged $1; }; _"
+        # Redo above
+        track = "!_() { git update-index --no-assume-unchanged $1; }; _"
+        # Keep independent version file forever
+        keep-forever = "!_() { git update-index --skip-worktree $1; }; _"
+        # Redo above
+        stop-keep-forever = "!_() { git update-index --no-skip-worktree $1; }; _"
+        # Show root level directory
+        root = "!_() { git rev-parse --show-toplevel; }; _"
+[push]
+        # Only push current branch to same name branch
+        default = current
+[gc]
+        # Don't auto git gc, with large project can slow when working
+        auto = 0
+[filter "lfs"]
+        # LFS subcommand
+        clean = git-lfs clean -- %f
+        smudge = git-lfs smudge -- %f
+        process = git-lfs filter-process
+        required = true
+[includeIf "gitdir/i:~/Working/enterprise/**"]
+        # Include config file from enterprise projects
+        path = ~/Working/enterprise/.gitconfig
+[init]
+        defaultBranch = main
+[blame]
+        # Show short date in blame view
+	date = short
