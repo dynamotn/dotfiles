@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# setup.sh hash: {{ joinPath .chezmoi.homeDir ".config/dynamo/binary/setup.sh" | include | sha256sum }}
+bash {{ .chezmoi.homeDir }}/.config/dynamo/binary/setup.sh -m

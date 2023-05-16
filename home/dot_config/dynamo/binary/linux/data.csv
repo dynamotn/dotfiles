@@ -1,0 +1,2 @@
+github_repo,version,asset_file,output_file,has_helper,must_needed
+dandavison/delta,,delta-${version}-x86_64-unknown-linux-gnu.tar.gz,delta,true,true
