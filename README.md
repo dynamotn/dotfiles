@@ -32,3 +32,9 @@ cd dotfiles
 
 ## :scroll:&nbsp; Cheatsheet
 TODO: Link to another configs' cheatsheet
+
+## :wrench:&nbsp; Tools & Packages
+See [package_manager](docs/tools/package_manager.md)
+
+### Via Github Release binary
+See [release_binary](docs/tools/release_binary.md)
