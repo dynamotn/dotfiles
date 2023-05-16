@@ -34,6 +34,8 @@ cd dotfiles
 TODO: Link to another configs' cheatsheet
 
 ## :wrench:&nbsp; Tools & Packages
+
+### Via package manager
 See [package_manager](docs/tools/package_manager.md)
 
 ### Via Github Release binary
