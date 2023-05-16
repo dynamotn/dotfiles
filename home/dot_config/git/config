@@ -9,6 +9,7 @@
         # Use SSH instead of GPG to sign
         format = ssh
 [commit]
+        # Always sign commit
         gpgsign = true
 [merge]
         # Merge with vim
@@ -75,6 +76,7 @@
         whitespace = trailing-space,space-before-tab,tab-in-indent,cr-at-eol
         # Use neovim to edit message
         editor = nvim
+        # Custom global ignore file
         excludesfile = ~/.config/git/ignore
         # Use delta to prettier diff
         pager = delta
