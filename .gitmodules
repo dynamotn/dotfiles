@@ -4,3 +4,6 @@
 [submodule "external_fish"]
 	path = home/dot_config/external_fish
 	url = git@gitlab.com:dynamo-config/fish.git
+[submodule "home/dot_config/external_tmux"]
+	path = home/dot_config/external_tmux
+	url = git@gitlab.com:dynamo-config/tmux.git
