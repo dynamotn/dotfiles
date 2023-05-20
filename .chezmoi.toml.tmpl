@@ -12,3 +12,6 @@ progress = true
 
 [diff]
     pager = "delta"
+
+[data]
+    hasGUI = {{ promptBoolOnce . "hasGUI" "Do this machine have a GUI? (y/n)" }}
