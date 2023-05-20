@@ -1,2 +1,6 @@
 #!/usr/bin/env sh
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+
+_notice "Setup fish shell"
 fish {{ .chezmoi.homeDir }}/.config/fish/.setup/setup.fish
+_success "Setup fish shell"

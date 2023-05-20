@@ -1,18 +1,9 @@
+{{ if (eq .chezmoi.os "linux") -}}
 #!/bin/bash
 set -euo pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
-DISTRO=
-
-_detect_distro() {
-  grep -qis "$1" /etc/os-release && DISTRO=$1
-}
-
-_detect_package_tool() {
-  _detect_distro "Gentoo" && return
-  _detect_distro "Arch Linux" && return
-  _detect_distro "Ubuntu" && return
-}
-
+{{ if (eq .chezmoi.osRelease.id "gentoo") -}}
 _gentoo_repo_sync() {
   emerge --sync
 }
@@ -25,6 +16,7 @@ _gentoo_install() {
 }
 
 _gentoo_init() {
+  _info "Distro of this machine is Gentoo."
   _gentoo_repo_sync
   _gentoo_install app-portage/gentoolkit
   _gentoo_install app-portage/layman
@@ -47,7 +39,7 @@ _gentoo_run() {
     _gentoo_install "$package"
   done < "{{ .chezmoi.homeDir }}/.config/dynamo/os/linux/gentoo.csv"
 }
-
+{{ else if (eq .chezmoi.osRelease.id "arch") -}}
 _arch_repo_sync() {
   if ! command -v yay > /dev/null; then
     sudo pacman -Sy
@@ -61,6 +53,7 @@ _arch_install() {
 }
 
 _arch_init() {
+  _info "Distro of this machine is Arch Linux."
   _arch_repo_sync
   if ! command -v yay > /dev/null; then
     sudo pacman -S --needed git base-devel
@@ -78,7 +71,7 @@ _arch_run() {
     _arch_install "$package"
   done < "{{ .chezmoi.homeDir }}/.config/dynamo/os/linux/arch.csv"
 }
-
+{{ else if (eq .chezmoi.osRelease.id "debian" "ubuntu") -}}
 _ubuntu_repo_sync() {
   apt update
 }
@@ -88,6 +81,7 @@ _ubuntu_install() {
 }
 
 _ubuntu_init() {
+  _info "Distro of this machine is Ubuntu."
   _ubuntu_repo_sync
 }
 
@@ -109,26 +103,26 @@ _ubuntu_run() {
     _ubuntu_install "$package"
   done < "{{ .chezmoi.homeDir }}/.config/dynamo/os/linux/ubuntu.csv"
 }
+{{ end }}
 
 _main() {
-  _detect_package_tool
-  if [[ $(id -u) -ne 0 ]] && [ "$DISTRO" != "Arch Linux" ]; then
-    sudo bash "$0"
-    exit
-  fi
-
-  case $DISTRO in
-    "Gentoo")
-      # _gentoo_init
-      _gentoo_run
-      ;;
-    "Arch Linux")
-      _arch_init && _arch_run
-      ;;
-    "Ubuntu")
-      _ubuntu_init && _ubuntu_run
-      ;;
-  esac
+  {{ if (eq .chezmoi.osRelease.id "gentoo") -}}
+   _gentoo_init
+  _gentoo_run
+  {{ else if (eq .chezmoi.osRelease.id "arch") -}}
+  _arch_init && _arch_run
+  {{ else if (eq .chezmoi.osRelease.id "debian" "ubuntu") -}}
+  _ubuntu_init && _ubuntu_run
+  {{ end }}
 }
 
+{{ if (ne .chezmoi.osRelease.id "arch") -}}
+if [[ $(id -u) -ne 0 ]]; then
+  sudo bash "$0"
+  exit
+fi
+{{ end -}}
+_notice "Install system packages"
 _main
+_success "Install system packages"
+{{ end }}

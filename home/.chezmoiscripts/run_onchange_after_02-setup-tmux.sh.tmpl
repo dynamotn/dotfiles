@@ -1,7 +1,13 @@
 #!/usr/bin/env sh
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+
+_notice "Setup tmux"
 # config hash: {{ joinPath .chezmoi.sourceDir "dot_config/external_tmux/config" | include | sha256sum }}
 chmod +x {{ .chezmoi.homeDir }}/.config/tmux/plugins/dymux/*.mux
 mkdir -p {{ .chezmoi.homeDir }}/.local/share/tmux/plugins
+_progress "Install tpm"
 test ! -d {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm && \
   git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm
+_progress "Install other plugins"
 bash {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm/bin/install_plugins
+_success "Setup tmux"
