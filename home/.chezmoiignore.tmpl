@@ -1,3 +1,7 @@
+**/.git/**
+**/.gitignore
+**/.gitmodules
+
 {{ if ne .chezmoi.os "linux" }}
 .config/dynamo/os/linux/**
 {{ else }}
@@ -10,4 +14,8 @@
 {{ if ne .chezmoi.osRelease.id "ubuntu" }}
 .config/dynamo/os/linux/ubuntu.csv
 {{ end }}
+{{ end }}
+
+{{ if ne .chezmoi.os "linux" }}
+.config/dynamo/binary/linux/**
 {{ end }}
