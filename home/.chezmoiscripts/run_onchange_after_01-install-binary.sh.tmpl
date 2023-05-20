@@ -3,5 +3,5 @@ source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
 _notice "Install some binary tools"
 # data.csv hash: {{ joinPath .chezmoi.homeDir ".config/dynamo/binary/linux/data.csv" | include | sha256sum }}
-bash {{ .chezmoi.homeDir }}/.config/dynamo/binary/setup.sh -m
+bash {{ .chezmoi.homeDir }}/.config/dynamo/binary/setup.sh -n
 _success "Install some binary tools"
