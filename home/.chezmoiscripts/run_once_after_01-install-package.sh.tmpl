@@ -16,7 +16,6 @@ _gentoo_install() {
 }
 
 _gentoo_init() {
-  _info "Distro of this machine is Gentoo."
   _gentoo_repo_sync
   _gentoo_install app-portage/gentoolkit
   _gentoo_install app-portage/layman
@@ -26,6 +25,7 @@ _gentoo_run() {
   local is_first_line=true
   while IFS=, read -r package repo; do
     $is_first_line && is_first_line=false && continue
+    [[ $package =~ ^#.*$ ]] && continue
 
     if [ -z "$repo" ]; then
       layman -l | grep -qis " $repo " \
@@ -53,7 +53,6 @@ _arch_install() {
 }
 
 _arch_init() {
-  _info "Distro of this machine is Arch Linux."
   _arch_repo_sync
   if ! command -v yay > /dev/null; then
     sudo pacman -S --needed git base-devel
@@ -68,6 +67,8 @@ _arch_run() {
   local is_first_line=true
   while IFS=, read -r package; do
     $is_first_line && is_first_line=false && continue
+    [[ $package =~ ^#.*$ ]] && continue
+
     _arch_install "$package"
   done < "{{ .chezmoi.homeDir }}/.config/dynamo/os/linux/arch.csv"
 }
@@ -81,7 +82,6 @@ _ubuntu_install() {
 }
 
 _ubuntu_init() {
-  _info "Distro of this machine is Ubuntu."
   _ubuntu_repo_sync
 }
 
@@ -89,6 +89,7 @@ _ubuntu_run() {
   local is_first_line=true
   while IFS=, read -r package repo repo_name distro_version repo_version key; do
     $is_first_line && is_first_line=false && continue
+    [[ $package =~ ^#.*$ ]] && continue
 
     if [ -n "$repo" ]; then
       test -z "$repo_name" && repo_name=$package
@@ -107,11 +108,14 @@ _ubuntu_run() {
 
 _main() {
   {{ if (eq .chezmoi.osRelease.id "gentoo") -}}
-   _gentoo_init
+  _info "Distro of this machine is Gentoo."
+  # _gentoo_init
   _gentoo_run
   {{ else if (eq .chezmoi.osRelease.id "arch") -}}
+  _info "Distro of this machine is Arch Linux."
   _arch_init && _arch_run
   {{ else if (eq .chezmoi.osRelease.id "debian" "ubuntu") -}}
+  _info "Distro of this machine is Ubuntu."
   _ubuntu_init && _ubuntu_run
   {{ end }}
 }
