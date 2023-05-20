@@ -4,3 +4,14 @@ source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 _notice "Setup fish shell"
 fish {{ .chezmoi.homeDir }}/.config/fish/.setup/setup.fish
 _success "Setup fish shell"
+
+_notice "Install neccessary tools"
+{{ if eq .kind "pc" -}}
+fish -c "install_asdf"
+fish -c "install_gcloud"
+fish -c "install_kubectl"
+fish -c "install_helm"
+fish -c "install_terraform"
+fish -c "install_pre_commit"
+{{ end }}
+_success "Install neccessary tools"
