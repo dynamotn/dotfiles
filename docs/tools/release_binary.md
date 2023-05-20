@@ -6,3 +6,4 @@
 | [bat](https://github.com/sharkdp/bat)         | Alternative to `cat` with syntax highlighting and Git integration |
 | [fd](https://github.com/sharkdp/fd)           | Alternative to `find`, simpler and faster                         |
 | [exa](https://github.com/ogham/exa)           | Alternative to `ls` with colours, faster                          |
+| [btop](https://github.com/aristocratos/btop)  | Alternative to `htop` and `glances`                               |
