@@ -3,3 +3,5 @@ twpayne/chezmoi,,chezmoi-linux-amd64,chezmoi,,
 FiloSottile/age,,age-${VERSION}-linux-amd64.tar.gz,age,true,true
 dandavison/delta,,delta-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,delta,true,true
 sharkdp/bat,,bat-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,bat,true,true
+sharkdp/fd,,fd-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,fd,true,true
+ogham/exa,,exa-linux-x86_64-${VERSION}.zip,exa,true,true

@@ -5,5 +5,6 @@ app-editors/neovim,
 app-shells/fish,
 app-misc/tmux,
 dev-util/watchman,
+sys-apps/ripgrep,
 # GUI packages
 x11-terms/kitty,
