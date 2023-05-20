@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/external_tmux/config" | include | sha256sum }}
+chmod +x {{ .chezmoi.homeDir }}/.config/tmux/plugins/dymux/*.mux
+mkdir -p {{ .chezmoi.homeDir }}/.local/share/tmux/plugins
+test ! -d {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm && \
+  git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm
+bash {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm/bin/install_plugins
