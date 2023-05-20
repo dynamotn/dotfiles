@@ -12,7 +12,7 @@ _gentoo_install() {
   if [ ! -x '/usr/bin/qlist' ]; then
     echo >&2 ":: Error: Must install app-portage/portage-utils first."
   fi
-  qlist -I "$1" 2&>1 || emerge --ask n -uDN --noreplace "$1"
+  qlist -I "$1" || emerge --ask n --noreplace "$1"
 }
 
 _gentoo_init() {
@@ -108,13 +108,16 @@ _ubuntu_run() {
 
 _main() {
   {{ if (eq .chezmoi.osRelease.id "gentoo") -}}
+  # gentoo.csv hash: {{ joinPath .chezmoi.homeDir ".config/dynamo/os/linux/gentoo.csv" | include | sha256sum }}
   _info "Distro of this machine is Gentoo."
   # _gentoo_init
   _gentoo_run
   {{ else if (eq .chezmoi.osRelease.id "arch") -}}
+  # arch.csv hash: {{ joinPath .chezmoi.homeDir ".config/dynamo/os/linux/arch.csv" | include | sha256sum }}
   _info "Distro of this machine is Arch Linux."
   _arch_init && _arch_run
   {{ else if (eq .chezmoi.osRelease.id "debian" "ubuntu") -}}
+  # ubuntu.csv hash: {{ joinPath .chezmoi.homeDir ".config/dynamo/os/linux/ubuntu.csv" | include | sha256sum }}
   _info "Distro of this machine is Ubuntu."
   _ubuntu_init && _ubuntu_run
   {{ end }}

@@ -38,7 +38,7 @@ _update() {
   if [ "$3" = true ]; then
     TEMP=$(mktemp)
     export TEMP
-    curl -SL "$1" -o "$TEMP" && bash "$SCRIPT_DIR/helpers/$2.sh"
+    curl -SL "$1" -o "$TEMP" && bash "$SCRIPT_DIR/helpers/$2.sh" || exit 1
     rm -rf "$TEMP"
   else
     curl -SL "$1" -o "$BIN_DIR/$2"

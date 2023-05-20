@@ -6,6 +6,5 @@ if [ -d ~/.config/fish/completions ]; then
   tar xzf $TEMP --strip=2 -C ~/.config/fish/completions bat-$VERSION-x86_64-unknown-linux-gnu/autocomplete/bat.fish
 fi
 if [ -d ~/Working/personal/fish/caran/completions ]; then
-  tar xzf $TEMP --strip=2 -C ~/Working/personal/fish/caran/completions/bat.fish bat-$VERSION-x86_64-unknown-linux-gnu/autocomplete/bat.fish
+  tar xzf $TEMP --strip=2 -C ~/Working/personal/fish/caran/completions bat-$VERSION-x86_64-unknown-linux-gnu/autocomplete/bat.fish
 fi
-
