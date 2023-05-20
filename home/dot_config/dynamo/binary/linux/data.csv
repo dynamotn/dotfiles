@@ -1,6 +1,7 @@
 github_repo,version,asset_file,output_file,has_helper,must_needed
 twpayne/chezmoi,,chezmoi-linux-amd64,chezmoi,,
 FiloSottile/age,,age-${VERSION}-linux-amd64.tar.gz,age,true,true
+dynamotn/rbw,,rbw_${VERSION}_x86_64-unknown-linux-musl.tar.gz,rbw,true,true
 dandavison/delta,,delta-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,delta,true,true
 sharkdp/bat,,bat-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,bat,true,true
 sharkdp/fd,,fd-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,fd,true,true
