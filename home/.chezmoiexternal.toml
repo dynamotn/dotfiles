@@ -1,0 +1,13 @@
+[".fzf"]
+    type = "git-repo"
+    url = "https://github.com/junegunn/fzf.git"
+    refreshPeriod = "168h"
+[".asdf"]
+    type = "git-repo"
+    url = "https://github.com/asdf-vm/asdf.git"
+    refreshPeriod = "168h"
+[".local/bin/cht"]
+    type = "file"
+    url = "https://cht.sh/:cht.sh"
+    executable = true
+    refreshPeriod = "168h"
