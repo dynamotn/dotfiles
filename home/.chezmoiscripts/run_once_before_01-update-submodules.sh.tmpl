@@ -1,4 +1,7 @@
 #!/bin/sh
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
+_notice "Update submodules"
 cd {{ .chezmoi.sourceDir }}/..
 git submodule update --init --remote --recursive
+_success "Update submodules"
