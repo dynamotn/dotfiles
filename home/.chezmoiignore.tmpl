@@ -19,3 +19,7 @@
 {{ if ne .chezmoi.os "linux" }}
 .config/dynamo/binary/linux/**
 {{ end }}
+
+{{ if ne .kind "pc" }}
+.config/kitty
+{{ end }}
