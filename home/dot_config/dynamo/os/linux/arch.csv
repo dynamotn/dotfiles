@@ -1,6 +1,9 @@
 package
+# Terminal packages
 git
 neovim-git
 fish
 tmux
 watchman
+# GUI packages
+kitty
