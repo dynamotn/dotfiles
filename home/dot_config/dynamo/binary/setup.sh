@@ -83,4 +83,5 @@ _parse_args "$@"
 
 GITHUB_API_USERNAME=${GITHUB_API_USERNAME:-dynamotn}
 GITHUB_API_TOKEN=${GITHUB_API_TOKEN:-}
+mkdir -p $MAN_DIR/man{1,2,3,4,5,6,7,8}
 _main
