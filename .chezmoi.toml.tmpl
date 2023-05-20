@@ -14,4 +14,5 @@ progress = true
     pager = "delta"
 
 [data]
-    hasGUI = {{ promptBoolOnce . "hasGUI" "Do this machine have a GUI? (y/n)" }}
+    place = {{ promptStringOnce . "place" "Where does this machine place? (home/office/cloud)" | quote }}
+    kind = {{ promptStringOnce . "kind" "What kind of this machine is it? (pc/workstation/tablet/vm/...)" | quote }}
