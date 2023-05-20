@@ -7,3 +7,4 @@ sharkdp/bat,,bat-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,bat,true,true
 sharkdp/fd,,fd-${VERSION}-x86_64-unknown-linux-gnu.tar.gz,fd,true,true
 ogham/exa,,exa-linux-x86_64-${VERSION}.zip,exa,true,true
 aristocratos/btop,,btop-x86_64-linux-musl.tbz,btop,true,true
+soywod/himalaya,,himalaya-musl.tar.gz,himalaya,true,true
