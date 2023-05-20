@@ -56,7 +56,7 @@ _main() {
   # to chezmoi's default config template
   echo "sourceDir = \"$SETUP_DIR\"" > "$SETUP_DIR"/home/.chezmoi.toml.tmpl
   cat "$SETUP_DIR"/.chezmoi.toml.tmpl >> "$SETUP_DIR"/home/.chezmoi.toml.tmpl
-  chezmoi init "$chezmoi_params" -S "$SETUP_DIR"
+  chezmoi init "$chezmoi_params" -S "$SETUP_DIR" --prompt --true
 
   # Apply configuration by order
   # shellcheck disable=SC2086
