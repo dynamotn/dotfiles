@@ -4,6 +4,5 @@
 | `neovim`   | My love editor, and IDE in my eyes                     |
 | `fish`     | Smart command line shell                               |
 | `tmux`     | Terminal multiplexer                                   |
-| `watchman` | File watching service                                  |
 | `kitty`    | Terminal emulator, support ligature fonts and GPU      |
 | `ripgrep`  | Alternative to `grep`, with Git integration and faster |
