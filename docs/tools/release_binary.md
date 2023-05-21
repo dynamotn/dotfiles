@@ -9,3 +9,4 @@
 | [exa](https://github.com/ogham/exa)            | Alternative to `ls` with colours, faster                          |
 | [btop](https://github.com/aristocratos/btop)   | Alternative to `htop` and `glances`                               |
 | [himalaya](https://github.com/soywod/himalaya) | Email CIL tool                                                    |
+| [smug](https://github.com/ivaaaan/smug)        | Tmux session manager                                              |

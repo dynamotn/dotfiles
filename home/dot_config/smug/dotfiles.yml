@@ -1,0 +1,9 @@
+session: dotfiles
+root: ~/Dotfiles
+
+windows:
+  - name: neovim
+    root: ~/Dotfiles/modules/neovim
+    layouts: tiled
+    commands:
+      - vim lua/plugins/list.lua
