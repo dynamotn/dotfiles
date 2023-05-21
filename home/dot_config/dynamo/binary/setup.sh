@@ -1,4 +1,6 @@
 #!/bin/bash
+set -eou pipefail
+
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 export BIN_DIR=$HOME/.local/bin
 export MAN_DIR=$HOME/.local/man
@@ -79,6 +81,9 @@ _main() {
   done
 }
 
+PACKAGE=
+MUST_NEEDED=false
+NOT_EXIST_ONLY=false
 _parse_args "$@"
 
 GITHUB_API_USERNAME=${GITHUB_API_USERNAME:-dynamotn}
