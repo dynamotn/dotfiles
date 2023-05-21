@@ -7,3 +7,4 @@ tmux,,,,,
 ripgrep,,,,,
 # GUI packages
 kitty,,,,,
+ibus-bamboo,http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu,,,main,5AD2E0B68A0409AD907D462D36ED424E9659D014
