@@ -7,3 +7,6 @@
 [submodule "home/dot_config/external_tmux"]
 	path = home/dot_config/tmux
 	url = git@gitlab.com:dynamo-config/tmux.git
+[submodule "home/dot_config/awesome"]
+	path = home/dot_config/awesome
+	url = git@gitlab.com:dynamo-config/awesome.git

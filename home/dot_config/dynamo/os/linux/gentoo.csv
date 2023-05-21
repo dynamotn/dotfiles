@@ -8,3 +8,4 @@ sys-apps/ripgrep,
 # GUI packages
 x11-terms/kitty,
 app-i18n/ibus-bamboo,dynamo
+x11-wm/awesome,
