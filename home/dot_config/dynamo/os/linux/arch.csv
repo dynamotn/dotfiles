@@ -4,7 +4,6 @@ git
 neovim-git
 fish
 tmux
-watchman
 ripgrep
 # GUI packages
 kitty
