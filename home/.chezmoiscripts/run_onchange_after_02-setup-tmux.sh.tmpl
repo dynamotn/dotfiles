@@ -2,7 +2,7 @@
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
 _notice "Setup tmux"
-# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/external_tmux/config" | include | sha256sum }}
+# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/tmux/config" | include | sha256sum }}
 chmod +x {{ .chezmoi.homeDir }}/.config/tmux/plugins/dymux/*.mux
 mkdir -p {{ .chezmoi.homeDir }}/.local/share/tmux/plugins
 _progress "Install tpm"
