@@ -1,0 +1,14 @@
+[desktop/ibus/general]
+preload-engines=['Bamboo', 'xkb:us::eng']
+use-system-keyboard-layout=true
+engines-order=['xkb:us::eng', 'Bamboo']
+
+[desktop/ibus/general/hotkey]
+triggers=['<Control><Shift>space']
+
+[desktop/ibus/panel/emoji]
+font='Iosevka Dynamo 16'
+
+[desktop/ibus/panel]
+xkb-icon-rgba='#44c0dd'
+show=0
