@@ -1,0 +1,26 @@
+display-name = "Trần Đức Nam"
+signature = "Trân trọng cảm ơn,"
+email-listing-page-size = 50
+
+[personal]
+default = true
+email = "dynamo.foss@gmail.com"
+downloads-dir = "~/Misc/Downloads/Emails/personal"
+
+backend = "imap"
+imap-host = "imap.gmail.com"
+imap-port = 993
+imap-login = "dynamo.foss@gmail.com"
+imap-passwd-cmd = "rbw get --field=Himalaya 'Email cá nhân'"
+
+sender = "smtp"
+smtp-host = "smtp.gmail.com"
+smtp-port = 465
+smtp-login = "dynamo.foss@gmail.com"
+smtp-passwd-cmd = "rbw get --field=Himalaya 'Email cá nhân'"
+
+[personal.folder-aliases]
+inbox = "INBOX"
+sent = "[Gmail]/Sent Mail"
+drafts = "[Gmail]/Drafts"
+trash = "[Gmail]/Trash"
