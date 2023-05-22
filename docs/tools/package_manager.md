@@ -8,3 +8,6 @@
 | `kitty`       | Terminal emulator, support ligature fonts and GPU      |
 | `ripgrep`     | Alternative to `grep`, with Git integration and faster |
 | `ibus-bamboo` | Vietnamese input method for Ibus                       |
+| `greenclip`   | Clipboard manager                                      |
+| `xsel`        | Get and set contents of X selection, eg: clipboard     |
+| `rofi`        | Application launcher, simple switcher                  |

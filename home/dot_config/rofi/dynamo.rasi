@@ -1,0 +1,177 @@
+* {
+  transparent: #00000000;
+  foreground: #cad3f5ee;
+  background-selected: #939ab766;
+  background-active: #939ab733;
+  background-white: #18192666;
+  background-black: #24273a66;
+  urgent: #a6da95ff;
+  urgent-selected: #8bd5ca77;
+}
+
+window {
+  transparency: "real";
+  background-color: @transparent;
+  location: center;
+  anchor: center;
+  x-offset: 0px;
+  height: 800px;
+  width: 1000px;
+  border-radius: 20px;
+}
+
+mainbox {
+  background-color: @background-white;
+  children: [ inputbar, message, listview ];
+  spacing: 25px;
+  padding: 40px 25px 25px 25px;
+}
+
+inputbar {
+  background-color: @background-white;
+  text-color: @foreground;
+  expand: false;
+  border-radius: 24px;
+  margin: 0px 100px 0px 100px;
+  padding: 10px 10px 10px 10px;
+  position: north;
+  children: [ prompt, entry-wrapper ];
+}
+
+message {
+  enabled: true;
+  margin: 0px;
+  padding: 0px;
+  border: 0px solid;
+  border-radius: 0px 0px 0px 0px;
+  background-color: @transparent;
+  text-color: @foreground;
+}
+
+textbox {
+ padding: 5px 10px;
+ border: 0px solid;
+ border-radius: 20px;
+ background-color: @background-active;
+ text-color: @foreground;
+ vertical-align: 0.5;
+ horizontal-align: 0.0;
+ highlight: none;
+ placeholder-color: @foreground;
+ blink: true;
+ markup: true;
+}
+
+error-message {
+ padding: 10px;
+ border: 2px solid;
+ border-radius: 20px;
+ background-color: @background-white;
+ text-color: @foreground;
+}
+
+listview {
+  background-color: @transparent;
+  columns: 2;
+  spacing: 5px;
+  cycle: false;
+  dynamic: true;
+  layout: vertical;
+}
+
+prompt {
+  enabled: true;
+  background-color: transparent;
+  text-color: @foreground;
+  margin: 0px 10px 0px 10px;
+}
+
+entry-wrapper {
+  orientation: horizontal;
+  vertical-align: 0.5;
+  spacing: 4px;
+  background-color: @transparent;
+  children: [ button, entry, case-indicator ];
+}
+
+button {
+  action: "ok";
+  str: " ";
+  font: "Symbols Nerd Font 11";
+  expand: false;
+  text-color: @foreground;
+  background-color: @transparent;
+  vertical-align: 0.7;
+  horizontal-align: 0.5;
+}
+
+entry {
+  font: "Iosevka Dynamo 11";
+  background-color: @transparent;
+  text-color: @foreground;
+  expand: true;
+  vertical-align: 0.5;
+  horizontal-align: 0.5;
+  placeholder: "Type to search";
+  placeholder-color: @foreground;
+  blink: true;
+}
+
+case-indicator {
+  background-color: @transparent;
+  text-color: @foreground;
+  vertical-align: 0.5;
+  horizontal-align: 0.5;
+}
+
+element {
+  background-color: @transparent;
+  text-color: @foreground;
+  orientation: horizontal;
+  border-radius: 6px;
+  padding: 5px 10px 5px 10px;
+  spacing: 8px;
+}
+
+element-icon {
+  background-color: @transparent;
+  size: 36px;
+  border: 0;
+}
+
+element-text {
+  background-color: @transparent;
+  text-color: @foreground;
+  expand: true;
+  horizontal-align: 0;
+  vertical-align: 0.5;
+  margin: 0 10px 0 10px;
+}
+
+element normal.urgent,
+element alternate.urgent {
+  background-color: @urgent;
+  text-color: @foreground;
+  border-radius: 9px;
+}
+
+element normal.active,
+element alternate.active {
+  background-color: @background-active;
+  text-color: @foreground;
+}
+
+element selected {
+  background-color: @background-selected;
+  text-color: @foreground;
+}
+
+element selected.urgent {
+  background-color: @urgent-selected;
+  text-color: @foreground;
+}
+
+element selected.active {
+  background-color: @background-active;
+  color: @foreground;
+}
