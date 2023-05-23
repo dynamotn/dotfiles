@@ -5,6 +5,7 @@ neovim,http://ppa.launchpad.net/neovim-ppa/unstable/ubuntu,,,main,9DBB0BE9366964
 fish,http://ppa.launchpad.net/fish-shell/release-3/ubuntu,,,main,59FDA1CE1B84B3FAD89366C027557F056DC33CA5
 tmux,,,,,
 ripgrep,,,,,
+{{ if eq .kind "pc" -}}
 # GUI packages
 kitty,,,,,
 ibus-bamboo,http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu,,,main,5AD2E0B68A0409AD907D462D36ED424E9659D014
@@ -12,3 +13,4 @@ awesome,,,,,
 greenclip,https://glyphpoch.github.io/ppa,,,./,20AA82EB22A4C561908076DF248567F73D835DD6
 xsel,,,,,
 rofi,,,,,
+{{ end -}}
