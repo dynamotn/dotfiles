@@ -20,8 +20,8 @@
 	path = home/dot_local/share/themes
 	url = git@gitlab.com:dynamo-theme/gtk.git
 [submodule "home/dot_local/share/icons/Dynamo-Cursor"]
-	path = home/dot_local/share/icons/Dynamo-Cursor
+	path = modules/cursor
 	url = git@gitlab.com:dynamo-theme/cursor.git
 [submodule "home/dot_local/share/icons/Dynamo"]
-	path = home/dot_local/share/icons/Dynamo
+	path = modules/icons
 	url = git@gitlab.com:dynamo-theme/icon.git
