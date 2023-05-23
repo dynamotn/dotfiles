@@ -13,3 +13,6 @@
 [submodule "home/Multimedia/Pictures/Wallpaper"]
 	path = home/Multimedia/Pictures/Wallpaper
 	url = git@gitlab.com:dynamo-config/wallpaper.git
+[submodule "home/dot_local/share/fonts"]
+	path = modules/font
+	url = git@gitlab.com:dynamo-config/font.git
