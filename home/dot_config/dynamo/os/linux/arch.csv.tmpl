@@ -5,6 +5,7 @@ neovim-git
 fish
 tmux
 ripgrep
+{{ if eq .kind "pc" -}}
 # GUI packages
 kitty
 ibus-bamboo
@@ -12,3 +13,4 @@ awesome-git
 rofi-greenclip
 xsel
 rofi
+{{ end -}}
