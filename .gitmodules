@@ -16,3 +16,6 @@
 [submodule "home/dot_local/share/fonts"]
 	path = modules/font
 	url = git@gitlab.com:dynamo-config/font.git
+[submodule "home/dot_local/share/themes"]
+	path = home/dot_local/share/themes
+	url = git@gitlab.com:dynamo-theme/gtk.git
