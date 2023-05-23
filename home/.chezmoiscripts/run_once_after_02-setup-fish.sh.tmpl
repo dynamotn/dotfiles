@@ -2,6 +2,7 @@
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
 _notice "Setup fish shell"
+chsh -s "$(which fish)"
 fish {{ .chezmoi.homeDir }}/.config/fish/.setup/setup.fish
 _success "Setup fish shell"
 
