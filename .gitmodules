@@ -10,3 +10,6 @@
 [submodule "home/dot_config/awesome"]
 	path = home/dot_config/awesome
 	url = git@gitlab.com:dynamo-config/awesome.git
+[submodule "home/Multimedia/Pictures/Wallpaper"]
+	path = home/Multimedia/Pictures/Wallpaper
+	url = git@gitlab.com:dynamo-config/wallpaper.git
