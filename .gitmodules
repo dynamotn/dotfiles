@@ -17,7 +17,7 @@
 	path = modules/font
 	url = git@gitlab.com:dynamo-config/font.git
 [submodule "home/dot_local/share/themes"]
-	path = home/dot_local/share/themes/Dynamo
+	path = modules/theme
 	url = git@gitlab.com:dynamo-theme/gtk.git
 [submodule "home/dot_local/share/icons/Dynamo-Cursor"]
 	path = modules/cursor
