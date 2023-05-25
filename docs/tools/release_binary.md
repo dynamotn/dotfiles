@@ -11,3 +11,4 @@
 | [btop](https://github.com/aristocratos/btop)   | Alternative to `htop` and `glances`                               | Frequently used tools, in `modules/awesome`      |
 | [himalaya](https://github.com/soywod/himalaya) | Email CLI tool                                                    | Frequently used tools, in `modules/awesome`      |
 | [smug](https://github.com/ivaaaan/smug)        | Tmux session manager                                              | Frequently used tools, in `home/dot_config/smug` |
+| [projekt](https://github.com/dynamotn/projekt) | Smart CLI command to manage project folder                        | Frequently used tools, in `modules/fish`         |
