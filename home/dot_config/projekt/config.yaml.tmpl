@@ -1,0 +1,29 @@
+{{- $which := printf "%s_%s" .place .kind -}}
+folders:
+{{- if eq $which "home_pc" }}
+    - path: {{ .chezmoi.sourceDir }}/../modules
+      prefix: ""
+      is_workspace: true
+      regex: ""
+      priority: 0
+    - path: {{ .chezmoi.homeDir }}/Working/community
+      prefix: ""
+      is_workspace: true
+      regex: ""
+      priority: 0
+    - path: {{ .chezmoi.homeDir }}/Working/personal
+      prefix: ""
+      is_workspace: true
+      regex: ""
+      priority: 0
+    - path: {{ .chezmoi.homeDir }}/Working/personal/fish
+      prefix: "fish"
+      is_workspace: true
+      regex: ""
+      priority: 0
+    - path: {{ .chezmoi.homeDir }}/Working/personal/tools
+      prefix: "tools"
+      is_workspace: true
+      regex: ""
+      priority: 0
+{{- end }}
