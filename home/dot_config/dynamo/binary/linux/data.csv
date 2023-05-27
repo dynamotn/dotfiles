@@ -11,3 +11,4 @@ aristocratos/btop,,btop-x86_64-linux-musl.tbz,btop,true,true
 soywod/himalaya,,himalaya-musl.tar.gz,himalaya,true,true
 ivaaaan/smug,, smug_${VERSION:1}_Linux_x86_64.tar.gz,smug,true,
 dynamotn/projekt,,projekt_${VERSION:1}_Linux_x86_64.tar.gz,projekt,true,
+erebe/greenclip,,greenclip,greenclip,false,true
