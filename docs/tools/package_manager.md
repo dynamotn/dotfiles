@@ -12,6 +12,5 @@
 | `awesomewm`            | AwesomeWM, window manager for X                        | `modules/awesome`                                              |
 | `redshift`             | Adjusts the color temperature of screen                | `modules/awesome`                                              |
 | `ibus-bamboo`          | Vietnamese input method for Ibus                       | `home/dot_config/ibus-bamboo`                                  |
-| `greenclip`            | Clipboard manager                                      | `modules/awesome`                                              |
 | `xsel`                 | Get and set contents of X selection, eg: clipboard     | Frequently used tools, in `modules/tmux` and `modules/awesome` |
 | `rofi`                 | Application launcher, simple switcher                  | `modules/awesome`                                              |
