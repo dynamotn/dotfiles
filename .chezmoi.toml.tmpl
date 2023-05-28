@@ -16,3 +16,4 @@ progress = true
 [data]
     place = {{ promptStringOnce . "place" "Where does this machine place? (home/office/cloud)" | quote }}
     kind = {{ promptStringOnce . "kind" "What kind of this machine is it? (pc/workstation/tablet/vm/...)" | quote }}
+    guiServer = {{ promptStringOnce . "guiServer" "Which GUI server of this machine is, X for X, W for Wayland, 0 for CLI-only? (X/W/0)" | quote }}
