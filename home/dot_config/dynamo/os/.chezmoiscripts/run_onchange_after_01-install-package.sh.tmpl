@@ -1,5 +1,6 @@
 {{ if (eq .chezmoi.os "linux") -}}
 #!/bin/bash
+set -x
 set -euo pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
@@ -27,12 +28,12 @@ _gentoo_run() {
     $is_first_line && is_first_line=false && continue
     [[ $package =~ ^#.*$ ]] && continue
 
-    if [ -z "$repo" ]; then
-      layman -l | grep -qis " $repo " \
+    if [ -n "$repo" ]; then
+      eselect repository list -i | grep -qis "$repo" \
         || if [ "$repo" = "dynamo" ]; then
-          layman -o https://raw.githubusercontent.com/dynamotn/overlay/master/repositories.xml -f -a dynamo
+          eselect repository add dynamo https://github.com/dynamotn/overlay.git
         else
-          layman -a "$repo"
+          eselect repository add "$repo"
         fi
     fi
 
