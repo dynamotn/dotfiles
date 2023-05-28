@@ -9,13 +9,16 @@ grc,,,,,
 tar,,,,,
 unzip,,,,,
 gzip,,,,,
-{{ if eq .kind "pc" -}}
+{{ if eq .guiServer "X" "W" -}}
 # GUI packages
-xdg-user-dirs,,,,,
-kitty,,,,,
 ibus-bamboo,http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu,,,main,5AD2E0B68A0409AD907D462D36ED424E9659D014
+kitty,,,,,
+{{ end -}}
+xdg-user-dirs,,,,,
 awesome,,,,,
 redshift-minimal,,,,,
 xsel,,,,,
 rofi,,,,,
+{{ end -}}
+{{ if eq .guiServer "W" -}}
 {{ end -}}

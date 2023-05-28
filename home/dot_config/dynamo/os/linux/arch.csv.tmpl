@@ -9,13 +9,18 @@ grc
 tar
 unzip
 gzip
-{{ if eq .kind "pc" -}}
+{{ if eq .guiServer "X" "W" -}}
 # GUI packages
-xdg-user-dirs
-kitty
 ibus-bamboo-git
+kitty
+{{ end -}}
+{{ if eq .guiServer "X" -}}
+xdg-user-dirs
 awesome-git
 redshift-minimal
 xsel
 rofi
+{{ end -}}
+{{ if eq .guiServer "W" -}}
+hyprland-git
 {{ end -}}
