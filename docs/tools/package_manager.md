@@ -9,7 +9,8 @@
 | `tar`, `unzip`, `gzip` | Uncompress file                                        | Prequisite, in `home/dot_config/dynamo`                        |
 | `xdg-user-dirs`        | Manage well-known user directories                     | Prequisite for GUI applications                                |
 | `kitty`                | Terminal emulator, support ligature fonts and GPU      | `home/dot_config/kitty`                                        |
-| `hyprland`             | Hyprland, window manager for Wayland                   | `home/dot_config/hypr`                                         |
+| `hyprland`             | Window manager for Wayland                             | `home/dot_config/hypr`                                         |
+| `eww`                  | Widgets and status bar                                 | `home/dot_config/eww`                                          |
 | `awesomewm`            | AwesomeWM, window manager for X                        | `modules/awesome`                                              |
 | `redshift`             | Adjusts the color temperature of screen                | `modules/awesome`                                              |
 | `ibus-bamboo`          | Vietnamese input method for Ibus                       | `home/dot_config/ibus-bamboo`                                  |
