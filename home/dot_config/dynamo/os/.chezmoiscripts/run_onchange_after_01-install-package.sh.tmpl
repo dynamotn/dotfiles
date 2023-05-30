@@ -49,7 +49,7 @@ _arch_repo_sync() {
 }
 
 _arch_install() {
-  pacman -Qi "$1" 2&>1 || yay --noconfirm -S --needed --answerclean All --answerdiff None "$1"
+  pacman -Qi "$1" > /dev/null || yay --noconfirm -S --needed --answerclean All --answerdiff None "$1"
 }
 
 _arch_init() {
