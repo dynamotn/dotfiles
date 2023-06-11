@@ -11,17 +11,18 @@ app-arch/unzip,
 app-arch/gzip,
 {{ if eq .guiServer "X" "W" -}}
 # GUI packages
-app-i18n/ibus-bamboo,dynamo
 x11-terms/kitty,
 {{ end -}}
 {{ if eq .guiServer "X" -}}
+app-i18n/ibus-bamboo,dynamo
+x11-misc/xdg-user-dirs,
 x11-wm/awesome,
 x11-misc/redshift,
 x11-misc/xsel,
 x11-misc/rofi,
-x11-misc/xdg-user-dirs,
 {{ end -}}
 {{ if eq .guiServer "W" -}}
+app-i18n/fcitx-bamboo,dynamo
 gui-wm/hyprland,guru
-gui-wm/eww,guru
+gui-apps/eww,guru
 {{ end -}}

@@ -11,9 +11,10 @@ unzip,,,,,
 gzip,,,,,
 {{ if eq .guiServer "X" "W" -}}
 # GUI packages
-ibus-bamboo,http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu,,,main,5AD2E0B68A0409AD907D462D36ED424E9659D014
 kitty,,,,,
 {{ end -}}
+{{ if eq .guiServer "X" -}}
+ibus-bamboo,http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu,,,main,5AD2E0B68A0409AD907D462D36ED424E9659D014
 xdg-user-dirs,,,,,
 awesome,,,,,
 redshift-minimal,,,,,
