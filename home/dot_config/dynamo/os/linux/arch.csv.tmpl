@@ -11,17 +11,18 @@ unzip
 gzip
 {{ if eq .guiServer "X" "W" -}}
 # GUI packages
-ibus-bamboo-git
 kitty
-{{ end -}}
+{{ end }}
 {{ if eq .guiServer "X" -}}
+ibus-bamboo-git
 xdg-user-dirs
 awesome-git
 redshift-minimal
 xsel
 rofi
-{{ end -}}
+{{ end }}
 {{ if eq .guiServer "W" -}}
-hyprland-git
+fcitx5-bamboo-git
+hyprland-nvidia-git
 eww-wayland
-{{ end -}}
+{{ end }}

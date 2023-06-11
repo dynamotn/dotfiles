@@ -30,7 +30,7 @@ _gentoo_run() {
     if [ -n "$repo" ]; then
       eselect repository list -i | grep -qis "$repo" \
         || if [ "$repo" = "dynamo" ]; then
-          eselect repository add dynamo https://github.com/dynamotn/overlay.git
+          eselect repository add dynamo git https://github.com/dynamotn/overlay.git || true
         else
           eselect repository add "$repo"
         fi
