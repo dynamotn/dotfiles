@@ -11,3 +11,7 @@
     url = "https://cht.sh/:cht.sh"
     executable = true
     refreshPeriod = "168h"
+[".config/bat/themes/catppuccin.tmTheme"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/catppuccin/bat/main/Catppuccin-macchiato.tmTheme"
+    refreshPeriod = "168h"
