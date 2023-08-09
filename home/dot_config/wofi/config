@@ -1,0 +1,13 @@
+width=1020
+height=768
+show_all=true
+print_command=true
+insensitive=true
+prompt=Mày muốn gì ở tao?
+allow_images=true
+matching=fuzzy
+location=center
+columns=2
+layer=overlay
+
+run-always_parse_args=true
