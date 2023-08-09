@@ -25,8 +25,9 @@
 | `rofi`          | Application launcher, simple switcher              | `modules/awesome`                                              |
 
 # Wayland server applications
-| Tool           | Purpose                           | Used in                        |
-|----------------|-----------------------------------|--------------------------------|
-| `fcitx-bamboo` | Vietnamese input method for Fcitx | `home/dot_config/fcitx-bamboo` |
-| `hyprland`     | Window manager for Wayland        | `home/dot_config/hypr`         |
-| `eww`          | Widgets and status bar            | `home/dot_config/eww`          |
+| Tool           | Purpose                               | Used in                        |
+|----------------|---------------------------------------|--------------------------------|
+| `fcitx-bamboo` | Vietnamese input method for Fcitx     | `home/dot_config/fcitx-bamboo` |
+| `hyprland`     | Window manager for Wayland            | `home/dot_config/hypr`         |
+| `eww`          | Widgets and status bar                | `home/dot_config/eww`          |
+| `wofi`         | Application launcher, simple switcher | `home/dot_config/hypr`         |

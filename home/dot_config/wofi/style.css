@@ -1,0 +1,92 @@
+@define-color blue #8aadf4;
+@define-color lavender #b7bdf8;
+@define-color txt #cad3f5;
+@define-color base #24273a;
+@define-color surface1 #494d64;
+
+* {
+  font-family: 'Iosevka Dynamo', monospace;
+  font-size: 16px;
+}
+
+/* Slide In */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Fade In */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Window */
+window {
+  background-color: transparent;
+  animation: slideIn 0.5s ease-in-out both;
+}
+
+/* Inner Box */
+#inner-box {
+  margin: 5px;
+  padding: 10px;
+  border: none;
+  background-color: transparent;
+  animation: fadeIn 0.5s ease-in-out both;
+}
+
+/* Outer Box */
+#outer-box {
+  margin: 0px;
+  padding: 40px 25px 25px 25px;
+  border: 1px solid @blue;
+  border-radius: 7px;
+  background-color: @base;
+  opacity: 0.95;
+}
+
+/* Scroll */
+#scroll {
+  margin: 0px;
+  padding: 10px;
+  border: none;
+}
+
+/* Input */
+#input {
+  margin: 5px;
+  padding: 10px;
+  border: none;
+  color: @lavender;
+  background-color: @surface1;
+  animation: fadeIn 0.5s ease-in-out both;
+}
+
+/* Text */
+#text {
+  margin: 5px;
+  padding: 10px;
+  border: none;
+  color: @txt;
+  animation: fadeIn 0.5s ease-in-out both;
+}
+
+/* Selected Entry */
+#entry:selected {
+  background-color: @lavender;
+}
+
+#text:selected {
+  color: @base;
+}
