@@ -9,21 +9,25 @@ grc
 tar
 unzip
 gzip
-{{ if eq .guiServer "X" "W" -}}
+{{- if eq .guiServer "X" "W" }}
 # GUI packages
 kitty
-{{ end -}}
-{{ if eq .guiServer "X" -}}
+{{- end }}
+{{- if eq .guiServer "X" }}
 ibus-bamboo-git
 xdg-user-dirs
 awesome-git
 redshift-minimal
 xsel
 rofi
-{{ end -}}
-{{ if eq .guiServer "W" -}}
+{{- end }}
+{{- if eq .guiServer "W" }}
 fcitx5-bamboo-git
+{{- if eq .guiDriver "N" }}
 hyprland-nvidia-git
+{{- else }}
+hyprland
+{{- end }}
 eww-wayland
 wofi
 {{ end -}}
