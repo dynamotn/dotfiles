@@ -4,7 +4,7 @@ source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 trap "_error \"Can't setup fish shell\"" ERR
 
 _notice "Setup fish shell"
-# config hash: {{ joinPath .chezmoi.sourceDir "../modules/fish/fish_plugins" | include | sha256sum }}
+# plugins hash: {{ joinPath .chezmoi.sourceDir "../modules/fish/fish_plugins" | include | sha256sum }}
 if [[ $SHELL != "$(which fish)" ]]; then
   _info "Change default shell to fish"
   chsh -s "$(which fish)"

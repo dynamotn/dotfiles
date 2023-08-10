@@ -4,7 +4,7 @@ source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 trap "_error \"Can't update submodules\"" ERR
 
 _notice "Update submodules"
-# config hash: {{ joinPath .chezmoi.sourceDir "../.gitmodules" | include | sha256sum }}
+# modules hash: {{ joinPath .chezmoi.sourceDir "../.gitmodules" | include | sha256sum }}
 cd {{ .chezmoi.sourceDir }}/..
 git submodule update --init --remote --recursive \
   {{- if eq .guiServer "X" "W" }}
