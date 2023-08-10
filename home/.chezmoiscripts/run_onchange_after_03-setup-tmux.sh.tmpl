@@ -1,4 +1,4 @@
-#!/bin/bash
+#!{{ lookPath "bash" }}
 set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 trap "_error \"Can't setup tmux\"" ERR

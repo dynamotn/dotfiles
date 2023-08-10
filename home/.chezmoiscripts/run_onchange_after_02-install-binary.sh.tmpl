@@ -1,4 +1,4 @@
-#!/bin/bash
+#!{{ lookPath "bash" }}
 set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 trap "_error \"Install binary tools failed\"" ERR
