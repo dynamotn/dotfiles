@@ -60,9 +60,13 @@ _main() {
 
   # Apply configuration by order
   # shellcheck disable=SC2086
-  chezmoi apply $chezmoi_params "$HOME/.ssh"
+  chezmoi apply $chezmoi_params $HOME/.ssh
   # shellcheck disable=SC2086
   chezmoi apply $chezmoi_params
+
+  # Modify remote url of dotfiles
+  git remote set-url origin git@gitlab.com:dynamo-config/dotfiles
+  git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git
 }
 
 if [ "$DEBUG" = "true" ]; then
