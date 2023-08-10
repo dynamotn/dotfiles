@@ -67,7 +67,5 @@ _main() {
 
 if [ "$DEBUG" = "true" ]; then
   set -x
-  _main
-else
-  _main > /dev/null 2>&1
 fi
+_main
