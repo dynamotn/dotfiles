@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+#!/bin/bash
+set -eou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
 _notice "Setup ibus-bamboo"

@@ -1,27 +1,27 @@
-[submodule "external_modules/neovim"]
+[submodule "neovim"]
 	path = home/dot_config/nvim
 	url = git@gitlab.com:dynamo-config/neovim.git
-[submodule "external_fish"]
+[submodule "fish"]
 	path = home/dot_config/fish
 	url = git@gitlab.com:dynamo-config/fish.git
-[submodule "home/dot_config/external_tmux"]
+[submodule "tmux"]
 	path = home/dot_config/tmux
 	url = git@gitlab.com:dynamo-config/tmux.git
-[submodule "home/dot_config/awesome"]
+[submodule "awesome"]
 	path = home/dot_config/awesome
 	url = git@gitlab.com:dynamo-config/awesome.git
-[submodule "home/Multimedia/Pictures/Wallpaper"]
+[submodule "wallpaper"]
 	path = home/Multimedia/Pictures/Wallpaper
 	url = git@gitlab.com:dynamo-config/wallpaper.git
-[submodule "home/dot_local/share/fonts"]
+[submodule "font"]
 	path = modules/font
 	url = git@gitlab.com:dynamo-config/font.git
-[submodule "home/dot_local/share/themes"]
-	path = modules/theme
+[submodule "gtk"]
+	path = modules/gtk
 	url = git@gitlab.com:dynamo-theme/gtk.git
-[submodule "home/dot_local/share/icons/Dynamo-Cursor"]
+[submodule "cursor"]
 	path = modules/cursor
 	url = git@gitlab.com:dynamo-theme/cursor.git
-[submodule "home/dot_local/share/icons/Dynamo"]
-	path = modules/icons
+[submodule "icon"]
+	path = modules/icon
 	url = git@gitlab.com:dynamo-theme/icon.git

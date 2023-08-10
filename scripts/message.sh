@@ -48,5 +48,5 @@ _debug() {
 }
 
 _info() {
-  echo -e "${NC}INFO:${1}"
+  echo -e "${NC}INFO: ${1}"
 }
