@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -eou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
 _notice "Update submodules"
@@ -7,9 +8,9 @@ git submodule update --init --remote --recursive \
   {{- if eq .guiServer "X" "W" }}
   home/Multimedia/Pictures/Wallpaper \
   modules/font \
-  modules/theme \
+  modules/gtk \
   modules/cursor \
-  modules/icons \
+  modules/icon \
   {{- end }}
   {{- if eq .guiServer "X" }}
   home/dot_config/awesome \
