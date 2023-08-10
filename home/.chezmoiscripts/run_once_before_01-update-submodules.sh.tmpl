@@ -3,5 +3,18 @@ source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
 _notice "Update submodules"
 cd {{ .chezmoi.sourceDir }}/..
-git submodule update --init --remote --recursive
-_success "Update submodules"
+git submodule update --init --remote --recursive \
+  {{- if eq .guiServer "X" "W" }}
+  home/Multimedia/Pictures/Wallpaper \
+  modules/font \
+  modules/theme \
+  modules/cursor \
+  modules/icons \
+  {{- end }}
+  {{- if eq .guiServer "X" }}
+  home/dot_config/awesome \
+  {{- end }}
+  home/dot_config/nvim \
+  home/dot_config/fish \
+  home/dot_config/tmux
+_success "Updated submodules"
