@@ -4,6 +4,8 @@ source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 trap "_error \"Install binary tools failed\"" ERR
 
 _notice "Install some binary tools"
+{{- if stat (joinPath .chezmoi.homeDir ".config/dynamo/binary/linux/data.csv") }}
 # data.csv hash: {{ joinPath .chezmoi.homeDir ".config/dynamo/binary/linux/data.csv" | include | sha256sum }}
+{{- end }}
 bash {{ .chezmoi.homeDir }}/.config/dynamo/binary/setup.sh -n
 _success "Install some binary tools"
