@@ -1,7 +1,8 @@
 {{ if (eq .chezmoi.os "linux") -}}
 #!/bin/bash
-set -euo pipefail
+set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+trap "_error \"Install system packages failed\"" ERR
 
 {{ if (eq .chezmoi.osRelease.id "gentoo") -}}
 _gentoo_repo_sync() {
@@ -131,5 +132,5 @@ fi
 {{ end -}}
 _notice "Install system packages"
 _main
-_success "Install system packages"
+_success "Installed system packages"
 {{ end }}

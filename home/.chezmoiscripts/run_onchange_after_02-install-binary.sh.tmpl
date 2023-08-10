@@ -1,6 +1,7 @@
 #!/bin/bash
-set -eou pipefail
+set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+trap "_error \"Install binary tools failed\"" ERR
 
 _notice "Install some binary tools"
 # data.csv hash: {{ joinPath .chezmoi.homeDir ".config/dynamo/binary/linux/data.csv" | include | sha256sum }}

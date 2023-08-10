@@ -1,13 +1,17 @@
 #!/bin/bash
-set -eou pipefail
+set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+trap "_error \"Can't setup fish shell\"" ERR
 
 _notice "Setup fish shell"
-chsh -s "$(which fish)"
+# config hash: {{ joinPath .chezmoi.sourceDir "../modules/fish/fish_plugins" | include | sha256sum }}
+if [[ $SHELL != "$(which fish)" ]]; then
+  _info "Change default shell to fish"
+  chsh -s "$(which fish)"
+fi
 fish {{ .chezmoi.homeDir }}/.config/fish/setup.fish
-_success "Setup fish shell"
 
-_notice "Install neccessary tools"
+_progress "Install neccessary tools"
 {{ if eq .kind "pc" -}}
 fish -c "install_asdf"
 fish -c "install_gcloud"
@@ -16,4 +20,4 @@ fish -c "install_helm"
 fish -c "install_terraform"
 fish -c "install_pre_commit"
 {{ end }}
-_success "Install neccessary tools"
+_success "Setup fish shell"
