@@ -17,8 +17,15 @@
     refreshPeriod = "168h"
 [".local/share/themes/Dynamo"]
     type = "archive"
-    url = "https://github.com/catppuccin/gtk/releases/download/v0.6.1/Catppuccin-Macchiato-Standard-Lavender-dark.zip"
+    url = "https://github.com/catppuccin/gtk/releases/latest/download/Catppuccin-Macchiato-Standard-Lavender-dark.zip"
     exact = true
     refreshPeriod = "168h"
     stripComponents = 1
     include = [ "Catppuccin-Macchiato-Standard-Lavender-dark/gtk-*/*" ]
+[".local/share/icons/Dynamo-Cursor"]
+    type = "archive"
+    url = "https://github.com/catppuccin/cursors/releases/latest/download/Catppuccin-Macchiato-Lavender-Cursors.zip"
+    exact = true
+    refreshPeriod = "168h"
+    stripComponents = 1
+    exclude = [ "Catppuccin-Macchiato-Lavender-Cursors/index.theme" ]
