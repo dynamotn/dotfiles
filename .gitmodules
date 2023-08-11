@@ -16,9 +16,6 @@
 [submodule "font"]
 	path = modules/font
 	url = git@gitlab.com:dynamo-config/font.git
-[submodule "gtk"]
-	path = modules/gtk
-	url = git@gitlab.com:dynamo-theme/gtk.git
 [submodule "cursor"]
 	path = modules/cursor
 	url = git@gitlab.com:dynamo-theme/cursor.git

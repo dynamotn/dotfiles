@@ -1,17 +1,24 @@
-[".fzf"]
-    type = "git-repo"
-    url = "https://github.com/junegunn/fzf.git"
-    refreshPeriod = "168h"
 [".asdf"]
     type = "git-repo"
     url = "https://github.com/asdf-vm/asdf.git"
+    refreshPeriod = "168h"
+[".config/bat/themes/catppuccin.tmTheme"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/catppuccin/bat/main/Catppuccin-macchiato.tmTheme"
+    refreshPeriod = "168h"
+[".fzf"]
+    type = "git-repo"
+    url = "https://github.com/junegunn/fzf.git"
     refreshPeriod = "168h"
 [".local/bin/cht"]
     type = "file"
     url = "https://cht.sh/:cht.sh"
     executable = true
     refreshPeriod = "168h"
-[".config/bat/themes/catppuccin.tmTheme"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/catppuccin/bat/main/Catppuccin-macchiato.tmTheme"
+[".local/share/themes/Dynamo"]
+    type = "archive"
+    url = "https://github.com/catppuccin/gtk/releases/download/v0.6.1/Catppuccin-Macchiato-Standard-Lavender-dark.zip"
+    exact = true
     refreshPeriod = "168h"
+    stripComponents = 1
+    include = [ "Catppuccin-Macchiato-Standard-Lavender-dark/gtk-*/*" ]
