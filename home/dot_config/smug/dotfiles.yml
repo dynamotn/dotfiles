@@ -2,8 +2,10 @@ session: dotfiles
 root: ~/Dotfiles
 
 windows:
+  - name: common
+    layouts: tiled
   - name: neovim
     root: ~/Dotfiles/modules/neovim
     layouts: tiled
     commands:
-      - vim lua/plugins/list.lua
+      - vim .
