@@ -2,31 +2,33 @@
 **/.gitignore
 **/.gitmodules
 
-{{ if ne .chezmoi.os "linux" }}
-.config/dynamo/os/linux/**
-{{ else }}
-{{ if ne .chezmoi.osRelease.id "gentoo" }}
+{{- if eq .chezmoi.os "linux" }}
+{{- if ne .chezmoi.osRelease.id "gentoo" }}
 .config/dynamo/os/linux/gentoo.csv
-{{ end }}
-{{ if ne .chezmoi.osRelease.id "arch" }}
+{{- end }}
+{{- if ne .chezmoi.osRelease.id "arch" }}
 .config/dynamo/os/linux/arch.csv
-{{ end }}
-{{ if ne .chezmoi.osRelease.id "ubuntu" }}
+{{- end }}
+{{- if ne .chezmoi.osRelease.id "ubuntu" }}
 .config/dynamo/os/linux/ubuntu.csv
-{{ end }}
-{{ end }}
+{{- end }}
+{{- else }}
+.config/dynamo/os/linux/**
+{{- end }}
 
-{{ if ne .chezmoi.os "linux" }}
+{{- if ne .chezmoi.os "linux" }}
 .config/dynamo/binary/linux/**
-{{ end }}
+{{- end }}
 
-{{ if ne .kind "pc" }}
+{{- if ne .kind "pc" }}
 .xprofile
 .Xresources
 .config/kitty
+{{- if ne .guiServer "X" }}
 .config/awesome
 .config/ibus-bamboo
 .config/rofi
+{{- end }}
 Multimedia/Pictures/Wallpaper
 .local/share/fonts
 .config/fontconfig
@@ -36,4 +38,4 @@ Multimedia/Pictures/Wallpaper
 .config/gtk-4.0
 .config/Trolltech.conf
 .config/user-dirs.dirs
-{{ end }}
+{{- end }}

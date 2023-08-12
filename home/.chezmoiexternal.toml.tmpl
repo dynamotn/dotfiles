@@ -15,6 +15,7 @@
     url = "https://cht.sh/:cht.sh"
     executable = true
     refreshPeriod = "168h"
+{{- if eq .kind "pc" }}
 [".local/share/themes/Dynamo"]
     type = "archive"
     url = "https://github.com/catppuccin/gtk/releases/latest/download/Catppuccin-Macchiato-Standard-Lavender-dark.zip"
@@ -29,3 +30,4 @@
     refreshPeriod = "168h"
     stripComponents = 1
     exclude = [ "Catppuccin-Macchiato-Lavender-Cursors/index.theme" ]
+{{- end }}
