@@ -39,3 +39,10 @@ Multimedia/Pictures/Wallpaper
 .config/Trolltech.conf
 .config/user-dirs.dirs
 {{- end }}
+
+{{- if ne .place "office" }}
+.config/smug/**
+{{- end }}
+{{- if eq .kind "pc" }}
+!.config/smug/dotfiles.yml
+{{- end }}
