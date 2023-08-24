@@ -2,10 +2,18 @@
 exec-once = dbus-update-activation-environment --all --systemd
 
 # Authentication agent
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
+exec = /usr/lib64/libexec/polkit-gnome-authentication-agent-1
+{{- else }}
 exec = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+{{- end }}
 
 # Sound & Screencast
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
 exec-once = gentoo-pipewire-launcher restart
+{{- else }}
+exec-once = systemctl --user start wireplumber
+{{- end }}
 exec-once = bash ~/.config/hypr/scripts/screencast.sh
 
 # Gtk theme
