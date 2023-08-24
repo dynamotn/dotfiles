@@ -1,0 +1,13 @@
+#!/bin/bash
+killall xdg-desktop-portal-wlr
+killall xdg-desktop-portal-hyprland
+killall xdg-desktop-portal
+{{ if eq .chezmoi.osRelease.id "gentoo" }}
+/usr/libexec/xdg-desktop-portal-wlr -r &
+sleep 2
+/usr/libexec/xdg-desktop-portal
+{{ else if eq .chezmoi.osRelease.id "arch" }}
+/usr/lib64/xdg-desktop-portal-wlr -r &
+sleep 2
+/usr/lib64/xdg-desktop-portal
+{{ end }}
