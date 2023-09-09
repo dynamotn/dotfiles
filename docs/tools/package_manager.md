@@ -23,6 +23,7 @@
 | `redshift`      | Adjusts the color temperature of screen            | `modules/awesome`                                              |
 | `xsel`          | Get and set contents of X selection, eg: clipboard | Frequently used tools, in `modules/tmux` and `modules/awesome` |
 | `rofi`          | Application launcher, simple switcher              | `modules/awesome`                                              |
+| `picom`         | Compositor for X11                                 | `modules/awesome`
 
 # Wayland server applications
 | Tool           | Purpose                               | Used in                        |
