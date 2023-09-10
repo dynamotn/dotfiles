@@ -29,6 +29,6 @@
 | Tool           | Purpose                               | Used in                        |
 |----------------|---------------------------------------|--------------------------------|
 | `fcitx-bamboo` | Vietnamese input method for Fcitx     | `home/dot_config/fcitx-bamboo` |
-| `hyprland`     | Window manager for Wayland            | `home/dot_config/hypr`         |
+| `hyprland`     | Window manager for Wayland            | `modules/hyprland`             |
 | `eww`          | Widgets and status bar                | `home/dot_config/eww`          |
-| `wofi`         | Application launcher, simple switcher | `home/dot_config/hypr`         |
+| `wofi`         | Application launcher, simple switcher | `modules/hyprland`             |
