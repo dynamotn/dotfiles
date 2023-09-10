@@ -12,4 +12,5 @@
 | [himalaya](https://github.com/soywod/himalaya)  | Email CLI tool                                                    | Frequently used tools, in `modules/awesome`      |
 | [smug](https://github.com/ivaaaan/smug)         | Tmux session manager                                              | Frequently used tools, in `home/dot_config/smug` |
 | [projekt](https://github.com/dynamotn/projekt)  | Smart CLI command to manage project folder                        | Frequently used tools, in `modules/fish`         |
-| [greenclip](https://github.com/erebe/greenclip) | Clipboard manager                                                 | Frequently used tools, in `modules/awesome`      |
+| [greenclip](https://github.com/erebe/greenclip) | Clipboard manager for X                                           | Frequently used tools, in `modules/awesome`      |
+| [cliphist](https://github.com/sentriz/cliphist) | Clipboard manager for Wayland                                     | Frequently used tools, in `modules/hyprland`     |
