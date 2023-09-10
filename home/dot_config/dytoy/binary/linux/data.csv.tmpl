@@ -11,4 +11,8 @@ aristocratos/btop,,btop-x86_64-linux-musl.tbz,btop,true,true
 soywod/himalaya,,himalaya-linux.tgz,himalaya,true,true
 ivaaaan/smug,, smug_${VERSION:1}_Linux_x86_64.tar.gz,smug,true,
 dynamotn/projekt,,projekt_${VERSION:1}_Linux_x86_64.tar.gz,projekt,true,
+{{- if eq .guiServer "X" }}
 erebe/greenclip,,greenclip,greenclip,false,true
+{{- else if eq .guiServer "W" }}
+sentriz/cliphist,,${VERSION}-linux-amd64,cliphist,false,true
+{{- end }}
