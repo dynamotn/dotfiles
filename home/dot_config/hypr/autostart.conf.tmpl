@@ -27,7 +27,8 @@ exec-once = eww
 exec-once = swaync
 
 # Clipboard
-exec-once = wl-paste --watch cliphist store
+exec-once = wl-paste --type text --watch cliphist store
+exec-once = wl-paste --type image --watch cliphist store
 
 # IM
 exec-once = fcitx5 -d --replace
@@ -36,5 +37,8 @@ exec-once = fcitx5 -d --replace
 exec-once = kitty fish -c "tmux -q has-session && tmux attach-session -d || tmux new-session -nwtf"
 
 # Browser
-exec-once = firefox-bin -P Dynamo --no-remote
-exec-once = firefox-bin -P Office --no-remote
+exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Dynamo
+exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Office
+
+# Email client
+exec = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }}
