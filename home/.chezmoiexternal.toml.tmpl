@@ -6,6 +6,12 @@
     type = "file"
     url = "https://raw.githubusercontent.com/catppuccin/bat/main/Catppuccin-macchiato.tmTheme"
     refreshPeriod = "168h"
+{{- if eq .chezmoi.os "android" }}
+[".config/termux/color.properties"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/catppuccin/termux/main/Macchiato/colors.properties"
+    refreshPeriod = "168h"
+{{- end }}
 [".fzf"]
     type = "git-repo"
     url = "https://github.com/junegunn/fzf.git"
@@ -34,4 +40,10 @@
     refreshPeriod = "168h"
     stripComponents = 1
     exclude = [ "Catppuccin-Macchiato-Lavender-Cursors/index.theme" ]
+{{- end }}
+{{- if eq .chezmoi.os "android" }}
+[".termux/font.ttf"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/dynamotn/font-collection/main/files/DIY/Iosevka/iosevka-dynamo-nerd.ttf"
+    refreshPeriod = "168h"
 {{- end }}
