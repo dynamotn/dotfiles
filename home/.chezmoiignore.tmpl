@@ -24,6 +24,8 @@
 .xprofile
 .Xresources
 .config/kitty
+.config/firefox
+.mozilla/firefox
 {{- if ne .guiServer "X" }}
 .config/awesome
 .config/ibus-bamboo
@@ -42,6 +44,7 @@ Multimedia/Pictures/Wallpaper
 
 {{- if ne .place "office" }}
 .config/smug/**
+.config/firefox/profiles/Chat
 {{- end }}
 {{- if eq .kind "pc" }}
 !.config/smug/dotfiles.yml

@@ -1,0 +1,36 @@
+{{- $configPath := joinPath .chezmoi.homeDir ".config/firefox/profiles" }}
+{{- $releaseId := "0" }}
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{- $releaseId = mozillaInstallHash "/opt/firefox" }}
+{{- else }}
+{{- $releaseId = mozillaInstallHash "/usr/lib/firefox" }}
+{{- end }}
+
+[Profile0]
+Name=Personal
+IsRelative=0
+Path={{- $configPath }}/Personal
+
+[Profile1]
+Name=Enterprise
+IsRelative=0
+Path={{- $configPath }}/Enterprise
+
+{{- if eq .place "office" }}
+[Profile2]
+Name=Chat
+IsRelative=0
+Path={{- $configPath }}/Chat
+{{- end }}
+
+[General]
+StartWithLastProfile=1
+Version=2
+
+[Install{{- $releaseId -}}]
+{{- if eq .place "office" }}
+Default={{- $configPath }}/Enterprise
+{{- else }}
+Default={{- $configPath }}/Personal
+{{- end }}
+Locked=1
