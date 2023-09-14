@@ -31,6 +31,10 @@
 .config/ibus-bamboo
 .config/rofi
 {{- end }}
+{{- if ne .guiServer "W" }}
+.config/hypr
+.wayland_init.rc
+{{- end }}
 Multimedia/Pictures/Wallpaper
 .local/share/fonts
 .config/fontconfig
