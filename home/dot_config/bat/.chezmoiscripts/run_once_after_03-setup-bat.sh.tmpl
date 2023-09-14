@@ -5,6 +5,7 @@ trap "_error \"Can't setup bash\"" ERR
 
 _notice "Setup bat"
 # theme hash: {{ joinPath .chezmoi.homeDir ".config/bat/themes/catppuccin.tmTheme" | include | sha256sum }}
+export PATH=$PATH:~/.local/bin
 if command -v bat > /dev/null 2>&1; then
   bat cache --build
 else
