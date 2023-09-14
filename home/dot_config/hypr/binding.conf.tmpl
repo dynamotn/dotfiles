@@ -63,7 +63,7 @@ bindm = $mainMod, mouse:273, resizewindow
 # Kill window
 bind = $altMod, F4, killactive,
 bind = $mainMod, F, fullscreen
-bind = $mainMod, T, togglefloating,
+bind = $mainMod, H, togglefloating,
 bind = $mainMod, J, togglesplit,
 bind = $mainMod, G, togglegroup,
 
@@ -73,7 +73,9 @@ bind = $mainMod, G, togglegroup,
 bind = $mainMod, Q, exec, kitty fish -c "tmux -q has-session && tmux attach-session -d || tmux new-session -nwtf"
 bind = $mainMod, E, exec, firefox-bin
 bind = $mainMod, N, exec, swaync-client -t -sw
-bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup --pre-display-cmd "echo '%s' | cut -f 2" | cliphist decode | wl-copy
+bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
+bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise{{- end }} bitrofi"
+bind = $mainMod, T, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise{{- end }} bitrofi totp"
 
 ##############
 # Multimedia #
