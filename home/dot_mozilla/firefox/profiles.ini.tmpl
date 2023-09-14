@@ -9,18 +9,18 @@
 [Profile0]
 Name=Personal
 IsRelative=0
-Path={{- $configPath }}/Personal
+Path={{- $configPath }}/personal
 
 [Profile1]
 Name=Enterprise
 IsRelative=0
-Path={{- $configPath }}/Enterprise
+Path={{- $configPath }}/enterprise
 
 {{- if eq .place "office" }}
 [Profile2]
 Name=Chat
 IsRelative=0
-Path={{- $configPath }}/Chat
+Path={{- $configPath }}/chat
 {{- end }}
 
 [General]
@@ -29,8 +29,8 @@ Version=2
 
 [Install{{- $releaseId -}}]
 {{- if eq .place "office" }}
-Default={{- $configPath }}/Enterprise
+Default={{- $configPath }}/enterprise
 {{- else }}
-Default={{- $configPath }}/Personal
+Default={{- $configPath }}/personal
 {{- end }}
 Locked=1
