@@ -37,8 +37,11 @@ exec-once = fcitx5 -d --replace
 exec-once = kitty fish -c "tmux -q has-session && tmux attach-session -d || tmux new-session -nwtf"
 
 # Browser
-exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Dynamo
-exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Office
+exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Personal
+exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Enterprise
+{{- if eq .place "office" }}
+exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Chat --name=chat
+{{- end }}
 
 # Email client
 exec-once = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }}
