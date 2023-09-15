@@ -4,17 +4,14 @@
 {{- $releaseId = mozillaInstallHash "/opt/firefox" }}
 {{- else }}
 {{- $releaseId = mozillaInstallHash "/usr/lib/firefox" }}
+{{- end -}}
+[Install{{- $releaseId -}}]
+{{- if eq .place "office" }}
+Default={{- $configPath }}/enterprise
+{{- else }}
+Default={{- $configPath }}/personal
 {{- end }}
-
-[Profile0]
-Name=Personal
-IsRelative=0
-Path={{- $configPath }}/personal
-
-[Profile1]
-Name=Enterprise
-IsRelative=0
-Path={{- $configPath }}/enterprise
+Locked=1
 
 {{- if eq .place "office" }}
 [Profile2]
@@ -23,14 +20,16 @@ IsRelative=0
 Path={{- $configPath }}/chat
 {{- end }}
 
+[Profile1]
+Name=Enterprise
+IsRelative=0
+Path={{- $configPath }}/enterprise
+
+[Profile0]
+Name=Personal
+IsRelative=0
+Path={{- $configPath }}/personal
+
 [General]
 StartWithLastProfile=1
 Version=2
-
-[Install{{- $releaseId -}}]
-{{- if eq .place "office" }}
-Default={{- $configPath }}/enterprise
-{{- else }}
-Default={{- $configPath }}/personal
-{{- end }}
-Locked=1
