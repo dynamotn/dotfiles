@@ -1,0 +1,13 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+trap "_error \"Can't setup hyprland\"" ERR
+trap "rm -rf /tmp/hyprsome" EXIT
+
+_notice "Setup hyprland"
+_progress "Install hyprsome"
+git clone https://github.com/sopa0/hyprsome.git /tmp/hyprsome
+cd /tmp/hyprsome
+cargo build --release
+cp target/release/hyprsome ~/.local/bin
+_success "Setup hyprland"
