@@ -19,3 +19,6 @@
 [submodule "icon"]
 	path = modules/icon
 	url = git@gitlab.com:dynamo-theme/icon.git
+[submodule "lepton"]
+	path = home/.chezmoitemplates/firefox/chrome/lepton
+	url = git@github.com:black7375/Firefox-UI-Fix.git
