@@ -1,0 +1,43 @@
+{
+  "version": 4,
+  "lastUserContextId": 8,
+  "identities": [
+    {
+      "public": false,
+      "icon": "",
+      "color": "",
+      "name": "userContextIdInternal.thumbnail",
+      "accessKey": "",
+      "userContextId": 5
+    },
+    {
+      "userContextId": 4294967295,
+      "public": false,
+      "icon": "",
+      "color": "",
+      "name": "userContextIdInternal.webextStorageLocal",
+      "accessKey": ""
+    },
+    {
+      "userContextId": 6,
+      "public": true,
+      "icon": "circle",
+      "color": "blue",
+      "name": "Profile 1"
+    },
+    {
+      "userContextId": 7,
+      "public": true,
+      "icon": "circle",
+      "color": "turquoise",
+      "name": "Profile 2"
+    },
+    {
+      "userContextId": 8,
+      "public": true,
+      "icon": "circle",
+      "color": "green",
+      "name": "Profile 3"
+    }
+  ]
+}
