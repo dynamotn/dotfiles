@@ -4,7 +4,7 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 export XDG_SESSION_TYPE=wayland
 export WLR_NO_HARDWARE_CURSORS=1
 export GTK_USE_PORTAL=0
-export PATH=$PATH:~/.local/bin
+export PATH=$PATH:~/.local/bin:~/.cargo/bin
 {{- if eq .guiDriver "N" }}
 
 export LIBVA_DRIVER_NAME=nvidia
