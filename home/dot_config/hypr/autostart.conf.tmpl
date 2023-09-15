@@ -41,4 +41,4 @@ exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Dy
 exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Office
 
 # Email client
-exec = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }}
+exec-once = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }}
