@@ -28,3 +28,6 @@
 [submodule "firefox-data/enterprise"]
 	path = home/dot_config/firefox/data/enterprise
 	url = git@gitlab.com:dynamo-config/firefox-data.git
+[submodule "firefox-data/test"]
+	path = home/dot_config/firefox/data/test
+	url = git@gitlab.com:dynamo-config/firefox-data.git
