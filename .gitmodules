@@ -22,12 +22,11 @@
 [submodule "lepton"]
 	path = home/.chezmoitemplates/firefox/chrome/lepton
 	url = git@github.com:black7375/Firefox-UI-Fix.git
-[submodule "firefox-data/personal"]
-	path = home/dot_config/firefox/data/personal
-	url = git@gitlab.com:dynamo-config/firefox-data.git
-[submodule "firefox-data/enterprise"]
-	path = home/dot_config/firefox/data/enterprise
-	url = git@gitlab.com:dynamo-config/firefox-data.git
-[submodule "firefox-data/test"]
-	path = home/dot_config/firefox/data/test
-	url = git@gitlab.com:dynamo-config/firefox-data.git
+[submodule "firefox-personal"]
+	path = home/dot_config/firefox/profiles/personal
+	url = git@gitlab.com:dynamo-config/firefox.git
+        branch = personal
+[submodule "firefox-enterprise"]
+	path = home/dot_config/firefox/profiles/enterprise
+	url = git@gitlab.com:dynamo-config/firefox.git
+        branch = enterprise

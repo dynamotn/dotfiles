@@ -22,6 +22,6 @@ progress = true
     guiDriver = {{ promptStringOnce . "guiDriver" "Which GUI video driver of this machine is, N for Nvidia, I for Intel, A for AMD? (N/I/A)" | quote }}
     {{- end }}
 
-[hooks.apply.pre]
+[hooks.diff.pre]
     command = "bash"
-    args = ["-c", "bash ~/.config/chezmoi/hooks/apply/pre.sh"]
+    args = ["-c", "bash ~/.config/chezmoi/hooks/diff/pre.sh"]
