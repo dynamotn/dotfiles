@@ -58,7 +58,7 @@ _main() {
   _notice "Initialize chezmoi"
   echo "sourceDir = \"$SETUP_DIR\"" > "$SETUP_DIR"/home/.chezmoi.toml.tmpl
   cat "$SETUP_DIR"/.chezmoi.toml.tmpl >> "$SETUP_DIR"/home/.chezmoi.toml.tmpl
-  mkdir -p $HOME/.config/chezmoi/hooks/apply && touch $HOME/.config/chezmoi/hooks/apply/pre.sh
+  mkdir -p $HOME/.config/chezmoi/hooks/diff && touch $HOME/.config/chezmoi/hooks/diff/pre.sh
   _notice "Please answer the following questions"
   chezmoi init "$chezmoi_params" -S "$SETUP_DIR" --prompt
 

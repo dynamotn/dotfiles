@@ -1,0 +1,35 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+
+{{- if eq .guiServer "X" "W" }}
+_notice "Update firefox settings"
+for profile in "personal" "enterprise"; do
+  if [ -f ~/.config/firefox/profiles/${profile}/prefs.js ]; then
+    _progress "Update toolbar setting for profile ${profile}"
+    grep "browser.uiCustomization.state" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/01-toolbar.js
+
+    _progress "Update addon setting for profile ${profile}"
+    grep "extensions.webextensions.uuids" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js
+    grep "privacy.userContext.extension" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js
+    grep "extensions.webextensions.ExtensionStorageIDB.migrated" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js
+  fi
+
+  _progress "Update extensions data for profile ${profile}"
+  chezmoi add ~/.config/firefox/profiles/${profile}/extensions || true
+  chezmoi add ~/.config/firefox/profiles/${profile}/addons.json --create || true
+  chezmoi add ~/.config/firefox/profiles/${profile}/addonStartup.json.lz4 --create || true
+  chezmoi add ~/.config/firefox/profiles/${profile}/extension*.json --create || true
+
+  _progress "Update search engines for profile ${profile}"
+  chezmoi add ~/.config/firefox/profiles/${profile}/search.json.mozlz4 --create || true
+
+  _progress "Update bookmarks and history for profile ${profile}"
+  chezmoi add ~/.config/firefox/profiles/${profile}/favicons.sqlite --encrypt || true
+  chezmoi add ~/.config/firefox/profiles/${profile}/places.sqlite --encrypt || true
+
+  _progress "Update storage data for profile ${profile}"
+  chezmoi add ~/.config/firefox/profiles/${profile}/storage.sqlite --encrypt || true
+  chezmoi add ~/.config/firefox/profiles/${profile}/storage/default --create || true
+done
+{{- end }}
