@@ -10,9 +10,10 @@
 | `tar`, `unzip`, `gzip` | Uncompress file                                        | Prequisite, in `home/dot_config/dynamo` |
 
 # Both X and Wayland applications
-| Tool    | Purpose                                           | Used in                 |
-|---------|---------------------------------------------------|-------------------------|
-| `kitty` | Terminal emulator, support ligature fonts and GPU | `home/dot_config/kitty` |
+| Tool      | Purpose                                           | Used in                 |
+|-----------|---------------------------------------------------|-------------------------|
+| `kitty`   | Terminal emulator, support ligature fonts and GPU | `home/dot_config/kitty` |
+| `firefox` | Web browser                                       | `modules/firefox`       |
 
 # X server applications
 | Tool            | Purpose                                            | Used in                                                        |
