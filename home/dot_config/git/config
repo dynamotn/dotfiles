@@ -31,6 +31,9 @@
         # A differ for sqlite file
         binary = true
         textconv = "echo .dump | sqlite3"
+[diff "json"]
+        # A differ for json file
+        textconv = "jq ."
 [mergetool]
         # Not prompt launch apps, I have no time to confirm that don't think why I used it
         prompt = false
@@ -82,6 +85,8 @@
         editor = nvim
         # Custom global ignore file
         excludesfile = ~/.config/git/ignore
+        # Custom global attributes file
+        attributesfile = ~/.config/git/attributes
         # Use delta to prettier diff
         pager = delta
 [interactive]
