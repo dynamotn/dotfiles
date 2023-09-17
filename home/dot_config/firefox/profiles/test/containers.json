@@ -1,0 +1,50 @@
+{
+  "version": 4,
+  "lastUserContextId": 11,
+  "identities": [
+    {
+      "userContextId": 5,
+      "public": false,
+      "icon": "",
+      "color": "",
+      "name": "userContextIdInternal.thumbnail",
+      "accessKey": ""
+    },
+    {
+      "userContextId": 4294967295,
+      "public": false,
+      "icon": "",
+      "color": "",
+      "name": "userContextIdInternal.webextStorageLocal",
+      "accessKey": ""
+    },
+    {
+      "userContextId": 6,
+      "public": true,
+      "icon": "fence",
+      "color": "purple",
+      "name": "Social"
+    },
+    {
+      "userContextId": 7,
+      "public": true,
+      "icon": "chill",
+      "color": "toolbar",
+      "name": "Development - Me"
+    },
+    {
+      "userContextId": 8,
+      "public": true,
+      "icon": "dollar",
+      "color": "yellow",
+      "name": "Development - Freelance"
+    },
+    {
+      "userContextId": 9,
+      "public": true,
+      "icon": "fingerprint",
+      "color": "blue",
+      "name": "Sensitive"
+    }
+  ]
+}

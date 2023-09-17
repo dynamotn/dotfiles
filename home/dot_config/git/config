@@ -27,6 +27,10 @@
 [diff "sopsdiffer"]
         # A differ for secret encoded
         textconv = sops -d
+[diff "sqlite3"]
+        # A differ for sqlite file
+        binary = true
+        textconv = "echo .dump | sqlite3"
 [mergetool]
         # Not prompt launch apps, I have no time to confirm that don't think why I used it
         prompt = false
