@@ -8,6 +8,7 @@
 | `ripgrep`              | Alternative to `grep`, with Git integration and faster | Frequently used tools on CLI            |
 | `grc`                  | Colorise for some GNU/Linux commands                   | `modules/fish`                          |
 | `tar`, `unzip`, `gzip` | Uncompress file                                        | Prequisite, in `home/dot_config/dynamo` |
+| `tree-sitter`          | Parser generator tool for syntax                       | `modules/neovim`                        |
 
 # Both X and Wayland applications
 | Tool      | Purpose                                           | Used in                 |
