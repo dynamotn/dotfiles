@@ -3,7 +3,7 @@
 /* Warn when quitting browser */
 user_pref("browser.sessionstore.warnOnQuit", true);
 /* Disable Firefox View */
-user_pref("browser.tabs.firefox-view", false)
+user_pref("browser.tabs.firefox-view", false);
 
 // Language and Appearance
 /* Set website default colorscheme to dark

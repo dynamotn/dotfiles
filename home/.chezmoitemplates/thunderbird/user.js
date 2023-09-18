@@ -5,7 +5,6 @@
 {{- else if regexMatch ".*enterprise/user\\.js\\.tmpl" .chezmoi.sourceFile }}
 {{- $settings = concat $settings (glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/thunderbird/prefs/enterprise/*.js")) }}
 {{- end }}
-{{- $settings = concat $settings (list (joinPath .chezmoi.sourceDir ".chezmoitemplates/thunderbird/chrome/lepton/user.js")) }}
 {{- range ($settings) }}
 {{- output "chezmoi" "execute-template" (include .) }}
 {{- end }}
