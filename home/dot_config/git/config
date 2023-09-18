@@ -138,6 +138,10 @@
         stop-keep-forever = "!_() { git update-index --no-skip-worktree $1; }; _"
         # Show root level directory
         root = "!_() { git rev-parse --show-toplevel; }; _"
+        # Show file with conflicts
+        conflicts = "!_() { git ls-files -u | awk '{print $4}' | sort -u; }; _"
+        # Delete dangling commits
+        delete-dangling = "!_() { git reflog expire --expire=now --all; git gc --prune=now; }; _"
 [push]
         # Only push current branch to same name branch
         default = current
