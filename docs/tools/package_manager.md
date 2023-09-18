@@ -11,10 +11,11 @@
 | `tree-sitter`          | Parser generator tool for syntax                       | `modules/neovim`                        |
 
 # Both X and Wayland applications
-| Tool      | Purpose                                           | Used in                 |
-|-----------|---------------------------------------------------|-------------------------|
-| `kitty`   | Terminal emulator, support ligature fonts and GPU | `home/dot_config/kitty` |
-| `firefox` | Web browser                                       | `modules/firefox`       |
+| Tool          | Purpose                                           | Used in                 |
+|---------------|---------------------------------------------------|-------------------------|
+| `kitty`       | Terminal emulator, support ligature fonts and GPU | `home/dot_config/kitty` |
+| `firefox`     | Web browser                                       | `modules/firefox`       |
+| `thunderbird` | Email client                                      | `modules/thunderbird`   |
 
 # X server applications
 | Tool            | Purpose                                            | Used in                                                        |
