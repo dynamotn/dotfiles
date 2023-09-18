@@ -73,6 +73,7 @@ _main() {
   # Modify remote url of dotfiles
   git remote set-url origin git@gitlab.com:dynamo-config/dotfiles
   git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git
+  git config --local include.path ../.gitconfig
 }
 
 if [ "$DEBUG" = "true" ]; then

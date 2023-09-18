@@ -1,0 +1,2 @@
+[diff "age"]
+  textconv = "age -d -i ~/.config/chezmoi/key"
