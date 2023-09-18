@@ -20,6 +20,10 @@
     type = "file"
     url = "https://raw.githubusercontent.com/arkenfox/user.js/master/user.js"
     refreshPeriod = "168h"
+["{{- splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/.chezmoitemplates/thunderbird/prefs/00-arkenfox.js"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/HorlogeSkynet/thunderbird-user.js/master/user.js"
+    refreshPeriod = "168h"
 [".local/bin/cht"]
     type = "file"
     url = "https://cht.sh/:cht.sh"
