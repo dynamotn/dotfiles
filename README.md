@@ -40,6 +40,8 @@ TODO: Link to another configs' cheatsheet
 
 ### Via package manager
 See [package_manager](docs/tools/package_manager.md)
+### Via chezmoi external
+See [chezmoi](docs/tools/chezmoi.md)
 
 ### Via Github Release binary
 See [release_binary](docs/tools/release_binary.md)
