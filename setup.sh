@@ -56,8 +56,8 @@ _main() {
   # Modify source directory of chezmoi, manipulate chezmoi config and generate
   # to chezmoi's default config template
   _notice "Initialize chezmoi"
-  echo "sourceDir = \"$SETUP_DIR\"" > "$SETUP_DIR"/home/.chezmoi.toml.tmpl
-  cat "$SETUP_DIR"/.chezmoi.toml.tmpl >> "$SETUP_DIR"/home/.chezmoi.toml.tmpl
+  echo "sourceDir: \"$SETUP_DIR\"" > "$SETUP_DIR"/home/.chezmoi.yaml.tmpl
+  cat "$SETUP_DIR"/.chezmoi.yaml.tmpl >> "$SETUP_DIR"/home/.chezmoi.yaml.tmpl
   mkdir -p $HOME/.config/chezmoi/hooks/diff && touch $HOME/.config/chezmoi/hooks/diff/pre.sh
   _notice "Please answer the following questions"
   chezmoi init "$chezmoi_params" -S "$SETUP_DIR" --prompt

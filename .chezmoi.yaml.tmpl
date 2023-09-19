@@ -1,0 +1,31 @@
+encryption: age
+format: yaml
+mode: symlink
+progress: true
+
+add:
+  templateSymlinks: true
+
+age:
+  identity: ~/.config/chezmoi/key
+  recipient: age1fzajmt2yy4naas2wtcn3v2vjea3f5rgvmz2elp02zvvmdtcgwcdsqxnd5a
+
+diff:
+  pager: delta
+
+data:
+  place: {{ promptStringOnce . "place" "Where does this machine place? (home/office/cloud)" | quote }}
+  kind: {{ promptStringOnce . "kind" "What kind of this machine is it? (pc/workstation/tablet/vm/...)" | quote }}
+  {{ $guiServer := promptStringOnce . "guiServer" "Which GUI server of this machine is, X for Xorg, W for Wayland, 0 for CLI-only? (X/W/0)" }}
+  guiServer: {{ $guiServer | quote }}
+  {{- if eq $guiServer "X" "W" }}
+  guiDriver: {{ promptStringOnce . "guiDriver" "Which GUI video driver of this machine is, N for Nvidia, I for Intel, A for AMD? (N/I/A)" | quote }}
+  {{- end }}
+
+hooks:
+  diff:
+    pre:
+      command: "bash"
+      args:
+        - -c
+        - bash ~/.config/chezmoi/hooks/diff/pre.sh
