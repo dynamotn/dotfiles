@@ -71,9 +71,12 @@ _main() {
   chezmoi apply $chezmoi_params
 
   # Modify remote url of dotfiles
+  _notice "Setup remote url of dotfiles"
   git remote set-url origin git@gitlab.com:dynamo-config/dotfiles
   git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git
   git config --local include.path ../.gitconfig
+
+  _success "Setup complete"
 }
 
 if [ "$DEBUG" = "true" ]; then
