@@ -1,0 +1,115 @@
+.asdf:
+  type: git-repo
+  url: 'https://github.com/asdf-vm/asdf.git'
+  refreshPeriod: 168h
+.config/bat/themes/catppuccin.tmTheme:
+  type: file
+  url: https://raw.githubusercontent.com/catppuccin/bat/main/Catppuccin-macchiato.tmTheme
+  refreshPeriod: 168h
+{{- if eq .chezmoi.os "android" }}
+.config/termux/color.properties:
+  type: file
+  url: https://raw.githubusercontent.com/catppuccin/termux/main/Macchiato/colors.properties
+  refreshPeriod: 168h
+{{- end }}
+.fzf:
+  type: git-repo
+  url: 'https://github.com/junegunn/fzf.git'
+  refreshPeriod: 168h
+{{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/.chezmoitemplates/firefox/prefs/00-arkenfox.js:
+  type: file
+  url: 'https://raw.githubusercontent.com/arkenfox/user.js/master/user.js'
+  refreshPeriod: 168h
+{{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/.chezmoitemplates/thunderbird/prefs/00-arkenfox.js:
+  type: file
+  url: https://raw.githubusercontent.com/HorlogeSkynet/thunderbird-user.js/master/user.js
+  refreshPeriod: 168h
+.local/bin/anti-ddos:
+  type: file
+  url: 'https://raw.githubusercontent.com/anti-ddos/Anti-DDOS/master/anti-ddos.sh'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/cht:
+  type: file
+  url: 'https://cht.sh/:cht.sh'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/color16:
+  type: file
+  url: 'https://raw.githubusercontent.com/pablopunk/colortest/master/colortest'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/color256:
+  type: file
+  url: https://misc.flogisoft.com/_export/code/bash/tip_colors_and_formatting?codeblock=56
+  executable: true
+  refreshPeriod: 168h
+.local/bin/colorfull:
+  type: file
+  url: https://misc.flogisoft.com/_export/code/bash/tip_colors_and_formatting?codeblock=55
+  executable: true
+  refreshPeriod: 168h
+.local/bin/git-quick-stats:
+  type: file
+  url: https://raw.githubusercontent.com/arzzen/git-quick-stats/master/git-quick-stats
+  executable: true
+  refreshPeriod: 168h
+.local/bin/now:
+  type: file
+  url: 'https://raw.githubusercontent.com/apankrat/now.sh/master/now.sh'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/qrify:
+  type: file
+  url: https://raw.githubusercontent.com/alexanderepstein/Bash-Snippets/master/qrify/qrify
+  executable: true
+  refreshPeriod: 168h
+.local/bin/screensaver:
+  type: file
+  url: 'https://raw.githubusercontent.com/pipeseroni/pipes.sh/master/pipes.sh'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/shmig:
+  type: file
+  url: 'https://raw.githubusercontent.com/mbucc/shmig/master/shmig'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/tmpmail:
+  type: file
+  url: 'https://raw.githubusercontent.com/sdushantha/tmpmail/master/tmpmail'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/trans:
+  type: file
+  url: 'https://raw.githubusercontent.com/soimort/translate-shell/gh-pages/trans'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/xpanes:
+  type: file
+  url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/master/bin/xpanes'
+  executable: true
+  refreshPeriod: 168h
+{{- if eq .kind "pc" }}
+.local/share/themes/Dynamo:
+  type: archive
+  url: https://github.com/catppuccin/gtk/releases/latest/download/Catppuccin-Macchiato-Standard-Lavender-dark.zip
+  exact: true
+  refreshPeriod: 168h
+  stripComponents: 1
+  include:
+    - Catppuccin-Macchiato-Standard-Lavender-dark/gtk-*/*
+.local/share/icons/Dynamo-Cursor:
+  type: archive
+  url: https://github.com/catppuccin/cursors/releases/latest/download/Catppuccin-Macchiato-Lavender-Cursors.zip
+  exact: true
+  refreshPeriod: 168h
+  stripComponents: 1
+  exclude:
+    - Catppuccin-Macchiato-Lavender-Cursors/index.theme
+{{- end }}
+{{- if eq .chezmoi.os "android" }}
+.termux/font.ttf:
+  type: file
+  url: https://raw.githubusercontent.com/dynamotn/font-collection/main/files/DIY/Iosevka/iosevka-dynamo-nerd.ttf
+  refreshPeriod: 168h
+{{- end }}
