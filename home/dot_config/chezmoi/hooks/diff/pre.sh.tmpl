@@ -3,7 +3,7 @@ set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
 {{- if eq .guiServer "X" "W" }}
-if ! (( $(ps x | grep firefox > /dev/null) )); then
+if ! $(ps aux | grep firefox > /dev/null); then
   _notice "Update firefox settings"
   for profile in "personal" "enterprise"; do
     if [ -f ~/.config/firefox/profiles/${profile}/prefs.js ]; then
@@ -36,7 +36,7 @@ if ! (( $(ps x | grep firefox > /dev/null) )); then
   _success "Update firefox settings"
 fi
 
-if ! (( $(ps x | grep thunder > /dev/null) )); then
+if ! $(ps aux | grep thunderbird > /dev/null); then
   _notice "Update thunderbird settings"
   for profile in "personal" "enterprise"; do
     if [ -f ~/.config/thunderbird/profiles/${profile}/prefs.js ]; then
