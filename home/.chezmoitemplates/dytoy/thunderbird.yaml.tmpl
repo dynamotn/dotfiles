@@ -1,0 +1,10 @@
+{{- if eq .guiServer "X" "W" }}
+name: thunderbird
+method: os
+gentoo:
+  package: mail-client/thunderbird-bin
+arch:
+  package: thunderbird
+ubuntu:
+  package: thunderbird
+{{- end }}

@@ -1,0 +1,8 @@
+name: tar
+method: os
+gentoo:
+  package: app-arch/tar
+arch:
+  package: tar
+ubuntu:
+  package: tar

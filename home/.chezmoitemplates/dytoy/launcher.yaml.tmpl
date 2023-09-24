@@ -1,0 +1,19 @@
+{{- if eq .guiServer "X" }}
+name: rofi
+method: os
+gentoo:
+  package: x11-misc/rofi
+arch:
+  package: rofi
+ubuntu:
+  package: rofi
+{{- else if eq .guiServer "W" }}
+name: wofi
+method: os
+gentoo:
+  package: gui-apps/wofi
+arch:
+  package: wofi
+ubuntu:
+  package: wofi
+{{- end }}

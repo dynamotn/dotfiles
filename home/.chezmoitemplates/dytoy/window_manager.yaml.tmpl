@@ -1,0 +1,24 @@
+{{- if eq .guiServer "X" }}
+name: awesome
+method: os
+gentoo:
+  package: x11-wm/awesome
+arch:
+  package: awesome-git
+ubuntu:
+  package: awesome
+{{- else if eq .guiServer "W" }}
+name: hyprland
+method: os
+gentoo:
+  package: gui-wm/hyprland
+  repo: guru
+arch:
+  {{- if eq .guiDriver "N" }}
+  package: hyprland-nvidia-git
+  {{- else }}
+  package: hyprland
+  {{- end }}
+ubuntu:
+  package: awesome
+{{- end }}

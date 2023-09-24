@@ -1,0 +1,8 @@
+name: tmux
+method: os
+gentoo:
+  package: app-misc/tmux
+arch:
+  package: tmux
+ubuntu:
+  package: tmux

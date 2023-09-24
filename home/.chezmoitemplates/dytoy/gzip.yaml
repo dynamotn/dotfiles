@@ -1,0 +1,8 @@
+name: gzip
+method: os
+gentoo:
+  package: app-arch/gzip
+arch:
+  package: gzip
+ubuntu:
+  package: gzip

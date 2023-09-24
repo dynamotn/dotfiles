@@ -1,0 +1,10 @@
+{{- if eq .guiServer "X" "W" }}
+name: firefox
+method: os
+gentoo:
+  package: www-client/firefox-bin
+arch:
+  package: firefox
+ubuntu:
+  package: firefox
+{{- end }}

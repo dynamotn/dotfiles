@@ -1,0 +1,10 @@
+{{- if eq .guiServer "X" }}
+name: picom
+method: os
+gentoo:
+  package: x11-misc/picom
+arch:
+  package: picom-git
+ubuntu:
+  package: picom
+{{- end }}
