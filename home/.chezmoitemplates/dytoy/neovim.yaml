@@ -1,0 +1,11 @@
+name: neovim
+method: os
+gentoo:
+  package: app-editors/neovim
+arch:
+  package: neovim-git
+ubuntu:
+  package: neovim
+  repo: http://ppa.launchpad.net/neovim-ppa/unstable/ubuntu
+  repo_version: main
+  key: 9DBB0BE9366964F134855E2255F96FCF8231B6DD

@@ -1,0 +1,10 @@
+{{- if eq .guiServer "X" }}
+name: xdg-user-dirs
+method: os
+gentoo:
+  package: x11-misc/xdg-user-dirs
+arch:
+  package: xdg-user-dirs
+ubuntu:
+  package: xdg-user-dirs
+{{- end }}

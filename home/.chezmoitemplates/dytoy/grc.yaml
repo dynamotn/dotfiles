@@ -1,0 +1,8 @@
+name: grc
+method: os
+gentoo:
+  package: app-misc/grc
+arch:
+  package: grc
+ubuntu:
+  package: grc

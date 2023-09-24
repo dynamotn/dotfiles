@@ -1,0 +1,10 @@
+{{- if eq .guiServer "X" "W" }}
+name: kitty
+method: os
+gentoo:
+  package: x11-terms/kitty
+arch:
+  package: kitty
+ubuntu:
+  package: kitty
+{{- end }}

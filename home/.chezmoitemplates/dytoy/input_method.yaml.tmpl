@@ -1,0 +1,24 @@
+{{- if eq .guiServer "X" }}
+name: ibus-bamboo
+method: os
+gentoo:
+  package: app-i18n/ibus-bamboo
+  repo: dynamo
+arch:
+  package: ibus-bamboo-git
+ubuntu:
+  package: ibus-bamboo
+  repo: http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu
+  repo_version: main
+  key: 5AD2E0B68A0409AD907D462D36ED424E9659D014
+{{- else if eq .guiServer "W" }}
+name: fcitx-bamboo
+method: os
+gentoo:
+  package: app-i18n/fcitx-bamboo
+  repo: dynamo
+arch:
+  package: fcitx-bamboo-git
+ubuntu:
+  package: fcitx-bamboo
+{{- end }}

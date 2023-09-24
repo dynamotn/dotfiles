@@ -1,0 +1,8 @@
+name: ripgrep
+method: os
+gentoo:
+  package: sys-apps/ripgrep
+arch:
+  package: ripgrep
+ubuntu:
+  package: ripgrep

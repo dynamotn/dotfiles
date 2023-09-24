@@ -1,0 +1,8 @@
+name: git
+method: os
+gentoo:
+  package: dev-vcs/git
+arch:
+  package: git
+ubuntu:
+  package: git

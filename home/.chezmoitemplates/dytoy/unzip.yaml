@@ -1,0 +1,8 @@
+name: unzip
+method: os
+gentoo:
+  package: app-arch/unzip
+arch:
+  package: unzip
+ubuntu:
+  package: unzip

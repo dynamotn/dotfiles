@@ -1,0 +1,19 @@
+{{- if eq .guiServer "X" }}
+name: xsel
+method: os
+gentoo:
+  package: x11-misc/xsel
+arch:
+  package: xsel
+ubuntu:
+  package: xsel
+{{- else if eq .guiServer "W" }}
+name: wl-clipboard
+method: os
+gentoo:
+  package: gui-apps/wl-clipboard
+arch:
+  package: wl-clipboard
+ubuntu:
+  package: wl-clipboard
+{{- end }}

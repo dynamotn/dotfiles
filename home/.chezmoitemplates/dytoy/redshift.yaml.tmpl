@@ -1,0 +1,10 @@
+{{- if eq .guiServer "X" }}
+name: redshift
+method: os
+gentoo:
+  package: x11-misc/redshift
+arch:
+  package: redshift-minimal
+ubuntu:
+  package: redshift-minimal
+{{- end }}

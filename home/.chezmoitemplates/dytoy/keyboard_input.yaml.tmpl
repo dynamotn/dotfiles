@@ -1,0 +1,19 @@
+{{- if eq .guiServer "X" }}
+name: xdotool
+method: os
+gentoo:
+  package: x11-misc/xdotool
+arch:
+  package: xdotool
+ubuntu:
+  package: xdotool
+{{- else if eq .guiServer "W" }}
+name: wtype
+method: os
+gentoo:
+  package: gui-apps/wtype
+arch:
+  package: wtype
+ubuntu:
+  package: wtype
+{{- end }}
