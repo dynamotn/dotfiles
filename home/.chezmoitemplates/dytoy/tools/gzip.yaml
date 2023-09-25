@@ -6,3 +6,5 @@ arch:
   package: gzip
 ubuntu:
   package: gzip
+termux:
+  package: gzip

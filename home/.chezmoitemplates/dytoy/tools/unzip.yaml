@@ -6,3 +6,5 @@ arch:
   package: unzip
 ubuntu:
   package: unzip
+termux:
+  package: unzip

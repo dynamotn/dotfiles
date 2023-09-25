@@ -6,3 +6,5 @@ arch:
   package: tar
 ubuntu:
   package: tar
+termux:
+  package: tar

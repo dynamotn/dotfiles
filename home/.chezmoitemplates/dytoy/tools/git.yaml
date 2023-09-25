@@ -6,3 +6,5 @@ arch:
   package: git
 ubuntu:
   package: git
+termux:
+  package: git

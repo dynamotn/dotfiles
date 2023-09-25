@@ -6,6 +6,5 @@ arch:
   package: fish
 ubuntu:
   package: fish
-  repo: http://ppa.launchpad.net/fish-shell/release-3/ubuntu
-  repo_version: main
-  key: 59FDA1CE1B84B3FAD89366C027557F056DC33CA5
+termux:
+  package: fish

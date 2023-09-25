@@ -6,3 +6,5 @@ arch:
   package: ripgrep
 ubuntu:
   package: ripgrep
+termux:
+  package: ripgrep

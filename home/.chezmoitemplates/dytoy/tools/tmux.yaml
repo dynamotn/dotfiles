@@ -6,3 +6,5 @@ arch:
   package: tmux
 ubuntu:
   package: tmux
+termux:
+  package: tmux
