@@ -7,11 +7,16 @@ trap "_error \"Install tools failed\"" ERR
 package_tools=()
 binary_tools=()
 
+{{- if (eq .chezmoi.os "linux") }}
 {{- if (eq .chezmoi.osRelease.id "gentoo") }}
 _gentoo_run() {
   for package in "${package_tools[@]}"; do
     package_name=$(echo "$package" | yq e '.gentoo.package')
     repo=$(echo "$package" | yq e '.gentoo.repo')
+    if [[ "$package_name" == "null" ]]; then
+      continue
+    fi
+
     if [[ "$repo" != "null" ]]; then
       _gentoo_install "$package_name::$repo"
     else
@@ -23,6 +28,10 @@ _gentoo_run() {
 _arch_run() {
   for package in "${package_tools[@]}"; do
     package_name=$(echo "$package" | yq e '.arch.package')
+    if [[ "$package_name" == "null" ]]; then
+      continue
+    fi
+
     _arch_install "$package_name"
   done
 }
@@ -31,6 +40,9 @@ _ubuntu_run() {
   for package in "${package_tools[@]}"; do
     package_name=$(echo "$package" | yq e '.ubuntu.package')
     repo=$(echo "$package" | yq e '.ubuntu.repo')
+    if [[ "$package_name" == "null" ]]; then
+      continue
+    fi
 
     if [[ "$repo" != "null" ]]; then
       repo_name=$(echo "$package" | yq e '.ubuntu.repo_name')
@@ -50,10 +62,23 @@ _ubuntu_run() {
   done
 }
 {{- end }}
+{{- else if eq .chezmoi.os "android" }}
+{{- end }}
+_termux_run() {
+  for package in "${package_tools[@]}"; do
+    package_name=$(echo "$package" | yq e '.termux.package')
+    if [[ "$package_name" == "null" ]]; then
+      continue
+    fi
+
+    _termux_install "$package_name"
+  done
+}
 
 _install_package_tools() {
   readarray package_tools < <(yq e -o=j -I=0 'filter(.method == "os") | .[]' ~/.config/dytoy/tools.yaml )
 
+  {{- if (eq .chezmoi.os "linux") }}
   {{- if (eq .chezmoi.osRelease.id "gentoo") }}
   _info "Distro of this machine is Gentoo."
   _gentoo_run
@@ -63,6 +88,10 @@ _install_package_tools() {
   {{- else if (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
   _info "Distro of this machine is Ubuntu."
   _ubuntu_init && _ubuntu_run
+  {{- end }}
+  {{- else if eq .chezmoi.os "android" }}
+  _info "OS of this machine is Termux."
+  _termux_init && _termux_run
   {{- end }}
 }
 
@@ -79,7 +108,7 @@ export PATH=$PATH:~/.local/bin
 
 _notice "Install tools"
 _info $PATH
-{{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/*.yaml*" | glob) }}
+{{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/tools/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
 _main

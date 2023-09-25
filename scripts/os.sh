@@ -53,3 +53,15 @@ _ubuntu_install() {
 _ubuntu_init() {
   _ubuntu_repo_sync
 }
+
+_termux_repo_sync() {
+  pkg update
+}
+
+_termux_init() {
+  _termux_repo_sync
+}
+
+_termux_install() {
+  dpkg-query -s "$1" 2&>1 || pkg install -y "$1"
+}
