@@ -1,0 +1,18 @@
+name: age
+{{- if eq .chezmoi.os "android" }}
+method: os
+termux:
+  package: age
+{{- else }}
+method: binary
+is_essential: true
+github:
+  repo: FiloSottile/age
+  version: latest
+  release_asset: age-%v-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz
+archive:
+  strip_components: 1
+  paths:
+    - age/age
+    - age/age-keygen
+{{- end }}
