@@ -76,6 +76,7 @@ _termux_run() {
 }
 
 _install_package_tools() {
+  _info "Install package tools"
   readarray package_tools < <(yq e -o=j -I=0 'filter(.method == "os") | .[]' ~/.config/dytoy/tools.yaml )
 
   {{- if (eq .chezmoi.os "linux") }}
@@ -93,10 +94,12 @@ _install_package_tools() {
   _info "OS of this machine is Termux."
   _termux_init && _termux_run
   {{- end }}
+
+  _success "Installed package tools"
 }
 
 _install_binary_tools() {
-  readarray binary_tools < <(yq e -o=j -I=0 'filter(.method == "binary") | .[]' ~/.config/dytoy/tools.yaml )
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/binary.sh -e -n
 }
 
 _main() {
