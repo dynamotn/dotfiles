@@ -1,0 +1,18 @@
+{{- if eq .kind "pc" "vm" }}
+{{- if eq .chezmoi.os "linux" }}
+name: container
+method: os
+gentoo:
+  packages:
+    - name: app-containers/podman
+arch:
+  packages:
+    - name: podman
+    - name: podman-docker
+
+ubuntu:
+  packages:
+    - name: podman
+    - name: podman-docker
+{{- end }}
+{{- end }}
