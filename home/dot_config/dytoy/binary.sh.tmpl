@@ -110,6 +110,7 @@ _parse_github_release() {
     return
   fi
 
+  _progress "Installing ${name}"
   repo=$(echo "$package" | yq e '.github.repo')
   version=$(echo "$package" | yq e '.github.version')
   release_asset=$(echo "$package" | yq e '.github.release_asset')
@@ -152,7 +153,6 @@ _main() {
   for package in "${package_tools[@]}"; do
     name=$(echo "$package" | yq e '.name')
     if [ "$PACKAGE" = "" ] || [ "$PACKAGE" = "$name" ]; then
-      _progress "Installing ${name}"
       _parse_github_release "$package"
     fi
   done
