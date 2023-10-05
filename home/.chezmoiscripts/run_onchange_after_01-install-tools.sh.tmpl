@@ -24,7 +24,7 @@ _gentoo_run() {
       else
         _gentoo_install "$package_name"
       fi
-    fi
+    done
   done
 }
 {{- else if (eq .chezmoi.osRelease.id "arch") }}

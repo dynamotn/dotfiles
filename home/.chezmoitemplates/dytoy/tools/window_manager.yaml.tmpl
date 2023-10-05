@@ -14,8 +14,8 @@ ubuntu:
 name: hyprland
 method: os
 gentoo:
-  package: gui-wm/hyprland
-  repo: guru
+  packages:
+    - name: gui-wm/hyprland
 arch:
   {{- if eq .guiDriver "N" }}
   packages:
