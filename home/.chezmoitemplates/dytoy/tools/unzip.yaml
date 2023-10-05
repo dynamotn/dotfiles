@@ -1,10 +1,14 @@
 name: unzip
 method: os
 gentoo:
-  package: app-arch/unzip
+  packages:
+    - name: app-arch/unzip
 arch:
-  package: unzip
+  packages:
+    - name: unzip
 ubuntu:
-  package: unzip
+  packages:
+    - name: unzip
 termux:
-  package: unzip
+  packages:
+    - name: unzip

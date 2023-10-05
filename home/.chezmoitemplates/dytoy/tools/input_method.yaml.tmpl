@@ -2,23 +2,29 @@
 name: ibus-bamboo
 method: os
 gentoo:
-  package: app-i18n/ibus-bamboo
-  repo: dynamo
+  packages:
+    - name: app-i18n/ibus-bamboo
+      repo: dynamo
 arch:
-  package: ibus-bamboo-git
+  packages:
+    - name: ibus-bamboo-git
 ubuntu:
-  package: ibus-bamboo
-  repo: http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu
-  repo_version: main
-  key: 5AD2E0B68A0409AD907D462D36ED424E9659D014
+  packages:
+    - name: ibus-bamboo
+      repo: http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu
+      repo_version: main
+      key: 5AD2E0B68A0409AD907D462D36ED424E9659D014
 {{- else if eq .guiServer "W" }}
 name: fcitx-bamboo
 method: os
 gentoo:
-  package: app-i18n/fcitx-bamboo
-  repo: dynamo
+  packages:
+    - name: app-i18n/fcitx-bamboo
+      repo: dynamo
 arch:
-  package: fcitx5-bamboo-git
+  packages:
+    - name: fcitx5-bamboo-git
 ubuntu:
-  package: fcitx-bamboo
+  packages:
+    - name: fcitx-bamboo
 {{- end }}

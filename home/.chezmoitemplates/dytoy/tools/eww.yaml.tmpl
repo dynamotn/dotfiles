@@ -2,8 +2,10 @@
 name: eww
 method: os
 gentoo:
-  package: gui-apps/eww
-  repo: guru
+  packages:
+    - name: gui-apps/eww
+      repo: guru
 arch:
-  package: eww-wayland
+  packages:
+    - name: eww-wayland
 {{- end }}

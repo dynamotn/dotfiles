@@ -1,10 +1,14 @@
 name: tmux
 method: os
 gentoo:
-  package: app-misc/tmux
+  packages:
+    - name: app-misc/tmux
 arch:
-  package: tmux
+  packages:
+    - name: tmux
 ubuntu:
-  package: tmux
+  packages:
+    - name: tmux
 termux:
-  package: tmux
+  packages:
+    - name: tmux

@@ -2,11 +2,14 @@
 name: awesome
 method: os
 gentoo:
-  package: x11-wm/awesome
+  packages:
+    - name: x11-wm/awesome
 arch:
-  package: awesome-git
+  packages:
+    - name: awesome-git
 ubuntu:
-  package: awesome
+  packages:
+    - name: awesome
 {{- else if eq .guiServer "W" }}
 name: hyprland
 method: os
@@ -15,10 +18,13 @@ gentoo:
   repo: guru
 arch:
   {{- if eq .guiDriver "N" }}
-  package: hyprland-nvidia-git
+  packages:
+    - name: hyprland-nvidia-git
   {{- else }}
-  package: hyprland
+  packages:
+    - name: hyprland
   {{- end }}
 ubuntu:
-  package: awesome
+  packages:
+    - name: awesome
 {{- end }}

@@ -1,10 +1,14 @@
 name: gzip
 method: os
 gentoo:
-  package: app-arch/gzip
+  packages:
+    - name: app-arch/gzip
 arch:
-  package: gzip
+  packages:
+    - name: gzip
 ubuntu:
-  package: gzip
+  packages:
+    - name: gzip
 termux:
-  package: gzip
+  packages:
+    - name: gzip

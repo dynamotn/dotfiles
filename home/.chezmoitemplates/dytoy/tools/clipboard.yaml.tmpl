@@ -2,18 +2,24 @@
 name: xsel
 method: os
 gentoo:
-  package: x11-misc/xsel
+  packages:
+    - name: x11-misc/xsel
 arch:
-  package: xsel
+  packages:
+    - name: xsel
 ubuntu:
-  package: xsel
+  packages:
+    - name: xsel
 {{- else if eq .guiServer "W" }}
 name: wl-clipboard
 method: os
 gentoo:
-  package: gui-apps/wl-clipboard
+  packages:
+    - name: gui-apps/wl-clipboard
 arch:
-  package: wl-clipboard
+  packages:
+    - name: wl-clipboard
 ubuntu:
-  package: wl-clipboard
+  packages:
+    - name: wl-clipboard
 {{- end }}

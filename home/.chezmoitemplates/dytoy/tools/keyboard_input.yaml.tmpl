@@ -2,18 +2,24 @@
 name: xdotool
 method: os
 gentoo:
-  package: x11-misc/xdotool
+  packages:
+    - name: x11-misc/xdotool
 arch:
-  package: xdotool
+  packages:
+    - name: xdotool
 ubuntu:
-  package: xdotool
+  packages:
+    - name: xdotool
 {{- else if eq .guiServer "W" }}
 name: wtype
 method: os
 gentoo:
-  package: gui-apps/wtype
+  packages:
+    - name: gui-apps/wtype
 arch:
-  package: wtype
+  packages:
+    - name: wtype
 ubuntu:
-  package: wtype
+  packages:
+    - name: wtype
 {{- end }}
