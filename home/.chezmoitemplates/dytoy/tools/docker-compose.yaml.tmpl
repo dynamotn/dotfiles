@@ -1,0 +1,12 @@
+{{- if eq .chezmoi.os "linux" }}
+name: docker-compose
+method: binary
+github:
+  repo: docker/compose
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: docker-compose-linux-x86_64
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: docker-compose-linux-aarch64
+  {{- end }}
+{{- end }}
