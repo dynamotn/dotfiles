@@ -2,9 +2,12 @@
 name: thunderbird
 method: os
 gentoo:
-  package: mail-client/thunderbird-bin
+  packages:
+    - name: mail-client/thunderbird-bin
 arch:
-  package: thunderbird
+  packages:
+    - name: thunderbird
 ubuntu:
-  package: thunderbird
+  packages:
+    - name: thunderbird
 {{- end }}

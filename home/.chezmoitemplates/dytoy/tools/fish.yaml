@@ -1,10 +1,14 @@
 name: fish
 method: os
 gentoo:
-  package: app-shells/fish
+  packages:
+    - name: app-shells/fish
 arch:
-  package: fish
+  packages:
+    - name: fish
 ubuntu:
-  package: fish
+  packages:
+    - name: fish
 termux:
-  package: fish
+  packages:
+    - name: fish

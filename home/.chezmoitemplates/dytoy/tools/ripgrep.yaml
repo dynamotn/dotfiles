@@ -1,10 +1,14 @@
 name: ripgrep
 method: os
 gentoo:
-  package: sys-apps/ripgrep
+  packages:
+    - name: sys-apps/ripgrep
 arch:
-  package: ripgrep
+  packages:
+    - name: ripgrep
 ubuntu:
-  package: ripgrep
+  packages:
+    - name: ripgrep
 termux:
-  package: ripgrep
+  packages:
+    - name: ripgrep

@@ -2,9 +2,12 @@
 name: picom
 method: os
 gentoo:
-  package: x11-misc/picom
+  packages:
+    - name: x11-misc/picom
 arch:
-  package: picom-git
+  packages:
+    - name: picom-git
 ubuntu:
-  package: picom
+  packages:
+    - name: picom
 {{- end }}

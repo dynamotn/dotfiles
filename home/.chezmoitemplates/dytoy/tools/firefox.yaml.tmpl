@@ -2,9 +2,12 @@
 name: firefox
 method: os
 gentoo:
-  package: www-client/firefox-bin
+  packages:
+    - name: www-client/firefox-bin
 arch:
-  package: firefox
+  packages:
+    - name: firefox
 ubuntu:
-  package: firefox
+  packages:
+    - name: firefox
 {{- end }}

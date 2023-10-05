@@ -2,7 +2,8 @@ name: age
 {{- if eq .chezmoi.os "android" }}
 method: os
 termux:
-  package: age
+  packages:
+    - name: age
 {{- else }}
 method: binary
 is_essential: true

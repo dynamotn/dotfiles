@@ -1,10 +1,14 @@
 name: tar
 method: os
 gentoo:
-  package: app-arch/tar
+  packages:
+    - name: app-arch/tar
 arch:
-  package: tar
+  packages:
+    - name: tar
 ubuntu:
-  package: tar
+  packages:
+    - name: tar
 termux:
-  package: tar
+  packages:
+    - name: tar

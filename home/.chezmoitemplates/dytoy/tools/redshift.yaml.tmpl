@@ -2,9 +2,12 @@
 name: redshift
 method: os
 gentoo:
-  package: x11-misc/redshift
+  packages:
+    - name: x11-misc/redshift
 arch:
-  package: redshift-minimal
+  packages:
+    - name: redshift-minimal
 ubuntu:
-  package: redshift-minimal
+  packages:
+    - name: redshift-minimal
 {{- end }}
