@@ -1,6 +1,7 @@
 # Tools
 | Tool                                                         | Purpose                                                                          | Used in        |
 |--------------------------------------------------------------|----------------------------------------------------------------------------------|----------------|
+| [yq](https://github.com/mikefarah/yq)                        | YAML processor                                                                   | Prequisite     |
 | [asdf](https://asdf-vm.com/)                                 | All-in-one version manager                                                       | `modules/fish` |
 | [fzf](https://github.com/junegunn/fzf)                       | Fuzzy finder on CLI                                                              | `modules/fish` |
 | [anti-ddos](https://github.com/anti-ddos/Anti-DDOS)          | Anti DDOS                                                                        |                |
