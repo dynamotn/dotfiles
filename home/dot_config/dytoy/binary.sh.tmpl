@@ -57,7 +57,7 @@ _extract_tar() {
   bash $TEMP_HOOK_BEFORE
   readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
   for path in "${paths[@]}"; do
-    tar ${param} -f "$TEMP_COMPRESSED" -C "$BIN_DIR" ${path%%*( )}
+    tar ${param} -f "$TEMP_COMPRESSED" -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g")
   done
   bash $TEMP_HOOK_AFTER
 }
