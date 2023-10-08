@@ -8,7 +8,7 @@ github:
   {{- if eq .chezmoi.arch "amd64" }}
   release_asset: eza_x86_64-unknown-linux-gnu.tar.gz
   {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: eza-aarch64-unknown-linux-gnu.tar.gz
+  release_asset: eza_aarch64-unknown-linux-gnu.tar.gz
   {{- end }}
 archive:
   paths:
