@@ -7,7 +7,7 @@
 | [delta](https://github.com/dandavison/delta)        | Syntax highlighting pager for git, diff, and grep output          | `home/dot_config/git`                            |
 | [bat](https://github.com/sharkdp/bat)               | Alternative to `cat` with syntax highlighting and Git integration | Frequently used tools                            |
 | [fd](https://github.com/sharkdp/fd)                 | Alternative to `find`, simpler and faster                         | Frequently used tools, in `modules/fish`         |
-| [exa](https://github.com/ogham/exa)                 | Alternative to `ls` with colours, faster                          | Frequently used tools                            |
+| [eza](https://github.com/eza-community/eza)         | Alternative to `ls` with colours, faster                          | Frequently used tools                            |
 | [btop](https://github.com/aristocratos/btop)        | Alternative to `htop` and `glances`                               | Frequently used tools, in `modules/awesome`      |
 | [himalaya](https://github.com/soywod/himalaya)      | Email CLI tool                                                    | Frequently used tools, in `modules/awesome`      |
 | [smug](https://github.com/ivaaaan/smug)             | Tmux session manager                                              | Frequently used tools, in `home/dot_config/smug` |
