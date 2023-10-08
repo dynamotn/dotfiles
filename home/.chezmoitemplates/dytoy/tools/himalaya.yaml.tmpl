@@ -1,0 +1,11 @@
+{{- if eq .chezmoi.os "linux" }}
+name: himalaya
+method: binary
+github:
+  repo: soywod/himalaya
+  version: latest
+  release_asset: himalaya-linux.tgz
+archive:
+  paths:
+    - himalaya
+{{- end }}
