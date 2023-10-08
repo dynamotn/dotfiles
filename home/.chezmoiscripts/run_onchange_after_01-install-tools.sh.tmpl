@@ -122,7 +122,6 @@ _main() {
 export PATH=$PATH:~/.local/bin
 
 _notice "Install tools"
-_info $PATH
 {{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/tools/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}

@@ -52,13 +52,15 @@ _extract_tar() {
   fi
 
   if [ "$3" != "null" ]; then
-    param="${param} --strip-components $3"
+    param="${param} --strip=$3"
   fi
+  param="${param} -f $TEMP_COMPRESSED"
   bash $TEMP_HOOK_BEFORE
   readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
   for path in "${paths[@]}"; do
-    tar ${param} -f "$TEMP_COMPRESSED" -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g")
+    tar ${param} -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g")
   done
+  export param=$param
   bash $TEMP_HOOK_AFTER
 }
 
@@ -144,6 +146,7 @@ _parse_github_release() {
   export TEMP_COMPRESSED=$TEMP_COMPRESSED
   export BIN_DIR=$BIN_DIR
   export MAN_DIR=$MAN_DIR
+  export version=$version
   _update "https://github.com/${repo}/releases/download/${version}/${release_asset}" "${name}" "${paths}" "${strip_components}"
 }
 
