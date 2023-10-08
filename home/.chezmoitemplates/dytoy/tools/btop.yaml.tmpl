@@ -1,0 +1,16 @@
+{{- if eq .chezmoi.os "linux" }}
+name: btop
+method: binary
+github:
+  repo: aristocratos/btop
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: btop-x86_64-linux-musl.tbz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: btop-aarch64-linux-gnu.tbz
+  {{- end }}
+archive:
+  strip_components: 3
+  paths:
+    - ./btop/bin/btop
+{{- end }}
