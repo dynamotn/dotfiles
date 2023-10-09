@@ -17,3 +17,4 @@
 | [docker-compose](https://github.com/docker/compose) | Run multi-container applications                                  | DevOps tools                                     |
 | [sops](https://github.com/getsops/sops)             | Managing secrets in Git repositories                              | DevOps tools                                     |
 | [k9s](https://github.com/derailed/k9s)              | Interactive TUI with Kubernetes cluster                           | DevOps tools                                     |
+| [helm-docs](https://github.com/norwoodj/helm-docs)  | Generate documents for Helm chart                                 | DevOps tools                                     |
