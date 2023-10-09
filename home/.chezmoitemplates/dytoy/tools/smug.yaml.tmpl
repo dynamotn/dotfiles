@@ -1,0 +1,13 @@
+name: smug
+method: binary
+github:
+  repo: ivaaaan/smug
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: smug_%1v_Linux_x86_64.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: smug_%1v_Linux_arm64.tar.gz
+  {{- end }}
+archive:
+  paths:
+    - smug

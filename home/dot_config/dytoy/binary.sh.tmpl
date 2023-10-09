@@ -58,7 +58,7 @@ _extract_tar() {
   bash $TEMP_HOOK_BEFORE
   readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
   for path in "${paths[@]}"; do
-    tar ${param} -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g")
+    tar ${param} -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   done
   export param=$param
   bash $TEMP_HOOK_AFTER
@@ -128,10 +128,10 @@ _parse_github_release() {
   else
     _info "Using version ${version} for https://github.com/${repo}"
   fi
-  release_asset=$(echo ${release_asset} | sed "s/%v/${version}/g")
+  release_asset=$(echo ${release_asset} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
 
-  hook_before=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.before" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g")
-  hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.after" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g")
+  hook_before=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.before" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
+  hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.after" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   if [ "$hook_before" != "null" ]; then
     echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_BEFORE}"
     echo "_progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
