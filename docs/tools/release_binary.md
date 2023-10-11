@@ -22,3 +22,4 @@
 | [hyperfine](https://github.com/sharkdp/hyperfine)                  | Benchmarking tool for CLI apps                                    | Miscellaneous                                    |
 | [tokei](https://github.com/XAMPPRocky/tokei)                       | Display statistics about code                                     | Miscellaneous                                    |
 | [ec](https://github.com/editorconfig-checker/editorconfig-checker) | Verify files are in harmony with .editorconfig                    | Miscellaneous                                    |
+| [vale](https://github.com/errata-ai/vale)                          | Linter for prose                                                  | Miscellaneous                                    |
