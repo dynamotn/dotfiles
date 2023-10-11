@@ -21,7 +21,7 @@
 .config/dynamo/binary/linux/**
 {{- end }}
 
-{{- if ne .kind "pc" }}
+{{- if eq .guiServer "0" }}
 .xprofile
 .Xresources
 .config/kitty
@@ -29,16 +29,6 @@
 .mozilla/firefox
 .config/thunderbird
 .thunderbird
-{{- if ne .guiServer "X" }}
-.config/awesome
-.config/ibus-bamboo
-.config/rofi
-{{- end }}
-{{- if ne .guiServer "W" }}
-.config/hypr
-.wayland_init.rc
-{{- end }}
-Multimedia/Pictures/Wallpaper
 .local/share/fonts
 .config/fontconfig
 .local/share/themes
@@ -47,6 +37,17 @@ Multimedia/Pictures/Wallpaper
 .config/gtk-4.0
 .config/Trolltech.conf
 .config/user-dirs.dirs
+Multimedia/Pictures/Wallpaper
+{{- end }}
+
+{{- if ne .guiServer "X" }}
+.config/awesome
+.config/ibus-bamboo
+.config/rofi
+{{- end }}
+{{- if ne .guiServer "W" }}
+.config/hypr
+.wayland_init.rc
 {{- end }}
 
 {{- if ne .place "office" }}
