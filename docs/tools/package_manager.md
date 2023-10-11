@@ -1,15 +1,15 @@
 # Terminal applications
-| Tool                   | Purpose                                                | Used in                                 |
-|------------------------|--------------------------------------------------------|-----------------------------------------|
-| `git`                  | Source version control system                          | Prequisite                              |
-| `neovim`               | My love editor, and IDE in my eyes                     | `modules/neovim`                        |
-| `fish`                 | Smart command line shell                               | `modules/fish`                          |
-| `tmux`                 | Terminal multiplexer                                   | `modules/tmux`                          |
-| `ripgrep`              | Alternative to `grep`, with Git integration and faster | Frequently used tools on CLI            |
-| `grc`                  | Colorise for some GNU/Linux commands                   | `modules/fish`                          |
-| `tar`, `unzip`, `gzip` | Uncompress file                                        | Prequisite, in `home/dot_config/dynamo` |
-| `tree-sitter`          | Parser generator tool for syntax                       | `modules/neovim`                        |
-| `podman`               | Manage containers and pods, alternative of docker      | DevOps tools                            |
+| Tool                   | Purpose                                                | Used in                                   |
+|------------------------|--------------------------------------------------------|-------------------------------------------|
+| `git`                  | Source version control system                          | Prerequisite                              |
+| `neovim`               | My love editor, and IDE in my eyes                     | `modules/neovim`                          |
+| `fish`                 | Smart command line shell                               | `modules/fish`                            |
+| `tmux`                 | Terminal multiplexer                                   | `modules/tmux`                            |
+| `ripgrep`              | Alternative to `grep`, with Git integration and faster | Frequently used tools on CLI              |
+| `grc`                  | Colorise for some GNU/Linux commands                   | `modules/fish`                            |
+| `tar`, `unzip`, `gzip` | Uncompress file                                        | Prerequisite, in `home/dot_config/dynamo` |
+| `tree-sitter`          | Parser generator tool for syntax                       | `modules/neovim`                          |
+| `podman`               | Manage containers and pods, alternative of docker      | DevOps tools                              |
 
 
 # Both X and Wayland applications
@@ -22,7 +22,7 @@
 # X server applications
 | Tool            | Purpose                                            | Used in                                                        |
 |-----------------|----------------------------------------------------|----------------------------------------------------------------|
-| `xdg-user-dirs` | Manage well-known user directories                 | Prequisite for GUI applications with X                         |
+| `xdg-user-dirs` | Manage well-known user directories                 | Prerequisite for GUI applications with X                       |
 | `ibus-bamboo`   | Vietnamese input method for Ibus                   | `home/dot_config/ibus-bamboo`                                  |
 | `awesomewm`     | AwesomeWM, window manager for X                    | `modules/awesome`                                              |
 | `redshift`      | Adjusts the color temperature of screen            | `modules/awesome`                                              |
