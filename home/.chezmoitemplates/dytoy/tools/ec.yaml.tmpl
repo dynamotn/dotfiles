@@ -1,0 +1,13 @@
+name: ec
+method: binary
+github:
+  repo: editorconfig-checker/editorconfig-checker
+  version: latest
+  release_asset: ec-linux-{{ .chezmoi.arch }}.tar.gz
+archive:
+  strip_components: 1
+  paths:
+    - bin/ec-linux-{{ .chezmoi.arch }}
+  hook:
+    after: |
+      mv ~/.local/bin/ec-linux-{{ .chezmoi.arch }} ~/.local/bin/ec
