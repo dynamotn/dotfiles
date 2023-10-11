@@ -1,0 +1,34 @@
+name: hyperfine
+{{- if eq .chezmoi.os "linux" }}
+method: binary
+github:
+  repo: sharkdp/hyperfine
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: hyperfine-%v-x86_64-unknown-linux-gnu.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: hyperfine-%v-aarch64-unknown-linux-gnu.tar.gz
+  {{- end }}
+archive:
+  strip_components: 1
+  paths:
+  {{- if eq .chezmoi.arch "amd64" }}
+    - hyperfine-%v-x86_64-unknown-linux-gnu/hyperfine
+  {{- else if eq .chezmoi.arch "arm64" }}
+    - hyperfine-%v-aarch64-unknown-linux-gnu/hyperfine
+  {{- end }}
+  hook:
+    after: |
+      tar $param -C "$MAN_DIR/man1" "hyperfine-$version-x86_64-unknown-linux-gnu/hyperfine.1"
+      if [ -d ~/.config/fish/completions ]; then
+        tar $param --strip=2 -C ~/.config/fish/completions hyperfine-$version-x86_64-unknown-linux-gnu/autocomplete/hyperfine.fish
+      fi
+      if [ -d ~/Working/personal/fish/caran/completions ]; then
+        tar $param --strip=2 -C ~/Working/personal/fish/caran/completions hyperfine-$version-x86_64-unknown-linux-gnu/autocomplete/hyperfine.fish
+      fi
+{{- else if eq .chezmoi.os "android" }}
+method: os
+termux:
+  packages:
+    - name: hyperfine
+{{- end }}
