@@ -1,5 +1,8 @@
 name: ec
 method: binary
+{{- if eq .kind "pc" }}
+is_essential: true
+{{- end }}
 github:
   repo: editorconfig-checker/editorconfig-checker
   version: latest

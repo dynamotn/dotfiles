@@ -1,5 +1,8 @@
 name: projekt
 method: binary
+{{- if eq .kind "pc" }}
+is_essential: true
+{{- end }}
 github:
   repo: dynamotn/projekt
   version: latest
