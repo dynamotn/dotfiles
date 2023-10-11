@@ -1,6 +1,9 @@
 {{- if eq .chezmoi.os "linux" }}
 name: himalaya
 method: binary
+{{- if eq .kind "pc" }}
+is_essential: true
+{{- end }}
 github:
   repo: soywod/himalaya
   version: latest
