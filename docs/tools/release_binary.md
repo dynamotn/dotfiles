@@ -1,8 +1,8 @@
 | Tool                                                     | Purpose                                                           | Used in                                          |
 |----------------------------------------------------------|-------------------------------------------------------------------|--------------------------------------------------|
-| [chezmoi](https://github.com/twpayne/chezmoi)            | Manage dotfiles across machines                                   | Prequisite                                       |
-| [age](https://github.com/FiloSottile/age)                | Simple file encryption                                            | Prequisite                                       |
-| [rbw](https://github.com/dynamotn/rbw)                   | Bitwarden CLI tool                                                | Prequisite, in `modules/awesome`                 |
+| [chezmoi](https://github.com/twpayne/chezmoi)            | Manage dotfiles across machines                                   | Prerequisite                                     |
+| [age](https://github.com/FiloSottile/age)                | Simple file encryption                                            | Prerequisite                                     |
+| [rbw](https://github.com/dynamotn/rbw)                   | Bitwarden CLI tool                                                | Prerequisite, in `modules/awesome`               |
 | [jq](https://github.com/stedolan/jq)                     | JSON processor                                                    | `modules/awesome`                                |
 | [delta](https://github.com/dandavison/delta)             | Syntax highlighting pager for git, diff, and grep output          | `home/dot_config/git`                            |
 | [bat](https://github.com/sharkdp/bat)                    | Alternative to `cat` with syntax highlighting and Git integration | Frequently used tools                            |
