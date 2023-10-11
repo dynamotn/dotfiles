@@ -19,3 +19,4 @@
 | [k9s](https://github.com/derailed/k9s)                   | Interactive TUI with Kubernetes cluster                           | DevOps tools                                     |
 | [helm-docs](https://github.com/norwoodj/helm-docs)       | Generate documents for Helm chart                                 | DevOps tools                                     |
 | [terragrunt](https://github.com/gruntwork-io/terragrunt) | Wrapper for Terraform to provide extra tools                      | DevOps tools                                     |
+| [hyperfine](https://github.com/sharkdp/hyperfine)        | Benchmarking tool for CLI apps                                    | Miscellaneous                                    |
