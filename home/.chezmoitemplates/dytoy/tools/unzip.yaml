@@ -1,5 +1,6 @@
 name: unzip
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: app-arch/unzip

@@ -1,6 +1,7 @@
 {{- if eq .guiServer "X" "W" }}
 name: thunderbird
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: mail-client/thunderbird-bin

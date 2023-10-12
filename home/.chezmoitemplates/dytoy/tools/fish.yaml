@@ -1,5 +1,6 @@
 name: fish
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: app-shells/fish

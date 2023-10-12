@@ -1,5 +1,6 @@
 name: tar
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: app-arch/tar

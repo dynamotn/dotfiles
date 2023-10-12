@@ -1,5 +1,6 @@
 name: tmux
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: app-misc/tmux
