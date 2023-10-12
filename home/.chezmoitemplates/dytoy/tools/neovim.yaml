@@ -1,5 +1,6 @@
 name: neovim
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: app-editors/neovim

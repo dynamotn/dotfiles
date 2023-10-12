@@ -1,5 +1,4 @@
 name: wireshark
-is_essential: false
 method: os
 gentoo:
   packages:

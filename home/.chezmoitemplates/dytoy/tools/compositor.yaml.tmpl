@@ -1,6 +1,7 @@
 {{- if eq .guiServer "X" }}
 name: picom
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: x11-misc/picom

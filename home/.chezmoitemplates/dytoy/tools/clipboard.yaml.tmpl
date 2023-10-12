@@ -1,6 +1,7 @@
 {{- if eq .guiServer "X" }}
 name: xsel
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: x11-misc/xsel
@@ -13,6 +14,7 @@ ubuntu:
 {{- else if eq .guiServer "W" }}
 name: wl-clipboard
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: gui-apps/wl-clipboard

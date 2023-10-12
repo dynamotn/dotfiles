@@ -1,6 +1,7 @@
 {{- if eq .guiServer "X" }}
 name: xdotool
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: x11-misc/xdotool
@@ -13,6 +14,7 @@ ubuntu:
 {{- else if eq .guiServer "W" }}
 name: wtype
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: gui-apps/wtype

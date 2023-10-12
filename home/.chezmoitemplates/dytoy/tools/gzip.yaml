@@ -1,5 +1,6 @@
 name: gzip
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: app-arch/gzip
