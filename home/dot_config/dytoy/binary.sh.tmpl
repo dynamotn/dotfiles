@@ -71,7 +71,7 @@ _extract_zip() {
   bash $TEMP_HOOK_BEFORE
   readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
   for path in "${paths[@]}"; do
-    unzip -qqoj $TEMP_COMPRESSED -d $BIN_DIR $path
+    unzip -qqoj $TEMP_COMPRESSED -d $BIN_DIR $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   done
   bash $TEMP_HOOK_AFTER
 }
