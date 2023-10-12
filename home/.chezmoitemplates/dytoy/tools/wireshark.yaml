@@ -1,0 +1,15 @@
+name: wireshark
+is_essential: false
+method: os
+gentoo:
+  packages:
+    - name: net-analyzer/wireshark
+arch:
+  packages:
+    - name: wireshark-cli
+ubuntu:
+  packages:
+    - name: tshark
+termux:
+  packages:
+    - name: tshark
