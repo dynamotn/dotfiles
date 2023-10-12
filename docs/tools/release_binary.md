@@ -21,5 +21,6 @@
 | [terragrunt](https://github.com/gruntwork-io/terragrunt)           | Wrapper for Terraform to provide extra tools                      | DevOps tools                                     |
 | [hyperfine](https://github.com/sharkdp/hyperfine)                  | Benchmarking tool for CLI apps                                    | Miscellaneous                                    |
 | [tokei](https://github.com/XAMPPRocky/tokei)                       | Display statistics about code                                     | Miscellaneous                                    |
+| [procs](https://github.com/dalance/procs)                          | Alternative to `ps` with colours, tree view...                    | Miscellaneous                                    |
 | [ec](https://github.com/editorconfig-checker/editorconfig-checker) | Verify files are in harmony with .editorconfig                    | Linter, in `modules/neovim`                      |
 | [vale](https://github.com/errata-ai/vale)                          | Linter for prose                                                  | Linter, in `modules/neovim`                      |
