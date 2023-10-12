@@ -1,0 +1,19 @@
+name: rclone
+{{- if eq .chezmoi.os "linux" }}
+method: binary
+github:
+  repo: rclone/rclone
+  version: latest
+  release_asset: rclone-%v-linux-{{ .chezmoi.arch }}.zip
+archive:
+  paths:
+    - rclone-%v-linux-{{ .chezmoi.arch }}/rclone
+  hook:
+    after: |
+      unzip -qqoj $TEMP_COMPRESSED rclone-$version-linux-{{ .chezmoi.arch }}/rclone.1 -d $MAN_DIR/man1
+{{- else if eq .chezmoi.os "android" }}
+method: os
+termux:
+  packages:
+    - name: rclone
+{{- end }}
