@@ -22,11 +22,11 @@
 | [helm-docs](https://github.com/norwoodj/helm-docs)                 | Generate documents for Helm chart                                 | DevOps tools                                     |
 | [terragrunt](https://github.com/gruntwork-io/terragrunt)           | Wrapper for Terraform to provide extra tools                      | DevOps tools                                     |
 | [arduino](https://github.com/arduino/arduino-cli)                  | CLI to manage Arduino board                                       | IoT tools                                        |
+| [procs](https://github.com/dalance/procs)                          | Alternative to `ps` with colours, tree view...                    | SysOps tools                                     |
+| [rclone](https://github.com/rclone/rclone)                         | Sync files to and from cloud providers                            | SysOps tools                                     |
+| [termshark](https://github.com/gcla/termshark)                     | TUI to network packet analysis                                    | Network tools                                    |
 | [hyperfine](https://github.com/sharkdp/hyperfine)                  | Benchmarking tool for CLI apps                                    | Miscellaneous                                    |
 | [tokei](https://github.com/XAMPPRocky/tokei)                       | Display statistics about code                                     | Miscellaneous                                    |
-| [procs](https://github.com/dalance/procs)                          | Alternative to `ps` with colours, tree view...                    | Miscellaneous                                    |
-| [rclone](https://github.com/rclone/rclone)                         | Sync files to and from cloud providers                            | Miscellaneous                                    |
 | [cointop](https://github.com/arduino/arduino-cli)                  | TUI to track coin stats                                           | Miscellaneous                                    |
-| [termshark](https://github.com/gcla/termshark)                     | TUI to network packet analysis                                    | Miscellaneous                                    |
 | [ec](https://github.com/editorconfig-checker/editorconfig-checker) | Verify files are in harmony with .editorconfig                    | Linter, in `modules/neovim`                      |
 | [vale](https://github.com/errata-ai/vale)                          | Linter for prose                                                  | Linter, in `modules/neovim`                      |
