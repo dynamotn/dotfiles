@@ -9,6 +9,7 @@
 | `tar`, `unzip`, `gzip` | Uncompress file                                        | Prerequisite, in `home/dot_config/dynamo` |
 | `tree-sitter`          | Parser generator tool for syntax                       | `modules/neovim`                          |
 | `podman`               | Manage containers and pods, alternative of docker      | DevOps tools                              |
+| `tshark`               | CLI of Wireshark, network packet analysis              | Miscellaneous                             |
 
 
 # Both X and Wayland applications

@@ -27,5 +27,6 @@
 | [procs](https://github.com/dalance/procs)                          | Alternative to `ps` with colours, tree view...                    | Miscellaneous                                    |
 | [rclone](https://github.com/rclone/rclone)                         | Sync files to and from cloud providers                            | Miscellaneous                                    |
 | [cointop](https://github.com/arduino/arduino-cli)                  | TUI to track coin stats                                           | Miscellaneous                                    |
+| [termshark](https://github.com/gcla/termshark)                     | TUI to network packet analysis                                    | Miscellaneous                                    |
 | [ec](https://github.com/editorconfig-checker/editorconfig-checker) | Verify files are in harmony with .editorconfig                    | Linter, in `modules/neovim`                      |
 | [vale](https://github.com/errata-ai/vale)                          | Linter for prose                                                  | Linter, in `modules/neovim`                      |
