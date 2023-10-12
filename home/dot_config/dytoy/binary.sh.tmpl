@@ -69,15 +69,18 @@ _extract_tar() {
 # $2: Path of file in archive
 _extract_zip() {
   bash $TEMP_HOOK_BEFORE
-  unzip -qqoj $TEMP_COMPRESSED -d $BIN_DIR $2
+  readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
+  for path in "${paths[@]}"; do
+    unzip -qqoj $TEMP_COMPRESSED -d $BIN_DIR $path
+  done
   bash $TEMP_HOOK_AFTER
 }
 
 # Update tool by get from release file
 # $1: URL of file
 # $2: File name of command
-# $3: Strip components
-# $4: Path of file in archive
+# $3: Path of file in archive
+# $4: Strip components
 _update() {
   if [[ "$1" =~ \.(tar\.gz|tgz|tar\.xz|tar\.bz2|tbz2|xz|tar|tar\.zst|tbz)$ ]]; then
     curl -SL "$1" -o "$TEMP_COMPRESSED"
@@ -87,7 +90,7 @@ _update() {
     rm -rf "$TEMP_COMPRESSED"
   elif [[ "$1" =~ \.zip$ ]]; then
     curl -SL "$1" -o "$TEMP_COMPRESSED"
-    _extract_zip "$1" "$4"
+    _extract_zip "$1" "$3"
     echo > "$TEMP_HOOK_BEFORE"
     echo > "$TEMP_HOOK_AFTER"
     rm -rf "$TEMP_COMPRESSED"
