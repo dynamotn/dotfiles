@@ -1,0 +1,11 @@
+{{- if eq .chezmoi.arch "amd64" }}
+name: cointop
+method: binary
+github:
+  repo: cointop-sh/cointop
+  version: latest
+  release_asset: cointop_%1v_linux_amd64.tar.gz
+archive:
+  paths:
+    - cointop
+{{- end }}
