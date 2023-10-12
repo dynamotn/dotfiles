@@ -1,40 +1,42 @@
-name: bat
+name: rg
 is_essential: true
 {{- if eq .chezmoi.os "linux" }}
 method: binary
 github:
-  repo: sharkdp/bat
+  repo: BurntSushi/ripgrep
   version: latest
   {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: bat-%v-x86_64-unknown-linux-gnu.tar.gz
+  release_asset: ripgrep-%v-x86_64-unknown-linux-musl.tar.gz
   {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: bat-%v-aarch64-unknown-linux-gnu.tar.gz
+  release_asset: ripgrep-%v-arm-unknown-linux-gnueabihf.tar.gz
   {{- end }}
 archive:
   strip_components: 1
   paths:
   {{- if eq .chezmoi.arch "amd64" }}
-    - bat-%v-x86_64-unknown-linux-gnu/bat
+    - ripgrep-%v-x86_64-unknown-linux-musl/rg
   {{- else if eq .chezmoi.arch "arm64" }}
-    - bat-%v-aarch64-unknown-linux-gnu/bat
+    - ripgrep-%v-arm-unknown-linux-gnueabihf/rg
   {{- end }}
   hook:
     after: |
       {{- if eq .chezmoi.arch "amd64" }}
       arch=x86_64
+      libc=musl
       {{- else if eq .chezmoi.arch "arm64" }}
       arch=aarch64
+      libc=gnueabihf
       {{- end }}
-      tar $param -C "$MAN_DIR/man1" "bat-$version-$arch-unknown-linux-gnu/bat.1"
+      tar $param --strip=2 -C "$MAN_DIR/man1" "ripgrep-$version-$arch-unknown-linux-$libc/doc/rg.1"
       if [ -d ~/.config/fish/completions ]; then
-        tar $param --strip=2 -C ~/.config/fish/completions bat-$version-$arch-unknown-linux-gnu/autocomplete/bat.fish
+        tar $param --strip=2 -C ~/.config/fish/completions ripgrep-$version-$arch-unknown-linux-$libc/complete/rg.fish
       fi
       if [ -d ~/Working/personal/fish/caran/completions ]; then
-        tar $param --strip=2 -C ~/Working/personal/fish/caran/completions bat-$version-$arch-unknown-linux-gnu/autocomplete/bat.fish
+        tar $param --strip=2 -C ~/Working/personal/fish/caran/completions ripgrep-$version-$arch-unknown-linux-$libc/complete/rg.fish
       fi
 {{- else if eq .chezmoi.os "android" }}
 method: os
 termux:
   packages:
-    - name: bat
+    - name: ripgrep
 {{- end }}

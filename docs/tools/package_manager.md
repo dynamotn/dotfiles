@@ -5,7 +5,6 @@
 | `neovim`               | My love editor, and IDE in my eyes                     | `modules/neovim`                          |
 | `fish`                 | Smart command line shell                               | `modules/fish`                            |
 | `tmux`                 | Terminal multiplexer                                   | `modules/tmux`                            |
-| `ripgrep`              | Alternative to `grep`, with Git integration and faster | Frequently used tools on CLI              |
 | `grc`                  | Colorise for some GNU/Linux commands                   | `modules/fish`                            |
 | `tar`, `unzip`, `gzip` | Uncompress file                                        | Prerequisite, in `home/dot_config/dynamo` |
 | `tree-sitter`          | Parser generator tool for syntax                       | `modules/neovim`                          |
