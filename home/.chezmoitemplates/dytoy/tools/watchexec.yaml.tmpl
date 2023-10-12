@@ -1,0 +1,33 @@
+name: watchexec
+method: binary
+{{- if eq .chezmoi.os "linux" }}
+github:
+  repo: watchexec/watchexec
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: watchexec-%v-x86_64-unknown-linux-gnu.tar.xz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: watchexec-%v-aarch64-unknown-linux-gnu.tar.xz
+  {{- end }}
+archive:
+  strip_components: 1
+  paths:
+    {{- if eq .chezmoi.arch "amd64" }}
+    - watchexec-%v-x86_64-unknown-linux-gnu/watchexec
+    {{- else if eq .chezmoi.arch "arm64" }}
+    - watchexec-%v-aarch64-unknown-linux-gnu/watchexec
+    {{- end }}
+  hook:
+    after: |
+      {{- if eq .chezmoi.arch "amd64" }}
+      arch=x86_64
+      {{- else if eq .chezmoi.arch "arm64" }}
+      arch=aarch64
+      {{- end }}
+      tar $param -C "$MAN_DIR/man1" "watchexec-${version:1}-$arch-unknown-linux-gnu/watchexec"
+{{- else if eq .chezmoi.os "android" }}
+method: os
+termux:
+  packages:
+    - name: fd
+{{- end }}
