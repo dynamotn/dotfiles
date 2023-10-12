@@ -1,0 +1,16 @@
+name: arduino
+method: binary
+github:
+  repo: arduino/arduino-cli
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: arduino-cli_%v_Linux_64bit.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: arduino-cli_%v_Linux_ARM64.tar.gz
+  {{- end }}
+archive:
+  paths:
+    - arduino-cli
+  hook:
+    after: |
+      mv ~/.local/bin/arduino-cli ~/.local/bin/arduino

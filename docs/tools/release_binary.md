@@ -21,6 +21,7 @@
 | [k9s](https://github.com/derailed/k9s)                             | Interactive TUI with Kubernetes cluster                           | DevOps tools                                     |
 | [helm-docs](https://github.com/norwoodj/helm-docs)                 | Generate documents for Helm chart                                 | DevOps tools                                     |
 | [terragrunt](https://github.com/gruntwork-io/terragrunt)           | Wrapper for Terraform to provide extra tools                      | DevOps tools                                     |
+| [arduino](https://github.com/arduino/arduino-cli)                  | CLI to manage Arduino board                                       | IoT tools                                        |
 | [hyperfine](https://github.com/sharkdp/hyperfine)                  | Benchmarking tool for CLI apps                                    | Miscellaneous                                    |
 | [tokei](https://github.com/XAMPPRocky/tokei)                       | Display statistics about code                                     | Miscellaneous                                    |
 | [procs](https://github.com/dalance/procs)                          | Alternative to `ps` with colours, tree view...                    | Miscellaneous                                    |
