@@ -25,6 +25,7 @@
 | [procs](https://github.com/dalance/procs)                          | Alternative to `ps` with colours, tree view...                    | SysOps tools                                     |
 | [rclone](https://github.com/rclone/rclone)                         | Sync files to and from cloud providers                            | SysOps tools                                     |
 | [termshark](https://github.com/gcla/termshark)                     | TUI to network packet analysis                                    | Network tools                                    |
+| [http](https://github.com/httpie/cli)                              | Interactive CLI tool with web services                            | Network tools                                    |
 | [watchexec](https://github.com/watchexec/watchexec)                | Detects modifications and run command                             | Developer tools                                  |
 | [hyperfine](https://github.com/sharkdp/hyperfine)                  | Benchmarking tool for CLI apps                                    | Miscellaneous                                    |
 | [tokei](https://github.com/XAMPPRocky/tokei)                       | Display statistics about code                                     | Miscellaneous                                    |
