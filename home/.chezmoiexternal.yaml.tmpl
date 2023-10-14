@@ -63,6 +63,13 @@
   url: 'https://raw.githubusercontent.com/apankrat/now.sh/master/now.sh'
   executable: true
   refreshPeriod: 168h
+{{- if eq .kind "pc" }}
+.local/bin/pulsemixer:
+  type: file
+  url: 'https://raw.githubusercontent.com/GeorgeFilipkin/pulsemixer/master/pulsemixer'
+  executable: true
+  refreshPeriod: 168h
+{{- end  }}
 .local/bin/qrify:
   type: file
   url: https://raw.githubusercontent.com/alexanderepstein/Bash-Snippets/master/qrify/qrify
