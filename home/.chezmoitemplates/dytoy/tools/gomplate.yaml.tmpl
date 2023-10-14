@@ -1,0 +1,8 @@
+{{- if eq .chezmoi.os "linux" }}
+name: gomplate
+method: binary
+github:
+  repo: hairyhenderson/gomplate
+  version: latest
+  release_asset:  gomplate_linux-{{ .chezmoi.arch }}
+{{- end }}
