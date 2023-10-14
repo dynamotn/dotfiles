@@ -1,0 +1,11 @@
+{{- if eq .chezmoi.os "linux" }}
+name: dive
+method: binary
+github:
+  repo: wagoodman/dive
+  version: latest
+  release_asset:  dive_%1v_linux_{{ .chezmoi.arch }}.tar.gz
+archive:
+  paths:
+    - dive
+{{- end }}
