@@ -18,6 +18,7 @@
 | [cliphist](https://github.com/sentriz/cliphist)                    | Clipboard manager for Wayland                                     | Frequently used tools, in `modules/hyprland`     |
 | [docker-compose](https://github.com/docker/compose)                | Run multi-container applications                                  | DevOps tools                                     |
 | [lazydocker](https://github.com/jesseduffield/lazydocker)          | Interactive TUI with Docker and Compose                           | DevOps tools                                     |
+| [dive](https://github.com/wagoodman/dive)                          | Explore each layer in Docker images                               | DevOps tools                                     |
 | [k9s](https://github.com/derailed/k9s)                             | Interactive TUI with Kubernetes cluster                           | DevOps tools                                     |
 | [helm-docs](https://github.com/norwoodj/helm-docs)                 | Generate documents for Helm chart                                 | DevOps tools                                     |
 | [sops](https://github.com/getsops/sops)                            | Managing secrets in Git repositories                              | DevOps tools                                     |
