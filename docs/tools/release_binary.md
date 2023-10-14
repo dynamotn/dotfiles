@@ -24,14 +24,15 @@
 | [sops](https://github.com/getsops/sops)                            | Managing secrets in Git repositories                              | DevOps tools                                     |
 | [terragrunt](https://github.com/gruntwork-io/terragrunt)           | Wrapper for Terraform to provide extra tools                      | DevOps tools                                     |
 | [terraformer](https://github.com/GoogleCloudPlatform/terraformer)  | Generate Terraform from existing infrastructure                   | DevOps tools                                     |
-| [arduino](https://github.com/arduino/arduino-cli)                  | CLI to manage Arduino board                                       | IoT tools                                        |
 | [procs](https://github.com/dalance/procs)                          | Alternative to `ps` with colours, tree view...                    | SysOps tools                                     |
 | [rclone](https://github.com/rclone/rclone)                         | Sync files to and from cloud providers                            | SysOps tools                                     |
 | [viddy](https://github.com/sachaos/viddy)                          | Alternative to `watch` with colours, diff, time machine...        | SysOps tools                                     |
+| [infracost](https://github.com/infracost/infracost)                | Estimate cost of cloud infra via Terraform                        | FinOps tools                                     |
 | [termshark](https://github.com/gcla/termshark)                     | TUI to network packet analysis                                    | Network tools                                    |
 | [http](https://github.com/httpie/cli)                              | Interactive CLI tool with web services                            | Network tools                                    |
 | [watchexec](https://github.com/watchexec/watchexec)                | Detects modifications and run command                             | Developer tools                                  |
 | [gomplate](https://github.com/hairyhenderson/gomplate)             | Template rendering, like jinja                                    | Developer tools                                  |
+| [arduino](https://github.com/arduino/arduino-cli)                  | CLI to manage Arduino board                                       | IoT tools                                        |
 | [hyperfine](https://github.com/sharkdp/hyperfine)                  | Benchmarking tool for CLI apps                                    | Miscellaneous                                    |
 | [tokei](https://github.com/XAMPPRocky/tokei)                       | Display statistics about code                                     | Miscellaneous                                    |
 | [cointop](https://github.com/arduino/arduino-cli)                  | TUI to track coin stats                                           | Miscellaneous                                    |
