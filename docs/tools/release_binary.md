@@ -21,6 +21,7 @@
 | [k9s](https://github.com/derailed/k9s)                             | Interactive TUI with Kubernetes cluster                           | DevOps tools                                     |
 | [helm-docs](https://github.com/norwoodj/helm-docs)                 | Generate documents for Helm chart                                 | DevOps tools                                     |
 | [terragrunt](https://github.com/gruntwork-io/terragrunt)           | Wrapper for Terraform to provide extra tools                      | DevOps tools                                     |
+| [lazydocker](https://github.com/jesseduffield/lazydocker)          | Interactive TUI with Docker and Compose                           | DevOps tools                                     |
 | [arduino](https://github.com/arduino/arduino-cli)                  | CLI to manage Arduino board                                       | IoT tools                                        |
 | [procs](https://github.com/dalance/procs)                          | Alternative to `ps` with colours, tree view...                    | SysOps tools                                     |
 | [rclone](https://github.com/rclone/rclone)                         | Sync files to and from cloud providers                            | SysOps tools                                     |
