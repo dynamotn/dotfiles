@@ -1,0 +1,13 @@
+name: stylua
+method: binary
+github:
+  repo: JohnnyMorganz/StyLua
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: stylua-linux-x86_64.zip
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: stylua-linux-aarch64.zip
+  {{- end }}
+archive:
+  paths:
+    - stylua
