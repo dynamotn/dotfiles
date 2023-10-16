@@ -38,3 +38,4 @@
 | [cointop](https://github.com/arduino/arduino-cli)                  | TUI to track coin stats                                           | Miscellaneous                                    |
 | [ec](https://github.com/editorconfig-checker/editorconfig-checker) | Verify files are in harmony with .editorconfig                    | Linter, in `modules/neovim`                      |
 | [vale](https://github.com/errata-ai/vale)                          | Linter for prose                                                  | Linter, in `modules/neovim`                      |
+| [stylua](https://github.com/JohnnyMorganz/StyLua)                  | Linter, formatter for Lua                                         | Linter & formater, in `modules/neovim`           |
