@@ -1,0 +1,20 @@
+{{- if eq .kind "pc" }}
+name: jira
+method: binary
+github:
+  repo: ankitpokhrel/jira-cli
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: jira_%1v_linux_x86_64.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: jira_%1v_linux_arm64.tar.gz
+  {{- end }}
+archive:
+  strip_components: 2
+  paths:
+    {{- if eq .chezmoi.arch "amd64" }}
+    - jira_%1v_linux_x86_64/bin/jira
+    {{- else if eq .chezmoi.arch "arm64" }}
+    - jira_%1v_linux_arm64/bin/jira
+    {{- end }}
+{{- end }}
