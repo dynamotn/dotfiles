@@ -1,0 +1,12 @@
+{{- if eq .kind "pc" }}
+name: glab
+method: binary
+gitlab:
+  repo: gitlab-org/cli
+  version: latest
+  release_asset: glab_%1v_Linux_x86_64.tar.gz
+archive:
+  strip_components: 1
+  paths:
+    - bin/glab
+{{- end }}

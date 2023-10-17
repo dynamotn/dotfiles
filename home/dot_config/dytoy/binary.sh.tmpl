@@ -169,13 +169,74 @@ _parse_github_release() {
   _update "https://github.com/${repo}/releases/download/${version}/${release_asset}" "${name}" "${paths}" "${strip_components}"
 }
 
+# Parse config file and update tool
+# by get from Gitlab release file
+# $1: YAML string of tool
+_parse_gitlab_release() {
+  name=$(echo "$package" | yq e '.name')
+  if [ "$FLAG_NOT_EXIST" = true ] && [ -f "$BIN_DIR/$name" ]; then
+    return
+  fi
+
+  is_essential=$(echo "$package" | yq e '.is_essential')
+  if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
+    return
+  fi
+
+  _progress "Installing ${name}"
+  host=$(echo "$package" | yq e '.gitlab.host')
+  if [ "$host" = "null" ]; then
+    host="gitlab.com"
+  fi
+
+  repo=$(echo "$package" | yq e '.gitlab.repo')
+  version=$(echo "$package" | yq e '.gitlab.version')
+  release_asset=$(echo "$package" | yq e '.gitlab.release_asset')
+  strip_components=$(echo "$package" | yq e '.archive.strip_components')
+  paths=$(echo "$package" | yq e '.archive.paths')
+
+  _progress "Checking ${name} from ${repo}"
+  if [ "$version" = "latest" ]; then
+    version=$(curl -sSL -u "${GITLAB_API_USERNAME}:${GITLAB_API_TOKEN}" "https://gitlab.com/api/v4/projects/$(echo $repo | sed -e "s/\//%2f/g")/releases/permalink/latest" | yq ".tag_name")
+  fi
+  if [ "$version" = "" ]; then
+    _error "Version is not specified or you're limited request to Github API"
+  else
+    _info "Using version ${version} for https://gitlab.com/${repo}"
+  fi
+  release_asset=$(echo ${release_asset} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
+
+  hook_before=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.before" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
+  hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.after" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
+  if [ "$hook_before" != "null" ]; then
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_BEFORE}"
+    echo "_progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
+    echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
+  fi
+  if [ "$hook_after" != "null" ]; then
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_AFTER}"
+    echo "_progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
+    echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
+  fi
+
+  export TEMP_COMPRESSED=$TEMP_COMPRESSED
+  export BIN_DIR=$BIN_DIR
+  export MAN_DIR=$MAN_DIR
+  export version=$version
+  _update "https://gitlab.com/${repo}/-/releases/${version}/downloads/${release_asset}" "${name}" "${paths}" "${strip_components}"
+}
+
 _main() {
   _info "Install binary tools"
   readarray package_tools < <(yq e -o=j -I=0 'filter(.method == "binary") | .[]' ~/.config/dytoy/tools.yaml )
   for package in "${package_tools[@]}"; do
     name=$(echo "$package" | yq e '.name')
     if [ "$PACKAGE" = "" ] || [ "$PACKAGE" = "$name" ]; then
-      _parse_github_release "$package"
+      if [ "$(echo "$package" | yq e '.github')" != "null" ]; then
+        _parse_github_release "$package"
+      elif [ "$(echo "$package" | yq e '.gitlab')" != "null" ]; then
+        _parse_gitlab_release "$package"
+      fi
     fi
   done
   _success "Installed binary tools"
@@ -189,4 +250,6 @@ _parse_args "$@"
 
 GITHUB_API_USERNAME=${GITHUB_API_USERNAME:-dynamotn}
 GITHUB_API_TOKEN=${GITHUB_API_TOKEN:-}
+GITLAB_API_USERNAME=${GITLAB_API_USERNAME:-dynamotn}
+GITLAB_API_TOKEN=${GITLAB_API_TOKEN:-}
 _main
