@@ -32,6 +32,7 @@
 | [dust](https://github.com/bootandy/dust)                           | Alternative to `du` with more intuitive                           | SysOps tools                                     |
 | [duf](https://github.com/muesli/duf)                               | Alternative to `df` with colours...                               | SysOps tools                                     |
 | [infracost](https://github.com/infracost/infracost)                | Estimate cost of cloud infra via Terraform                        | FinOps tools                                     |
+| [kubescape](https://github.com/kubescape/kubescape)                | Kubernetes security platform                                      | SecOps tools                                     |
 | [termshark](https://github.com/gcla/termshark)                     | TUI to network packet analysis                                    | Network tools                                    |
 | [http](https://github.com/httpie/cli)                              | Interactive CLI tool with web services                            | Network tools                                    |
 | [watchexec](https://github.com/watchexec/watchexec)                | Detects modifications and run command                             | Developer tools                                  |
