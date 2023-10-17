@@ -42,3 +42,4 @@
 | [stylua](https://github.com/JohnnyMorganz/StyLua)                  | Linter, formatter for Lua                                         | Linter & formater, in `modules/neovim`           |
 | [jira](https://github.com/ankitpokhrel/jira-cli)                   | Interactive CLI tool with JIRA                                    | Project management tools                         |
 | [glab](https://gitlab.com/gitlab-org/cli)                          | Interactive CLI tool with Gitlab                                  | Project management tools                         |
+| [gh](https://github.com/cli/cli)                                   | Interactive CLI tool with Github                                  | Project management tools                         |

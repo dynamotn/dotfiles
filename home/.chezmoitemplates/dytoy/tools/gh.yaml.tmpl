@@ -1,0 +1,13 @@
+name: gh
+method: binary
+github:
+  repo: cli/cli
+  version: latest
+  release_asset: gh_%1v_linux_{{ .chezmoi.arch }}.tar.gz
+archive:
+  strip_components: 2
+  paths:
+    - gh_%1v_linux_{{ .chezmoi.arch }}/bin/gh
+  hook:
+    after: |
+      tar $param --strip=4 -C "$MAN_DIR/man1" --wildcards gh_${version:1}_linux_{{ .chezmoi.arch }}/share/man/man1/*
