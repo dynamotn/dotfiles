@@ -1,0 +1,14 @@
+name: gping
+method: binary
+is_essential: true
+github:
+  repo: orf/gping
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: gping-Linux-x86_64.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: gping-aarch64-unknown-linux-gnu.tar.gz
+  {{- end }}
+archive:
+  paths:
+    - gping
