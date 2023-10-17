@@ -23,6 +23,7 @@
 | [k9s](https://github.com/derailed/k9s)                                      | Interactive TUI with Kubernetes cluster                           | DevOps tools                                     |
 | [k0sctl](https://github.com/k0sproject/k0sctl)                              | Bootstrap and manage k0s cluster                                  | DevOps tools                                     |
 | [helm-docs](https://github.com/norwoodj/helm-docs)                          | Generate documents for Helm chart                                 | DevOps tools                                     |
+| [kubeconform](https://github.com/yannh/kubeconform)                         | Validate Kubernetes manifest                                      | DevOps tools                                     |
 | [sops](https://github.com/getsops/sops)                                     | Managing secrets in Git repositories                              | DevOps tools                                     |
 | [terragrunt](https://github.com/gruntwork-io/terragrunt)                    | Wrapper for Terraform to provide extra tools                      | DevOps tools                                     |
 | [terraformer](https://github.com/GoogleCloudPlatform/terraformer)           | Generate Terraform from existing infrastructure                   | DevOps tools                                     |
