@@ -16,7 +16,7 @@ _usage() {
 }
 
 _parse_args() {
-  while getopts ":hnet:" arg; do
+  while getopts ":hnedt:" arg; do
     case $arg in
       n) # Update only not existed tool
         FLAG_NOT_EXIST=true
@@ -30,6 +30,9 @@ _parse_args() {
       t) # Only one specific tool
         PACKAGE=$OPTARG
         ;;
+      d) # Debug mode
+        DEBUG=true
+        ;;
       *) ;;
     esac
   done
@@ -40,7 +43,12 @@ _parse_args() {
 # $2: Path of file in archive
 # $3: Strip components
 _extract_tar() {
-  local param="-x"
+  local param=""
+  if [ "$DEBUG" = true ]; then
+    param="-vt"
+  else
+    param="-x"
+  fi
   if [[ "$1" =~ \.(tar\.gz|tgz)$ ]]; then
     param="${param}z"
   elif [[ "$1" =~ \.(tar\.xz|xz)$ ]]; then
@@ -55,25 +63,33 @@ _extract_tar() {
     param="${param} --strip=$3"
   fi
   param="${param} -f $TEMP_COMPRESSED"
-  bash $TEMP_HOOK_BEFORE
-  readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
-  for path in "${paths[@]}"; do
-    tar ${param} -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
-  done
-  export param=$param
-  bash $TEMP_HOOK_AFTER
+  if [ "$DEBUG" = true ]; then
+    tar ${param}
+  else
+    bash $TEMP_HOOK_BEFORE
+    readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
+    for path in "${paths[@]}"; do
+      tar ${param} -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
+    done
+    export param=$param
+    bash $TEMP_HOOK_AFTER
+  fi
 }
 
 # Extract from zip compressed release file
 # $1: URL of file
 # $2: Path of file in archive
 _extract_zip() {
-  bash $TEMP_HOOK_BEFORE
-  readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
-  for path in "${paths[@]}"; do
-    unzip -qqoj $TEMP_COMPRESSED -d $BIN_DIR $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
-  done
-  bash $TEMP_HOOK_AFTER
+  if [ "$DEBUG" = true ]; then
+    unzip -Zl $TEMP_COMPRESSED
+  else
+    bash $TEMP_HOOK_BEFORE
+    readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
+    for path in "${paths[@]}"; do
+      unzip -qqoj $TEMP_COMPRESSED -d $BIN_DIR $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
+    done
+    bash $TEMP_HOOK_AFTER
+  fi
 }
 
 # Update tool by get from release file
@@ -168,6 +184,7 @@ _main() {
 PACKAGE=
 FLAG_IS_ESSENTIAL=false
 FLAG_NOT_EXIST=false
+DEBUG=false
 _parse_args "$@"
 
 GITHUB_API_USERNAME=${GITHUB_API_USERNAME:-dynamotn}
