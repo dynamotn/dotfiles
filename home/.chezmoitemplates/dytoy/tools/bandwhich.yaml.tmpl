@@ -1,0 +1,11 @@
+{{- if eq .chezmoi.arch "amd64" }}
+name: bandwhich
+method: binary
+github:
+  repo: imsnif/bandwhich
+  version: latest
+  release_asset: bandwhich-%v-x86_64-unknown-linux-gnu.tar.gz
+archive:
+  paths:
+    - bandwhich
+{{- end }}

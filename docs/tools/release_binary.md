@@ -38,6 +38,7 @@
 |[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|SecOps tool|
 |[termshark](https://github.com/gcla/termshark)|TUI to network packet analysis|Network tool|
 |[http](https://github.com/httpie/cli)|Interactive CLI tool with web services|Network tool|
+|[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|Network tool|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tool|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|Developer tool|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|Developer tool|
