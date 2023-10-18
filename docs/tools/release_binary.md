@@ -1,53 +1,54 @@
-| Tool                                                                        | Purpose                                                           | Used in                                          |
-|-----------------------------------------------------------------------------|-------------------------------------------------------------------|--------------------------------------------------|
-| [chezmoi](https://github.com/twpayne/chezmoi)                               | Manage dotfiles across machines                                   | Prerequisite                                     |
-| [age](https://github.com/FiloSottile/age)                                   | Simple file encryption                                            | Prerequisite                                     |
-| [rbw](https://github.com/dynamotn/rbw)                                      | Bitwarden CLI tool                                                | Prerequisite, in `modules/awesome`               |
-| [jq](https://github.com/stedolan/jq)                                        | JSON processor                                                    | `modules/awesome`                                |
-| [delta](https://github.com/dandavison/delta)                                | Syntax highlighting pager for git, diff, and grep output          | `home/dot_config/git`                            |
-| [bat](https://github.com/sharkdp/bat)                                       | Alternative to `cat` with syntax highlighting and Git integration | Frequently used tools                            |
-| [fd](https://github.com/sharkdp/fd)                                         | Alternative to `find`, simpler and faster                         | Frequently used tools, in `modules/fish`         |
-| [eza](https://github.com/eza-community/eza)                                 | Alternative to `ls` with colours, faster                          | Frequently used tools                            |
-| [ripgrep](https://github.com/BurntSushi/ripgrep)                            | Alternative to `grep`, with Git integration and faster            | Frequently used tools                            |
-| [gping](https://github.com/orf/gping)                                       | Alternative to `ping` with graph                                  | Frequently used tools                            |
-| [direnv](https://github.com/direnv/direnv)                                  | Load environment variables depending on directory                 | Frequently used tools, in `modules/fish`         |
-| [btop](https://github.com/aristocratos/btop)                                | Alternative to `htop` and `glances`                               | Frequently used tools, in `modules/awesome`      |
-| [himalaya](https://github.com/soywod/himalaya)                              | Email CLI tool                                                    | Frequently used tools, in `modules/awesome`      |
-| [smug](https://github.com/ivaaaan/smug)                                     | Tmux session manager                                              | Frequently used tools, in `home/dot_config/smug` |
-| [projekt](https://github.com/dynamotn/projekt)                              | Smart CLI command to manage project folder                        | Frequently used tools, in `modules/fish`         |
-| [greenclip](https://github.com/erebe/greenclip)                             | Clipboard manager for X                                           | Frequently used tools, in `modules/awesome`      |
-| [cliphist](https://github.com/sentriz/cliphist)                             | Clipboard manager for Wayland                                     | Frequently used tools, in `modules/hyprland`     |
-| [docker-compose](https://github.com/docker/compose)                         | Run multi-container applications                                  | DevOps tools                                     |
-| [lazydocker](https://github.com/jesseduffield/lazydocker)                   | Interactive TUI with Docker and Compose                           | DevOps tools                                     |
-| [dive](https://github.com/wagoodman/dive)                                   | Explore each layer in Docker images                               | DevOps tools                                     |
-| [k9s](https://github.com/derailed/k9s)                                      | Interactive TUI with Kubernetes cluster                           | DevOps tools                                     |
-| [k0sctl](https://github.com/k0sproject/k0sctl)                              | Bootstrap and manage k0s cluster                                  | DevOps tools                                     |
-| [helm-docs](https://github.com/norwoodj/helm-docs)                          | Generate documents for Helm chart                                 | DevOps tools                                     |
-| [kubeconform](https://github.com/yannh/kubeconform)                         | Validate Kubernetes manifest                                      | DevOps tools                                     |
-| [sops](https://github.com/getsops/sops)                                     | Managing secrets in Git repositories                              | DevOps tools                                     |
-| [terragrunt](https://github.com/gruntwork-io/terragrunt)                    | Wrapper for Terraform to provide extra tools                      | DevOps tools                                     |
-| [terraformer](https://github.com/GoogleCloudPlatform/terraformer)           | Generate Terraform from existing infrastructure                   | DevOps tools                                     |
-| [procs](https://github.com/dalance/procs)                                   | Alternative to `ps` with colours, tree view...                    | SysOps tools                                     |
-| [rclone](https://github.com/rclone/rclone)                                  | Sync files to and from cloud providers                            | SysOps tools                                     |
-| [viddy](https://github.com/sachaos/viddy)                                   | Alternative to `watch` with colours, diff, time machine...        | SysOps tools                                     |
-| [dust](https://github.com/bootandy/dust)                                    | Alternative to `du` with more intuitive                           | SysOps tools                                     |
-| [duf](https://github.com/muesli/duf)                                        | Alternative to `df` with colours...                               | SysOps tools                                     |
-| [infracost](https://github.com/infracost/infracost)                         | Estimate cost of cloud infra via Terraform                        | FinOps tools                                     |
-| [kubescape](https://github.com/kubescape/kubescape)                         | Kubernetes security platform                                      | SecOps tools                                     |
-| [terrascan](https://github.com/tenable/terrascan)                           | IaC security analyzer                                             | SecOps tools                                     |
-| [termshark](https://github.com/gcla/termshark)                              | TUI to network packet analysis                                    | Network tools                                    |
-| [http](https://github.com/httpie/cli)                                       | Interactive CLI tool with web services                            | Network tools                                    |
-| [watchexec](https://github.com/watchexec/watchexec)                         | Detects modifications and run command                             | Developer tools                                  |
-| [gomplate](https://github.com/hairyhenderson/gomplate)                      | Template rendering, like jinja                                    | Developer tools                                  |
-| [semantic-release](https://github.com/go-semantic-release/semantic-release) | Semantic release                                                  | Developer tools                                  |
-| [arduino](https://github.com/arduino/arduino-cli)                           | CLI to manage Arduino board                                       | IoT tools                                        |
-| [hyperfine](https://github.com/sharkdp/hyperfine)                           | Benchmarking tool for CLI apps                                    | Miscellaneous                                    |
-| [tokei](https://github.com/XAMPPRocky/tokei)                                | Display statistics about code                                     | Miscellaneous                                    |
-| [cointop](https://github.com/arduino/arduino-cli)                           | TUI to track coin stats                                           | Miscellaneous                                    |
-| [ec](https://github.com/editorconfig-checker/editorconfig-checker)          | Verify files are in harmony with .editorconfig                    | Linter, in `modules/neovim`                      |
-| [vale](https://github.com/errata-ai/vale)                                   | Linter for prose                                                  | Linter, in `modules/neovim`                      |
-| [stylua](https://github.com/JohnnyMorganz/StyLua)                           | Linter, formatter for Lua                                         | Linter & formater, in `modules/neovim`           |
-| [hadolint](https://github.com/hadolint/hadolint)                            | Linter for Dockerfile                                             | Linter, in `modules/neovim`                      |
-| [jira](https://github.com/ankitpokhrel/jira-cli)                            | Interactive CLI tool with JIRA                                    | Project management tools                         |
-| [glab](https://gitlab.com/gitlab-org/cli)                                   | Interactive CLI tool with Gitlab                                  | Project management tools                         |
-| [gh](https://github.com/cli/cli)                                            | Interactive CLI tool with Github                                  | Project management tools                         |
+|Tool|Purpose|Used in|
+|-----|---------|---------|
+|[chezmoi](https://github.com/twpayne/chezmoi)|Manage dotfiles across machines|Prerequisite|
+|[age](https://github.com/FiloSottile/age)|Simple file encryption|Prerequisite|
+|[rbw](https://github.com/dynamotn/rbw)|Bitwarden CLI tool|Prerequisite, in `modules/awesome`|
+|[jq](https://github.com/stedolan/jq)|JSON processor|`modules/awesome`|
+|[delta](https://github.com/dandavison/delta)|Syntax highlighting pager for git, diff, and grep output|`home/dot_config/git`|
+|[bat](https://github.com/sharkdp/bat)|Alternative to `cat` with syntax highlighting and Git integration|Frequently used tools|
+|[fd](https://github.com/sharkdp/fd)|Alternative to `find`, simpler and faster|Frequently used tools, in `modules/fish`|
+|[eza](https://github.com/eza-community/eza)|Alternative to `ls` with colours, faster|Frequently used tools|
+|[ripgrep](https://github.com/BurntSushi/ripgrep)|Alternative to `grep`, with Git integration and faster|Frequently used tools|
+|[gping](https://github.com/orf/gping)|Alternative to `ping` with graph|Frequently used tools|
+|[direnv](https://github.com/direnv/direnv)|Load environment variables depending on directory|Frequently used tools, in `modules/fish`|
+|[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|Frequently used tools, in `modules/fish`, `modules/tmux`|
+|[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|Frequently used tools, in `modules/awesome`|
+|[himalaya](https://github.com/soywod/himalaya)|Email CLI tool|Frequently used tools, in `modules/awesome`|
+|[smug](https://github.com/ivaaaan/smug)|Tmux session manager|Frequently used tools, in `home/dot_config/smug`|
+|[projekt](https://github.com/dynamotn/projekt)|Smart CLI command to manage project folder|Frequently used tools, in `modules/fish`|
+|[greenclip](https://github.com/erebe/greenclip)|Clipboard manager for X|Frequently used tools, in `modules/awesome`|
+|[cliphist](https://github.com/sentriz/cliphist)|Clipboard manager for Wayland|Frequently used tools, in `modules/hyprland`|
+|[docker-compose](https://github.com/docker/compose)|Run multi-container applications|DevOps tools|
+|[lazydocker](https://github.com/jesseduffield/lazydocker)|Interactive TUI with Docker and Compose|DevOps tools|
+|[dive](https://github.com/wagoodman/dive)|Explore each layer in Docker images|DevOps tools|
+|[k9s](https://github.com/derailed/k9s)|Interactive TUI with Kubernetes cluster|DevOps tools|
+|[k0sctl](https://github.com/k0sproject/k0sctl)|Bootstrap and manage k0s cluster|DevOps tools|
+|[helm-docs](https://github.com/norwoodj/helm-docs)|Generate documents for Helm chart|DevOps tools|
+|[kubeconform](https://github.com/yannh/kubeconform)|Validate Kubernetes manifest|DevOps tools|
+|[sops](https://github.com/getsops/sops)|Managing secrets in Git repositories|DevOps tools|
+|[terragrunt](https://github.com/gruntwork-io/terragrunt)|Wrapper for Terraform to provide extra tools|DevOps tools|
+|[terraformer](https://github.com/GoogleCloudPlatform/terraformer)|Generate Terraform from existing infrastructure|DevOps tools|
+|[procs](https://github.com/dalance/procs)|Alternative to `ps` with colours, tree view...|SysOps tools|
+|[rclone](https://github.com/rclone/rclone)|Sync files to and from cloud providers|SysOps tools|
+|[viddy](https://github.com/sachaos/viddy)|Alternative to `watch` with colours, diff, time machine...|SysOps tools|
+|[dust](https://github.com/bootandy/dust)|Alternative to `du` with more intuitive|SysOps tools|
+|[duf](https://github.com/muesli/duf)|Alternative to `df` with colours...|SysOps tools|
+|[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|FinOps tools|
+|[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|SecOps tools|
+|[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|SecOps tools|
+|[termshark](https://github.com/gcla/termshark)|TUI to network packet analysis|Network tools|
+|[http](https://github.com/httpie/cli)|Interactive CLI tool with web services|Network tools|
+|[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tools|
+|[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|Developer tools|
+|[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|Developer tools|
+|[arduino](https://github.com/arduino/arduino-cli)|CLI to manage Arduino board|IoT tools|
+|[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|Miscellaneous|
+|[tokei](https://github.com/XAMPPRocky/tokei)|Display statistics about code|Miscellaneous|
+|[cointop](https://github.com/arduino/arduino-cli)|TUI to track coin stats|Miscellaneous|
+|[ec](https://github.com/editorconfig-checker/editorconfig-checker)|Verify files are in harmony with .editorconfig|Linter, in `modules/neovim`|
+|[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `modules/neovim`|
+|[stylua](https://github.com/JohnnyMorganz/StyLua)|Linter, formatter for Lua|Linter & formater, in `modules/neovim`|
+|[hadolint](https://github.com/hadolint/hadolint)|Linter for Dockerfile|Linter, in `modules/neovim`|
+|[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tools|
+|[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|Project management tools|
+|[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|Project management tools|
