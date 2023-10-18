@@ -45,6 +45,7 @@
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|Miscellaneous|
 |[tokei](https://github.com/XAMPPRocky/tokei)|Display statistics about code|Miscellaneous|
 |[cointop](https://github.com/arduino/arduino-cli)|TUI to track coin stats|Miscellaneous|
+|[tldr](https://github.com/dbrgn/tealdeer)|Cheatsheet CLI tool|Miscellaneous|
 |[ec](https://github.com/editorconfig-checker/editorconfig-checker)|Verify files are in harmony with .editorconfig|Linter, in `modules/neovim`|
 |[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `modules/neovim`|
 |[stylua](https://github.com/JohnnyMorganz/StyLua)|Linter, formatter for Lua|Linter & formater, in `modules/neovim`|

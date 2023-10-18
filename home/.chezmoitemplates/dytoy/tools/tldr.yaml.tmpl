@@ -1,0 +1,9 @@
+{{- if eq .chezmoi.arch "amd64" }}
+name: tldr
+is_essential: true
+method: binary
+github:
+  repo: dbrgn/tealdeer
+  version: latest
+  release_asset: tealdeer-linux-x86_64-musl
+{{- end }}
