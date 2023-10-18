@@ -1,0 +1,10 @@
+name: k6
+method: binary
+github:
+  repo: grafana/k6
+  version: latest
+  release_asset: k6-%v-linux-{{ .chezmoi.arch }}.tar.gz
+archive:
+  strip_components: 1
+  paths:
+    - k6-%v-linux-{{ .chezmoi.arch }}/k6
