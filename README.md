@@ -24,7 +24,7 @@ TODO: Show all conditions or philosophy that are required for this repository.
 TODO: List all screenshots
 
 ## :inbox_tray:&nbsp; Installation
-You must install `git`, `curl`, `tar`, `gzip` packages to your system.
+You must install `git`, `curl` packages to your system.
 After that, clone this repository into your host machine, and run setup script:
 
 ```sh

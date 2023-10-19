@@ -45,7 +45,6 @@ _main() {
   mkdir -p "$BIN_DIR"
   export PATH="$BIN_DIR":"$PATH"
   _install_chezmoi
-  _install_age
 
   # Run chezmoi in debug mode
   chezmoi_params=""
@@ -63,6 +62,11 @@ _main() {
   chezmoi init "$chezmoi_params" -S "$SETUP_DIR" --prompt
 
   # Apply configuration by order
+  _notice "Setup dytoy"
+  # shellcheck disable=SC2086
+  chezmoi apply "$chezmoi_params" $HOME/.config/dytoy
+  _install_age
+
   _notice "Setup SSH"
   # shellcheck disable=SC2086
   chezmoi apply $chezmoi_params $HOME/.ssh
