@@ -1,0 +1,25 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+
+_install_package_tools() {
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/os.sh -e
+}
+
+_install_binary_tools() {
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/binary.sh -e -n
+}
+
+_main() {
+  _install_package_tools
+  _install_binary_tools
+}
+
+export PATH=$PATH:~/.local/bin
+
+_notice "Install tools"
+{{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/tools/*" | glob) }}
+# {{ . }} hash: {{ . | include | sha256sum }}
+{{- end }}
+_main
+_success "Installed tools"

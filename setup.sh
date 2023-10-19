@@ -63,6 +63,8 @@ _main() {
 
   # Apply configuration by order
   _notice "Setup dytoy"
+  mkdir -p $HOME/.config/dytoy
+  touch $HOME/.config/dytoy/{os,binary}.sh
   # shellcheck disable=SC2086
   chezmoi apply "$chezmoi_params" $HOME/.config/dytoy
   _install_age
