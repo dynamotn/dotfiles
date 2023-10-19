@@ -1,0 +1,15 @@
+name: bzip2
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: app-arch/bzip2
+arch:
+  packages:
+    - name: bzip2
+ubuntu:
+  packages:
+    - name: bzip2
+termux:
+  packages:
+    - name: bzip2
