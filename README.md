@@ -24,10 +24,11 @@ TODO: Show all conditions or philosophy that are required for this repository.
 TODO: List all screenshots
 
 ## :inbox_tray:&nbsp; Installation
-You must install `git`, `curl` packages to your system.
+You must install `bash`, `git`, `curl` packages to your system.
 After that, clone this repository into your host machine, and run setup script:
 
 ```sh
+curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/prerequisite.sh | bash -
 git clone https://github.com/dynamotn/dotfiles.git # or git clone https://gitlab.com/dynamo-config/dotfiles.git
 cd dotfiles
 ./setup.sh
