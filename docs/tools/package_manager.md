@@ -6,7 +6,8 @@
 |`fish`|Smart command line shell|`modules/fish`|
 |`tmux`|Terminal multiplexer|`modules/tmux`|
 |`grc`|Colorise for some GNU/Linux commands|`modules/fish`|
-|`tar`, `unzip`, `gzip`|Uncompress file|Prerequisite, in `home/dot_config/dynamo`|
+|`tar`, `unzip`, `gzip`,`bzip2`|Uncompress file|Prerequisite, in `home/dot_config/dynamo`|
+|`ssh`|SSH client|DevOps tool|
 |`tree-sitter`|Parser generator tool for syntax|`modules/neovim`|
 |`podman`|Manage containers and pods, alternative of docker|DevOps tool|
 |`tshark`|CLI of Wireshark, network packet analysis|Miscellaneous|

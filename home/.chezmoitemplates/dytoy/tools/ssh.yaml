@@ -1,0 +1,13 @@
+name: ssh
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: net-misc/openssh
+arch:
+  packages:
+    - name: openssh
+ubuntu:
+  packages:
+    - name: openssh-server
+    - name: openssh-client
