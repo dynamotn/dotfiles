@@ -89,8 +89,8 @@ _ubuntu_run() {
         distro_version=$(echo "$package" | yq e '.distro_version')
         key=$(echo "$package" | yq e '.key')
 
-        [[ "$repo_name" != "null" ]] && repo_name=$package
-        [[ "$distro_version" != "null" ]] && distro_version=$(grep -is UBUNTU_CODENAME /etc/os-release | cut -d= -f2)
+        [[ "$repo_name" == "null" ]] && repo_name=$package
+        [[ "$distro_version" == "null" ]] && distro_version=$(grep -is UBUNTU_CODENAME /etc/os-release | cut -d= -f2)
         if [ ! -f "/etc/apt/sources.list.d/$repo_name.list" ]; then
           echo "deb $repo $distro_version $repo_version" > /"etc/apt/sources.list.d/$repo_name.list"
           curl -sSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" | apt-key add -
