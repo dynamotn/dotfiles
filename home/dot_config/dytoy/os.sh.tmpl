@@ -89,7 +89,7 @@ _ubuntu_run() {
         distro_version=$(echo "$package" | yq e '.distro_version')
         key=$(echo "$package" | yq e '.key')
 
-        [[ "$repo_name" == "null" ]] && repo_name=$package
+        [[ "$repo_name" == "null" ]] && repo_name=$package_name
         [[ "$distro_version" == "null" ]] && distro_version=$(grep -is {{ if eq .chezmoi.osRelease.id "ubuntu" }}UBUNTU_CODENAME{{ else }}VERSION_CODENAME{{ end }} /etc/os-release | cut -d= -f2)
         if [ ! -f "/etc/apt/sources.list.d/$repo_name.list" ]; then
           echo "deb $repo $distro_version $repo_version" > /"etc/apt/sources.list.d/$repo_name.list"
