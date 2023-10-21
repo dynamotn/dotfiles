@@ -2,11 +2,7 @@ name: terraform-docs
 method: binary
 github:
   repo: terraform-docs/terraform-docs
-  {{- if eq .chezmoi.os "linux" }}
   release_asset: terraform-docs-%v-linux-{{ .chezmoi.arch }}.tar.gz
-  {{- else if eq .chezmoi.os "android" }}
-  release_asset: terraform-docs-%v-linux-arm64.tar.gz
-  {{- end }}
 archive:
   paths:
     - terraform-docs
