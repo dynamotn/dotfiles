@@ -55,6 +55,7 @@
 |[yt-dlp](https://github.com/yt-dlp/yt-dlp)|Download videos tool|Miscellaneous|
 |[viu](https://github.com/atanunq/viu)|View image on CLI|Miscellaneous|
 |[ec](https://github.com/editorconfig-checker/editorconfig-checker)|Verify files are in harmony with .editorconfig|Linter, in `modules/neovim`|
+|[shellcheck](https://github.com/koalaman/shellcheck)|Linter for Bash script|Linter, in `modules/neovim`|
 |[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `modules/neovim`|
 |[stylua](https://github.com/JohnnyMorganz/StyLua)|Linter, formatter for Lua|Linter & formater, in `modules/neovim`|
 |[hadolint](https://github.com/hadolint/hadolint)|Linter for Dockerfile|Linter, in `modules/neovim`|
