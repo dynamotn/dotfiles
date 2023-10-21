@@ -46,6 +46,7 @@
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tool|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|Developer tool|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|Developer tool|
+|[hugo](https://github.com/gohugoio/hugo)|Build static website|Developer tool|
 |[arduino](https://github.com/arduino/arduino-cli)|CLI to manage Arduino board|IoT tool|
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|Miscellaneous|
 |[tokei](https://github.com/XAMPPRocky/tokei)|Display statistics about code|Miscellaneous|
