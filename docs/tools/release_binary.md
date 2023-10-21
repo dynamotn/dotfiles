@@ -10,6 +10,7 @@
 |[eza](https://github.com/eza-community/eza)|Alternative to `ls` with colours, faster|Frequently used tool|
 |[ripgrep](https://github.com/BurntSushi/ripgrep)|Alternative to `grep`, with Git integration and faster|Frequently used tool|
 |[gping](https://github.com/orf/gping)|Alternative to `ping` with graph|Frequently used tool|
+|[zoxide](https://github.com/ajeetdsouza/zoxide)|Alternative to `cd` with smarter|Frequently used tool, in `modules/fish`|
 |[direnv](https://github.com/direnv/direnv)|Load environment variables depending on directory|Frequently used tool, in `modules/fish`|
 |[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|Frequently used tool, in `modules/fish`, `modules/tmux`|
 |[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|Frequently used tool, in `modules/awesome`|

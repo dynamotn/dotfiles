@@ -1,0 +1,22 @@
+name: zoxide
+method: binary
+is_essential: true
+github:
+  repo: ajeetdsouza/zoxide
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: zoxide-%1v-x86_64-unknown-linux-musl.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: zoxide-%1v-aarch64-unknown-linux-musl.tar.gz
+  {{- end }}
+archive:
+  paths:
+    - zoxide
+  hook:
+    after: |
+      tar $param --strip=2 -C "$MAN_DIR/man1" --wildcards man/man1/*
+      if [ -d ~/.config/fish/completions ]; then
+        tar $param --strip=1 -C ~/.config/fish/completions completions/zoxide.fish
+      fi
+      if [ -d ~/Working/personal/fish/caran/completions ]; then
+        tar $param --strip=1 -C ~/Working/personal/fish/caran/completions completions/zoxide.fish
+      fi
