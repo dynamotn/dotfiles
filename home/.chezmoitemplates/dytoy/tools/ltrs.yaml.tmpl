@@ -1,0 +1,11 @@
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "amd64") }}
+name: ltrs
+method: binary
+github:
+  repo: jeertmans/languagetool-rust
+  release_asset: ltrs-%v-x86_64-unknown-linux-musl.tar.gz
+archive:
+  strip_components: 1
+  paths:
+    - ltrs-%v-x86_64-unknown-linux-musl/ltrs
+{{- end }}
