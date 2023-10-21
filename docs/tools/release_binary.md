@@ -59,6 +59,8 @@
 |[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `modules/neovim`|
 |[stylua](https://github.com/JohnnyMorganz/StyLua)|Linter, formatter for Lua|Linter & formater, in `modules/neovim`|
 |[hadolint](https://github.com/hadolint/hadolint)|Linter for Dockerfile|Linter, in `modules/neovim`|
+|[ltrs](https://github.com/jeertmans/languagetool-rust)|Spell check for Markdown, text file|Linter, in `modules/neovim`|
+|[ltcc](https://github.com/dustinblackman/languagetool-code-comments)|Spell check for comment in code|Linter, in `modules/neovim`|
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tool|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|Project management tool|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|Project management tool|
