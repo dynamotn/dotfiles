@@ -41,6 +41,7 @@
 |[termshark](https://github.com/gcla/termshark)|TUI to network packet analysis|Network tool|
 |[http](https://github.com/httpie/cli)|Interactive CLI tool with web services|Network tool|
 |[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|Network tool|
+|[dog](https://github.com/dynamotn/dog)|Alternative to `dig`|Network tool|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tool|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|Developer tool|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|Developer tool|
