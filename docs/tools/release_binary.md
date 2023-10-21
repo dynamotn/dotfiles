@@ -28,6 +28,7 @@
 |[sops](https://github.com/getsops/sops)|Managing secrets in Git repositories|DevOps tool|
 |[terragrunt](https://github.com/gruntwork-io/terragrunt)|Wrapper for Terraform to provide extra tool|DevOps tool|
 |[terraformer](https://github.com/GoogleCloudPlatform/terraformer)|Generate Terraform from existing infrastructure|DevOps tool|
+|[terraform-docs](https://github.com/terraform-docs/terraform-docs)|Generate documents for Terraform modules|DevOps tool|
 |[k6](https://github.com/grafana/k6)|Load testing tool|DevOps tool|
 |[procs](https://github.com/dalance/procs)|Alternative to `ps` with colours, tree view...|SysOps tool|
 |[rclone](https://github.com/rclone/rclone)|Sync files to and from cloud providers|SysOps tool|
