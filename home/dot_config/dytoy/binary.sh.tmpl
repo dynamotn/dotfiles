@@ -155,7 +155,7 @@ _parse_github_release() {
   paths=$(echo "$package" | yq e '.archive.paths')
 
   _progress "Checking ${name} from ${repo}"
-  if [ "$version" = "latest" ]; then
+  if [ "$version" = "latest" ] || [ "$version" = "null" ]; then
     version=$(curl -sSL -u "${GITHUB_API_USERNAME}:${GITHUB_API_TOKEN}" "https://api.github.com/repos/${repo}/releases/latest" | grep -Po "tag_name\": \"(\K.*)(?=\",)")
   fi
   if [ "$version" = "" ]; then
