@@ -40,7 +40,7 @@
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|SecOps tool|
 |[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|SecOps tool|
 |[termshark](https://github.com/gcla/termshark)|TUI to network packet analysis|Network tool|
-|[http](https://github.com/httpie/cli)|Interactive CLI tool with web services|Network tool|
+|[curlie](https://github.com/rs/curlie)|Alternative to `curl` with the ease of use from `httpie`|Network tool|
 |[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|Network tool|
 |[dog](https://github.com/dynamotn/dog)|Alternative to `dig`|Network tool|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tool|
