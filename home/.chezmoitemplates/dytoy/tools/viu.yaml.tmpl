@@ -1,0 +1,9 @@
+name: viu
+method: binary
+github:
+  repo: atanunq/viu
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: viu
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: viu-aarch64
+  {{- end }}
