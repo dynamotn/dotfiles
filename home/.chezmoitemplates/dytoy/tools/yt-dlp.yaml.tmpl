@@ -1,0 +1,9 @@
+name: yt-dlp
+method: binary
+github:
+  repo: yt-dlp/yt-dlp
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: yt-dlp_linux
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset:  yt-dlp_linux_aarch64
+  {{- end  }}
