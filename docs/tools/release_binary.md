@@ -32,6 +32,7 @@
 |[terraformer](https://github.com/GoogleCloudPlatform/terraformer)|Generate Terraform from existing infrastructure|DevOps tool|
 |[terraform-docs](https://github.com/terraform-docs/terraform-docs)|Generate documents for Terraform modules|DevOps tool|
 |[k6](https://github.com/grafana/k6)|Load testing tool|DevOps tool|
+|[kubeseal](https://github.com/bitnami-labs/sealed-secrets)|Encrypt secret on Kubernetes cluster|DevOps tool|
 |[procs](https://github.com/dalance/procs)|Alternative to `ps` with colours, tree view...|SysOps tool|
 |[rclone](https://github.com/rclone/rclone)|Sync files to and from cloud providers|SysOps tool|
 |[viddy](https://github.com/sachaos/viddy)|Alternative to `watch` with colours, diff, time machine...|SysOps tool|
