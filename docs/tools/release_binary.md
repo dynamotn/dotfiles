@@ -40,6 +40,7 @@
 |[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|FinOps tool|
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|SecOps tool|
 |[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|SecOps tool|
+|[trivy](https://github.com/aquasecurity/trivy)|Security scanner|SecOps tool|
 |[termshark](https://github.com/gcla/termshark)|TUI to network packet analysis|Network tool|
 |[curlie](https://github.com/rs/curlie)|Alternative to `curl` with the ease of use from `httpie`|Network tool|
 |[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|Network tool|
