@@ -1,0 +1,12 @@
+name: trivy
+method: binary
+github:
+  repo: aquasecurity/trivy
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: trivy_%1v_Linux-64bit.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: trivy_%1v_Linux-ARM64.tar.gz
+  {{- end }}
+archive:
+  paths:
+    - trivy
