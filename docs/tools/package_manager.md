@@ -41,3 +41,7 @@
 |`wofi`|Application launcher, simple switcher|`modules/hyprland`|
 |`wtype`|Simulate keyboard input for Wayland|`modules/fish`|
 |`swww`|Animated wallpaper daemon|`modules/hyprland`|
+
+# System applications
+|Tool|Purpose|
+|`nftables`|Netfilter framework|
