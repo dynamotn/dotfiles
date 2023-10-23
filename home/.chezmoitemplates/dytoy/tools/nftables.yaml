@@ -1,0 +1,11 @@
+name: nftables
+method: os
+gentoo:
+  packages:
+    - name: net-firewall/nftables
+arch:
+  packages:
+    - name: nftables
+ubuntu:
+  package:
+    - name: nftables
