@@ -6,7 +6,7 @@
 |[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|`modules/fish`|
 |[anti-ddos](https://github.com/anti-ddos/Anti-DDOS)|Anti DDOS||
 |[cht](https://cht.sh)|Access to community cheat sheet||
-|color16, color256, colorful|Test CLI color||
+|color16, color256, colorful, truecolor|Test CLI color||
 |[git-quick-stats](https://github.com/arzzen/git-quick-stats)|Show statistics of Git repository||
 |[now](https://github.com/apankrat/now.sh)|Prints current date/time while waiting for an input and echoing it to the stdout||
 |[pulsemixer](https://github.com/GeorgeFilipkin/pulsemixer)|Alternative CLI tool for pavucontrol||
