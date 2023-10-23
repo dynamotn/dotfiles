@@ -10,6 +10,11 @@ DEBUG="${1:-false}"
 _install_chezmoi() {
   if [ ! "$(command -v chezmoi)" ]; then
     _notice "Install chezmoi"
+    if command -v termux-setup-storage &> /dev/null; then
+      pkg install -y chezmoi
+      return
+    fi
+
     if [ "$(command -v curl)" ]; then
       sh -c "$(curl -fsSL https://git.io/chezmoi)" -- -b "$BIN_DIR"
     elif [ "$(command -v wget)" ]; then
@@ -22,6 +27,12 @@ _install_chezmoi() {
 
 _install_age() {
   if [ ! "$(command -v age)" ]; then
+    _notice "Install age"
+    if command -v termux-setup-storage &> /dev/null; then
+      pkg install -y age
+      return
+    fi
+
     temp=$(mktemp)
     if [ "$(command -v curl)" ]; then
       curl -sSL -o "$temp" https://dl.filippo.io/age/latest?for=linux/amd64
@@ -63,23 +74,22 @@ _main() {
   chezmoi init $chezmoi_params -S "$SETUP_DIR" --prompt
 
   # Apply configuration by order
-  _notice "Setup dytoy"
-  mkdir -p "$HOME/.config/dytoy"
-  touch "$HOME"/.config/dytoy/{os,binary}.sh
-  # shellcheck disable=SC2086
-  chezmoi apply $chezmoi_params $HOME/.config/dytoy
-  _install_age
-
-  _notice "Setup operating system"
-  yq '.mode = "file"' > "$HOME/.config/chezmoi/root_chezmoi.yaml"
-  sudo chezmoi --destination / --source "$SETUP_DIR/root" --working-tree "$SETUP_DIR" --config "$HOME/.config/chezmoi/root_chezmoi.yaml" apply
-
   _notice "Setup SSH"
+  _install_age
   # shellcheck disable=SC2086
   chezmoi apply $chezmoi_params $HOME/.ssh
   _notice "Setup other dotfiles"
   # shellcheck disable=SC2086
   chezmoi apply $chezmoi_params
+  _notice "Setup operating system"
+  yq '.mode = "file"' > "$HOME/.config/chezmoi/root_chezmoi.yaml"
+  sudo env "PATH=$PATH" \
+    chezmoi \
+    --destination / \
+    --source "$SETUP_DIR/root" \
+    --working-tree "$SETUP_DIR" \
+    --config "$HOME/.config/chezmoi/root_chezmoi.yaml" \
+    apply
 
   # Modify remote url of dotfiles
   _notice "Setup remote url of dotfiles"

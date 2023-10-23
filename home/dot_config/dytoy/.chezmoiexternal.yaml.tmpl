@@ -1,9 +1,0 @@
-.local/bin/yq:
-  {{- $version := "v4.35.1" }}
-  type: file
-  {{- if eq .chezmoi.os "android" }}
-  url: 'https://github.com/mikefarah/yq/releases/download/{{ $version }}/yq_linux_arm64'
-  {{- else if eq .chezmoi.os "linux" }}
-  url: 'https://github.com/mikefarah/yq/releases/download/{{ $version }}/yq_linux_{{ .chezmoi.arch }}'
-  {{- end }}
-  executable: true
