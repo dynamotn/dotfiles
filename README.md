@@ -18,7 +18,13 @@ This repository contains all my dotfiles managed by [chezmoi](https://github.com
 Please note that this is my own personal dotfiles for Linux and Android (Termux).
 
 ## :brain:&nbsp; Philosophy
-TODO: Show all conditions or philosophy that are required for this repository.
+
+- Manage all configurations by only chezmoi, not use any other tool (dotbot, comtrya, stow...) or IaC tool (ansible, nix...). Use script and template of chezmoi to do anything.
+- Manage my home folders, and some of OS configurations across multiple machine
+- Must convert configurations of a tool to use Git submodule as a part of dotfiles, if match any of below conditions:
+  - Not existed in any machine, and has large disk usage (>=1MiB)
+  - Can be separated as a Git repository to get more stargazers, or to contribute from other guys :)
+  - Conflict with this repository's LICENSE
 
 ## :camera:&nbsp; Screenshots
 TODO: List all screenshots
