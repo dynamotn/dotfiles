@@ -59,14 +59,15 @@ _main() {
   cat "$SETUP_DIR"/.chezmoi.yaml.tmpl >> "$SETUP_DIR"/home/.chezmoi.yaml.tmpl
   mkdir -p "$HOME/.config/chezmoi/hooks/diff" && touch "$HOME/.config/chezmoi/hooks/diff/pre.sh"
   _notice "Please answer the following questions"
-  chezmoi init "$chezmoi_params" -S "$SETUP_DIR" --prompt
+  # shellcheck disable=SC2086
+  chezmoi init $chezmoi_params -S "$SETUP_DIR" --prompt
 
   # Apply configuration by order
   _notice "Setup dytoy"
   mkdir -p "$HOME/.config/dytoy"
   touch "$HOME"/.config/dytoy/{os,binary}.sh
   # shellcheck disable=SC2086
-  chezmoi apply "$chezmoi_params" $HOME/.config/dytoy
+  chezmoi apply $chezmoi_params $HOME/.config/dytoy
   _install_age
 
   _notice "Setup operating system"
