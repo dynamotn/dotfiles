@@ -5,7 +5,7 @@ windows:
   - name: common
     layouts: tiled
   - name: neovim
-    root: ~/Dotfiles/modules/neovim
+    root: ~/Dotfiles/silos/neovim
     layouts: tiled
     commands:
       - vim .
