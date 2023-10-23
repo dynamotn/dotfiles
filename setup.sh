@@ -71,7 +71,8 @@ _main() {
   _install_age
 
   _notice "Setup operating system"
-  sudo chezmoi --destination / --source "$SETUP_DIR/root" --working-tree "$SETUP_DIR" --config "$HOME/.config/chezmoi/chezmoi.yaml" apply
+  yq '.mode = "file"' > "$HOME/.config/chezmoi/root_chezmoi.yaml"
+  sudo chezmoi --destination / --source "$SETUP_DIR/root" --working-tree "$SETUP_DIR" --config "$HOME/.config/chezmoi/root_chezmoi.yaml" apply
 
   _notice "Setup SSH"
   # shellcheck disable=SC2086
