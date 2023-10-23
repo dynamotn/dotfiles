@@ -7,7 +7,7 @@ add:
   templateSymlinks: true
 
 age:
-  identity: ~/.config/chezmoi/key
+  identity: {{ .chezmoi.homeDir }}/.config/chezmoi/key
   recipient: age1fzajmt2yy4naas2wtcn3v2vjea3f5rgvmz2elp02zvvmdtcgwcdsqxnd5a
 
 diff:
@@ -28,4 +28,5 @@ hooks:
       command: "bash"
       args:
         - -c
-        - bash ~/.config/chezmoi/hooks/diff/pre.sh
+        # HACK: run bash again to avoid the error
+        - bash {{ .chezmoi.homeDir }}/.config/chezmoi/hooks/diff/pre.sh

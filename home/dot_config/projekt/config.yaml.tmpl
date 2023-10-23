@@ -25,7 +25,6 @@ folders:
       is_workspace: true
       regex: ""
       priority: 0
-{{- if eq $which "home_pc" }}
     - path: {{ .chezmoi.homeDir }}/Working/personal/fish
       prefix: "fish"
       is_workspace: true
@@ -36,4 +35,3 @@ folders:
       is_workspace: true
       regex: ""
       priority: 0
-{{- end }}
