@@ -1,0 +1,18 @@
+(defwidget top[]
+  (box
+    :space-evenly false
+    :halign "center"
+    :valign "start"
+    :spacing 15
+    :orientation "v"
+    (launcher_icon)
+(workspaces)
+  )
+)
+
+(defwidget bar []
+  (box
+    :class "bar"
+    :orientation "v"
+  )
+)

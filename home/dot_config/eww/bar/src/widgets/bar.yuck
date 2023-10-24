@@ -1,0 +1,11 @@
+(defwidget launcher_icon  []
+  (eventbox
+    :cursor "pointer"
+    :halign "center"
+    (button
+      :class "launcher_icon"
+      :valign "start"
+      ""
+    )
+  )
+)
