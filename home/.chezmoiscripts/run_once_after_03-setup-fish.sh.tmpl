@@ -7,7 +7,11 @@ _notice "Setup fish shell"
 # plugins hash: {{ joinPath .chezmoi.sourceDir "../silos/fish/fish_plugins" | include | sha256sum }}
 if [[ $SHELL != "$(which fish)" ]]; then
   _info "Change default shell to fish"
+  {{- if eq .chezmoi.os "linux" -}}
   chsh -s "$(which fish)"
+  {{- else }}
+  chsh -s fish
+  {{- end }}
 fi
 fish {{ .chezmoi.homeDir }}/.config/fish/setup.fish
 
