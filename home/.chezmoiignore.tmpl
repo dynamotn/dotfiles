@@ -3,24 +3,6 @@
 **/.gitmodules
 **/*.sqlite-wal
 
-{{- if eq .chezmoi.os "linux" }}
-{{- if ne .chezmoi.osRelease.id "gentoo" }}
-.config/dynamo/os/linux/gentoo.csv
-{{- end }}
-{{- if ne .chezmoi.osRelease.id "arch" }}
-.config/dynamo/os/linux/arch.csv
-{{- end }}
-{{- if ne .chezmoi.osRelease.id "ubuntu" }}
-.config/dynamo/os/linux/ubuntu.csv
-{{- end }}
-{{- else }}
-.config/dynamo/os/linux/**
-{{- end }}
-
-{{- if ne .chezmoi.os "linux" }}
-.config/dynamo/binary/linux/**
-{{- end }}
-
 {{- if eq .guiServer "0" }}
 .xprofile
 .Xresources
