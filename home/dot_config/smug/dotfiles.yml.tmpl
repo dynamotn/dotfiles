@@ -1,0 +1,14 @@
+session: dotfiles
+root: {{ .chezmoi.sourceDir }}/..
+
+windows:
+  - name: common
+    layouts: tiled
+  - name: neovim
+    root: {{ .chezmoi.sourceDir }}/../silos/neovim
+    layouts: tiled
+    commands:
+      - vim .
+  - name: dytoy
+    root: {{ .chezmoi.sourceDir }}/../silos/dytoy
+    layouts: tiled
