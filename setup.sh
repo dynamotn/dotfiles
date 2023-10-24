@@ -81,15 +81,18 @@ _main() {
   _notice "Setup other dotfiles"
   # shellcheck disable=SC2086
   chezmoi apply $chezmoi_params
-  _notice "Setup operating system"
-  yq '.mode = "file"' > "$HOME/.config/chezmoi/root_chezmoi.yaml"
-  sudo env "PATH=$PATH" \
-    chezmoi \
-    --destination / \
-    --source "$SETUP_DIR/root" \
-    --working-tree "$SETUP_DIR" \
-    --config "$HOME/.config/chezmoi/root_chezmoi.yaml" \
-    apply
+
+  if ! command -v termux-setup-storage &> /dev/null; then
+    _notice "Setup operating system"
+    yq '.mode = "file"' > "$HOME/.config/chezmoi/root_chezmoi.yaml"
+    sudo env "PATH=$PATH" \
+      chezmoi \
+      --destination / \
+      --source "$SETUP_DIR/root" \
+      --working-tree "$SETUP_DIR" \
+      --config "$HOME/.config/chezmoi/root_chezmoi.yaml" \
+      apply
+  fi
 
   # Modify remote url of dotfiles
   _notice "Setup remote url of dotfiles"
