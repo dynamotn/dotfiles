@@ -84,7 +84,7 @@ _main() {
 
   if ! command -v termux-setup-storage &> /dev/null; then
     _notice "Setup operating system"
-    yq '.mode = "file"' > "$HOME/.config/chezmoi/root_chezmoi.yaml"
+    yq '.mode = "file"' "$HOME/.config/chezmoi/chezmoi.yaml" > "$HOME/.config/chezmoi/root_chezmoi.yaml"
     sudo env "PATH=$PATH" \
       chezmoi \
       --destination / \
