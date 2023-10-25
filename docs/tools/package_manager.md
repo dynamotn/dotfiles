@@ -32,6 +32,7 @@
 |`picom`|Compositor for X11|`modules/awesome`|
 |`xdotool`|Simulate keyboard input for X11|`modules/fish`|
 |`lightdm`|LightDM, display manager for X||
+|`xss-lock`|Screen locker for X|`modules/awesome`|
 
 # Wayland server applications
 |Tool|Purpose|Used in|
@@ -43,6 +44,7 @@
 |`wtype`|Simulate keyboard input for Wayland|`modules/fish`|
 |`swww`|Animated wallpaper daemon|`modules/hyprland`|
 |`greetd`|GreetD, display manager for Wayland||
+|`swaylock`|Screen locker for Wayland|`modules/hyprland`
 
 # System applications
 |Tool|Purpose|
