@@ -2,23 +2,23 @@
 |-----|---------|---------|
 |[chezmoi](https://github.com/twpayne/chezmoi)|Manage dotfiles across machines|Prerequisite|
 |[age](https://github.com/FiloSottile/age)|Simple file encryption|Prerequisite|
-|[rbw](https://github.com/dynamotn/rbw)|Bitwarden CLI tool|Prerequisite, in `modules/awesome`|
-|[jq](https://github.com/stedolan/jq)|JSON processor|`modules/awesome`|
+|[rbw](https://github.com/dynamotn/rbw)|Bitwarden CLI tool|Prerequisite, in `silos/awesome`|
+|[jq](https://github.com/stedolan/jq)|JSON processor|`silos/awesome`|
 |[delta](https://github.com/dandavison/delta)|Syntax highlighting pager for git, diff, and grep output|`home/dot_config/git`|
 |[bat](https://github.com/sharkdp/bat)|Alternative to `cat` with syntax highlighting and Git integration|Frequently used tool|
-|[fd](https://github.com/sharkdp/fd)|Alternative to `find`, simpler and faster|Frequently used tool, in `modules/fish`|
+|[fd](https://github.com/sharkdp/fd)|Alternative to `find`, simpler and faster|Frequently used tool, in `silos/fish`|
 |[eza](https://github.com/eza-community/eza)|Alternative to `ls` with colours, faster|Frequently used tool|
 |[ripgrep](https://github.com/BurntSushi/ripgrep)|Alternative to `grep`, with Git integration and faster|Frequently used tool|
 |[gping](https://github.com/orf/gping)|Alternative to `ping` with graph|Frequently used tool|
-|[zoxide](https://github.com/ajeetdsouza/zoxide)|Alternative to `cd` with smarter|Frequently used tool, in `modules/fish`|
-|[direnv](https://github.com/direnv/direnv)|Load environment variables depending on directory|Frequently used tool, in `modules/fish`|
-|[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|Frequently used tool, in `modules/fish`, `modules/tmux`|
-|[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|Frequently used tool, in `modules/awesome`|
-|[himalaya](https://github.com/soywod/himalaya)|Email CLI tool|Frequently used tool, in `modules/awesome`|
+|[zoxide](https://github.com/ajeetdsouza/zoxide)|Alternative to `cd` with smarter|Frequently used tool, in `silos/fish`|
+|[direnv](https://github.com/direnv/direnv)|Load environment variables depending on directory|Frequently used tool, in `silos/fish`|
+|[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|Frequently used tool, in `silos/fish`, `silos/tmux`|
+|[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|Frequently used tool, in `silos/awesome`|
+|[himalaya](https://github.com/soywod/himalaya)|Email CLI tool|Frequently used tool, in `silos/awesome`|
 |[smug](https://github.com/ivaaaan/smug)|Tmux session manager|Frequently used tool, in `home/dot_config/smug`|
-|[projekt](https://github.com/dynamotn/projekt)|Smart CLI command to manage project folder|Frequently used tool, in `modules/fish`|
-|[greenclip](https://github.com/erebe/greenclip)|Clipboard manager for X|Frequently used tool, in `modules/awesome`|
-|[cliphist](https://github.com/sentriz/cliphist)|Clipboard manager for Wayland|Frequently used tool, in `modules/hyprland`|
+|[projekt](https://github.com/dynamotn/projekt)|Smart CLI command to manage project folder|Frequently used tool, in `silos/fish`|
+|[greenclip](https://github.com/erebe/greenclip)|Clipboard manager for X|Frequently used tool, in `silos/awesome`|
+|[cliphist](https://github.com/sentriz/cliphist)|Clipboard manager for Wayland|Frequently used tool, in `silos/hyprland`|
 |[docker-compose](https://github.com/docker/compose)|Run multi-container applications|DevOps tool|
 |[lazydocker](https://github.com/jesseduffield/lazydocker)|Interactive TUI with Docker and Compose|DevOps tool|
 |[dive](https://github.com/wagoodman/dive)|Explore each layer in Docker images|DevOps tool|
@@ -60,15 +60,15 @@
 |[tldr](https://github.com/dbrgn/tealdeer)|Cheatsheet CLI tool|Miscellaneous|
 |[yt-dlp](https://github.com/yt-dlp/yt-dlp)|Download videos tool|Miscellaneous|
 |[viu](https://github.com/atanunq/viu)|View image on CLI|Miscellaneous|
-|[ec](https://github.com/editorconfig-checker/editorconfig-checker)|Verify files are in harmony with .editorconfig|Linter, in `modules/neovim`|
-|[shellcheck](https://github.com/koalaman/shellcheck)|Linter for Bash script|Linter, in `modules/neovim`|
-|[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `modules/neovim`|
-|[stylua](https://github.com/JohnnyMorganz/StyLua)|Linter, formatter for Lua|Linter & formater, in `modules/neovim`|
-|[hadolint](https://github.com/hadolint/hadolint)|Linter for Dockerfile|Linter, in `modules/neovim`|
-|[ltrs](https://github.com/jeertmans/languagetool-rust)|Spell check for Markdown, text file|Linter, in `modules/neovim`|
-|[ltcc](https://github.com/dustinblackman/languagetool-code-comments)|Spell check for comment in code|Linter, in `modules/neovim`|
-|[tflint](https://github.com/terraform-linters/tflint)|Linter for Terraform|Linter, in `modules/neovim`|
-|[shfmt](https://github.com/mvdan/sh)|Formatter for Bash script|Formatter, in `modules/neovim`|
+|[ec](https://github.com/editorconfig-checker/editorconfig-checker)|Verify files are in harmony with .editorconfig|Linter, in `silos/neovim`|
+|[shellcheck](https://github.com/koalaman/shellcheck)|Linter for Bash script|Linter, in `silos/neovim`|
+|[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `silos/neovim`|
+|[stylua](https://github.com/JohnnyMorganz/StyLua)|Linter, formatter for Lua|Linter & formater, in `silos/neovim`|
+|[hadolint](https://github.com/hadolint/hadolint)|Linter for Dockerfile|Linter, in `silos/neovim`|
+|[ltrs](https://github.com/jeertmans/languagetool-rust)|Spell check for Markdown, text file|Linter, in `silos/neovim`|
+|[ltcc](https://github.com/dustinblackman/languagetool-code-comments)|Spell check for comment in code|Linter, in `silos/neovim`|
+|[tflint](https://github.com/terraform-linters/tflint)|Linter for Terraform|Linter, in `silos/neovim`|
+|[shfmt](https://github.com/mvdan/sh)|Formatter for Bash script|Formatter, in `silos/neovim`|
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tool|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|Project management tool|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|Project management tool|
