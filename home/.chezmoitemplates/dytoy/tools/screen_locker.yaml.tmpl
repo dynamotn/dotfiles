@@ -1,0 +1,30 @@
+{{- if eq .guiServer "X" }}
+name: xss-lock
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: x11-misc/xss-lock
+arch:
+  packages:
+    - name: xss-lock
+ubuntu:
+  packages:
+    - name: xss-lock
+{{- else if eq .guiServer "W" }}
+name: swaylock
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/swaylock
+    - name: gui-apps/swayidle
+arch:
+  packages:
+    - name: swaylock
+    - name: swayidle
+ubuntu:
+  packages:
+    - name: swaylock
+    - name: swayidle
+{{- end }}
