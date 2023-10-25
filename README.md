@@ -19,6 +19,14 @@ Please note that this is my own personal dotfiles for Linux and Android (Termux)
 
 ## :brain:&nbsp; Philosophy
 
+- Everything must be under control
+- Everything must be easy to initial or change
+- Everything must be automatically, with few manual steps before setup
+- Everything must be dynamic, on every places
+- Everything must have same pastel, with harmony
+
+## :wrench:&nbsp; Rules
+
 - Manage all configurations by only chezmoi, not use any other tool (dotbot, comtrya, stow...) or IaC tool (ansible, nix...). Use script and template of chezmoi to do anything.
 - Manage my home folders, and some of OS configurations across multiple machine
 - Must convert configurations of a tool to use Git submodule as a part of dotfiles, if match any of below conditions:
