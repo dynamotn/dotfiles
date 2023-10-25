@@ -57,6 +57,7 @@
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|Miscellaneous|
 |[tokei](https://github.com/XAMPPRocky/tokei)|Display statistics about code|Miscellaneous|
 |[cointop](https://github.com/arduino/arduino-cli)|TUI to track coin stats|Miscellaneous|
+|[tickrs](https://github.com/tarkah/tickrs)|TUI to track stock stats|Miscellaneous|
 |[pastel](https://github.com/sharkdp/pastel)|Generate, manipulate, convert colors CLI tool|Miscellaneous|
 |[tldr](https://github.com/dbrgn/tealdeer)|Cheatsheet CLI tool|Miscellaneous|
 |[yt-dlp](https://github.com/yt-dlp/yt-dlp)|Download videos tool|Miscellaneous|
