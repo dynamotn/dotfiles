@@ -31,6 +31,7 @@
 |`rofi`|Application launcher, simple switcher|`modules/awesome`|
 |`picom`|Compositor for X11|`modules/awesome`|
 |`xdotool`|Simulate keyboard input for X11|`modules/fish`|
+|`lightdm`|LightDM, display manager for X||
 
 # Wayland server applications
 |Tool|Purpose|Used in|
@@ -41,6 +42,7 @@
 |`wofi`|Application launcher, simple switcher|`modules/hyprland`|
 |`wtype`|Simulate keyboard input for Wayland|`modules/fish`|
 |`swww`|Animated wallpaper daemon|`modules/hyprland`|
+|`greetd`|GreetD, display manager for Wayland||
 
 # System applications
 |Tool|Purpose|

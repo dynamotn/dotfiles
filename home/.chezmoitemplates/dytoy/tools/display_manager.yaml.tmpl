@@ -1,0 +1,29 @@
+{{- if eq .guiServer "X" }}
+name: lightdm
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: x11-misc/lightdm
+    - name: x11-misc/lightdm-gtk-greeter
+arch:
+  packages:
+    - name: lightdm
+    - name: lightdm-gtk-greeter
+ubuntu:
+  packages:
+    - name: lightdm
+    - name: lightdm-gtk-greeter
+{{- else if eq .guiServer "W" }}
+name: greetd
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-libs/greetd
+    - name: gui-apps/regreet
+arch:
+  packages:
+    - name: greetd
+    - name: greetd-regreet
+{{- end }}
