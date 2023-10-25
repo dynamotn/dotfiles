@@ -2,8 +2,8 @@
 |Tool|Purpose|Used in|
 |----|-------|-------|
 |[yq](https://github.com/mikefarah/yq)|YAML processor|Prerequisite|
-|[asdf](https://asdf-vm.com/)|All-in-one version manager|`modules/fish`|
-|[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|`modules/fish`|
+|[asdf](https://asdf-vm.com/)|All-in-one version manager|`silos/fish`|
+|[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|`silos/fish`|
 |[anti-ddos](https://github.com/anti-ddos/Anti-DDOS)|Anti DDOS||
 |[cht](https://cht.sh)|Access to community cheat sheet||
 |color16, color256, colorful, truecolor|Test CLI color||
