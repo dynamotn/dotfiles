@@ -74,6 +74,7 @@ bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
 bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE={{- end }} bitrofi"
 bind = $mainMod, T, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE={{- end }} bitrofi totp"
+bind = $mainMod, L, exec, swaylock
 
 ##############
 # Multimedia #
