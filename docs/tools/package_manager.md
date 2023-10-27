@@ -48,4 +48,5 @@
 
 # System applications
 |Tool|Purpose|
+|----|-------|
 |`nftables`|Netfilter framework|
