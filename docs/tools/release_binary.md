@@ -71,6 +71,7 @@
 |[tldr](https://github.com/dbrgn/tealdeer)|Cheatsheet CLI tool|Miscellaneous|
 |[yt-dlp](https://github.com/yt-dlp/yt-dlp)|Download videos tool|Miscellaneous|
 |[viu](https://github.com/atanunq/viu)|View image on CLI|Miscellaneous|
+|[patat](https://github.com/jaspervdj/patat)|CLI presentation tool|Miscellaneous|
 |[ec](https://github.com/editorconfig-checker/editorconfig-checker)|Verify files are in harmony with .editorconfig|Linter, in `silos/neovim`|
 |[shellcheck](https://github.com/koalaman/shellcheck)|Linter for Bash script|Linter, in `silos/neovim`|
 |[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `silos/neovim`|
