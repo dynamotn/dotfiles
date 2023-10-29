@@ -49,6 +49,7 @@
 |[curlie](https://github.com/rs/curlie)|Alternative to `curl` with the ease of use from `httpie`|Network tool|
 |[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|Network tool|
 |[dog](https://github.com/dynamotn/dog)|Alternative to `dig`|Network tool|
+|[websocat](https://github.com/vi/websocat)|Netcat, curl and socat for websocket|Network tool|
 |[flarectl](https://github.com/cloudflare/cloudflare-go)|Interactive CLI with Cloudflare|Network tool|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tool|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|Developer tool|
