@@ -53,6 +53,7 @@
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tool|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|Developer tool|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|Developer tool|
+|[svu](https://github.com/)|Get Sematic version|Developer tool|
 |[hugo](https://github.com/gohugoio/hugo)|Build static website|Developer tool|
 |[trdsql](https://github.com/noborus/trdsql)|CLI execute SQL queries tool|Developer tool|
 |[task](https://github.com/go-task/task)|Alternative to `make`, a task runner|Developer tool|
