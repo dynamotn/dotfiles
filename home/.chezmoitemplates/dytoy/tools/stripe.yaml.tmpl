@@ -1,0 +1,12 @@
+name: stripe
+method: binary
+github:
+  repo: stripe/stripe-cli
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: stripe_1.18.0_linux_arm64.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: stripe_1.18.0_linux_arm64.tar.gz
+  {{- end }}
+archive:
+  paths:
+    - stripe

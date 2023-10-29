@@ -58,6 +58,7 @@
 |[trdsql](https://github.com/noborus/trdsql)|CLI execute SQL queries tool|Developer tool|
 |[task](https://github.com/go-task/task)|Alternative to `make`, a task runner|Developer tool|
 |[step](https://github.com/smallstep/cli)|CLI tool for PKI systems and workflows|Developer tool|
+|[stripe](https://github.com/stripe/stripe-cli)|CLI to build, test Stripe integration|Developer tool|
 |[arduino](https://github.com/arduino/arduino-cli)|CLI to manage Arduino board|IoT tool|
 |[k6](https://github.com/grafana/k6)|Load testing tool|Testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|Testing tool|
