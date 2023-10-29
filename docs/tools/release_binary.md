@@ -33,7 +33,6 @@
 |[terragrunt](https://github.com/gruntwork-io/terragrunt)|Wrapper for Terraform to provide extra tool|DevOps tool|
 |[terraformer](https://github.com/GoogleCloudPlatform/terraformer)|Generate Terraform from existing infrastructure|DevOps tool|
 |[terraform-docs](https://github.com/terraform-docs/terraform-docs)|Generate documents for Terraform modules|DevOps tool|
-|[k6](https://github.com/grafana/k6)|Load testing tool|DevOps tool|
 |[kubeseal](https://github.com/bitnami-labs/sealed-secrets)|Encrypt secret on Kubernetes cluster|DevOps tool|
 |[procs](https://github.com/dalance/procs)|Alternative to `ps` with colours, tree view...|SysOps tool|
 |[rclone](https://github.com/rclone/rclone)|Sync files to and from cloud providers|SysOps tool|
@@ -56,6 +55,8 @@
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|Developer tool|
 |[hugo](https://github.com/gohugoio/hugo)|Build static website|Developer tool|
 |[arduino](https://github.com/arduino/arduino-cli)|CLI to manage Arduino board|IoT tool|
+|[k6](https://github.com/grafana/k6)|Load testing tool|Testing tool|
+|[venom](https://github.com/ovh/venom)|Integration testing tool|Testing tool|
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|Miscellaneous|
 |[tokei](https://github.com/XAMPPRocky/tokei)|Display statistics about code|Miscellaneous|
 |[cointop](https://github.com/arduino/arduino-cli)|TUI to track coin stats|Miscellaneous|
