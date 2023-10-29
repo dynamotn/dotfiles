@@ -1,0 +1,8 @@
+name: flarectl
+method: binary
+github:
+  repo: cloudflare/cloudflare-go
+  release_asset: flarectl_%1v_linux_{{ .chezmoi.arch }}.tar.gz
+archive:
+  paths:
+    - flarectl
