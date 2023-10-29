@@ -1,0 +1,9 @@
+name: trdsql
+method: binary
+github:
+  repo: noborus/trdsql
+  release_asset: trdsql_%v_linux_{{ .chezmoi.arch }}.zip
+archive:
+  strip_components: 1
+  paths:
+    - trdsql_%v_linux_{{ .chezmoi.arch }}/trdsql
