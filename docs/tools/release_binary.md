@@ -71,6 +71,7 @@
 |[ltrs](https://github.com/jeertmans/languagetool-rust)|Spell check for Markdown, text file|Linter, in `silos/neovim`|
 |[ltcc](https://github.com/dustinblackman/languagetool-code-comments)|Spell check for comment in code|Linter, in `silos/neovim`|
 |[tflint](https://github.com/terraform-linters/tflint)|Linter for Terraform|Linter, in `silos/neovim`|
+|[yamlfmt](https://github.com/google/yamlfmt)|Formatter for YAML|Formatter, in `silos/neovim`|
 |[shfmt](https://github.com/mvdan/sh)|Formatter for Bash script|Formatter, in `silos/neovim`|
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tool|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|Project management tool|
