@@ -1,0 +1,9 @@
+name: amass
+method: binary
+github:
+  repo: owasp-amass/amass
+  release_asset: amass_Linux_{{ .chezmoi.arch }}.zip
+archive:
+  strip_components: 1
+  paths:
+    - amass_Linux_{{ .chezmoi.arch }}/amass
