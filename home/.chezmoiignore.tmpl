@@ -20,6 +20,15 @@
 .config/Trolltech.conf
 .config/user-dirs.dirs
 Multimedia/Pictures/Wallpaper
+{{- else }}
+{{- if gt (output "bash" "-c" "ps aux | grep firefox | wc -l" | int) 1 }}
+.config/firefox
+.mozilla/firefox
+{{- end }}
+{{- if gt (output "bash" "-c" "ps aux | grep thunderbird | wc -l" | int) 1 }}
+.config/thunderbird
+.thunderbird
+{{- end }}
 {{- end }}
 
 {{- if ne .guiServer "X" }}
