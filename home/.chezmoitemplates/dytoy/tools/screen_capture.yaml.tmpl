@@ -1,0 +1,32 @@
+{{- if eq .guiServer "X" }}
+name: flameshot
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: media-gfx/flameshot
+arch:
+  packages:
+    - name: flameshot
+ubuntu:
+  packages:
+    - name: flameshot
+{{- else }}
+name: screen_capture
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/grim
+    - name: gui-apps/slurp
+    - name: gui-apps/swappy
+arch:
+  packages:
+    - name: grim
+    - name: slurp
+    - name: swappy
+ubuntu:
+  packages:
+    - name: grim
+    - name: slurp
+{{- end }}
