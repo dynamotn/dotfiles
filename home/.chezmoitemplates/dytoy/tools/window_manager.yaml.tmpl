@@ -18,12 +18,13 @@ is_essential: true
 gentoo:
   packages:
     - name: gui-wm/hyprland
+    - name: gui-libs/xdg-desktop-portal-wlr
 arch:
-  {{- if eq .guiDriver "N" }}
   packages:
+    {{- if eq .guiDriver "N" }}
     - name: hyprland-nvidia-git
-  {{- else }}
-  packages:
+    {{- else }}
     - name: hyprland
-  {{- end }}
+    {{- end }}
+    - name: xdg-desktop-portal-wlr
 {{- end }}
