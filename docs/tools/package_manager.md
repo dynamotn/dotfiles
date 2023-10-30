@@ -33,6 +33,7 @@
 |`xdotool`|Simulate keyboard input for X11|`silos/fish`|
 |`lightdm`|LightDM, display manager for X||
 |`xss-lock`|Screen locker for X|`silos/awesome`|
+|`flameshot`|Screen capturing and editing snapshot tool for X|`silos/awesome`|
 
 # Wayland server applications
 |Tool|Purpose|Used in|
@@ -44,7 +45,10 @@
 |`wtype`|Simulate keyboard input for Wayland|`silos/fish`|
 |`swww`|Animated wallpaper daemon|`silos/hyprland`|
 |`greetd`|GreetD, display manager for Wayland||
-|`swaylock`|Screen locker for Wayland|`silos/hyprland`
+|`swaylock`|Screen locker for Wayland|`silos/hyprland`|
+|`swappy`|Editing snapshot tool for Wayland|`silos/hyprland`|
+|`grim`|Screen capturing tool for Wayland|`silso/hyprland`|
+|`slurp`|Selecting region tool for Wayland|`silos/hyprland`|
 
 # System applications
 |Tool|Purpose|
