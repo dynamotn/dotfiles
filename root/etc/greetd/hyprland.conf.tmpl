@@ -1,0 +1,8 @@
+exec-once = regreet; hyprctl dispatch exit
+exec-once = dbus-update-activation-environment --all --systemd
+exec-once = bash {{ .chezmoi.sourceDir }}/../../.config/hypr/scripts/gtk.sh
+{{- template "hyprland/monitor" . -}}
+
+misc {
+  disable_hyprland_logo = true
+}
