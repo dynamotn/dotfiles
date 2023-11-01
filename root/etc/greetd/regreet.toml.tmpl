@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2022 Harish Rajagopal <harish.rajagopals@gmail.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[background]
+# Path to the background image
+path = "{{ .chezmoi.sourceDir }}/../home/Multimedia/Pictures/Wallpaper/night/unicat.png"
+
+# How the background image covers the screen if the aspect ratio doesn't match
+# Available values: "Fill", "Contain", "Cover", "ScaleDown"
+# Refer to: https://docs.gtk.org/gtk4/enum.ContentFit.html
+# NOTE: This is ignored if ReGreet isn't compiled with GTK v4.8 support.
+fit = "Cover"
+
+[env]
+
+[GTK]
+# Whether to use the dark theme
+application_prefer_dark_theme = true
+
+# Cursor theme name
+cursor_theme_name = "Dynamo-Cursor"
+cursor_theme_size = 32
+
+# Font name and size
+font_name = "Iosevka Dynamo 16"
+
+# Icon theme name
+icon_theme_name = "Dynamo"
+
+# GTK theme name
+theme_name = "Dynamo"
+
+[commands]
+# The command used to reboot the system
+reboot = [ "sudo", "reboot" ]
+
+# The command used to shut down the system
+poweroff = [ "sudo", "shutdown", "-P", "-h", "now" ]

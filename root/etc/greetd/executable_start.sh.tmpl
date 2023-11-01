@@ -1,0 +1,13 @@
+#!/bin/sh
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+export HOME=$XDG_RUNTIME_DIR
+export XDG_SESSION_TYPE=wayland
+{{- if eq .guiDriver "N" }}
+export LIBVA_DRIVER_NAME=nvidia
+export GBM_BACKEND=nvidia-drm
+export __GLX_VENDOR_LIBRARY_NAME=nvidia
+{{- end }}
+export WLR_NO_HARDWARE_CURSORS=1
+export GTK_USE_PORTAL=0
+mkdir -p $XDG_RUNTIME_DIR && chmod 700 $XDG_RUNTIME_DIR
+dbus-run-session Hyprland --config /etc/greetd/hyprland.conf
