@@ -59,3 +59,7 @@ See [chezmoi](docs/tools/chezmoi.md)
 
 ### Via Github Release binary
 See [release_binary](docs/tools/release_binary.md)
+
+### Via ASDF
+
+See [asdf](docs/tools/asdf.md)

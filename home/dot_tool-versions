@@ -1,0 +1,6 @@
+nodejs 21.1.0
+helm 3.13.1
+kubectl 1.28.3
+gcloud 453.0.0
+terraform 1.6.2
+pre-commit 3.5.0
