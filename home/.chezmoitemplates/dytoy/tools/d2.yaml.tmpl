@@ -1,0 +1,12 @@
+name: d2
+method: binary
+github:
+  repo: terrastruct/d2
+  release_asset:  d2-%v-linux-{{ .chezmoi.arch }}.tar.gz
+archive:
+  strip_components: 2
+  paths:
+    - d2-%v/bin/d2
+  hook:
+    after: |
+      tar $param -C "$MAN_DIR/man1" "d2-$version/man/d2.1"
