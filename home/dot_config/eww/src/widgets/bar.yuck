@@ -1,4 +1,4 @@
-(defwidget launcher_icon  []
+(defwidget launcher_icon[]
   (eventbox
     :cursor "pointer"
     :halign "center"
