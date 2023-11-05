@@ -1,0 +1,15 @@
+name: netcat
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: net-analyzer/openbsd-netcat
+arch:
+  packages:
+    - name: openbsd-netcat
+ubuntu:
+  packages:
+    - name: netcat-openbsd
+termux:
+  packages:
+    - name: netcat-openbsd
