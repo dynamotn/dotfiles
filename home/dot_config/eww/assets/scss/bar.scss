@@ -13,10 +13,48 @@ window > .bar {
 
   .launcher_icon {
     font-size: 1rem;
-    color: $blue;
+    color: $lavender;
 
     &:hover {
-      color: darken($color: $blue, $amount: 30%);
+      color: darken($color: $lavender, $amount: 30%);
+    }
+  }
+
+  .workspaces {
+    background: $bg-alt;
+    padding: 0.2rem 0.2rem;
+    border-radius: 1rem;
+
+    .workspace {
+      border-radius: 1rem;
+      min-width: .5rem;
+
+      &.empty {
+        background: lighten($color: $bg, $amount: 3%);
+        min-height: .7rem;
+        min-width: .7rem;
+      }
+
+      &.occupied {
+        background: $lavender;
+        min-height: 1rem;
+      }
+
+      &.active {
+        background: $blue;
+        min-height: 1rem;
+        min-width: 1rem;
+      }
+
+      &:hover {
+        &.empty {
+          background: lighten($color: $bg, $amount: 10%);
+        }
+        &.occupied,
+        &.active {
+          background: lighten($color: $lavender, $amount: 10%);
+        }
+      }
     }
   }
 }

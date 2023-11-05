@@ -6,6 +6,7 @@
     :spacing 15
     :orientation "v"
     (launcher_icon)
+    (workspaces)
   )
 )
 
