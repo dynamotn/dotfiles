@@ -11,6 +11,7 @@
 |`tree-sitter`|Parser generator tool for syntax|`silos/neovim`|
 |`podman`|Manage containers and pods, alternative of docker|DevOps tool|
 |`tshark`|CLI of Wireshark, network packet analysis|Miscellaneous|
+|`nc`|TCP/IP swiss army knife|`silos/eww`|
 
 
 # Both X and Wayland applications
