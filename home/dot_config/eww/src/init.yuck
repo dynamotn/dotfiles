@@ -1,4 +1,0 @@
-(include "src/widgets/bar.yuck")
-(include "src/windows/bar.yuck")
-
-(include "src/setup.yuck")

@@ -1,1 +1,9 @@
-(include "src/init.yuck")
+(include "src/widgets/bar.yuck")
+(include "src/windows/bar.yuck")
+(defwindow bar
+  :monitor 0
+  :stacking "fg"
+  :geometry (geometry :width 50 :height "100%" :anchor "center left")
+  :exclusive true
+  (bar)
+)

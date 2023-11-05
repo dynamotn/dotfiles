@@ -1,5 +1,5 @@
 window > .bar {
-  margin: 0.7rem;
+  margin: 0.5rem 0.5rem 0.5rem 0.7rem;
   box-shadow: 0 0 4px 1px rgba(black, 0.5);
   background-color: $bg;
 }
@@ -16,7 +16,7 @@ window > .bar {
     color: $blue;
 
     &:hover {
-      color: darken($color: $blue, $amount: 10%);
+      color: darken($color: $blue, $amount: 30%);
     }
   }
 }
