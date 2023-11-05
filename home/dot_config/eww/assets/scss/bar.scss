@@ -1,16 +1,18 @@
 window > .bar {
-  margin: 1rem;
+  margin: 0.7rem;
   box-shadow: 0 0 4px 1px rgba(black, 0.5);
-  background-color: #bg;
+  background-color: $bg;
 }
 
 .bar {
+  font-family: "Iosevka Dynamo", monospace;
   font-size: 1.4rem;
   padding: 1rem 0.4rem;
   border-radius: 1rem;
+  background-color: transparent;
 
   .launcher_icon {
-    font-size: 1.4rem;
+    font-size: 1rem;
     color: $blue;
 
     &:hover {
