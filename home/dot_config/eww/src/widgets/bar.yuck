@@ -9,3 +9,25 @@
     )
   )
 )
+
+(defwidget workspaces[]
+  (box
+    :class "workspaces"
+    :orientation "v"
+    :width 25
+    :height 250
+    (for workspace in {workspaces.all}
+      (eventbox
+        :cursor "pointer"
+        :onscroll "echo {} | sed -e 's/up/-1/g' -e 's/down/+1/g' | xargs hyprctl dispatch workspace"
+        :halign "center"
+        :valign "center"
+        :vexpand true
+        (button
+          :onclick "hyprctl dispatch workspace ${workspace.id}"
+          :class "workspace ${workspace.id == workspaces.active ? "active" : workspace.windows > 0 ? "occupied" : "empty"}"
+        )
+      )
+    )
+  )
+)
