@@ -76,6 +76,7 @@ bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE={{- e
 bind = $mainMod, T, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE={{- end }} bitrofi totp"
 bind = $mainMod, L, exec, swaylock
 bind = $mainMod, S, exec, grim -g "$(slurp)" - | swappy -f -
+bind = $mainMod, Z, exec, hdrop kitty --class btop -e btop
 
 ##############
 # Multimedia #

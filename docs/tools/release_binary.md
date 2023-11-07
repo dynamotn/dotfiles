@@ -14,7 +14,7 @@
 |[zoxide](https://github.com/ajeetdsouza/zoxide)|Alternative to `cd` with smarter|Frequently used tool, in `silos/fish`|
 |[direnv](https://github.com/direnv/direnv)|Load environment variables depending on directory|Frequently used tool, in `silos/fish`|
 |[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|Frequently used tool, in `silos/fish`, `silos/tmux`|
-|[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|Frequently used tool, in `silos/awesome`|
+|[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|Frequently used tool, in `silos/awesome`, `silos/hyprland`|
 |[himalaya](https://github.com/soywod/himalaya)|Email CLI tool|Frequently used tool, in `silos/awesome`|
 |[smug](https://github.com/ivaaaan/smug)|Tmux session manager|Frequently used tool, in `home/dot_config/smug`|
 |[projekt](https://github.com/dynamotn/projekt)|Smart CLI command to manage project folder|Frequently used tool, in `silos/fish`|

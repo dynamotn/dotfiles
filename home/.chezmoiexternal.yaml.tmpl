@@ -115,6 +115,11 @@
   {{- end }}
   executable: true
 {{- if eq .kind "pc" }}
+.local/bin/hdrop:
+  type: file
+  url: https://raw.githubusercontent.com/hyprwm/contrib/main/hdrop/hdrop
+  executable: true
+  refreshPeriod: 168h
 .local/share/themes/Dynamo:
   type: archive
   url: https://github.com/catppuccin/gtk/releases/latest/download/Catppuccin-Macchiato-Standard-Lavender-dark.zip
