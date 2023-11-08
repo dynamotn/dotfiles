@@ -27,6 +27,7 @@ _parse_args() {
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 _gentoo_run() {
   for tool in "${package_tools[@]}"; do
+    tool_name=$(echo "$tool" | yq e '.name')
     is_essential=$(echo "$tool" | yq e '.is_essential')
     if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
       continue
@@ -40,6 +41,17 @@ _gentoo_run() {
       fi
 
       repo=$(echo "$package" | yq e '.repo')
+      accept_keywords=$(echo "$package" | yq e '.accept_keywords')
+      if [[ "$accept_keywords" != "null" ]]; then
+        sudo touch "/etc/portage/package.accept_keywords/$tool_name"
+        echo "$package_name $accept_keywords" | sudo tee "/etc/portage/package.accept_keywords/$tool_name" > /dev/null
+      fi
+      use=$(echo "$package" | yq e '.use')
+      if [[ "$use" != "null" ]]; then
+        sudo touch "/etc/portage/package.use/$tool_name"
+        echo "$package_name $use" | sudo tee "/etc/portage/package.use/$tool_name" > /dev/null
+      fi
+
       if [[ "$repo" != "null" ]]; then
         _gentoo_install "$package_name::$repo"
       else
