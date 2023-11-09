@@ -1,0 +1,18 @@
+{{- if eq .kind "pc" }}
+name: pipewire
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: media-video/pipewire
+      use: sound-server bluetooth pipewire-alsa dbus
+    - name: media-video/wireplumber
+      use: elogind
+arch:
+  packages:
+    - name: pipewire
+    - name: wireplumber
+    - name: pipewire-audio
+    - name: pipewire-pulse
+    - name: pipewire-alsa
+{{- end }}
