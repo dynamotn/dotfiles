@@ -15,7 +15,11 @@ diff:
 
 data:
   place: {{ promptStringOnce . "place" "Where does this machine place? (home/office/cloud)" | quote }}
-  kind: {{ promptStringOnce . "kind" "What kind of this machine is it? (pc/workstation/tablet/vm/...)" | quote }}
+  {{ $kind := promptStringOnce . "kind" "What kind of this machine is it? (pc/workstation/tablet/vm/sbc/...)" | quote }}
+  kind: {{ $kind }}
+  {{- if eq $kind "sbc" "vm" "workstation" }}
+  code: {{ promptStringOnce . "code" "What is this machine's name?" | quote }}
+  {{- end }}
   {{ $guiServer := promptStringOnce . "guiServer" "Which GUI server of this machine is, X for Xorg, W for Wayland, 0 for CLI-only? (X/W/0)" }}
   guiServer: {{ $guiServer | quote }}
   {{- if eq $guiServer "X" "W" }}
