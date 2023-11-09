@@ -1,0 +1,14 @@
+{{- if eq .kind "pc" }}
+name: wireguard
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: net-vpn/wireguard-tools
+arch:
+  packages:
+    - name: wireguard-tools
+ubuntu:
+  packages:
+    - name: wireguard-tools
+{{- end }}
