@@ -1,0 +1,14 @@
+{{- if eq .kind "pc" "workstation" "sbc" }}
+name: pam-u2f
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-auth/pam_u2f
+arch:
+  packages:
+    - name: pam-u2f
+ubuntu:
+  packages:
+    - name: libpam-u2f
+{{- end }}
