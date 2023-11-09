@@ -1,0 +1,1 @@
+auth sufficient pam_u2f.so cue [cue_prompt=Khóa bảo mật của mày đâu?]
