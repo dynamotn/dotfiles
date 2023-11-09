@@ -57,3 +57,4 @@
 |----|-------|
 |`nftables`|Netfilter framework|
 |`pam-u2f`|PAM U2F module|
+|`wireguard`|Simple and modern VPN|
