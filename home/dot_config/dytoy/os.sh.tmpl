@@ -33,6 +33,17 @@ _gentoo_run() {
       continue
     fi
 
+    accept_keywords=$(echo "$tool" | yq e '.gentoo.accept_keywords')
+    if [[ "$accept_keywords" != "null" ]]; then
+      sudo touch "/etc/portage/package.accept_keywords/$tool_name"
+      echo "$accept_keywords" | sudo tee "/etc/portage/package.accept_keywords/$tool_name" > /dev/null
+    fi
+    use=$(echo "$tool" | yq e '.gentoo.use')
+    if [[ "$use" != "null" ]]; then
+      sudo touch "/etc/portage/package.use/$tool_name"
+      echo "$use" | sudo tee "/etc/portage/package.use/$tool_name" > /dev/null
+    fi
+
     readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.gentoo.packages.[]')
     for package in "${packages[@]}"; do
       package_name=$(echo "$package" | yq e '.name')
@@ -41,16 +52,6 @@ _gentoo_run() {
       fi
 
       repo=$(echo "$package" | yq e '.repo')
-      accept_keywords=$(echo "$package" | yq e '.accept_keywords')
-      if [[ "$accept_keywords" != "null" ]]; then
-        sudo touch "/etc/portage/package.accept_keywords/$tool_name"
-        echo "$package_name $accept_keywords" | sudo tee "/etc/portage/package.accept_keywords/$tool_name" > /dev/null
-      fi
-      use=$(echo "$package" | yq e '.use')
-      if [[ "$use" != "null" ]]; then
-        sudo touch "/etc/portage/package.use/$tool_name"
-        echo "$package_name $use" | sudo tee "/etc/portage/package.use/$tool_name" > /dev/null
-      fi
 
       if [[ "$repo" != "null" ]]; then
         _gentoo_install "$package_name::$repo"

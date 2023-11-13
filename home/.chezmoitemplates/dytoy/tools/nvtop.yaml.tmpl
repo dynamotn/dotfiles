@@ -4,8 +4,10 @@ method: os
 gentoo:
   packages:
     - name: sys-process/nvtop
-      accept_keywords: ~amd64
-      use: video_cards_{{ if eq .guiDriver "N" }}nvidia{{ else if eq .guiDriver "A" }}amdgpu{{ else if eq .guiDriver "I" }}intel{{ end }}
+  accept_keywords: |-
+    sys-process/nvtop ~amd64
+  use: |-
+    sys-process/nvtop video_cards_{{ if eq .guiDriver "N" }}nvidia{{ else if eq .guiDriver "A" }}amdgpu{{ else if eq .guiDriver "I" }}intel{{ end }}
 arch:
   packages:
     - name: nvtop
