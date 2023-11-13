@@ -5,9 +5,10 @@ is_essential: true
 gentoo:
   packages:
     - name: media-video/pipewire
-      use: sound-server bluetooth pipewire-alsa dbus
     - name: media-video/wireplumber
-      use: elogind
+  use: |-
+    media-video/pipewire sound-server bluetooth pipewire-alsa dbus
+    media-video/wireplumber elogind
 arch:
   packages:
     - name: pipewire
