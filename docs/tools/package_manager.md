@@ -60,3 +60,4 @@
 |`pam-u2f`|PAM U2F module|
 |`wireguard`|Simple and modern VPN|
 |`pipewire`|Audio and video devices framework|
+|`kernel`|Linux kernel for OS|
