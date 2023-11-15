@@ -51,5 +51,8 @@ exec-once = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -
 exec-once = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Enterprise
 {{- end }}
 
+# Note-taking
+exec-once = obsidian
+
 # Scratchpad
 exec-once = [workspace special:hdrop silent] kitty --class btop -e btop
