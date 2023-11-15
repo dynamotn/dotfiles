@@ -21,6 +21,7 @@
 |`firefox`|Web browser|`silos/firefox`|
 |`thunderbird`|Email client|`silos/thunderbird`|
 |`nvtop`|Monitor resources of GPU|`silos/hyprland`, `silos/awesome`|
+|`obsidian`|Note-taking app|`silos/hyprland`|
 
 # X server applications
 |Tool|Purpose|Used in|
