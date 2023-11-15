@@ -1,0 +1,12 @@
+{{- if eq .kind "pc" }}
+name: kernel
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-kernel/gentoo-sources
+arch:
+  packages:
+    - name: linux-hardened
+    - name: linux-hardened-headers
+{{- end }}
