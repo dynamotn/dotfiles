@@ -67,3 +67,10 @@ folders:
     regex: ""
     priority: 0
   {{- end }}
+  {{- if eq .kind "pc" }}
+  - path: {{ .chezmoi.homeDir }}/Documents/Notes
+    prefix: ""
+    is_workspace: false
+    regex: ""
+    priority: 0
+  {{- end }}
