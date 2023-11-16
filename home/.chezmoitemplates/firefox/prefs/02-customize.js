@@ -12,6 +12,16 @@ user_pref("layout.css.prefers-color-scheme.content-override", 0);
 /* Set font for languages
  * [SETTING] General->Language and Appearance->Fonts and Colors */
 user_pref("font.default.x-western", "sans-serif"); // Change Latin to Sans-serif
+user_pref("font.default.x-unicode", "sans-serif"); // Change Latin to Sans-serif
+/* Set default font size
+ * [SETTING] General->Language and Appearance->Fonts and Colors */
+user_pref("font.size.monospace.x-western", 14);
+user_pref("font.size.monospace.x-unicode", 14);
+user_pref("font.minimum-size.x-western", 14)
+user_pref("font.minimum-size.x-unicode", 14)
+/* Disable web page's font
+ * [SETTING] General->Language and Appearance->Fonts and Colors */
+user_pref("browser.display.use_document_fonts", 0);
 /* Set preferred language for displaying web pages
  * [SETTING] General->Language and Appearance->Language->Choose your preferred language for displaying pages */
 user_pref("intl.accept_languages", "en-US, vi");
