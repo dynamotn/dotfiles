@@ -21,11 +21,11 @@
 .config/user-dirs.dirs
 Multimedia/Pictures/Wallpaper
 {{- else }}
-{{- if gt (output "bash" "-c" "ps aux | grep firefox | wc -l" | trim | int) 1 }}
+{{- if gt (output "bash" "-c" "ps aux | grep firefox | wc -l" | trim | int) 2 }}
 .config/firefox
 .mozilla/firefox
 {{- end }}
-{{- if gt (output "bash" "-c" "ps aux | grep thunderbird | wc -l" | trim | int) 1 }}
+{{- if gt (output "bash" "-c" "ps aux | grep thunderbird | wc -l" | trim | int) 2 }}
 .config/thunderbird
 .thunderbird
 {{- end }}
