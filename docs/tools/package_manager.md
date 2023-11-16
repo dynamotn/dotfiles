@@ -61,3 +61,4 @@
 |`wireguard`|Simple and modern VPN|
 |`pipewire`|Audio and video devices framework|
 |`kernel`|Linux kernel for OS|
+|`cronie`|Run scheduled tasks|
