@@ -17,8 +17,8 @@ user_pref("font.default.x-unicode", "sans-serif"); // Change Latin to Sans-serif
  * [SETTING] General->Language and Appearance->Fonts and Colors */
 user_pref("font.size.monospace.x-western", 14);
 user_pref("font.size.monospace.x-unicode", 14);
-user_pref("font.minimum-size.x-western", 14)
-user_pref("font.minimum-size.x-unicode", 14)
+user_pref("font.minimum-size.x-western", 14);
+user_pref("font.minimum-size.x-unicode", 14);
 /* Disable web page's font
  * [SETTING] General->Language and Appearance->Fonts and Colors */
 user_pref("browser.display.use_document_fonts", 0);
