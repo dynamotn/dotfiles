@@ -93,4 +93,8 @@ class Component extends HTMLElement {
     this.refs = this.createRef();
     RenderedComponents[this.localName] = this;
   }
+
+  connectedCallback() {
+    this.render();
+  }
 }
