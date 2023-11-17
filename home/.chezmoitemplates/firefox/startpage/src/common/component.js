@@ -3,7 +3,11 @@ const RenderedComponents = {};
 class Component extends HTMLElement {
   refs = {};
 
-  resources = {};
+  resources = {
+    css: {
+      core: '<link rel="stylesheet" type="text/css" href="src/css/core.css">',
+    },
+  };
 
   constructor() {
     super();
@@ -34,6 +38,7 @@ class Component extends HTMLElement {
 
     if (this.resources?.style)
     imports.push(this.resources.style);
+    imports.push(this.resources.css.core);
 
     return imports;
   }
