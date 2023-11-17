@@ -1,3 +1,11 @@
 {{- if ne .guiServer "W" }}
 usr/share/wayland-sessions/dyland.desktop
 {{- end }}
+{{- if eq .guiServer "W" "X" }}
+{{- if ne .chezmoi.osRelease.id "gentoo" }}
+/opt/firefox
+{{- end }}
+{{- if ne .chezmoi.osRelease.id "arch" }}
+/usr/lib/firefox
+{{- end }}
+{{- end }}
