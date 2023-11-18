@@ -1,29 +1,7 @@
 class Tabs extends Component {
   constructor() {
     super();
-    this.tabs = [
-      {
-        name: "work",
-        background_url: "src/img/tabs/work.gif",
-        categories: [
-          {
-            name: "development",
-            links: [
-              {
-                name: "github",
-                url: "https://github.com",
-                icon: "brand-github",
-                icon_color: "#a6da95",
-              },
-            ]
-          },
-        ],
-      },
-      {
-        name: "chill",
-        background_url: "src/img/tabs/chill.gif",
-      },
-    ];
+    this.tabs = LOADED_CONFIG.tabs;
   }
 
   style() {
