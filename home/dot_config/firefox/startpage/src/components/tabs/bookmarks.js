@@ -1,9 +1,9 @@
 class Bookmarks {
   static getIcon(link) {
-    const default_color = "var(--bg)";
+    const default_color = "bg";
 
     return link.icon
-      ? `<p style="color: ${link.icon_color ?? default_color}">${link.icon}</p>`
+      ? `<p style="color: var(--${link.icon_color ?? default_color})">${link.icon}</p>`
       : "";
   }
 

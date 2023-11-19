@@ -76,7 +76,7 @@ class Component extends HTMLElement {
         const elements = this.shadow.querySelectorAll(ref);
         if (elements.length > 1) return elements;
 
-        const element = elems[0];
+        const element = elements[0];
         if (!element) return ref;
 
         return element;

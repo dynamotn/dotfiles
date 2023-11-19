@@ -1,3 +1,5 @@
+const { parse } = JSON;
+
 class Storage {
   key;
 
