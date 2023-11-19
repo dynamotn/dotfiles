@@ -1,0 +1,69 @@
+*:not(:defined) { display: none; }
+
+.tabs,
+.tabs .widgets,
+.tabs ul li:last-child {
+  position: absolute;
+}
+
+.tabs {
+  width: 100%;
+  height: 100%;
+}
+
+.tabs ul {
+  counter-reset: tabs;
+  height: 100%;
+  position: relative;
+  list-style: none;
+  align-items: center;
+  display: flex;
+}
+
+.tabs ul li:not(:last-child)::after {
+  content: counter(tabs);
+  counter-increment: tabs;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+.tabs ul li:not(:last-child) {
+  width: 35px;
+  text-align: center;
+  font: 700 13px serif;
+  color: var(--text);
+  padding: 6px 0;
+  transition: all .1s;
+  cursor: pointer;
+  line-height: 0;
+  height: 100%;
+}
+
+.tabs ul li:not(:last-child):hover {
+  background: var(--bg);
+}
+
+.tabs ul li:last-child {
+  width: 35px;
+  height: 3px;
+  background: var(--flavour);
+  bottom: 0;
+  transition: all .3s;
+}
+
+.tabs ul li[active]:not(:last-child) {
+  color: var(--text);
+  font-size: 13px;
+  padding: 6px 0;
+}
+
+.tabs > cols {
+  position: relative;
+  height: 100%;
+  grid-template-columns: [tabs] auto [widgets] auto;
+}

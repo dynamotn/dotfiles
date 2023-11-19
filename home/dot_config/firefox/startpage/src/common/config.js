@@ -2,6 +2,7 @@ const { stringify } = JSON;
 
 class Config {
   defaults = {
+    openLastVisitedTab: true,
     tabs: [],
   };
 

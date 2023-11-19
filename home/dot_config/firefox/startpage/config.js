@@ -1,10 +1,12 @@
 let saved_config = JSON.parse(localStorage.getItem("LOADED_CONFIG"));
 
 const default_config = {
+  openLastVisitedTab: true,
   tabs: [
     {
       name: "work",
       background_url: "src/img/tabs/work.gif",
+      tab_color: "sapphire",
       categories: [
         {
           name: "development",
@@ -12,14 +14,14 @@ const default_config = {
             {
               name: "github",
               url: "https://github.com",
-              icon: " ",
-              icon_color: "var(--green)",
+              icon: "",
+              icon_color: "green",
             },
             {
               name: "gitlab",
               url: "https://gitlab.com",
-              icon: " ",
-              icon_color: "var(--peach)",
+              icon: "",
+              icon_color: "peach",
             },
           ],
         },
@@ -29,8 +31,38 @@ const default_config = {
             {
               name: "gmail",
               url: "https://mail.google.com",
-              icon: "󰊫 ",
-              icon_color: "var(--red)",
+              icon: "󰊫",
+              icon_color: "red",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "chill",
+      background_url: "src/img/tabs/chill.gif",
+      tab_color: "maroon",
+      categories: [
+        {
+          name: "multimedia",
+          links: [
+            {
+              name: "youtube",
+              url: "https://youtube.com",
+              icon: "",
+              icon_color: "red",
+            },
+            {
+              name: "spotify",
+              url: "https://open.spotify.com",
+              icon: "",
+              icon_color: "green",
+            },
+            {
+              name: "netflix",
+              url: "https://netflix.com",
+              icon: "󰝆",
+              icon_color: "red",
             },
           ],
         },
