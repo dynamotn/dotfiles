@@ -17,8 +17,9 @@ class Tabs extends Component {
         <div class="slides">
           ${Slide.getAll(this.tabs)}
         </div>
-        <status-bar class=""></status-bar>
+        <status-bar></status-bar>
       </div>
+      <current-time></current-time>
     `;
   }
 }
