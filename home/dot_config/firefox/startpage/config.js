@@ -12,10 +12,27 @@ const default_config = {
             {
               name: "github",
               url: "https://github.com",
-              icon: "brand-github",
-              icon_color: "#a6da95",
+              icon: " ",
+              icon_color: "var(--green)",
             },
-          ]
+            {
+              name: "gitlab",
+              url: "https://gitlab.com",
+              icon: " ",
+              icon_color: "var(--peach)",
+            },
+          ],
+        },
+        {
+          name: "email",
+          links: [
+            {
+              name: "gmail",
+              url: "https://mail.google.com",
+              icon: "󰊫 ",
+              icon_color: "var(--red)",
+            },
+          ],
         },
       ],
     },

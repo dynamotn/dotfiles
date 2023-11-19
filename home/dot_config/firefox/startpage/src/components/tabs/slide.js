@@ -8,7 +8,7 @@ class Slide {
       .map(({ name, background_url }, index) => {
         return `<ul ${Slide.getBackgroundStyle(background_url)} ${index == 0 ? "active" : ""}>
           <div class="banners" data-name="${name}"></div>
-          <div class="links">${name}</div>
+          <div class="bookmarks">${Bookmarks.getAll(name, tabs)}</div>
         </ul>`;
       })
       .join("")
