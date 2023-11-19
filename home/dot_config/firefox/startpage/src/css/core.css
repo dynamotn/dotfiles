@@ -98,3 +98,16 @@ status-bar {
 cols, row {
   display: grid;
 }
+
+current-time {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  bottom: 50%;
+  font-size: 7em;
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--bg);
+  text-align: center;
+}
