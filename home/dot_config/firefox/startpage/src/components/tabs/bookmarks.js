@@ -20,7 +20,7 @@ class Bookmarks {
               .map(
                 (link) => `
                 <div class="link">
-                  <a href="${link.url}" target="_blank">
+                  <a href="${link.url}">
                     ${Bookmarks.getIcon(link)}
                     ${link.name ? `<p>${link.name}</p>` : ""}
                   </a>
