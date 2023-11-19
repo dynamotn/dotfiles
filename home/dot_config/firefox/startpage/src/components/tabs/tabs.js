@@ -25,7 +25,7 @@ class Tabs extends Component {
         bottom: 0;
         margin: auto;
         box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-        background: #24273a;
+        background: var(--bg);
         position: relative;
       }
 
@@ -79,7 +79,7 @@ class Tabs extends Component {
         background: linear-gradient(to top, rgb(50 48 47 / 90%), transparent);
         color: var(--flavour);
         letter-spacing: 1px;
-        font: 500 30px 'Nunito', sans-serif;
+        font: 500 30px sans-serif;
         text-align: center;
         flex-wrap: wrap;
         word-break: break-all;
@@ -102,7 +102,7 @@ class Tabs extends Component {
         --flavour: var(--mauve);
       }
 
-      .slides .links {
+      .slides .bookmarks {
         position: absolute;
         box-shadow: inset -2px 0 var(--flavour);
         right: 0;
@@ -111,6 +111,66 @@ class Tabs extends Component {
         background: var(--bg);
         padding: 5%;
         flex-wrap: wrap;
+      }
+
+      .slides .bookmarks li {
+        list-style: none;
+      }
+
+      .slides .bookmarks li:not(:last-child) {
+        box-shadow: 0 1px 0 rgba(212, 190, 152, .25);
+        padding: 0 0 .5em 0;
+        margin-bottom: 1.5em;
+      }
+
+      .slides .bookmarks li h1 {
+        color: var(--flavour);
+        opacity: 0.8;
+        font-size: 13px;
+        margin-bottom: 1em;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-family: sans-serif;
+      }
+
+      .categories {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .categories .link {
+        display: inline-flex;
+      }
+
+      .categories .link:not(:last-child) {
+        margin-right: .5em;
+      }
+
+      .categories .link a {
+        color: var(--text);
+        text-decoration: none;
+        font: 700 18px sans-serif;
+        transition: all .2s;
+        display: inline-flex;
+        align-items: center;
+        padding: .4em .7em;
+        background: var(--surface);
+        box-shadow: 0 4px rgba(0, 0, 0, 0.5), 0 5px 10px rgb(0 0 0 / 20%);
+        border-radius: 2px;
+        margin-bottom: .7em;
+      }
+
+      .categories .link a:hover {
+        color: var(--flavour);
+        transform: translate(0, 4px);
+        box-shadow: 0 0 rgba(0, 0, 0, 0.25), 0 0 0 rgba(0, 0, 0, .5), 0 -0px 5px rgba(0, 0, 0, .1);
+      }
+
+      .categories .link a p:nth-child(2) {
+        margin-left: 10px;
+        font: 700 16px monospace;
+        text-transform: capitalize;
       }
     `;
   }
