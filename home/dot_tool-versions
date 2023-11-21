@@ -2,6 +2,6 @@ nodejs 21.1.0
 helm 3.13.2
 kubectl 1.28.3
 gcloud 454.0.0
-terraform 1.6.3
+terraform 1.6.4
 pre-commit 3.5.0
 python 3.12.0
