@@ -2,7 +2,7 @@
 [user]
         # Tôi ra đây có phải xưng danh không nhỉ?
         name = Trần Đức Nam
-        email = dynamo.foss@gmail.com
+        email = me@dynamotn.dev
         # Signing SSH key
         signingkey = ~/.ssh/key/Dynamo-Linux_ed25519.pub
 [gpg]
