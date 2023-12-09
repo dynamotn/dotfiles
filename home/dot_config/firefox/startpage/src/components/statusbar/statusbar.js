@@ -23,7 +23,7 @@ class Statusbar extends Component {
 
   imports() {
     return [
-      '<link rel="stylesheet" type="text/css" href="src/css/statusbar.css">',
+      '<link rel="stylesheet" type="text/css" href="../../src/css/statusbar.css">',
     ];
   }
 

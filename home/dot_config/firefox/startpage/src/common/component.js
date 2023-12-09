@@ -5,7 +5,7 @@ class Component extends HTMLElement {
 
   resources = {
     css: {
-      core: '<link rel="stylesheet" type="text/css" href="src/css/core.css">',
+      core: '<link rel="stylesheet" type="text/css" href="../../src/css/core.css">',
     },
   };
 

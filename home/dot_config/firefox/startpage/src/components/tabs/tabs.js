@@ -6,7 +6,7 @@ class Tabs extends Component {
 
   imports() {
     return [
-      '<link rel="stylesheet" type="text/css" href="src/css/tabs.css">',
+      '<link rel="stylesheet" type="text/css" href="../../src/css/tabs.css">',
     ];
   }
 

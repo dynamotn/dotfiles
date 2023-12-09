@@ -5,9 +5,32 @@ const default_config = {
   tabs: [
     {
       name: "work",
-      background_url: "src/img/tabs/work.gif",
+      background_url: "../../src/img/tabs/work.gif",
       tab_color: "sapphire",
       categories: [
+        {
+          name: "communicate",
+          links: [
+            {
+              name: "proton",
+              url: "https://mail.proton.me",
+              icon: "https://mail.proton.me/assets/favicon.d47d3d0bef6d338e377a.svg?v=5.0.32.6",
+              icon_color: "lavender",
+            },
+            {
+              name: "gmail",
+              url: "https://mail.google.com",
+              icon: "󰊫",
+              icon_color: "red",
+            },
+            {
+              name: "telegram",
+              url: "https://web.telegram.org/k/",
+              icon: "",
+              icon_color: "blue",
+            },
+          ],
+        },
         {
           name: "development",
           links: [
@@ -26,13 +49,13 @@ const default_config = {
           ],
         },
         {
-          name: "email",
+          name: "management",
           links: [
             {
-              name: "gmail",
-              url: "https://mail.google.com",
-              icon: "󰊫",
-              icon_color: "red",
+              name: "clickup",
+              url: "https://app.clickup.com",
+              icon: "https://app-cdn.clickup.com/assets/favicons/favicon-16x16.png",
+              icon_color: "text",
             },
           ],
         },
@@ -40,7 +63,7 @@ const default_config = {
     },
     {
       name: "chill",
-      background_url: "src/img/tabs/chill.gif",
+      background_url: "../../src/img/tabs/chill.gif",
       tab_color: "maroon",
       categories: [
         {
