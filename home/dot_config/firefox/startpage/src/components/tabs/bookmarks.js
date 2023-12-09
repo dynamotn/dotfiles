@@ -2,9 +2,12 @@ class Bookmarks {
   static getIcon(link) {
     const default_color = "bg";
 
-    return link.icon
-      ? `<p style="color: var(--${link.icon_color ?? default_color})">${link.icon}</p>`
-      : "";
+    if (!link.icon) return "";
+    if (link.icon.startsWith("http")) {
+      return `<img style="max-width: 18px" src="${link.icon}" alt="${link.name}" />`;
+    } else {
+      return `<p style="color: var(--${link.icon_color ?? default_color})">${link.icon}</p>`;
+    }
   }
 
   static getAll(tabName, tabs) {
