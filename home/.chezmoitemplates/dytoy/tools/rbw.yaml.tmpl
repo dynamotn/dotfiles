@@ -1,10 +1,11 @@
+{{- if eq .chezmoi.arch "amd64" }}
 name: rbw
 method: binary
 is_essential: true
 github:
-  repo: dynamotn/rbw
-  version: v1.7.0
-  release_asset: rbw_%v_x86_64-unknown-linux-musl.tar.gz
+  repo: doy/rbw
+  version: latest
+  release_asset: rbw_%v_linux_amd64.tar.gz
 archive:
   paths:
     - rbw
@@ -17,3 +18,4 @@ archive:
       if [ -d ~/Working/personal/fish/caran/completions ]; then
         rbw gen-completions fish > ~/Working/personal/fish/caran/completions/rbw.fish
       fi
+{{- end }}
