@@ -145,6 +145,8 @@
 [push]
         # Only push current branch to same name branch
         default = current
+        # Push follow tags
+        followTags = true
 [gc]
         # Don't auto git gc, with large project can slow when working
         auto = 0
