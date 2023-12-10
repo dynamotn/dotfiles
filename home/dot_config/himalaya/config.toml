@@ -4,23 +4,30 @@ email-listing-page-size = 50
 
 [personal]
 default = true
-email = "dynamo.foss@gmail.com"
-downloads-dir = "~/Misc/Downloads/Emails/personal"
+email = "me@dynamotn.dev"
+downloads-dir = "~/Misc/Emails/personal"
+sync = true
 
 backend = "imap"
-imap-host = "imap.gmail.com"
-imap-port = 993
-imap-login = "dynamo.foss@gmail.com"
-imap-passwd-cmd = "rbw get --field=Himalaya 'Email cá nhân'"
+imap-host = "127.0.0.1"
+imap-port = 1143
+imap-login = "me@dynamotn.dev"
+imap-auth = "passwd"
+imap-starttls = true
+imap-insecure = true
+imap-passwd = { cmd = "cat ~/.local/share/himalaya/personal-passwd" }
 
 sender = "smtp"
-smtp-host = "smtp.gmail.com"
-smtp-port = 465
-smtp-login = "dynamo.foss@gmail.com"
-smtp-passwd-cmd = "rbw get --field=Himalaya 'Email cá nhân'"
+smtp-host = "127.0.0.1"
+smtp-port = 1025
+smtp-login = "me@dynamotn.dev"
+smtp-auth = "passwd"
+smtp-starttls = true
+smtp-insecure = true
+smtp-passwd = { cmd = "cat ~/.local/share/himalaya/personal-passwd" }
 
 [personal.folder-aliases]
 inbox = "INBOX"
-sent = "[Gmail]/Sent Mail"
-drafts = "[Gmail]/Drafts"
-trash = "[Gmail]/Trash"
+sent = "Sent"
+drafts = "Drafts"
+trash = "Trash"
