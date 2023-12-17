@@ -35,6 +35,11 @@ folders:
     is_workspace: true
     regex: ""
     priority: 0
+  - path: {{ .chezmoi.homeDir }}/Working/personal/infra
+    prefix: "infra"
+    is_workspace: true
+    regex: ""
+    priority: 0
   {{- if eq $machine "office_pc" }}
   - path: {{ .chezmoi.homeDir }}/Working/enterprise/DSO/docker
     prefix: "docker"
