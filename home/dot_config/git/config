@@ -99,6 +99,10 @@
         features = side-by-side line-numbers decorations
         # Style of whitespace error
         whitespace-error-style = red reverse
+[delta "decorations"]
+        commit-decoration-style = bold blue box ul
+        file-style = bold blue ul
+        file-decoration-style = green ul
 [apply]
         # Auto fix white space
         whitespace = fix
