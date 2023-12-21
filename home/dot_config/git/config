@@ -149,6 +149,8 @@
 [gc]
         # Don't auto git gc, with large project can slow when working
         auto = 0
+[init]
+        defaultBranch = main
 [filter "lfs"]
         # LFS subcommand
         clean = git-lfs clean -- %f
@@ -158,8 +160,3 @@
 [includeIf "gitdir/i:~/Working/enterprise/**"]
         # Include config file from enterprise projects
         path = ~/Working/enterprise/.gitconfig
-[init]
-        defaultBranch = main
-[blame]
-        # Show short date in blame view
-	date = short
