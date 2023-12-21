@@ -103,6 +103,12 @@
         commit-decoration-style = bold blue box ul
         file-style = bold blue ul
         file-decoration-style = green ul
+        minus-style = syntax "#390910"
+        minus-emph-style = syntax "#921628"
+        minus-empty-line-marker-style = syntax magenta
+        plus-style = syntax "#172d10"
+        plus-emph-style = syntax "#3e792a"
+        plus-empty-line-marker-style = syntax cyan
 [apply]
         # Auto fix white space
         whitespace = fix
