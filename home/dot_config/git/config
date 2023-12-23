@@ -4,7 +4,7 @@
         name = Trần Đức Nam
         email = me@dynamotn.dev
         # Signing SSH key
-        signingkey = ~/.ssh/key/Dynamo-Linux_ed25519.pub
+        signingkey = ~/.ssh/key/personal_ed25519.pub
 [gpg]
         # Use SSH instead of GPG to sign
         format = ssh
