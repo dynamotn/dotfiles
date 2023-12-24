@@ -11,7 +11,7 @@ arch:
 ubuntu:
   packages:
     - name: flameshot
-{{- else }}
+{{- else if eq .guiServer "W" }}
 name: screen_capture
 method: os
 is_essential: true
