@@ -6,7 +6,7 @@ Host *
     AddKeysToAgent yes
 
 Host github.com
-    IdentityFile ~/.ssh/key/Dynamo-Linux_ed25519
+    IdentityFile ~/.ssh/key/personal_ed25519
 
 Host gitlab.com
-    IdentityFile ~/.ssh/key/Dynamo-Linux_ed25519
+    IdentityFile ~/.ssh/key/personal_ed25519
