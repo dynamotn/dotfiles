@@ -1,5 +1,6 @@
 {{- if ne .guiServer "W" }}
 usr/share/wayland-sessions/dyland.desktop
+etc/greetd
 {{- end }}
 {{- if eq .guiServer "W" "X" }}
 {{- if ne .chezmoi.osRelease.id "gentoo" }}
