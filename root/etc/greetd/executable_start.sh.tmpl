@@ -1,5 +1,6 @@
 #!/bin/sh
-export XDG_RUNTIME_DIR=/run/user/$(id -u)
+export XDG_RUNTIME_DIR=/tmp/user-$(id -u)
+mkdir -p $XDG_RUNTIME_DIR
 export HOME=$XDG_RUNTIME_DIR
 export XDG_SESSION_TYPE=wayland
 {{- if eq .guiDriver "N" }}
