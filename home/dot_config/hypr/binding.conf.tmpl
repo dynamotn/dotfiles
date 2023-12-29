@@ -69,7 +69,7 @@ bind = $mainMod, G, togglegroup,
 # 3rd apps #
 ############
 bind = $mainMod, Q, exec, kitty fish -c "tmux -q has-session && tmux attach-session -d || tmux new-session -nwtf"
-bind = $mainMod, E, exec, firefox-bin
+bind = $mainMod, E, exec, firefox
 bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
 bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE={{- end }} bitrofi"

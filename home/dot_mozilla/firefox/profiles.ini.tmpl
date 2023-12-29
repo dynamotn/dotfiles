@@ -1,7 +1,7 @@
 {{- $configPath := joinPath .chezmoi.homeDir ".config/firefox/profiles" }}
 {{- $releaseId := "0" }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
-{{- $releaseId = mozillaInstallHash "/opt/firefox" }}
+{{- $releaseId = mozillaInstallHash "/usr/lib64/firefox" }}
 {{- else }}
 {{- $releaseId = mozillaInstallHash "/usr/lib/firefox" }}
 {{- end -}}
