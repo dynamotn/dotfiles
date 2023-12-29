@@ -39,9 +39,9 @@ exec-once = kitty fish -c "tmux -q has-session && tmux attach-session -d || tmux
 
 # Browser
 {{- if eq .place "home" }}
-exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Personal
+exec-once = firefox -P Personal
 {{- else if eq .place "office" }}
-exec-once = firefox{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Enterprise
+exec-once = firefox -P Enterprise
 {{- end }}
 
 # Email client
