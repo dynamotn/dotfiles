@@ -19,7 +19,6 @@
 |----|-------|-------|
 |`kitty`|Terminal emulator, support ligature fonts and GPU|`home/dot_config/kitty`|
 |`firefox`|Web browser|`silos/firefox`|
-|`thunderbird`|Email client|`silos/thunderbird`|
 |`nvtop`|Monitor resources of GPU|`silos/hyprland`, `silos/awesome`|
 |`obsidian`|Note-taking app|`silos/hyprland`|
 
