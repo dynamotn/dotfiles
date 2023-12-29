@@ -35,30 +35,4 @@ if [ $(ps aux | grep firefox | wc -l) -gt 2 ]; then
   done
   _success "Update firefox settings"
 fi
-
-if [ $(ps aux | grep thunderbird | wc -l) -gt 2 ]; then
-  _notice "Update thunderbird settings"
-  for profile in "personal" "enterprise"; do
-    if [ -f ~/.config/thunderbird/profiles/${profile}/prefs.js ]; then
-      _progress "Update addon setting for profile ${profile}"
-      grep "extensions.webextensions.uuids" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
-      grep "extensions.webextensions.ExtensionStorageIDB.migrated" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
-      grep "privacy.userContext.extension" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
-    fi
-
-    _progress "Update extensions data for profile ${profile}"
-    chezmoi add ~/.config/thunderbird/profiles/${profile}/extensions || true
-    chezmoi add ~/.config/thunderbird/profiles/${profile}/addons.json --create || true
-    chezmoi add ~/.config/thunderbird/profiles/${profile}/addonStartup.json.lz4 --create || true
-    chezmoi add ~/.config/thunderbird/profiles/${profile}/extension*.json --create || true
-
-    _progress "Update search engines for profile ${profile}"
-    chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
-
-    _progress "Update storage data for profile ${profile}"
-    chezmoi add ~/.config/thunderbird/profiles/${profile}/storage.sqlite --create || true
-    chezmoi add ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* --create || true
-  done
-  _success "Update thunderbird settings"
-fi
 {{- end }}
