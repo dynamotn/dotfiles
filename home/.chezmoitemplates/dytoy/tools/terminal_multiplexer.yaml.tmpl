@@ -1,0 +1,30 @@
+{{- if eq .place "cloud" }}
+name: tmux
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: app-misc/tmux
+arch:
+  packages:
+    - name: tmux
+ubuntu:
+  packages:
+    - name: tmux
+termux:
+  packages:
+    - name: tmux
+{{- else }}
+name: zellij
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: app-misc/zellij
+arch:
+  packages:
+    - name: zellij
+termux:
+  packages:
+    - name: zellij
+{{- end }}
