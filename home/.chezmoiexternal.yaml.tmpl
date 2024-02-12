@@ -103,6 +103,8 @@
   url: 'https://github.com/mikefarah/yq/releases/download/{{ $version }}/yq_linux_arm64'
   {{- else if eq .chezmoi.os "linux" }}
   url: 'https://github.com/mikefarah/yq/releases/download/{{ $version }}/yq_linux_{{ .chezmoi.arch }}'
+    {{- else if eq .chezmoi.os "darwin" }}
+  url: 'https://github.com/mikefarah/yq/releases/download/{{ $version }}/yq_darwin_{{ .chezmoi.arch }}'
   {{- end }}
   executable: true
 {{- if eq .kind "pc" }}
