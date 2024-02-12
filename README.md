@@ -15,7 +15,7 @@
 ## :book:&nbsp; Overview
 
 This repository contains all my dotfiles managed by [chezmoi](https://github.com/twpayne/chezmoi).
-Please note that this is my own personal dotfiles for Linux and Android (Termux).
+Please note that this is my own personal dotfiles for Linux and Android (Termux), with experimental version on MacOS.
 
 ## :brain:&nbsp; Philosophy
 
