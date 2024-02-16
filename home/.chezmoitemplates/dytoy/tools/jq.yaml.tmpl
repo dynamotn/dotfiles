@@ -1,7 +1,14 @@
 name: jq
-method: binary
 is_essential: true
+{{- if eq .chezmoi.os "darwin" }}
+method: os
+macos:
+  packages:
+    - name: jq
+{{- else }}
+method: binary
 github:
   repo: jqlang/jq
   version: latest
   release_asset: jq-linux-{{ .chezmoi.arch }}
+{{- end }}

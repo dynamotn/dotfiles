@@ -18,5 +18,9 @@ method: os
 termux:
   packages:
     - name: eza
+{{- else if eq .chezmoi.os "darwin" }}
+method: os
+macos:
+  packages:
+    - name: eza
 {{- end }}
-
