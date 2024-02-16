@@ -1,7 +1,15 @@
 name: direnv
+{{- if eq .chezmoi.os "darwin" }}
+method: os
+is_essential: true
+macos:
+  packages:
+    - name: direnv
+{{- else }}
 method: binary
 is_essential: true
 github:
   repo: direnv/direnv
   version: latest
   release_asset: direnv.linux-{{ .chezmoi.arch }}
+{{- end }}

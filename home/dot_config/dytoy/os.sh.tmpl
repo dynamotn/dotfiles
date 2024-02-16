@@ -134,6 +134,29 @@ _termux_run() {
     done
   done
 }
+{{- else if eq .chezmoi.os "darwin" }}
+_macos_run() {
+  for tool in "${package_tools[@]}"; do
+    is_essential=$(echo "$tool" | yq e '.is_essential')
+    if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
+      continue
+    fi
+
+    readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.macos.packages.[]')
+    for package in "${packages[@]}"; do
+      package_name=$(echo "$package" | yq e '.name')
+      if [[ "$package_name" == "null" ]]; then
+        continue
+      fi
+      package_param=$(echo "$package" | yq e '.param')
+      if [[ "$package_param" == "null" ]]; then
+        package_param=""
+      fi
+
+      _macos_install "$package_name" "$package_param"
+    done
+  done
+}
 {{- end }}
 
 _main() {
@@ -154,6 +177,9 @@ _main() {
   {{- else if eq .chezmoi.os "android" }}
   _info "OS of this machine is Termux."
   _termux_init && _termux_run
+  {{- else if eq .chezmoi.os "darwin" }}
+  _info "OS of this machine is MacOS."
+  _macos_run
   {{- end }}
 
   _success "Installed package tools"

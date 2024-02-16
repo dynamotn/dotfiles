@@ -4,6 +4,11 @@ method: os
 termux:
   packages:
     - name: age
+{{- else if eq .chezmoi.os "darwin" }}
+method: os
+macos:
+  packages:
+    - name: age
 {{- else }}
 method: binary
 is_essential: true

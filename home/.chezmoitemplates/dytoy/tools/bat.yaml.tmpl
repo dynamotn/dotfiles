@@ -37,4 +37,9 @@ method: os
 termux:
   packages:
     - name: bat
+{{- else if eq .chezmoi.os "darwin" }}
+method: os
+macos:
+  packages:
+    - name: bat
 {{- end }}

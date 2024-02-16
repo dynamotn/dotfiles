@@ -13,3 +13,6 @@ ubuntu:
 termux:
   packages:
     - name: fish
+macos:
+  packages:
+    - name: fish

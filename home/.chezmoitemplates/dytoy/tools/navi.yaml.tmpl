@@ -1,4 +1,11 @@
 name: navi
+{{- if eq .chezmoi.os "darwin" }}
+method: os
+is_essential: true
+macos:
+  packages:
+    - name: navi
+{{- else }}
 method: binary
 is_essential: true
 github:
@@ -16,3 +23,4 @@ github:
 archive:
   paths:
     - ./navi
+{{- end }}

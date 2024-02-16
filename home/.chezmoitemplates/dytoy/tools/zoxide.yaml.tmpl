@@ -1,4 +1,11 @@
 name: zoxide
+{{- if eq .chezmoi.os "darwin" }}
+method: os
+is_essential: true
+macos:
+  packages:
+    - name: direnv
+{{- else }}
 method: binary
 is_essential: true
 github:
@@ -20,3 +27,4 @@ archive:
       if [ -d ~/Working/personal/fish/caran/completions ]; then
         tar $param --strip=1 -C ~/Working/personal/fish/caran/completions completions/zoxide.fish
       fi
+{{- end }}

@@ -16,3 +16,7 @@ ubuntu:
 termux:
   packages:
     - name: neovim
+macos:
+  packages:
+    - name: neovim
+      param: --HEAD
