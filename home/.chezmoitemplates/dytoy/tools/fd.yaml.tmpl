@@ -37,4 +37,9 @@ method: os
 termux:
   packages:
     - name: fd
+{{- else if eq .chezmoi.os "darwin" }}
+method: os
+macos:
+  packages:
+    - name: fd
 {{- end }}

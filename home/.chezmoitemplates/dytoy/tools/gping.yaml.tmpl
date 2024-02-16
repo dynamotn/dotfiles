@@ -1,6 +1,12 @@
 name: gping
-method: binary
 is_essential: true
+{{- if eq .chezmoi.os "darwin" }}
+method: os
+macos:
+  packages:
+    - name: gping
+{{- else }}
+method: binary
 github:
   repo: orf/gping
   version: latest
@@ -12,3 +18,4 @@ github:
 archive:
   paths:
     - gping
+{{- end }}

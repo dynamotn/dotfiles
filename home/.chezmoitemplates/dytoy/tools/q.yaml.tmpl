@@ -3,7 +3,11 @@ is_essential: true
 method: binary
 github:
   repo: natesales/q
+  {{- if eq .chezmoi.os "darwin" }}
+  release_asset: q_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
+  {{- else }}
   release_asset: q_%1v_linux_{{ .chezmoi.arch }}.tar.gz
+  {{- end }}
 archive:
   paths:
     - q

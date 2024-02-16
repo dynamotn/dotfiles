@@ -39,4 +39,9 @@ method: os
 termux:
   packages:
     - name: ripgrep
+{{- else if eq .chezmoi.os "darwin" }}
+method: os
+macos:
+  packages:
+    - name: ripgrep
 {{- end }}
