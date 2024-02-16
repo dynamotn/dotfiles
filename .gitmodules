@@ -1,9 +1,6 @@
 [submodule "neovim"]
 	path = home/dot_config/nvim
 	url = git@gitlab.com:dynamo-config/neovim.git
-[submodule "fish"]
-	path = home/dot_config/fish
-	url = git@gitlab.com:dynamo-config/fish.git
 [submodule "tmux"]
 	path = home/dot_config/tmux
 	url = git@gitlab.com:dynamo-config/tmux.git
