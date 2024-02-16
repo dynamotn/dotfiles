@@ -82,7 +82,8 @@ _main() {
   # shellcheck disable=SC2086
   chezmoi apply $chezmoi_params
 
-  if ! command -v termux-setup-storage &> /dev/null; then
+  if ! command -v termux-setup-storage &> /dev/null;
+    and ! command -v sw_vers &> /dev/null; then
     _notice "Setup operating system"
     yq '.mode = "file"' "$HOME/.config/chezmoi/chezmoi.yaml" > "$HOME/.config/chezmoi/root_chezmoi.yaml"
     sudo env "PATH=$PATH" \
