@@ -65,3 +65,7 @@ _termux_init() {
 _termux_install() {
   dpkg-query -s "$1" 2&>1 || pkg install -y "$1"
 }
+
+_macos_install() {
+  brew ls | grep -E "^$1$" || brew install "$1" $2
+}

@@ -1,6 +1,7 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+{{- if eq .place "cloud" }} 
 trap "_error \"Can't setup tmux\"" ERR
 
 _notice "Setup tmux"
@@ -15,3 +16,4 @@ test ! -d {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm && \
 _progress "Install other plugins"
 bash {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm/bin/install_plugins
 _success "Setup tmux"
+{{- end }}
