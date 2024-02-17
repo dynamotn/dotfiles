@@ -77,8 +77,6 @@ set -g fish_prompt_pwd_dir_length 0
 set -g theme_nerd_fonts yes
 set -g theme_color_scheme terminal
 set -g theme_display_k8s_context yes
-
-set -U pisces_only_insert_at_eol 1
 ## }
 
 ## Fish or shell miscelaneous config {
@@ -147,11 +145,13 @@ if type -q projekt
 end
 ## }
 
+{{- if eq .chezmoi.os "darwin" }}
+# Iterm2
+test -e ~/.iterm2_shell_integration.fish; and source ~/.iterm2_shell_integration.fish
+{{- end }}
+
 ## Load per-machine config {
 if test -e $HOME/.config/fish/secret.fish
   source $HOME/.config/fish/secret.fish
 end
 ## }
-
-test -e {$HOME}/.iterm2_shell_integration.fish ; and source {$HOME}/.iterm2_shell_integration.fish
-
