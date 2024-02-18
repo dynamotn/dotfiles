@@ -13,6 +13,9 @@ git submodule update --init --remote --recursive \
   silos/icon \
   home/.chezmoitemplates/firefox/chrome/lepton \
   home/dot_config/firefox/profiles \
+  {{- else if eq .guiServer "X" "W" }}
+  home/.chezmoitemplates/firefox/chrome/lepton \
+  home/dot_config/firefox/profiles \
   {{- end }}
   {{- if eq .guiServer "X" }}
   home/dot_config/awesome \

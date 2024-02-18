@@ -9,6 +9,7 @@
 .config/kitty
 .config/firefox
 .mozilla/firefox
+Library/Application Support/Firefox
 .local/share/fonts
 .config/fontconfig
 .local/share/themes
@@ -21,7 +22,11 @@ Multimedia/Pictures/Wallpaper
 {{- else }}
 {{- if gt (output "bash" "-c" "ps aux | grep firefox | wc -l" | trim | int) 2 }}
 .config/firefox
+{{- if ne .guiServer "M" }}
 .mozilla/firefox
+Library/Application Support/Firefox
+{{- else }}
+{{- end }}
 {{- end }}
 {{- end }}
 
