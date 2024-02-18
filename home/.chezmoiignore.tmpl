@@ -19,7 +19,10 @@ Library/Application Support/Firefox
 .config/Trolltech.conf
 .config/user-dirs.dirs
 Multimedia/Pictures/Wallpaper
-{{- else }}
+{{- else if eq .guiServer "M" }}
+.mozilla/firefox
+{{- else if eq .guiServer "X" "W" }}
+Library/Application Support/Firefox
 {{- end }}
 
 {{- if ne .guiServer "X" }}
