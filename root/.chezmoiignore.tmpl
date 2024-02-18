@@ -4,9 +4,10 @@ etc/greetd
 {{- end }}
 {{- if eq .guiServer "W" "X" }}
 {{- if ne .chezmoi.osRelease.id "gentoo" }}
-/opt/firefox
+opt/firefox
 {{- end }}
 {{- if ne .chezmoi.osRelease.id "arch" }}
-/usr/lib/firefox
+usr/lib/firefox
+etc/vconsole.conf
 {{- end }}
 {{- end }}
