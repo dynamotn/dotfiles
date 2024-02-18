@@ -1,0 +1,15 @@
+name: fail2ban
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: net-analyzer/fail2ban
+arch:
+  packages:
+    - name: fail2ban
+termux:
+  packages:
+    - name: fail2ban
+macos:
+  packages:
+    - name: fail2ban
