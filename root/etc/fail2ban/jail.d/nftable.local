@@ -1,0 +1,3 @@
+[DEFAULT]
+banaction = nftables
+banaction_allports = nftables[type=allports]
