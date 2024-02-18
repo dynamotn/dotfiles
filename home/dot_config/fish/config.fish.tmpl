@@ -145,11 +145,6 @@ if type -q projekt
 end
 ## }
 
-{{- if eq .chezmoi.os "darwin" }}
-# Iterm2
-test -e ~/.iterm2_shell_integration.fish; and source ~/.iterm2_shell_integration.fish
-{{- end }}
-
 ## Load per-machine config {
 if test -e $HOME/.config/fish/secret.fish
   source $HOME/.config/fish/secret.fish
