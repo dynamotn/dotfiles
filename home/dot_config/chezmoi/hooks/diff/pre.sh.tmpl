@@ -3,7 +3,7 @@ set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 
 {{- if eq .guiServer "X" "W" }}
-if [ $(ps aux | grep firefox | wc -l) -gt 2 ]; then
+if [ $(ps aux | grep firefox | wc -l) -gt 0 ]; then
   _notice "Update firefox settings"
   for profile in "personal" "enterprise"; do
     if [ -f ~/.config/firefox/profiles/${profile}/prefs.js ]; then
