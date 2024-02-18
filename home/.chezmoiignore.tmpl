@@ -20,14 +20,6 @@ Library/Application Support/Firefox
 .config/user-dirs.dirs
 Multimedia/Pictures/Wallpaper
 {{- else }}
-{{- if gt (output "bash" "-c" "ps aux | grep firefox | wc -l" | trim | int) 2 }}
-.config/firefox
-{{- if ne .guiServer "M" }}
-.mozilla/firefox
-Library/Application Support/Firefox
-{{- else }}
-{{- end }}
-{{- end }}
 {{- end }}
 
 {{- if ne .guiServer "X" }}
