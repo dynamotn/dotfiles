@@ -1,9 +1,13 @@
 {{- $configPath := joinPath .chezmoi.homeDir ".config/firefox/profiles" }}
 {{- $releaseId := "0" }}
+{{- if eq .chezmoi.os "linux" "android" }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 {{- $releaseId = mozillaInstallHash "/usr/lib64/firefox" }}
 {{- else }}
 {{- $releaseId = mozillaInstallHash "/usr/lib/firefox" }}
+{{- end -}}
+{{- else if eq .chezmoi.os "darwin" }}
+{{- $releaseId = mozillaInstallHash "/Applications/Firefox.app/Contents/MacOS" }}
 {{- end -}}
 [Install{{- $releaseId -}}]
 {{- if eq .place "office" }}
