@@ -1,0 +1,17 @@
+{{- if eq .guiServer "X" "W" }}
+name: fonts
+is_essential: true
+method: os
+gentoo:
+  packages:
+    - name: media-fonts/roboto
+    - name: media-fonts/noto
+arch:
+  packages:
+    - name: ttf-roboto
+    - name: noto-fonts
+ubuntu:
+  packages:
+    - name: fonts-roboto
+    - name: fonts-noto
+{{- end }}

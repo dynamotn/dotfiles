@@ -97,14 +97,13 @@
   executable: true
   refreshPeriod: 168h
 .local/bin/yq:
-  {{- $version := "v4.35.1" }}
   type: file
   {{- if eq .chezmoi.os "android" }}
-  url: 'https://github.com/mikefarah/yq/releases/download/{{ $version }}/yq_linux_arm64'
+  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_linux_arm64'
   {{- else if eq .chezmoi.os "linux" }}
-  url: 'https://github.com/mikefarah/yq/releases/download/{{ $version }}/yq_linux_{{ .chezmoi.arch }}'
+  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_linux_{{ .chezmoi.arch }}'
     {{- else if eq .chezmoi.os "darwin" }}
-  url: 'https://github.com/mikefarah/yq/releases/download/{{ $version }}/yq_darwin_{{ .chezmoi.arch }}'
+  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_darwin_{{ .chezmoi.arch }}'
   {{- end }}
   executable: true
 {{- if eq .kind "pc" "laptop" }}
@@ -132,6 +131,12 @@
   stripComponents: 1
   exclude:
     - Catppuccin-Macchiato-Lavender-Cursors/index.theme
+{{- end }}
+{{- if eq .guiServer "X" "W" }}
+{{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/../silos/font/files/Community/Nerd/SymbolsNerdFont-Regular.ttf:
+  type: file
+  url: 'https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFont-Regular.ttf'
+  refreshPeriod: 168h
 {{- end }}
 Documents/Notes:
   type: git-repo
