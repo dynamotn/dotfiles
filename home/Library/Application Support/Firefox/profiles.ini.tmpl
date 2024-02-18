@@ -1,1 +1,24 @@
-../../../dot_mozilla/firefox/profiles.ini.tmpl
+{{- $configPath := joinPath .chezmoi.homeDir ".config/firefox/profiles" }}
+{{- $releaseId := mozillaInstallHash "/Applications/Firefox.app/Contents/MacOS" }}
+[Install{{- $releaseId -}}]
+Default={{- $configPath }}/enterprise
+Locked=1
+
+[Profile1]
+Name=Enterprise
+IsRelative=0
+Path={{- $configPath }}/enterprise
+
+{{- $releaseId := mozillaInstallHash "/Applications/Firefox Personal.app/Contents/MacOS" }}
+[Install{{- $releaseId -}}]
+Default={{- $configPath }}/personal
+Locked=1
+
+[Profile0]
+Name=Personal
+IsRelative=0
+Path={{- $configPath }}/personal
+
+[General]
+StartWithLastProfile=1
+Version=2
