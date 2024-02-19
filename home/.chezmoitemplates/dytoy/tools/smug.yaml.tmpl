@@ -1,8 +1,7 @@
+{{- if eq .place "cloud" }}
 name: smug
 method: binary
-{{- if eq .kind "pc" }}
 is_essential: true
-{{- end }}
 github:
   repo: ivaaaan/smug
   version: latest
@@ -14,3 +13,4 @@ github:
 archive:
   paths:
     - smug
+{{- end }}
