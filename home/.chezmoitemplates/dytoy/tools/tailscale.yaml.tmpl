@@ -1,0 +1,13 @@
+{{- if eq .kind "pc" }}
+name: tailscale
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: net-vpn/tailscale
+      accept_keywords: |-
+        net-vpn/tailscale ~amd64
+arch:
+  packages:
+    - name: tailscale
+{{- end }}
