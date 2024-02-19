@@ -1,0 +1,13 @@
+{{- if eq .kind "pc" }}
+name: obsidian
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: app-office/obsidian
+      accept_keywords: |-
+        app-office/obsidian ~amd64
+arch:
+  packages:
+    - name: obsidian
+{{- end }}
