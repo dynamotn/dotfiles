@@ -17,7 +17,9 @@ method: os
 is_essential: true
 gentoo:
   packages:
+    - name: x11-base/xorg-proto
     - name: gui-apps/swaylock-effects
+      accept_keywords: gui-apps/swaylock-effects **
     - name: gui-apps/swayidle
 arch:
   packages:
