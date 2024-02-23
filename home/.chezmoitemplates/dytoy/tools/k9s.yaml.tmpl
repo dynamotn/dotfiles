@@ -3,7 +3,13 @@ method: binary
 github:
   repo: derailed/k9s
   version: latest
-  release_asset:  k9s_Linux_{{ .chezmoi.arch }}.tar.gz
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "Darwin" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{- $os = "Linux" }}
+  {{- end }}
+  release_asset: k9s_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
 archive:
   paths:
     - k9s
