@@ -39,6 +39,7 @@ _arch_init() {
     cd /tmp/yay || exit
     makepkg -si --noconfirm
     rm -rf /tmp/yay
+    sudo pacman -Rscn go
   fi
 }
 
