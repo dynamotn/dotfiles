@@ -21,6 +21,7 @@ fish {{ .chezmoi.homeDir }}/.config/fish/setup.fish
 _progress "Install neccessary tools"
 {{ if eq .kind "pc" -}}
 fish -c "install_asdf"
+fish -c "update_fzf"
 fish -c "install_gcloud"
 fish -c "install_kubectl"
 fish -c "install_helm"
