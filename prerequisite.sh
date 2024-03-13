@@ -8,10 +8,10 @@ if command -v sw_vers &> /dev/null; then
   brew install bash coreutils findutils gnu-tar gnu-sed gawk gnutls gnu-indent gnu-getopt grep chezmoi age yq
   echo "export PATH=\"/opt/homebrew/bin:/opt/homebrew/opt/coreutils/libexec/gnubin:/opt/homebrew/opt/findutils/libexec/gnubin:/opt/homebrew/opt/gnu-tar/libexec/gnubin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:/opt/homebrew/opt/gawk/libexec/gnubin:/opt/homebrew/opt/gnu-indent/libexec/gnubin:/opt/homebrew/opt/gnu-getopt/bin:/opt/homebrew/opt/grep/libexec/gnubin:$PATH\"" >> ~/.zprofile
 elif command -v termux-setup-storage &> /dev/null; then
+  pkg update && pkg upgrade -y
   termux-change-repo
   termux-setup-storage
-  pkg update && pkg install -y git curl tsu
-  pkg install -y chezmoi age
+  pkg update && pkg install -y git curl tsu chezmoi age
 elif command -v apt &> /dev/null; then
   sudo apt update && sudo apt install -y git curl gnupg
 elif command -v pacman &> /dev/null; then
