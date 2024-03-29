@@ -1,21 +1,15 @@
 $mainMod = SUPER
 $altMod = ALT
 
-###########
 # Session #
-###########
 bind = $mainMod SHIFT, Q, exit,
 bind = $mainMod SHIFT, R, exec, hyprctl reload
 
-##########
 # Prompt #
-##########
 bind = $altMod, F2, exec, wofi --show run
 bind = $mainMod, F2, exec, wofi --show drun
 
-#############
 # Workspace #
-#############
 # Switch workspaces with mainMod + [0-9]
 bind = $mainMod, 1, exec, hyprsome workspace 1
 bind = $mainMod, 2, exec, hyprsome workspace 2
@@ -31,9 +25,7 @@ bind = $mainMod, 9, exec, hyprsome workspace 9
 bind = $mainMod, mouse_down, workspace, e+1
 bind = $mainMod, mouse_up, workspace, e-1
 
-##########
 # Window #
-##########
 # Move active window to a workspace with mainMod + SHIFT + [0-9]
 bind = $mainMod SHIFT, 1, exec, hyprsome move 1
 bind = $mainMod SHIFT, 2, exec, hyprsome move 2
@@ -65,9 +57,7 @@ bind = $mainMod, H, togglefloating,
 bind = $mainMod, J, togglesplit,
 bind = $mainMod, G, togglegroup,
 
-############
 # 3rd apps #
-############
 bind = $mainMod, Q, exec, kitty
 bind = $mainMod, E, exec, firefox
 bind = $mainMod, N, exec, swaync-client -t -sw
@@ -78,9 +68,7 @@ bind = $mainMod, L, exec, swaylock --screenshots --clock --indicator --indicator
 bind = $mainMod, S, exec, grim -g "$(slurp)" - | swappy -f -
 bind = $mainMod, Z, exec, hdrop kitty --class btop -e btop
 
-##############
 # Multimedia #
-##############
 bindle = , XF86AudioRaiseVolume, exec, wpctl set-volume -l "1.0" @DEFAULT_AUDIO_SINK@ 6%+
 bindle = , XF86AudioLowerVolume, exec, wpctl set-volume -l "1.0" @DEFAULT_AUDIO_SINK@ 6%-
 bindl = , XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
