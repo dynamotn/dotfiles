@@ -7,9 +7,6 @@ gentoo:
 arch:
   packages:
     - name: fail2ban
-termux:
-  packages:
-    - name: fail2ban
 macos:
   packages:
     - name: fail2ban
