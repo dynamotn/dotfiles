@@ -1,10 +1,13 @@
 name: direnv
-{{- if eq .chezmoi.os "darwin" }}
+{{- if eq .chezmoi.os "darwin" "android" }}
 method: os
 is_essential: true
 macos:
   packages:
     - name: direnv
+termux:
+  packages:
+    - name: direvn
 {{- else }}
 method: binary
 is_essential: true
