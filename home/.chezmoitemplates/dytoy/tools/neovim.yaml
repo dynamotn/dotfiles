@@ -10,7 +10,7 @@ gentoo:
         app-editors/neovim -nvimpager
 arch:
   packages:
-    - name: neovim-git
+    - name: neovim
 ubuntu:
   packages:
     - name: neovim
