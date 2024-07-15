@@ -15,6 +15,14 @@ ubuntu:
     - name: lightdm
     - name: lightdm-gtk-greeter
 {{- else if eq .guiServer "W" }}
+{{- if eq .place "office" }}
+name: gdm
+method: os
+is_essential: true
+arch:
+  packages:
+    - name: gdm
+{{- else }}
 name: greetd
 method: os
 is_essential: true
@@ -28,4 +36,5 @@ arch:
   packages:
     - name: greetd
     - name: greetd-regreet
+{{- end }}
 {{- end }}
