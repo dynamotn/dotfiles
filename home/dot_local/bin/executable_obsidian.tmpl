@@ -1,0 +1,15 @@
+#!/bin/bash
+
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-~/.config}
+
+# Allow users to override command-line options
+if [[ -f $XDG_CONFIG_HOME/obsidian/user-flags.conf ]]; then
+OBSIDIAN_USER_FLAGS="$(sed 's/#.*//' $XDG_CONFIG_HOME/obsidian/user-flags.conf | tr '\n' ' ')"
+fi
+
+# Launch
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
+/opt/Obsidian/obsidian $OBSIDIAN_USER_FLAGS
+{{- else if eq .chezmoi.osRelease.id "archlinux" }}
+/usr/lib/obsidian/app.asar $OBSIDIAN_USER_FLAGS
+{{- end }}
