@@ -1,0 +1,7 @@
+{{- if eq .guiServer "W" }}
+--enable-features=UseOzonePlatform,WaylandWindowDecorations
+--ozone-platform=wayland
+--enable-wayland-ime
+--ozone-platform-hint=auto
+--disable-gpu
+{{- end }}
