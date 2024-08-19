@@ -1,9 +1,7 @@
 {{- if eq .guiServer "X" }}
 name: greenclip
 method: binary
-{{- if eq .kind "pc" }}
 is_essential: true
-{{- end }}
 github:
   repo: erebe/greenclip
   version: latest
@@ -11,9 +9,7 @@ github:
 {{- else if eq .guiServer "W" }}
 name: cliphist
 method: binary
-{{- if eq .kind "pc" }}
 is_essential: true
-{{- end }}
 github:
   repo: sentriz/cliphist
   version: latest

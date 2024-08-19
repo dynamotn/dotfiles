@@ -19,7 +19,7 @@ fi
 fish {{ .chezmoi.homeDir }}/.config/fish/setup.fish
 
 _progress "Install neccessary tools"
-{{ if eq .kind "pc" -}}
+{{ if eq .kind "pc" "laptop" -}}
 fish -c "install_asdf"
 fish -c "update_fzf"
 fish -c "install_gcloud"
