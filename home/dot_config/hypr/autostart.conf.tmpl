@@ -13,6 +13,7 @@ exec = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec-once = gentoo-pipewire-launcher restart
 {{- else }}
 exec-once = systemctl --user start wireplumber
+exec-once = systemctl --user start pipewire-pulse
 {{- end }}
 exec-once = bash ~/.config/hypr/scripts/screencast.sh
 
