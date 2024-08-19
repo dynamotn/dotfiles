@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 SIGNATURE = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+USER = subprocess.check_output(["id", "-u"]).decode("utf-8").strip()
 
 def get_workspaces():
     workspaces = subprocess.check_output(["hyprctl", "workspaces", "-j"])
@@ -35,7 +36,11 @@ def get_active_empty():
     return True
 
 def monitor_socat_output():
-    socat_command = ["nc", "-U", f"/tmp/hypr/{SIGNATURE}/.socket2.sock"]
+    {{- if eq .chezmoi.osRelease.id "gentoo" }}
+    socat_command = ["nc", "-U", f"/tmp/user-{USER}/hypr/{SIGNATURE}/.socket2.sock"]
+    {{- else }}
+    socat_command = ["nc", "-U", f"/run/user/{USER}/hypr/{SIGNATURE}/.socket2.sock"]
+    {{- end }}
     with subprocess.Popen(socat_command, stdout=subprocess.PIPE, text=True) as process:
         for line in process.stdout:
             result = {
