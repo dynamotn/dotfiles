@@ -17,3 +17,7 @@ user_pref("webgl.disabled", false);
 // 2811: Disable clear session and history on shutdown
 user_pref("privacy.clearOnShutdown.history", false); // Browsing & Download History
 user_pref("privacy.clearOnShutdown.sessions", false); // Active Logins
+user_pref("privacy.clearOnShutdown.cookies", false); // Cookies
+user_pref("privacy.clearOnShutdown.offlineApps", false); // Site Data
+user_pref("privacy.clearOnShutdown.sessions", false);  // Active Logins [DEFAULT: false]
+user_pref("privacy.clearOnShutdown_v2.cookiesAndStorage", false); // Cookies, Site Data, Active Logins [FF128+]

@@ -12,16 +12,16 @@ const default_config = {
           name: "communicate",
           links: [
             {
-              name: "gmail",
-              url: "https://mail.google.com",
-              icon: "󰊫",
+              name: "outlook",
+              url: "https://outlook.office.com",
+              icon: "󰴢",
               icon_color: "red",
             },
             {
-              name: "telegram",
-              url: "https://web.telegram.org/k/",
-              icon: "",
-              icon_color: "blue",
+              name: "teams",
+              url: "https://teams.microsoft.com",
+              icon: "󰊻",
+              icon_color: "purple",
             },
           ],
         },
@@ -30,9 +30,15 @@ const default_config = {
           links: [
             {
               name: "gitlab",
-              url: "https://gitlab.topworking.vn",
+              url: "https://git3.fsoft.com.vn",
               icon: "",
               icon_color: "peach",
+            },
+            {
+              name: "github",
+              url: "https://github.com/enterprises/fsoft",
+              icon: "",
+              icon_color: "black",
             },
           ],
         },
@@ -40,14 +46,20 @@ const default_config = {
           name: "management",
           links: [
             {
-              name: "jira",
-              url: "https://jira.topworking.vn",
+              name: "jira dcs",
+              url: "https://insight.fsoft.com.vn/jira9",
+              icon: "",
+              icon_color: "blue",
+            },
+            {
+              name: "jira f1",
+              url: "https://insight.fsoft.com.vn/onepmx",
               icon: "",
               icon_color: "blue",
             },
             {
               name: "confluence",
-              url: "https://confluence.topworking.vn",
+              url: "https://insight.fsoft.com.vn/conf",
               icon: "󰈙",
               icon_color: "blue",
             },
