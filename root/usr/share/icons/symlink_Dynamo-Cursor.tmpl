@@ -1,1 +1,1 @@
-{{ .chezmoi.sourceDir }}/../silos/cursor
+{{ splitList (splitList "/" .chezmoi.configFile | last) .chezmoi.configFile | join "/" }}/../../.local/share/icons/Dynamo-Cursor
