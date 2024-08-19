@@ -5,6 +5,7 @@
 |`neovim`|My love editor, and IDE in my eyes|`silos/neovim`|
 |`fish`|Smart command line shell|`silos/fish`|
 |`tmux`|Terminal multiplexer|`silos/tmux`|
+|`zellij`|Terminal multiplexer|`silos/zellij`|
 |`grc`|Colorise for some GNU/Linux commands|`silos/fish`|
 |`tar`, `unzip`, `gzip`,`bzip2`|Uncompress file|Prerequisite, in `home/dot_config/dynamo`|
 |`ssh`|SSH client|DevOps tool|
@@ -61,3 +62,4 @@
 |`pipewire`|Audio and video devices framework|
 |`kernel`|Linux kernel for OS|
 |`cronie`|Run scheduled tasks|
+|`fail2ban`|Intrusion prevention software framework|
