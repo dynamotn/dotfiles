@@ -1,0 +1,12 @@
+{{- if eq .kind "laptop" }}
+name: auto-cpufreq
+method: os
+gentoo:
+  packages:
+    - name: sys-power/auto-cpufreq
+      accept_keywords: |-
+        sys-power/auto-cpufreq ~amd64
+arch:
+  packages:
+    - name: auto-cpufreq
+{{- end }}
