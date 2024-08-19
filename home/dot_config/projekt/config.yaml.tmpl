@@ -40,39 +40,9 @@ folders:
     is_workspace: true
     regex: ""
     priority: 0
-  {{- if eq $machine "office_pc" }}
-  - path: {{ .chezmoi.homeDir }}/Working/enterprise/DSO/docker
-    prefix: "docker"
-    is_workspace: true
-    regex: ""
-    priority: 0
-  - path: {{ .chezmoi.homeDir }}/Working/enterprise/DSO/docs
-    prefix: "docs"
-    is_workspace: true
-    regex: ""
-    priority: 0
-  - path: {{ .chezmoi.homeDir }}/Working/enterprise/DSO/basic
-    prefix: "core"
-    is_workspace: true
-    regex: ""
-    priority: 0
-  - path: {{ .chezmoi.homeDir }}/Working/enterprise/DSO/helm
-    prefix: "helm"
-    is_workspace: true
-    regex: ""
-    priority: 0
-  - path: {{ .chezmoi.homeDir }}/Working/enterprise/DSO/security
-    prefix: "security"
-    is_workspace: true
-    regex: ""
-    priority: 0
-  - path: {{ .chezmoi.homeDir }}/Working/enterprise/DSO/terraform
-    prefix: "terraform"
-    is_workspace: true
-    regex: ""
-    priority: 0
+  {{- if eq .place "office" }}
   {{- end }}
-  {{- if eq .kind "pc" }}
+  {{- if eq .kind "pc" "laptop" }}
   - path: {{ .chezmoi.homeDir }}/Documents/Notes
     prefix: ""
     is_workspace: false

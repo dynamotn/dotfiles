@@ -1,9 +1,7 @@
 {{- if eq .chezmoi.os "linux" }}
 name: btop
 method: binary
-{{- if eq .kind "pc" }}
 is_essential: true
-{{- end }}
 github:
   repo: aristocratos/btop
   version: latest
