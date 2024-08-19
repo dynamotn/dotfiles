@@ -10,6 +10,6 @@ fi
 # Launch
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 /opt/Obsidian/obsidian $OBSIDIAN_USER_FLAGS
-{{- else if eq .chezmoi.osRelease.id "archlinux" }}
-/usr/lib/obsidian/app.asar $OBSIDIAN_USER_FLAGS
+{{- else if eq .chezmoi.osRelease.id "arch" }}
+exec electron30 /usr/lib/obsidian/app.asar $OBSIDIAN_USER_FLAGS
 {{- end }}
