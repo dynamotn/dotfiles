@@ -18,6 +18,12 @@ is_essential: true
 gentoo:
   packages:
     - name: gui-wm/hyprland
+      accept_keywords: |-
+        gui-wm/hyprland ~amd64
+        dev-util/hyprwayland-scanner ~amd64
+        dev-libs/wayland-protocols ~amd64
+        gui-libs/aquamarine ~amd64
+        gui-libs/hyprutils ~amd64
     - name: gui-libs/xdg-desktop-portal-wlr
 arch:
   packages:
