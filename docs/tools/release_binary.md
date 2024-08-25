@@ -30,6 +30,7 @@
 |[kubeconform](https://github.com/yannh/kubeconform)|Validate Kubernetes manifest|DevOps tool|
 |[sops](https://github.com/getsops/sops)|Managing secrets in Git repositories|DevOps tool|
 |[argocd](https://github.com/argoproj/argo-cd)|Interactive with ArgoCD on Kubenetes cluster|DevOps tool|
+|[flux](https://github.com/fluxcd/flux2)|Interactive with Flux on Kubenetes cluster|DevOps tool|
 |[terragrunt](https://github.com/gruntwork-io/terragrunt)|Wrapper for Terraform to provide extra tool|DevOps tool|
 |[terraformer](https://github.com/GoogleCloudPlatform/terraformer)|Generate Terraform from existing infrastructure|DevOps tool|
 |[terraform-docs](https://github.com/terraform-docs/terraform-docs)|Generate documents for Terraform modules|DevOps tool|
