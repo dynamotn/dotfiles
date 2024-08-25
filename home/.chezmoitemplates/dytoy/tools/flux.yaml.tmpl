@@ -1,0 +1,8 @@
+name: flux
+method: binary
+github:
+  repo: fluxcd/flux2
+  release_asset: flux_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
+archive:
+  paths:
+    - flux
