@@ -1,5 +1,5 @@
 [Desktop Entry]
 Name=Dyland
 Comment=An intelligent dynamic tiling Wayland compositor
-Exec=sh ~/.wayland_init.rc
+Exec=~/.wayland_init.fish
 Type=Application
