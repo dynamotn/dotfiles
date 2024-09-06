@@ -52,6 +52,7 @@
 |`swappy`|Editing snapshot tool for Wayland|`silos/hyprland`|
 |`grim`|Screen capturing tool for Wayland|`silso/hyprland`|
 |`slurp`|Selecting region tool for Wayland|`silos/hyprland`|
+|`swaync`|Notification center for Wayland||
 
 # System applications
 |Tool|Purpose|

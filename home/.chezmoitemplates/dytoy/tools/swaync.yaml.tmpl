@@ -1,0 +1,13 @@
+{{- if eq .guiServer "W" }}
+name: swaync
+method: os
+gentoo:
+  packages:
+    - name: gui-apps/swaync
+      repo: guru
+      accept_keywords: |-
+        gui-apps/swaync **
+arch:
+  packages:
+    - name: swaync
+{{- end }}
