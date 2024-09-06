@@ -150,3 +150,9 @@ if test -e $HOME/.config/fish/secret.fish
   source $HOME/.config/fish/secret.fish
 end
 ## }
+
+{{- if and (eq .place "home") (eq .kind "pc") }}
+if fish_is_root_user
+  builtin cd /etc
+end
+{{- end }}
