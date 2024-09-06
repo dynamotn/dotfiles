@@ -1,0 +1,9 @@
+#!/bin/env fish
+
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
+export XDG_RUNTIME_DIR=/tmp/user-$(id -u)
+{{- else }}
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+{{- end }}
+mkdir -p $XDG_RUNTIME_DIR
+dbus-run-session Hyprland

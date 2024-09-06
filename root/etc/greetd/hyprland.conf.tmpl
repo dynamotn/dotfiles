@@ -1,7 +1,23 @@
 exec-once = regreet; hyprctl dispatch exit
-exec-once = dbus-update-activation-environment --all --systemd
 exec-once = bash {{ .chezmoi.sourceDir }}/../../.config/hypr/scripts/gtk.sh
+
 {{- template "hyprland/monitor" . -}}
+
+{{- if eq .guiServer "N" }}
+# NVIDIA setting
+env = LIBVA_DRIVER_NAME, nvidia
+env = __GLX_VENDOR_LIBRARY_NAME, nvidia
+env = GBM_BACKEND, nvidia-drm
+{{- end }}
+
+# XDG specification
+env = XDG_CURRENT_DESKTOP, Hyprland
+env = XDG_SESSION_TYPE, wayland
+env = XDG_SESSION_DESKTOP, Hyprland
+
+cursor {
+  no_hardware_cursors = true
+}
 
 misc {
   disable_hyprland_logo = true
