@@ -2,7 +2,7 @@
 usr/share/wayland-sessions/dyland.desktop
 etc/greetd
 {{- end }}
-{{- if ne .guiServer "0" }}
+{{- if eq .guiServer "X" "W" }}
 {{- if ne .chezmoi.osRelease.id "gentoo" }}
 opt/firefox
 {{- end }}
