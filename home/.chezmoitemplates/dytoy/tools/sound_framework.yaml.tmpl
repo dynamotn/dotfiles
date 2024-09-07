@@ -7,6 +7,8 @@ gentoo:
     - name: media-video/pipewire
       use: |-
         media-video/pipewire sound-server bluetooth pipewire-alsa dbus
+      accept_keywords:
+        media-video/pipewire ~amd64
     - name: media-video/wireplumber
       use: |-
         media-video/wireplumber elogind

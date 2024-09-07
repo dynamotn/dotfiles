@@ -24,7 +24,9 @@ gentoo:
         dev-libs/wayland-protocols ~amd64
         gui-libs/aquamarine ~amd64
         gui-libs/hyprutils ~amd64
-    - name: gui-libs/xdg-desktop-portal-wlr
+        gui-libs/xdg-desktop-portal-hyprland ~amd64
+        dev-cpp/sdbus-c++ ~amd64
+    - name: gui-libs/xdg-desktop-portal-hyprland
 arch:
   packages:
     {{- if eq .guiDriver "N" }}
