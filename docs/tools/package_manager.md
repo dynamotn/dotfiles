@@ -10,7 +10,7 @@
 |`tar`, `unzip`, `gzip`,`bzip2`|Uncompress file|Prerequisite, in `home/dot_config/dynamo`|
 |`ssh`|SSH client|DevOps tool|
 |`tree-sitter`|Parser generator tool for syntax|`silos/neovim`|
-|`podman`|Manage containers and pods, alternative of docker|DevOps tool|
+|`docker`|Manage containers|DevOps tool|
 |`tshark`|CLI of Wireshark, network packet analysis|Miscellaneous|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
 
