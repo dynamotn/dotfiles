@@ -4,15 +4,15 @@ name: container
 method: os
 gentoo:
   packages:
-    - name: app-containers/podman
+    - name: app-containers/docker
+    - name: app-containers/docker-cli
 arch:
   packages:
-    - name: podman
-    - name: podman-docker
+    - name: docker
 
 ubuntu:
   packages:
-    - name: podman
-    - name: podman-docker
+    - name: docker-ce
+    - name: docker-ce-cli
 {{- end }}
 {{- end }}
