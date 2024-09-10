@@ -1,0 +1,8 @@
+{{- if eq .guiServer "W" }}
+name: hyprsome
+method: shell
+is_essential: true
+dependencies:
+  - rust
+content: cargo install hyprsome
+{{- end }}

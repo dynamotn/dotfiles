@@ -1,0 +1,11 @@
+{{- if eq .guiServer "W" }}
+name: rust
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: dev-lang/rust
+arch:
+  packages:
+    - name: rust
+{{- end }}

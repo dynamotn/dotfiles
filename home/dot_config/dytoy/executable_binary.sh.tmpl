@@ -243,7 +243,11 @@ _parse_gitlab_release() {
 }
 
 _main() {
-  _info "Install binary tools"
+  if [ "$PACKAGE" = "" ]; then
+    _info "Install binary tools"
+  else
+    _info "Install binary tool: $PACKAGE"
+  fi
   readarray package_tools < <(yq e -o=j -I=0 'filter(.method == "binary") | .[]' ~/.config/dytoy/tools.yaml )
   for package in "${package_tools[@]}"; do
     name=$(echo "$package" | yq e '.name')

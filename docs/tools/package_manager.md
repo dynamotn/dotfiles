@@ -53,6 +53,7 @@
 |`grim`|Screen capturing tool for Wayland|`silso/hyprland`|
 |`slurp`|Selecting region tool for Wayland|`silos/hyprland`|
 |`swaync`|Notification center for Wayland||
+|`rust`|Compiler and library for Rust|Prerequisite for cargo installation|
 
 # System applications
 |Tool|Purpose|
