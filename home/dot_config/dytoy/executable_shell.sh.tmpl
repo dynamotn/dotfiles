@@ -1,0 +1,56 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/os.sh
+trap "_error \"Install tools failed\"" ERR
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+_usage() {
+  echo "$0 usage:" && grep " .) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
+  exit 0
+}
+
+_parse_args() {
+  while getopts ":he" arg; do
+    case $arg in
+      e) # Update only essential tool
+        FLAG_IS_ESSENTIAL=true
+        ;;
+      h) # Display help
+        _usage
+        ;;
+      *) ;;
+    esac
+  done
+}
+
+_main() {
+  _info "Install shell tools"
+  readarray shell_tools < <(yq e -o=j -I=0 'filter(.method == "shell") | .[]' ~/.config/dytoy/tools.yaml )
+
+  for tool in "${shell_tools[@]}"; do
+    is_essential=$(echo "$tool" | yq e '.is_essential')
+    if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
+      continue
+    fi
+
+    readarray dependencies < <(echo "$tool" | yq e -o=j -I=0 -r '.dependencies.[]')
+    for dependency in "${dependencies[@]}"; do
+      dependency=${dependency%$'\n'}
+      method=$(yq e -o=j -I=0 'filter(.name == "'"$dependency"'") | .[].method | .' ~/.config/dytoy/tools.yaml)
+      method=${method%\"}
+      method=${method#\"}
+      {{ lookPath "bash" }} "$SCRIPT_DIR/$method.sh" -t "$dependency"
+    done
+    content=$(echo "$tool" | yq e '.content')
+    {{ lookPath "bash" }} -c "$content"
+  done
+
+  _success "Installed shell tools"
+}
+
+FLAG_IS_ESSENTIAL=false
+_parse_args "$@"
+
+_main

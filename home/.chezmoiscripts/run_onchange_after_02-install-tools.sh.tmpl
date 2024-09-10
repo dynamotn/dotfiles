@@ -10,9 +10,14 @@ _install_binary_tools() {
   bash {{ .chezmoi.homeDir  }}/.config/dytoy/binary.sh -e -n
 }
 
+_install_shell_tools() {
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/shell.sh -e
+}
+
 _main() {
   _install_package_tools
   _install_binary_tools
+  _install_shell_tools
 }
 
 export PATH=$PATH:~/.local/bin
