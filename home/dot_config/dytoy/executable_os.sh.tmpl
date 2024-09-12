@@ -31,7 +31,7 @@ _parse_args() {
 _gentoo_run() {
   for tool in "${package_tools[@]}"; do
     tool_name=$(echo "$tool" | yq e '.name')
-    if [ "$TOOL" = "" ] || [ "$TOOL" = "$name" ]; then
+    if [ "$TOOL" = "" ] || [ "$TOOL" = "$tool_name" ]; then
       is_essential=$(echo "$tool" | yq e '.is_essential')
       if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
         continue
