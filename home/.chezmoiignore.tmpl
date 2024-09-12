@@ -25,6 +25,10 @@ Multimedia/Pictures/Wallpaper
 Library/Application Support/Firefox
 {{- end }}
 
+{{- if gt (output "bash" "-c" "ps aux | grep firefox | wc -l" | trim | int) 2 }}
+.config/firefox
+{{- end }}
+
 {{- if ne .guiServer "X" }}
 .config/awesome
 .config/ibus-bamboo
@@ -40,6 +44,5 @@ Library/Application Support/Firefox
 
 {{- if ne .place "office" }}
 .config/smug/*
-.config/firefox/profiles/Chat
 {{- end }}
 !.config/smug/dotfiles.yml
