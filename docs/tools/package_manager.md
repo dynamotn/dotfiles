@@ -54,6 +54,7 @@
 |`slurp`|Selecting region tool for Wayland|`silos/hyprland`|
 |`swaync`|Notification center for Wayland||
 |`rust`|Compiler and library for Rust|Prerequisite for cargo installation|
+|`wdisplays`|Configure display monitors manually with GUI||
 
 # System applications
 |Tool|Purpose|
