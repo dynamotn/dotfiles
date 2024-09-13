@@ -49,13 +49,18 @@ bind = $altMod, Tab, cyclenext,
 # Move/resize windows with mainMod + LMB/RMB and dragging
 bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
+bind = $mainMod SHIFT, right, resizeactive, 100 0 # Increase window width with keyboard
+bind = $mainMod SHIFT, left, resizeactive, -100 0 # Reduce window width with keyboard
+bind = $mainMod SHIFT, down, resizeactive, 0 100 # Increase window height with keyboard
+bind = $mainMod SHIFT, up, resizeactive, 0 -100 # Reduce window height with keyboard
 
-# Kill window
+# Windows
 bind = $altMod, F4, killactive,
 bind = $mainMod, F, fullscreen
 bind = $mainMod, H, togglefloating,
 bind = $mainMod, J, togglesplit,
 bind = $mainMod, G, togglegroup,
+bind = $mainMod, K, swapsplit,
 
 # 3rd apps #
 bind = $mainMod, Q, exec, kitty
@@ -73,3 +78,7 @@ bindle = , XF86AudioRaiseVolume, exec, wpctl set-volume -l "1.0" @DEFAULT_AUDIO_
 bindle = , XF86AudioLowerVolume, exec, wpctl set-volume -l "1.0" @DEFAULT_AUDIO_SINK@ 6%-
 bindl = , XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 bindl = , XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+bind = , XF86AudioPlay, exec, playerctl play-pause
+bind = , XF86AudioPause, exec, playerctl pause
+bind = , XF86AudioNext, exec, playerctl next
+bind = , XF86AudioPrev, exec, playerctl previous
