@@ -1,0 +1,11 @@
+{{- if eq .guiServer "X" "W" }}
+name: libnotify
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: x11-libs/libnotify
+arch:
+  packages:
+    - name: libnotify
+{{- end }}
