@@ -21,3 +21,4 @@ user_pref("privacy.clearOnShutdown.cookies", false); // Cookies
 user_pref("privacy.clearOnShutdown.offlineApps", false); // Site Data
 user_pref("privacy.clearOnShutdown.sessions", false);  // Active Logins [DEFAULT: false]
 user_pref("privacy.clearOnShutdown_v2.cookiesAndStorage", false); // Cookies, Site Data, Active Logins [FF128+]
+user_pref("privacy.clearOnShutdown_v2.historyFormDataAndDownloads", false); // Browsing & Download History [FF128+]
