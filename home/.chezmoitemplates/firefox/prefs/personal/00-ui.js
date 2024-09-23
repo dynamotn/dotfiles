@@ -1,4 +1,4 @@
-{{- if and (eq .place "office") }}
+{{- if and (eq .place "home") }}
 {{- $source := -1.0 }}
 {{- if eq .kind "pc" }}
 {{- $source = 1.1 }}
