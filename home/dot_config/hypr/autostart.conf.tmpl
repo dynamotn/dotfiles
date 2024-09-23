@@ -1,3 +1,6 @@
+# Plugin manager
+exec-once = hyprpm reload -n && hyprctl reload
+
 # Authentication agent
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 exec = /usr/lib64/libexec/polkit-gnome-authentication-agent-1

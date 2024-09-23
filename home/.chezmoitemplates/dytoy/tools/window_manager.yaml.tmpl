@@ -27,6 +27,7 @@ gentoo:
         gui-libs/xdg-desktop-portal-hyprland ~amd64
         dev-cpp/sdbus-c++ ~amd64
     - name: gui-libs/xdg-desktop-portal-hyprland
+    - name: x11-libs/xcb-util
 arch:
   packages:
     {{- if eq .guiDriver "N" }}

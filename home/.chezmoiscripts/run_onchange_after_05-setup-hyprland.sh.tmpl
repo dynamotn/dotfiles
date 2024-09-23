@@ -1,0 +1,21 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+{{- if eq .guiServer "W" }}
+trap "_error \"Can't setup hyprland\"" ERR
+
+_notice "Setup hyprland"
+# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/hypr/plugins" | include | sha256sum }}
+
+_progress "Install hyprland's header"
+hyprpm update
+
+_progress "Install plugins"
+while IFS="" read -r plugin; do
+  _progress "Install plugin ${plugin}"
+  hyprpm add https://github.com/${plugin} || true
+  hyprpm enable ${plugin#*/}
+done < {{ joinPath .chezmoi.sourceDir "dot_config/hypr/plugins" }}
+hyprpm reload -n
+_success "Setup hyprland"
+{{- end }}
