@@ -112,7 +112,7 @@ set -U FZF_DEFAULT_OPTS "\
 --color=marker:#f4dbd6,fg+:#cad3f5,prompt:#c6a0f6,hl+:#ed8796 \
 --cycle --layout=reverse --preview-window=wrap \
 --marker=\"*\" --prompt=\" \" --pointer=\"=>\""
-test -n "$TMUX"; and set -g FZF_TMUX 1
+type -q tmux; and test -n "$TMUX"; and set -g FZF_TMUX 1
 if type -q fdfind
   alias fd fdfind
 end
