@@ -1,3 +1,4 @@
 {{- if eq .place "office" }}
-monitor = DP-1, preferred, 0x0, 1
+monitor = HDMI-A-1, preferred, 0x0, 1
+monitor = Unknown-1, disable
 {{- end }}
