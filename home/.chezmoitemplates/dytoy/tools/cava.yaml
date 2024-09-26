@@ -1,0 +1,11 @@
+name: cava
+method: os
+gentoo:
+  packages:
+    - name: media-sound/cava
+arch:
+  packages:
+    - name: cava
+ubuntu:
+  packages:
+    - name: cava

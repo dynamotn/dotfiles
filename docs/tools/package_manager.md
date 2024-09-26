@@ -13,7 +13,7 @@
 |`docker`|Manage containers|DevOps tool|
 |`tshark`|CLI of Wireshark, network packet analysis|Miscellaneous|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
-
+|`cava`|Audio visualizer||
 
 # Both X and Wayland applications
 |Tool|Purpose|Used in|
