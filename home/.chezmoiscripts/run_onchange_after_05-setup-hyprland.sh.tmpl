@@ -13,7 +13,7 @@ hyprpm update
 _progress "Install plugins"
 while IFS="" read -r plugin; do
   _progress "Install plugin ${plugin}"
-  hyprpm add https://github.com/${plugin} || true
+  hyprpm add -f https://github.com/${plugin} || true
   hyprpm enable ${plugin#*/}
 done < {{ joinPath .chezmoi.sourceDir "dot_config/hypr/plugins" }}
 hyprpm reload -n
