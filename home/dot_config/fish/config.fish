@@ -36,23 +36,7 @@ __add_folder_to_path $HOME/.yarn/bin
 __add_folder_to_path $HOME/.cargo/bin
 __add_folder_to_path $HOME/.go/bin
 __add_folder_to_path $HOME/.local/share/nvim/mason/bin
-{{- if eq .chezmoi.os "darwin" }}
-__add_folder_to_path /opt/homebrew/bin
-__add_folder_to_path /opt/homebrew/opt/coreutils/libexec/gnubin
-__add_folder_to_path /opt/homebrew/opt/findutils/libexec/gnubin
-__add_folder_to_path /opt/homebrew/opt/gnu-tar/libexec/gnubin
-__add_folder_to_path /opt/homebrew/opt/gnu-sed/libexec/gnubin
-__add_folder_to_path /opt/homebrew/opt/gawk/libexec/gnubin
-__add_folder_to_path /opt/homebrew/opt/gnu-indent/libexec/gnubin
-__add_folder_to_path /opt/homebrew/opt/gnu-getopt/bin
-__add_folder_to_path /opt/homebrew/opt/grep/libexec/gnubin
-{{- end }}
 
-{{- if eq .chezmoi.os "linux" }}
-if type -q manpath
-  set -gx MANPATH (manpath -g)
-end
-{{- end }}
 __add_folder_to_manpath $HOME/.local/man
 __add_folder_to_manpath $CONFIG_PATH/../scripts/man
 
@@ -145,14 +129,11 @@ if type -q projekt
 end
 ## }
 
-## Load per-machine config {
+## Load per-machine & secret config {
+if test -e $HOME/.config/fish/per_machine.fish
+  source $HOME/.config/fish/per_machine.fish
+end
 if test -e $HOME/.config/fish/secret.fish
   source $HOME/.config/fish/secret.fish
 end
 ## }
-
-{{- if and (eq .place "home") (eq .kind "pc") }}
-if fish_is_root_user
-  builtin cd /etc
-end
-{{- end }}
