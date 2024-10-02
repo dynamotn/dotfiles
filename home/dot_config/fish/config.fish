@@ -54,15 +54,6 @@ or begin
 end
 ## }
 
-## Theme & Plugin config {
-set -g theme_date_format "+%a %H:%M"
-set -g theme_show_exit_status yes
-set -g fish_prompt_pwd_dir_length 0
-set -g theme_nerd_fonts yes
-set -g theme_color_scheme terminal
-set -g theme_display_k8s_context yes
-## }
-
 ## Fish or shell miscelaneous config {
 # Enable vi key bindings
 if test -n "$TERM"
@@ -88,44 +79,52 @@ end
 ## }
 
 ## Other tools {
-# Fzf config
-type -q __fzf_setup; and __fzf_setup
-set -U FZF_DEFAULT_OPTS "\
---color=bg+:#363a4f,bg:#24273a,spinner:#f4dbd6,hl:#ed8796 \
---color=fg:#cad3f5,header:#ed8796,info:#c6a0f6,pointer:#f4dbd6 \
---color=marker:#f4dbd6,fg+:#cad3f5,prompt:#c6a0f6,hl+:#ed8796 \
---cycle --layout=reverse --preview-window=wrap \
---marker=\"*\" --prompt=\" \" --pointer=\"=>\""
-type -q tmux; and test -n "$TMUX"; and set -g FZF_TMUX 1
-if type -q fdfind
-  alias fd fdfind
-end
-if type -q fd
-  set -U FZF_FIND_FILE_COMMAND "fd -Ht f -E .git . \$dir 2> /dev/null"
-  set -U FZF_CD_COMMAND "fd -t d . \$dir 2> /dev/null"
-  set -U FZF_CD_WITH_HIDDEN_COMMAND "fd -Ht d -E .git . \$dir 2> /dev/null"
-end
+if status is-interactive
+  # Fzf config
+  type -q __fzf_setup; and __fzf_setup
+  set -U FZF_DEFAULT_OPTS "\
+  --color=bg+:#363a4f,bg:#24273a,spinner:#f4dbd6,hl:#ed8796 \
+  --color=fg:#cad3f5,header:#ed8796,info:#c6a0f6,pointer:#f4dbd6 \
+  --color=marker:#f4dbd6,fg+:#cad3f5,prompt:#c6a0f6,hl+:#ed8796 \
+  --cycle --layout=reverse --preview-window=wrap \
+  --marker=\"*\" --prompt=\" \" --pointer=\"=>\""
+  type -q tmux; and test -n "$TMUX"; and set -g FZF_TMUX 1
+  if type -q fdfind
+    alias fd fdfind
+  end
+  if type -q fd
+    set -U FZF_FIND_FILE_COMMAND "fd -Ht f -E .git . \$dir 2> /dev/null"
+    set -U FZF_CD_COMMAND "fd -t d . \$dir 2> /dev/null"
+    set -U FZF_CD_WITH_HIDDEN_COMMAND "fd -Ht d -E .git . \$dir 2> /dev/null"
+  end
 
-# ASDF
-if test -e $HOME/.asdf/asdf.fish
-  . ~/.asdf/asdf.fish
-end
+  # ASDF
+  if test -e $HOME/.asdf/asdf.fish
+    . ~/.asdf/asdf.fish
+  end
 
-# Direnv
-type -q direnv; and direnv hook fish | source
+  # Direnv
+  type -q direnv; and direnv hook fish | source
 
-# Zoxide
-type -q zoxide; and zoxide init fish | source
+  # Zoxide
+  type -q zoxide; and zoxide init fish | source
 
-# Navi
-type -q navi; and navi widget fish | source
+  # Navi
+  type -q navi; and navi widget fish | source
 
-# Projekt
-if type -q projekt
-  projekt init fish | source
-  projekt completion fish | source
-  t completion fish | source
-  b completion fish | source
+  # Zellij
+  if type -q zellij
+    eval (zellij setup --generate-auto-start fish | string collect)
+    zellij setup --generate-completion fish | source
+  end
+
+  # Projekt
+  if type -q projekt
+    projekt init fish | source
+    projekt completion fish | source
+    t completion fish | source
+    b completion fish | source
+  end
 end
 ## }
 

@@ -16,12 +16,12 @@ if type -q manpath
 end
 {{- end }}
 
-{{- if eq .place "office" }}
-set -U NODE_TLS_REJECT_UNAUTHORIZED 0
-{{- end }}
-
 {{- if and (eq .place "home") (eq .kind "pc") }}
 if fish_is_root_user
   builtin cd /etc
 end
+{{- end }}
+
+{{- if eq .place "office" }}
+set -U NODE_TLS_REJECT_UNAUTHORIZED 0
 {{- end }}
