@@ -1,0 +1,13 @@
+name: d2plugin-tala
+method: binary
+github:
+  repo: terrastruct/TALA
+  release_asset:  tala-%v-linux-{{ .chezmoi.arch }}.tar.gz
+archive:
+  strip_components: 2
+  paths:
+    - tala-%v/bin/d2plugin-tala
+  hook:
+    after: |
+      tar $param -C "$MAN_DIR/man1" "tala-$version/man/tala.1"
+      tar $param -C "$MAN_DIR/man1" "tala-$version/man/d2plugin-tala.1"
