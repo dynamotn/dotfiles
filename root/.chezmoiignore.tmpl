@@ -11,3 +11,6 @@ usr/lib/firefox
 etc/vconsole.conf
 {{- end }}
 {{- end }}
+{{- if ne .chezmoi.osRelease.id "arch" }}
+etc/systemd
+{{- end }}
