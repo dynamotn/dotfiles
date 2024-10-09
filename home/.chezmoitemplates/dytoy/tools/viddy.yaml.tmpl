@@ -3,11 +3,19 @@ method: binary
 github:
   repo: sachaos/viddy
   version: latest
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: viddy_Linux_x86_64.tar.gz
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: viddy_Linux_arm64.tar.gz
+  {{- $os := "" }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "macos" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{- $os = "linux" }}
   {{- end }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64" }}
+  {{- end }}
+  release_asset: viddy-%v-{{ $os }}-{{ $arch }}.tar.gz
 archive:
   paths:
     - viddy

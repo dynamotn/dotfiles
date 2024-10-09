@@ -69,7 +69,6 @@
 |[k6](https://github.com/grafana/k6)|Load testing tool|Testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|Testing tool|
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|Miscellaneous|
-|[tokei](https://github.com/XAMPPRocky/tokei)|Display statistics about code|Miscellaneous|
 |[cointop](https://github.com/arduino/arduino-cli)|TUI to track coin stats|Miscellaneous|
 |[tickrs](https://github.com/tarkah/tickrs)|TUI to track stock stats|Miscellaneous|
 |[pastel](https://github.com/sharkdp/pastel)|Generate, manipulate, convert colors CLI tool|Miscellaneous|
