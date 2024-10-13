@@ -48,6 +48,13 @@ exec-once = firefox -P Personal
 exec-once = firefox -P Enterprise
 {{- end }}
 
+# Email client
+{{- if eq .place "home" }}
+exec-once = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Personal
+{{- else if eq .place "office" }}
+exec-once = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Enterprise
+{{- end }}
+
 # Note-taking
 exec-once = obsidian
 

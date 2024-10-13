@@ -10,6 +10,8 @@
 .config/firefox
 .mozilla/firefox
 Library/Application Support/Firefox
+.config/thunderbird
+.thunderbird
 .local/share/fonts
 .config/fontconfig
 .local/share/themes
@@ -27,6 +29,11 @@ Library/Application Support/Firefox
 
 {{- if gt (output "bash" "-c" "ps aux | grep firefox | wc -l" | trim | int) 2 }}
 .config/firefox
+.mozilla/firefox
+{{- end }}
+{{- if gt (output "bash" "-c" "ps aux | grep thunderbird | wc -l" | trim | int) 2 }}
+.config/thunderbird
+.thunderbird
 {{- end }}
 
 {{- if ne .guiServer "X" }}
