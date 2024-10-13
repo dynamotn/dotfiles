@@ -1,0 +1,27 @@
+{{- if eq .guiServer "X" }}
+name: redshift
+method: os
+gentoo:
+  packages:
+    - name: x11-misc/redshift
+arch:
+  packages:
+    - name: redshift-minimal
+ubuntu:
+  packages:
+    - name: redshift-minimal
+{{- else if eq .guiServer "W" }}
+name: hyprshade
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/hyprshade
+      repo: guru
+      accept_keywords: |-
+        gui-apps/hyprshade ~amd64
+        dev-python/chevron ~amd64
+arch:
+  packages:
+    - name: hyprshade
+{{- end }}
