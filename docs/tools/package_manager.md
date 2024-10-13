@@ -44,6 +44,7 @@
 |----|-------|-------|
 |`fcitx-bamboo`|Vietnamese input method for Fcitx|`home/dot_config/fcitx-bamboo`|
 |`hyprland`|Window manager for Wayland|`silos/hyprland`|
+|`hyprshade`|Adjusts the color temperature of screen|`silos/hyprland`|
 |`eww`|Widgets and status bar|`home/dot_config/eww`|
 |`wofi`|Application launcher, simple switcher|`silos/hyprland`|
 |`wtype`|Simulate keyboard input for Wayland|`silos/fish`|
