@@ -114,6 +114,7 @@ if status is-interactive
 
   # Zellij
   if type -q zellij
+    set -U ZELLIJ_AUTO_ATTACH true
     eval (zellij setup --generate-auto-start fish | string collect)
     zellij setup --generate-completion fish | source
   end
