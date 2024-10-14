@@ -1,6 +1,6 @@
 /******
 * name: thunderbird user.js
-* date: 18 November 2023
+* date: 21 April 2024
 * version: v115.0
 * url: https://github.com/HorlogeSkynet/thunderbird-user.js
 * license: MIT (https://github.com/HorlogeSkynet/thunderbird-user.js/blob/master/LICENSE)
@@ -82,7 +82,7 @@ user_pref("browser.aboutConfig.showWarning", false);
 user_pref("_user.js.parrot", "0100 syntax error: the parrot's dead!");
 /* 0102: set START page [SETUP-CHROME]
  * [SETTING] General > Thunderbird Start Page ***/
-user_pref("mailnews.start_page.enabled", false);
+   // user_pref("mailnews.start_page.enabled", false);
 /* 0104: set NEWTAB page
  * true=? (default), false=blank page ***/
 user_pref("browser.newtabpage.enabled", false);
@@ -774,7 +774,7 @@ user_pref("privacy.resistFingerprinting", true); // [FF41+]
 user_pref("privacy.window.maxInnerWidth", 1600);
 user_pref("privacy.window.maxInnerHeight", 900);
 /* 4503: disable mozAddonManager Web API [FF57+]
- * [NOTE] To allow extensions to work on AMO, you also need 2662
+ * [NOTE] To allow extensions to work on AMO, you also need 2662 and 4505
  * [1] https://bugzilla.mozilla.org/buglist.cgi?bug_id=1384330,1406795,1415644,1453988 ***/
 user_pref("privacy.resistFingerprinting.block_mozAddonManager", true); // [HIDDEN PREF FF57-108]
 /* 4504: enable RFP letterboxing [FF67+]
@@ -789,9 +789,10 @@ user_pref("privacy.resistFingerprinting.block_mozAddonManager", true); // [HIDDE
 user_pref("privacy.resistFingerprinting.letterboxing", true); // [HIDDEN PREF]
    // user_pref("privacy.resistFingerprinting.letterboxing.dimensions", ""); // [HIDDEN PREF]
 /* 4505: experimental RFP [FF91+]
+ * List of domains exempted from RFP (comma-separated).
  * [WARNING] DO NOT USE unless testing, see [1] comment 12
  * [1] https://bugzilla.mozilla.org/1635603 ***/
-   // user_pref("privacy.resistFingerprinting.exemptedDomains", "*.example.invalid");
+   // user_pref("privacy.resistFingerprinting.exemptedDomains", "addons.thunderbird.net");
 /* 4506: set RFP's font visibility level (1402) [FF94+] ***/
    // user_pref("layout.css.font-visibility.resistFingerprinting", 1); // [DEFAULT: 1]
 /* 4510: disable using system colors
@@ -849,7 +850,7 @@ user_pref("permissions.memory_only", true); // [HIDDEN PREF]
 /* 5005: disable intermediate certificate caching [FF41+] [RESTART]
  * [NOTE] This affects login/cert/key dbs. The effect is all credentials are session-only.
  * Saved logins and passwords are not available. Reset the pref and restart to return them ***/
-    // user_pref("security.nocertdb", true);
+   // user_pref("security.nocertdb", true);
 /* 5006: disable favicons in history and bookmarks
  * [NOTE] Stored as data blobs in favicons.sqlite, these don't reveal anything that your
  * actual history (and bookmarks) already do. Your history is more detailed, so
@@ -860,7 +861,7 @@ user_pref("browser.chrome.site_icons", false);
 user_pref("browser.sessionstore.max_tabs_undo", 0);
 /* 5008: disable resuming session from crash
  * [TEST] about:crashparent ***/
-user_pref("browser.sessionstore.resume_from_crash", false);
+   // user_pref("browser.sessionstore.resume_from_crash", false);
 /* 5009: disable "open with" in download dialog [FF50+]
  * Application data isolation [1]
  * [1] https://bugzilla.mozilla.org/1281959 ***/
@@ -1151,15 +1152,17 @@ user_pref("_user.js.parrot", "9100 syntax error: this parrot is blind!");
  * Such settings require a query to Mozilla which could have privacy implications
  * if the user wishes to keep the existence of the mail provider private.
  * We also enforce (valid) SSL/TLS connections if auto-configuration happens to be enabled.
+ * If auto-configuration is re-enabled, fetching from Exchange will be allowed by default.
  * [1] https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Autoconfiguration ***/
 user_pref("mailnews.auto_config.guess.enabled", false);
 user_pref("mailnews.auto_config.fetchFromISP.enabled", false);
 user_pref("mailnews.auto_config.fetchFromISP.sendEmailAddress", false);
-user_pref("mailnews.auto_config.fetchFromExchange.enabled", false);
+user_pref("mailnews.auto_config.fetchFromISP.sslOnly", true);
+   // user_pref("mailnews.auto_config.fetchFromExchange.enabled", false);
 user_pref("mailnews.auto_config.guess.sslOnly", true);
 user_pref("mailnews.auto_config.guess.requireGoodCert", true); // [DEFAULT: true]
-user_pref("mailnews.auto_config_url", "");
-user_pref("mailnews.auto_config.addons_url","");
+   // user_pref("mailnews.auto_config_url", "https://live.thunderbird.net/autoconfig/v1.1/");
+   // user_pref("mailnews.auto_config.addons_url","https://live.thunderbird.net/autoconfig/addons.json");
 /* 9102: Disable account provisioning [SETUP-INSTALL]
  * This option allows users to create a new email account through partner providers.
  * [1] https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Account_Provisioner ***/
@@ -1260,16 +1263,16 @@ user_pref("mail.sanitize_date_header", true);
  * [1] https://bugzilla.mozilla.org/show_bug.cgi?id=667133 ***/
    // user_pref("mail.SpellCheckBeforeSend", false);
 /* 9212: Compose email in plaintext unless expressly overridden
- * [SETUP-FEATURE] Sometimes HTML is useful especially when used with Markdown Here
+ * Sometimes HTML is useful especially when used with Markdown Here
  * [SETTING] Account Settings > Composition & Addressing > Composition > Compose messages in HTML format
  * [NOTE] Holding down shift when you click on "Write" will bypass
  * [1] http://kb.mozillazine.org/Plain_text_e-mail_%28Thunderbird%29
  * [2] https://support.mozilla.org/en-US/questions/1004181
  * [3] https://markdown-here.com ***/
-user_pref("mail.html_compose", false);
+   // user_pref("mail.html_compose", false);
 user_pref("mail.identity.default.compose_html", false);
 /* 9213: Send only plaintext email by default
- * [SETUP-FEATURE] Only use HTML email if you need it, see [1]
+ * You should only use HTML email if you need it (see [1])
  * [SETTING] Composition > Composition > Sending Format
  * Email that is HTML should also have plaintext multipart for plain text users.
  * 0=auto (default, send only plain text if the message is free of any rich formatting
@@ -1278,8 +1281,8 @@ user_pref("mail.identity.default.compose_html", false);
  * 2=HTML (only send a HTML part)
  * 3=both (send both the HTML part and the plain text alternative part)
  * [1] https://drewdevault.com/2016/04/11/Please-use-text-plain-for-emails.html ***/
-user_pref("mail.default_send_format", 1);
-/* 9214: What classes can process incoming data.
+   // user_pref("mail.default_send_format", 0);
+/* 9214: What classes can process incoming data. [SETUP-FEATURE]
  * (0=All classes (default), 1=Don't display HTML, 2=Don't display HTML and inline images,
  * 3=Don't display HTML, inline images and some other uncommon types, 100=Use a hard coded list)
  * In the past this has mitigated a vulnerability CVE-2008-0304 (rare)
@@ -1388,7 +1391,7 @@ user_pref("mail.chat.notification_info", 2);
  * [SETTING] Calendar > Calendar > Timezone ***/
 user_pref("calendar.timezone.local", "UTC");  // [DEFAULT: ""]
 /* 9313: Disable calendar service performing event "extraction" from email content ***/
-user_pref("calendar.extract.service.enabled", false);  // [DEFAULT: false]
+   // user_pref("calendar.extract.service.enabled", false);  // [DEFAULT: false]
 
 /** RSS ***/
 /** These features don't actually do anything as they aren't implemented
