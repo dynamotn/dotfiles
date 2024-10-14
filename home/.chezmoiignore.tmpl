@@ -53,3 +53,7 @@ Library/Application Support/Firefox
 .config/smug/*
 {{- end }}
 !.config/smug/dotfiles.yml
+
+{{- if ne .kind "laptop" }}
+.config/shikane
+{{- end }}

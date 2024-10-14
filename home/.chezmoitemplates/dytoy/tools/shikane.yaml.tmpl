@@ -1,0 +1,8 @@
+{{- if eq .kind "laptop" }}
+name: shikane
+method: shell
+is_essential: true
+dependencies:
+  - rust
+content: cargo install shikane
+{{- end }}
