@@ -1,6 +1,7 @@
 {{- if eq .kind "laptop" }}
 name: auto-cpufreq
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: sys-power/auto-cpufreq
