@@ -28,6 +28,9 @@ gentoo:
         dev-cpp/sdbus-c++ ~amd64
     - name: gui-libs/xdg-desktop-portal-hyprland
     - name: x11-libs/xcb-util
+    - name: gui-apps/hypridle
+      accept_keywords: |-
+        gui-apps/hypridle ~amd64
 arch:
   packages:
     {{- if eq .guiDriver "N" }}
@@ -37,4 +40,5 @@ arch:
     {{- end }}
     - name: xdg-desktop-portal-wlr
     - name: xdg-desktop-portal-hyprland-git
+    - name: hypridle
 {{- end }}
