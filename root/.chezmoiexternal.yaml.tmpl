@@ -1,0 +1,9 @@
+{{- if eq .kind "pc" "laptop" }}
+usr/share/grub/themes/catppuccin:
+  type: archive
+  url: https://github.com/catppuccin/grub/archive/refs/heads/main.zip
+  refreshPeriod: 168h
+  stripComponents: 3
+  include:
+    - grub-main/src/catppuccin-macchiato-grub-theme/*
+{{- end }}
