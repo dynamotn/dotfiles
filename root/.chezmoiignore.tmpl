@@ -4,7 +4,7 @@ etc/greetd
 {{- end }}
 {{- if eq .guiServer "X" "W" }}
 {{- if ne .chezmoi.osRelease.id "gentoo" }}
-opt/firefox
+usr/lib64/firefox
 {{- end }}
 {{- if ne .chezmoi.osRelease.id "arch" }}
 usr/lib/firefox
