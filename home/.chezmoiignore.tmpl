@@ -38,7 +38,7 @@ Library/Application Support/Firefox
 .mozilla/firefox
 {{- end }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
-{{- $process = "/usr/lib64/thunderbird" }}
+{{- $process = "/opt/thunderbird" }}
 {{- else }}
 {{- $process = "/usr/lib/thunderbird" }}
 {{- end -}}
