@@ -103,12 +103,21 @@
         commit-decoration-style = bold blue box ul
         file-style = bold blue ul
         file-decoration-style = green ul
-        minus-style = syntax "#390910"
-        minus-emph-style = syntax "#921628"
+        minus-style = syntax "#563f51"
+        minus-emph-style = syntax "#895768"
         minus-empty-line-marker-style = syntax magenta
-        plus-style = syntax "#172d10"
-        plus-emph-style = syntax "#3e792a"
+        plus-style = syntax "#455450"
+        plus-emph-style = syntax "#658168"
         plus-empty-line-marker-style = syntax cyan
+        hunk-header-decoration-style = box ul
+        hunk-header-file-style = bold
+        hunk-header-line-number-style = bold "#a5adcb"
+        hunk-header-style = file line-number syntax
+        line-numbers-left-style = "#6e738d"
+        line-numbers-minus-style = bold "#ed8796"
+        line-numbers-plus-style = bold "#a6da95"
+        line-numbers-right-style = "#6e738d"
+        line-numbers-zero-style = "#6e738d"
 [apply]
         # Auto fix white space
         whitespace = fix
