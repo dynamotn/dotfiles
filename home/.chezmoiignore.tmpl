@@ -27,11 +27,22 @@ Multimedia/Pictures/Wallpaper
 Library/Application Support/Firefox
 {{- end }}
 
-{{- if gt (output "bash" "-c" "ps aux | grep firefox | wc -l" | trim | int) 2 }}
+{{ $process := "" }}
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{- $process = "/usr/lib64/firefox" }}
+{{- else }}
+{{- $process = "/usr/lib/firefox" }}
+{{- end -}}
+{{- if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $process) | trim | int) 2 }}
 .config/firefox
 .mozilla/firefox
 {{- end }}
-{{- if gt (output "bash" "-c" "ps aux | grep thunderbird | wc -l" | trim | int) 2 }}
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{- $process = "/usr/lib64/thunderbird" }}
+{{- else }}
+{{- $process = "/usr/lib/thunderbird" }}
+{{- end -}}
+{{- if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $process) | trim | int) 2 }}
 .config/thunderbird
 .thunderbird
 {{- end }}
