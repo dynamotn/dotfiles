@@ -36,7 +36,7 @@ if [ $(ps aux | grep firefox | wc -l) -gt 0 ]; then
   _success "Update firefox settings"
 fi
 
-if [ $(ps aux | grep thunderbird | wc -l) -gt 2 ]; then
+if [ $(ps aux | grep thunderbird | wc -l) -gt 0 ]; then
   _notice "Update thunderbird settings"
   for profile in "personal" "enterprise"; do
     if [ -f ~/.config/thunderbird/profiles/${profile}/prefs.js ]; then
