@@ -121,6 +121,13 @@
   url: https://raw.githubusercontent.com/hyprwm/contrib/main/hdrop/hdrop
   executable: true
   refreshPeriod: 168h
+.local/share/fcitx5/themes/catppuccin:
+  type: archive
+  url: https://github.com/catppuccin/fcitx5/archive/refs/heads/main.zip
+  refreshPeriod: 168h
+  stripComponents: 3
+  include:
+    - fcitx5-main/src/catppuccin-macchiato-teal/*
 {{- end }}
 {{- if and (eq .chezmoi.os "linux") (eq .guiServer "X" "W") }}
 .local/share/themes/Dynamo:
