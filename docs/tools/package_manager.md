@@ -70,3 +70,4 @@
 |`cronie`|Run scheduled tasks|
 |`fail2ban`|Intrusion prevention software framework|
 |`auto-cpufreq`|Automatic CPU speed & power optimizer|
+|`grub`|Bootloader for system|

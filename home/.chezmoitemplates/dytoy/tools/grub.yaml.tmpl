@@ -1,0 +1,16 @@
+{{- if eq .kind "pc" "laptop" }}
+name: grub
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-boot/grub
+      use: |-
+        sys-boot/grub -fonts -themes
+arch:
+  packages:
+    - name: grub
+ubuntu:
+  packages:
+    - name: grub
+{{- end }}
