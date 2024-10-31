@@ -14,3 +14,6 @@ etc/vconsole.conf
 {{- if ne .chezmoi.osRelease.id "arch" }}
 etc/systemd
 {{- end }}
+{{- if and (ne .kind "pc") (ne .kind "laptop") }}
+etc/default/grub
+{{- end }}
