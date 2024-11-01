@@ -1,0 +1,31 @@
+name: vivid
+is_essential: true
+{{- if eq .chezmoi.os "linux" }}
+method: binary
+github:
+  repo: sharkdp/vivid
+  version: latest
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: vivid-%v-x86_64-unknown-linux-gnu.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: vivid-%v-aarch64-unknown-linux-gnu.tar.gz
+  {{- end }}
+archive:
+  strip_components: 1
+  paths:
+  {{- if eq .chezmoi.arch "amd64" }}
+    - vivid-%v-x86_64-unknown-linux-gnu/vivid
+  {{- else if eq .chezmoi.arch "arm64" }}
+    - vivid-%v-aarch64-unknown-linux-gnu/vivid
+  {{- end }}
+{{- else if eq .chezmoi.os "android" }}
+method: os
+termux:
+  packages:
+    - name: vivid
+{{- else if eq .chezmoi.os "darwin" }}
+method: os
+macos:
+  packages:
+    - name: vivid
+{{- end }}

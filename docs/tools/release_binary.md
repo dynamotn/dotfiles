@@ -91,3 +91,4 @@
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tool|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|Project management tool|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|Project management tool|
+|[vivid](https://github.com/sharkdp/vivid)|A themeable LS_COLORS generator with database|Frequently used tool|
