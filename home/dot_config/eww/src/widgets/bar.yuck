@@ -1,3 +1,4 @@
+; Launcher
 (defwidget launcher_icon[]
   (eventbox
     :cursor "pointer"
@@ -10,6 +11,8 @@
   )
 )
 
+; Workspaces
+(deflisten workspaces "scripts/workspaces.py")
 (defwidget workspaces[]
   (box
     :class "workspaces"
@@ -29,5 +32,26 @@
         )
       )
     )
+  )
+)
+
+; Clock
+(defpoll hour
+  :interval "1s"
+  "date '+%H'"
+)
+(defpoll min
+  :interval "1s"
+  "date '+%M'"
+)
+(defwidget time[]
+  (box
+    :orientation "v"
+    :class "time"
+    :valign "end"
+    (button
+      :class "time hour" hour)
+    (button
+      :class "time" min)
   )
 )

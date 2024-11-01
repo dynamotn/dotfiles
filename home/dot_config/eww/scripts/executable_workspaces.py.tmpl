@@ -43,15 +43,9 @@ def monitor_socat_output():
     {{- end }}
     with subprocess.Popen(socat_command, stdout=subprocess.PIPE, text=True) as process:
         for line in process.stdout:
-            result = {
-                "all": workspaces(),
-                "active": get_active(),
-                "active_empty": get_active_empty()
-            }
-            sys.stdout.write(json.dumps(result) + "\n")
-            sys.stdout.flush()
+            show_result()
 
-if __name__ == "__main__":
+def show_result():
     result = {
         "all": workspaces(),
         "active": get_active(),
@@ -59,4 +53,7 @@ if __name__ == "__main__":
     }
     sys.stdout.write(json.dumps(result) + "\n")
     sys.stdout.flush()
+
+if __name__ == "__main__":
+    show_result()
     monitor_socat_output()
