@@ -26,8 +26,6 @@ Multimedia/Pictures/Wallpaper
 .thunderbird
 {{- else if eq .guiServer "X" "W" }}
 Library
-{{- end }}
-
 {{ $process := "" }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 {{- $process = "/usr/lib64/firefox" }}
@@ -47,6 +45,7 @@ Library
 .config/thunderbird
 .thunderbird
 {{- end }}
+{{- end }}
 
 {{- if ne .guiServer "X" }}
 .config/awesome
@@ -61,10 +60,9 @@ Library
 .config/eww
 {{- end }}
 
-{{- if ne .place "office" }}
-.config/smug/*
+{{- if ne .place "cloud" }}
+.config/smug
 {{- end }}
-!.config/smug/dotfiles.yml
 
 {{- if ne .kind "laptop" }}
 .config/shikane
