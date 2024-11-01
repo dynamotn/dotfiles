@@ -36,9 +36,9 @@ arch:
     {{- if eq .guiDriver "N" }}
     - name: hyprland-nvidia-git
     {{- else }}
-    - name: hyprland-git
+    - name: hyprland
     {{- end }}
     - name: xdg-desktop-portal-wlr
-    - name: xdg-desktop-portal-hyprland-git
+    - name: xdg-desktop-portal-hyprland
     - name: hypridle
 {{- end }}
