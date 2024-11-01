@@ -20,6 +20,3 @@ fisher update
 
 # Install fzf
 fish -c "install_fzf"
-
-# Install DIRCOLORS
-curl https://raw.githubusercontent.com/trapd00r/LS_COLORS/master/LS_COLORS -sLo ~/.config/fish/DIRCOLORS

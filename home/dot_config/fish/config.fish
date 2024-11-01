@@ -66,9 +66,6 @@ if type -q grc
   set -x grcplugin_df -H
 end
 
-# DIRCOLOR for ls
-eval (dircolors -c $CONFIG_PATH/DIRCOLORS 2> /dev/null)
-
 # Color for Virtual console
 if test "$TERM" = "linux"; and test $CONFIG_PATH/console_color
   for i in (sed -n "s/.*\*color\([0-9]\{1,\}\).*#\([0-9a-fA-F]\{6\}\).*/\1 \2/p" $CONFIG_PATH/console_color | awk '$1 < 16 {printf "\\\e]P%X%s", $1, $2}')
@@ -126,6 +123,9 @@ if status is-interactive
     t completion fish | source
     b completion fish | source
   end
+
+  # Vivid
+  type -q vivid; and set -Ux LS_COLORS (vivid generate catppuccin-macchiato)
 end
 ## }
 
