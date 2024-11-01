@@ -9,7 +9,7 @@
 .config/kitty
 .config/firefox
 .mozilla/firefox
-Library/Application Support/Firefox
+Library
 .config/thunderbird
 .thunderbird
 .local/share/fonts
@@ -22,9 +22,10 @@ Library/Application Support/Firefox
 .config/user-dirs.dirs
 Multimedia/Pictures/Wallpaper
 {{- else if eq .guiServer "M" }}
-.mozilla/firefox
+.mozilla
+.thunderbird
 {{- else if eq .guiServer "X" "W" }}
-Library/Application Support/Firefox
+Library
 {{- end }}
 
 {{ $process := "" }}
