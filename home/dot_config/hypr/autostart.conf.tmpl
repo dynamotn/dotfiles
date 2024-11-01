@@ -15,17 +15,17 @@ exec-once = gentoo-pipewire-launcher restart
 exec-once = systemctl --user start wireplumber
 exec-once = systemctl --user start pipewire-pulse
 {{- end }}
-exec-once = bash ~/.config/hypr/scripts/screencast.sh
+exec-once = ~/.config/hypr/scripts/screencast.sh
 
 # Gtk theme
-exec-once = bash ~/.config/hypr/scripts/gtk.sh
+exec-once = ~/.config/hypr/scripts/gtk.sh
 
 # Wallpaper
 exec-once = swww init
 exec = swww img ~/Multimedia/Pictures/Wallpaper/all/working.gif
 
 # Bar & Panel & Widgets
-exec-once = eww -c ~/.config/eww daemon && eww -c ~/.config/eww open bar
+exec-once = ~/.config/hypr/scripts/bar.sh
 exec-once = swaync
 
 # Screen shader and changes detection
