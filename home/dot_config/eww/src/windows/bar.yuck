@@ -10,10 +10,27 @@
   )
 )
 
+(defwidget end[]
+  (box
+    :space-evenly false
+    :halign "center"
+    :valign "end"
+    :spacing 5
+    :orientation "v"
+    (systray
+      :orientation "v"
+      :spacing 5
+      :icon-size 16
+    )
+    (time)
+  )
+)
+
 (defwidget bar[]
   (box
     :class "bar"
     :orientation "v"
     (top)
+    (end)
   )
 )

@@ -13,10 +13,10 @@ window > .bar {
 
   .launcher_icon {
     font-size: 1rem;
-    color: $lavender;
+    color: $teal;
 
     &:hover {
-      color: darken($color: $lavender, $amount: 30%);
+      color: darken($color: $teal, $amount: 30%);
     }
   }
 
@@ -27,21 +27,21 @@ window > .bar {
 
     .workspace {
       border-radius: 1rem;
-      min-width: .5rem;
+      min-width: 0.5rem;
 
       &.empty {
         background: lighten($color: $bg, $amount: 3%);
-        min-height: .7rem;
-        min-width: .7rem;
+        min-height: 0.7rem;
+        min-width: 0.7rem;
       }
 
       &.occupied {
-        background: $lavender;
+        background: $teal;
         min-height: 1rem;
       }
 
       &.active {
-        background: $blue;
+        background: $green;
         min-height: 1rem;
         min-width: 1rem;
       }
@@ -52,9 +52,24 @@ window > .bar {
         }
         &.occupied,
         &.active {
-          background: lighten($color: $lavender, $amount: 10%);
+          background: lighten($color: $teal, $amount: 10%);
         }
       }
+    }
+  }
+
+  .time {
+    font-weight: bold;
+    font-size: 1em;
+    background-color: $bg-alt;
+    color: $fg;
+    border-radius: 1rem;
+    padding: 0.2rem 0.2rem 0.1rem 0.2rem;
+
+    &.hour {
+      border-bottom: 0.1rem solid $fg;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
     }
   }
 }
