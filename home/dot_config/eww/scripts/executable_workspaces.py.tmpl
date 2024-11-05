@@ -7,33 +7,37 @@ import sys
 
 SIGNATURE = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
 USER = subprocess.check_output(["id", "-u"]).decode("utf-8").strip()
+WORKSPACE_NAMES = [
+    "TERM",
+    "WEB",
+    "MAIL",
+    "DOC",
+    "CHAT",
+    "M&V",
+    "GAME",
+    "SYS",
+    "MISC",
+    "SEC",
+]
 
 def get_workspaces():
     workspaces = subprocess.check_output(["hyprctl", "workspaces", "-j"])
     return json.loads(workspaces)
 
-def get_active():
+def get_monitors():
     active = subprocess.check_output(["hyprctl", "monitors", "-j"])
-    active = json.loads(active)
-    return active[0]['activeWorkspace']['id']
+    return json.loads(active)
 
-def workspaces():
-    WORKSPACE_WINDOWS = get_workspaces()
-    workspace_data_dict = {item["id"]: item["windows"] for item in WORKSPACE_WINDOWS}
+def get_active_workspace(monitor):
+    return monitor['activeWorkspace']['id']
 
-    workspace_ids = range(1, 9 + 1)
-    workspaces_data = [{"id": ws, "windows": workspace_data_dict.get(ws, 0)} for ws in workspace_ids]
+def get_workspace_datas(monitor):
+    WORKSPACES = get_workspaces()
+    workspace_data_dict = {item["id"]: item["windows"] for item in WORKSPACES}
+    monitor_id = int(monitor["id"])
+    workspace_ids = range(1 + monitor_id * 10, 10 + 1 + monitor_id * 10)
+    workspaces_data = [{"id": ws, "windows": workspace_data_dict.get(ws, 0), "name": WORKSPACE_NAMES[ws - monitor_id * 10 - 1]} for ws in workspace_ids]
     return workspaces_data
-
-def get_active_empty():
-    workspaces_data = get_workspaces()
-    active_workspace_id = get_active()
-
-    for workspace in workspaces_data:
-        if workspace['id'] == active_workspace_id:
-            if workspace['windows'] != 0:
-                return False
-    return True
 
 def monitor_socat_output():
     {{- if eq .chezmoi.osRelease.id "gentoo" }}
@@ -46,11 +50,12 @@ def monitor_socat_output():
             show_result()
 
 def show_result():
-    result = {
-        "all": workspaces(),
-        "active": get_active(),
-        "active_empty": get_active_empty()
-    }
+    result = []
+    for monitor in get_monitors():
+        result.append({
+            "all": get_workspace_datas(monitor),
+            "active": get_active_workspace(monitor),
+        })
     sys.stdout.write(json.dumps(result) + "\n")
     sys.stdout.flush()
 
