@@ -1,4 +1,4 @@
-(defwidget top[]
+(defwidget top [monitor]
   (box
     :space-evenly false
     :halign "center"
@@ -6,11 +6,13 @@
     :spacing 15
     :orientation "v"
     (launcher_icon)
-    (workspaces)
+    (workspaces
+      :monitor monitor
+    )
   )
 )
 
-(defwidget end[]
+(defwidget end []
   (box
     :space-evenly false
     :halign "center"
@@ -26,11 +28,13 @@
   )
 )
 
-(defwidget bar[]
+(defwidget bar [monitor]
   (box
     :class "bar"
     :orientation "v"
-    (top)
+    (top
+      :monitor monitor
+    )
     (end)
   )
 )

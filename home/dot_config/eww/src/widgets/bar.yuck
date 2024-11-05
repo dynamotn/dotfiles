@@ -1,5 +1,5 @@
 ; Launcher
-(defwidget launcher_icon[]
+(defwidget launcher_icon []
   (eventbox
     :cursor "pointer"
     :halign "center"
@@ -12,14 +12,14 @@
 )
 
 ; Workspaces
-(deflisten workspaces "scripts/workspaces.py")
-(defwidget workspaces[]
+(deflisten workspaces :initial "[]" "scripts/workspaces.py")
+(defwidget workspaces [monitor]
   (box
     :class "workspaces"
     :orientation "v"
     :width 25
     :height 250
-    (for workspace in {workspaces.all}
+    (for workspace in {workspaces[monitor].all}
       (eventbox
         :cursor "pointer"
         :onscroll "echo {} | sed -e 's/up/-1/g' -e 's/down/+1/g' | xargs hyprctl dispatch workspace"
@@ -28,7 +28,7 @@
         :vexpand true
         (button
           :onclick "hyprctl dispatch workspace ${workspace.id}"
-          :class "workspace ${workspace.id == workspaces.active ? "active" : workspace.windows > 0 ? "occupied" : "empty"}"
+          :class "workspace ${workspace.id == workspaces[monitor].active ? "active" : workspace.windows > 0 ? "occupied" : "empty"}"
         )
       )
     )
@@ -44,7 +44,7 @@
   :interval "1s"
   "date '+%M'"
 )
-(defwidget time[]
+(defwidget time []
   (box
     :orientation "v"
     :class "time"

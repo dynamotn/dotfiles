@@ -12,6 +12,7 @@ adaptive_sync = false
 
 [[profile]]
 name = "office"
+exec = ["eww open bar --screen 1 --id bar1"]
 
 [[profile.output]]
 enable = false
