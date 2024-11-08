@@ -13,6 +13,7 @@
 |[wtf](https://github.com/wtfutil/wtf)|Personal information dashboard on CLI|Frequently used tool|
 |[zoxide](https://github.com/ajeetdsouza/zoxide)|Alternative to `cd` with smarter|Frequently used tool, in `silos/fish`|
 |[direnv](https://github.com/direnv/direnv)|Load environment variables depending on directory|Frequently used tool, in `silos/fish`|
+|[vivid](https://github.com/sharkdp/vivid)|A themeable LS_COLORS generator with database|Frequently used tool|
 |[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|Frequently used tool, in `silos/fish`, `silos/tmux`|
 |[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|Frequently used tool, in `silos/awesome`, `silos/hyprland`|
 |[himalaya](https://github.com/soywod/himalaya)|Email CLI tool|Frequently used tool, in `silos/awesome`|
@@ -77,6 +78,7 @@
 |[viu](https://github.com/atanunq/viu)|View image on CLI|Miscellaneous|
 |[patat](https://github.com/jaspervdj/patat)|CLI presentation tool|Miscellaneous|
 |[ncspot](https://github.com/hrkfdn/ncspot)|Spotify CLI client|Miscellaneous|
+|[fabric](https://github.com/danielmiessler/fabric)|Framework for augmenting humans using AI|AI tool|
 |[ec](https://github.com/editorconfig-checker/editorconfig-checker)|Verify files are in harmony with .editorconfig|Linter, in `silos/neovim`|
 |[shellcheck](https://github.com/koalaman/shellcheck)|Linter for Bash script|Linter, in `silos/neovim`|
 |[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `silos/neovim`|
@@ -91,4 +93,3 @@
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tool|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|Project management tool|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|Project management tool|
-|[vivid](https://github.com/sharkdp/vivid)|A themeable LS_COLORS generator with database|Frequently used tool|
