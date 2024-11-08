@@ -1,4 +1,4 @@
 {{- $tools := glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/tools/*") }}
 {{- range ($tools) }}
-- {{ output "chezmoi" "execute-template" (include .) | nindent 2 | trim }}
+- {{ includeTemplate . $ | nindent 2 | trim }}
 {{- end }}
