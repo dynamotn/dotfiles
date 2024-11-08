@@ -1,0 +1,17 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+trap "_error \"Can't setup fish shell\"" ERR
+
+{{- if eq .chezmoi.os "android" }}
+if [ ! -d ~/storage/shared/Documents/Notes ]; then
+  _progress "Clone notes"
+  mkdir -p ~/storage/shared/Documents/Notes
+  cd ~/storage/shared/Documents/Notes
+  git init
+  git remote add ssh git@gitlab.com:dynamo.foss/notes.git
+  git pull ssh main
+  git remote set-url origin https://gitlab.com/dynamo.foss/notes.git
+  _success "Clone notes"
+fi
+{{- end }}
