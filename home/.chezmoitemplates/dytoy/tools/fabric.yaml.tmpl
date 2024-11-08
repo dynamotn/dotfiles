@@ -1,0 +1,9 @@
+name: fabric
+method: binary
+{{- if eq .kind "pc" "laptop" }}
+is_essential: true
+{{- end }}
+github:
+  repo: danielmiessler/fabric
+  version: latest
+  release_asset: fabric-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
