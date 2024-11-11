@@ -216,11 +216,93 @@ plugins {
     }
     configuration location="zellij:configuration"
     plugin-manager location="zellij:plugin-manager"
+
+    zjstatus location="file:~/.config/zellij/plugins/zjstatus.wasm" {
+        color_rosewater "#f5e0dc"
+        color_flamingo "#f2cdcd"
+        color_pink "#f5c2e7"
+        color_mauve "#cba6f7"
+        color_red "#f38ba8"
+        color_maroon "#eba0ac"
+        color_peach "#fab387"
+        color_yellow "#f9e2af"
+        color_green "#a6e3a1"
+        color_teal "#94e2d5"
+        color_sky "#89dceb"
+        color_sapphire "#74c7ec"
+        color_blue "#89b4fa"
+        color_lavender "#b4befe"
+        color_text "#cdd6f4"
+        color_subtext1 "#bac2de"
+        color_subtext0 "#a6adc8"
+        color_overlay2 "#9399b2"
+        color_overlay1 "#7f849c"
+        color_overlay0 "#6c7086"
+        color_surface2 "#585b70"
+        color_surface1 "#45475a"
+        color_surface0 "#313244"
+        color_base "#1e1e2e"
+        color_mantle "#181825"
+        color_crust "#11111b"
+
+        format_left   "#[bg=$surface0,fg=$sapphire]#[bg=$sapphire,fg=$crust,bold]  {session} {mode}#[bg=$surface0] {tabs}"
+        format_center "{notifications}"
+        format_right  "#[bg=$surface0,fg=$flamingo]#[fg=$crust,bg=$flamingo] #[fg=$surface1,bg=$flamingo] {command_uptime} #[bg=$flamingo,fg=$maroon]#[bg=$maroon,fg=$crust] 󰃭  {datetime} #[bg=$surface0,fg=$surface1]"
+        format_space  "#[bg=$surface0,fg=$crust]"
+        format_hide_on_overlength "true"
+        format_precedence "lrc"
+
+        border_enabled  "false"
+        border_char     "─"
+        border_format   "#[fg=$surface0]{char}"
+        border_position "top"
+
+        hide_frame_for_single_pane "true"
+
+        mode_normal        "#[bg=$green,fg=$sapphire]#[bg=$green,fg=$base,italic] NORMAL #[bg=$surface0,fg=$green]"
+        mode_tmux          "#[bg=$mauve,fg=$sapphire]#[bg=$mauve,fg=$base,italic] TMUX #[bg=$surface0,fg=$mauve]"
+        mode_locked        "#[bg=$red,fg=$sapphire]#[bg=$red,fg=$base,italic] LOCKED #[bg=$surface0,fg=$red]"
+        mode_pane          "#[bg=$teal,fg=$sapphire]#[bg=$teal,fg=$base,italic] PANE #[bg=$surface0,fg=teal]"
+        mode_tab           "#[bg=$teal,fg=$sapphire]#[bg=$teal,fg=$base,italic] TAB #[bg=$surface0,fg=$teal]"
+        mode_scroll        "#[bg=$flamingo,fg=$sapphire]#[bg=$flamingo,fg=$base,italic] SCROLL #[bg=$surface0,fg=$flamingo]"
+        mode_enter_search  "#[bg=$flamingo,fg=$sapphire]#[bg=$flamingo,fg=$base,italic] ENT-SEARCH #[bg=$surfaco,fg=$flamingo]"
+        mode_search        "#[bg=$flamingo,fg=$sapphire]#[bg=$flamingo,fg=$base,italic] SEARCHARCH #[bg=$surfac0,fg=$flamingo]"
+        mode_resize        "#[bg=$yellow,fg=$sapphire]#[bg=$yellow,fg=$base,italic] RESIZE #[bg=$surfac0,fg=$yellow]"
+        mode_rename_tab    "#[bg=$yellow,fg=$sapphire]#[bg=$yellow,fg=$base,italic] RENAME-TAB #[bg=$surface0,fg=$yellow]"
+        mode_rename_pane   "#[bg=$yellow,fg=$sapphire]#[bg=$yellow,fg=$base,italic] RENAME-PANE #[bg=$surface0,fg=$yellow]"
+        mode_move          "#[bg=$yellow,fg=$sapphire]#[bg=$yellow,fg=$base,italic] MOVE #[bg=$surface0,fg=$yellow]"
+        mode_session       "#[bg=$pink,fg=$sapphire]#[bg=$pink,fg=$base,italic] SESSION #[bg=$surface0,fg=$pink]"
+        mode_prompt        "#[bg=$pink,fg=$sapphire]#[bg=$pink,fg=$base,italic] PROMPT #[bg=$surface0,fg=$pink]"
+
+        tab_normal              "#[fg=$surface0,bg=$blue]#[bg=$blue,fg=$crust,bold] {index} #[bg=$blue,fg=$base] {name} {floating_indicator}#[bg=$surface0,fg=$blue]"
+        tab_normal_fullscreen   "#[fg=$surface0,bg=$blue]#[bg=$blue,fg=$crust,bold] {index} #[bg=$blue,fg=$base] {name} {fullscreen_indicator}#[bg=$surface0,fg=$blue]"
+        tab_normal_sync         "#[fg=$surface0,bg=$blue]#[bg=$blue,fg=$crust,bold] {index} #[bg=$blue,fg=$base] {name} {sync_indicator}#[bg=$surface0,fg=$blue]"
+        tab_active              "#[fg=$surface0,bg=$teal]#[bg=$teal,fg=$crust,bold] {index} #[bg=$teal,fg=$base] {name} {floating_indicator}#[bg=$surface0,fg=$teal]"
+        tab_active_fullscreen   "#[fg=$surface0,bg=$teal]#[bg=$teal,fg=$crust,bold] {index} #[bg=$teal,fg=$base] {name} {fullscreen_indicator}#[bg=$surface0,fg=$teal]"
+        tab_active_sync         "#[fg=$surface0,bg=$teal]#[bg=$teal,fg=$crust,bold] {index} #[bg=$teal,fg=$base] {name} {sync_indicator}#[bg=$surface0,fg=$teal]"
+        tab_separator           "#[bg=$surface0,fg=$crust,bold]"
+
+        tab_sync_indicator       " "
+        tab_fullscreen_indicator " 󰊓"
+        tab_floating_indicator   " 󰹙"
+
+        notification_format_unread "#[fg=surface0,bg=$yellow]  {message}#[bg=$surface0,fg=$yellow]"
+        notification_format_no_notifications ""
+        notification_show_interval "10"
+
+        command_uptime_command    "bash -c \"uptime | rev | cut -d':' -f1 | rev | sed s/,//g\""
+        command_uptime_format     "Uptime:{stdout}"
+        command_uptime_interval   "1"
+        command_uptime_rendermode "static"
+
+        datetime          "{format}"
+        datetime_format   "%Y-%m-%d 󰅐 %H:%M"
+        datetime_timezone "Asia/Ho_Chi_Minh"
+    }
 }
 
 // Plugins to load in the background when a new session starts
 load_plugins {
-  // "file:/path/to/my-plugin.wasm"
   // "https://example.com/my-plugin.wasm"
 }
 
@@ -310,6 +392,12 @@ load_plugins {
 // Default: default
 //
 theme "catppuccin-mocha"
+
+ui {
+    pane_frames {
+        rounded_corners true
+    }
+}
 
 // The name of the default layout to load on startup
 // Default: "default"
