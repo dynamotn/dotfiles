@@ -10,10 +10,12 @@
   type: file
   url: https://raw.githubusercontent.com/catppuccin/k9s/main/dist/catppuccin-macchiato.yaml
   refreshPeriod: 168h
+{{- if ne .chezmoi.os "cloud" }}
 .config/zellij/themes/catppuccin.kdl:
   type: file
   url: https://raw.githubusercontent.com/catppuccin/zellij/refs/heads/main/catppuccin.kdl
   refreshPeriod: 168h
+{{- end }}
 {{- if eq .chezmoi.os "android" }}
 .config/termux/color.properties:
   type: file
@@ -99,11 +101,13 @@
   url: 'https://raw.githubusercontent.com/soimort/translate-shell/gh-pages/trans'
   executable: true
   refreshPeriod: 168h
+{{- if eq .chezmoi.os "cloud" }}
 .local/bin/xpanes:
   type: file
   url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/master/bin/xpanes'
   executable: true
   refreshPeriod: 168h
+{{- end }}
 .local/bin/yq:
   type: file
   {{- if eq .chezmoi.os "android" }}
