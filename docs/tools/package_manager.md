@@ -11,6 +11,7 @@
 |`ssh`|SSH client|DevOps tool|
 |`tree-sitter`|Parser generator tool for syntax|`silos/neovim`|
 |`docker`|Manage containers|DevOps tool|
+|`ollama`|Get up and running LLMs|AI Tool|
 |`tshark`|CLI of Wireshark, network packet analysis|Miscellaneous|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
 |`cava`|Audio visualizer||

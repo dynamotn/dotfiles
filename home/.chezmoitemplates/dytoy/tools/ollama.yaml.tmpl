@@ -1,0 +1,14 @@
+name: ollama
+method: os
+gentoo:
+  packages:
+    - name: app-misc/ollama
+arch:
+  packages:
+    {{- if eq .guiDriver "I" }}
+    - name: ollama
+    {{- else if eq .guiDriver "N" }}
+    - name: ollama-cuda
+    {{- else if eq .guiDriver "A" }}
+    - name: ollama-rocm
+    {{- end }}
