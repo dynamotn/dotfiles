@@ -63,7 +63,11 @@ Library
 {{- end }}
 
 {{- if ne .place "cloud" }}
+.tmux.conf
+.config/tmux
 .config/smug
+{{- else }}
+.config/zellij
 {{- end }}
 
 {{- if ne .kind "laptop" }}
