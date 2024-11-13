@@ -99,4 +99,51 @@ layout {
       pane { x "50%"; y "1%"; width "45%"; height "45%"; }
     }
   }
+
+  tab name="dot" cwd="~/Dotfiles" split_direction="vertical" {
+    pane focus=true
+    floating_panes {
+      pane {
+        command "git"
+        args "pull"
+      }
+      pane {
+        command "git"
+        args "status"
+      }
+      pane {
+        command "chezmoi"
+        args "diff"
+      }
+      pane {
+        command "chezmoi"
+        args "apply"
+      }
+    }
+  }
+  tab name="notes" cwd="~/Documents/Notes" split_direction="vertical" {
+    pane focus=true
+    pane {
+      cwd "~/Documents/Notes/.publish"
+    }
+    floating_panes {
+      pane {
+        command "git"
+        args "pull"
+      }
+      pane {
+        command "git"
+        args "status"
+      }
+    }
+  }
+  tab name="working-personal" cwd="~/Working/personal" {
+    pane
+  }
+  tab name="working-enterprise" cwd="~/Working/enterprise" {
+    pane
+  }
+  tab name="other" cwd="~" {
+    pane
+  }
 }
