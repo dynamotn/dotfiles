@@ -7,3 +7,9 @@ usr/share/grub/themes/catppuccin:
   include:
     - grub-main/src/catppuccin-macchiato-grub-theme/*
 {{- end }}
+{{- if eq .kind "laptop" }}
+etc/NetworkManager/dispatcher.d/90-open_captive_portal:
+  type: file
+  url: https://raw.githubusercontent.com/Seme4eg/captive-portal-sh/refs/heads/master/90-open_captive_portal
+  refreshPeriod: 168h
+{{- end }}
