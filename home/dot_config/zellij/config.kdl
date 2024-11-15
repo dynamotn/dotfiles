@@ -136,7 +136,7 @@ keybinds clear-defaults=true {
         bind "Alt ]" { NextSwapLayout; }
         bind "Alt f" { ToggleFloatingPanes; }
         bind "Shift Left" {
-            MessagePlugin "https://github.com/dynamotn/zellij-nvim-navigator/releases/download/v0.3.0/zellij-nvim-navigator.wasm" {
+            MessagePlugin "nvim-navigator" {
                 name "move_focus_or_tab";
                 payload "left";
                 move_mod "shift";
@@ -144,7 +144,7 @@ keybinds clear-defaults=true {
         }
 
         bind "Shift Down" {
-            MessagePlugin "https://github.com/dynamotn/zellij-nvim-navigator/releases/download/v0.3.0/zellij-nvim-navigator.wasm" {
+            MessagePlugin "nvim-navigator" {
                 name "move_focus";
                 payload "down";
                 move_mod "shift";
@@ -152,7 +152,7 @@ keybinds clear-defaults=true {
         }
 
         bind "Shift Up" {
-            MessagePlugin "https://github.com/dynamotn/zellij-nvim-navigator/releases/download/v0.3.0/zellij-nvim-navigator.wasm" {
+            MessagePlugin "nvim-navigator" {
                 name "move_focus";
                 payload "up";
                 move_mod "shift";
@@ -160,7 +160,7 @@ keybinds clear-defaults=true {
         }
 
         bind "Shift Right" {
-            MessagePlugin "https://github.com/dynamotn/zellij-nvim-navigator/releases/download/v0.3.0/zellij-nvim-navigator.wasm" {
+            MessagePlugin "nvim-navigator" {
                 name "move_focus_or_tab";
                 payload "right";
                 move_mod "shift";
@@ -248,7 +248,8 @@ plugins {
         welcome_screen true
     }
 
-    zjstatus location="file:~/.config/zellij/plugins/zjstatus.wasm" {
+    nvim-navigator location="https://github.com/dynamotn/zellij-nvim-navigator/releases/latest/download/zellij-nvim-navigator.wasm"
+    zjstatus location="https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm" {
         color_rosewater "#f5e0dc"
         color_flamingo "#f2cdcd"
         color_pink "#f5c2e7"
@@ -336,6 +337,8 @@ plugins {
 // eg. "file:/path/to/my-plugin.wasm"
 // eg. "https://example.com/my-plugin.wasm"
 load_plugins {
+    zjstatus
+    nvim-navigator
 }
 
 // Use a simplified UI without special fonts (arrow glyphs)
