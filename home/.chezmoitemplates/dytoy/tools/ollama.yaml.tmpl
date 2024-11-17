@@ -3,6 +3,8 @@ method: os
 gentoo:
   packages:
     - name: app-misc/ollama
+      accept_keywords: |-
+        app-misc/ollama **
 arch:
   packages:
     {{- if eq .guiDriver "I" }}
