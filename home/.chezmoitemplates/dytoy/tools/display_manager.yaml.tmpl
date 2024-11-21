@@ -6,14 +6,24 @@ gentoo:
   packages:
     - name: x11-misc/lightdm
     - name: x11-misc/lightdm-gtk-greeter
+  hook:
+    after: |-
+      sudo rc-update add display-manager default
+      sudo rc-service display-manager start
 arch:
   packages:
     - name: lightdm
     - name: lightdm-gtk-greeter
+  hook:
+    after: |-
+      sudo systemctl enable --now lightdm
 ubuntu:
   packages:
     - name: lightdm
     - name: lightdm-gtk-greeter
+  hook:
+    after: |-
+      sudo systemctl enable --now lightdm
 {{- else if eq .guiServer "W" }}
 name: greetd
 method: os
@@ -24,8 +34,15 @@ gentoo:
     - name: gui-apps/regreet
       accept_keywords: |-
         gui-apps/regreet **
+  hook:
+    after: |-
+      sudo rc-update add display-manager default
+      sudo rc-service display-manager start
 arch:
   packages:
     - name: greetd
     - name: greetd-regreet
+  hook:
+    after: |-
+      sudo systemctl enable --now greetd
 {{- end }}

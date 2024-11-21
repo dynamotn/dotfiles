@@ -7,7 +7,16 @@ gentoo:
     - name: net-vpn/tailscale
       accept_keywords: |-
         net-vpn/tailscale ~amd64
+  hook:
+    after: |-
+      sudo rc-update add tailscale default
+      sudo rc-service tailscale restart
+      sudo tailscale up
 arch:
   packages:
     - name: tailscale
+  hook:
+    after: |-
+      sudo systemctl enable --now tailscaled
+      sudo tailscale up
 {{- end }}

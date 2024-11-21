@@ -5,6 +5,10 @@ gentoo:
     - name: app-misc/ollama
       accept_keywords: |-
         app-misc/ollama **
+  hook:
+    after: |-
+      sudo rc-update add ollama default
+      sudo rc-service ollama start
 arch:
   packages:
     {{- if eq .guiDriver "I" }}
@@ -14,3 +18,6 @@ arch:
     {{- else if eq .guiDriver "A" }}
     - name: ollama-rocm
     {{- end }}
+  hook:
+    after: |-
+      sudo systemctl enable --now ollama
