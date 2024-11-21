@@ -1,3 +1,4 @@
+{{- if .hasSound }}
 name: cava
 method: os
 gentoo:
@@ -9,3 +10,4 @@ arch:
 ubuntu:
   packages:
     - name: cava
+{{- end }}

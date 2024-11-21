@@ -9,11 +9,13 @@ exec = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 {{- end }}
 
 # Sound & Screencast
+{{- if .hasSound }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 exec-once = gentoo-pipewire-launcher restart
 {{- else }}
 exec-once = systemctl --user start wireplumber
 exec-once = systemctl --user start pipewire-pulse
+{{- end }}
 {{- end }}
 exec-once = ~/.config/hypr/scripts/screencast.sh
 

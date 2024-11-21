@@ -25,6 +25,10 @@ data:
   {{- if eq $guiServer "X" "W" }}
   guiDriver: {{ promptStringOnce . "guiDriver" "Which GUI video driver of this machine is, N for Nvidia, I for Intel, A for AMD? (N/I/A)" | quote }}
   {{- end }}
+  {{ $hasSound := promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" }}
+  hasSound: {{ $hasSound }}
+  {{ $hasBluetooth := promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" }}
+  hasBluetooth: {{ $hasBluetooth }}
 
 hooks:
   diff:

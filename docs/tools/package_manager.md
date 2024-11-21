@@ -12,6 +12,7 @@
 |`tshark`|CLI of Wireshark, network packet analysis|Miscellaneous|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
 |`cava`|Audio visualizer|Multimedia tool|
+|`playerctl`|Control media players that implement the MPRIS|Multimedia tool|
 
 # Both X and Wayland applications
 |Tool|Purpose|Used in|
