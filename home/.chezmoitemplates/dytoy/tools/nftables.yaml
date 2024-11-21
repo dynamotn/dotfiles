@@ -1,5 +1,6 @@
 name: nftables
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: net-firewall/nftables

@@ -10,4 +10,7 @@ gentoo:
 arch:
   packages:
     - name: auto-cpufreq
+  hook:
+    after: |-
+      sudo systemctl enable --now auto-cpufreq
 {{- end }}

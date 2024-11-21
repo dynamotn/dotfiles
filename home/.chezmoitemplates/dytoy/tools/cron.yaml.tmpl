@@ -4,12 +4,26 @@ is_essential: true
 gentoo:
   packages:
     - name: sys-process/cronie
+  hook:
+    after: |-
+      sudo rc-update add cronie default
+      sudo rc-service cronie restart
 arch:
   packages:
     - name: cronie
+  hook:
+    after: |-
+      sudo systemctl enable --now cronie
 ubuntu:
   packages:
     - name: cronie
+  hook:
+    after: |-
+      sudo systemctl enable --now cronie
 termux:
   packages:
     - name: cronie
+  hook:
+    after: |-
+      sv-enable cronie
+      sv up cronie

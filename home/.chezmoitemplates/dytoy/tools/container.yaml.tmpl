@@ -6,13 +6,27 @@ gentoo:
   packages:
     - name: app-containers/docker
     - name: app-containers/docker-cli
+  hook:
+    after: |-
+      sudo usermod -aG docker $USER
+      sudo rc-update add docker default
+      sudo rc-service docker start
 arch:
   packages:
     - name: docker
-
+  hook:
+    after: |-
+      sudo groupadd docker
+      sudo usermod -aG docker $USER
+      sudo systemctl enable --now docker containerd
 ubuntu:
   packages:
     - name: docker-ce
     - name: docker-ce-cli
+  hook:
+    after: |-
+      sudo groupadd docker
+      sudo usermod -aG docker $USER
+      sudo systemctl enable --now docker containerd
 {{- end }}
 {{- end }}

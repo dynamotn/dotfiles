@@ -4,9 +4,19 @@ is_essential: true
 gentoo:
   packages:
     - name: net-analyzer/fail2ban
+  hook:
+    after: |-
+      sudo rc-update add fail2ban default
+      sudo rc-service fail2ban restart
 arch:
   packages:
     - name: fail2ban
+  hook:
+    after: |-
+      sudo systemctl enable --now fail2ban
 macos:
   packages:
     - name: fail2ban
+  hook:
+    after: |-
+      sudo systemctl enable --now fail2ban

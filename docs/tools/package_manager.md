@@ -8,13 +8,10 @@
 |`zellij`|Terminal multiplexer|`silos/zellij`|
 |`grc`|Colorise for some GNU/Linux commands|`silos/fish`|
 |`tar`, `unzip`, `gzip`,`bzip2`|Uncompress file|Prerequisite, in `home/dot_config/dynamo`|
-|`ssh`|SSH client|DevOps tool|
 |`tree-sitter`|Parser generator tool for syntax|`silos/neovim`|
-|`docker`|Manage containers|DevOps tool|
-|`ollama`|Get up and running LLMs|AI Tool|
 |`tshark`|CLI of Wireshark, network packet analysis|Miscellaneous|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
-|`cava`|Audio visualizer||
+|`cava`|Audio visualizer|Multimedia tool|
 
 # Both X and Wayland applications
 |Tool|Purpose|Used in|
@@ -24,7 +21,7 @@
 |`thunderbird`|Email client|`silos/thunderbird`|
 |`nvtop`|Monitor resources of GPU|`silos/hyprland`, `silos/awesome`|
 |`obsidian`|Note-taking app|`silos/hyprland`|
-|`libnotify`|Library for sending desktop notifications to a notification daemon||
+|`libnotify`|Library for sending desktop notifications to a notification daemon|Miscellaneous|
 
 # X server applications
 |Tool|Purpose|Used in|
@@ -37,7 +34,7 @@
 |`rofi`|Application launcher, simple switcher|`silos/awesome`|
 |`picom`|Compositor for X11|`silos/awesome`|
 |`xdotool`|Simulate keyboard input for X11|`silos/fish`|
-|`lightdm`|LightDM, display manager for X||
+|`lightdm`|LightDM, display manager for X|OS core tool|
 |`xss-lock`|Screen locker for X|`silos/awesome`|
 |`flameshot`|Screen capturing and editing snapshot tool for X|`silos/awesome`|
 
@@ -51,24 +48,29 @@
 |`wofi`|Application launcher, simple switcher|`silos/hyprland`|
 |`wtype`|Simulate keyboard input for Wayland|`silos/fish`|
 |`swww`|Animated wallpaper daemon|`silos/hyprland`|
-|`greetd`|GreetD, display manager for Wayland||
+|`greetd`|GreetD, display manager for Wayland|OS core tool|
 |`swaylock`|Screen locker for Wayland|`silos/hyprland`|
 |`swappy`|Editing snapshot tool for Wayland|`silos/hyprland`|
 |`grim`|Screen capturing tool for Wayland|`silso/hyprland`|
 |`slurp`|Selecting region tool for Wayland|`silos/hyprland`|
-|`swaync`|Notification center for Wayland||
+|`swaync`|Notification center for Wayland|Miscellaneous|
 |`rust`|Compiler and library for Rust|Prerequisite for cargo installation|
-|`wdisplays`|Configure display monitors manually with GUI||
+|`wdisplays`|Configure display monitors manually with GUI|Miscellaneous
+|
 
 # System applications
-|Tool|Purpose|
-|----|-------|
-|`nftables`|Netfilter framework|
-|`pam-u2f`|PAM U2F module|
-|`wireguard`|Simple and modern VPN|
-|`pipewire`|Audio and video devices framework|
-|`kernel`|Linux kernel for OS|
-|`cronie`|Run scheduled tasks|
-|`fail2ban`|Intrusion prevention software framework|
-|`auto-cpufreq`|Automatic CPU speed & power optimizer|
-|`grub`|Bootloader for system|
+|Tool|Purpose|Used in|
+|----|-------|-------|
+|`ssh`|SSH client|DevOps tool|
+|`nftables`|Netfilter framework|Security tool|
+|`pam-u2f`|PAM U2F module|Security tool|
+|`wireguard`|Simple and modern VPN|Security tool|
+|`tailscale`|VPN built on Wireguard to connect securely to my machines|Security tool|
+|`pipewire`|Audio and video devices framework|Multimedia tool|
+|`kernel`|Linux kernel for OS|OS core tool|
+|`cronie`|Run scheduled tasks|OS core tool|
+|`fail2ban`|Intrusion prevention software framework|Security tool|
+|`auto-cpufreq`|Automatic CPU speed & power optimizer|OS tune tool|
+|`grub`|Bootloader for system|OS core tool|
+|`docker`|Manage containers|DevOps tool|
+|`ollama`|Get up and running LLMs|AI Tool|
