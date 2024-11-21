@@ -76,6 +76,7 @@ bind = $mainMod, L, exec, loginctl lock-session
 bind = $mainMod, S, exec, grim -g "$(slurp)" - | swappy -f -
 bind = $mainMod, Z, exec, hdrop kitty --class btop -e btop
 
+{{- if .hasSound }}
 # Multimedia #
 bindle = , XF86AudioRaiseVolume, exec, wpctl set-volume -l "1.0" @DEFAULT_AUDIO_SINK@ 6%+
 bindle = , XF86AudioLowerVolume, exec, wpctl set-volume -l "1.0" @DEFAULT_AUDIO_SINK@ 6%-
@@ -85,3 +86,4 @@ bind = , XF86AudioPlay, exec, playerctl play-pause
 bind = , XF86AudioPause, exec, playerctl pause
 bind = , XF86AudioNext, exec, playerctl next
 bind = , XF86AudioPrev, exec, playerctl previous
+{{- end }}
