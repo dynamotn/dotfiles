@@ -2,7 +2,9 @@
 set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 source {{ .chezmoi.sourceDir }}/../scripts/os.sh
-trap "_error \"Install tools failed\"" ERR
+TEMP_HOOK_BEFORE=$(mktemp)
+TEMP_HOOK_AFTER=$(mktemp)
+trap "rm -rf $TEMP_HOOK_BEFORE $TEMP_HOOK_AFTER && echo \"Install tools failed\"" ERR
 
 _usage() {
   echo "$0 usage:" && grep " .) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
@@ -26,9 +28,28 @@ _parse_args() {
   done
 }
 
+{{- $shortCode := "" }}
+{{- $name := "" }}
 {{- if eq .chezmoi.os "linux" }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
-_gentoo_run() {
+{{- $shortCode = "gentoo" }}
+{{- $name = "Gentoo Linux" }}
+{{- else if eq .chezmoi.osRelease.id "arch" }}
+{{- $shortCode = "arch" }}
+{{- $name = "Arch Linux" }}
+{{- else if eq .chezmoi.osRelease.id "debian" "ubuntu" }}
+{{- $shortCode = "ubuntu" }}
+{{- $name = "Debian-based Linux" }}
+{{- end }}
+{{- else if eq .chezmoi.os "android" }}
+{{- $shortCode = "termux" }}
+{{- $name = "Android" }}
+{{- else if eq .chezmoi.os "darwin" }}
+{{- $shortCode = "macos" }}
+{{- $name = "MacOS" }}
+{{- end }}
+
+_{{ $shortCode }}_run() {
   for tool in "${package_tools[@]}"; do
     tool_name=$(echo "$tool" | yq e '.name')
     if [ "$TOOL" = "" ] || [ "$TOOL" = "$tool_name" ]; then
@@ -37,13 +58,23 @@ _gentoo_run() {
         continue
       fi
 
-      readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.gentoo.packages.[]')
+      hook_before=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.before")
+      hook_after=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.after")
+      if [ "$hook_before" != "null" ]; then
+        echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_BEFORE}"
+        echo "_progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
+        echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
+        bash ${TEMP_HOOK_BEFORE}
+      fi
+
+      readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.{{ $shortCode }}.packages.[]')
       for package in "${packages[@]}"; do
         package_name=$(echo "$package" | yq e '.name')
         if [[ "$package_name" == "null" ]]; then
           continue
         fi
 
+        {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "gentoo") }}
         accept_keywords=$(echo "$package" | yq e '.accept_keywords')
         if [[ "$accept_keywords" != "null" ]]; then
           sudo mkdir -p $(dirname "/etc/portage/package.accept_keywords/$package_name")
@@ -63,49 +94,7 @@ _gentoo_run() {
         else
           _gentoo_install "$package_name"
         fi
-      done
-    fi
-  done
-}
-{{- else if eq .chezmoi.osRelease.id "arch" }}
-_arch_run() {
-  for tool in "${package_tools[@]}"; do
-    tool_name=$(echo "$tool" | yq e '.name')
-    if [ "$TOOL" = "" ] || [ "$TOOL" = "$tool_name" ]; then
-      is_essential=$(echo "$tool" | yq e '.is_essential')
-      if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
-        continue
-      fi
-
-      readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.arch.packages.[]')
-      for package in "${packages[@]}"; do
-        package_name=$(echo "$package" | yq e '.name')
-        if [[ "$package_name" == "null" ]]; then
-          continue
-        fi
-
-        _arch_install "$package_name"
-      done
-    fi
-  done
-}
-{{- else if eq .chezmoi.osRelease.id "debian" "ubuntu" }}
-_ubuntu_run() {
-  for tool in "${package_tools[@]}"; do
-    tool_name=$(echo "$tool" | yq e '.name')
-    if [ "$TOOL" = "" ] || [ "$TOOL" = "$tool_name" ]; then
-      is_essential=$(echo "$tool" | yq e '.is_essential')
-      if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
-        continue
-      fi
-
-      readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.ubuntu.packages.[]')
-      for package in "${packages[@]}"; do
-        package_name=$(echo "$package" | yq e '.name')
-        if [[ "$package_name" == "null" ]]; then
-          continue
-        fi
-
+        {{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
         repo=$(echo "$package" | yq e '.repo')
         if [[ "$repo" != "null" ]]; then
           repo_name=$(echo "$package" | yq e '.repo_name')
@@ -122,60 +111,25 @@ _ubuntu_run() {
           _ubuntu_repo_sync
         fi
         _ubuntu_install "$package_name"
-      done
-    fi
-  done
-}
-{{- end }}
-{{- else if eq .chezmoi.os "android" }}
-_termux_run() {
-  for tool in "${package_tools[@]}"; do
-    tool_name=$(echo "$tool" | yq e '.name')
-    if [ "$TOOL" = "" ] || [ "$TOOL" = "$tool_name" ]; then
-      is_essential=$(echo "$tool" | yq e '.is_essential')
-      if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
-        continue
-      fi
-
-      readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.termux.packages.[]')
-      for package in "${packages[@]}"; do
-        package_name=$(echo "$package" | yq e '.name')
-        if [[ "$package_name" == "null" ]]; then
-          continue
-        fi
-
-        _termux_install "$package_name"
-      done
-    fi
-  done
-}
-{{- else if eq .chezmoi.os "darwin" }}
-_macos_run() {
-  for tool in "${package_tools[@]}"; do
-    tool_name=$(echo "$tool" | yq e '.name')
-    if [ "$TOOL" = "" ] || [ "$TOOL" = "$tool_name" ]; then
-      is_essential=$(echo "$tool" | yq e '.is_essential')
-      if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
-        continue
-      fi
-
-      readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.macos.packages.[]')
-      for package in "${packages[@]}"; do
-        package_name=$(echo "$package" | yq e '.name')
-        if [[ "$package_name" == "null" ]]; then
-          continue
-        fi
+        {{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
         package_param=$(echo "$package" | yq e '.param')
         if [[ "$package_param" == "null" ]]; then
           package_param=""
         fi
-
         _macos_install "$package_name" "$package_param"
+        {{- else }}
+        _{{ $shortCode }}_install "$package_name"
+        {{- end }}
       done
+      if [ "$hook_after" != "null" ]; then
+        echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_AFTER}"
+        echo "_progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
+        echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
+        bash ${TEMP_HOOK_AFTER}
+      fi
     fi
   done
 }
-{{- end }}
 
 _main() {
   if [ "$TOOL" = "" ]; then
@@ -185,22 +139,18 @@ _main() {
   fi
   readarray package_tools < <(yq e -o=j -I=0 'filter(.method == "os") | .[]' ~/.config/dytoy/tools.yaml )
 
+  _info "Distro of this machine is {{ $name }}."
   {{- if eq .chezmoi.os "linux" }}
   {{- if eq .chezmoi.osRelease.id "gentoo" }}
-  _info "Distro of this machine is Gentoo."
   _gentoo_run
   {{- else if eq .chezmoi.osRelease.id "arch" }}
-  _info "Distro of this machine is Arch Linux."
   _arch_init && _arch_run
   {{- else if eq .chezmoi.osRelease.id "debian" "ubuntu" }}
-  _info "Distro of this machine is Ubuntu."
   _ubuntu_init && _ubuntu_run
   {{- end }}
   {{- else if eq .chezmoi.os "android" }}
-  _info "OS of this machine is Termux."
   _termux_init && _termux_run
   {{- else if eq .chezmoi.os "darwin" }}
-  _info "OS of this machine is MacOS."
   _macos_run
   {{- end }}
 
