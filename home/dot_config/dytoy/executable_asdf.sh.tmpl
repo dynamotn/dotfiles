@@ -1,0 +1,69 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/os.sh
+trap "echo \"Install tools failed\"" ERR
+
+_usage() {
+  echo "$0 usage:" && grep " .) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
+  exit 0
+}
+
+_parse_args() {
+  while getopts ":het:" arg; do
+    case $arg in
+      e) # Update only essential tool
+        FLAG_IS_ESSENTIAL=true
+        ;;
+      t) # Only one specific tool
+        TOOL=$OPTARG
+        ;;
+      h) # Display help
+        _usage
+        ;;
+      *) ;;
+    esac
+  done
+}
+
+_main() {
+  if [ "$TOOL" = "" ]; then
+    _info "Install asdf tools"
+  else
+    _info "Install asdf tool: $TOOL"
+  fi
+  readarray asdf_tools < <(yq e -o=j -I=0 'filter(.method == "asdf") | .[]' ~/.config/dytoy/tools.yaml )
+
+  for tool in "${asdf_tools[@]}"; do
+    tool_name=$(echo "$tool" | yq e '.name')
+    if [ "$TOOL" != "" ] && [ "$TOOL" != "$tool_name" ]; then
+      continue
+    fi
+    is_essential=$(echo "$tool" | yq e '.is_essential')
+    if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
+      continue
+    fi
+
+    readarray dependencies < <(echo "$tool" | yq e -o=j -I=0 -r '.dependencies.[]')
+    for dependency in "${dependencies[@]}"; do
+      dependency=${dependency%$'\n'}
+      method=$(yq e -o=j -I=0 'filter(.name == "'"$dependency"'") | .[].method | .' ~/.config/dytoy/tools.yaml)
+      method=${method%\"}
+      method=${method#\"}
+      {{ lookPath "bash" }} "$SCRIPT_DIR/$method.sh" -t "$dependency"
+    done
+
+    repo=$(echo "$tool" | yq e '.repo')
+    asdf plugin add $tool_name $repo
+    asdf install $tool_name latest
+    asdf global $tool_name $(asdf latest $tool_name)
+  done
+
+  _success "Installed asdf tools"
+}
+
+TOOL=
+FLAG_IS_ESSENTIAL=false
+_parse_args "$@"
+
+_main

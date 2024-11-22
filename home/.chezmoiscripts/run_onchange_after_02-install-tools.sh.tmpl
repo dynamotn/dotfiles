@@ -14,10 +14,16 @@ _install_shell_tools() {
   bash {{ .chezmoi.homeDir  }}/.config/dytoy/shell.sh -e
 }
 
+_install_asdf_tools() {
+  . ~/.asdf/asdf.sh
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/asdf.sh -e
+}
+
 _main() {
   _install_package_tools
   _install_binary_tools
   _install_shell_tools
+  _install_asdf_tools
 }
 
 export PATH=$PATH:~/.local/bin
