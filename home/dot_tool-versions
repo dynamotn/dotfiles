@@ -1,9 +1,10 @@
-nodejs 21.1.0
+nodejs 23.3.0
 helm 3.15.4
-kubectl 1.31.0
+kubectl 1.31.3
 gcloud 491.0.0
 terraform 1.9.5
-pre-commit 3.8.0
-python 3.12.0
+pre-commit 4.0.1
+python 3.13.0t
 awscli 2.17.47
 azure-cli 2.64.0
+ruby 3.3.6
