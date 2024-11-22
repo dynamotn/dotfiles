@@ -56,6 +56,7 @@
 |`slurp`|Selecting region tool for Wayland|`silos/hyprland`|
 |`swaync`|Notification center for Wayland|Miscellaneous|
 |`rust`|Compiler and library for Rust|Prerequisite for cargo installation|
+|`go`|Compiler and library for Go|Prerequisite for go installation|
 |`wdisplays`|Configure display monitors manually with GUI|Miscellaneous
 |
 
