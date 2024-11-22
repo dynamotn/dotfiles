@@ -1,4 +1,3 @@
-{{- if eq .kind "pc" "laptop" }}
 name: kernel
 method: os
 is_essential: true
@@ -7,8 +6,9 @@ gentoo:
     - name: sys-kernel/gentoo-sources
       accept_keywords: |-
         sys-kernel/gentoo-sources ~amd64
+    - name: sys-kernel/linux-firmware
 arch:
   packages:
     - name: linux-hardened
     - name: linux-hardened-headers
-{{- end }}
+    - name: linux-firmware
