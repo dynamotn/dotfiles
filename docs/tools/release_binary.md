@@ -44,6 +44,7 @@
 |[dust](https://github.com/bootandy/dust)|Alternative to `du` with more intuitive|SysOps tool|
 |[duf](https://github.com/muesli/duf)|Alternative to `df` with colours...|SysOps tool|
 |[restic](https://github.com/restic/restic)|Backup program|SysOps tool|
+|[goaccess](https://github.com/allinurl/goaccess)|Real-time web log analyzer|SysOps tool|
 |[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|FinOps tool|
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|SecOps tool|
 |[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|SecOps tool|
