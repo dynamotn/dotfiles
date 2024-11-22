@@ -15,15 +15,6 @@ name = "office"
 exec = ["eww open bar --screen 1 --id bar1"]
 
 [[profile.output]]
-enable = false
-search = ["m=", "s=", "v="]
-mode = "2880x1800@60Hz"
-position = "3360,0"
-scale = 1.0
-transform = "normal"
-adaptive_sync = false
-
-[[profile.output]]
 enable = true
 search = ["m=CB242Y E", "s=24220B6C83W01", "v=Acer Technologies"]
 mode = "1920x1080@60Hz"
@@ -33,7 +24,7 @@ transform = "normal"
 adaptive_sync = false
 
 [[profile.output]]
-enable = true
+enable = false
 search = ["m=0x419D", "s=", "v=Samsung Display Corp."]
 mode = "2880x1800@120Hz"
 position = "0,0"
