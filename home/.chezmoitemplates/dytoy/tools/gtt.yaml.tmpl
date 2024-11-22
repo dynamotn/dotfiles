@@ -1,0 +1,8 @@
+{{- if eq .kind "pc" "laptop" }}
+name: gtt
+method: shell
+dependencies:
+  - go
+content: |-
+  go install -ldflags="-s -w" github.com/eeeXun/gtt@latest
+{{- end }}
