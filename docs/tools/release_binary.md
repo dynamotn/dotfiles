@@ -47,6 +47,7 @@
 |[restic](https://github.com/restic/restic)|Backup program|SysOps tool|
 |[goaccess](https://github.com/allinurl/goaccess)|Real-time web log analyzer|SysOps tool|
 |[hl](https://github.com/pamburus/hl)|Log viewer and processor that translates JSON or logfmt logs into a pretty human-readable format|SysOps tool|
+|[]
 |[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|FinOps tool|
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|SecOps tool|
 |[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|SecOps tool|
@@ -72,6 +73,7 @@
 |[arduino](https://github.com/arduino/arduino-cli)|CLI to manage Arduino board|IoT tool|
 |[k6](https://github.com/grafana/k6)|Load testing tool|Testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|Testing tool|
+|[oha](https://github.com/hatoo/oha)|HTTP load generator tool|Testing tool|
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|Miscellaneous|
 |[cointop](https://github.com/arduino/arduino-cli)|TUI to track coin stats|Miscellaneous|
 |[tickrs](https://github.com/tarkah/tickrs)|TUI to track stock stats|Miscellaneous|
