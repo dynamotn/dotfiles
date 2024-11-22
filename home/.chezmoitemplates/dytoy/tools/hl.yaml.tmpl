@@ -1,0 +1,12 @@
+name: hl
+method: binary
+github:
+  repo: pamburus/hl
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: hl-linux-x86_64-gnu.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: hl-linux-arm64-gnu.tar.gz
+  {{- end }}
+archive:
+  paths:
+    - hl
