@@ -1,0 +1,11 @@
+{{- if .hasBluetooth }}
+name: bluetooth
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: net-wireless/bluez
+arch:
+  packages:
+    - name: bluez
+{{- end }}

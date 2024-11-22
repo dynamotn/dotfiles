@@ -68,6 +68,7 @@
 |`wireguard`|Simple and modern VPN|Security tool|
 |`tailscale`|VPN built on Wireguard to connect securely to my machines|Security tool|
 |`pipewire`|Audio and video devices framework|Multimedia tool|
+|`bluez`|Bluetooth controller|Multimedia tool|
 |`kernel`|Linux kernel for OS|OS core tool|
 |`cronie`|Run scheduled tasks|OS core tool|
 |`fail2ban`|Intrusion prevention software framework|Security tool|
