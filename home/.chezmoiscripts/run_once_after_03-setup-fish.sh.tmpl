@@ -19,13 +19,6 @@ fi
 fish {{ .chezmoi.homeDir }}/.config/fish/setup.fish
 
 _progress "Install neccessary tools"
-{{ if eq .kind "pc" "laptop" -}}
-fish -c "install_asdf"
-fish -c "update_fzf"
-fish -c "install_gcloud"
-fish -c "install_kubectl"
-fish -c "install_helm"
-fish -c "install_terraform"
-fish -c "install_pre_commit"
-{{ end }}
+mkdir -p ~/.config/fish/completions && ln -sf ~/.asdf/completions/asdf.fish ~/.config/fish/completions/asdf.fish
+~/.fzf/install --no-zsh --bin
 _success "Setup fish shell"

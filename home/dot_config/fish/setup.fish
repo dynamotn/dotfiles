@@ -18,5 +18,5 @@ source ~/.config/fish/functions/fisher.fish
 
 fisher update
 
-# Install fzf
-fish -c "install_fzf"
+# Install nix
+fish -c "install_nix"
