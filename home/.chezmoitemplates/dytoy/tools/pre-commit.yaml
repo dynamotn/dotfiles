@@ -1,0 +1,5 @@
+name: pre-commit
+method: asdf
+dependencies:
+  - python
+is_essential: true
