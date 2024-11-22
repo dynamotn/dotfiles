@@ -23,6 +23,7 @@
 |`nvtop`|Monitor resources of GPU|`silos/hyprland`, `silos/awesome`|
 |`obsidian`|Note-taking app|`silos/hyprland`|
 |`libnotify`|Library for sending desktop notifications to a notification daemon|Miscellaneous|
+|[sonyheadphones](https://github.com/Plutoberth/SonyHeadphonesClient)|Control Sony Headphones|Multimedia tool|
 
 # X server applications
 |Tool|Purpose|Used in|
