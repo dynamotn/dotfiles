@@ -1,0 +1,11 @@
+{{- if eq .chezmoi.os "linux" }}
+name: oryx
+method: binary
+github:
+  repo: pythops/oryx
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: oryx-x86_64-unknown-linux-musl
+  {{- else if eq .chezmoi.arch "amd64" }}
+  release_asset:  oryx-aarch64-unknown-linux-musl
+  {{- end }}
+{{- end }}
