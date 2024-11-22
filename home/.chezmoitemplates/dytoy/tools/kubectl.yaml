@@ -1,0 +1,3 @@
+name: kubectl
+method: asdf
+is_essential: true
