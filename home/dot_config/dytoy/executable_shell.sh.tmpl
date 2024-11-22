@@ -29,7 +29,11 @@ _parse_args() {
 }
 
 _main() {
-  _info "Install shell tools"
+  if [ "$TOOL" = "" ]; then
+    _info "Install shell tools"
+  else
+    _info "Install shell tool: $TOOL"
+  fi
   readarray shell_tools < <(yq e -o=j -I=0 'filter(.method == "shell") | .[]' ~/.config/dytoy/tools.yaml )
 
   for tool in "${shell_tools[@]}"; do
