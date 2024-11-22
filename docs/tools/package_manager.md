@@ -9,7 +9,7 @@
 |`grc`|Colorise for some GNU/Linux commands|`silos/fish`|
 |`tar`, `unzip`, `gzip`,`bzip2`|Uncompress file|Prerequisite, in `home/dot_config/dynamo`|
 |`tree-sitter`|Parser generator tool for syntax|`silos/neovim`|
-|`tshark`|CLI of Wireshark, network packet analysis|Miscellaneous|
+|`tshark`|CLI of Wireshark, network packet analysis|Network tool|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
 |`cava`|Audio visualizer|Multimedia tool|
 |`playerctl`|Control media players that implement the MPRIS|Multimedia tool|
