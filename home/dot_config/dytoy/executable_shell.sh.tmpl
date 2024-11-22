@@ -12,10 +12,13 @@ _usage() {
 }
 
 _parse_args() {
-  while getopts ":he" arg; do
+  while getopts ":het:" arg; do
     case $arg in
       e) # Update only essential tool
         FLAG_IS_ESSENTIAL=true
+        ;;
+      t) # Only one specific tool
+        TOOL=$OPTARG
         ;;
       h) # Display help
         _usage
@@ -30,6 +33,10 @@ _main() {
   readarray shell_tools < <(yq e -o=j -I=0 'filter(.method == "shell") | .[]' ~/.config/dytoy/tools.yaml )
 
   for tool in "${shell_tools[@]}"; do
+    tool_name=$(echo "$tool" | yq e '.name')
+    if [ "$TOOL" != "" ] && [ "$TOOL" != "$tool_name" ]; then
+      continue
+    fi
     is_essential=$(echo "$tool" | yq e '.is_essential')
     if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
       continue
@@ -50,6 +57,7 @@ _main() {
   _success "Installed shell tools"
 }
 
+TOOL=
 FLAG_IS_ESSENTIAL=false
 _parse_args "$@"
 
