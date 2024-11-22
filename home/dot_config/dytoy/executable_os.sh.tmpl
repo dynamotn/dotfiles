@@ -52,81 +52,82 @@ _parse_args() {
 _{{ $shortCode }}_run() {
   for tool in "${package_tools[@]}"; do
     tool_name=$(echo "$tool" | yq e '.name')
-    if [ "$TOOL" = "" ] || [ "$TOOL" = "$tool_name" ]; then
-      is_essential=$(echo "$tool" | yq e '.is_essential')
-      if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
+    if [ "$TOOL" != "" ] && [ "$TOOL" != "$tool_name" ]; then
+      continue
+    fi
+    is_essential=$(echo "$tool" | yq e '.is_essential')
+    if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
+      continue
+    fi
+
+    hook_before=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.before")
+    hook_after=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.after")
+    if [ "$hook_before" != "null" ]; then
+      echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_BEFORE}"
+      echo "_progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
+      echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
+      {{ lookPath "bash" }} ${TEMP_HOOK_BEFORE}
+    fi
+
+    readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.{{ $shortCode }}.packages.[]')
+    for package in "${packages[@]}"; do
+      package_name=$(echo "$package" | yq e '.name')
+      if [[ "$package_name" == "null" ]]; then
         continue
       fi
 
-      hook_before=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.before")
-      hook_after=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.after")
-      if [ "$hook_before" != "null" ]; then
-        echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_BEFORE}"
-        echo "_progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
-        echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
-        bash ${TEMP_HOOK_BEFORE}
+      {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "gentoo") }}
+      accept_keywords=$(echo "$package" | yq e '.accept_keywords')
+      if [[ "$accept_keywords" != "null" ]]; then
+        sudo mkdir -p $(dirname "/etc/portage/package.accept_keywords/$package_name")
+        sudo touch "/etc/portage/package.accept_keywords/$package_name"
+        echo "$accept_keywords" | sudo tee "/etc/portage/package.accept_keywords/$package_name" > /dev/null
+      fi
+      use=$(echo "$package" | yq e '.use')
+      if [[ "$use" != "null" ]]; then
+        sudo touch "/etc/portage/package.use/$package_name"
+        echo "$use" | sudo tee "/etc/portage/package.use/$package_name" > /dev/null
       fi
 
-      readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.{{ $shortCode }}.packages.[]')
-      for package in "${packages[@]}"; do
-        package_name=$(echo "$package" | yq e '.name')
-        if [[ "$package_name" == "null" ]]; then
-          continue
-        fi
+      repo=$(echo "$package" | yq e '.repo')
 
-        {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "gentoo") }}
-        accept_keywords=$(echo "$package" | yq e '.accept_keywords')
-        if [[ "$accept_keywords" != "null" ]]; then
-          sudo mkdir -p $(dirname "/etc/portage/package.accept_keywords/$package_name")
-          sudo touch "/etc/portage/package.accept_keywords/$package_name"
-          echo "$accept_keywords" | sudo tee "/etc/portage/package.accept_keywords/$package_name" > /dev/null
-        fi
-        use=$(echo "$package" | yq e '.use')
-        if [[ "$use" != "null" ]]; then
-          sudo touch "/etc/portage/package.use/$package_name"
-          echo "$use" | sudo tee "/etc/portage/package.use/$package_name" > /dev/null
-        fi
-
-        repo=$(echo "$package" | yq e '.repo')
-
-        if [[ "$repo" != "null" ]]; then
-          _gentoo_install "$package_name::$repo"
-        else
-          _gentoo_install "$package_name"
-        fi
-        {{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
-        repo=$(echo "$package" | yq e '.repo')
-        if [[ "$repo" != "null" ]]; then
-          repo_name=$(echo "$package" | yq e '.repo_name')
-          repo_version=$(echo "$package" | yq e '.repo_version')
-          distro_version=$(echo "$package" | yq e '.distro_version')
-          key=$(echo "$package" | yq e '.key')
-
-          [[ "$repo_name" == "null" ]] && repo_name=$package_name
-          [[ "$distro_version" == "null" ]] && distro_version=$(grep -is {{ if eq .chezmoi.osRelease.id "ubuntu" }}UBUNTU_CODENAME{{ else }}VERSION_CODENAME{{ end }} /etc/os-release | cut -d= -f2)
-          if [ ! -f "/etc/apt/sources.list.d/$repo_name.list" ]; then
-            echo "deb $repo $distro_version $repo_version" | sudo tee /"etc/apt/sources.list.d/$repo_name.list"
-            curl -sSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" | sudo apt-key add -
-          fi
-          _ubuntu_repo_sync
-        fi
-        _ubuntu_install "$package_name"
-        {{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
-        package_param=$(echo "$package" | yq e '.param')
-        if [[ "$package_param" == "null" ]]; then
-          package_param=""
-        fi
-        _macos_install "$package_name" "$package_param"
-        {{- else }}
-        _{{ $shortCode }}_install "$package_name"
-        {{- end }}
-      done
-      if [ "$hook_after" != "null" ]; then
-        echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_AFTER}"
-        echo "_progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
-        echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
-        bash ${TEMP_HOOK_AFTER}
+      if [[ "$repo" != "null" ]]; then
+        _gentoo_install "$package_name::$repo"
+      else
+        _gentoo_install "$package_name"
       fi
+      {{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
+      repo=$(echo "$package" | yq e '.repo')
+      if [[ "$repo" != "null" ]]; then
+        repo_name=$(echo "$package" | yq e '.repo_name')
+        repo_version=$(echo "$package" | yq e '.repo_version')
+        distro_version=$(echo "$package" | yq e '.distro_version')
+        key=$(echo "$package" | yq e '.key')
+
+        [[ "$repo_name" == "null" ]] && repo_name=$package_name
+        [[ "$distro_version" == "null" ]] && distro_version=$(grep -is {{ if eq .chezmoi.osRelease.id "ubuntu" }}UBUNTU_CODENAME{{ else }}VERSION_CODENAME{{ end }} /etc/os-release | cut -d= -f2)
+        if [ ! -f "/etc/apt/sources.list.d/$repo_name.list" ]; then
+          echo "deb $repo $distro_version $repo_version" | sudo tee /"etc/apt/sources.list.d/$repo_name.list"
+          curl -sSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" | sudo apt-key add -
+        fi
+        _ubuntu_repo_sync
+      fi
+      _ubuntu_install "$package_name"
+      {{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
+      package_param=$(echo "$package" | yq e '.param')
+      if [[ "$package_param" == "null" ]]; then
+        package_param=""
+      fi
+      _macos_install "$package_name" "$package_param"
+      {{- else }}
+      _{{ $shortCode }}_install "$package_name"
+      {{- end }}
+    done
+    if [ "$hook_after" != "null" ]; then
+      echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_AFTER}"
+      echo "_progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
+      echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
+      {{ lookPath "bash" }} ${TEMP_HOOK_AFTER}
     fi
   done
 }
