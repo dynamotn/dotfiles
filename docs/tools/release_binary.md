@@ -47,7 +47,6 @@
 |[restic](https://github.com/restic/restic)|Backup program|SysOps tool|
 |[goaccess](https://github.com/allinurl/goaccess)|Real-time web log analyzer|SysOps tool|
 |[hl](https://github.com/pamburus/hl)|Log viewer and processor that translates JSON or logfmt logs into a pretty human-readable format|SysOps tool|
-|[]
 |[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|FinOps tool|
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|SecOps tool|
 |[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|SecOps tool|

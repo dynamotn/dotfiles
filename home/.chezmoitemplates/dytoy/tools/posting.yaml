@@ -1,0 +1,5 @@
+name: posting
+method: shell
+dependencies:
+  - uv
+content: uv tool install --python 3.12 posting
