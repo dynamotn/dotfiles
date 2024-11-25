@@ -9,6 +9,7 @@
 |[grc](https://github.com/garabik/grc)|Colorise for some GNU/Linux commands|`silos/fish`|
 |`tar`, `unzip`, `gzip`,`bzip2`|Uncompress file|Prerequisite, in `home/dot_config/dynamo`|
 |[tree-sitter](https://github.com/tree-sitter/tree-sitter)|Parser generator tool for syntax|`silos/neovim`|
+|[w3m](https://github.com/acg/w3m)|Text-based web browser|Frequently used tool|
 |[tshark](https://www.wireshark.org/docs/man-pages/tshark.html)|CLI of Wireshark, network packet analysis|Network tool|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
 |[cava](https://github.com/karlstav/cava)|Audio visualizer|Multimedia tool|
