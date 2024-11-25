@@ -1,0 +1,15 @@
+name: w3m
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: www-client/w3m
+arch:
+  packages:
+    - name: w3m
+ubuntu:
+  packages:
+    - name: w3m
+termux:
+  packages:
+    - name: w3m
