@@ -39,6 +39,7 @@
 |[kubeseal](https://github.com/bitnami-labs/sealed-secrets)|Encrypt secret on Kubernetes cluster|DevOps tool|
 |[steampipe](https://github.com/turbot/steampipe)|SQL console for API queries|DevOps tool|
 |[goose](https://github.com/pressly/goose)|Database migration tool|DevOps tool|
+|[process-compose](https://github.com/F1bonacc1/process-compose)|Scheduler and orchestrator to manage non-containerized applications|DevOps tool|-
 |[procs](https://github.com/dalance/procs)|Alternative to `ps` with colours, tree view...|SysOps tool|
 |[rclone](https://github.com/rclone/rclone)|Sync files to and from cloud providers|SysOps tool|
 |[viddy](https://github.com/sachaos/viddy)|Alternative to `watch` with colours, diff, time machine...|SysOps tool|
