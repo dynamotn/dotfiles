@@ -61,8 +61,17 @@ _main() {
     else
       asdf plugin add $tool_name
     fi
-    asdf install $tool_name latest
-    asdf global $tool_name $(asdf latest $tool_name)
+    version=$(echo "$tool" | yq e '.version')
+    if [[ "$version" = "null" ]]; then
+      asdf install $tool_name latest
+      asdf global $tool_name $(asdf latest $tool_name)
+    elif [[ "$version" = "system" ]]; then
+      asdf install $tool_name latest
+      asdf global $tool_name system
+    else
+      asdf install $tool_name $version
+      asdf global $tool_name $(asdf latest $tool_name)
+    fi
   done
 
   _success "Installed asdf tools"
