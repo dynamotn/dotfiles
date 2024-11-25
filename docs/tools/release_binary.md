@@ -73,6 +73,7 @@
 |[stripe](https://github.com/stripe/stripe-cli)|CLI to build, test Stripe integration|Developer tool|
 |[d2](https://github.com/terrastruct/d2)|Diagram as code tool|Developer tool|
 |[d2plugin-tala](https://github.com/terrastruct/TALA)|Engine plugin TALA for d2|Developer tool|
+|[zrok](https://github.com/openziti/zrok)|{eer-to-peer sharing platform|Developer tool|
 |[arduino](https://github.com/arduino/arduino-cli)|CLI to manage Arduino board|IoT tool|
 |[k6](https://github.com/grafana/k6)|Load testing tool|Testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|Testing tool|
