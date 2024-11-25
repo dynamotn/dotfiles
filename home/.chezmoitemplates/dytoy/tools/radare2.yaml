@@ -1,0 +1,8 @@
+name: radare2
+method: os
+gentoo:
+  packages:
+    - name: dev-util/radare2
+arch:
+  packages:
+    - name: radare2
