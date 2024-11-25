@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.os "linux" "darwin" }}
 name: oha
 method: binary
 github:
@@ -7,3 +8,4 @@ github:
   {{- else if eq .chezmoi.os "darwin" }}
   release_asset: oha-macos-{{ .chezmoi.arch }}
   {{- end }}
+{{- end }}
