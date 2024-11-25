@@ -1,0 +1,11 @@
+name: lynis
+method: os
+gentoo:
+  packages:
+    - name: app-forensics/lynis
+arch:
+  packages:
+    - name: lynis
+ubuntu:
+  packages:
+    - name: lynis

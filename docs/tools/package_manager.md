@@ -14,6 +14,7 @@
 |`cava`|Audio visualizer|Multimedia tool|
 |`playerctl`|Control media players that implement the MPRIS|Multimedia tool|
 |[radare2](https://github.com/radareorg/radare2)|Reverse engineering framework|Security tool|
+|[lynis](https://github.com/CISOfy/lynis)|Security auditing and hardening tool|Security tool|
 
 # Both X and Wayland applications
 |Tool|Purpose|Used in|
