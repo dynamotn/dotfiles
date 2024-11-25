@@ -36,6 +36,7 @@
 |[terragrunt](https://github.com/gruntwork-io/terragrunt)|Wrapper for Terraform to provide extra tool|DevOps tool|
 |[terraformer](https://github.com/GoogleCloudPlatform/terraformer)|Generate Terraform from existing infrastructure|DevOps tool|
 |[terraform-docs](https://github.com/terraform-docs/terraform-docs)|Generate documents for Terraform modules|DevOps tool|
+|[pug](https://github.com/leg100/pug)|TUI for terraform, terragrunt|DevOps tool|
 |[kubeseal](https://github.com/bitnami-labs/sealed-secrets)|Encrypt secret on Kubernetes cluster|DevOps tool|
 |[steampipe](https://github.com/turbot/steampipe)|SQL console for API queries|DevOps tool|
 |[goose](https://github.com/pressly/goose)|Database migration tool|DevOps tool|
