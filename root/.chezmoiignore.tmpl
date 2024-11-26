@@ -21,3 +21,6 @@ etc/default/grub
 etc/ca-certificates
 etc/NetworkManager/system-connections/Office.nmconnection
 {{- end }}
+{{- if ne .kind "pc" }}
+etc/NetworkManager/system-connections/Dynamo.nmconnection
+{{- end }}
