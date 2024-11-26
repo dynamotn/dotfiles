@@ -1,0 +1,25 @@
+{{- if eq .chezmoi.os "linux" }}
+name: networkmanager
+method: os
+gentoo:
+  packages:
+    - name: net-misc/networkmanager
+  hook:
+    after: |-
+      sudo usermod -aG plugdev $USER
+      sudo rc-update del dhcpcd default
+      sudo rc-update add NetworkManager default
+      sudo rc-service NetworkManager restart
+arch:
+  packages:
+    - name: networkmanager
+  hook:
+    after: |-
+      sudo systemctl enable --now NetworkManager
+ubuntu
+  packages:
+    - name: network-manager
+  hook:
+    after: |-
+      sudo systemctl enable --now NetworkManager
+{{- end }}
