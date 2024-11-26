@@ -6,6 +6,7 @@
 |[jq](https://github.com/stedolan/jq)|JSON processor|`silos/awesome`|
 |[delta](https://github.com/dandavison/delta)|Syntax highlighting pager for git, diff, and grep output|`home/dot_config/git`|
 |[bat](https://github.com/sharkdp/bat)|Alternative to `cat` with syntax highlighting and Git integration|Frequently used tool|
+|[ov](https://github.com/noborus/ov)|Alternative to `less`, `more`, `tail -f`|Frequently used tool|
 |[fd](https://github.com/sharkdp/fd)|Alternative to `find`, simpler and faster|Frequently used tool, in `silos/fish`|
 |[eza](https://github.com/eza-community/eza)|Alternative to `ls` with colours, faster|Frequently used tool|
 |[ripgrep](https://github.com/BurntSushi/ripgrep)|Alternative to `grep`, with Git integration and faster|Frequently used tool|

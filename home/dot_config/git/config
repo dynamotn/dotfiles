@@ -12,9 +12,7 @@
         # Always sign commit
         gpgsign = true
 [merge]
-        # Merge with vim
-        tool = nvimdiff
-        conflictstyle = diff3
+        conflictstyle = zdiff3
 [diff]
         # Diff with vim
         tool = nvimdiff
@@ -46,7 +44,7 @@
         # Nvim diff 2 files
         cmd = "nvim -d $LOCAL $REMOTE"
 [difftool "kitty"]
-        # Use kitten of kitty to diff each hunk
+        # Use kitten of kitty/ to diff each hunk
         cmd = "kitty +kitten diff $LOCAL $REMOTE"
 [mergetool "nvimdiff"]
         # Nvim diff 4 files
@@ -88,15 +86,24 @@
         # Custom global attributes file
         attributesfile = ~/.config/git/attributes
         # Use delta to prettier diff
-        pager = delta
+        pager = delta --pager='ov -F'
+[pager]
+        show = delta --features ov-diff
+        diff = delta --features ov-diff
+        log = delta --features ov-log
 [interactive]
         # Use delta to show diff when interactive each hunks
         diffFilter = delta --color-only
 [delta]
         # Use delta with catppuccin theme
         syntax-theme = "catppuccin"
+        # Change decorations
+        features = decorations
+        # Show navigate section
+        navigate = true
         # Show line number & Two side
-        features = side-by-side line-numbers decorations
+        side-by-side = true
+        line-numbers = true
         # Style of whitespace error
         whitespace-error-style = red reverse
 [delta "decorations"]
@@ -118,6 +125,10 @@
         line-numbers-plus-style = bold "#a6da95"
         line-numbers-right-style = "#6e738d"
         line-numbers-zero-style = "#6e738d"
+[delta "ov-diff"]
+        pager = ov -F --section-delimiter '^(commit|added:|removed:|renamed:|Δ)' --section-header --pattern '•'
+[delta "ov-log"]
+        pager = ov -F --section-delimiter '^(commit|\\* commit|\\* \\w{7})' --section-header-num 1
 [apply]
         # Auto fix white space
         whitespace = fix
