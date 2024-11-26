@@ -16,14 +16,14 @@ arch:
     - name: lightdm-gtk-greeter
   hook:
     after: |-
-      sudo systemctl enable --now lightdm
+      sudo systemctl enable lightdm
 ubuntu:
   packages:
     - name: lightdm
     - name: lightdm-gtk-greeter
   hook:
     after: |-
-      sudo systemctl enable --now lightdm
+      sudo systemctl enable lightdm
 {{- else if eq .guiServer "W" }}
 name: greetd
 method: os
@@ -44,5 +44,5 @@ arch:
     - name: greetd-regreet
   hook:
     after: |-
-      sudo systemctl enable --now greetd
+      sudo systemctl enable greetd
 {{- end }}
