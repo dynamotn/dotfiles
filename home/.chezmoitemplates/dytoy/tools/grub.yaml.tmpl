@@ -10,6 +10,9 @@ gentoo:
 arch:
   packages:
     - name: grub
+    {{- if and (eq .kind "laptop") (eq .place "office") }}
+    - name: sbsigntools
+    {{- end }}
 ubuntu:
   packages:
     - name: grub

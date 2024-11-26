@@ -19,4 +19,9 @@ arch:
     - name: pipewire-audio
     - name: pipewire-pulse
     - name: pipewire-alsa
+    # Sound firmware
+    {{- if and (eq .kind "laptop") (eq .place "office") }}
+    - name: sof-firmware
+    - name: alsa-firmware
+    {{- end }}
 {{- end }}
