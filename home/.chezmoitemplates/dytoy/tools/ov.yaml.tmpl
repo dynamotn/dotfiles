@@ -1,0 +1,15 @@
+name: ov
+method: binary
+is_essential: true
+github:
+  repo: noborus/ov
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "linux" }}
+  {{- else }}
+  {{- $os = .chezmoi.os }}
+  {{- end }}
+  release_asset: ov_%1v_{{ $os }}_{{ .chezmoi.arch }}.zip
+archive:
+  paths:
+    - ov
