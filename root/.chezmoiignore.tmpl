@@ -17,3 +17,6 @@ etc/systemd
 {{- if and (ne .kind "pc") (ne .kind "laptop") }}
 etc/default/grub
 {{- end }}
+{{- if or (ne .kind "office") (ne .company "F1") }}
+etc/ca-certificates
+{{- end }}

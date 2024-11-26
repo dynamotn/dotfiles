@@ -1,0 +1,11 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+trap "_error \"Can't setup SSL\"" ERR
+
+{{- if and (eq .kind "office") (eq .company "F1") }}
+_notice "Setup SSL"
+# hash: {{ joinPath .chezmoi.sourceDir "etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age" | include | sha256sum }}
+update-ca-trust
+_success "Setup SSL"
+{{- end }}
