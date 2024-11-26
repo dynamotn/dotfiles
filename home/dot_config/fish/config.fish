@@ -95,6 +95,9 @@ if status is-interactive
     set -U FZF_CD_WITH_HIDDEN_COMMAND "fd -Ht d -E .git . \$dir 2> /dev/null"
   end
 
+  # Bat
+  type -q bat; and set -gx PAGER "bat"
+
   # ASDF
   if test -e $HOME/.asdf/asdf.fish
     . ~/.asdf/asdf.fish
