@@ -67,7 +67,8 @@
 # System applications
 |Tool|Purpose|Used in|
 |----|-------|-------|
-|`ssh`|SSH client|DevOps tool|
+|`ssh`|SSH client|Network tool|
+|[NetworkManager](https://networkmanager.dev/)|Linux network configuration tool suite|Network tool|
 |`nftables`|Netfilter framework|Security tool|
 |[pam-u2f](https://github.com/Yubico/pam-u2f)|PAM U2F module|Security tool|
 |[wireguard](https://www.wireguard.com/)|Simple and modern VPN|Security tool|
