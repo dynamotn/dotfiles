@@ -11,7 +11,7 @@ age:
   recipient: age1fzajmt2yy4naas2wtcn3v2vjea3f5rgvmz2elp02zvvmdtcgwcdsqxnd5a
 
 diff:
-  pager: delta
+  pager: delta --pager="ov -F --section-delimiter '^(added:|removed:|renamed:|Δ)' --section-header --pattern '•'"
 
 data:
   place: {{ promptStringOnce . "place" "Where does this machine place? (home/office/cloud)" | quote }}
