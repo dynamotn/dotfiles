@@ -4,6 +4,9 @@ Host *
     Protocol 2
     StrictHostKeyChecking ask
     AddKeysToAgent yes
+    ForwardX11 no
+    HostbasedAuthentication no
+    Ciphers -arcfour*,-*cbc
 
 Host github.com
     IdentityFile ~/.ssh/key/personal_ed25519
