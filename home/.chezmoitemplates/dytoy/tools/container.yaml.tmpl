@@ -2,6 +2,7 @@
 {{- if eq .chezmoi.os "linux" }}
 name: container
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: app-containers/docker
