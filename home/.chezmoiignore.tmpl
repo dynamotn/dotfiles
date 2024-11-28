@@ -70,6 +70,10 @@ Library
 .config/zellij
 {{- end }}
 
+{{- if ne .place "office" }}
+.npmrc
+{{- end }}
+
 {{- if ne .kind "laptop" }}
 .config/shikane
 {{- end }}
