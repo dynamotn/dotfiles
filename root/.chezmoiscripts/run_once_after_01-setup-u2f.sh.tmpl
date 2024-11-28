@@ -1,9 +1,0 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
-trap "_error \"Can't setup U2F\"" ERR
-
-_notice "Setup U2F"
-# hash: {{ joinPath .chezmoi.sourceDir "etc/pam.d/u2f" | include | sha256sum }}
-sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
-_success "Setup U2F"
