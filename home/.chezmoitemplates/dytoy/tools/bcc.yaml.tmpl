@@ -1,0 +1,19 @@
+{{- if eq .chezmoi.os "linux" }}
+name: bcc
+method: os
+gentoo:
+  packages:
+    - name: dev-util/bcc
+arch:
+  packages:
+    - name: bcc
+    - name: bcc-tools
+    - name: python-bcc
+ubuntu:
+  packages:
+    - name: bcc-tools
+      repo: https://repo.iovisor.org/apt/%v
+      repo_version: main
+      key: 4052245BD4284CDD
+    - name: libbcc-examples
+{{- end }}
