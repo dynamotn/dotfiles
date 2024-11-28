@@ -1,0 +1,15 @@
+#!{{ lookPath "bash" }}
+set -Eeou pipefail
+source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+trap "_error \"Can't setup PAM\"" ERR
+
+_notice "Setup PAM"
+{{- range (joinPath .chezmoi.sourceDir "etc/pam.d/*" | glob) }}
+# {{ . }} hash: {{ . | include | sha256sum }}
+{{- end }}
+sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
+{{- if eq .chezmoi.osRelease.id "arch" "ubuntu" }}
+sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su
+sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su-l
+{{- end }}
+_success "Setup PAM"
