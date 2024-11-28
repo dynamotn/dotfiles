@@ -12,6 +12,7 @@
 |[w3m](https://github.com/acg/w3m)|Text-based web browser|Frequently used tool|
 |[tshark](https://www.wireshark.org/docs/man-pages/tshark.html)|CLI of Wireshark, network packet analysis|Network tool|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
+|[bcc](https://github.com/iovisor/bcc)|Toolkit for IO analysis, networking, monitoring...|SysOps tool|
 |[cava](https://github.com/karlstav/cava)|Audio visualizer|Multimedia tool|
 |[playerctl](https://github.com/altdesktop/playerctl)|Control media players that implement the MPRIS|Multimedia tool|
 |[radare2](https://github.com/radareorg/radare2)|Reverse engineering framework|Security tool|
