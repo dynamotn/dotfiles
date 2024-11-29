@@ -70,8 +70,8 @@ bind = $mainMod, Q, exec, kitty
 bind = $mainMod, E, exec, firefox
 bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
-bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE={{- end }} bitrofi"
-bind = $mainMod, T, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE={{- end }} bitrofi totp"
+bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise{{- end }} bitrofi"
+bind = $mainMod, T, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise{{- end }} bitrofi totp"
 bind = $mainMod, L, exec, loginctl lock-session
 bind = $mainMod, S, exec, grim -g "$(slurp)" - | swappy -f -
 bind = $mainMod, Z, exec, hdrop kitty --class btop -e btop
