@@ -2,4 +2,6 @@ name: pre-commit
 method: asdf
 dependencies:
   - python
+{{- if eq .kind "pc" "laptop" }}
 is_essential: true
+{{- end }}

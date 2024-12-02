@@ -1,3 +1,5 @@
 name: nodejs
 method: asdf
+{{- if eq .kind "pc" "laptop" }}
 is_essential: true
+{{- end }}
