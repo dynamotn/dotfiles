@@ -14,7 +14,8 @@ diff:
   pager: delta --pager="ov -F --section-delimiter '^(added:|removed:|renamed:|Δ)' --section-header --pattern '•'"
 
 data:
-  place: {{ promptStringOnce . "place" "Where does this machine place? (home/office/cloud)" | quote }}
+  {{ $place := promptStringOnce . "place" "Where does this machine place? (home/office/cloud)" | quote }}
+  place: {{ $place }}
   {{ $kind := promptStringOnce . "kind" "What kind of this machine is it? (pc/workstation/tablet/vm/sbc/...)" | quote }}
   kind: {{ $kind }}
   {{- if eq $kind "sbc" "vm" "workstation" }}
