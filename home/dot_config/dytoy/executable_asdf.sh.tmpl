@@ -7,7 +7,7 @@ trap "echo \"Install tools failed\"" ERR
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
 _usage() {
-  echo "$0 usage:" && grep " .) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
+  echo "$0 usage:" && grep -E " \w) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
   exit 0
 }
 
