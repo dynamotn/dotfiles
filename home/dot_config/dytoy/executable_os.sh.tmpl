@@ -7,7 +7,7 @@ TEMP_HOOK_AFTER=$(mktemp)
 trap "rm -rf $TEMP_HOOK_BEFORE $TEMP_HOOK_AFTER && echo \"Install tools failed\"" ERR
 
 _usage() {
-  echo "$0 usage:" && grep " .) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
+  echo "$0 usage:" && grep -E " \w) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
   exit 0
 }
 
