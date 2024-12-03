@@ -5,7 +5,7 @@ source {{ .chezmoi.sourceDir }}/../scripts/message.sh
 trap "_error \"Can't setup hyprland\"" ERR
 
 _notice "Setup hyprland"
-# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/hypr/plugins" | include | sha256sum }}
+# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" | include | sha256sum }}
 
 _progress "Install hyprland's header"
 hyprpm update
@@ -15,7 +15,7 @@ while IFS="" read -r plugin; do
   _progress "Install plugin ${plugin}"
   hyprpm add -f https://github.com/${plugin} || true
   hyprpm enable ${plugin#*/}
-done < {{ joinPath .chezmoi.sourceDir "dot_config/hypr/plugins" }}
+done < {{ joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" }}
 hyprpm reload -n
 _success "Setup hyprland"
 {{- end }}
