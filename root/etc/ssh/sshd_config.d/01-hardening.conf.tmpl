@@ -7,8 +7,6 @@ LogLevel VERBOSE
 PermitRootLogin No
 Protocol 2
 X11Forwarding no
-GSSAPIAuthentication no
-KerberosAuthentication no
 {{- if eq .chezmoi.osRelease.id "ubuntu" "debian" }}
 DebianBanner no
 {{- end }}
