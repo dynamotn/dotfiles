@@ -1,0 +1,23 @@
+name: ntp
+method: os
+gentoo:
+  packages:
+    - name: net-misc/ntp
+  hook:
+    after: |-
+      sudo rc-update add ntp-client default
+      sudo rc-service ntp-client restart
+arch:
+  packages:
+    - name: systemd
+  hook:
+    after: |-
+      sudo timedatectl set-ntp true
+      sudo systemctl enable --now systemd-timesyncd
+ubuntu:
+  packages:
+    - name: systemd
+  hook:
+    after: |-
+      sudo timedatectl set-ntp true
+      sudo systemctl enable --now systemd-timesyncd

@@ -78,6 +78,7 @@
 |[bluez](https://github.com/bluez/bluez)|Bluetooth controller|Multimedia tool|
 |[kernel](https://github.com/torvalds/linux)|Linux kernel for OS|OS core tool|
 |[cronie](https://github.com/cronie-crond/cronie)|Run scheduled tasks|OS core tool|
+|`ntp`|NTP client to sync system clock|OS core tool|
 |[fail2ban](https://github.com/fail2ban/fail2ban)|Intrusion prevention software framework|Security tool|
 |[auto-cpufreq](https://github.com/AdnanHodzic/auto-cpufreq)|Automatic CPU speed & power optimizer|OS tune tool|
 |[grub](https://www.gnu.org/software/grub/)|Bootloader for system|OS core tool|

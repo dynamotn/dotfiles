@@ -8,11 +8,14 @@ usr/lib64/firefox
 {{- end }}
 {{- if ne .chezmoi.osRelease.id "arch" }}
 usr/lib/firefox
+{{- end }}
+{{- end }}
+{{- if not (eq .chezmoi.osRelease.id "arch" "ubuntu") }}
+etc/systemd
 etc/vconsole.conf
 {{- end }}
-{{- end }}
-{{- if ne .chezmoi.osRelease.id "arch" }}
-etc/systemd
+{{- if ne .chezmoi.osRelease.id "gentoo" }}
+etc/ntp
 {{- end }}
 {{- if and (ne .kind "pc") (ne .kind "laptop") }}
 etc/default/grub
