@@ -17,17 +17,17 @@ exec-once = systemctl --user start wireplumber
 exec-once = systemctl --user start pipewire-pulse
 {{- end }}
 {{- end }}
-exec-once = ~/.config/hypr/scripts/screencast.sh
+exec-once = ~/.config/hypr/hyprland/scripts/screencast.sh
 
 # Gtk theme
-exec-once = ~/.config/hypr/scripts/gtk.sh
+exec-once = ~/.config/hypr/hyprland/scripts/gtk.sh
 
 # Wallpaper
 exec-once = swww-daemon
 exec = swww img ~/Multimedia/Pictures/Wallpaper/all/working.gif
 
 # Bar & Panel & Widgets
-exec-once = ~/.config/hypr/scripts/bar.sh
+exec-once = ~/.config/hypr/hyprland/scripts/bar.sh
 exec-once = swaync
 
 # Screen shader and changes detection
