@@ -24,7 +24,7 @@ transform = "normal"
 adaptive_sync = false
 
 [[profile.output]]
-enable = false
+enable = true
 search = ["m=0x419D", "s=", "v=Samsung Display Corp."]
 mode = "2880x1800@120Hz"
 position = "0,0"
