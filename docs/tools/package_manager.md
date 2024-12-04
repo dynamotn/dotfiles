@@ -56,7 +56,7 @@
 |[swww](https://github.com/LGFae/swww)|Animated wallpaper daemon|`silos/hyprland`|
 |[greetd](https://sr.ht/~kennylevinsen/greetd/)|GreetD, display manager for Wayland|OS core tool|
 |[regreet](https://github.com/rharish101/ReGreet)|ReGreet, greeter for GreetD|OS core tool|
-|[swaylock](https://github.com/swaywm/swaylock)|Screen locker for Wayland|`silos/hyprland`|
+|[hyprlock](https://github.com/hyprwm/hyprlock)|Screen locker for Wayland|`silos/hyprland`|
 |[swappy](https://github.com/jtheoof/swappy)|Editing snapshot tool for Wayland|`silos/hyprland`|
 |[grim](https://github.com/emersion/grim)|Screen capturing tool for Wayland|`silso/hyprland`|
 |[slurp](https://github.com/emersion/slurp)|Selecting region tool for Wayland|`silos/hyprland`|

@@ -12,17 +12,14 @@ ubuntu:
   packages:
     - name: xss-lock
 {{- else if eq .guiServer "W" }}
-name: swaylock
+name: hyprlock
 method: os
 is_essential: true
 gentoo:
   packages:
-    - name: x11-base/xorg-proto
-    - name: gui-apps/swaylock-effects
-      accept_keywords: gui-apps/swaylock-effects **
-    - name: gui-apps/swayidle
+    - name: gui-apps/hyprlock
+      accept_keywords: gui-apps/hyprlock ~amd64
 arch:
   packages:
-    - name: swaylock-effects
-    - name: swayidle
+    - name: hyprlock
 {{- end }}
