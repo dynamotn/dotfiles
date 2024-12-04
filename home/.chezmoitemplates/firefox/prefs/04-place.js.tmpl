@@ -1,2 +1,4 @@
+{{- if and (eq .place "office") (eq .company "F1") }}
 /* Proxy ignore */
 user_pref("security.cert_pinning.enforcement_level", 1);
+{{- end }}

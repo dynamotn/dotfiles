@@ -1,5 +1,5 @@
 {{/* Include all userscripts in order */}}
-{{- $settings := glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/prefs/*.js") }}
+{{- $settings := glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/prefs/*.js*") }}
 {{- if regexMatch ".*personal/user\\.js\\.tmpl" .chezmoi.sourceFile }}
 {{- $settings = concat $settings (glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/prefs/personal/*.js")) }}
 {{- else if regexMatch ".*enterprise/user\\.js\\.tmpl" .chezmoi.sourceFile }}
