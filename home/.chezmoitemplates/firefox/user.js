@@ -7,5 +7,5 @@
 {{- end }}
 {{- $settings = concat $settings (list (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/chrome/lepton/user.js")) }}
 {{- range ($settings) }}
-{{- output "chezmoi" "execute-template" (include .) }}
+{{- includeTemplate . $ }}
 {{- end }}
