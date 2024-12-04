@@ -132,6 +132,9 @@ if status is-interactive
 
   # Vivid
   type -q vivid; and set -Ux LS_COLORS (vivid generate catppuccin-macchiato)
+
+  # kubectl
+  type -q kubectl; and kubectl completion fish | source
 end
 ## }
 
