@@ -1,0 +1,18 @@
+layout {
+  tab name="notes" cwd="~/Documents/Notes" split_direction="vertical" {
+    pane focus=true
+    pane {
+      cwd "~/Documents/Notes/.publish"
+    }
+    floating_panes {
+      pane {
+        command "git"
+        args "pull"
+      }
+      pane {
+        command "git"
+        args "status"
+      }
+    }
+  }
+}
