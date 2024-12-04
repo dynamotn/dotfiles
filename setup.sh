@@ -71,21 +71,23 @@ _main() {
   mkdir -p "$HOME/.config/chezmoi/hooks/diff" && touch "$HOME/.config/chezmoi/hooks/diff/pre.sh"
   _notice "Please answer the following questions"
   # shellcheck disable=SC2086
-  chezmoi init $chezmoi_params -S "$SETUP_DIR" --prompt
+  chezmoi init "$chezmoi_params" -S "$SETUP_DIR" --prompt
 
   # Apply configuration by order
   _notice "Setup SSH"
   _install_age
   # shellcheck disable=SC2086
-  chezmoi apply $chezmoi_params $HOME/.ssh
+  chezmoi apply "$chezmoi_params" "$HOME"/.ssh
   _notice "Setup other dotfiles"
   # shellcheck disable=SC2086
-  chezmoi apply $chezmoi_params
+  chezmoi apply "$chezmoi_params"
 
-  if ! command -v termux-setup-storage &> /dev/null;
-    and ! command -v sw_vers &> /dev/null; then
+  if
+    ! command -v termux-setup-storage &> /dev/null
+    and ! command -v sw_vers &> /dev/null
+  then
     _notice "Setup operating system"
-    yq '.mode = "file"' "$HOME/.config/chezmoi/chezmoi.yaml" > "$HOME/.config/chezmoi/root_chezmoi.yaml"
+    yq '.mode = "file" | del(.hooks)' "$HOME/.config/chezmoi/chezmoi.yaml" > "$HOME/.config/chezmoi/root_chezmoi.yaml"
     sudo env "PATH=$PATH" \
       chezmoi \
       --destination / \
