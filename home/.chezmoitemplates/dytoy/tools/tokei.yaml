@@ -2,4 +2,4 @@ name: tokei
 method: shell
 dependencies:
   - rust
-content: cargo install --git https://github.com/XAMPPRocky/tokei.git
+content: cargo install --git https://github.com/XAMPPRocky/tokei.git tokei
