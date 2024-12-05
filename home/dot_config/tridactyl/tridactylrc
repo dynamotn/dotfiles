@@ -1,0 +1,93 @@
+"------------------------------------------------------------------------------
+" Core settings
+"------------------------------------------------------------------------------
+
+" Vimperator-like hinting mode.
+set hintfiltermode vimperator-reflow
+set hintchars neiohtsrad
+
+" Open new tabs at the end of the tab list instead of after the current tab.
+" (Remember to also set browser.tabs.insertRelatedAfterCurrent=false in
+" about:config.)
+set tabopenpos last
+set relatedopenpos last
+
+" Do not allow pages to focus elements for me.
+" (Remember to also set browser.autofocus=false in about:config.)
+set allowautofocus false
+
+" Smooth scroll
+set smoothscroll true
+
+" Colorscheme
+colourscheme --url https://raw.githubusercontent.com/lonepie/catppuccin-tridactyl/main/catppuccin.css catppuccin
+
+" Set editor to neovim
+set editorcmd kitty nvim
+
+" Defaults to 300ms but I'm a 'move fast and close the wrong tabs' kinda chap
+set hintdelay 100
+
+" Equivalent to `set csp clobber` before it was removed. This weakens your
+" defences against cross-site-scripting attacks and other types of
+" code-injection by reducing the strictness of Content Security Policy on
+" every site in a couple of ways.
+" You may not wish to run this. Mozilla strongly feels that you shouldn't.
+" It allows Tridactyl to function on more pages, e.g. raw GitHub pages.
+" Read https://wiki.mozilla.org/Security/CSP#Goals for more information.
+jsb browser.webRequest.onHeadersReceived.addListener(tri.request.clobberCSP,{urls:["<all_urls>"],types:["main_frame"]},["blocking","responseHeaders"])
+
+" Inject Google Translate
+" This (clearly) is remotely hosted code. Google will be sent the whole
+" contents of the page you are on if you run `:translate`
+" From https://github.com/jeremiahlee/page-translator
+command translate js let googleTranslateCallback = document.createElement('script'); googleTranslateCallback.innerHTML = "function googleTranslateElementInit(){ new google.translate.TranslateElement(); }"; document.body.insertBefore(googleTranslateCallback, document.body.firstChild); let googleTranslateScript = document.createElement('script'); googleTranslateScript.charset="UTF-8"; googleTranslateScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&tl=&sl=&hl="; document.body.insertBefore(googleTranslateScript, document.body.firstChild);
+
+"------------------------------------------------------------------------------
+" Key bindings
+"------------------------------------------------------------------------------
+
+" Before we begin, clear all user-defined commands.
+comclear
+
+" Previous/next tab.
+bind J tabprev
+bind K tabnext
+
+" Backward/forward in history.
+bind h back
+bind l forward
+
+" Handy multiwindow/multitasking binds
+bind gd tabdetach
+bind gD composite tabduplicate; tabdetach
+
+" Make yy use canonical / short links on the 5 websites that support them
+bind yy clipboard yankcanon
+
+" Open the selection with tabopen
+bind --mode=visual t composite js document.getSelection().toString() | fillcmdline tabopen
+
+" Open right click menu on links
+bind ;C composite hint_focus; !s xdotool key Menu
+
+" Use Firefox default keybind
+" search
+unbind <C-f>
+" select all
+unbind <C-a>
+" copy in the commandline
+unbind --mode=ex <C-c>
+
+"------------------------------------------------------------------------------
+" Website specific
+"------------------------------------------------------------------------------
+
+" Ignore sites
+blacklistadd teams.microsoft.com
+
+" Comment toggler for Reddit, Hacker News and Lobste.rs
+bind ;c hint -Jc [class*="expand"],[class="togg"],[class="comment_folder"]
+
+" Take back to subreddit from comments
+bindurl reddit.com gu urlparent 4
