@@ -14,6 +14,11 @@ usr/lib/firefox
 etc/systemd
 etc/vconsole.conf
 {{- end }}
+{{- if ne .chezmoi.osRelease.id "arch" }}
+etc/makepkg.conf
+etc/pacman.d
+etc/pacman.conf
+{{- end }}
 {{- if ne .chezmoi.osRelease.id "gentoo" }}
 etc/ntp
 {{- end }}
