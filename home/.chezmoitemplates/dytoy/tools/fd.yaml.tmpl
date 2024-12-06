@@ -26,19 +26,11 @@ archive:
       arch=aarch64
       {{- end }}
       tar $param -C "$MAN_DIR/man1" "fd-$version-$arch-unknown-linux-gnu/fd.1"
-      if [ -d ~/.config/fish/completions ]; then
-        tar $param --strip=2 -C ~/.config/fish/completions fd-$version-$arch-unknown-linux-gnu/autocomplete/fd.fish
-      fi
-      if [ -d ~/Working/personal/fish/caran/completions ]; then
-        tar $param --strip=2 -C ~/Working/personal/fish/caran/completions fd-$version-$arch-unknown-linux-gnu/autocomplete/fd.fish
-      fi
-{{- else if eq .chezmoi.os "android" }}
+{{- else if eq .chezmoi.os "android" "darwin" }}
 method: os
 termux:
   packages:
     - name: fd
-{{- else if eq .chezmoi.os "darwin" }}
-method: os
 macos:
   packages:
     - name: fd

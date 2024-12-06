@@ -9,11 +9,3 @@ archive:
   paths:
     - rbw
     - rbw-agent
-  hook:
-    after: |
-      if [ -d ~/.config/fish/completions ]; then
-        rbw gen-completions fish > ~/.config/fish/completions/rbw.fish
-      fi
-      if [ -d ~/Working/personal/fish/caran/completions ]; then
-        rbw gen-completions fish > ~/Working/personal/fish/caran/completions/rbw.fish
-      fi

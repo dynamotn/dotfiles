@@ -77,6 +77,7 @@ end
 
 ## Other tools {
 if status is-interactive
+  # Hooks
   # Fzf config
   type -q __fzf_setup; and __fzf_setup
   set -U FZF_DEFAULT_OPTS "\
@@ -93,35 +94,19 @@ if status is-interactive
     set -U FZF_FIND_FILE_COMMAND "fd -Ht f -E .git . \$dir 2> /dev/null"
     set -U FZF_CD_COMMAND "fd -t d . \$dir 2> /dev/null"
     set -U FZF_CD_WITH_HIDDEN_COMMAND "fd -Ht d -E .git . \$dir 2> /dev/null"
-  end
-
-  # ov
-  if type -q ov
-    set -gx PAGER "ov"
-    ov --completion fish | source
+    fd --gen-completions fish | source
   end
 
   # ASDF
   if test -e $HOME/.asdf/asdf.fish
     . ~/.asdf/asdf.fish
   end
-
   # Direnv
   type -q direnv; and direnv hook fish | source
-
   # Zoxide
   type -q zoxide; and zoxide init fish | source
-
   # Navi
   type -q navi; and navi widget fish | source
-
-  # Zellij
-  if type -q zellij
-    set -U ZELLIJ_AUTO_ATTACH true
-    eval (zellij setup --generate-auto-start fish | string collect)
-    zellij setup --generate-completion fish | source
-  end
-
   # Projekt
   if type -q projekt
     projekt init fish | source
@@ -129,12 +114,35 @@ if status is-interactive
     t completion fish | source
     b completion fish | source
   end
-
+  # ov
+  if type -q ov
+    set -gx PAGER "ov"
+    ov --completion fish | source
+  end
   # Vivid
   type -q vivid; and set -Ux LS_COLORS (vivid generate catppuccin-macchiato)
+  # Zellij
+  if type -q zellij
+    set -U ZELLIJ_AUTO_ATTACH true
+    eval (zellij setup --generate-auto-start fish | string collect)
+    zellij setup --generate-completion fish | source
+  end
 
+  # Other completions generation
   # kubectl
   type -q kubectl; and kubectl completion fish | source
+  # task
+  type -q task; and task --completion fish | source
+  # bat
+  type -q bat; and bat --completion fish | source
+  # ltcc
+  type -q ltcc; and ltcc completion --shell fish | source
+  # rg
+  type -q rg; and rg --generate=complete-fish | source
+  # chezmoi
+  type -q chezmoi; and chezmoi completion fish | source
+  # rbw
+  type -q rbw; and rbw gen-completions fish | source
 end
 ## }
 
