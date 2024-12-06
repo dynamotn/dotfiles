@@ -77,3 +77,7 @@ Library
 {{- if ne .kind "laptop" }}
 .config/shikane
 {{- end }}
+
+{{- if not (eq .kind "pc" "laptop") }}
+.config/tridactyl
+{{- end }}
