@@ -1,4 +1,14 @@
 layout {
+  default_tab_template {
+    children
+    pane size=1 borderless=true {
+      plugin location="status-bar"
+    }
+    pane size=1 borderless=true {
+      plugin location="zjstatus"
+    }
+  }
+
   tab name="working-personal" cwd="~/Working/personal" {
     pane
   }
