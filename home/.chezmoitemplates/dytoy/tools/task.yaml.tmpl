@@ -6,11 +6,3 @@ github:
 archive:
   paths:
     - task
-  hook:
-    after: |
-      if [ -d ~/.config/fish/completions ]; then
-        tar $param --strip=2 -C ~/.config/fish/completions completion/fish/task.fish
-      fi
-      if [ -d ~/working/personal/fish/caran/completions ]; then
-        tar $param --strip=2 -c ~/working/personal/fish/caran/completions completion/fish/task.fish
-      fi

@@ -8,10 +8,4 @@ archive:
     - languagetool-code-comments
   hook:
     after: |
-      if [ -d ~/.config/fish/completions ]; then
-        tar $param --strip=1 -C ~/.config/fish/completions completions/languagetool-code-comments.fish
-      fi
-      if [ -d ~/Working/personal/fish/caran/completions ]; then
-        tar $param --strip=1 -C ~/Working/personal/fish/caran/completions completions/languagetool-code-comments.fish
-      fi
       mv ~/.local/bin/languagetool-code-comments ~/.local/bin/ltcc

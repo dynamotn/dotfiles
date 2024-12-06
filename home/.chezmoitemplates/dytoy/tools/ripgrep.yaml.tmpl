@@ -28,19 +28,11 @@ archive:
       libc=gnueabihf
       {{- end }}
       tar $param --strip=2 -C "$MAN_DIR/man1" "ripgrep-$version-$arch-unknown-linux-$libc/doc/rg.1"
-      if [ -d ~/.config/fish/completions ]; then
-        tar $param --strip=2 -C ~/.config/fish/completions ripgrep-$version-$arch-unknown-linux-$libc/complete/rg.fish
-      fi
-      if [ -d ~/Working/personal/fish/caran/completions ]; then
-        tar $param --strip=2 -C ~/Working/personal/fish/caran/completions ripgrep-$version-$arch-unknown-linux-$libc/complete/rg.fish
-      fi
-{{- else if eq .chezmoi.os "android" }}
+{{- else if eq .chezmoi.os "android" "darwin" }}
 method: os
 termux:
   packages:
     - name: ripgrep
-{{- else if eq .chezmoi.os "darwin" }}
-method: os
 macos:
   packages:
     - name: ripgrep
