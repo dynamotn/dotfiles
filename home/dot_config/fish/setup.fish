@@ -15,7 +15,7 @@ if not functions -q fisher; or eval $UPDATE
   and fisher install jorgebucaran/fisher
 end
 
-fisher update
+fisher update < /dev/null
 
 # Install nix
 fish -c "install_nix"

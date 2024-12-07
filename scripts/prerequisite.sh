@@ -11,13 +11,13 @@ elif command -v termux-setup-storage &> /dev/null; then
   pkg update && pkg upgrade -y
   termux-change-repo
   termux-setup-storage
-  pkg update && pkg install -y git curl tsu chezmoi age which python termux-services
+  pkg update && pkg install -y git curl tsu chezmoi age which python termux-services openssh
 elif command -v apt &> /dev/null; then
-  sudo apt update && sudo apt install -y git curl gnupg
+  sudo apt update && sudo apt install -y git curl gnupg openssh
 elif command -v pacman &> /dev/null; then
-  sudo pacman -Sy git curl
+  sudo pacman -Sy git curl openssh
 elif command -v emerge &> /dev/null; then
-  sudo emerge -uDN dev-vcs/git net-misc/curl
+  sudo emerge -uDN dev-vcs/git net-misc/curl net-misc/openssh
 fi
 
 git clone https://github.com/dynamotn/dotfiles ~/Dotfiles

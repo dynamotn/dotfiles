@@ -1,3 +1,4 @@
+{{- if ne .kind "container" }}
 name: nftables
 method: os
 is_essential: true
@@ -10,3 +11,4 @@ arch:
 ubuntu:
   package:
     - name: nftables
+{{- end }}

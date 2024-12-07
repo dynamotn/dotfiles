@@ -1,3 +1,4 @@
+{{- if ne .kind "container" }}
 name: kernel
 method: os
 is_essential: true
@@ -12,3 +13,4 @@ arch:
     - name: linux-hardened
     - name: linux-hardened-headers
     - name: linux-firmware
+{{- end }}

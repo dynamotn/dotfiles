@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.os "linux" }}
+{{- if and (eq .chezmoi.os "linux") (ne .kind "container") }}
 name: networkmanager
 method: os
 gentoo:

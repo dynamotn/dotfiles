@@ -2,10 +2,33 @@
 set -Eeou pipefail
 
 SETUP_DIR=$(dirname "$(readlink -f "$0")")
-source "$SETUP_DIR/scripts/message.sh"
-
 BIN_DIR="$HOME/.local/bin"
-DEBUG="${1:-false}"
+source "$SETUP_DIR/lib/message.sh"
+DEBUG="false"
+USE_DEFAULT="false"
+
+_usage() {
+  echo "$0 usage:" && grep -E " \w) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
+  exit 0
+}
+
+_parse_args() {
+  while getopts ":hdz" arg; do
+    case $arg in
+      d) # Debug
+        set -x
+        DEBUG="true"
+        ;;
+      z) # Use default values of chezmoi
+        USE_DEFAULT="true"
+        ;;
+      h) # Display help
+        _usage
+        ;;
+      *) ;;
+    esac
+  done
+}
 
 _install_chezmoi() {
   if [ ! "$(command -v chezmoi)" ]; then
@@ -57,30 +80,29 @@ _main() {
   export PATH="$BIN_DIR":"$PATH"
   _install_chezmoi
 
-  # Run chezmoi in debug mode
-  chezmoi_params=""
-  if [ "$DEBUG" = "true" ]; then
-    chezmoi_params="$chezmoi_params --debug"
-  fi
-
   # Modify source directory of chezmoi, manipulate chezmoi config and generate
   # to chezmoi's default config template
   _notice "Initialize chezmoi"
-  echo "sourceDir: \"$SETUP_DIR\"" > "$SETUP_DIR"/home/.chezmoi.yaml.tmpl
-  cat "$SETUP_DIR"/.chezmoi.yaml.tmpl >> "$SETUP_DIR"/home/.chezmoi.yaml.tmpl
+  echo "sourceDir: \"$(readlink -f "$SETUP_DIR"/..)\"" > "$SETUP_DIR"/../home/.chezmoi.yaml.tmpl
+  cat "$SETUP_DIR"/../.chezmoi.yaml.tmpl >> "$SETUP_DIR"/../home/.chezmoi.yaml.tmpl
   mkdir -p "$HOME/.config/chezmoi/hooks/diff" && touch "$HOME/.config/chezmoi/hooks/diff/pre.sh"
   _notice "Please answer the following questions"
   # shellcheck disable=SC2086
-  chezmoi init "$chezmoi_params" -S "$SETUP_DIR" --prompt
+  if [ "$USE_DEFAULT" = "true" ]; then
+    prompt="--promptDefaults"
+  else
+    prompt="--prompt"
+  fi
+  chezmoi init -S "$SETUP_DIR/.." "$prompt"
 
   # Apply configuration by order
   _notice "Setup SSH"
   _install_age
   # shellcheck disable=SC2086
-  chezmoi apply "$chezmoi_params" "$HOME"/.ssh
+  chezmoi apply "$HOME"/.ssh
   _notice "Setup other dotfiles"
   # shellcheck disable=SC2086
-  chezmoi apply "$chezmoi_params"
+  chezmoi apply
 
   if
     ! command -v termux-setup-storage &> /dev/null
@@ -106,7 +128,5 @@ _main() {
   _success "Setup complete"
 }
 
-if [ "$DEBUG" = "true" ]; then
-  set -x
-fi
+_parse_args "$@"
 _main

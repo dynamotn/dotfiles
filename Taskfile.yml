@@ -1,0 +1,13 @@
+version: '3'
+
+tasks:
+  docker:
+    cmds:
+      - |
+        docker build --build-arg \
+          INTERNAL_CERT="$(\
+            age -d -i ~/.config/chezmoi/key \
+              root/etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age
+          )" \
+          --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
+          -t test .

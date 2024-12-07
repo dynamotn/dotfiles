@@ -1,7 +1,7 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
-source {{ .chezmoi.sourceDir }}/../scripts/os.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
 trap "_error \"Install tools failed\"" ERR
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")

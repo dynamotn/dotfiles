@@ -1,10 +1,14 @@
 #!{{ lookPath "bash" }}
 set -eou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 
 _notice "Decrypting key.age file to decrypt all encrypted files"
 if [ ! -f "${HOME}/.config/chezmoi/key" ]; then
+  {{- if eq .kind "container" }}
+  {{ .chezmoi.sourceDir }}/../scripts/expect-age "${AGE_PASSPHRASE}" "{{ .chezmoi.sourceDir }}/../secrets/key.age" "${HOME}/.config/chezmoi/key"
+  {{- else }}
   age --decrypt --output "${HOME}/.config/chezmoi/key" "{{ .chezmoi.sourceDir }}/../secrets/key.age"
+  {{- end }}
 
   if [ $? -eq 0 ]; then
     chmod 400 "${HOME}/.config/chezmoi/key"

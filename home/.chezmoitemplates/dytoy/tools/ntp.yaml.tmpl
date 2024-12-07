@@ -1,3 +1,4 @@
+{{- if ne .kind "container" }}
 name: ntp
 method: os
 gentoo:
@@ -21,3 +22,4 @@ ubuntu:
     after: |-
       sudo timedatectl set-ntp true
       sudo systemctl enable --now systemd-timesyncd
+{{- end }}
