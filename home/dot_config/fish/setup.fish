@@ -4,10 +4,10 @@ set SETUP_DIR (dirname (readlink -m (status --current-filename)))
 # Install fisher
 if not functions -q fisher
   curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
-  and fisher install jorgebucaran/fisher
+  and fisher install jorgebucaran/fisher </dev/null
 end
 
-fisher update < /dev/null
-
+# Install plugins
+fish -c "fisher update </dev/null"
 # Install nix
 fish -c "install_nix"
