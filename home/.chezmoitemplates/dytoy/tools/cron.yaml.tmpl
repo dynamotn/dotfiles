@@ -1,37 +1,31 @@
+  {{- if ne .kind "container" }}
 name: cron
 method: os
 is_essential: true
 gentoo:
   packages:
     - name: sys-process/cronie
-  {{- if ne .kind "container" }}
   hook:
     after: |-
       sudo rc-update add cronie default
       sudo rc-service cronie restart
-  {{- end }}
 arch:
   packages:
     - name: cronie
-  {{- if ne .kind "container" }}
   hook:
     after: |-
       sudo systemctl enable --now cronie
-  {{- end }}
 ubuntu:
   packages:
     - name: cronie
-  {{- if ne .kind "container" }}
   hook:
     after: |-
       sudo systemctl enable --now cronie
-  {{- end }}
 termux:
   packages:
     - name: cronie
-  {{- if ne .kind "container" }}
   hook:
     after: |-
       sv-enable crond
       sv up crond
-  {{- end }}
+{{- end }}

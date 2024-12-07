@@ -1,5 +1,6 @@
 {{- if eq .chezmoi.os "linux" }}
 name: btop
+{{- if ne .kind "container" }}
 method: binary
 is_essential: true
 github:
@@ -14,4 +15,9 @@ archive:
   strip_components: 3
   paths:
     - ./btop/bin/btop
+{{- end }}
+method: os
+arch:
+  packages:
+    - name: btop
 {{- end }}

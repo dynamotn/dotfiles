@@ -1,6 +1,17 @@
 name: rg
 is_essential: true
-{{- if eq .chezmoi.os "linux" }}
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+method: os
+termux:
+  packages:
+    - name: ripgrep
+macos:
+  packages:
+    - name: ripgrep
+arch:
+  packages:
+    - name: ripgrep
+{{- else }}
 method: binary
 github:
   repo: BurntSushi/ripgrep
@@ -28,12 +39,4 @@ archive:
       libc=gnueabihf
       {{- end }}
       tar $param --strip=2 -C "$MAN_DIR/man1" "ripgrep-$version-$arch-unknown-linux-$libc/doc/rg.1"
-{{- else if eq .chezmoi.os "android" "darwin" }}
-method: os
-termux:
-  packages:
-    - name: ripgrep
-macos:
-  packages:
-    - name: ripgrep
 {{- end }}

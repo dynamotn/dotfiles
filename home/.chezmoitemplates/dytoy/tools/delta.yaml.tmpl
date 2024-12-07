@@ -1,6 +1,6 @@
 name: delta
 is_essential: true
-{{- if eq .chezmoi.os "linux" }}
+{{- if and (eq .chezmoi.os "linux") (ne .kind "container") }}
 method: binary
 github:
   repo: dandavison/delta
@@ -18,13 +18,14 @@ archive:
   {{- else if eq .chezmoi.arch "arm64" }}
     - delta-%v-aarch64-unknown-linux-gnu/delta
   {{- end }}
-{{- else if eq .chezmoi.os "android" }}
+{{- else if eq .chezmoi.os "linux" "android" "darwin" }}
 method: os
+arch:
+  packages:
+    - name: git-delta
 termux:
   packages:
     - name: git-delta
-{{- else if eq .chezmoi.os "darwin" }}
-method: os
 macos:
   packages:
     - name: git-delta

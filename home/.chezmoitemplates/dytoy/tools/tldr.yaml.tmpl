@@ -1,4 +1,11 @@
-{{- if eq .chezmoi.arch "amd64" }}
+{{- if eq .kind "container" }}
+name: tldr
+is_essential: true
+method: os
+arch:
+  packages:
+    - name: tealdeer
+{{- else if eq .chezmoi.arch "amd64" }}
 name: tldr
 is_essential: true
 method: binary
