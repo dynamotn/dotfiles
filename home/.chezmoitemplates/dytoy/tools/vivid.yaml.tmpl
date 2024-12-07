@@ -1,6 +1,17 @@
 name: vivid
 is_essential: true
-{{- if eq .chezmoi.os "linux" }}
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+method: os
+arch:
+  packages:
+    - name: vivid
+termux:
+  packages:
+    - name: vivid
+macos:
+  packages:
+    - name: vivid
+{{- else }}
 method: binary
 github:
   repo: sharkdp/vivid
@@ -18,14 +29,4 @@ archive:
   {{- else if eq .chezmoi.arch "arm64" }}
     - vivid-%v-aarch64-unknown-linux-gnu/vivid
   {{- end }}
-{{- else if eq .chezmoi.os "android" }}
-method: os
-termux:
-  packages:
-    - name: vivid
-{{- else if eq .chezmoi.os "darwin" }}
-method: os
-macos:
-  packages:
-    - name: vivid
 {{- end }}

@@ -10,7 +10,7 @@ sudo update-ca-trust
 echo "Server = http://mirror.bizflycloud.vn/archlinux/\$repo/os/\$arch" | sudo tee /etc/pacman.d/mirrorlist
 
 # Prerequisite
-sudo pacman -Sy --noconfirm git openssh chezmoi expect
+sudo pacman -Sy --noconfirm git openssh chezmoi age expect
 
 # Setup
 export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"

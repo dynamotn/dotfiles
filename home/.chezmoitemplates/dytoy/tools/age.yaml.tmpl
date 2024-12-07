@@ -1,17 +1,18 @@
 name: age
-{{- if eq .chezmoi.os "android" }}
+is_essential: true
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
 method: os
 termux:
   packages:
     - name: age
-{{- else if eq .chezmoi.os "darwin" }}
-method: os
 macos:
+  packages:
+    - name: age
+arch:
   packages:
     - name: age
 {{- else }}
 method: binary
-is_essential: true
 github:
   repo: FiloSottile/age
   version: latest

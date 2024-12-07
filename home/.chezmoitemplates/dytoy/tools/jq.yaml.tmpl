@@ -1,11 +1,14 @@
 name: jq
 is_essential: true
-{{- if eq .chezmoi.os "darwin" "android" }}
+{{- if or (eq .chezmoi.os "darwin" "android") (eq .kind "container") }}
 method: os
 macos:
   packages:
     - name: jq
 termux:
+  packages:
+    - name: jq
+arch:
   packages:
     - name: jq
 {{- else }}

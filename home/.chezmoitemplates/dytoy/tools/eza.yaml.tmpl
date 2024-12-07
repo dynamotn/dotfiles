@@ -1,6 +1,14 @@
 name: eza
 is_essential: true
-{{- if eq .chezmoi.os "linux" }}
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+method: os
+termux:
+  packages:
+    - name: eza
+macos:
+  packages:
+    - name: eza
+{{- else }}
 method: binary
 github:
   repo: eza-community/eza
@@ -13,14 +21,4 @@ github:
 archive:
   paths:
     - ./eza
-{{- else if eq .chezmoi.os "android" }}
-method: os
-termux:
-  packages:
-    - name: eza
-{{- else if eq .chezmoi.os "darwin" }}
-method: os
-macos:
-  packages:
-    - name: eza
 {{- end }}

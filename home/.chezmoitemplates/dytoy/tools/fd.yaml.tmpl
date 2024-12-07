@@ -1,6 +1,17 @@
 name: fd
 is_essential: true
-{{- if eq .chezmoi.os "linux" }}
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+method: os
+termux:
+  packages:
+    - name: fd
+macos:
+  packages:
+    - name: fd
+arch:
+  packages:
+    - name: fd
+{{- else }}
 method: binary
 github:
   repo: sharkdp/fd
@@ -26,12 +37,4 @@ archive:
       arch=aarch64
       {{- end }}
       tar $param -C "$MAN_DIR/man1" "fd-$version-$arch-unknown-linux-gnu/fd.1"
-{{- else if eq .chezmoi.os "android" "darwin" }}
-method: os
-termux:
-  packages:
-    - name: fd
-macos:
-  packages:
-    - name: fd
 {{- end }}

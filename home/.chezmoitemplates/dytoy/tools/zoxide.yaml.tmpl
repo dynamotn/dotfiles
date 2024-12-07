@@ -1,8 +1,14 @@
 name: zoxide
-{{- if eq .chezmoi.os "darwin" }}
+{{- if or (eq .chezmoi.os "darwin" "android") (eq .kind "container") }}
 method: os
 is_essential: true
 macos:
+  packages:
+    - name: direnv
+termux:
+  packages:
+    - name: direnv
+arch:
   packages:
     - name: direnv
 {{- else }}

@@ -1,8 +1,14 @@
 name: navi
-{{- if eq .chezmoi.os "darwin" }}
+{{- if or (eq .chezmoi.os "darwin" "android") (eq .kind "container") }}
 method: os
 is_essential: true
 macos:
+  packages:
+    - name: navi
+termux:
+  packages:
+    - name: navi
+arch:
   packages:
     - name: navi
 {{- else }}
