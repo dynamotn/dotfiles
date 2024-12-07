@@ -1,6 +1,6 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 trap "_error \"Can't update submodules\"" ERR
 
 _notice "Update submodules"

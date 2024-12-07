@@ -1,6 +1,6 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 
 _install_package_tools() {
   bash {{ .chezmoi.homeDir  }}/.config/dytoy/os.sh -e

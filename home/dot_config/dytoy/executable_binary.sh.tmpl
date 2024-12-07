@@ -1,6 +1,6 @@
 #!/bin/bash
 set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 TEMP_COMPRESSED=$(mktemp)
 TEMP_HOOK_AFTER=$(mktemp)
 TEMP_HOOK_BEFORE=$(mktemp)
@@ -168,12 +168,12 @@ _parse_github_release() {
   hook_before=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.before" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.after" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   if [ "$hook_before" != "null" ]; then
-    echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_BEFORE}"
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_BEFORE}"
     echo "_progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
     echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
   fi
   if [ "$hook_after" != "null" ]; then
-    echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_AFTER}"
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_AFTER}"
     echo "_progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
     echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
   fi
@@ -225,12 +225,12 @@ _parse_gitlab_release() {
   hook_before=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.before" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.after" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   if [ "$hook_before" != "null" ]; then
-    echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_BEFORE}"
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_BEFORE}"
     echo "_progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
     echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
   fi
   if [ "$hook_after" != "null" ]; then
-    echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_AFTER}"
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_AFTER}"
     echo "_progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
     echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
   fi

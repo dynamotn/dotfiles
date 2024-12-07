@@ -1,6 +1,6 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 trap "rm -rf TEMP && _error \"Can't setup tridactyl\"" ERR
 
 {{- if eq .kind "pc" "laptop" }}

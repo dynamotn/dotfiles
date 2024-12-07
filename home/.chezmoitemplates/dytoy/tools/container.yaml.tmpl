@@ -10,8 +10,10 @@ gentoo:
   hook:
     after: |-
       sudo usermod -aG docker $USER
+      {{- if ne .kind "container" }}
       sudo rc-update add docker default
       sudo rc-service docker start
+      {{- end }}
 arch:
   packages:
     - name: docker
@@ -19,7 +21,9 @@ arch:
     after: |-
       sudo groupadd docker
       sudo usermod -aG docker $USER
+      {{- if ne .kind "container" }}
       sudo systemctl enable --now docker containerd
+      {{- end }}
 ubuntu:
   packages:
     - name: docker-ce
@@ -28,6 +32,8 @@ ubuntu:
     after: |-
       sudo groupadd docker
       sudo usermod -aG docker $USER
+      {{- if ne .kind "container" }}
       sudo systemctl enable --now docker containerd
+      {{- end }}
 {{- end }}
 {{- end }}

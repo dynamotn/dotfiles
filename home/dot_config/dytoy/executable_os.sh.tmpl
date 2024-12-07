@@ -1,7 +1,7 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
-source {{ .chezmoi.sourceDir }}/../scripts/os.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
 TEMP_HOOK_BEFORE=$(mktemp)
 TEMP_HOOK_AFTER=$(mktemp)
 trap "rm -rf $TEMP_HOOK_BEFORE $TEMP_HOOK_AFTER && echo \"Install tools failed\"" ERR
@@ -63,7 +63,7 @@ _{{ $shortCode }}_run() {
     hook_before=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.before")
     hook_after=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.after")
     if [ "$hook_before" != "null" ]; then
-      echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_BEFORE}"
+      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_BEFORE}"
       echo "_progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
       echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
       {{ lookPath "bash" }} ${TEMP_HOOK_BEFORE}
@@ -125,7 +125,7 @@ _{{ $shortCode }}_run() {
       {{- end }}
     done
     if [ "$hook_after" != "null" ]; then
-      echo "source {{ .chezmoi.sourceDir }}/../scripts/message.sh" > "${TEMP_HOOK_AFTER}"
+      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_AFTER}"
       echo "_progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
       echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
       {{ lookPath "bash" }} ${TEMP_HOOK_AFTER}

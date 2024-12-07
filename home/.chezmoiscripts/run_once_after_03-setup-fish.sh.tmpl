@@ -1,6 +1,6 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/message.sh
+source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 trap "_error \"Can't setup fish shell\"" ERR
 
 _notice "Setup fish shell"
@@ -8,7 +8,7 @@ _notice "Setup fish shell"
 if [[ $SHELL != "$(which fish)" ]]; then
   _info "Change default shell to fish"
   {{- if eq .chezmoi.os "linux" }}
-  chsh -s "$(which fish)"
+  sudo chsh -s "$(which fish)"
   {{- else if eq .chezmoi.os "darwin" }}
   echo "$(which fish)" | sudo tee -a /etc/shells
   chsh -s "$(which fish)" || :

@@ -5,14 +5,18 @@ is_essential: true
 gentoo:
   packages:
     - name: net-wireless/bluez
+  {{- if ne .kind "container" }}
   hook:
     after: |-
       sudo rc-update add bluetooth default
       sudo rc-service bluetooth restart
+  {{- end }}
 arch:
   packages:
     - name: bluez
+  {{- if ne .kind "container" }}
   hook:
     after: |-
       sudo systemctl enable --now bluetooth
+  {{- end }}
 {{- end }}

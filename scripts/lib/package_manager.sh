@@ -34,12 +34,12 @@ _arch_install() {
 _arch_init() {
   _arch_repo_sync
   if ! command -v yay > /dev/null; then
-    sudo pacman -S --needed git base-devel
+    sudo pacman -S --needed git base-devel go
     git clone https://aur.archlinux.org/yay.git /tmp/yay
     cd /tmp/yay || exit
     makepkg -si --noconfirm
     rm -rf /tmp/yay
-    sudo pacman -Rscn go
+    sudo pacman -Rscn --noconfirm go
   fi
 }
 
@@ -48,7 +48,7 @@ _ubuntu_repo_sync() {
 }
 
 _ubuntu_install() {
-  dpkg-query -s "$1" 2&>1 || sudo apt install -y "$1"
+  dpkg-query -s "$1" 2 &> 1 || sudo apt install -y "$1"
 }
 
 _ubuntu_init() {
@@ -64,9 +64,9 @@ _termux_init() {
 }
 
 _termux_install() {
-  dpkg-query -s "$1" 2&>1 || pkg install -y "$1"
+  dpkg-query -s "$1" 2 &> 1 || pkg install -y "$1"
 }
 
 _macos_install() {
-  brew ls | grep -E "^$1$" || brew install "$1" $2
+  brew ls | grep -E "^$1$" || brew install "$1" "$2"
 }

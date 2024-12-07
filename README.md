@@ -41,10 +41,10 @@ TODO: List all screenshots
 Run these commands:
 
 ```sh
-curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/prerequisite.sh | bash -
+curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | bash -
 git clone https://github.com/dynamotn/dotfiles.git # or git clone https://gitlab.com/dynamo-config/dotfiles.git
 cd dotfiles
-./setup.sh
+./script/setup.sh
 ```
 
 ## :scroll:&nbsp; Cheatsheet
