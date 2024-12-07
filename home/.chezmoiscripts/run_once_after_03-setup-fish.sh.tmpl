@@ -8,7 +8,8 @@ _notice "Setup fish shell"
 if [[ $SHELL != "$(which fish)" ]]; then
   _info "Change default shell to fish"
   {{- if eq .chezmoi.os "linux" }}
-  sudo chsh -s "$(which fish)"
+  # We need chsh without sudo cause sometimes we don't have sudo permissions on collaborative environment
+  chsh -s "$(which fish)"
   {{- else if eq .chezmoi.os "darwin" }}
   echo "$(which fish)" | sudo tee -a /etc/shells
   chsh -s "$(which fish)" || :
