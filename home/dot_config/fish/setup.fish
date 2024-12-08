@@ -12,7 +12,8 @@ for i in (echo $argv | sed "s|--*|\n|g" | grep -v '^$')
 end
 if not functions -q fisher; or eval $UPDATE
   curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
-  and fisher install jorgebucaran/fisher </dev/null
+  fisher install jorgebucaran/fisher </dev/null
+  cat $SETUP_DIR/plugins.list >> ~/.config/fish/fish_plugins
 end
 
 # Install plugins

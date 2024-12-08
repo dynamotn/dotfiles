@@ -1,12 +1,11 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-{{- if eq .place "cloud" }} 
+{{- if eq .place "cloud" }}
 trap "_error \"Can't setup tmux\"" ERR
 
 _notice "Setup tmux"
-# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/tmux/config" | include | sha256sum }}
-chmod +x {{ .chezmoi.homeDir }}/.config/tmux/plugins/dymux/*.mux
+# config hash: {{ joinPath .chezmoi.sourceDir "../silos/tmux/config" | include | sha256sum }}
 mkdir -p {{ .chezmoi.homeDir }}/.local/share/tmux/plugins
 
 _progress "Install tpm"

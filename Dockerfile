@@ -17,3 +17,4 @@ USER $UID
 COPY --chown=${USER}:${USER} . /home/${USER}/dotfiles
 WORKDIR /home/${USER}
 RUN /home/${USER}/dotfiles/scripts/build_container.sh
+ENTRYPOINT [ "/usr/bin/fish" ]
