@@ -99,10 +99,18 @@ _main() {
   _notice "Setup SSH"
   _install_age
   # shellcheck disable=SC2086
-  chezmoi apply "$HOME"/.ssh
+  if [ "$DEBUG" = "true" ]; then
+    chezmoi apply --debug "$HOME"/.ssh
+  else
+    chezmoi apply "$HOME"/.ssh
+  fi
   _notice "Setup other dotfiles"
   # shellcheck disable=SC2086
-  chezmoi apply
+  if [ "$DEBUG" = "true" ]; then
+    chezmoi apply --debug
+  else
+    chezmoi apply
+  fi
 
   if
     ! command -v termux-setup-storage &> /dev/null
@@ -121,6 +129,7 @@ _main() {
 
   # Modify remote url of dotfiles
   _notice "Setup remote url of dotfiles"
+  cd "$SETUP_DIR/.."
   git remote set-url origin git@gitlab.com:dynamo-config/dotfiles
   git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git
   git config --local include.path ../.gitconfig

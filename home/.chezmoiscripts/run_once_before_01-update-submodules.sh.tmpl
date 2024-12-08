@@ -22,6 +22,8 @@ git submodule update --init --remote --recursive \
   {{- if eq .guiServer "X" }}
   home/dot_config/awesome \
   {{- end }}
-  home/dot_config/nvim \
-  home/dot_config/tmux
+  {{- if eq .place "cloud" }}
+  silos/tmux \
+  {{- end }}
+  home/dot_config/nvim
 _success "Updated submodules"

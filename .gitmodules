@@ -2,7 +2,7 @@
 	path = home/dot_config/nvim
 	url = git@gitlab.com:dynamo-config/neovim.git
 [submodule "tmux"]
-	path = home/dot_config/tmux
+	path = silos/tmux
 	url = git@gitlab.com:dynamo-config/tmux.git
 [submodule "awesome"]
 	path = home/dot_config/awesome
