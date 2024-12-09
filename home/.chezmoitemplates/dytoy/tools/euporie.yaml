@@ -1,0 +1,5 @@
+name: euporie
+method: shell
+dependencies:
+  - python
+content: pipx install euporie
