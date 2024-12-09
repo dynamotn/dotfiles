@@ -61,6 +61,7 @@
 |[curlie](https://github.com/rs/curlie)|Alternative to `curl` with the ease of use from `httpie`|Network tool|
 |[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|Network tool|
 |[q](https://github.com/natesales/q)|Alternative to `dig`|Network tool|
+|[speedtest](https://github.com/showwin/speedtest-go)|CLI to test Internet speed|Network tool|
 |[websocat](https://github.com/vi/websocat)|Netcat, curl and socat for websocket|Network tool|
 |[flarectl](https://github.com/cloudflare/cloudflare-go)|Interactive CLI with Cloudflare|Network tool|
 |[oryx](https://github.com/pythops/oryx)|TUI for sniffing network traffic using eBPF|Network tool|
