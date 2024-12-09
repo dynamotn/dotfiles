@@ -3,5 +3,6 @@ fishfile
 /completions
 /functions
 /conf.d
+fish_plugins
 secret.fish
 DIRCOLORS
