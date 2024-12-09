@@ -70,6 +70,22 @@ Library
 .config/zellij
 {{- end }}
 
+{{- if eq .kind "container" }}
+.config/rbw
+.config/rbw-*
+.config/fish-ai.ini
+.config/fish/secret.fish
+.config/github-copilot/hosts.json
+.config/glab-cli/config.yml
+.config/himalaya
+.config/.jira
+.config/rclone/rclone.conf
+.config/tstruct/auth.json
+.kube/config
+.terraformrc
+.docker/config.json
+{{- end }}
+
 {{- if ne .place "office" }}
 .npmrc
 {{- end }}

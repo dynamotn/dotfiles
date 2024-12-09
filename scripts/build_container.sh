@@ -15,3 +15,5 @@ sudo pacman -Sy --noconfirm git openssh chezmoi age expect
 # Setup
 export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
 "$SCRIPT_DIR"/setup.sh -z
+chezmoi apply
+ssh-keygen -t ed25519 -f ~/.ssh/key/public_ed25519 -P ""
