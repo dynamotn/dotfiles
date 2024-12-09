@@ -53,11 +53,15 @@ Library
 .config/awesome
 .config/ibus-bamboo
 .config/rofi
+.config/picom
+.config/redshift
 {{- end }}
 {{- if ne .guiServer "W" }}
 .config/hypr
+.config/hyprshade
 .config/fcitx5
 .wayland_init.fish
+.config/wofi
 .config/swaylock
 .config/eww
 {{- end }}
@@ -71,6 +75,7 @@ Library
 {{- end }}
 
 {{- if eq .kind "container" }}
+.config/systemd
 .config/rbw
 .config/rbw-*
 .config/fish-ai.ini
