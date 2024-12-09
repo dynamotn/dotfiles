@@ -1,3 +1,4 @@
+{{- if ne .kind "container" }}
 name: rbw
 method: binary
 is_essential: true
@@ -9,3 +10,4 @@ archive:
   paths:
     - rbw
     - rbw-agent
+{{- end }}

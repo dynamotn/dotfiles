@@ -9,7 +9,7 @@ Host *
     Ciphers -arcfour*,-*cbc
 
 Host github.com
-    IdentityFile ~/.ssh/key/personal_ed25519
+    IdentityFile ~/.ssh/key/public_ed25519
 
 Host gitlab.com
-    IdentityFile ~/.ssh/key/personal_ed25519
+    IdentityFile ~/.ssh/key/public_ed25519
