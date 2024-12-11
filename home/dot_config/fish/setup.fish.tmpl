@@ -13,10 +13,12 @@ end
 if not functions -q fisher; or eval $UPDATE
   curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
   fisher install jorgebucaran/fisher </dev/null
-  cat $SETUP_DIR/plugins.list >> ~/.config/fish/fish_plugins
+  cat ~/.config/fish/plugins.list >> ~/.config/fish/fish_plugins
 end
 
 # Install plugins
 fish -c "fisher update </dev/null"
+{{- if ne .chezmoi.os "android" }}
 # Install nix
 fish -c "install_nix"
+{{- end }}

@@ -4,7 +4,7 @@ source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 trap "_error \"Can't setup fish shell\"" ERR
 
 _notice "Setup fish shell"
-# plugins hash: {{ joinPath .chezmoi.sourceDir "../silos/fish/plugins.list" | include | sha256sum }}
+# plugins hash: {{ joinPath .chezmoi.homeDir ".config/fish/plugins.list" | include | sha256sum }}
 {{- if ne .kind "container" }}
 if [[ $SHELL != "$(which fish)" ]]; then
   _info "Change default shell to fish"
@@ -19,6 +19,7 @@ if [[ $SHELL != "$(which fish)" ]]; then
   {{- end }}
 fi
 {{- end }}
+rm -rf {{ .chezmoi.homeDir }}/.config/fish/{conf.d,functions,completions,fishd*}
 fish {{ .chezmoi.homeDir }}/.config/fish/setup.fish
 
 _progress "Install neccessary tools"
