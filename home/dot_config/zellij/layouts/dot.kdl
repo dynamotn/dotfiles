@@ -1,0 +1,42 @@
+layout {
+  default_tab_template {
+    children
+    pane size=1 borderless=true {
+      plugin location="status-bar"
+    }
+    pane size=1 borderless=true {
+      plugin location="zjstatus"
+    }
+  }
+
+  tab name="dot" cwd="~/Dotfiles" split_direction="vertical" {
+    pane focus=true
+    floating_panes {
+      pane {
+        command "git"
+        args "pull"
+      }
+      pane {
+        command "git"
+        args "status"
+      }
+      pane {
+        command "chezmoi"
+        args "diff"
+      }
+      pane {
+        command "chezmoi"
+        args "apply"
+      }
+    }
+  }
+  tab name="nvim" cwd="~/Dotfiles/silos/neovim" split_direction="vertical" {
+    pane focus=true
+    floating_panes {
+      pane {
+        command "git"
+        args "pull"
+      }
+    }
+  }
+}
