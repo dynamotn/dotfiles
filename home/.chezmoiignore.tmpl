@@ -22,7 +22,7 @@ Library
 .config/gtk-4.0
 .config/Trolltech.conf
 .config/user-dirs.dirs
-Multimedia/Pictures/Wallpaper
+Multimedia
 {{- else if eq .guiServer "M" }}
 .mozilla
 .thunderbird
@@ -101,4 +101,8 @@ Library
 
 {{- if not (eq .kind "pc" "laptop") }}
 .config/tridactyl
+{{- end }}
+
+{{- if not (eq .kind "pc" "laptop" "container") }}
+Working
 {{- end }}
