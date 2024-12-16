@@ -1,0 +1,9 @@
+{{- if and (eq .kind "laptop") (eq .place "office") }}
+name: system_zzz
+method: os
+is_essential: true
+arch:
+  packages:
+    - name: sof-firmware
+    - name: btrfs-progs
+{{- end }}
