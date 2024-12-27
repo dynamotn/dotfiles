@@ -171,6 +171,7 @@
         auto = 0
 [init]
         defaultBranch = main
+        templatedir = ~/.config/git/templates
 [filter "lfs"]
         # LFS subcommand
         clean = git-lfs clean -- %f
