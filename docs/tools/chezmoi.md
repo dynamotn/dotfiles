@@ -2,7 +2,6 @@
 |Tool|Purpose|Used in|
 |----|-------|-------|
 |[yq](https://github.com/mikefarah/yq)|YAML processor|Prerequisite|
-|[asdf](https://asdf-vm.com/)|All-in-one version manager|`silos/fish`|
 |[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|`silos/fish`|
 |[anti-ddos](https://github.com/anti-ddos/Anti-DDOS)|Anti DDOS|Security tool|
 |[cht](https://cht.sh)|Access to community cheat sheet||

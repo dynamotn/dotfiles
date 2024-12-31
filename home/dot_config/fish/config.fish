@@ -97,10 +97,8 @@ if status is-interactive
     fd --gen-completions fish | source
   end
 
-  # ASDF
-  if test -e $HOME/.asdf/asdf.fish
-    . ~/.asdf/asdf.fish
-  end
+  # mise
+  type -q mise; and mise activate fish | source
   # Direnv
   type -q direnv; and direnv hook fish | source
   # Zoxide
