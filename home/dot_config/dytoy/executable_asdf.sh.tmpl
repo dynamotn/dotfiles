@@ -29,14 +29,17 @@ _parse_args() {
 }
 
 _main() {
-  if [ "$TOOL" = "" ]; then
-    _info "Install asdf tools"
-  else
-    _info "Install asdf tool: $TOOL"
+  if ! command -v mise 2>&1 >/dev/null; then
+    {{ lookPath "bash" }} "$SCRIPT_DIR/binary.sh" -t mise
   fi
-  readarray asdf_tools < <(yq e -o=j -I=0 'filter(.method == "asdf") | .[]' ~/.config/dytoy/tools.yaml )
+  if [ "$TOOL" = "" ]; then
+    _info "Install mise tools"
+  else
+    _info "Install mise tool: $TOOL"
+  fi
+  readarray mise_tools < <(yq e -o=j -I=0 'filter(.method == "mise") | .[]' ~/.config/dytoy/tools.yaml )
 
-  for tool in "${asdf_tools[@]}"; do
+  for tool in "${mise_tools[@]}"; do
     tool_name=$(echo "$tool" | yq e '.name')
     if [ "$TOOL" != "" ] && [ "$TOOL" != "$tool_name" ]; then
       continue
@@ -55,26 +58,22 @@ _main() {
       {{ lookPath "bash" }} "$SCRIPT_DIR/$method.sh" -t "$dependency"
     done
 
-    repo=$(echo "$tool" | yq e '.repo')
-    if [[ "$repo" != "null" ]]; then
-      asdf plugin add $tool_name $repo
-    else
-      asdf plugin add $tool_name
+    backend=$(echo "$tool" | yq e '.backend')
+    if [[ "$backend" = "null" ]]; then
+      backend=${tool_name}
     fi
+
     version=$(echo "$tool" | yq e '.version')
     if [[ "$version" = "null" ]]; then
-      asdf install $tool_name latest
-      asdf global $tool_name $(asdf latest $tool_name)
+      mise use -g ${backend}@latest
     elif [[ "$version" = "system" ]]; then
-      asdf install $tool_name latest
-      asdf global $tool_name system
+      mise use -g ${backend}@system
     else
-      asdf install $tool_name $version
-      asdf global $tool_name $(asdf latest $tool_name)
+      mise use -g ${backend}@${version}
     fi
   done
 
-  _success "Installed asdf tools"
+  _success "Installed mise tools"
 }
 
 TOOL=

@@ -1,0 +1,11 @@
+[tools]
+gcloud = "latest"
+helm = "latest"
+node = "latest"
+kubectl = "latest"
+pre-commit = "latest"
+terraform = "latest"
+awscli = "latest"
+uv = "latest"
+python = "system"
+azure = "latest"

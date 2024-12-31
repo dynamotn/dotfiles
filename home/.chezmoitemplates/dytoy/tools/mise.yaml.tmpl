@@ -1,0 +1,17 @@
+name: mise
+method: binary
+github:
+  repo: jdx/mise
+  {{- $os := "" }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "macos" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64" }}
+  {{- end }}
+  release_asset: mise-%v-{{ $os }}-{{ $arch }}

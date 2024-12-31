@@ -60,6 +60,6 @@ See [chezmoi](docs/tools/chezmoi.md)
 ### Via Github Release binary
 See [release_binary](docs/tools/release_binary.md)
 
-### Via ASDF
+### Via mise
 
-See [asdf](docs/tools/asdf.md)
+See [mise](docs/tools/mise.md)
