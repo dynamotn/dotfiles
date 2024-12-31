@@ -10,3 +10,4 @@
 |[az](https://github.com/Azure/azure-cli)|Libraries and tools for interacting with Microsoft Azure products and services|DevOps tool|
 |[terraform](https://github.com/hashicorp/terraform)|IaC tool for building, changing, and versioning infrastructure|DevOps tool|
 |[pre-commit](https://github.com/pre-commit/pre-commit)|Framework for manage pre-commit hooks|Developer tool|
+|[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|Developer tool|
