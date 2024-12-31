@@ -1,19 +1,4 @@
 name: bat
 is_essential: true
-{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
-method: os
-termux:
-  packages:
-    - name: bat
-macos:
-  packages:
-    - name: bat
-arch:
-  packages:
-    - name: bat
-{{- else }}
-method: shell
-dependencies:
-  - rust
-content: cargo install --git https://github.com/sharkdp/bat bat
-{{- end }}
+method: mise
+version: v0.25.0-prerelease.1
