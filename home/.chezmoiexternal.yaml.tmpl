@@ -18,10 +18,6 @@
   url: https://raw.githubusercontent.com/catppuccin/termux/main/themes/catppuccin-macchiato.properties
   refreshPeriod: 168h
 {{- end }}
-.fzf:
-  type: git-repo
-  url: 'https://github.com/junegunn/fzf.git'
-  refreshPeriod: 168h
 {{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/.chezmoitemplates/firefox/prefs/00-arkenfox.js:
   type: file
   url: 'https://raw.githubusercontent.com/arkenfox/user.js/master/user.js'
