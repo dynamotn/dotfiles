@@ -181,3 +181,7 @@
 [includeIf "gitdir/i:~/Working/enterprise/**"]
         # Include config file from enterprise projects
         path = ~/Working/enterprise/.gitconfig
+{{- if eq .kind "mobile" "tablet" }}
+[safe]
+        directory = /storage/emulated/0/Documents/Notes
+{{- end }}
