@@ -11,7 +11,7 @@ elif command -v termux-setup-storage &> /dev/null; then
   pkg update && pkg upgrade -y
   termux-change-repo
   termux-setup-storage
-  pkg update && pkg install -y git curl tsu chezmoi age which python termux-services openssh
+  pkg update && pkg install -y git curl tsu chezmoi age which python termux-services openssh proot
 elif command -v apt &> /dev/null; then
   sudo apt update && sudo apt install -y git curl gnupg openssh
 elif command -v pacman &> /dev/null; then
