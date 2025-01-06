@@ -48,7 +48,7 @@ _ubuntu_repo_sync() {
 }
 
 _ubuntu_install() {
-  dpkg-query -s "$1" 2 &> 1 || sudo apt install -y "$1"
+  dpkg-query -s "$1" 2>&1 || sudo apt install -y "$1"
 }
 
 _ubuntu_init() {
@@ -64,7 +64,7 @@ _termux_init() {
 }
 
 _termux_install() {
-  dpkg-query -s "$1" 2 &> 1 || pkg install -y "$1"
+  dpkg-query -s "$1" 2>&1 || pkg install -y "$1"
 }
 
 _macos_install() {
