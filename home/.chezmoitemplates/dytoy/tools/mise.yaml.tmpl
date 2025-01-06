@@ -4,9 +4,10 @@ github:
   repo: jdx/mise
   {{- $os := "" }}
   {{- $arch := "" }}
+  {{- $suffix := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "macos" }}
-  {{- else if eq .chezmoi.os "linux" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
   {{- $os = "linux" }}
   {{- end }}
   {{- if eq .chezmoi.arch "amd64" }}
@@ -14,4 +15,7 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{- $arch = "arm64" }}
   {{- end }}
-  release_asset: mise-%v-{{ $os }}-{{ $arch }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $suffix = "-musl" }}
+  {{- end }}
+  release_asset: mise-%v-{{ $os }}-{{ $arch }}{{ $suffix }}

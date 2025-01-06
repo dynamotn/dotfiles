@@ -64,12 +64,17 @@ _main() {
     fi
 
     version=$(echo "$tool" | yq e '.version')
+    {{- $command := "mise" }}
+    {{- if eq .chezmoi.os "android" }}
+    {{- $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mise" }}
+    {{- end }}
+
     if [[ "$version" = "null" ]]; then
-      mise use -g ${backend}@latest
+      {{ $command }} use -g ${backend}@latest
     elif [[ "$version" = "system" ]]; then
-      mise use -g ${backend}@system
+      {{ $command }} use -g ${backend}@system
     else
-      mise use -g ${backend}@${version}
+      {{ $command }} use -g ${backend}@${version}
     fi
   done
 
