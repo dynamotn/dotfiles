@@ -23,7 +23,7 @@ Architecture = auto
 
 # Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
 {{- if and (eq .place "office") (eq .kind "laptop") }}
-IgnorePkg   = linux-hardened linux-firmware alsa-firmware sof-firmware
+IgnorePkg   = linux-hardened linux-firmware alsa-firmware sof-firmware linux-hardened-headers
 {{- else }}
 #IngorePkg
 {{- end }}
