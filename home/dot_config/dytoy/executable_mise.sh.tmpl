@@ -31,6 +31,7 @@ _parse_args() {
 _main() {
   if ! command -v mise 2>&1 >/dev/null; then
     {{ lookPath "bash" }} "$SCRIPT_DIR/binary.sh" -t mise
+    mise trust
   fi
   if [ "$TOOL" = "" ]; then
     _info "Install mise tools"
