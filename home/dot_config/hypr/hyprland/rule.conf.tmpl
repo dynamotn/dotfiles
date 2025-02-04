@@ -1,23 +1,83 @@
-# Common
+# Common #
+# Floating
 windowrulev2 = float, floating:1
+# Smart gaps
 workspace = w[tv1], gapsout:0, gapsin:0
 workspace = f[1], gapsout:0, gapsin:0
+windowrulev2 = bordersize 0, floating:0, onworkspace:w[tv1]
+windowrulev2 = rounding 0, floating:0, onworkspace:w[tv1]
+windowrulev2 = decorate off, floating:0, onworkspace:w[tv1]
+windowrulev2 = noshadow, floating:0, onworkspace:w[tv1]
+windowrulev2 = bordersize 0, floating:0, onworkspace:f[1]
+windowrulev2 = rounding 0, floating:0, onworkspace:f[1]
+windowrulev2 = decorate off, floating:0, onworkspace:f[1]
+windowrulev2 = noshadow, floating:0, onworkspace:f[1]
 
-# Per apps
-windowrulev2 = workspace 1 silent, class:^(kitty)$
-windowrulev2 = workspace 2 silent, class:^(firefox)$, floating: 0
-windowrulev2 = workspace 2 silent, class:^(firefox-esr)$, floating: 0
-windowrulev2 = workspace 3 silent, class:^(thunderbird)$
-windowrulev2 = workspace 3 silent, class:^(thunderbird-esr)$
+# Per app #
+# Tags
+windowrulev2 = tag +term, class:^(kitty)$
+windowrulev2 = tag +browser, class:^([Ff]irefox(|-esr)|org.mozilla.firefox|[Ff]irefox)$
+windowrulev2 = tag +browser, class:^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$
+windowrulev2 = tag +browser, class:^(chrome-.+-Default)$ # Chrome PWAs
+windowrulev2 = tag +browser, class:^(Vivaldi.+)$
+windowrulev2 = tag +email, class:^([Tt]hunderbird(|-esr)|org.gnome.Evolution)$
+windowrulev2 = tag +note, class:^(obsidian)$
+windowrulev2 = tag +viewer, class:^(evince)$ # document viewer
+windowrulev2 = tag +viewer, class:^(eog|org.gnome.Loupe)$ # image viewer
+windowrulev2 = tag +im, class:^([Dd]iscord|[Ww]ebCord|[Vv]esktop)$
+windowrulev2 = tag +im, class:^([Ff]erdium)$
+windowrulev2 = tag +im, class:^([Ww]hatsapp-for-linux)$
+windowrulev2 = tag +im, class:^(org.telegram.desktop|io.github.tdesktop_x64.TDesktop)$
+windowrulev2 = tag +im, class:^(teams-for-linux)$
+windowrulev2 = tag +video, class:^(mpv)$
+windowrulev2 = tag +games, class:^(gamescope)$
+windowrulev2 = tag +games, class:^(steam_app_\d+)$
+windowrulev2 = tag +gamestore, class:^([Ss]team)$
+windowrulev2 = tag +gamestore, title:^([Ll]utris)$
+windowrulev2 = tag +gamestore, class:^(com.heroicgameslauncher.hgl)$
+windowrulev2 = tag +remote, class:^([Vv]mware-view)$
+windowrulev2 = tag +file-manager, class:^([Tt]hunar|org.gnome.Nautilus|[Pp]cmanfm-qt)$
+windowrulev2 = tag +file-manager, class:^(app.drey.Warp)$
+windowrulev2 = tag +settings, class:^(file-roller|org.gnome.FileRoller)$ # archive manager
+windowrulev2 = tag +settings, class:^(nm-applet|nm-connection-editor|blueman-manager)$
+windowrulev2 = tag +settings, class:^(pavucontrol|org.pulseaudio.pavucontrol|com.saivert.pwvucontrol)$
+windowrulev2 = tag +settings, class:^(nwg-look|qt5ct|qt6ct|[Yy]ad)$
+windowrulev2 = tag +settings, class:(xdg-desktop-portal-gtk)
+windowrulev2 = tag +settings, class:(btop)
+
+# Handle workspace
+windowrulev2 = workspace name:term silent, tag:term*
+windowrulev2 = workspace name:web silent, tag:browser*
+windowrulev2 = workspace name:mail silent, tag:email*
+windowrulev2 = workspace name:doc silent, tag:note*
+windowrulev2 = workspace name:doc silent, tag:viewer*
+windowrulev2 = workspace name:chat silent, tag:im*
+windowrulev2 = workspace name:m&v silent, tag:video*
+windowrulev2 = workspace name:game silent, tag:game*
+windowrulev2 = workspace name:game silent, tag:gamestore*
+windowrulev2 = workspace name:sys silent, tag:remote*
+windowrulev2 = workspace name:sys silent, tag:file-manager*
+# Floating for some apps
+windowrulev2 = float, tag:settings*
+windowrulev2 = float, tag:viewer*
 windowrulev2 = float, initialTitle:^(Calendar Reminders)$
-windowrulev2 = workspace 4 silent, class:^(obsidian)$
-windowrulev2 = workspace 6 silent, class:^(mpv)$
-windowrulev2 = workspace 7 silent, class:^(steam)$
-windowrulev2 = float, class:^(btop)$
-windowrulev2 = size 80% 50%, class:^(btop)$
-windowrulev2 = center, class:^(btop)$
-
-# Browser Picture in Picture
 windowrulev2 = float, title:^(Picture-in-Picture)$
+# Size
+windowrulev2 = size 80% 70%, tag:setting*
+windowrulev2 = keepaspectratio, title:^(Picture-in-Picture)$
+# Pin
 windowrulev2 = pin, title:^(Picture-in-Picture)$
-windowrulev2 = move 69.5% 4%, title:^(Picture-in-Picture)$
+# Position
+windowrulev2 = center, tag:setting*
+windowrulev2 = move 72% 7%, title:^(Picture-in-Picture)$
+# Blur and fullscreen
+windowrulev2 = noblur, tag:games*
+windowrulev2 = fullscreen, tag:games*
+
+# Layer
+layerrule = blur, wofi
+layerrule = ignorezero, wofi
+layerrule = blur, swaync-control-center
+layerrule = ignorezero, swaync-control-center
+layerrule = blur, gtk-layer-shell
+layerrule = ignorezero, gtk-layer-shell

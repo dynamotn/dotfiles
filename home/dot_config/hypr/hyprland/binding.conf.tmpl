@@ -2,7 +2,7 @@ $mainMod = SUPER
 $altMod = ALT
 
 # Session #
-bind = $mainMod SHIFT, Q, exit,
+bind = CTRL ALT, DELETE, exit,
 bind = $mainMod SHIFT, R, exec, hyprctl reload
 
 # Prompt #
@@ -11,16 +11,23 @@ bind = $mainMod, F2, exec, wofi --show drun
 
 # Workspace #
 # Switch workspaces with mainMod + [0-9]
-bind = $mainMod, 1, split:workspace, 1
-bind = $mainMod, 2, split:workspace, 2
-bind = $mainMod, 3, split:workspace, 3
-bind = $mainMod, 4, split:workspace, 4
-bind = $mainMod, 5, split:workspace, 5
-bind = $mainMod, 6, split:workspace, 6
-bind = $mainMod, 7, split:workspace, 7
-bind = $mainMod, 8, split:workspace, 8
-bind = $mainMod, 9, split:workspace, 9
-bind = $mainMod, 0, split:workspace, 10
+bind = $mainMod, 1, workspace, name:term
+bind = $mainMod, 2, workspace, name:web
+bind = $mainMod, 3, workspace, name:mail
+bind = $mainMod, 4, workspace, name:doc
+bind = $mainMod, 5, workspace, name:chat
+bind = $mainMod, 6, workspace, name:m&v
+bind = $mainMod, 7, workspace, name:game
+bind = $mainMod, 8, workspace, name:sys
+bind = $mainMod, 9, workspace, name:misc
+bind = $mainMod, 0, workspace, name:sec
+
+# Move workspace to another monitor and swap monitors
+bind = $mainMod, D, swapactiveworkspaces, 0 1
+bind = $mainMod CTRL, left, movecurrentworkspacetomonitor, l
+bind = $mainMod CTRL, right, movecurrentworkspacetomonitor, r
+bind = $mainMod CTRL, up, movecurrentworkspacetomonitor, u
+bind = $mainMod CTRL, down, movecurrentworkspacetomonitor, d
 
 # Scroll through existing workspaces with mainMod + scroll
 bind = $mainMod, mouse_down, workspace, e+1
@@ -28,15 +35,16 @@ bind = $mainMod, mouse_up, workspace, e-1
 
 # Window #
 # Move active window to a workspace with mainMod + SHIFT + [0-9]
-bind = $mainMod SHIFT, 1, split:movetoworkspacesilent, 1
-bind = $mainMod SHIFT, 2, split:movetoworkspacesilent, 2
-bind = $mainMod SHIFT, 3, split:movetoworkspacesilent, 3
-bind = $mainMod SHIFT, 4, split:movetoworkspacesilent, 4
-bind = $mainMod SHIFT, 5, split:movetoworkspacesilent, 5
-bind = $mainMod SHIFT, 6, split:movetoworkspacesilent, 6
-bind = $mainMod SHIFT, 7, split:movetoworkspacesilent, 7
-bind = $mainMod SHIFT, 8, split:movetoworkspacesilent, 8
-bind = $mainMod SHIFT, 9, split:movetoworkspacesilent, 9
+bind = $mainMod SHIFT, 1, movetoworkspacesilent, name:term
+bind = $mainMod SHIFT, 2, movetoworkspacesilent, name:web
+bind = $mainMod SHIFT, 3, movetoworkspacesilent, name:mail
+bind = $mainMod SHIFT, 4, movetoworkspacesilent, name:doc
+bind = $mainMod SHIFT, 5, movetoworkspacesilent, name:chat
+bind = $mainMod SHIFT, 6, movetoworkspacesilent, name:m&v
+bind = $mainMod SHIFT, 7, movetoworkspacesilent, name:game
+bind = $mainMod SHIFT, 8, movetoworkspacesilent, name:sys
+bind = $mainMod SHIFT, 9, movetoworkspacesilent, name:misc
+bind = $mainMod SHIFT, 0, movetoworkspacesilent, name:sec
 
 # Move focus with mainMod + arrow keys
 bind = $mainMod, left, movefocus, l
@@ -62,8 +70,6 @@ bind = $mainMod, H, togglefloating,
 bind = $mainMod, J, togglesplit,
 bind = $mainMod, G, togglegroup,
 bind = $mainMod, K, swapsplit,
-bind = $mainMod, D, split:swapactiveworkspaces, current +1
-bind = $mainMod, R, split:grabroguewindows
 
 # 3rd apps #
 bind = $mainMod, Q, exec, kitty
