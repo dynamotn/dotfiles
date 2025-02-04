@@ -66,6 +66,7 @@
 |[websocat](https://github.com/vi/websocat)|Netcat, curl and socat for websocket|Network tool|
 |[flarectl](https://github.com/cloudflare/cloudflare-go)|Interactive CLI with Cloudflare|Network tool|
 |[oryx](https://github.com/pythops/oryx)|TUI for sniffing network traffic using eBPF|Network tool|
+|[httptap](https://github.com/andrew-d/httptap)|CLI to view HTTP requests per command|Network tool|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tool|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|Developer tool|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|Developer tool|
