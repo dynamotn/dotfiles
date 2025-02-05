@@ -17,18 +17,23 @@
   (box
     :class "workspaces"
     :orientation "v"
-    :width 25
-    :height 250
     (for workspace in {workspaces[monitor].all}
       (eventbox
         :cursor "pointer"
-        :onscroll "echo {} | sed -e 's/up/-1/g' -e 's/down/+1/g' | xargs hyprctl dispatch workspace"
+        ;:onscroll "echo {} | sed -e 's/up/-1/g' -e 's/down/+1/g' | xargs hyprctl dispatch workspace"
         :halign "center"
         :valign "center"
         :vexpand true
         (button
-          :onclick "hyprctl dispatch workspace ${workspace.id}"
-          :class "workspace ${workspace.id == workspaces[monitor].active ? "active" : workspace.windows > 0 ? "occupied" : "empty"}"
+          :onclick "hyprctl dispatch workspace ${workspace.name}"
+          :class "workspace ${workspace.id == workspaces[monitor].active ? "active" : (workspace.windows > 0 ? "occupied" : "empty")}"
+          :width "1rem"
+          :height "1rem"
+          (label
+            :class "name"
+            :text "${workspace.icon}"
+            :justify: "center"
+          )
         )
       )
     )
