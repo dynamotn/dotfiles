@@ -7,18 +7,6 @@ import sys
 
 SIGNATURE = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
 USER = subprocess.check_output(["id", "-u"]).decode("utf-8").strip()
-WORKSPACE_NAMES = [
-    "TERM",
-    "WEB",
-    "MAIL",
-    "DOC",
-    "CHAT",
-    "M&V",
-    "GAME",
-    "SYS",
-    "MISC",
-    "SEC",
-]
 
 def get_workspaces():
     workspaces = subprocess.check_output(["hyprctl", "workspaces", "-j"])
@@ -29,15 +17,32 @@ def get_monitors():
     return json.loads(active)
 
 def get_active_workspace(monitor):
-    return monitor['activeWorkspace']['id']
+    return monitor["activeWorkspace"]["id"]
+
+def get_icon(name):
+    icons = {
+        "term": "",
+        "web": "",
+        "mail": "",
+        "doc": "",
+        "chat": "",
+        "media": "",
+        "game": "",
+        "sys": "",
+        "misc": "",
+        "sec": "",
+    }
+    return icons.get(name, name)
 
 def get_workspace_datas(monitor):
     WORKSPACES = get_workspaces()
-    workspace_data_dict = {item["id"]: item["windows"] for item in WORKSPACES}
-    monitor_id = int(monitor["id"])
-    workspace_ids = range(1 + monitor_id * 10, 10 + 1 + monitor_id * 10)
-    workspaces_data = [{"id": ws, "windows": workspace_data_dict.get(ws, 0), "name": WORKSPACE_NAMES[ws - monitor_id * 10 - 1]} for ws in workspace_ids]
-    return workspaces_data
+    workspace_data_dict = [{
+      "id": item["id"],
+      "name": item["name"],
+      "windows": item["windows"],
+      "icon": get_icon(item["name"]),
+    } for item in WORKSPACES if item["monitorID"] == monitor["id"] and item["name"].find("special:") == -1]
+    return workspace_data_dict
 
 def monitor_socat_output():
     {{- if eq .chezmoi.osRelease.id "gentoo" }}

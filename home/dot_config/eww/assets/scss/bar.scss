@@ -1,5 +1,5 @@
 window > .bar {
-  margin: 0.5rem 0.5rem 0.5rem 0.7rem;
+  margin: 0.5rem 0.5rem;
   box-shadow: 0 0 4px 1px rgba(black, 0.5);
   background-color: $bg;
 }
@@ -26,34 +26,43 @@ window > .bar {
     border-radius: 1rem;
 
     .workspace {
-      border-radius: 1rem;
-      min-width: 0.5rem;
+      border-radius: 2rem;
+      margin: 0.4rem 0.2rem;
 
       &.empty {
         background: lighten($color: $bg, $amount: 3%);
-        min-height: 0.7rem;
-        min-width: 0.7rem;
       }
 
       &.occupied {
         background: $teal;
-        min-height: 1rem;
+        .name {
+          color: $bg;
+        }
       }
 
       &.active {
         background: $green;
-        min-height: 1rem;
-        min-width: 1rem;
+        .name {
+          color: $bg;
+        }
       }
 
       &:hover {
         &.empty {
           background: lighten($color: $bg, $amount: 10%);
         }
-        &.occupied,
-        &.active {
+        &.occupied {
           background: lighten($color: $teal, $amount: 10%);
         }
+        &.active {
+          background: lighten($color: $green, $amount: 10%);
+        }
+      }
+
+      .name {
+        font-size: 1rem;
+        color: $fg;
+        margin: 0.4rem;
       }
     }
   }
