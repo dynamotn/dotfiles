@@ -26,4 +26,5 @@ end
 set -U NODE_TLS_REJECT_UNAUTHORIZED 0
 set -Ux GRPC_DEFAULT_SSL_ROOTS_FILE_PATH /etc/ssl/certs/ca-certificates.crt
 set -Ux REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt
+set -U DENO_TLS_CA_STORE=system
 {{- end }}
