@@ -13,7 +13,6 @@
 |[gping](https://github.com/orf/gping)|Alternative to `ping` with graph|Frequently used tool|
 |[wtf](https://github.com/wtfutil/wtf)|Personal information dashboard on CLI|Frequently used tool|
 |[zoxide](https://github.com/ajeetdsouza/zoxide)|Alternative to `cd` with smarter|Frequently used tool, in `silos/fish`|
-|[direnv](https://github.com/direnv/direnv)|Load environment variables depending on directory|Frequently used tool, in `silos/fish`|
 |[mise](https://github.com/jdx/mise)|All-in-one version manager|`silos/fish`|
 |[vivid](https://github.com/sharkdp/vivid)|A themeable LS_COLORS generator with database|Frequently used tool|
 |[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|Frequently used tool, in `silos/fish`, `silos/tmux`|
