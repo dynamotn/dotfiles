@@ -1,37 +1,48 @@
 [submodule "neovim"]
-	path = home/dot_config/nvim
-	url = git@gitlab.com:dynamo-config/neovim.git
+        path = home/dot_config/nvim
+        url = git@gitlab.com:dynamo-config/neovim.git
+        shallow = true
 [submodule "tmux"]
-	path = silos/tmux
-	url = git@gitlab.com:dynamo-config/tmux.git
+        path = silos/tmux
+        url = git@gitlab.com:dynamo-config/tmux.git
+        shallow = true
 [submodule "awesome"]
-	path = home/dot_config/awesome
-	url = git@gitlab.com:dynamo-config/awesome.git
+        path = home/dot_config/awesome
+        url = git@gitlab.com:dynamo-config/awesome.git
+        shallow = true
 [submodule "wallpaper"]
-	path = home/Multimedia/Pictures/Wallpaper
-	url = git@gitlab.com:dynamo-config/wallpaper.git
+        path = home/Multimedia/Pictures/Wallpaper
+        url = git@gitlab.com:dynamo-config/wallpaper.git
+        shallow = true
 [submodule "font"]
-	path = silos/font
-	url = git@gitlab.com:dynamo-config/font.git
+        path = silos/font
+        url = git@gitlab.com:dynamo-config/font.git
+        shallow = true
 [submodule "icon"]
-	path = silos/icon
-	url = git@gitlab.com:dynamo-theme/icon.git
+        path = silos/icon
+        url = git@gitlab.com:dynamo-theme/icon.git
+        shallow = true
 [submodule "lepton"]
-	path = home/.chezmoitemplates/firefox/chrome/lepton
-	url = git@github.com:black7375/Firefox-UI-Fix.git
+        path = home/.chezmoitemplates/firefox/chrome/lepton
+        url = git@github.com:black7375/Firefox-UI-Fix.git
+        shallow = true
 [submodule "firefox-personal"]
-	path = home/dot_config/firefox/profiles/personal
-	url = git@gitlab.com:dynamo-config/firefox.git
+        path = home/dot_config/firefox/profiles/personal
+        url = git@gitlab.com:dynamo-config/firefox.git
         branch = personal
+        shallow = true
 [submodule "firefox-enterprise"]
-	path = home/dot_config/firefox/profiles/enterprise
-	url = git@gitlab.com:dynamo-config/firefox.git
+        path = home/dot_config/firefox/profiles/enterprise
+        url = git@gitlab.com:dynamo-config/firefox.git
         branch = enterprise
+        shallow = true
 [submodule "thunderbird-enterprise"]
-	path = home/dot_config/thunderbird/profiles/enterprise
-	url = git@gitlab.com:dynamo-config/thunderbird.git
-	branch = enterprise
+        path = home/dot_config/thunderbird/profiles/enterprise
+        url = git@gitlab.com:dynamo-config/thunderbird.git
+        branch = enterprise
+        shallow = true
 [submodule "thunderbird-personal"]
-	path = home/dot_config/thunderbird/profiles/personal
-	url = git@gitlab.com:dynamo-config/thunderbird.git
-	branch = personal
+        path = home/dot_config/thunderbird/profiles/personal
+        url = git@gitlab.com:dynamo-config/thunderbird.git
+        branch = personal
+        shallow = true

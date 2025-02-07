@@ -42,7 +42,7 @@ Run these commands:
 
 ```sh
 curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | bash -
-git clone https://github.com/dynamotn/dotfiles.git # or git clone https://gitlab.com/dynamo-config/dotfiles.git
+git clone --depth 1 https://github.com/dynamotn/dotfiles.git # or git clone https://gitlab.com/dynamo-config/dotfiles.git
 cd dotfiles
 ./script/setup.sh
 ```
