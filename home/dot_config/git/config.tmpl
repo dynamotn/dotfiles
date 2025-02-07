@@ -178,6 +178,15 @@
         smudge = git-lfs smudge -- %f
         process = git-lfs filter-process
         required = true
+[filter "space2"]
+        smudge = unexpand --tabs=2 --first-only
+        clean = expand --tabs=2 --initial
+[filter "space4"]
+        smudge = unexpand --tabs=4 --first-only
+        clean = expand --tabs=4 --initial
+[filter "space8"]
+        smudge = unexpand --tabs=8 --first-only
+        clean = expand --tabs=8 --initial
 [includeIf "gitdir/i:~/Working/enterprise/**"]
         # Include config file from enterprise projects
         path = ~/Working/enterprise/.gitconfig
