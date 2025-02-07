@@ -99,8 +99,6 @@ if status is-interactive
 
   # mise
   type -q mise; and mise activate fish | source
-  # Direnv
-  type -q direnv; and direnv hook fish | source
   # Zoxide
   type -q zoxide; and zoxide init fish | source
   # Navi
