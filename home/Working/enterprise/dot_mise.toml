@@ -1,0 +1,2 @@
+[env]
+KUBECONFIG = "{{config_root}}/.kube/config"
