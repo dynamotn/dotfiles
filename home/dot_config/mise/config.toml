@@ -9,8 +9,5 @@ awscli = "latest"
 uv = "latest"
 python = "system"
 azure = "latest"
-bat = "v0.25.0-prerelease.1"
+bat = "latest"
 fzf = "latest"
-
-[alias]
-bat = "ubi:dynamotn/bat"
