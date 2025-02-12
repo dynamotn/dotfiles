@@ -76,6 +76,9 @@ end
 ## }
 
 ## Other tools {
+# mise
+type -q mise; and mise activate fish | source
+
 if status is-interactive
   # Hooks
   # Fzf config
@@ -97,8 +100,6 @@ if status is-interactive
     fd --gen-completions fish | source
   end
 
-  # mise
-  type -q mise; and mise activate fish | source
   # Zoxide
   type -q zoxide; and zoxide init fish | source
   # Navi
