@@ -3,19 +3,19 @@ set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 
 _install_package_tools() {
-  bash {{ .chezmoi.homeDir  }}/.config/.dytoy/os.sh -e
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/os.sh -e
 }
 
 _install_binary_tools() {
-  bash {{ .chezmoi.homeDir  }}/.config/.dytoy/binary.sh -e -n
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/binary.sh -e -n
 }
 
 _install_shell_tools() {
-  bash {{ .chezmoi.homeDir  }}/.config/.dytoy/shell.sh -e
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/shell.sh -e
 }
 
 _install_mise_tools() {
-  bash {{ .chezmoi.homeDir  }}/.config/.dytoy/mise.sh -e
+  bash {{ .chezmoi.homeDir  }}/.config/dytoy/mise.sh -e
 }
 
 _main() {
