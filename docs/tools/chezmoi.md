@@ -11,6 +11,7 @@
 |[pulsemixer](https://github.com/GeorgeFilipkin/pulsemixer)|Alternative CLI tool for pavucontrol|Multimedia tool|
 |[qrify](https://github.com/alexanderepstein/Bash-Snippets)|Show QR of text||
 |[screensaver](https://github.com/pipeseroni/pipes.sh)|Show screensaver on CLI with pipes||
+|[shdoc](https://github.com/mbucc/shmig)|Generate documents for Bash shell scripts|DevOps tool|
 |[shmig](https://github.com/mbucc/shmig)|Database migration tool|DevOps tool|
 |[tmpmail](https://github.com/sdushantha/tmpmail)|Create temp mail address and receive emails||
 |[trans](https://github.com/soimort/translate-shell)|Translate||
