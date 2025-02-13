@@ -22,6 +22,7 @@
 |[projekt](https://github.com/dynamotn/projekt)|Smart CLI command to manage project folder|Frequently used tool, in `silos/fish`|
 |[greenclip](https://github.com/erebe/greenclip)|Clipboard manager for X|Frequently used tool, in `silos/awesome`|
 |[cliphist](https://github.com/sentriz/cliphist)|Clipboard manager for Wayland|Frequently used tool, in `silos/hyprland`|
+|[pomodoro](https://github.com/open-pomodoro/openpomodoro-cli)|CLI command for Pomodoro tracker|Frequently used tool, in `silos/hyprland` and `silos/eww`|
 |[docker-compose](https://github.com/docker/compose)|Run multi-container applications|DevOps tool|
 |[lazydocker](https://github.com/jesseduffield/lazydocker)|Interactive TUI with Docker and Compose|DevOps tool|
 |[dive](https://github.com/wagoodman/dive)|Explore each layer in Docker images|DevOps tool|
