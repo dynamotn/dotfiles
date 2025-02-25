@@ -42,7 +42,7 @@
   type: file
   url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%207-9.txt
   refreshPeriod: 168h
-{{- if ne .chezmoi.os "cloud" }}
+{{- if ne .place "cloud" }}
 .config/zellij/themes/catppuccin.kdl:
   type: file
   url: https://raw.githubusercontent.com/catppuccin/zellij/refs/heads/main/catppuccin.kdl
@@ -134,7 +134,7 @@
   url: 'https://raw.githubusercontent.com/soimort/translate-shell/gh-pages/trans'
   executable: true
   refreshPeriod: 168h
-{{- if eq .chezmoi.os "cloud" }}
+{{- if eq .place "cloud" }}
 .local/bin/xpanes:
   type: file
   url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/master/bin/xpanes'
