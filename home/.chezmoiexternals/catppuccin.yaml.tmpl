@@ -1,0 +1,47 @@
+.config/bat/themes/catppuccin.tmTheme:
+  type: file
+  url: https://raw.githubusercontent.com/catppuccin/bat/main/themes/Catppuccin%20Macchiato.tmTheme
+  refreshPeriod: 168h
+.config/k9s/skin.yml:
+  type: file
+  url: https://raw.githubusercontent.com/catppuccin/k9s/main/dist/catppuccin-macchiato.yaml
+  refreshPeriod: 168h
+{{- if ne .place "cloud" }}
+.config/zellij/themes/catppuccin.kdl:
+  type: file
+  url: https://raw.githubusercontent.com/catppuccin/zellij/refs/heads/main/catppuccin.kdl
+  refreshPeriod: 168h
+{{- end }}
+{{- if eq .chezmoi.os "android" }}
+.config/termux/color.properties:
+  type: file
+  url: https://raw.githubusercontent.com/catppuccin/termux/main/themes/catppuccin-macchiato.properties
+  refreshPeriod: 168h
+{{- end }}
+{{- if eq .guiServer "W" }}
+.local/share/fcitx5/themes/catppuccin:
+  type: archive
+  url: https://github.com/catppuccin/fcitx5/archive/refs/heads/main.zip
+  refreshPeriod: 168h
+  stripComponents: 3
+  include:
+    - fcitx5-main/src/catppuccin-macchiato-teal/*
+{{- end }}
+{{- if eq .guiServer "X" "W" }}
+.local/share/themes/Dynamo:
+  type: archive
+  url: https://github.com/catppuccin/gtk/releases/download/v1.0.0-rc5/catppuccin-macchiato-teal-standard+default.zip
+  exact: true
+  refreshPeriod: 168h
+  stripComponents: 1
+  include:
+    - catppuccin-macchiato-teal-standard+default/gtk-*/*
+.local/share/icons/Dynamo-Cursor:
+  type: archive
+  url: https://github.com/catppuccin/cursors/releases/latest/download/catppuccin-macchiato-teal-cursors.zip
+  exact: true
+  refreshPeriod: 168h
+  stripComponents: 1
+  exclude:
+    - catppuccin-macchiato-teal-cursors/index.theme
+{{- end }}

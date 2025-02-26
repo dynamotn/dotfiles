@@ -1,0 +1,6 @@
+{{- if and (ne .chezmoi.username "root") (eq .kind "pc" "laptop") }}
+Documents/Notes:
+  type: git-repo
+  url: git@gitlab.com:dynamo.foss/notes.git
+  refreshPeriod: 2h
+{{- end }}
