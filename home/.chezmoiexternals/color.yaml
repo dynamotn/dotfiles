@@ -1,0 +1,20 @@
+.local/bin/color16:
+  type: file
+  url: 'https://raw.githubusercontent.com/pablopunk/colortest/master/colortest'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/color256:
+  type: file
+  url: https://misc.flogisoft.com/_export/code/bash/tip_colors_and_formatting?codeblock=56
+  executable: true
+  refreshPeriod: 168h
+.local/bin/colorfull:
+  type: file
+  url: https://misc.flogisoft.com/_export/code/bash/tip_colors_and_formatting?codeblock=55
+  executable: true
+  refreshPeriod: 168h
+.local/bin/truecolor:
+  type: file
+  url: https://gist.githubusercontent.com/lifepillar/09a44b8cf0f9397465614e622979107f/raw/24-bit-color.sh
+  executable: true
+  refreshPeriod: 168h

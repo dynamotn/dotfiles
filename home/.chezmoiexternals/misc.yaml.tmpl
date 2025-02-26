@@ -1,0 +1,76 @@
+.local/bin/anti-ddos:
+  type: file
+  url: 'https://raw.githubusercontent.com/anti-ddos/Anti-DDOS/master/anti-ddos.sh'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/git-quick-stats:
+  type: file
+  url: https://raw.githubusercontent.com/arzzen/git-quick-stats/master/git-quick-stats
+  executable: true
+  refreshPeriod: 168h
+.local/bin/now:
+  type: file
+  url: 'https://raw.githubusercontent.com/apankrat/now.sh/master/now.sh'
+  executable: true
+  refreshPeriod: 168h
+{{- if .hasSound }}
+.local/bin/pulsemixer:
+  type: file
+  url: 'https://raw.githubusercontent.com/GeorgeFilipkin/pulsemixer/master/pulsemixer'
+  executable: true
+  refreshPeriod: 168h
+{{- end  }}
+.local/bin/qrify:
+  type: file
+  url: https://raw.githubusercontent.com/alexanderepstein/Bash-Snippets/master/qrify/qrify
+  executable: true
+  refreshPeriod: 168h
+.local/bin/screensaver:
+  type: file
+  url: 'https://raw.githubusercontent.com/pipeseroni/pipes.sh/master/pipes.sh'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/shdoc:
+  type: file
+  url: 'https://raw.githubusercontent.com/reconquest/shdoc/refs/heads/master/shdoc'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/shmig:
+  type: file
+  url: 'https://raw.githubusercontent.com/mbucc/shmig/master/shmig'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/tmpmail:
+  type: file
+  url: 'https://raw.githubusercontent.com/sdushantha/tmpmail/master/tmpmail'
+  executable: true
+  refreshPeriod: 168h
+.local/bin/trans:
+  type: file
+  url: 'https://raw.githubusercontent.com/soimort/translate-shell/gh-pages/trans'
+  executable: true
+  refreshPeriod: 168h
+{{- if eq .place "cloud" }}
+.local/bin/xpanes:
+  type: file
+  url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/master/bin/xpanes'
+  executable: true
+  refreshPeriod: 168h
+{{- end }}
+.local/bin/yq:
+  type: file
+  {{- if eq .chezmoi.os "android" }}
+  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_linux_arm64'
+  {{- else if eq .chezmoi.os "linux" }}
+  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_linux_{{ .chezmoi.arch }}'
+    {{- else if eq .chezmoi.os "darwin" }}
+  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_darwin_{{ .chezmoi.arch }}'
+  {{- end }}
+  executable: true
+{{- if eq .guiServer "W" }}
+.local/bin/hdrop:
+  type: file
+  url: https://raw.githubusercontent.com/hyprwm/contrib/main/hdrop/hdrop
+  executable: true
+  refreshPeriod: 168h
+{{- end }}

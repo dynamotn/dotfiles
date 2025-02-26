@@ -1,0 +1,36 @@
+.config/dictionaries/english.txt:
+  type: file
+  url: https://raw.githubusercontent.com/dwyl/english-words/refs/heads/master/words.txt
+  refreshPeriod: 168h
+.config/dictionaries/vietnamese.txt:
+  type: file
+  url: https://raw.githubusercontent.com/duyet/vietnamese-wordlist/refs/heads/master/Viet74K.txt
+  refreshPeriod: 168h
+.config/dictionaries/chinese/HSK1.txt:
+  type: file
+  url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%201.txt
+  refreshPeriod: 168h
+.config/dictionaries/chinese/HSK2.txt:
+  type: file
+  url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%202.txt
+  refreshPeriod: 168h
+.config/dictionaries/chinese/HSK3.txt:
+  type: file
+  url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%203.txt
+  refreshPeriod: 168h
+.config/dictionaries/chinese/HSK4.txt:
+  type: file
+  url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%204.txt
+  refreshPeriod: 168h
+.config/dictionaries/chinese/HSK5.txt:
+  type: file
+  url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%205.txt
+  refreshPeriod: 168h
+.config/dictionaries/chinese/HSK6.txt:
+  type: file
+  url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%206.txt
+  refreshPeriod: 168h
+.config/dictionaries/chinese/HSK7-9.txt:
+  type: file
+  url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%207-9.txt
+  refreshPeriod: 168h
