@@ -6,16 +6,13 @@
     (button
       :class "launcher_icon"
       :valign "start"
-      ""
-    )
-  )
-)
+      "")))
 
 ; Workspaces
 (deflisten workspaces :initial "[]" "scripts/workspaces.py")
 (defwidget workspaces [monitor]
   (box
-    :class "workspaces"
+    :class "section"
     :orientation "v"
     (for workspace in {workspaces[monitor].all}
       (eventbox
@@ -27,36 +24,60 @@
         (button
           :onclick "hyprctl dispatch workspace ${workspace.name}"
           :class "workspace ${workspace.id == workspaces[monitor].active ? "active" : (workspace.windows > 0 ? "occupied" : "empty")}"
-          :width "1rem"
-          :height "1rem"
           (label
             :class "name"
             :text "${workspace.icon}"
-            :justify: "center"
-          )
-        )
-      )
-    )
-  )
-)
+            :justify "center"))))))
+
+; Pomodoro
+(defpoll pomoremain
+  :interval "1s"
+  "pomodoro status -f '%!r'")
+
+(defpoll pomocompleted
+  :interval "1s"
+  "echo \"$(pomodoro status -f '%c') | $(pomodoro status -f '%L')\"")
+
+(defwidget pomodoro []
+  (box
+    :orientation "v"
+    :class "section"
+    :valign "end"
+    (label
+      :class "pomodoro logo"
+      :text "🍅")
+    (label
+      :class "pomodoro remain"
+      :text pomoremain)
+    (label
+      :class "pomodoro"
+      :text "${pomocompleted}")))
+
+(defwidget tray []
+  (box
+    :orientation "v"
+    :class "section"
+    :valign "end"
+    (systray
+      :orientation "v"
+      :spacing 5
+      :icon-size 20)))
 
 ; Clock
 (defpoll hour
   :interval "1s"
-  "date '+%H'"
-)
+  "date '+%H'")
+
 (defpoll min
   :interval "1s"
-  "date '+%M'"
-)
+  "date '+%M'")
+
 (defwidget time []
   (box
     :orientation "v"
-    :class "time"
+    :class "section"
     :valign "end"
     (button
       :class "time hour" hour)
     (button
-      :class "time" min)
-  )
-)
+      :class "time" min)))

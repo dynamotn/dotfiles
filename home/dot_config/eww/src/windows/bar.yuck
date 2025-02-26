@@ -7,34 +7,32 @@
     :orientation "v"
     (launcher_icon)
     (workspaces
-      :monitor monitor
-    )
-  )
-)
+      :monitor monitor)))
+
+(defwidget middle []
+  (box
+    :space-evenly false
+    :halign "center"
+    :valign "center"
+    :spacing 5
+    :orientation "v"
+    (pomodoro)))
 
 (defwidget end []
   (box
     :space-evenly false
     :halign "center"
     :valign "end"
-    :spacing 5
+    :spacing 15
     :orientation "v"
-    (systray
-      :orientation "v"
-      :spacing 5
-      :icon-size 16
-    )
-    (time)
-  )
-)
+    (tray)
+    (time)))
 
 (defwidget bar [monitor]
   (box
     :class "bar"
     :orientation "v"
     (top
-      :monitor monitor
-    )
-    (end)
-  )
-)
+      :monitor monitor)
+    (middle)
+    (end)))

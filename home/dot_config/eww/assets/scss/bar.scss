@@ -20,14 +20,14 @@ window > .bar {
     }
   }
 
-  .workspaces {
+  .section {
     background: $bg-alt;
     padding: 0.2rem 0.2rem;
     border-radius: 1rem;
 
     .workspace {
       border-radius: 2rem;
-      margin: 0.4rem 0.2rem;
+      margin: 0.4rem 0.4rem;
 
       &.empty {
         background: lighten($color: $bg, $amount: 3%);
@@ -65,20 +65,31 @@ window > .bar {
         margin: 0.4rem;
       }
     }
-  }
 
-  .time {
-    font-weight: bold;
-    font-size: 1em;
-    background-color: $bg-alt;
-    color: $fg;
-    border-radius: 1rem;
-    padding: 0.2rem 0.2rem 0.1rem 0.2rem;
+    .time {
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: $fg;
+      padding: 0.2rem 0.4rem;
 
-    &.hour {
-      border-bottom: 0.1rem solid $fg;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
+      &.hour {
+        border-bottom: 0.1rem solid $fg;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+    }
+
+    .pomodoro {
+      font-weight: bold;
+      font-size: 1rem;
+      color: $fg;
+      padding: 0.2rem 0.4rem 0.1rem 0.4rem;
+
+      &.logo, &.remain, &.length {
+        border-bottom: 0.1rem solid $fg;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
     }
   }
 }
