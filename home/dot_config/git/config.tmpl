@@ -135,6 +135,8 @@
 [rebase]
         instructionFormat = "[%an - %ar] %s"
 [alias]
+        # Get main branch
+        main = "!_() { git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'; }; _"
         # Graph log view
         graph = log --graph --abbrev-commit
         # Meaning stash
@@ -161,6 +163,12 @@
         conflicts = "!_() { git ls-files -u | awk '{print $4}' | sort -u; }; _"
         # Delete dangling commits
         delete-dangling = "!_() { git reflog expire --expire=now --all; git gc --prune=now; }; _"
+        # Delete merged branch
+        delete-merged = "!_() { git branch --merged | grep -v $(git main) | grep -v develop | xargs git branch -d; }; _"
+        # Submodule clean
+        submodule-clean = "!_() { git submodule update --init --recursive && git submodule foreach --recursive 'git reset --hard' && git submodule foreach --recursive 'git clean -fd' }; _"
+        # Update main branch
+        update-main = !bash ~/.config/git/helper.sh update_main
 [push]
         # Only push current branch to same name branch
         default = current
