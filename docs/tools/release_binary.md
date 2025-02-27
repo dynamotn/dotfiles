@@ -93,7 +93,6 @@
 |[patat](https://github.com/jaspervdj/patat)|CLI presentation tool|Miscellaneous|
 |[ncspot](https://github.com/hrkfdn/ncspot)|Spotify CLI client|Miscellaneous|
 |[fabric](https://github.com/danielmiessler/fabric)|Framework for augmenting humans using AI|AI tool|
-|[ec](https://github.com/editorconfig-checker/editorconfig-checker)|Verify files are in harmony with .editorconfig|Linter, in `silos/neovim`|
 |[shellcheck](https://github.com/koalaman/shellcheck)|Linter for Bash script|Linter, in `silos/neovim`|
 |[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `silos/neovim`|
 |[stylua](https://github.com/JohnnyMorganz/StyLua)|Linter, formatter for Lua|Linter & formater, in `silos/neovim`|
