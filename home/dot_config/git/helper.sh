@@ -25,6 +25,6 @@ update_main() {
 	fi
 }
 
-cmd = "$1"
+cmd="$1"
 shift
 "$cmd" "$@"
