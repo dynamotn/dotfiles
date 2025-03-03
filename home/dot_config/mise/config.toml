@@ -1,3 +1,6 @@
+[env]
+GLAMOUR_STYLE = '~/.config/glamour/catppuccin.json'
+
 [tools]
 gcloud = "latest"
 helm = "latest"
