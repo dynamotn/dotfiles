@@ -14,10 +14,6 @@
         path = home/Multimedia/Pictures/Wallpaper
         url = git@gitlab.com:dynamo-config/wallpaper.git
         shallow = true
-[submodule "font"]
-        path = silos/font
-        url = git@gitlab.com:dynamo-config/font.git
-        shallow = true
 [submodule "icon"]
         path = silos/icon
         url = git@gitlab.com:dynamo-theme/icon.git
