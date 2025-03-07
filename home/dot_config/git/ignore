@@ -9,3 +9,6 @@ tags
 
 # Direnv
 .envrc
+
+# Session file of vim
+Session.vim
