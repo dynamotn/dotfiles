@@ -1,0 +1,11 @@
+[tasks.docker]
+run = """
+#!/usr/bin/env bash
+docker build --network=host --build-arg \
+  INTERNAL_CERT="$(\
+    age -d -i ~/.config/chezmoi/key \
+      root/etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age
+  )" \
+  --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
+  -t registry.gitlab.com/dynamo-config/dotfiles .
+"""
