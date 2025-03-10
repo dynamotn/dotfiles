@@ -17,5 +17,6 @@ github:
   {{- end }}
   {{- if eq .chezmoi.os "android" }}
   {{- $suffix = "-musl" }}
+  version: v2024.12.24
   {{- end }}
   release_asset: mise-%v-{{ $os }}-{{ $arch }}{{ $suffix }}
