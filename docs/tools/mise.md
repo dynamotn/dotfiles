@@ -1,6 +1,7 @@
 |Tool|Purpose|Used in|
 |-----|---------|---------|
-|[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|`silos/fish`|
+|[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|Frequently used tool, in `silos/fish`|
+|[lazygit](https://github.com/jesseduffield/lazygit)|TUI for git|Frequently used tool|
 |[nodejs](https://github.com/nodejs/node)|JavaScript runtime|LSP servers in `silos/neovim`|
 |[deno](https://github.com/denoland/deno)|JavaScript runtime|Markdown preview in `silos/neovim`|
 |[uv](https://github.com/astral-sh/uv)|Modern Python package and project manager|Package manager tool|
