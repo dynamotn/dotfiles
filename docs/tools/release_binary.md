@@ -73,7 +73,6 @@
 |[svu](https://github.com/)|Get Sematic version|Developer tool|
 |[hugo](https://github.com/gohugoio/hugo)|Build static website|Developer tool|
 |[trdsql](https://github.com/noborus/trdsql)|CLI execute SQL queries tool|Developer tool|
-|[task](https://github.com/go-task/task)|Alternative to `make`, a task runner|Developer tool|
 |[step](https://github.com/smallstep/cli)|CLI tool for PKI systems and workflows|Developer tool|
 |[stripe](https://github.com/stripe/stripe-cli)|CLI to build, test Stripe integration|Developer tool|
 |[d2](https://github.com/terrastruct/d2)|Diagram as code tool|Developer tool|
