@@ -40,7 +40,7 @@ TODO: List all screenshots
 ## :inbox_tray:&nbsp; Installation
 Run these commands:
 
-```shell
+```bash
 curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | bash -
 git clone --depth 1 https://github.com/dynamotn/dotfiles.git # or git clone https://gitlab.com/dynamo-config/dotfiles.git
 cd dotfiles
