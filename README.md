@@ -40,7 +40,7 @@ TODO: List all screenshots
 ## :inbox_tray:&nbsp; Installation
 Run these commands:
 
-```
+```sh
 a() {
   test
 }
