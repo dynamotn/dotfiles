@@ -12,13 +12,13 @@ __add_folder_to_path /opt/homebrew/opt/grep/libexec/gnubin
 
 {{- if eq .chezmoi.os "linux" }}
 if type -q manpath
-  set -gx MANPATH (manpath -g)
+    set -gx MANPATH (manpath -g)
 end
 {{- end }}
 
 {{- if and (eq .place "home") (eq .kind "pc") }}
 if fish_is_root_user
-  builtin cd /etc
+    builtin cd /etc
 end
 {{- end }}
 
