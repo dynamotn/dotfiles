@@ -92,16 +92,7 @@
 |[patat](https://github.com/jaspervdj/patat)|CLI presentation tool|Miscellaneous|
 |[ncspot](https://github.com/hrkfdn/ncspot)|Spotify CLI client|Miscellaneous|
 |[fabric](https://github.com/danielmiessler/fabric)|Framework for augmenting humans using AI|AI tool|
-|[shellcheck](https://github.com/koalaman/shellcheck)|Linter for Bash script|Linter, in `silos/neovim`|
-|[vale](https://github.com/errata-ai/vale)|Linter for prose|Linter, in `silos/neovim`|
-|[stylua](https://github.com/JohnnyMorganz/StyLua)|Linter, formatter for Lua|Linter & formater, in `silos/neovim`|
-|[hadolint](https://github.com/hadolint/hadolint)|Linter for Dockerfile|Linter, in `silos/neovim`|
-|[ltrs](https://github.com/jeertmans/languagetool-rust)|Spell check for Markdown, text file|Linter, in `silos/neovim`|
-|[ltcc](https://github.com/dustinblackman/languagetool-code-comments)|Spell check for comment in code|Linter, in `silos/neovim`|
-|[tflint](https://github.com/terraform-linters/tflint)|Linter for Terraform|Linter, in `silos/neovim`|
 |[pint](https://github.com/cloudflare/pint)|Linter for Prometheus rules|Linter|
-|[yamlfmt](https://github.com/google/yamlfmt)|Formatter for YAML|Formatter, in `silos/neovim`|
-|[shfmt](https://github.com/mvdan/sh)|Formatter for Bash script|Formatter, in `silos/neovim`|
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tool|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|Project management tool|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|Project management tool|
