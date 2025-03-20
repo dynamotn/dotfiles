@@ -12,6 +12,8 @@ windowrulev2 = bordersize 0, floating:0, onworkspace:f[1]
 windowrulev2 = rounding 0, floating:0, onworkspace:f[1]
 windowrulev2 = decorate off, floating:0, onworkspace:f[1]
 windowrulev2 = noshadow, floating:0, onworkspace:f[1]
+# Fix dragging issues with XWayland
+windowrulev2 = nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0
 
 # Per app #
 # Tags
