@@ -36,6 +36,39 @@ if [ $(ps aux | grep firefox | wc -l) -gt 0 ]; then
   _success "Update firefox settings"
 fi
 
+if [ $(ps aux | grep zen-browser | wc -l) -gt 0 ]; then
+  _notice "Update zen settings"
+  for profile in "personal" "enterprise"; do
+    if [ -f ~/.config/zen/profiles/${profile}/prefs.js ]; then
+      _progress "Update toolbar setting for profile ${profile}"
+      grep "browser.uiCustomization.state" ~/.config/zen/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/zen/prefs/${profile}/01-toolbar.js
+
+      _progress "Update addon setting for profile ${profile}"
+      grep "extensions.webextensions.uuids" ~/.config/zen/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/zen/prefs/${profile}/02-extensions.js || true
+      grep "extensions.webextensions.ExtensionStorageIDB.migrated" ~/.config/zen/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/zen/prefs/${profile}/02-extensions.js || true
+      grep "privacy.userContext.extension" ~/.config/zen/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/zen/prefs/${profile}/02-extensions.js || true
+    fi
+
+    _progress "Update extensions data for profile ${profile}"
+    chezmoi add ~/.config/zen/profiles/${profile}/extensions || true
+    chezmoi add ~/.config/zen/profiles/${profile}/addons.json --create || true
+    chezmoi add ~/.config/zen/profiles/${profile}/addonStartup.json.lz4 --create || true
+    chezmoi add ~/.config/zen/profiles/${profile}/extension*.json --create || true
+
+    _progress "Update search engines for profile ${profile}"
+    chezmoi add ~/.config/zen/profiles/${profile}/search.json.mozlz4 --create || true
+
+    _progress "Update bookmarks and history for profile ${profile}"
+    chezmoi add ~/.config/zen/profiles/${profile}/favicons.sqlite --create || true
+    chezmoi add ~/.config/zen/profiles/${profile}/places.sqlite --create || true
+
+    _progress "Update storage data for profile ${profile}"
+    chezmoi add ~/.config/zen/profiles/${profile}/storage.sqlite --create || true
+    chezmoi add ~/.config/zen/profiles/${profile}/storage/default/moz-extension+++* --create || true
+  done
+  _success "Update zen settings"
+fi
+
 if [ $(ps aux | grep thunderbird | wc -l) -gt 0 ]; then
   _notice "Update thunderbird settings"
   for profile in "personal" "enterprise"; do

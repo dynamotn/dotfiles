@@ -73,7 +73,7 @@ bind = $mainMod, K, swapsplit,
 
 # 3rd apps #
 bind = $mainMod, Q, exec, kitty
-bind = $mainMod, E, exec, firefox
+bind = $mainMod, E, exec, $browser
 bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
 bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise{{- end }} bitrofi"

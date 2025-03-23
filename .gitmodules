@@ -32,6 +32,16 @@
   url = git@gitlab.com:dynamo-config/firefox.git
   branch = enterprise
   shallow = true
+[submodule "zen-personal"]
+  path = home/dot_config/zen/profiles/personal
+  url = git@gitlab.com:dynamo-config/firefox.git
+  branch = personal
+  shallow = true
+[submodule "zen-enterprise"]
+  path = home/dot_config/zen/profiles/enterprise
+  url = git@gitlab.com:dynamo-config/firefox.git
+  branch = enterprise
+  shallow = true
 [submodule "thunderbird-enterprise"]
   path = home/dot_config/thunderbird/profiles/enterprise
   url = git@gitlab.com:dynamo-config/thunderbird.git

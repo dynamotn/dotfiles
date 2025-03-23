@@ -9,6 +9,8 @@
 .config/kitty
 .config/firefox
 .mozilla/firefox
+.config/zen
+.zen
 Library
 .config/thunderbird
 .thunderbird
@@ -26,6 +28,7 @@ Multimedia
 {{- else if eq .guiServer "M" }}
 .mozilla
 .thunderbird
+.zen
 {{- else if eq .guiServer "X" "W" }}
 Library
 {{ $process := "" }}
@@ -37,6 +40,11 @@ Library
 {{- if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $process) | trim | int) 2 }}
 .config/firefox
 .mozilla/firefox
+{{- end }}
+{{- $process = "/opt/zen-browser/zen" }}
+{{- if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $process) | trim | int) 2 }}
+.config/zen
+.zen
 {{- end }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 {{- $process = "/opt/thunderbird" }}
