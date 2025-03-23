@@ -16,9 +16,9 @@ diff:
   pager: delta --pager="ov -F --section-delimiter '^(added:|removed:|renamed:|Δ)' --section-header --pattern '•'"
 
 data:
-  {{ $place := promptStringOnce . "place" "Where does this machine place? (home/office/cloud)" "cloud" | quote }}
+  {{ $place := promptChoiceOnce . "place" "Where does this machine place?" (list "home" "office" "cloud") "cloud" | quote }}
   place: {{ $place }}
-  {{ $kind := promptStringOnce . "kind" "What kind of this machine is it? (pc/workstation/tablet/vm/sbc/container/...)" "container" | quote }}
+  {{ $kind := promptChoiceOnce . "kind" "What kind of this machine is it?"  (list "pc" "workstation" "tablet" "vm" "sbc" "container") "container" | quote }}
   kind: {{ $kind }}
   {{- if eq $kind "sbc" "vm" "workstation" }}
   code: {{ promptStringOnce . "code" "What is this machine's name?" | quote }}
@@ -26,10 +26,10 @@ data:
   {{- if eq $place "office" }}
   company: {{ promptStringOnce . "company" "What code of owner company is?" | quote }}
   {{- end }}
-  {{ $guiServer := promptStringOnce . "guiServer" "Which GUI server of this machine is, X for Xorg, W for Wayland, M for Mac, 0 for CLI-only? (X/W/0)" "0" }}
+  {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is, X for Xorg, W for Wayland, M for Mac, 0 for CLI-only?" (list "X" "W" "0") "0" }}
   guiServer: {{ $guiServer | quote }}
   {{- if eq $guiServer "X" "W" }}
-  guiDriver: {{ promptStringOnce . "guiDriver" "Which GUI video driver of this machine is, N for Nvidia, I for Intel, A for AMD? (N/I/A)" | quote }}
+  guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is, N for Nvidia, I for Intel, A for AMD?" (list "N" "I" "A") | quote }}
   {{- end }}
   {{ $hasSound := promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasSound: {{ $hasSound }}
