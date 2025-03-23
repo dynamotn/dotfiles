@@ -1,4 +1,5 @@
 # Terminal applications
+
 |Tool|Purpose|Used in|
 |----|-------|-------|
 |[git](https://github.com/git/git)|Source version control system|Prerequisite|
@@ -19,10 +20,12 @@
 |[lynis](https://github.com/CISOfy/lynis)|Security auditing and hardening tool|Security tool|
 
 # Both X and Wayland applications
+
 |Tool|Purpose|Used in|
 |----|-------|-------|
 |[kitty](https://github.com/kovidgoyal/kitty)|Terminal emulator, support ligature fonts and GPU|`home/dot_config/kitty`|
 |[firefox](https://www.mozilla.org/en-US/firefox/)|Web browser|`silos/firefox`|
+|[zen-browser](https://zen-browser.app/)|Web browser with modern features|`silos/firefox`|
 |[thunderbird](https://www.thunderbird.net/)|Email client|`silos/thunderbird`|
 |[nvtop](https://github.com/Syllo/nvtop)|Monitor resources of GPU|`silos/hyprland`, `silos/awesome`|
 |[obsidian](https://obsidian.md/)|Note-taking app|`silos/hyprland`|
@@ -30,6 +33,7 @@
 |[sonyheadphones](https://github.com/Plutoberth/SonyHeadphonesClient)|Control Sony Headphones|Multimedia tool|
 
 # X server applications
+
 |Tool|Purpose|Used in|
 |----|-------|-------|
 |[xdg-user-dirs](https://www.freedesktop.org/wiki/Software/xdg-user-dirs/)|Manage well-known user directories|Prerequisite for GUI applications with X|
@@ -45,6 +49,7 @@
 |[flameshot](https://github.com/flameshot-org/flameshot)|Screen capturing and editing snapshot tool for X|`silos/awesome`|
 
 # Wayland server applications
+
 |Tool|Purpose|Used in|
 |----|-------|-------|
 |[fcitx-bamboo](https://github.com/fcitx/fcitx5-bamboo)|Vietnamese input method for Fcitx|`home/dot_config/fcitx-bamboo`|
@@ -66,6 +71,7 @@
 |[wdisplays](https://github.com/cyclopsian/wdisplays)|Configure display monitors manually with GUI|Miscellaneous|
 
 # System applications
+
 |Tool|Purpose|Used in|
 |----|-------|-------|
 |`ssh`|SSH client|Network tool|

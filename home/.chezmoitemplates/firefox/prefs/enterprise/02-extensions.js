@@ -13,4 +13,4 @@ user_pref("extensions.webextensions.ExtensionStorageIDB.migrated.{3c078156-979c-
 user_pref("extensions.webextensions.ExtensionStorageIDB.migrated.{3e4d2037-d300-4e95-859d-3cba866f46d3}", true);
 user_pref("extensions.webextensions.ExtensionStorageIDB.migrated.{446900e4-71c2-419f-a6a7-df9c091e268b}", true);
 user_pref("extensions.webextensions.ExtensionStorageIDB.migrated.{5efceaa7-f3a2-4e59-a54b-85319448e305}", true);
-user_pref("privacy.userContext.extension", "tridactyl.vim@cmcaine.co.uk");
+user_pref("privacy.userContext.extension", "{3c078156-979c-498b-8990-85f7987dd929}");

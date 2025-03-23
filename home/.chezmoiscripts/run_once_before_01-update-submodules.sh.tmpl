@@ -19,7 +19,11 @@ git submodule update --init --remote --recursive \
   home/dot_config/thunderbird/profiles \
   {{- else if eq .guiServer "X" "W" }}
   home/.chezmoitemplates/firefox/chrome/lepton \
+  {{- if eq .browser "F" }}
   home/dot_config/firefox/profiles \
+  {{- else if eq .browser "Z" }}
+  home/dot_config/zen/profiles \
+  {{- end }}
   home/dot_config/thunderbird/profiles \
   {{- end }}
   {{- if eq .guiServer "X" }}

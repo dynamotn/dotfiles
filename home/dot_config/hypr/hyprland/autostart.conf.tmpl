@@ -48,10 +48,15 @@ exec-once = fcitx5 -d --replace
 exec-once = kitty
 
 # Browser
+{{- if eq .browser "F" }}
+$browser = "firefox"
+{{- else if eq .browser "Z" }}
+$browser = "zen-browser"
+{{- end }}
 {{- if eq .place "home" }}
-exec-once = firefox -P Personal
+exec-once = $browser -P Personal
 {{- else if eq .place "office" }}
-exec-once = firefox -P Enterprise
+exec-once = $browser -P Enterprise
 {{- end }}
 
 # Email client

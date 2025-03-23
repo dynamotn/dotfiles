@@ -1,0 +1,23 @@
+{{- $configPath := joinPath .chezmoi.homeDir ".config/zen/profiles" }}
+{{- $releaseId := mozillaInstallHash "/opt/zen-browser" }}
+[Install{{- $releaseId -}}]
+{{- if eq .place "office" }}
+Default={{- $configPath }}/enterprise
+{{- else }}
+Default={{- $configPath }}/personal
+{{- end }}
+Locked=1
+
+[Profile1]
+Name=Enterprise
+IsRelative=0
+Path={{- $configPath }}/enterprise
+
+[Profile0]
+Name=Personal
+IsRelative=0
+Path={{- $configPath }}/personal
+
+[General]
+StartWithLastProfile=1
+Version=2

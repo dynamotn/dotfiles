@@ -26,10 +26,11 @@ data:
   {{- if eq $place "office" }}
   company: {{ promptStringOnce . "company" "What code of owner company is?" | quote }}
   {{- end }}
-  {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is, X for Xorg, W for Wayland, M for Mac, 0 for CLI-only?" (list "X" "W" "0") "0" }}
+  {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is? (X for Xorg, W for Wayland, M for Mac, 0 for CLI-only)" (list "X" "W" "0") "0" }}
   guiServer: {{ $guiServer | quote }}
   {{- if eq $guiServer "X" "W" }}
-  guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is, N for Nvidia, I for Intel, A for AMD?" (list "N" "I" "A") | quote }}
+  guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is? (N for Nvidia, I for Intel, A for AMD)" (list "N" "I" "A") | quote }}
+  browser: {{ promptChoiceOnce . "browser" "What browser do you use? (F for Firefox, Z for Zen Browser)" (list "F" "Z") "Z" | quote }}
   {{- end }}
   {{ $hasSound := promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasSound: {{ $hasSound }}

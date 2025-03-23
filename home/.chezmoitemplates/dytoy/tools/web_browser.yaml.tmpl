@@ -1,4 +1,5 @@
 {{- if eq .guiServer "X" "W" }}
+{{- if eq .browser "F" }}
 name: firefox
 method: os
 is_essential: true
@@ -16,4 +17,18 @@ arch:
 ubuntu:
   packages:
     - name: firefox
+{{- else if eq .browser "Z" }}
+name: zen-browser
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: www-client/zen-browser
+      repo: edgets
+      accept_keywords: |-
+        www-client/zen-browser ~amd64
+arch:
+  packages:
+    - name: zen-browser-bin
+{{- end }}
 {{- end }}
