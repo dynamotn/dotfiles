@@ -18,7 +18,7 @@ diff:
 data:
   {{ $place := promptChoiceOnce . "place" "Where does this machine place?" (list "home" "office" "cloud") "cloud" | quote }}
   place: {{ $place }}
-  {{ $kind := promptChoiceOnce . "kind" "What kind of this machine is it?"  (list "pc" "workstation" "tablet" "vm" "sbc" "container") "container" | quote }}
+  {{ $kind := promptChoiceOnce . "kind" "What kind of this machine is it?"  (list "pc" "laptop" "workstation" "tablet" "vm" "sbc" "container") "container" | quote }}
   kind: {{ $kind }}
   {{- if eq $kind "sbc" "vm" "workstation" }}
   code: {{ promptStringOnce . "code" "What is this machine's name?" | quote }}

@@ -1,5 +1,10 @@
 {{- $configPath := joinPath .chezmoi.homeDir ".config/zen/profiles" }}
-{{- $releaseId := mozillaInstallHash "/opt/zen-browser" }}
+{{- $releaseId := "0" }}
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{- $releaseId = mozillaInstallHash "/opt/zen-browser" }}
+{{- else }}
+{{- $releaseId = mozillaInstallHash "/opt/zen-browser-bin" }}
+{{- end -}}
 [Install{{- $releaseId -}}]
 {{- if eq .place "office" }}
 Default={{- $configPath }}/enterprise
