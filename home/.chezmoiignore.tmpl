@@ -32,6 +32,7 @@ Multimedia
 {{- else if eq .guiServer "X" "W" }}
 Library
 {{ $process := "" }}
+{{- if eq .browser "F" }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 {{- $process = "/usr/lib64/firefox" }}
 {{- else }}
@@ -41,10 +42,12 @@ Library
 .config/firefox
 .mozilla/firefox
 {{- end }}
+{{- else if eq .browser "Z" }}
 {{- $process = "/opt/zen-browser/zen" }}
 {{- if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $process) | trim | int) 2 }}
 .config/zen
 .zen
+{{- end }}
 {{- end }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 {{- $process = "/opt/thunderbird" }}
