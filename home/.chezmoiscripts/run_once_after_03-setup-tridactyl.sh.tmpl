@@ -3,7 +3,7 @@ set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 trap "rm -rf TEMP && _error \"Can't setup tridactyl\"" ERR
 
-{{- if eq .kind "pc" "laptop" }}
+{{- if .browser }}
 TEMP=$(mktemp)
 _notice "Setup tridactyl"
 curl -fsSl https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh -o "$TEMP"

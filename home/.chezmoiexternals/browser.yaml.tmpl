@@ -6,7 +6,7 @@
   type: file
   url: https://raw.githubusercontent.com/HorlogeSkynet/thunderbird-user.js/master/user.js
   refreshPeriod: 168h
-{{- if eq .guiServer "X" "W" }}
+{{- if eq .guiServer "W" }}
 {{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/dot_config/firefox/profiles/personal/extensions/tridactyl.vim.betas.nonewtab@cmcaine.co.uk.xpi:
   type: file
   url: 'https://tridactyl.cmcaine.co.uk/betas/nonewtab/tridactyl_no_new_tab_beta-latest.xpi'

@@ -1,17 +1,4 @@
-{{- if eq .guiServer "X" }}
-name: xdotool
-method: os
-is_essential: true
-gentoo:
-  packages:
-    - name: x11-misc/xdotool
-arch:
-  packages:
-    - name: xdotool
-ubuntu:
-  packages:
-    - name: xdotool
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
 name: wtype
 method: os
 is_essential: true

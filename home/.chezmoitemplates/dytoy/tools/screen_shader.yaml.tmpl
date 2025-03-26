@@ -1,16 +1,5 @@
-{{- if eq .guiServer "X" }}
-name: redshift
-method: os
-gentoo:
-  packages:
-    - name: x11-misc/redshift
-arch:
-  packages:
-    - name: redshift-minimal
-ubuntu:
-  packages:
-    - name: redshift-minimal
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
+{{- if eq .guiWinManager "H" }}
 name: hyprshade
 method: os
 is_essential: true
@@ -24,4 +13,5 @@ gentoo:
 arch:
   packages:
     - name: hyprshade
+{{- end }}
 {{- end }}

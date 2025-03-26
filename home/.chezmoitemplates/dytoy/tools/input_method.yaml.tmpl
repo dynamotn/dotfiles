@@ -1,4 +1,5 @@
-{{- if eq .guiServer "X" }}
+{{- if eq .guiServer "W" }}
+{{- if eq .guiWinManager "G" }}
 name: ibus-bamboo
 method: os
 is_essential: true
@@ -15,7 +16,7 @@ ubuntu:
       repo: http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu
       repo_version: main
       key: 5AD2E0B68A0409AD907D462D36ED424E9659D014
-{{- else if eq .guiServer "W" }}
+{{- else if eq .guiWinManager "H" }}
 name: fcitx-bamboo
 method: os
 is_essential: true
@@ -32,4 +33,5 @@ arch:
 ubuntu:
   packages:
     - name: fcitx-bamboo
+{{- end }}
 {{- end }}

@@ -1,4 +1,4 @@
-{{- if eq .guiServer "X" "W" }}
+{{- if ne .guiServer "0" }}
 {{- if eq .browser "F" }}
 name: firefox
 method: os
@@ -17,6 +17,9 @@ arch:
 ubuntu:
   packages:
     - name: firefox
+macos:
+  packages:
+    - name: firefox
 {{- else if eq .browser "Z" }}
 name: zen-browser
 method: os
@@ -30,5 +33,8 @@ gentoo:
 arch:
   packages:
     - name: zen-browser-bin
+macos:
+  packages:
+    - name: zen-browser
 {{- end }}
 {{- end }}

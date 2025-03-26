@@ -1,17 +1,4 @@
-{{- if eq .guiServer "X" }}
-name: xsel
-method: os
-is_essential: true
-gentoo:
-  packages:
-    - name: x11-misc/xsel
-arch:
-  packages:
-    - name: xsel
-ubuntu:
-  packages:
-    - name: xsel
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
 name: wl-clipboard
 method: os
 is_essential: true

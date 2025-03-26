@@ -1,30 +1,4 @@
-{{- if eq .guiServer "X" }}
-name: lightdm
-method: os
-is_essential: true
-gentoo:
-  packages:
-    - name: x11-misc/lightdm
-    - name: x11-misc/lightdm-gtk-greeter
-  hook:
-    after: |-
-      sudo rc-update add display-manager default
-      sudo rc-service display-manager start
-arch:
-  packages:
-    - name: lightdm
-    - name: lightdm-gtk-greeter
-  hook:
-    after: |-
-      sudo systemctl enable lightdm
-ubuntu:
-  packages:
-    - name: lightdm
-    - name: lightdm-gtk-greeter
-  hook:
-    after: |-
-      sudo systemctl enable lightdm
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
 name: greetd
 method: os
 is_essential: true

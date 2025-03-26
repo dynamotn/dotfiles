@@ -1,4 +1,4 @@
-{{- if eq .guiServer "X" "W" }}
+{{- if eq .guiServer "W" "M" }}
 name: thunderbird
 method: os
 is_essential: true
@@ -9,6 +9,9 @@ arch:
   packages:
     - name: thunderbird
 ubuntu:
+  packages:
+    - name: thunderbird
+macos:
   packages:
     - name: thunderbird
 {{- end }}
