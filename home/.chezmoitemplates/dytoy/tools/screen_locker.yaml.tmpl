@@ -1,17 +1,4 @@
-{{- if eq .guiServer "X" }}
-name: xss-lock
-method: os
-is_essential: true
-gentoo:
-  packages:
-    - name: x11-misc/xss-lock
-arch:
-  packages:
-    - name: xss-lock
-ubuntu:
-  packages:
-    - name: xss-lock
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
 name: hyprlock
 method: os
 is_essential: true

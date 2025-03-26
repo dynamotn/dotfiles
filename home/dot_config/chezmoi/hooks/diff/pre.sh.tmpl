@@ -2,7 +2,8 @@
 set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
 
-{{- if eq .guiServer "X" "W" }}
+{{- if ne .guiServer "0" }}
+{{- if eq .browser "F" }}
 if [ $(ps aux | grep firefox | wc -l) -gt 0 ]; then
   _notice "Update firefox settings"
   for profile in "personal" "enterprise"; do
@@ -35,7 +36,9 @@ if [ $(ps aux | grep firefox | wc -l) -gt 0 ]; then
   done
   _success "Update firefox settings"
 fi
+{{- end }}
 
+{{- if eq .browser "F" }}
 if [ $(ps aux | grep zen-browser | wc -l) -gt 0 ]; then
   _notice "Update zen settings"
   for profile in "personal" "enterprise"; do
@@ -68,6 +71,7 @@ if [ $(ps aux | grep zen-browser | wc -l) -gt 0 ]; then
   done
   _success "Update zen settings"
 fi
+{{- end }}
 
 if [ $(ps aux | grep thunderbird | wc -l) -gt 0 ]; then
   _notice "Update thunderbird settings"

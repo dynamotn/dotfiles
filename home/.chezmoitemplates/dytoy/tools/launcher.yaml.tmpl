@@ -1,17 +1,4 @@
-{{- if eq .guiServer "X" }}
-name: rofi
-method: os
-is_essential: true
-gentoo:
-  packages:
-    - name: x11-misc/rofi
-arch:
-  packages:
-    - name: rofi
-ubuntu:
-  packages:
-    - name: rofi
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
 name: wofi
 method: os
 is_essential: true

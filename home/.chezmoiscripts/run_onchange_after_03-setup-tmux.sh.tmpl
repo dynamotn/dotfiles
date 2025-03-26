@@ -1,7 +1,7 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-{{- if eq .place "cloud" }}
+{{- if eq .terminalMultiplexer "tmux" }}
 trap "_error \"Can't setup tmux\"" ERR
 
 _notice "Setup tmux"

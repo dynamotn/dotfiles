@@ -1,17 +1,4 @@
-{{- if eq .guiServer "X" }}
-name: flameshot
-method: os
-is_essential: true
-gentoo:
-  packages:
-    - name: media-gfx/flameshot
-arch:
-  packages:
-    - name: flameshot
-ubuntu:
-  packages:
-    - name: flameshot
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
 name: screen_capture
 method: os
 is_essential: true

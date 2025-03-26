@@ -50,7 +50,7 @@
   url: 'https://raw.githubusercontent.com/soimort/translate-shell/gh-pages/trans'
   executable: true
   refreshPeriod: 168h
-{{- if eq .place "cloud" }}
+{{- if eq .terminalMultiplexer "T" }}
 .local/bin/xpanes:
   type: file
   url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/master/bin/xpanes'

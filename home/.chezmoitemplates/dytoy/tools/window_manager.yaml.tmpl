@@ -1,17 +1,4 @@
-{{- if eq .guiServer "X" }}
-name: awesome
-method: os
-is_essential: true
-gentoo:
-  packages:
-    - name: x11-wm/awesome
-arch:
-  packages:
-    - name: awesome-git
-ubuntu:
-  packages:
-    - name: awesome
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
 name: hyprland
 method: os
 is_essential: true

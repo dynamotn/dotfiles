@@ -1,7 +1,7 @@
 #!{{ lookPath "bash" }}
 set -Eeou pipefail
 source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-{{- if eq .guiServer "W" }}
+{{- if and (eq .guiServer "W") (eq .guiWinManager "H") }}
 trap "_error \"Can't setup hyprland\"" ERR
 
 _notice "Setup hyprland"
@@ -18,4 +18,7 @@ while IFS="" read -r plugin; do
 done < {{ joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" }}
 hyprpm reload -n
 _success "Setup hyprland"
+{{- end }}
+{{- if and (eq .guiServer "X") (eq .guiWinManager "G") }}
+gsettings set org.gnome.mutter overlay-key ''
 {{- end }}

@@ -4,14 +4,7 @@
 **/*.sqlite-wal
 
 {{- if eq .guiServer "0" }}
-.xprofile
-.Xresources
 .config/kitty
-.config/firefox
-.mozilla/firefox
-.config/zen
-.zen
-Library
 .config/thunderbird
 .thunderbird
 .local/share/fonts
@@ -48,6 +41,13 @@ Library
 .config/zen
 .zen
 {{- end }}
+{{- if ne .browser "F" }}
+.config/firefox
+.mozilla/firefox
+{{- else if ne .browser "Z" }}
+.config/zen
+.zen
+{{- end }}
 {{- end }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
 {{- $process = "/opt/thunderbird" }}
@@ -60,28 +60,26 @@ Library
 {{- end }}
 {{- end }}
 
-{{- if ne .guiServer "X" }}
-.config/awesome
-.config/ibus-bamboo
-.config/rofi
-.config/picom
-.config/redshift
-{{- end }}
 {{- if ne .guiServer "W" }}
+{{- if ne .guiWinManager "H" }}
 .config/hypr
 .config/hyprshade
-.config/fcitx5
 .wayland_init.fish
+.config/fcitx5
+{{- end }}
+{{- if ne .guiWinManager "G" }}
+.config/ibus-bamboo
+{{- end }}
 .config/wofi
 .config/swaylock
 .config/eww
 {{- end }}
 
-{{- if ne .place "cloud" }}
+{{- if ne .terminalMultiplexer "T" }}
 .tmux.conf
 .config/tmux
 .config/smug
-{{- else }}
+{{- else if ne .terminalMultiplexer "Z" }}
 .config/zellij
 {{- end }}
 
@@ -110,7 +108,7 @@ Library
 .config/shikane
 {{- end }}
 
-{{- if not (eq .kind "pc" "laptop") }}
+{{- if not .browser }}
 .config/tridactyl
 {{- end }}
 

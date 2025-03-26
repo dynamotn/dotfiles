@@ -1,4 +1,4 @@
-{{- if eq .guiServer "X" "W" }}
+{{- if eq .guiServer "W" }}
 name: nvtop
 method: os
 gentoo:
@@ -12,6 +12,9 @@ arch:
   packages:
     - name: nvtop
 ubuntu:
+  packages:
+    - name: nvtop
+macos:
   packages:
     - name: nvtop
 {{- end }}
