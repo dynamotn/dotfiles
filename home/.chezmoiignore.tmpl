@@ -17,12 +17,13 @@
 .config/gtk-4.0
 .config/Trolltech.conf
 .config/user-dirs.dirs
+.config/tridactyl
 Multimedia
 {{- else if eq .guiServer "M" }}
 .mozilla
 .thunderbird
 .zen
-{{- else if eq .guiServer "X" "W" }}
+{{- else if eq .guiServer "W" }}
 Library
 {{ $process := "" }}
 {{- if eq .browser "F" }}
@@ -61,6 +62,16 @@ Library
 {{- end }}
 
 {{- if ne .guiServer "W" }}
+.config/hypr
+.config/hyprshade
+.wayland_init.fish
+.config/fcitx5
+.config/ibus-bamboo
+.config/wofi
+.config/swaylock
+.config/eww
+{{- end }}
+{{- if eq .guiServer "W" }}
 {{- if ne .guiWinManager "H" }}
 .config/hypr
 .config/hyprshade
@@ -70,9 +81,6 @@ Library
 {{- if ne .guiWinManager "G" }}
 .config/ibus-bamboo
 {{- end }}
-.config/wofi
-.config/swaylock
-.config/eww
 {{- end }}
 
 {{- if ne .terminalMultiplexer "T" }}
@@ -106,10 +114,6 @@ Library
 
 {{- if ne .kind "laptop" }}
 .config/shikane
-{{- end }}
-
-{{- if not .browser }}
-.config/tridactyl
 {{- end }}
 
 {{- if not (eq .kind "pc" "laptop" "container") }}
