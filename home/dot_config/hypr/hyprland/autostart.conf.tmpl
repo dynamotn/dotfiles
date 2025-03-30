@@ -34,8 +34,10 @@ exec-once = swaync
 exec = hyprshade auto
 exec-once = shikane
 
+{{- if ne .place "home" }}
 # Screen idle
 exec-once = hypridle
+{{- end }}
 
 # Clipboard
 exec-once = wl-paste --type text --watch cliphist store
