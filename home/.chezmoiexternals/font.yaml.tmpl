@@ -10,6 +10,18 @@
   exact: true
   stripComponents: 1
 {{- end }}
+{{- if eq .guiServer "M" }}
+Library/Fonts/Nerd/SymbolsNerdFont-Regular.ttf:
+  type: file
+  url: 'https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFont-Regular.ttf'
+  refreshPeriod: 168h
+Library/Fonts/Iosevka:
+  type: archive
+  url: 'https://github.com/dynamotn/Iosevka-Dynamo/releases/latest/download/iosevka-dynamo.tar.gz'
+  refreshPeriod: 168h
+  exact: true
+  stripComponents: 1
+{{- end }}
 {{- if eq .chezmoi.os "android" }}
 .termux/font.ttf:
   type: file

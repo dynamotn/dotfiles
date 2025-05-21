@@ -11,7 +11,7 @@ gentoo:
       sudo rc-service ollama start
 arch:
   packages:
-    {{- if ne .guiServer "0" }}
+    {{- if eq .guiServer "W" }}
     {{- if eq .guiDriver "I" }}
     - name: ollama
     {{- else if eq .guiDriver "N" }}

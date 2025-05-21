@@ -20,5 +20,5 @@ macos:
     - name: fail2ban
   hook:
     after: |-
-      sudo systemctl enable --now fail2ban
+      sudo brew services restart fail2ban
 {{- end }}
