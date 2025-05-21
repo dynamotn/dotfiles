@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 SETUP_DIR=$(dirname "$(readlink -f "$0")")
 # shellcheck source=lib/dybatpho/init.sh
 . "$SETUP_DIR/lib/dybatpho/init.sh"
@@ -82,14 +82,14 @@ _main() {
   dybatpho::notice "Setup SSH"
   _install_age
   # shellcheck disable=SC2086
-  if [ "$LOG_LEVEL" = "true" ]; then
+  if dybatpho::compare_log_level debug; then
     chezmoi apply --debug "$HOME"/.ssh
   else
     chezmoi apply "$HOME"/.ssh
   fi
   dybatpho::notice "Setup other dotfiles"
   # shellcheck disable=SC2086
-  if [ "$DEBUG" = "true" ]; then
+  if dybatpho::compare_log_level debug; then
     chezmoi apply --debug
   else
     chezmoi apply
@@ -117,7 +117,7 @@ _main() {
   git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git
   git config --local include.path ../.gitconfig
 
-  _success "Setup complete"
+  dybatpho::success "Setup complete"
 }
 
 dybatpho::generate_from_spec _spec_main "$@"

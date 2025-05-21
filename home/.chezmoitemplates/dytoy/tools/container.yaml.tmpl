@@ -1,8 +1,8 @@
 {{- if eq .kind "pc" "vm" "laptop" }}
-{{- if eq .chezmoi.os "linux" }}
 name: container
 method: os
 is_essential: true
+{{- if eq .chezmoi.os "linux" }}
 gentoo:
   packages:
     - name: app-containers/docker
@@ -36,4 +36,11 @@ ubuntu:
       sudo systemctl enable --now docker containerd
       {{- end }}
 {{- end }}
+macos:
+  packages:
+    - name: lima
+    - name: docker
+  hook:
+    after: |-
+      limactl start template://docker || true
 {{- end }}

@@ -7,10 +7,17 @@
 #: fonts manually, read the font specification syntax
 #: <https://sw.kovidgoyal.net/kitty/kittens/choose-fonts/#font-spec-
 #: syntax>.
+{{- if eq .chezmoi.os "darwin" }}
+font_family      Iosevka Dynamo Nerd
+bold_font        Iosevka Dynamo Nerd Bold
+italic_font      Iosevka Dynamo Nerd Italic
+bold_italic_font Iosevka Dynamo Nerd Bold Italic
+{{- else }}
 font_family      Iosevka Dynamo
 bold_font        Iosevka Dynamo Bold
 italic_font      Iosevka Dynamo Italic
 bold_italic_font Iosevka Dynamo Bold Italic
+{{- end }}
 
 #: Font size (in pts)
 font_size 11.0

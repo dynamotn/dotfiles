@@ -114,7 +114,7 @@ _{{ $shortCode }}_run() {
         _ubuntu_repo_sync
       fi
       _ubuntu_install "$package_name"
-      {{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
+      {{- else if eq .chezmoi.os "darwin" }}
       package_param=$(echo "$package" | yq e '.param')
       if [[ "$package_param" == "null" ]]; then
         package_param=""
