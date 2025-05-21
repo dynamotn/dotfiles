@@ -20,9 +20,15 @@
 .config/tridactyl
 Multimedia
 {{- else if eq .guiServer "M" }}
+.local/bin/obsidian
 .mozilla
 .thunderbird
 .zen
+{{- if ne .browser "F" }}
+Library/Application Support/Firefox
+{{- else if ne .browser "Z" }}
+Library/Application Support/zen
+{{- end }}
 {{- else if eq .guiServer "W" }}
 Library
 {{ $process := "" }}

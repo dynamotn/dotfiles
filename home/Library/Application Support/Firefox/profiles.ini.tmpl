@@ -1,23 +1,34 @@
 {{- $configPath := joinPath .chezmoi.homeDir ".config/firefox/profiles" }}
+{{- $profile := "" }}
+{{- if eq .place "home" }}
+{{- $profile = "personal" }}
+{{- else if eq .place "office" }}
+{{- $profile = "enterprise" }}
+{{- end }}
 {{- $releaseId := mozillaInstallHash "/Applications/Firefox.app/Contents/MacOS" }}
 [Install{{- $releaseId -}}]
-Default={{- $configPath }}/enterprise
+Default={{- $configPath }}/{{ $profile }}
 Locked=1
 
 [Profile1]
-Name=Enterprise
+Name={{ camelcase $profile }}
 IsRelative=0
-Path={{- $configPath }}/enterprise
+Path={{- $configPath }}/{{ $profile }}
 
-{{- $releaseId := mozillaInstallHash "/Applications/Firefox Personal.app/Contents/MacOS" }}
+{{ $releaseId := (printf "/Applications/Firefox %s.app/Contents/MacOS" (camelcase $profile) | mozillaInstallHash) }}
+{{- if eq .place "home" }}
+{{- $profile = "enterprise" }}
+{{- else if eq .place "office" }}
+{{- $profile = "personal" }}
+{{- end }}
 [Install{{- $releaseId -}}]
-Default={{- $configPath }}/personal
+Default={{- $configPath }}/{{ $profile }}
 Locked=1
 
 [Profile0]
-Name=Personal
+Name={{ camelcase $profile }}
 IsRelative=0
-Path={{- $configPath }}/personal
+Path={{- $configPath }}/{{ $profile }}
 
 [General]
 StartWithLastProfile=1

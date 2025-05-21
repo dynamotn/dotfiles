@@ -29,6 +29,7 @@ function __add_folder_to_manpath --description "Add folder to MANPATH"
     end
 end
 
+__add_folder_to_path /opt/homebrew/bin
 __add_folder_to_path $HOME/.local/bin
 __add_folder_to_path $CONFIG_PATH/../scripts/bin
 __add_folder_to_path $HOME/.fzf/bin
@@ -36,6 +37,7 @@ __add_folder_to_path $HOME/.yarn/bin
 __add_folder_to_path $HOME/.cargo/bin
 __add_folder_to_path $HOME/.go/bin
 __add_folder_to_path $HOME/.local/share/nvim/mason/bin
+type -q brew; and brew shellenv | source
 
 __add_folder_to_manpath $HOME/.local/man
 __add_folder_to_manpath $CONFIG_PATH/../scripts/man
