@@ -1,6 +1,6 @@
 {{- if eq .chezmoi.os "linux" "darwin" }}
 name: btop
-{{- if ne .kind "container" }}
+{{- if and (ne .kind "container") (ne .chezmoi.os "darwin") }}
 method: binary
 is_essential: true
 github:
