@@ -1,9 +1,8 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-trap "_error \"Can't update submodules\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
-_notice "Update submodules"
+dybatpho::notice "Update submodules"
 # modules hash: {{ joinPath .chezmoi.sourceDir "../.gitmodules" | include | sha256sum }}
 cd {{ .chezmoi.sourceDir }}/..
 {{- if eq .kind "container" }}
@@ -26,4 +25,4 @@ git submodule update --init --remote --recursive \
   silos/tmux \
   {{- end }}
   home/dot_config/nvim
-_success "Updated submodules"
+dybatpho::success "Updated submodules"

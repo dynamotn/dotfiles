@@ -1,8 +1,6 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-source {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
-trap "echo \"Install tools failed\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
@@ -30,13 +28,13 @@ _parse_args() {
 
 _main() {
   if ! command -v mise 2>&1 >/dev/null; then
-    {{ lookPath "bash" }} "$SCRIPT_DIR/binary.sh" -t mise
+    "$SCRIPT_DIR/binary.sh" -t mise
     mise trust
   fi
   if [ "$TOOL" = "" ]; then
-    _info "Install mise tools"
+    dybatpho::info "Install mise tools"
   else
-    _info "Install mise tool: $TOOL"
+    dybatpho::info "Install mise tool: $TOOL"
   fi
   readarray mise_tools < <(yq e -o=j -I=0 'filter(.method == "mise") | .[]' ~/.config/dytoy/tools.yaml )
 
@@ -56,7 +54,7 @@ _main() {
       method=$(yq e -o=j -I=0 'filter(.name == "'"$dependency"'") | .[].method | .' ~/.config/dytoy/tools.yaml)
       method=${method%\"}
       method=${method#\"}
-      {{ lookPath "bash" }} "$SCRIPT_DIR/$method.sh" -t "$dependency"
+      "$SCRIPT_DIR/$method.sh" -t "$dependency"
     done
 
     backend=$(echo "$tool" | yq e '.backend')
@@ -79,7 +77,7 @@ _main() {
     fi
   done
 
-  _success "Installed mise tools"
+  dybatpho::success "Installed mise tools"
 }
 
 TOOL=

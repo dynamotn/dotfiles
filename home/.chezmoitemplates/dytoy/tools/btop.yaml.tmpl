@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.os "linux" }}
+{{- if eq .chezmoi.os "linux" "darwin" }}
 name: btop
 {{- if ne .kind "container" }}
 method: binary
@@ -18,6 +18,9 @@ archive:
 {{- end }}
 method: os
 arch:
+  packages:
+    - name: btop
+macos:
   packages:
     - name: btop
 {{- end }}

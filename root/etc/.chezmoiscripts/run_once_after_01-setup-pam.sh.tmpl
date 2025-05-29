@@ -1,9 +1,9 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-trap "_error \"Can't setup PAM\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
-_notice "Setup PAM"
+{{- if eq .chezmoi.os "linux" }}
+dybatpho::notice "Setup PAM"
 {{- range (joinPath .chezmoi.sourceDir "etc/pam.d/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
@@ -12,4 +12,5 @@ sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su-l
 {{- end }}
-_success "Setup PAM"
+dybatpho::success "Setup PAM"
+{{- end }}

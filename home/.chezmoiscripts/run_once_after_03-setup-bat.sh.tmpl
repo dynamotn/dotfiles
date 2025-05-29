@@ -1,14 +1,10 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-trap "_error \"Can't setup bash\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
-_notice "Setup bat"
+dybatpho::require "bat"
+dybatpho::notice "Setup bat"
 # theme hash: {{ joinPath .chezmoi.homeDir ".config/bat/themes/catppuccin.tmTheme" | include | sha256sum }}
-export PATH=$PATH:~/.local/bin
-if command -v bat > /dev/null 2>&1; then
-  bat cache --build
-else
-  _error "bat is not installed"
-fi
-_success "Setup bat"
+export PATH=~/.local/bin:$PATH
+bat cache --build
+dybatpho::success "Setup bat"

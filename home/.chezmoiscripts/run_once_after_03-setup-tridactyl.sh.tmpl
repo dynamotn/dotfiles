@@ -1,13 +1,12 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-trap "rm -rf TEMP && _error \"Can't setup tridactyl\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
 {{- if ne .guiServer "0" }}
 TEMP=$(mktemp)
-_notice "Setup tridactyl"
-curl -fsSl https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh -o "$TEMP"
-sh "$TEMP" master
-rm -rf "$TEMP"
-_success "Setup tridactyl"
+dybatpho::cleanup_file_on_exit "$TEMP"
+dybatpho::notice "Setup tridactyl"
+dybatpho::curl_do https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh "$TEMP"
+bash "$TEMP" master
+dybatpho::success "Setup tridactyl"
 {{- end }}

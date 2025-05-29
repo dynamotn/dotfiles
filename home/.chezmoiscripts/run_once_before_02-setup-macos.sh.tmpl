@@ -2,6 +2,7 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
-dybatpho::notice "Setup neovim"
-nvim --headless "+Lazy! sync" +qa
-dybatpho::success "Setup neovim"
+{{- if eq .chezmoi.os "darwin" }}
+dybatpho::notice "Setup MacOS"
+dybatpho::success "Setup MacOS"
+{{- end }}

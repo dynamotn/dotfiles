@@ -19,4 +19,8 @@ arch:
     after: |-
       sudo systemctl enable --now tailscaled
       sudo tailscale up
+macos:
+  packages:
+    - name: tailscale
+      is_cask: true
 {{- end }}

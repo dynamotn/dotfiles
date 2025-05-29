@@ -1,8 +1,6 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-source {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
-trap "_error \"Install tools failed\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
@@ -30,9 +28,9 @@ _parse_args() {
 
 _main() {
   if [ "$TOOL" = "" ]; then
-    _info "Install shell tools"
+    dybatpho::info "Install shell tools"
   else
-    _info "Install shell tool: $TOOL"
+    dybatpho::info "Install shell tool: $TOOL"
   fi
   readarray shell_tools < <(yq e -o=j -I=0 'filter(.method == "shell") | .[]' ~/.config/dytoy/tools.yaml )
 
@@ -52,13 +50,13 @@ _main() {
       method=$(yq e -o=j -I=0 'filter(.name == "'"$dependency"'") | .[].method | .' ~/.config/dytoy/tools.yaml)
       method=${method%\"}
       method=${method#\"}
-      {{ lookPath "bash" }} "$SCRIPT_DIR/$method.sh" -t "$dependency"
+      "$SCRIPT_DIR/$method.sh" -t "$dependency"
     done
     content=$(echo "$tool" | yq e '.content')
-    {{ lookPath "bash" }} -c "$content"
+    bash -c "$content"
   done
 
-  _success "Installed shell tools"
+  dybatpho::success "Installed shell tools"
 }
 
 TOOL=
