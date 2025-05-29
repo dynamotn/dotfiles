@@ -81,3 +81,4 @@
 |[pipewire](https://github.com/PipeWire/pipewire)|Audio and video devices framework|Multimedia tool|
 |[bluez](https://github.com/bluez/bluez)|Bluetooth controller|Multimedia tool|
 |[sonyheadphones](https://github.com/Plutoberth/SonyHeadphonesClient)|Control Sony Headphones|Multimedia tool|
+|[mpv](https://github.com/mpv-player/mpv)|Media player|Multimedia tool|
