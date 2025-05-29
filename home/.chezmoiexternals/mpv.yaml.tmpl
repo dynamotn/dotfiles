@@ -1,0 +1,20 @@
+{{- if ne .guiServer "0" }}
+.config/mpv/fonts:
+  type: archive
+  url: https://github.com/tomasklaen/uosc/releases/latest/download/uosc.zip
+  refreshPeriod: 168h
+  stripComponents: 1
+  include:
+    - fonts/**
+.config/mpv/scripts/uosc:
+  type: archive
+  url: https://github.com/tomasklaen/uosc/releases/latest/download/uosc.zip
+  refreshPeriod: 168h
+  stripComponents: 2
+  include:
+    - scripts/uosc/**
+.config/mpv/scripts/thumbfast.lua:
+  type: file
+  url: https://raw.githubusercontent.com/po5/thumbfast/refs/heads/master/thumbfast.lua
+  refreshPeriod: 168h
+{{- end }}
