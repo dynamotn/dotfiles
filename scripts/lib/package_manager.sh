@@ -69,10 +69,10 @@ _termux_install() {
 
 _macos_install() {
   brew ls | grep -E "^$1$" || (
-    if [ -z "$2" ]; then
-      brew install "$1"
+    if [ -z "$3" ]; then
+      brew install "$2" "$1"
     else
-      brew install "$1" "$2"
+      brew install "$2" "$1" "$3"
     fi
   )
 }

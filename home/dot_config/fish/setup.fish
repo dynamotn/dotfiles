@@ -18,7 +18,3 @@ end
 
 # Install plugins
 fish -c "fisher update </dev/null"
-{{- if ne .chezmoi.os "android" }}
-# Install nix
-fish -c install_nix
-{{- end }}

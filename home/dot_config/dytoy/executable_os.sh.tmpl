@@ -1,10 +1,12 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 source {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
+dybatpho::register_err_handler
+
 TEMP_HOOK_BEFORE=$(mktemp)
 TEMP_HOOK_AFTER=$(mktemp)
-trap "rm -rf $TEMP_HOOK_BEFORE $TEMP_HOOK_AFTER && echo \"Install tools failed\"" ERR
+dybatpho::cleanup_file_on_exit "$TEMP_HOOK_BEFORE"
+dybatpho::cleanup_file_on_exit "$TEMP_HOOK_AFTER"
 
 _usage() {
   echo "$0 usage:" && grep -E " \w) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
@@ -30,21 +32,19 @@ _parse_args() {
 
 {{- $shortCode := "" }}
 {{- $name := "" }}
-{{- if eq .chezmoi.os "linux" }}
-{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{- if eq .osid "linux-gentoo" }}
 {{- $shortCode = "gentoo" }}
 {{- $name = "Gentoo Linux" }}
-{{- else if eq .chezmoi.osRelease.id "arch" }}
+{{- else if eq .osid "linux-arch" }}
 {{- $shortCode = "arch" }}
 {{- $name = "Arch Linux" }}
-{{- else if eq .chezmoi.osRelease.id "debian" "ubuntu" }}
+{{- else if eq .osid "linux-debian" "linux-ubuntu" }}
 {{- $shortCode = "ubuntu" }}
 {{- $name = "Debian-based Linux" }}
-{{- end }}
-{{- else if eq .chezmoi.os "android" }}
+{{- else if eq .osid "android" }}
 {{- $shortCode = "termux" }}
 {{- $name = "Android" }}
-{{- else if eq .chezmoi.os "darwin" }}
+{{- else if eq .osid "darwin" }}
 {{- $shortCode = "macos" }}
 {{- $name = "MacOS" }}
 {{- end }}
@@ -63,10 +63,10 @@ _{{ $shortCode }}_run() {
     hook_before=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.before")
     hook_after=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.after")
     if [ "$hook_before" != "null" ]; then
-      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_BEFORE}"
-      echo "_progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
+      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
+      echo "dybatpho::progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
       echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
-      {{ lookPath "bash" }} ${TEMP_HOOK_BEFORE}
+      bash ${TEMP_HOOK_BEFORE}
     fi
 
     readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.{{ $shortCode }}.packages.[]')
@@ -76,7 +76,7 @@ _{{ $shortCode }}_run() {
         continue
       fi
 
-      {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "gentoo") }}
+      {{- if eq .osid "linux-gentoo" }}
       accept_keywords=$(echo "$package" | yq e '.accept_keywords')
       if [[ "$accept_keywords" != "null" ]]; then
         sudo mkdir -p $(dirname "/etc/portage/package.accept_keywords/$package_name")
@@ -96,7 +96,7 @@ _{{ $shortCode }}_run() {
       else
         _gentoo_install "$package_name"
       fi
-      {{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "debian" "ubuntu") }}
+      {{- else if eq .osid "linux-debian" "linux-ubuntu" }}
       repo=$(echo "$package" | yq e '.repo')
       if [[ "$repo" != "null" ]]; then
         repo_name=$(echo "$package" | yq e '.repo_name')
@@ -105,7 +105,7 @@ _{{ $shortCode }}_run() {
         key=$(echo "$package" | yq e '.key')
 
         [[ "$repo_name" == "null" ]] && repo_name=$package_name
-        [[ "$distro_version" == "null" ]] && distro_version=$(grep -is {{ if eq .chezmoi.osRelease.id "ubuntu" }}UBUNTU_CODENAME{{ else }}VERSION_CODENAME{{ end }} /etc/os-release | cut -d= -f2)
+        [[ "$distro_version" == "null" ]] && distro_version=$(grep -is {{ if eq .osid "linux-ubuntu" }}UBUNTU_CODENAME{{ else }}VERSION_CODENAME{{ end }} /etc/os-release | cut -d= -f2)
         repo=$(echo ${repo} | sed "s/%v/${distro_version}/g")
         if [ ! -f "/etc/apt/sources.list.d/$repo_name.list" ]; then
           echo "deb $repo $distro_version $repo_version" | sudo tee /"etc/apt/sources.list.d/$repo_name.list"
@@ -114,34 +114,40 @@ _{{ $shortCode }}_run() {
         _ubuntu_repo_sync
       fi
       _ubuntu_install "$package_name"
-      {{- else if eq .chezmoi.os "darwin" }}
+      {{- else if eq .osid "darwin" }}
       package_param=$(echo "$package" | yq e '.param')
+      package_is_cask=$(echo "package" | yq e '.is_cask')
       if [[ "$package_param" == "null" ]]; then
         package_param=""
       fi
-      _macos_install "$package_name" "$package_param"
+      if [[ "$package_is_cask" == "true" ]]; then
+        brew_param="--cask"
+      else
+        brew_param="--formula"
+      fi
+      _macos_install "$package_name" "$brew_param" "$package_param"
       {{- else }}
       _{{ $shortCode }}_install "$package_name"
       {{- end }}
     done
     if [ "$hook_after" != "null" ]; then
-      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_AFTER}"
-      echo "_progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
+      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
+      echo "dybatpho::progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
       echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
-      {{ lookPath "bash" }} ${TEMP_HOOK_AFTER}
+      bash ${TEMP_HOOK_AFTER}
     fi
   done
 }
 
 _main() {
   if [ "$TOOL" = "" ]; then
-    _info "Install package tools"
+    dybatpho::info "Install package tools"
   else
-    _info "Install package tool: $TOOL"
+    dybatpho::info "Install package tool: $TOOL"
   fi
   readarray package_tools < <(yq e -o=j -I=0 'filter(.method == "os") | .[]' ~/.config/dytoy/tools.yaml )
 
-  _info "Distro of this machine is {{ $name }}."
+  dybatpho::info "Distro of this machine is {{ $name }}."
   {{- if eq .chezmoi.os "linux" }}
   {{- if eq .chezmoi.osRelease.id "gentoo" }}
   _gentoo_run
@@ -156,7 +162,7 @@ _main() {
   _macos_run
   {{- end }}
 
-  _success "Installed package tools"
+  dybatpho::success "Installed package tools"
 }
 
 TOOL=

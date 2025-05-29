@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+{{- if eq .guiServer "W" "X" }}
+{{- if eq .guiWinManager "H" }}
+dybatpho::notice "Setup hyprland"
+# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" | include | sha256sum }}
+
+dybatpho::progress "Install hyprland's header"
+hyprpm update
+
+dybatpho::progress "Install plugins"
+while IFS="" read -r plugin; do
+  dybatpho::progress "Install plugin ${plugin}"
+  hyprpm add -f https://github.com/${plugin} || true
+  hyprpm enable ${plugin#*/}
+done < {{ joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" }}
+hyprpm reload -n
+dybatpho::success "Setup hyprland"
+{{- end }}
+{{- if eq .guiWinManager "G" }}
+gsettings set org.gnome.mutter overlay-key ''
+{{- end }}
+{{- end }}

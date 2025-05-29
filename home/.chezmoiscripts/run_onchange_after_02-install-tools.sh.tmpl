@@ -1,21 +1,21 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
 _install_package_tools() {
-  bash {{ .chezmoi.homeDir  }}/.config/dytoy/os.sh -e
+  {{ .chezmoi.homeDir  }}/.config/dytoy/os.sh -e
 }
 
 _install_binary_tools() {
-  bash {{ .chezmoi.homeDir  }}/.config/dytoy/binary.sh -e -n
+  {{ .chezmoi.homeDir  }}/.config/dytoy/binary.sh -e -n
 }
 
 _install_shell_tools() {
-  bash {{ .chezmoi.homeDir  }}/.config/dytoy/shell.sh -e
+  {{ .chezmoi.homeDir  }}/.config/dytoy/shell.sh -e
 }
 
 _install_mise_tools() {
-  bash {{ .chezmoi.homeDir  }}/.config/dytoy/mise.sh -e
+  {{ .chezmoi.homeDir  }}/.config/dytoy/mise.sh -e
 }
 
 _main() {
@@ -25,11 +25,11 @@ _main() {
   _install_mise_tools
 }
 
-export PATH=$PATH:~/.local/bin
+export PATH=~/.local/bin:$PATH
 
-_notice "Install tools"
+dybatpho::notice "Install tools"
 {{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/tools/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
 _main
-_success "Installed tools"
+dybatpho::success "Installed tools"

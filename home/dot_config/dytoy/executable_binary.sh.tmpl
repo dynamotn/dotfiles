@@ -1,10 +1,13 @@
-#!/bin/bash
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
 TEMP_COMPRESSED=$(mktemp)
-TEMP_HOOK_AFTER=$(mktemp)
+dybatpho::cleanup_file_on_exit "$TEMP_COMPRESSED"
 TEMP_HOOK_BEFORE=$(mktemp)
-trap "rm -rf $TEMP_COMPRESSED $TEMP_HOOK_BEFORE $TEMP_HOOK_AFTER && echo \"Install tools failed\"" ERR
+dybatpho::cleanup_file_on_exit "$TEMP_HOOK_BEFORE"
+TEMP_HOOK_AFTER=$(mktemp)
+dybatpho::cleanup_file_on_exit "$TEMP_HOOK_AFTER"
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 export BIN_DIR=$HOME/.local/bin
@@ -66,13 +69,13 @@ _extract_tar() {
   if [ "$DEBUG" = true ]; then
     tar ${param}
   else
-    {{ lookPath "bash" }} $TEMP_HOOK_BEFORE
+    bash $TEMP_HOOK_BEFORE
     readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
     for path in "${paths[@]}"; do
       tar ${param} -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
     done
     export param=$param
-    {{ lookPath "bash" }} $TEMP_HOOK_AFTER
+    bash $TEMP_HOOK_AFTER
   fi
 }
 
@@ -83,12 +86,12 @@ _extract_zip() {
   if [ "$DEBUG" = true ]; then
     unzip -Zl $TEMP_COMPRESSED
   else
-    {{ lookPath "bash" }} $TEMP_HOOK_BEFORE
+    bash $TEMP_HOOK_BEFORE
     readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
     for path in "${paths[@]}"; do
       unzip -qqoj $TEMP_COMPRESSED -d $BIN_DIR $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
     done
-    {{ lookPath "bash" }} $TEMP_HOOK_AFTER
+    bash $TEMP_HOOK_AFTER
   fi
 }
 
@@ -96,10 +99,10 @@ _extract_zip() {
 # $1: URL of file
 # $2: File name of command
 _extract_bzip2() {
-  {{ lookPath "bash" }} $TEMP_HOOK_BEFORE
+  bash $TEMP_HOOK_BEFORE
   readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
   bzip2 -cd $TEMP_COMPRESSED > $BIN_DIR/$2
-  {{ lookPath "bash" }} $TEMP_HOOK_AFTER
+  bash $TEMP_HOOK_AFTER
 }
 
 # Update tool by get from release file
@@ -130,7 +133,7 @@ _update() {
     curl -SL "$1" -o "$BIN_DIR/$2"
   fi
   chmod +x "$BIN_DIR/$2"
-  _progress "Installed $2"
+  dybatpho::progress "Installed $2"
 }
 
 # Parse config file and update tool
@@ -147,34 +150,34 @@ _parse_github_release() {
     return
   fi
 
-  _progress "Installing ${name}"
+  dybatpho::progress "Installing ${name}"
   repo=$(echo "$1" | yq e '.github.repo')
   version=$(echo "$1" | yq e '.github.version')
   release_asset=$(echo "$1" | yq e '.github.release_asset')
   strip_components=$(echo "$1" | yq e '.archive.strip_components')
   paths=$(echo "$1" | yq e '.archive.paths')
 
-  _progress "Checking ${name} from ${repo}"
+  dybatpho::progress "Checking ${name} from ${repo}"
   if [ "$version" = "latest" ] || [ "$version" = "null" ]; then
     version=$(curl -sSL -u "${GITHUB_API_USERNAME}:${GITHUB_API_TOKEN}" "https://api.github.com/repos/${repo}/releases/latest" | grep -Po "tag_name\": \"(\K.*)(?=\",)")
   fi
   if [ "$version" = "" ]; then
-    _error "Version is not specified or you're limited request to Github API"
+    dybatpho::error "Version is not specified or you're limited request to Github API"
   else
-    _info "Using version ${version} for https://github.com/${repo}"
+    dybatpho::info "Using version ${version} for https://github.com/${repo}"
   fi
   release_asset=$(echo ${release_asset} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
 
   hook_before=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.before" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.after" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   if [ "$hook_before" != "null" ]; then
-    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_BEFORE}"
-    echo "_progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
+    echo "dybatpho::progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
     echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
   fi
   if [ "$hook_after" != "null" ]; then
-    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_AFTER}"
-    echo "_progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
+    echo "dybatpho::progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
     echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
   fi
 
@@ -199,7 +202,7 @@ _parse_gitlab_release() {
     return
   fi
 
-  _progress "Installing ${name}"
+  dybatpho::progress "Installing ${name}"
   host=$(echo "$1" | yq e '.gitlab.host')
   if [ "$host" = "null" ]; then
     host="gitlab.com"
@@ -211,27 +214,27 @@ _parse_gitlab_release() {
   strip_components=$(echo "$1" | yq e '.archive.strip_components')
   paths=$(echo "$1" | yq e '.archive.paths')
 
-  _progress "Checking ${name} from ${repo}"
+  dybatpho::progress "Checking ${name} from ${repo}"
   if [ "$version" = "latest" ]; then
     version=$(curl -sSL -u "${GITLAB_API_USERNAME}:${GITLAB_API_TOKEN}" "https://gitlab.com/api/v4/projects/$(echo $repo | sed -e "s/\//%2f/g")/releases/permalink/latest" | yq ".tag_name")
   fi
   if [ "$version" = "" ]; then
-    _error "Version is not specified or you're limited request to Github API"
+    dybatpho::error "Version is not specified or you're limited request to Github API"
   else
-    _info "Using version ${version} for https://gitlab.com/${repo}"
+    dybatpho::info "Using version ${version} for https://gitlab.com/${repo}"
   fi
   release_asset=$(echo ${release_asset} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
 
   hook_before=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.before" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.after" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   if [ "$hook_before" != "null" ]; then
-    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_BEFORE}"
-    echo "_progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
+    echo "dybatpho::progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
     echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
   fi
   if [ "$hook_after" != "null" ]; then
-    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh" > "${TEMP_HOOK_AFTER}"
-    echo "_progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
+    echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
+    echo "dybatpho::progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
     echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
   fi
 
@@ -244,9 +247,9 @@ _parse_gitlab_release() {
 
 _main() {
   if [ "$TOOL" = "" ]; then
-    _info "Install binary tools"
+    dybatpho::info "Install binary tools"
   else
-    _info "Install binary tool: $TOOL"
+    dybatpho::info "Install binary tool: $TOOL"
   fi
   readarray binary_tools < <(yq e -o=j -I=0 'filter(.method == "binary") | .[]' ~/.config/dytoy/tools.yaml )
   for binary in "${binary_tools[@]}"; do
@@ -259,7 +262,7 @@ _main() {
       fi
     fi
   done
-  _success "Installed binary tools"
+  dybatpho::success "Installed binary tools"
 }
 
 TOOL=

@@ -1,12 +1,10 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-trap "_error \"Can't setup ibus-bamboo\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
 {{- if eq .guiServer "G" }}
-_notice "Setup ibus-bamboo"
-if command -v dconf > /dev/null 2&>1; then
-  dconf load / < ~/.config/ibus-bamboo/dconf
-fi
-_success "Setup ibus-bamboo"
+dybatpho::require "dconf"
+dybatpho::notice "Setup ibus-bamboo"
+dconf load / < ~/.config/ibus-bamboo/dconf
+dybatpho::success "Setup ibus-bamboo"
 {{- end }}

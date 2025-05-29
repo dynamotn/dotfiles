@@ -1,9 +1,9 @@
-#!{{ lookPath "bash" }}
-set -eou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
-_notice "Decrypting key.age file to decrypt all encrypted files"
-if [ ! -f "${HOME}/.config/chezmoi/key" ]; then
+dybatpho::notice "Decrypting key.age file to decrypt all encrypted files"
+if ! dybatpho::is file "${HOME}/.config/chezmoi/key"; then
   {{- if eq .kind "container" }}
   {{ .chezmoi.sourceDir }}/../scripts/expect-age "${AGE_PASSPHRASE}" "{{ .chezmoi.sourceDir }}/../secrets/key.age" "${HOME}/.config/chezmoi/key"
   {{- else }}
@@ -12,10 +12,10 @@ if [ ! -f "${HOME}/.config/chezmoi/key" ]; then
 
   if [ $? -eq 0 ]; then
     chmod 400 "${HOME}/.config/chezmoi/key"
-    _success "Successfully decrypted key.age file"
+    dybatpho::success "Successfully decrypted key.age file"
   else
-    _error "Failed to decrypt key.age file"
+    dybatpho::error "Failed to decrypt key.age file"
   fi
 else
-  _info "Not need to decrypt key.age file"
+  dybatpho::info "Not need to decrypt key.age file"
 fi

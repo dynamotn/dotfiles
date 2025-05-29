@@ -1,8 +1,7 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-trap "_error \"Can't setup neovim\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
-_notice "Setup neovim"
+dybatpho::notice "Setup neovim"
 nvim --headless "+Lazy! sync" +qa
-_success "Setup neovim"
+dybatpho::success "Setup neovim"

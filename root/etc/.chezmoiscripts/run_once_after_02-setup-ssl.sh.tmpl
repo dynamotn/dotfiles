@@ -1,11 +1,10 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-trap "_error \"Can't setup SSL\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
 {{- if and (eq .kind "office") (eq .company "F1") }}
-_notice "Setup SSL"
+dybatpho::notice "Setup SSL"
 # hash: {{ joinPath .chezmoi.sourceDir "etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age" | include | sha256sum }}
 update-ca-trust
-_success "Setup SSL"
+dybatpho::success "Setup SSL"
 {{- end }}

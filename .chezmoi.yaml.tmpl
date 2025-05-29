@@ -16,6 +16,11 @@ diff:
   pager: delta --pager="ov -F --section-delimiter '^(added:|removed:|renamed:|Δ)' --section-header --pattern '•'"
 
 data:
+  {{- $osid := .chezmoi.os -}}
+  {{- if hasKey .chezmoi.osRelease "id" -}}
+  {{- $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+  {{- end -}}
+  osid: {{ $osid }}
   {{ $place := promptChoiceOnce . "place" "Where does this machine place?" (list "home" "office" "cloud") "cloud" | quote }}
   place: {{ $place }}
   {{ $kind := promptChoiceOnce . "kind" "What kind of this machine is it?"  (list "pc" "laptop" "workstation" "tablet" "vm" "sbc" "container") "container" | quote }}
@@ -26,7 +31,7 @@ data:
   {{- if eq $place "office" }}
   company: {{ promptStringOnce . "company" "What code of owner company is?" | quote }}
   {{- end }}
-  {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is? (W for Wayland, M for Mac, 0 for CLI-only)" (list "W" "M" "0") "0" }}
+  {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is? (W for Wayland, X for XOrg, M for Mac, 0 for CLI-only)" (list "W" "X" "M" "0") "0" }}
   guiServer: {{ $guiServer | quote }}
   {{- if eq $guiServer "X" "W" }}
   guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is? (N for Nvidia, I for Intel, A for AMD)" (list "N" "I" "A") | quote }}

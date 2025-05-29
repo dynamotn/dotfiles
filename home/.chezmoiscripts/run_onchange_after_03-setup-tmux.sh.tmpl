@@ -1,18 +1,17 @@
-#!{{ lookPath "bash" }}
-set -Eeou pipefail
-source {{ .chezmoi.sourceDir }}/../scripts/lib/message.sh
-{{- if eq .terminalMultiplexer "tmux" }}
-trap "_error \"Can't setup tmux\"" ERR
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
 
-_notice "Setup tmux"
+{{- if eq .terminalMultiplexer "T" }}
+dybatpho::notice "Setup tmux"
 # config hash: {{ joinPath .chezmoi.sourceDir "../silos/tmux/config" | include | sha256sum }}
 mkdir -p {{ .chezmoi.homeDir }}/.local/share/tmux/plugins
 
-_progress "Install tpm"
+dybatpho::progress "Install tpm"
 test ! -d {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm && \
   git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm
 
-_progress "Install other plugins"
+dybatpho::progress "Install other plugins"
 bash {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm/bin/install_plugins
-_success "Setup tmux"
+dybatpho::success "Setup tmux"
 {{- end }}
