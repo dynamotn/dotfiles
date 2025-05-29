@@ -1,34 +1,22 @@
 {{- $configPath := joinPath .chezmoi.homeDir ".config/zen/profiles" }}
-{{- $profile := "" }}
-{{- if eq .place "home" }}
-{{- $profile = "personal" }}
-{{- else if eq .place "office" }}
-{{- $profile = "enterprise" }}
-{{- end }}
 {{- $releaseId := mozillaInstallHash "/Applications/Zen.app/Contents/MacOS" }}
 [Install{{- $releaseId -}}]
-Default={{- $configPath }}/{{ $profile }}
+{{- if eq .place "office" }}
+Default={{- $configPath }}/enterprise
+{{- else }}
+Default={{- $configPath }}/personal
+{{- end }}
 Locked=1
 
 [Profile1]
-Name={{ camelcase $profile }}
+Name=Enterprise
 IsRelative=0
-Path={{- $configPath }}/{{ $profile }}
-
-{{ if eq .place "home" }}
-{{- $profile = "enterprise" }}
-{{- else if eq .place "office" }}
-{{- $profile = "personal" }}
-{{- end }}
-{{- $releaseId := (printf "/Applications/Zen %s.app/Contents/MacOS" (camelcase $profile) | mozillaInstallHash) }}
-[Install{{- $releaseId -}}]
-Default={{- $configPath }}/{{ $profile }}
-Locked=1
+Path={{- $configPath }}/enterprise
 
 [Profile0]
-Name={{ camelcase $profile }}
+Name=Personal
 IsRelative=0
-Path={{- $configPath }}/{{ $profile }}
+Path={{- $configPath }}/personal
 
 [General]
 StartWithLastProfile=1
