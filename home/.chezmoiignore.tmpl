@@ -36,14 +36,16 @@ Library/Application Support/zen
 Library/thunderbird
 {{- end }}
 {/* Based on type of browser */}
-{{- if ne .browser "F" }}
+{{- if ne .guiServer "0" }}
+{{-   if ne .browser "F" }}
 .config/firefox
 .mozilla/firefox
 Library/Application Support/Firefox
-{{- else if ne .browser "Z" }}
+{{-   else if ne .browser "Z" }}
 .config/zen
 .zen
 Library/Application Support/zen
+{{-   end }}
 {{- end }}
 {/* Ignore when running */}
 {{- if ne .guiServer "0" }}
