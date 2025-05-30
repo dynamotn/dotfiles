@@ -8,7 +8,7 @@ _gentoo_install() {
   if [ ! -x '/usr/bin/qlist' ]; then
     echo >&2 ":: Error: Must install app-portage/portage-utils first."
   fi
-  qlist -I "$1" || sudo emerge --ask n --noreplace "$1"
+  qlist -I "$1" > /dev/null || sudo emerge --ask n --noreplace "$1"
 }
 
 _gentoo_init() {
@@ -48,7 +48,7 @@ _ubuntu_repo_sync() {
 }
 
 _ubuntu_install() {
-  dpkg-query -s "$1" 2>&1 || sudo apt install -y "$1"
+  dpkg-query -s "$1" > /dev/null 2>&1 || sudo apt install -y "$1"
 }
 
 _ubuntu_init() {
@@ -64,7 +64,7 @@ _termux_init() {
 }
 
 _termux_install() {
-  dpkg-query -s "$1" 2>&1 || pkg install -y "$1"
+  dpkg-query -s "$1" > /dev/null 2>&1 || pkg install -y "$1"
 }
 
 _macos_install() {
