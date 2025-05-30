@@ -1,4 +1,4 @@
-{{- if ne .guiServer "0" }}
+{{- if eq .kind "pc" "laptop" }}
 .config/mpv/fonts:
   type: archive
   url: https://github.com/tomasklaen/uosc/releases/latest/download/uosc.zip

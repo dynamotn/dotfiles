@@ -92,10 +92,12 @@ Library/thunderbird
 {{- if eq .guiServer "0" }}
 .local/bin/obsidian
 .config/kitty
-.config/mpv
 {{- end }}
 {{- if eq .guiServer "M" }}
 .local/bin/obsidian
+{{- end }}
+{{- if not (eq .kind "pc" "laptop") }}
+.config/mpv
 {{- end }}
 
 {/* Window manager and WM-related files */}
