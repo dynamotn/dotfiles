@@ -172,11 +172,13 @@ _parse_github_release() {
   hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].archive.hook.after" ~/.config/dytoy/tools.yaml | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
   if [ "$hook_before" != "null" ]; then
     echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
+    echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_BEFORE}"
     echo "dybatpho::progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
     echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
   fi
   if [ "$hook_after" != "null" ]; then
     echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
+    echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_AFTER}"
     echo "dybatpho::progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
     echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
   fi
