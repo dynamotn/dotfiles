@@ -33,10 +33,8 @@ data:
   {{- end }}
   {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is? (W for Wayland, X for XOrg, M for Mac, 0 for CLI-only)" (list "W" "X" "M" "0") "0" }}
   guiServer: {{ $guiServer | quote }}
-  {{- if eq $guiServer "X" "W" }}
-  guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is? (N for Nvidia, I for Intel, A for AMD)" (list "N" "I" "A") | quote }}
-  guiWinManager: {{ promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is? (A for awesome, H for hyprland, G for gnome)" (list "H" "A" "G") "H" | quote }}
-  {{- end }}
+  guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is? (N for Nvidia, I for Intel, A for AMD, M for Mac)" (list "N" "I" "A" "M") | quote }}
+  guiWinManager: {{ promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is? (A for aerospace, H for hyprland, G for gnome)" (list "H" "A" "G") "H" | quote }}
   {{- if ne $guiServer "0" }}
   browser: {{ promptChoiceOnce . "browser" "What browser do you use? (F for Firefox, Z for Zen Browser)" (list "F" "Z") "Z" | quote }}
   {{- end }}
