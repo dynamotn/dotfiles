@@ -72,7 +72,7 @@ Library/Application Support/zen
 {{- else }}
 {{-   $processThunderbird = "/usr/lib/thunderbird" }}
 {{- end }}
-{{- if eq .guiServer "0" }}
+{{- if ne .guiServer "0" }}
 {{-   if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $processFirefox) | trim | int) 2 }}
 .config/firefox
 .mozilla/firefox
