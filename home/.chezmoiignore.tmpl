@@ -103,7 +103,8 @@ Library/thunderbird
 {{- end }}
 
 {/* Window manager and WM-related files */}
-{{- if ne .guiWinManager "H" }}
+{{- if ne .guiServer "0" }}
+{{-   if ne .guiWinManager "H" }}
 .config/hypr
 .config/hyprshade
 .wayland_init.fish
@@ -111,12 +112,13 @@ Library/thunderbird
 .config/wofi
 .config/swaylock
 .config/eww
-{{- end }}
-{{- if ne .guiWinManager "G" }}
+{{-   end }}
+{{-   if ne .guiWinManager "G" }}
 .config/ibus-bamboo
-{{- end }}
-{{- if ne .guiServer "M" }}
+{{-   end }}
+{{-   if ne .guiServer "M" }}
 Library
+{{-   end }}
 {{- end }}
 
 {/* Terminal multiplexer files */}
