@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+export PATH=~/.local/bin:$PATH
+{{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/tools/*" | glob) }}
+# {{ . }} hash: {{ . | include | sha256sum }}
+{{- end }}
+{{ .chezmoi.homeDir  }}/.config/dytoy/shell.sh -e
