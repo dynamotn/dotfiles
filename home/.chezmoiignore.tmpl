@@ -60,8 +60,10 @@ Library/Application Support/zen
 {{-   else if eq .browser "Z" }}
 {{-     if eq .chezmoi.os "darwin" }}
 {{-       $processFirefox = "/Applications/Zen.app/Contents/MacOS/zen" }}
-{{-     else }}
+{{-     else if eq .osid "linux-gentoo" }}
 {{-       $processFirefox = "/opt/zen-browser/zen" }}
+{{-     else }}
+{{-       $processFirefox = "/opt/zen-browser-bin/zen" }}
 {{-     end }}
 {{-   end }}
 {{-   if eq .chezmoi.os "darwin" }}
