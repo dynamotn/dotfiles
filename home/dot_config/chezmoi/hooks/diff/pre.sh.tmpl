@@ -2,7 +2,6 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
-{{- if ne .guiServer "0" }}
 {{- if eq .browser "F" }}
 if [ $(ps aux | grep firefox | wc -l) -gt 0 ]; then
   dybatpho::notice "Update firefox settings"
@@ -73,6 +72,7 @@ if [ $(ps aux | grep zen-browser | wc -l) -gt 0 ]; then
 fi
 {{- end }}
 
+{{- if ne .guiServer "0" }}
 if [ $(ps aux | grep thunderbird | wc -l) -gt 0 ]; then
   dybatpho::notice "Update thunderbird settings"
   for profile in "personal" "enterprise"; do
