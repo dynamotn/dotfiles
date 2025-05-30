@@ -19,7 +19,7 @@ arch:
     - name: docker
   hook:
     after: |-
-      sudo groupadd docker
+      sudo groupadd docker || true
       sudo usermod -aG docker $USER
       {{- if ne .kind "container" }}
       sudo systemctl enable --now docker containerd
@@ -30,7 +30,7 @@ ubuntu:
     - name: docker-ce-cli
   hook:
     after: |-
-      sudo groupadd docker
+      sudo groupadd docker || true
       sudo usermod -aG docker $USER
       {{- if ne .kind "container" }}
       sudo systemctl enable --now docker containerd
