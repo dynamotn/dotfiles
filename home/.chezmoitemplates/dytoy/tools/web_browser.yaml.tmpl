@@ -1,4 +1,3 @@
-{{- if ne .guiServer "0" }}
 {{- if eq .browser "F" }}
 name: firefox
 method: os
@@ -37,5 +36,4 @@ macos:
   packages:
     - name: zen
       is_cask: true
-{{- end }}
 {{- end }}

@@ -36,58 +36,54 @@ Library/Application Support/zen
 Library/thunderbird
 {{- end }}
 {/* Based on type of browser */}
-{{- if ne .guiServer "0" }}
-{{-   if ne .browser "F" }}
+{{- if ne .browser "F" }}
 .config/firefox
 .mozilla/firefox
 Library/Application Support/Firefox
-{{-   else if ne .browser "Z" }}
+{{- else if ne .browser "Z" }}
 .config/zen
 .zen
 Library/Application Support/zen
-{{-   end }}
 {{- end }}
 {/* Ignore when running */}
-{{- if ne .guiServer "0" }}
-{{-   $processFirefox := "" }}
-{{-   $processThunderbird := "" }}
-{{-   if eq .browser "F" }}
-{{-     if eq .chezmoi.os "darwin" }}
-{{-       $processFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
-{{-     else if eq .osid "linux-gentoo" }}
-{{-       $processFirefox = "/usr/lib64/firefox" }}
-{{-     else }}
-{{-       $processFirefox = "/usr/lib/firefox" }}
-{{-     end }}
-{{-   else if eq .browser "Z" }}
-{{-     if eq .chezmoi.os "darwin" }}
-{{-       $processFirefox = "/Applications/Zen.app/Contents/MacOS/zen" }}
-{{-     else if eq .osid "linux-gentoo" }}
-{{-       $processFirefox = "/opt/zen-browser/zen" }}
-{{-     else }}
-{{-       $processFirefox = "/opt/zen-browser-bin/zen" }}
-{{-     end }}
-{{-   end }}
+{{- $processFirefox := "" }}
+{{- $processThunderbird := "" }}
+{{- if eq .browser "F" }}
 {{-   if eq .chezmoi.os "darwin" }}
-{{-     $processThunderbird = "/Applications/Thunderbird.app/Contents/MacOS/thunderbird" }}
+{{-     $processFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
 {{-   else if eq .osid "linux-gentoo" }}
-{{-     $processThunderbird = "/opt/thunderbird" }}
+{{-     $processFirefox = "/usr/lib64/firefox" }}
 {{-   else }}
-{{-     $processThunderbird = "/usr/lib/thunderbird" }}
+{{-     $processFirefox = "/usr/lib/firefox" }}
 {{-   end }}
-{{-   if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $processFirefox) | trim | int) 2 }}
+{{- else if eq .browser "Z" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $processFirefox = "/Applications/Zen.app/Contents/MacOS/zen" }}
+{{-   else if eq .osid "linux-gentoo" }}
+{{-     $processFirefox = "/opt/zen-browser/zen" }}
+{{-   else }}
+{{-     $processFirefox = "/opt/zen-browser-bin/zen" }}
+{{-   end }}
+{{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $processThunderbird = "/Applications/Thunderbird.app/Contents/MacOS/thunderbird" }}
+{{- else if eq .osid "linux-gentoo" }}
+{{-   $processThunderbird = "/opt/thunderbird" }}
+{{- else }}
+{{-   $processThunderbird = "/usr/lib/thunderbird" }}
+{{- end }}
+{{- if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $processFirefox) | trim | int) 2 }}
 .config/firefox
 .mozilla/firefox
 .config/zen
 .zen
 Library/Application Support/Firefox
 Library/Application Support/zen
-{{-   end }}
-{{-   if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $processThunderbird) | trim | int) 2 }}
+{{- end }}
+{{- if gt (output "bash" "-c" (printf "ps aux | grep %s | wc -l" $processThunderbird) | trim | int) 2 }}
 .config/thunderbird
 .thunderbird
 Library/thunderbird
-{{-   end }}
 {{- end }}
 
 {/* Other GUI tools */}
@@ -103,8 +99,7 @@ Library/thunderbird
 {{- end }}
 
 {/* Window manager and WM-related files */}
-{{- if ne .guiServer "0" }}
-{{-   if ne .guiWinManager "H" }}
+{{- if ne .guiWinManager "H" }}
 .config/hypr
 .config/hyprshade
 .wayland_init.fish
@@ -112,13 +107,12 @@ Library/thunderbird
 .config/wofi
 .config/swaylock
 .config/eww
-{{-   end }}
-{{-   if ne .guiWinManager "G" }}
+{{- end }}
+{{- if ne .guiWinManager "G" }}
 .config/ibus-bamboo
-{{-   end }}
-{{-   if ne .guiServer "M" }}
+{{- end }}
+{{- if ne .guiServer "M" }}
 Library
-{{-   end }}
 {{- end }}
 
 {/* Terminal multiplexer files */}

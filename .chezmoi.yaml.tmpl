@@ -27,9 +27,13 @@ data:
   kind: {{ $kind }}
   {{- if eq $kind "sbc" "vm" "workstation" }}
   code: {{ promptStringOnce . "code" "What is this machine's name?" | quote }}
+  {{- else }}
+  code:
   {{- end }}
   {{- if eq $place "office" }}
   company: {{ promptStringOnce . "company" "What code of owner company is?" | quote }}
+  {{- else }}
+  company:
   {{- end }}
   {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is? (W for Wayland, X for XOrg, M for Mac, 0 for CLI-only)" (list "W" "X" "M" "0") "0" }}
   guiServer: {{ $guiServer | quote }}
@@ -37,6 +41,10 @@ data:
   guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is? (N for Nvidia, I for Intel, A for AMD, M for Mac)" (list "N" "I" "A" "M") | quote }}
   guiWinManager: {{ promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is? (A for aerospace, H for hyprland, G for gnome)" (list "H" "A" "G") "H" | quote }}
   browser: {{ promptChoiceOnce . "browser" "What browser do you use? (F for Firefox, Z for Zen Browser)" (list "F" "Z") "Z" | quote }}
+  {{- else }}
+  guiDriver:
+  guiWinManager:
+  browser:
   {{- end }}
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" false }}
