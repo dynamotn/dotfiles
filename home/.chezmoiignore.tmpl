@@ -99,26 +99,17 @@ Library/thunderbird
 {{- end }}
 
 {/* Window manager and WM-related files */}
-{{- if ne .guiServer "W" }}
+{{- if ne .guiWinManager "H" }}
 .config/hypr
 .config/hyprshade
 .wayland_init.fish
 .config/fcitx5
-.config/ibus-bamboo
 .config/wofi
 .config/swaylock
 .config/eww
 {{- end }}
-{{- if eq .guiServer "W" }}
-{{-   if ne .guiWinManager "H" }}
-.config/hypr
-.config/hyprshade
-.wayland_init.fish
-.config/fcitx5
-{{-   end }}
-{{-   if ne .guiWinManager "G" }}
+{{- if ne .guiWinManager "G" }}
 .config/ibus-bamboo
-{{-   end }}
 {{- end }}
 {{- if ne .guiServer "M" }}
 Library

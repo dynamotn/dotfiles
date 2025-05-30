@@ -2,10 +2,12 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
-{{- if eq .guiServer "W" "X" }}
 {{- if eq .guiWinManager "H" }}
+{{- $configHash := joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" | include | sha256sum }}
+{{/* check list plugin is empty or not */}}
+{{- if ne $configHash "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }}
+# config hash: {{ $configHash }}
 dybatpho::notice "Setup hyprland"
-# config hash: {{ joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" | include | sha256sum }}
 
 dybatpho::progress "Install hyprland's header"
 hyprpm update
@@ -18,8 +20,5 @@ while IFS="" read -r plugin; do
 done < {{ joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" }}
 hyprpm reload -n
 dybatpho::success "Setup hyprland"
-{{- end }}
-{{- if eq .guiWinManager "G" }}
-gsettings set org.gnome.mutter overlay-key ''
 {{- end }}
 {{- end }}

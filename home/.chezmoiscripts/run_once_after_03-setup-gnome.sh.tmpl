@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+{{- if eq .guiWinManager "G" }}
+gsettings set org.gnome.mutter overlay-key ''
+{{- end }}
