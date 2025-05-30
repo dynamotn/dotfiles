@@ -16,10 +16,10 @@ diff:
   pager: delta --pager="ov -F --section-delimiter '^(added:|removed:|renamed:|Δ)' --section-header --pattern '•'"
 
 data:
-  {{- $osid := .chezmoi.os -}}
-  {{- if hasKey .chezmoi.osRelease "id" -}}
-  {{- $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
-  {{- end -}}
+  {{- $osid := .chezmoi.os }}
+  {{- if hasKey .chezmoi.osRelease "id" }}
+  {{- $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id }}
+  {{- end }}
   osid: {{ $osid }}
   {{ $place := promptChoiceOnce . "place" "Where does this machine place?" (list "home" "office" "cloud") "cloud" | quote }}
   place: {{ $place }}
