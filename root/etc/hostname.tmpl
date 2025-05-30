@@ -2,7 +2,11 @@
 {{- if eq $machine "home_pc" -}}
 l30n4rd0d4v1nc1
 {{- else if eq $machine "office_laptop" -}}
+{{- if eq .company "TOP" }}
 d3lt4f0rc3
+{{- else if eq .company "F1" }}
+h1tl3r
+{{- end }}
 {{- else if eq $machine "office_workstation" -}}
 {{- if eq .code "t40-1" -}}
 p1k4ch0o
