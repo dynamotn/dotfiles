@@ -15,6 +15,10 @@ if type -q manpath
 end
 {{- end }}
 
+{{- if eq .chezmoi.os "android" }}
+set -gx XDG_RUNTIME_DIR $PREFIX/tmp
+{{- end }}
+
 {{- if and (eq .place "home") (eq .kind "pc") }}
 if fish_is_root_user
     builtin cd /etc
