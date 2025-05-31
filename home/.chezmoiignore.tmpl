@@ -16,6 +16,7 @@
 .local/bin/xdg-*
 {{- end }}
 
+
 {/* Browser and mail client files */}
 {/* Based on GUI window manager */}
 {{- if eq .guiServer "0" }}
@@ -113,8 +114,9 @@ Library/thunderbird
 {{- if ne .guiWinManager "G" }}
 .config/ibus-bamboo
 {{- end }}
-{{- if ne .guiServer "M" }}
-Library
+{{- if ne .guiWinManager "A" }}
+.config/aerospace
+.config/sketchybar
 {{- end }}
 
 {/* Terminal multiplexer files */}
@@ -146,6 +148,11 @@ Library
 {/* Linux related files */}
 {{- if eq .osid "linux-gentoo" "darwin" "android" }}
 .config/systemd
+{{- end }}
+
+{/* MacOS related files */}
+{{- if ne .guiServer "M" }}
+Library
 {{- end }}
 
 {{- if ne .kind "laptop" }}
