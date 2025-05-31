@@ -6,5 +6,8 @@ macos:
   packages:
     - name: sketchybar
   hook:
-    before: brew tap FelixKratz/formulae
+    before: |-
+      brew tap FelixKratz/formulae
+    after: |-
+      brew services start sketchybar
 {{- end }}
