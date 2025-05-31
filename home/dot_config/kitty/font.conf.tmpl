@@ -20,7 +20,11 @@ bold_italic_font Iosevka Dynamo Bold Italic
 {{- end }}
 
 #: Font size (in pts)
+{{- if eq .chezmoi.os "darwin" }}
+font_size 14.0
+{{- else }}
 font_size 11.0
+{{- end }}
 
 #: kitty does not support BIDI (bidirectional text), however, for RTL
 #: scripts, words are automatically displayed in RTL. That is to say,
