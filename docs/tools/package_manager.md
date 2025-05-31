@@ -51,6 +51,13 @@
 |[fcitx-bamboo](https://github.com/fcitx/fcitx5-bamboo)|Vietnamese input method for Fcitx|`home/dot_config/fcitx-bamboo`|
 |[libnotify](https://gitlab.gnome.org/GNOME/libnotify)|Library for sending desktop notifications to a notification daemon|Miscellaneous|
 
+# MacOS GUI applications
+
+|Tool|Purpose|Used in|
+|----|-------|-------|
+|[sketchybar](https://github.com/FelixKratz/SketchyBar)|Status bar for MacOS|`home/dot_config/sketchybar`|
+|[aerospace](https://github.com/nikitabobko/AeroSpace)|Window manager for MacOS|`home/dot_config/aerospace`|
+
 # System applications
 
 |Tool|Purpose|Used in|
