@@ -1,0 +1,8 @@
+{{- if eq .chezmoi.os "darwin" }}
+name: macos-defaults
+method: os
+is_essential: true
+macos:
+  packages:
+    - name: dsully/tap/macos-defaults
+{{- end }}
