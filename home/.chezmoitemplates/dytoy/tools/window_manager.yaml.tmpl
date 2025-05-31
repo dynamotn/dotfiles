@@ -1,4 +1,4 @@
-{{- if eq .guiServer "W" }}
+{{- if eq .guiWinManager "H" }}
 name: hyprland
 method: os
 is_essential: true
@@ -33,4 +33,12 @@ arch:
     - name: cpio
     - name: cmake
     - name: meson
+{{- else if eq .guiWinManager "A" }}
+name: aerospace
+is_essential: true
+method: os
+macos:
+  packages:
+    - name: nikitabobko/tap/aerospace
+      is_cask: true
 {{- end }}
