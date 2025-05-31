@@ -117,7 +117,7 @@ _{{ $shortCode }}_run() {
       _ubuntu_install "$package_name"
       {{- else if eq .osid "darwin" }}
       package_param=$(echo "$package" | yq e '.param')
-      package_is_cask=$(echo "package" | yq e '.is_cask')
+      package_is_cask=$(echo "$package" | yq e '.is_cask')
       if [[ "$package_param" == "null" ]]; then
         package_param=""
       fi
