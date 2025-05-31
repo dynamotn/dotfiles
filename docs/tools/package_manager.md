@@ -55,6 +55,7 @@
 
 |Tool|Purpose|Used in|
 |----|-------|-------|
+|[macos-defaults](https://github.com/dsully/macos-defaults)|Managing macOS defaults declaratively via YAML files|Prerequisite for MacOS|
 |`ssh`|SSH client|Network tool|
 |[NetworkManager](https://networkmanager.dev/)|Linux network configuration tool suite|Network tool|
 |`nftables`|Netfilter framework|Security tool|
