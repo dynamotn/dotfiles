@@ -1,4 +1,4 @@
-{{- if eq .place "cloud" }}
+{{- if eq .terminalMultiplexer "T" }}
 name: tmux
 method: os
 is_essential: true
@@ -14,7 +14,7 @@ ubuntu:
 termux:
   packages:
     - name: tmux
-{{- else }}
+{{- else if eq .terminalMultiplexer "Z" }}
 name: zellij
 is_essential: true
 {{- if ne .osid "linux-ubuntu" }}
