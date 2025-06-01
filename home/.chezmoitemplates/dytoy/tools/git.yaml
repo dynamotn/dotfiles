@@ -4,8 +4,6 @@ is_essential: true
 gentoo:
   packages:
     - name: dev-vcs/git
-      use: |-
-        dev-vcs/git -perl
 arch:
   packages:
     - name: git

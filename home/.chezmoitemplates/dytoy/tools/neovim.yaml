@@ -4,10 +4,6 @@ is_essential: true
 gentoo:
   packages:
     - name: app-editors/neovim
-      accept_keywords: |-
-        app-editors/neovim **
-      use: |-
-        app-editors/neovim -nvimpager
 arch:
   packages:
     - name: neovim

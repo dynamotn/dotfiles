@@ -78,18 +78,6 @@ _{{ $shortCode }}_run() {
       fi
 
       {{- if eq .osid "linux-gentoo" }}
-      accept_keywords=$(echo "$package" | yq e '.accept_keywords')
-      if [[ "$accept_keywords" != "null" ]]; then
-        sudo mkdir -p $(dirname "/etc/portage/package.accept_keywords/$package_name")
-        sudo touch "/etc/portage/package.accept_keywords/$package_name"
-        echo "$accept_keywords" | sudo tee "/etc/portage/package.accept_keywords/$package_name" > /dev/null
-      fi
-      use=$(echo "$package" | yq e '.use')
-      if [[ "$use" != "null" ]]; then
-        sudo touch "/etc/portage/package.use/$package_name"
-        echo "$use" | sudo tee "/etc/portage/package.use/$package_name" > /dev/null
-      fi
-
       repo=$(echo "$package" | yq e '.repo')
 
       if [[ "$repo" != "null" ]]; then
