@@ -16,8 +16,9 @@ termux:
     - name: tmux
 {{- else }}
 name: zellij
-method: os
 is_essential: true
+{{- if ne .osid "linux-ubuntu" }}
+method: os
 gentoo:
   packages:
     - name: app-misc/zellij
@@ -30,4 +31,10 @@ termux:
 macos:
   packages:
     - name: zellij
+{{- else }}
+method: shell
+dependencies:
+  - rust
+content: cargo install --locked zellij
+{{- end }}
 {{- end }}
