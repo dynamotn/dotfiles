@@ -11,4 +11,12 @@ arch:
 ubuntu:
   packages:
     - name: wofi
+{{- else if eq .guiServer "M" }}
+name: raycast
+method: os
+is_essential: true
+macos:
+  packages:
+    - name: raycast
+      is_cask: true
 {{- end }}
