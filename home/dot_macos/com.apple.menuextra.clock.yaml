@@ -1,0 +1,10 @@
+description: com.apple.menuextra.clock
+data:
+  com.apple.menuextra.clock:
+    FlashDateSeparators: false
+    IsAnalog: false
+    ShowAMPM: true
+    ShowDate: 0
+    ShowDayOfWeek: true
+    ShowSeconds: false
+    DateFormat: "\"EEE d MMM HH:mm:ss\""

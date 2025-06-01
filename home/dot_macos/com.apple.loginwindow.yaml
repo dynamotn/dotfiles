@@ -1,0 +1,8 @@
+description: com.apple.loginwindow
+data:
+  com.apple.loginwindow:
+    MiniBuddyLaunch: false
+    TALLogoutReason: Log Out
+    TALLogoutSavesState: false
+    oneTimeSSMigrationComplete: true
+    AdminHostInfo: HostName
