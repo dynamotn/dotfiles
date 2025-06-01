@@ -7,6 +7,10 @@ dybatpho::register_err_handler
 {{/* check list plugin is empty or not */}}
 {{- if ne $configHash "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }}
 # config hash: {{ $configHash }}
+
+if ! [[ -v HYPRLAND_INSTANCE_SIGNATURE ]]; then
+  exit
+fi
 dybatpho::notice "Setup hyprland"
 
 dybatpho::progress "Install hyprland's header"
