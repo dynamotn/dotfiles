@@ -1,0 +1,42 @@
+#!{{ .bash }}
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+{{- if eq .chezmoi.os "darwin" }}
+{{- range (joinPath .chezmoi.sourceDir "dot_macos/*" | glob) }}
+# {{ . }} hash: {{ . | include | sha256sum }}
+{{- end }}
+dybatpho::notice "Setup MacOS"
+macos-defaults apply ~/.macos
+
+# Disable the sound effects on boot
+sudo nvram SystemAudioVolume=" "
+# Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+
+dybatpho::progress "Mapping keys for Apply Internal Keyboard"
+# Code table
+# |Key|Left|Right|
+# |No action|30064771072||
+# |Esc|30064771113||
+# |Caps Lock|30064771129||
+# |⌃ Control|30064771296|30064771300|
+# |⌥ Options|30064771298|30064771302|
+# |⌘ Command|30064771299|30064771303|
+# |🌐 Fn |1095216660483|280379760050179|
+mapping="<array>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>1095216660483</integer><key>HIDKeyboardModifierMappingSrc</key><integer>30064771296</integer></dict>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>30064771302</integer><key>HIDKeyboardModifierMappingSrc</key><integer>30064771302</integer></dict>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>30064771300</integer><key>HIDKeyboardModifierMappingSrc</key><integer>1095216660483</integer></dict>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>30064771303</integer><key>HIDKeyboardModifierMappingSrc</key><integer>30064771303</integer></dict>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>1095216660483</integer><key>HIDKeyboardModifierMappingSrc</key><integer>30064771300</integer></dict>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>30064771298</integer><key>HIDKeyboardModifierMappingSrc</key><integer>30064771298</integer></dict>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>30064771296</integer><key>HIDKeyboardModifierMappingSrc</key><integer>280379760050179</integer></dict>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>30064771300</integer><key>HIDKeyboardModifierMappingSrc</key><integer>30064771129</integer></dict>"
+mapping="${mapping}<dict><key>HIDKeyboardModifierMappingDst</key><integer>30064771299</integer><key>HIDKeyboardModifierMappingSrc</key><integer>30064771299</integer></dict>"
+mapping="${mapping}</array>"
+defaults -currentHost write -g com.apple.keyboard.modifiermapping.0-0-0 $mapping
+killall "cfprefsd" &> /dev/null
+
+dybatpho::success "Setup MacOS"
+{{- end }}

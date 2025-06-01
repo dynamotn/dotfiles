@@ -1,8 +1,0 @@
-#!{{ .bash }}
-source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
-
-{{- if eq .chezmoi.os "darwin" }}
-dybatpho::notice "Setup MacOS"
-dybatpho::success "Setup MacOS"
-{{- end }}

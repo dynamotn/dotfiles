@@ -1,0 +1,31 @@
+description: com.apple.dock
+kill: ["Dock"]
+data:
+  com.apple.dock:
+    autohide: true
+    enterMissionControlByTopWindowDrag: true
+    largesize: 16.0
+    mineffect: scale
+    minimize-to-application: false
+    mru-spaces: true
+    orientation: left
+    persistent-apps:
+      - tile-data:
+          file-data:
+            _CFURLStringType: 15
+            _CFURLString: "file:///System/Applications/Launchpad.app/"
+      - tile-data:
+          file-data:
+            _CFURLStringType: 15
+            _CFURLString: "file:///Applications/kitty.app/"
+    persistent-others: []
+    recent-apps: []
+    show-recents: false
+    tilesize: 36.0
+    trash-full: false
+    version: 1
+    wvous-bl-corner: 11
+    wvous-bl-modifier: 0
+    wvous-br-corner: 14
+    wvous-tr-corner: 12
+    wvous-tr-modifier: 0

@@ -1,0 +1,4 @@
+description: com.apple.LaunchServices
+data:
+  com.apple.LaunchServices:
+    LSQuarantine: false

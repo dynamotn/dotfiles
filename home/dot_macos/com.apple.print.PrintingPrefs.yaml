@@ -1,0 +1,4 @@
+description: com.apple.print.PrintingPrefs
+data:
+  com.apple.print.PrintingPrefs:
+    Quit When Finished: true
