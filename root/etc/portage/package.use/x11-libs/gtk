@@ -1,0 +1,25 @@
+x11-libs/gtk+ X introspection
+# required by x11-libs/gtk+-3.24.38::gentoo
+# required by gtk+ (argument)
+>=media-libs/libepoxy-1.5.10-r2 X
+# required by x11-libs/gtk+-3.24.38::gentoo
+# required by gtk+ (argument)
+>=x11-libs/cairo-1.18.0 X
+# required by x11-libs/gtk+-3.24.38::gentoo[X]
+# required by gtk+ (argument)
+>=media-libs/libglvnd-1.7.0 X
+# required by gtk+ (argument)
+>=app-accessibility/at-spi2-core-2.50.2 introspection
+# required by gtk+ (argument)
+>=x11-libs/gdk-pixbuf-2.42.10-r1 introspection
+# required by gtk+ (argument)
+>=x11-libs/pango-1.52.1 introspection
+# required by gtk+ (argument)
+>=media-libs/harfbuzz-8.5.0 introspection
+# required by dev-libs/gobject-introspection-1.80.1-r3::gentoo
+# required by app-accessibility/at-spi2-core-2.52.0::gentoo[introspection]
+# required by x11-libs/gtk+-3.24.42-r1::gentoo
+# required by x11-themes/adwaita-icon-theme-legacy-46.2::gentoo
+# required by x11-themes/adwaita-icon-theme-46.2::gentoo
+# required by gui-libs/gtk-4.14.4-r1::gentoo
+>=dev-libs/glib-2.80.5-r1 introspection

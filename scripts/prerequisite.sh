@@ -26,7 +26,7 @@ elif command -v pacman &> /dev/null; then
   sudo pacman -Sy git curl openssh
 elif command -v emerge &> /dev/null; then
   # Gentoo
-  sudo emerge -uDN dev-vcs/git net-misc/curl net-misc/openssh
+  sudo emerge -uDN dev-vcs/git net-misc/curl net-misc/openssh app-portage/cpuid2cpuflag app-misc/resolve-march-native
 else
   echo "Your OS/distro is not supported"
   exit 1
