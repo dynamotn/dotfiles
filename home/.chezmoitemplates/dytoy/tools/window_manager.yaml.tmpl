@@ -5,18 +5,9 @@ is_essential: true
 gentoo:
   packages:
     - name: gui-wm/hyprland
-      accept_keywords: |-
-        gui-wm/hyprland ~amd64
-        dev-util/hyprwayland-scanner ~amd64
-        dev-libs/wayland-protocols ~amd64
-        gui-libs/aquamarine ~amd64
-        gui-libs/hyprutils ~amd64
-        dev-cpp/sdbus-c++ ~amd64
     - name: x11-libs/xcb-util
     {{- if ne .place "home" }}
     - name: gui-apps/hypridle
-      accept_keywords: |-
-        gui-apps/hypridle ~amd64
     {{- end }}
 arch:
   packages:
