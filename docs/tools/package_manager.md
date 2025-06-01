@@ -57,6 +57,7 @@
 |----|-------|-------|
 |[sketchybar](https://github.com/FelixKratz/SketchyBar)|Status bar for MacOS|`home/dot_config/sketchybar`|
 |[aerospace](https://github.com/nikitabobko/AeroSpace)|Window manager for MacOS|`home/dot_config/aerospace`|
+|[raycast](https://www.raycast.com/)|Launcher for everything|Miscellaneous|
 
 # System applications
 
