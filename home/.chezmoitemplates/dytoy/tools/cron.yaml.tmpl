@@ -17,10 +17,10 @@ arch:
       sudo systemctl enable --now cronie
 ubuntu:
   packages:
-    - name: cronie
+    - name: cron
   hook:
     after: |-
-      sudo systemctl enable --now cronie
+      sudo systemctl enable --now cron
 termux:
   packages:
     - name: cronie
