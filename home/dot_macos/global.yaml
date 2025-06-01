@@ -1,0 +1,84 @@
+description: NSGlobalDomain
+data:
+  NSGlobalDomain:
+    AKLastIDMSEnvironment: 0
+    AKLastLocale: en_VN
+    AppleAccentColor: 3
+    AppleActionOnDoubleClick: Maximize
+    AppleAntiAliasingThreshold: 4
+    AppleAquaColorVariant: 1
+    AppleHighlightColor: 0.752941 0.964706 0.678431 Green
+    AppleICUDateFormatStrings:
+      "1": dd/MM/y
+    AppleICUForce12HourTime: true
+    AppleICUNumberSymbols:
+      "10": ","
+      "1":  
+      "17":  
+      "0": ","
+    AppleInterfaceStyle: Dark
+    AppleKeyboardUIMode: 2
+    AppleLanguages:
+      - en-VN
+      - vi-VN
+    AppleLanguagesSchemaVersion: 5400
+    AppleLiveTextEnabled: true
+    AppleLocale: en_VN
+    AppleMiniaturizeOnDoubleClick: false
+    AppleReduceDesktopTinting: false
+    AppleScrollerPagingBehavior: false
+    AppleShowAllExtensions: true
+    AppleShowScrollBars: Always
+    AppleSpacesSwitchOnActivate: true
+    AppleWindowTabbingMode: fullscreen
+    KB_DoubleQuoteOption: “abc”
+    KB_SingleQuoteOption: ‘abc’
+    KB_SpellingLanguage:
+      KB_SpellingLanguageIsAutomatic: true
+    NSAutomaticCapitalizationEnabled: true
+    NSAutomaticPeriodSubstitutionEnabled: true
+    NSAutomaticWindowAnimationsEnabled: false
+    NSLinguisticDataAssetsRequestLastInterval: 86400.0
+    NSLinguisticDataAssetsRequestTime: "2025-05-31T15:32:56.288089036Z"
+    NSLinguisticDataAssetsRequested:
+      - vi
+      - vi_VN
+      - en
+      - en_VN
+      - en_US
+    NSLinguisticDataAssetsRequestedByChecker: []
+    NSPreferredWebServices:
+      NSWebServicesProviderWebSearch:
+        NSDefaultDisplayName: Google
+        NSProviderIdentifier: com.google.www
+    NSSpellCheckerDictionaryContainerTransitionComplete: true
+    NSTableViewDefaultSizeMode: 2
+    NSUserDictionaryReplacementItems:
+      - replace: dtd
+        "on": 1
+        with: Đang trên đường!
+      - replace: omw
+        "on": 1
+        with: On my way!
+    NSUserKeyEquivalents: {}
+    NSUserQuotesArray:
+      - “
+      - ”
+      - ‘
+      - ’
+    NSWindowShouldDragOnGesture: true
+    PKOrderManagementDisabled: true
+    UIPreferredContentSizeCategoryName: UICTContentSizeCategoryL
+    _HIHideMenuBar: true
+    com.apple.finder.SyncExtensions:
+      collaborationMap: {}
+      dirMap: {}
+    com.apple.keyboard.fnState: true
+    com.apple.sound.beep.flash: 0
+    com.apple.springing.delay: 0.5
+    com.apple.springing.enabled: true
+    com.apple.swipescrolldirection: false
+    com.apple.trackpad.forceClick: true
+    shouldShowRSVPDataDetectors: false
+    NSDocumentSaveNewDocumentsToCloud: false
+    NSTextShowsControlCharacters: true

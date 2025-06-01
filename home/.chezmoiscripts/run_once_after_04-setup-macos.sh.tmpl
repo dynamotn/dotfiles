@@ -1,0 +1,18 @@
+#!{{ .bash }}
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+{{- if eq .chezmoi.os "darwin" }}
+{{- range (joinPath .chezmoi.sourceDir "dot_macos/*" | glob) }}
+# {{ . }} hash: {{ . | include | sha256sum }}
+{{- end }}
+dybatpho::notice "Setup MacOS"
+macos-defaults apply ~/.macos
+
+# Disable the sound effects on boot
+sudo nvram SystemAudioVolume=" "
+# Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+
+dybatpho::success "Setup MacOS"
+{{- end }}

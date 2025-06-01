@@ -1,0 +1,41 @@
+# Code table
+# |Key|Left|Right|
+# |No action|30064771072||
+# |Esc|30064771113||
+# |Caps Lock|30064771129||
+# |⌃ Control|30064771296|30064771300|
+# |⌥ Options|30064771298|30064771302|
+# |⌘ Command|30064771299|30064771303|
+# |🌐 Fn |1095216660483|280379760050179|
+
+description: com.apple.keyboard.modifiermapping.0-0-0
+kill: ["cfprefsd"]
+data:
+  com.apple.keyboard.modifiermapping.0-0-0:
+# "0": # Caps Lock -> Right Control
+#   HIDKeyboardModifierMappingSrc: 30064771129
+#   HIDKeyboardModifierMappingDst: 30064771300
+# "1": # Left Command -> Left Command
+#   HIDKeyboardModifierMappingSrc: 30064771299
+#   HIDKeyboardModifierMappingDst: 30064771299
+# "2": # Right Command -> Right Command
+#   HIDKeyboardModifierMappingSrc: 30064771303
+#   HIDKeyboardModifierMappingDst: 30064771303
+# "3": # Left Option -> Left Option
+#   HIDKeyboardModifierMappingSrc: 30064771298
+#   HIDKeyboardModifierMappingDst: 30064771298
+# "4": # Right Option -> Right Option
+#   HIDKeyboardModifierMappingSrc: 30064771302
+#   HIDKeyboardModifierMappingDst: 30064771302
+# "5": # Left Fn -> Right Control
+#   HIDKeyboardModifierMappingSrc: 1095216660483
+#   HIDKeyboardModifierMappingDst: 30064771300
+# "6": # Right Fn -> Left Control
+#   HIDKeyboardModifierMappingSrc: 280379760050179
+#   HIDKeyboardModifierMappingDst: 30064771296
+# "7": # Left Control -> Left Fn
+#   HIDKeyboardModifierMappingSrc: 30064771296
+#   HIDKeyboardModifierMappingDst: 1095216660483
+# "8": # Right Control -> Left Fn
+#   HIDKeyboardModifierMappingSrc: 30064771129
+#   HIDKeyboardModifierMappingDst: 30064771300
