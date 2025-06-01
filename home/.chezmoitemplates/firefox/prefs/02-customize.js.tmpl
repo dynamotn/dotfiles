@@ -19,6 +19,10 @@ user_pref("font.size.monospace.x-western", 14);
 user_pref("font.size.monospace.x-unicode", 14);
 user_pref("font.minimum-size.x-western", 14);
 user_pref("font.minimum-size.x-unicode", 14);
+{{- if eq .chezmoi.os "darwin" }}
+user_pref("font.name.sans-serif.x-western", "Roboto");
+user_pref("font.name.monospace.x-western", "Iosevka Dynamo");
+{{- end }}
 /* Disable web page's font
  * [SETTING] General->Language and Appearance->Fonts and Colors */
 user_pref("browser.display.use_document_fonts", 0);
