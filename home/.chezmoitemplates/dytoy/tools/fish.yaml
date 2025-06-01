@@ -10,6 +10,9 @@ arch:
 ubuntu:
   packages:
     - name: fish
+      repo: http://ppa.launchpad.net/fish-shell/release-4/ubuntu
+      repo_version: main
+      key: 88421E703EDC7AF54967DED473C9FCC9E2BB48DA
 termux:
   packages:
     - name: fish
