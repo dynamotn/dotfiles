@@ -1,0 +1,5 @@
+app-containers/podman btrfs wrapper
+# required by app-containers/containers-common-0.56.0-r1::gentoo
+# required by app-containers/podman-4.7.2::gentoo
+# required by app-containers/podman (argument)
+>=net-firewall/iptables-1.8.9 nftables

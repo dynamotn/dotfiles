@@ -1,0 +1,7 @@
+# required by gui-apps/eww-9999::guru
+# required by gui-apps/eww::guru (argument)
+>=dev-libs/libdbusmenu-16.04.0-r2 gtk3
+# required by gui-apps/eww-9999::guru
+# required by @selected
+# required by @world (argument)
+>=x11-libs/gdk-pixbuf-2.42.10-r1 jpeg

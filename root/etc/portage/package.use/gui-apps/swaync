@@ -1,0 +1,9 @@
+gui-apps/swaync pulseaudio
+gui-libs/libhandy introspection vala
+# required by gui-apps/swaync-0.10.1-r1::guru
+# required by swaync (argument)
+>=gui-libs/gtk-layer-shell-0.8.2 introspection vala
+# required by dev-libs/granite-6.2.0::gentoo
+# required by gui-apps/swaync-0.10.1-r1::guru
+# required by swaync (argument)
+>=dev-libs/libgee-0.20.6-r1 introspection

@@ -1,0 +1,1 @@
+export DISTCC_VERBOSE=1
