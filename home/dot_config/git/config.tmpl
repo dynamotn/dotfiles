@@ -11,8 +11,12 @@
 [commit]
         # Always sign commit
         gpgsign = true
+{{- if lookPath "git" }}
+{{- if gt (semver "2.35" | (output "bash" "-c" "git --version | cut -f3 -d' '" | trim | semver).Compare ) 0 }}
 [merge]
         conflictstyle = zdiff3
+{{- end}}
+{{- end}}
 [diff]
         # Diff with vim
         tool = nvimdiff
