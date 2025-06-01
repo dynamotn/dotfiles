@@ -65,14 +65,14 @@ bind = $mainMod SHIFT, up, resizeactive, 0 -100 # Reduce window height with keyb
 
 # Windows
 bind = $altMod, F4, killactive,
-bind = $mainMod, F, fullscreen
-bind = $mainMod, H, togglefloating,
-bind = $mainMod, J, togglesplit,
-bind = $mainMod, G, togglegroup,
-bind = $mainMod, K, swapsplit,
+bind = $mainMod, period, fullscreen
+bind = $mainMod, slash, togglefloating,
+bind = $mainMod, comma, togglesplit,
+bind = $mainMod, semicolon, togglegroup,
+bind = $mainMod, apostrophe, swapsplit,
 
 # 3rd apps #
-bind = $mainMod, Q, exec, kitty zellij
+bind = $mainMod, Return, exec, kitty zellij
 bind = $mainMod, E, exec, $browser
 bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
