@@ -3,6 +3,7 @@
 **/.gitignore
 **/.gitmodules
 **/*.sqlite-wal
+**/.DS_Store
 
 {/* Linux UI-related files */}
 {{- if eq .guiServer "0" "M" }}
@@ -155,6 +156,7 @@ Library/thunderbird
 Library
 {{- end }}
 
+{/* Machine type files */}
 {{- if ne .kind "laptop" }}
 .config/shikane
 {{- end }}

@@ -1,4 +1,5 @@
-{{- if eq .kind "pc" "laptop" }}
+{{- if eq .chezmoi.os "linux" }}
+{{-   if eq .kind "pc" "laptop" }}
 usr/share/grub/themes/catppuccin:
   type: archive
   url: https://github.com/catppuccin/grub/archive/refs/heads/main.zip
@@ -6,10 +7,11 @@ usr/share/grub/themes/catppuccin:
   stripComponents: 3
   include:
     - grub-main/src/catppuccin-macchiato-grub-theme/*
-{{- end }}
-{{- if eq .kind "laptop" }}
+{{-   end }}
+{{-   if eq .kind "laptop" }}
 etc/NetworkManager/dispatcher.d/90-open_captive_portal:
   type: file
   url: https://raw.githubusercontent.com/Seme4eg/captive-portal-sh/refs/heads/master/90-open_captive_portal
   refreshPeriod: 168h
+{{-   end }}
 {{- end }}
