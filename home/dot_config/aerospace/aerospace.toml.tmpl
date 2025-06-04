@@ -1,6 +1,12 @@
 after-startup-command = [
   ## SketchyBar
   'exec-and-forget sketchybar --reload ~/.config/sketchybar/sketchybarrc',
+  ## Kitty
+  'exec-and-forget kitty zellij',
+  ## Firefox/Zen
+  'exec-and-forget open -a /Applications/{{ if eq .browser "F" }}Firefox{{ else if eq .browser "Z" }}Zen{{ end }}.app',
+  ## Obsidian
+  'exec-and-forget open -a /Applications/Obsidian.app',
 ]
 exec-on-workspace-change = [
   ## SketchyBar
@@ -66,6 +72,10 @@ run = 'move-node-to-workspace 3'
 [[on-window-detected]]
 if.app-name-regex-substring = 'Obsidian'
 run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Omnissa'
+run = ['layout floating', 'move-node-to-workspace 0']
 
 # Possible values: (qwerty|dvorak)
 # See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
@@ -166,6 +176,7 @@ alt-esc = 'mode apps'
 
 alt-enter = 'exec-and-forget kitty zellij'
 alt-e = 'exec-and-forget open -a /Applications/Zen.app'
+alt-q = 'exec-and-forget /Applications/Zen.app/Contents/MacOS/zen -P Enterprise'
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
