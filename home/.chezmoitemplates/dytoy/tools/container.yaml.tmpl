@@ -42,5 +42,6 @@ macos:
     - name: docker
   hook:
     after: |-
-      limactl start template://docker || true
+      limactl list docker || limactl start template://docker || true
+      limactl start-at-login docker
 {{- end }}
