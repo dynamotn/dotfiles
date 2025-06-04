@@ -77,6 +77,7 @@
 |[auto-cpufreq](https://github.com/AdnanHodzic/auto-cpufreq)|Automatic CPU speed & power optimizer|OS tune tool|
 |[grub](https://www.gnu.org/software/grub/)|Bootloader for system|OS core tool|
 |[docker](https://docs.docker.com/engine/)|Manage containers|DevOps tool|
+|[lima](https://github.com/lima-vm/lima)|Linux VM on MacOS|DevOps tool|
 |[ollama](https://github.com/ollama/ollama)|Get up and running LLMs|AI Tool|
 |[rust](https://github.com/rust-lang/rust)|Compiler and library for Rust|Prerequisite for cargo installation|
 |[go](https://github.com/golang/go)|Compiler and library for Go|Prerequisite for go installation|
