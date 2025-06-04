@@ -51,6 +51,11 @@
   executable: true
   refreshPeriod: 168h
 {{- if eq .terminalMultiplexer "T" }}
+.local/bin/fzf-tmux:
+  type: file
+  url: 'https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux'
+  executable: true
+  refreshPeriod: 168h
 .local/bin/xpanes:
   type: file
   url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/master/bin/xpanes'
