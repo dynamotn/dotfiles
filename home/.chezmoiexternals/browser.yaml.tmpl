@@ -1,3 +1,4 @@
+{{- if eq .browser "F" "Z" }}
 {{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/.chezmoitemplates/firefox/prefs/00-arkenfox.js:
   type: file
   url: 'https://raw.githubusercontent.com/arkenfox/user.js/master/user.js'
@@ -6,15 +7,12 @@
   type: file
   url: https://raw.githubusercontent.com/HorlogeSkynet/thunderbird-user.js/master/user.js
   refreshPeriod: 168h
-{{- if eq .guiServer "W" }}
-{{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/dot_config/firefox/profiles/personal/extensions/tridactyl.vim.betas.nonewtab@cmcaine.co.uk.xpi:
+{{- range (list "enterprise" "personal" "public") }}
+{{ splitList (printf "%s/" $.chezmoi.homeDir) $.chezmoi.sourceDir | last }}/dot_config/firefox/profiles/{{ . }}/extensions/tridactyl.vim.betas.nonewtab@cmcaine.co.uk.xpi:
   type: file
   url: 'https://tridactyl.cmcaine.co.uk/betas/nonewtab/tridactyl_no_new_tab_beta-latest.xpi'
   refreshPeriod: 168h
-{{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/dot_config/firefox/profiles/enterprise/extensions/tridactyl.vim.betas.nonewtab@cmcaine.co.uk.xpi:
-  type: file
-  url: 'https://tridactyl.cmcaine.co.uk/betas/nonewtab/tridactyl_no_new_tab_beta-latest.xpi'
-  refreshPeriod: 168h
+{{- end }}
 {{ splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}/dot_config/thunderbird/profiles/personal/extensions/{d3f3abb5-21aa-57fd-80e3-a9a1887b1d16}.xpi:
   type: file
   url: 'https://github.com/catppuccin/thunderbird/raw/refs/heads/main/themes/macchiato/macchiato-teal.xpi'
