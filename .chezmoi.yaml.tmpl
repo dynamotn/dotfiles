@@ -54,6 +54,9 @@ data:
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" false }}
   terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use? (T for tmux, Z for Zellij)" (list "T" "Z") "Z" | quote }}
+  httpProxy: {{ promptStringOnce . "httpProxy" "Does this machine need HTTP(S) proxy? Fill proxy address, empty for not using:" | quote }}
+  socksProxy: {{ promptStringOnce . "httpProxy" "Does this machine need SOCKS v5 proxy? Fill proxy address, empty for not using:" | quote }}
+  noProxyAddresses: []
 
 hooks:
   diff:
