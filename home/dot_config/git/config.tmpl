@@ -202,7 +202,7 @@
 [includeIf "gitdir/i:~/Working/enterprise/**"]
         # Include config file from enterprise projects
         path = ~/Working/enterprise/.gitconfig
-{{- if ne .place "container" }}
+{{- if not (eq .kind "container" "vm") }}
 [url "git@github.com:"]
         # Prefer SSH than HTTPS for github
         insteadOf = https://github.com/
