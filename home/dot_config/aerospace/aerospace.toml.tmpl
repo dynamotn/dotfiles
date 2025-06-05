@@ -62,7 +62,7 @@ if.app-name-regex-substring = 'kitty'
 run = 'move-node-to-workspace 1'
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'Zen'
+if.app-name-regex-substring = '{{ if eq .browser "F" }}Firefox{{ else if eq .browser "Z" }}Zen{{ end }}'
 run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
@@ -175,8 +175,8 @@ alt-semicolon = 'mode service'
 alt-esc = 'mode apps'
 
 alt-enter = 'exec-and-forget kitty zellij'
-alt-e = 'exec-and-forget open -a /Applications/Zen.app'
-alt-q = 'exec-and-forget /Applications/Zen.app/Contents/MacOS/zen -P Enterprise'
+alt-e = 'exec-and-forget open -a /Applications/{{ if eq .browser "F" }}Firefox{{ else if eq .browser "Z" }}Zen{{ end }}.app'
+alt-q = 'exec-and-forget open -a /Applications/{{ if eq .browser "F" }}Firefox{{ else if eq .browser "Z" }}Zen{{ end }}.app --args -P Enterprise'
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
