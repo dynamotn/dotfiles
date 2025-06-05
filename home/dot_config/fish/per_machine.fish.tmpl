@@ -34,9 +34,11 @@ set -U DENO_TLS_CA_STORE system
 
 {{- if .httpProxy }}
 set -gx http_proxy {{ .httpProxy | quote }}
+set -gx https_proxy {{ .httpProxy | quote }}
 {{- end }}
 {{- if .socksProxy }}
 set -gx http_proxy {{ .socksProxy | quote }}
+set -gx https_proxy {{ .socksProxy | quote }}
 {{- end }}
 {{- with .noProxyAddresses }}
 set -gx no_proxy {{ join "," . | quote }}
