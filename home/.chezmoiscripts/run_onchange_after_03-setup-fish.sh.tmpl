@@ -9,12 +9,12 @@ if [[ $SHELL != "$(which fish)" ]]; then
   dybatpho::info "Change default shell to fish"
   {{- if eq .chezmoi.os "linux" }}
   # We need chsh without sudo cause sometimes we don't have sudo permissions on collaborative environment
-  chsh -s "$(which fish)"
+  chsh -s "$(which fish)" || :
   {{- else if eq .chezmoi.os "darwin" }}
   echo "$(which fish)" | sudo tee -a /etc/shells
   chsh -s "$(which fish)" || :
   {{- else }}
-  chsh -s fish
+  chsh -s fish || :
   {{- end }}
 fi
 {{- end }}
