@@ -7,7 +7,9 @@ dybatpho::notice "Setup PAM"
 {{- range (joinPath .chezmoi.sourceDir "etc/pam.d/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
-sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
+if dybatpho::is file /etc/pam.d/system-local-login; then
+  sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
+fi
 {{- if eq .chezmoi.osRelease.id "arch" "ubuntu" }}
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su-l

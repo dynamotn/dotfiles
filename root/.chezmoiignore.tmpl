@@ -62,3 +62,8 @@ etc/NetworkManager/system-connections/Office-Project.nmconnection
 {{- if ne .kind "pc" }}
 etc/NetworkManager/system-connections/Dynamo.nmconnection
 {{- end }}
+{{- if and (eq .kind "vm") (eq .place "office") }}
+etc/hostname
+etc/modprobe.d
+etc/pam.d
+{{- end }}
