@@ -127,6 +127,10 @@ if status is-interactive
         set -U ZELLIJ_AUTO_ATTACH true
         zellij setup --generate-completion fish | source
     end
+    # Lima
+    if type -q limactl
+        set -Ux DOCKER_HOST (limactl list docker --format 'unix://{{.Dir}}/sock/docker.sock')
+    end
 
     # Other completions generation
     # kubectl
