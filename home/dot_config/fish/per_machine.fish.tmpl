@@ -31,3 +31,13 @@ set -Ux GRPC_DEFAULT_SSL_ROOTS_FILE_PATH /etc/ssl/certs/ca-certificates.crt
 set -Ux REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt
 set -U DENO_TLS_CA_STORE system
 {{- end }}
+
+{{- if .httpProxy }}
+set -gx http_proxy {{ .httpProxy | quote }}
+{{- end }}
+{{- if .socksProxy }}
+set -gx http_proxy {{ .socksProxy | quote }}
+{{- end }}
+{{- with .noProxyAddresses }}
+set -gx no_proxy {{ join "," . | quote }}
+{{- end }}
