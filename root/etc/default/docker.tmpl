@@ -1,0 +1,11 @@
+{{- with .httpProxy }}
+export http_proxy={{ . | quote}}
+export https_proxy={{ . | quote}}
+{{- end }}
+{{- with .socksProxy }}
+export http_proxy={{ . | quote}}
+export https_proxy={{ . | quote}}
+{{- end }}
+{{- with .noProxyAddresses }}
+export no_proxy={{ join "," . | quote }}
+{{- end }}
