@@ -1,0 +1,13 @@
+{{- if .httpProxy }}
+Acquire::http::Proxy "{{ .httpProxy }}";
+Acquire::https::Proxy "{{ .httpProxy }}";
+{{-   range .noProxyAddresses }}
+Acquire::http::proxy::{{ . }} "DIRECT";
+{{-   end }}
+{{- end }}
+{{- if .socksProxy }}
+Acquire::socks::Proxy "{{ .socksProxy }}";
+{{-   range .noProxyAddresses }}
+Acquire::socks::proxy::{{ . }} "DIRECT";
+{{-   end }}
+{{- end }}

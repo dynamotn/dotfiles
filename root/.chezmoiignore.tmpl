@@ -33,7 +33,7 @@ opt/zen-browser-bin
 {{- end }}
 
 {/* Linux related files */}
-{{- if not (eq .osid "linux-arch" "linux-ubuntu") }}
+{{- if not (eq .osid "linux-arch" "linux-ubuntu" "linux-debian") }}
 etc/systemd
 etc/vconsole.conf
 {{- end }}
@@ -45,6 +45,9 @@ etc/pacman.conf
 {{- if ne .osid "linux-gentoo" }}
 etc/ntp
 etc/portage
+{{- end }}
+{{- if not (eq .osid "linux-ubuntu" "linux-debian") }}
+etc/apt
 {{- end }}
 
 {/* Machine type files */}
