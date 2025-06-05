@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+{{- if ne .guiServer "0" }}
+{{-   $process := "" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $process = "/Applications/Thunderbird.app/Contents/MacOS/thunderbird" }}
+{{-   else if eq .osid "linux-gentoo" }}
+{{-     $process = "/opt/thunderbird" }}
+{{-   else }}
+{{-     $process = "/usr/lib/thunderbird" }}
+{{-   end }}
+{{-   $profiles := list }}
+{{-   if eq .kind "container" "vm" }}
+{{-     $profiles = list "public" }}
+{{-   else }}
+{{-     $profiles = list "personal" "enterprise" }}
+{{-   end }}
+
+function _update_dotfiles {
+  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
+    if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
+      {{- if not (eq .kind "container" "vm") }}
+      if dybatpho::is file ~/.config/thunderbird/profiles/${profile}/prefs.js; then
+        dybatpho::progress "Update toolbar setting for profile ${profile}"
+        grep "browser.uiCustomization.state" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/01-toolbar.js
+
+        dybatpho::progress "Update addon setting for profile ${profile}"
+        grep "extensions.webextensions.uuids" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
+        grep "extensions.webextensions.ExtensionStorageIDB.migrated" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
+        grep "privacy.userContext.extension" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
+      fi
+      {{- end }}
+
+      dybatpho::progress "Update extensions data for profile ${profile}"
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/extensions || true
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/addons.json --create || true
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/addonStartup.json.lz4 --create || true
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/extension*.json --create || true
+
+      dybatpho::progress "Update search engines for profile ${profile}"
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
+
+      dybatpho::progress "Update bookmarks and history for profile ${profile}"
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/favicons.sqlite --create || true
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/places.sqlite --create || true
+
+      dybatpho::progress "Update storage data for profile ${profile}"
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/storage.sqlite --create || true
+      chezmoi add ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* --create || true
+    else
+      dybatpho::debug "$PROFILE"
+    fi
+  done
+}
+
+function _main {
+  if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 1 ]; then
+    dybatpho::fatal "thunderbird is running"
+  else
+    dybatpho::notice "Update thunderbird settings"
+    _update_dotfiles
+    dybatpho::success "Update thunderbird settings"
+  fi
+}
+
+function _spec_main {
+  dybatpho::opts::setup "Update your live data of thunderbird to your dotfiles" MAIN_ARGS action:"_main"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"_validate_profile"
+  dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
+}
+
+function _validate_profile {
+  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
+    if [ "$OPTARG" = "" ] || [ "$OPTARG" = "$profile" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+dybatpho::generate_from_spec _spec_main "$@"
+{{- end }}
