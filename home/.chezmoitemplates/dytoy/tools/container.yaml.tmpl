@@ -9,7 +9,7 @@ gentoo:
     - name: app-containers/docker-cli
   hook:
     after: |-
-      sudo usermod -aG docker $USER
+      sudo usermod -aG docker $USER || true
       {{- if ne .kind "container" }}
       sudo rc-update add docker default
       sudo rc-service docker start
@@ -20,7 +20,7 @@ arch:
   hook:
     after: |-
       sudo groupadd docker || true
-      sudo usermod -aG docker $USER
+      sudo usermod -aG docker $USER || true
       {{- if ne .kind "container" }}
       sudo systemctl enable --now docker containerd
       {{- end }}
@@ -31,7 +31,7 @@ ubuntu:
   hook:
     after: |-
       sudo groupadd docker || true
-      sudo usermod -aG docker $USER
+      sudo usermod -aG docker $USER || true
       {{- if ne .kind "container" }}
       sudo systemctl enable --now docker containerd
       {{- end }}
