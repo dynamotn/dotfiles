@@ -1,0 +1,38 @@
+# vim:ft=gitconfig
+[submodule "neovim"]
+  path = home/dot_config/nvim
+  url = git@github.com:dynamo/neovim-config.git
+[submodule "tmux"]
+  path = silos/tmux
+  url = git@github.com:dynamo/tmux-config.git
+[submodule "awesome"]
+  path = home/dot_config/awesome
+  url = git@github.com:dynamo/awesomewm-config.git
+[submodule "wallpaper"]
+  path = home/Multimedia/Pictures/Wallpaper
+  url = git@github.com:dynamo/wallpapers-collection.git
+[submodule "icon"]
+  path = silos/icon
+  url = git@github.com:dynamo/Dynamo-Icon.git
+[submodule "lepton"]
+  path = home/.chezmoitemplates/firefox/chrome/lepton
+  url = git@github.com:black7375/Firefox-UI-Fix.git
+[submodule "firefox-personal"]
+  path = home/dot_config/firefox/profiles/personal
+  url = git@github.com:dynamo/firefox.git
+  branch = personal
+[submodule "firefox-enterprise"]
+  path = home/dot_config/firefox/profiles/enterprise
+  url = git@github.com:dynamo/firefox.git
+  branch = enterprise
+[submodule "thunderbird-enterprise"]
+  path = home/dot_config/thunderbird/profiles/enterprise
+  url = git@github.com:dynamo/thunderbird.git
+  branch = enterprise
+[submodule "thunderbird-personal"]
+  path = home/dot_config/thunderbird/profiles/personal
+  url = git@github.com:dynamo/thunderbird.git
+  branch = personal
+[submodule "scripts/lib/dybatpho"]
+  path = scripts/lib/dybatpho
+  url = https://github.com/dynamotn/dybatpho.git
