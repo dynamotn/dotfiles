@@ -57,6 +57,8 @@ data:
   httpProxy: {{ promptStringOnce . "httpProxy" "Does this machine need HTTP(S) proxy? Fill proxy address, empty for not using:" | quote }}
   socksProxy: {{ promptStringOnce . "httpProxy" "Does this machine need SOCKS v5 proxy? Fill proxy address, empty for not using:" | quote }}
   noProxyAddresses: []
+  preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git? (y/n)" true }}
+  blockedGitlab: {{ promptBoolOnce . "blockedGitlab" "Is this machines blocked to access Gitlab? (y/n)" false }}
 
 hooks:
   diff:
