@@ -14,11 +14,3 @@
   refreshPeriod: 168h
 {{-   end }}
 {{- end }}
-{{- if ne .guiServer "0" }}
-{{-   range (list "enterprise" "personal" "public") }}
-{{ splitList (printf "%s/" $.chezmoi.homeDir) $.chezmoi.sourceDir | last }}/dot_config/thunderbird/profiles/{{ . }}/extensions/{d3f3abb5-21aa-57fd-80e3-a9a1887b1d16}.xpi:
-  type: file
-  url: 'https://github.com/catppuccin/thunderbird/raw/refs/heads/main/themes/macchiato/macchiato-teal.xpi'
-  refreshPeriod: 168h
-{{-   end }}
-{{- end }}
