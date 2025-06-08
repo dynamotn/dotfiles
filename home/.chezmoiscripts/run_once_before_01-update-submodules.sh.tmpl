@@ -10,15 +10,17 @@ sed -i 's#git@gitlab.com:#https://gitlab.com/#g' .gitmodules
 git submodule sync --recursive
 {{- end }}
 git submodule update --init --remote --recursive \
-  {{- if eq .guiServer "W" }}
+  {{- if eq .guiServer "W" "X" }}
   home/Multimedia/Pictures/Wallpaper \
   silos/icon \
+  {{- end }}
   {{- if eq .browser "F" }}
   home/dot_config/firefox/profiles \
   home/.chezmoitemplates/firefox/chrome/lepton \
   {{- else if eq .browser "Z" }}
   home/dot_config/firefox/profiles \
   {{- end }}
+  {{- if ne .guiServer "0" }}
   home/dot_config/thunderbird/profiles \
   {{- end }}
   {{- if eq .terminalMultiplexer "T" }}
