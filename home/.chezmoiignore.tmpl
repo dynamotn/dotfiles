@@ -162,6 +162,12 @@ Library
 {{- if ne .kind "laptop" }}
 .config/shikane
 {{- end }}
+{{- if eq .kind "container" "vm" }}
+.config/firefox/profiles/personal
+.config/firefox/profiles/enterprise
+.config/thunderbird/profiles/personal
+.config/thunderbird/profiles/enterprise
+{{- end }}
 
 {/* Self-managed folders */}
 {{- if not (eq .kind "pc" "laptop") }}
