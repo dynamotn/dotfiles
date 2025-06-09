@@ -20,12 +20,16 @@ git submodule update --init --remote --recursive \
   silos/icon \
   {{- end }}
   {{- if eq .browser "F" }}
-  home/dot_config/firefox/profiles \
   home/.chezmoitemplates/firefox/chrome/lepton \
-  {{- else if eq .browser "Z" }}
-  home/dot_config/firefox/profiles \
   {{- end }}
-  {{- if ne .guiServer "0" }}
+  {{- if not (eq .kind "vm" "container") }}
+  {{-   if eq .browser "F" }}
+  home/dot_config/firefox/profiles \
+  {{-   else if eq .browser "Z" }}
+  home/dot_config/firefox/profiles \
+  {{-   end }}
+  {{- end }}
+  {{- if and (ne .guiServer "0") (not (eq .kind "vm" "container")) }}
   home/dot_config/thunderbird/profiles \
   {{- end }}
   {{- if eq .terminalMultiplexer "T" }}
