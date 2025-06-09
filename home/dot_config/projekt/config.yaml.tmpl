@@ -10,6 +10,11 @@ folders:
     is_workspace: true
     regex: ""
     priority: 0
+  - path: {{ .chezmoi.homeDir }}/Temp
+    prefix: "tmp"
+    is_workspace: true
+    regex: ""
+    priority: 0
   - path: {{ .chezmoi.homeDir }}/Working/community
     prefix: ""
     is_workspace: true
@@ -40,12 +45,17 @@ folders:
     is_workspace: true
     regex: ""
     priority: 0
-  {{- if eq .place "office" }}
-  {{- end }}
   {{- if eq .kind "pc" "laptop" }}
   - path: {{ .chezmoi.homeDir }}/Documents/Notes
     prefix: ""
     is_workspace: false
+    regex: ""
+    priority: 0
+  {{- end }}
+  {{- if or (eq .kind "pc" "laptop") (and (eq .kind "vm") (eq .place "office")) }}
+  - path: {{ .chezmoi.homeDir }}/Working/enterprise/F1/OP
+    prefix: "op"
+    is_workspace: true
     regex: ""
     priority: 0
   {{- end }}
