@@ -5,11 +5,11 @@ dybatpho::register_err_handler
 dybatpho::notice "Update submodules"
 # modules hash: {{ joinPath .chezmoi.sourceDir "../.gitmodules" | include | sha256sum }}
 cd {{ .chezmoi.sourceDir }}/..
-{{- if eq .blockedGitlab }}
+{{- if .blockedGitlab }}
 cp .github/modules .gitmodules
 git submodule sync --recursive
 {{- end }}
-{{- if ne .preferGitSSH }}
+{{- if not .preferGitSSH }}
 sed -i 's#git@gitlab.com:#https://gitlab.com/#g' .gitmodules
 sed -i 's#git@github.com:#https://github.com/#g' .gitmodules
 git submodule sync --recursive
