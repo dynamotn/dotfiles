@@ -175,8 +175,19 @@ alt-semicolon = 'mode service'
 alt-esc = 'mode apps'
 
 alt-enter = 'exec-and-forget kitty zellij'
-alt-e = 'exec-and-forget open -a /Applications/{{ if eq .browser "F" }}Firefox{{ else if eq .browser "Z" }}Zen{{ end }}.app'
-alt-q = 'exec-and-forget open -a /Applications/{{ if eq .browser "F" }}Firefox{{ else if eq .browser "Z" }}Zen{{ end }}.app --args -P Enterprise'
+{{- $process := "" }}
+{{- if eq .browser "F" }}
+{{-   $process = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
+{{- else }}
+{{-   $process = "/Applications/Zen.app/Contents/MacOS/zen" }}
+{{- end }}
+{{- if eq .place "home" }}
+alt-e = 'exec-and-forget {{ $process }} -P Personal'
+alt-q = 'exec-and-forget {{ $process }} -P Enterprise'
+{{- else if eq .place "office" }}
+alt-e = 'exec-and-forget {{ $process }} -P Enterprise'
+alt-q = 'exec-and-forget {{ $process }} -P Personal'
+{{- end }}
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes

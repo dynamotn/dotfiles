@@ -73,7 +73,13 @@ bind = $mainMod, apostrophe, swapsplit,
 
 # 3rd apps #
 bind = $mainMod, Return, exec, kitty zellij
-bind = $mainMod, E, exec, $browser
+{{- if eq .place "home" }}
+bind = $mainMod, E, exec, $browser -P Personal
+bind = $mainMod, Q, exec, $browser -P Enterprise
+{{- else if eq .place "office" }}
+bind = $mainMod, E, exec, $browser -P Enterprise
+bind = $mainMod, Q, exec, $browser -P Personal
+{{- end }}
 bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
 bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise{{- end }} bitrofi"
