@@ -203,19 +203,19 @@
         # Include config file from enterprise projects
         path = ~/Working/enterprise/.gitconfig
 {{- if .preferGitSSH }}
-[url "https://github.com/"]
-        # Prefer HTTPS than for github
-        insteadOf = git@github.com:
-[url "https://gitlab.com/"]
-        # Prefer HTTPS than for gitlab
-        insteadOf = git@gitlab.com:
-{{- else }}
 [url "git@github.com:"]
         # Prefer SSH than HTTPS for github
         insteadOf = https://github.com/
 [url "git@gitlab.com:"]
         # Prefer SSH than HTTPS for gitlab
         insteadOf = https://gitlab.com/
+{{- else }}
+[url "https://github.com/"]
+        # Prefer HTTPS than for github
+        insteadOf = git@github.com:
+[url "https://gitlab.com/"]
+        # Prefer HTTPS than for gitlab
+        insteadOf = git@gitlab.com:
 {{- end }}
 {{- if eq .kind "mobile" "tablet" }}
 [safe]
