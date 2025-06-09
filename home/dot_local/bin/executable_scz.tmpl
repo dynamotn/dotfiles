@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+dotfiles=$(realpath $(chezmoi execute-template '{{ .chezmoi.sourceDir }}')/..)
+sudo env "PATH=$PATH" \
+  chezmoi --destination / \
+  --source "$dotfiles/root" \
+  --mode file \
+  --working-tree "$dotfiles" \
+  --config ~/.config/chezmoi/root_chezmoi.yaml \
+  "$@"

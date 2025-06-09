@@ -59,11 +59,3 @@ data:
   noProxyAddresses: []
   preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git? (y/n)" true }}
   blockedGitlab: {{ promptBoolOnce . "blockedGitlab" "Is this machines blocked to access Gitlab? (y/n)" false }}
-
-hooks:
-  diff:
-    pre:
-      command: "bash"
-      args:
-        - -c
-        - dyfox; dybird

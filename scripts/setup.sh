@@ -100,14 +100,7 @@ _main() {
     and ! command -v sw_vers &> /dev/null
   then
     dybatpho::notice "Setup operating system"
-    yq '.mode = "file" | del(.hooks)' "$HOME/.config/chezmoi/chezmoi.yaml" > "$HOME/.config/chezmoi/root_chezmoi.yaml"
-    sudo env "PATH=$PATH" \
-      chezmoi \
-      --destination / \
-      --source "$SETUP_DIR/root" \
-      --working-tree "$SETUP_DIR" \
-      --config "$HOME/.config/chezmoi/root_chezmoi.yaml" \
-      apply
+    ~/.local/bin/scz apply
   fi
 
   # Modify remote url of dotfiles
