@@ -77,14 +77,14 @@ Library/Application Support/zen
 {{-   $processThunderbird = "/usr/lib/thunderbird" }}
 {{- end }}
 {{- if ne .guiServer "0" }}
-{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 2 }}
+{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 1 }}
 .config/firefox
 .mozilla
 .zen
 Library/Application Support/Firefox
 Library/Application Support/zen
 {{-   end }}
-{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) 2 }}
+{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) 1 }}
 .config/thunderbird
 .thunderbird
 Library/thunderbird
