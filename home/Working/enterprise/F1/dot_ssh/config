@@ -1,4 +1,4 @@
 Host github.com
     User git
-    IdentityFile ~/.ssh/key/enterprise_ed25519
+    IdentityFile ~/.ssh/key/enterprise-F1_ed25519
     IdentitiesOnly yes
