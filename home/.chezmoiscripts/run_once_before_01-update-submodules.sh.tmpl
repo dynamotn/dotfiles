@@ -13,6 +13,7 @@ git submodule sync --recursive
 sed -i 's#git@gitlab.com:#https://gitlab.com/#g' .gitmodules
 sed -i 's#git@github.com:#https://github.com/#g' .gitmodules
 git submodule sync --recursive
+git update-index --assume-unchanged .gitmodules
 {{- end }}
 git submodule update --init --remote --recursive \
   {{- if eq .guiServer "W" "X" }}
