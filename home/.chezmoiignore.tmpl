@@ -184,12 +184,12 @@ Multimedia
 .ssh/key/personal*
 {{- end }}
 {{- if empty .decryptEnterprise }}
-Working/enterprise/.gitconfig
 .config/firefox/startpage/profiles/enterprise/config.js
 .config/rclone/rclone.conf
-.ssh/key/enterprise*
 {{-   if not has "F1" .decryptEnterprise }}
+Working/enterprise/F1/.gitconfig
 Working/enterprise/F1/OP/.kube/config
 Working/enterprise/F1/OP/.docker/config.json
+.ssh/key/enterprise-F1_*
 {{-   end }}
 {{- end }}
