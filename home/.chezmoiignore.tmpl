@@ -131,23 +131,6 @@ Library/thunderbird
 .config/zellij
 {{- end }}
 
-{/* Non-container-related files */}
-{{- if eq .kind "container" }}
-.config/rbw
-.config/rbw-*
-.config/fish-ai.ini
-.config/fish/secret.fish
-.config/github-copilot/hosts.json
-.config/glab-cli/config.yml
-.config/himalaya
-.config/.jira
-.config/rclone/rclone.conf
-.config/tstruct/auth.json
-.kube/config
-.terraformrc
-.docker/config.json
-{{- end }}
-
 {/* Linux related files */}
 {{- if eq .osid "linux-gentoo" "darwin" "android" }}
 .config/systemd
@@ -181,4 +164,32 @@ Multimedia
 {/* Enterprise files */}
 {{- if ne .place "office" }}
 .npmrc
+{{- end }}
+
+{/* Secret files */}
+{{- if not .decryptPersonal }}
+.config/fish-ai.ini
+.config/fish/secret.fish
+.config/github-copilot/hosts.json
+.config/glab-cli/config.yml
+.config/himalaya
+.config/.jira
+.config/rbw
+.config/rbw-*
+.config/tstruct/auth.json
+.kube/config
+.terraformrc
+.docker/config.json
+.ssh/config.d/personal.config
+.ssh/key/personal*
+{{- end }}
+{{- if empty .decryptEnterprise }}
+Working/enterprise/.gitconfig
+.config/firefox/startpage/profiles/enterprise/config.js
+.config/rclone/rclone.conf
+.ssh/key/enterprise*
+{{-   if not has "F1" .decryptEnterprise }}
+Working/enterprise/F1/OP/.kube/config
+Working/enterprise/F1/OP/.docker/config.json
+{{-   end }}
 {{- end }}

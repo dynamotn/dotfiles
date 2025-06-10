@@ -56,16 +56,18 @@ etc/apt
 {{- if not (eq .kind "pc" "laptop") }}
 etc/default/grub
 {{- end }}
+{{- if and (eq .kind "vm") (eq .place "office") }}
+etc/hostname
+etc/modprobe.d
+etc/pam.d
+{{- end }}
+
+{/* Secret files */}
 {{- if or (ne .kind "office") (ne .company "F1") }}
 etc/ca-certificates
 etc/NetworkManager/system-connections/Office.nmconnection
 etc/NetworkManager/system-connections/Office-Project.nmconnection
 {{- end }}
-{{- if ne .kind "pc" }}
+{{- if ne .kind "pc" "laptop" }}
 etc/NetworkManager/system-connections/Dynamo.nmconnection
-{{- end }}
-{{- if and (eq .kind "vm") (eq .place "office") }}
-etc/hostname
-etc/modprobe.d
-etc/pam.d
 {{- end }}

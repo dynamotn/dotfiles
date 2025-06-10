@@ -1,1 +1,3 @@
-*.age diff=age
+home/**/*.age diff=personal-age
+home/Working/enterprise/F1/**/*.age diff=enterprise-F1-age
+root/**/*.age diff=personal-age

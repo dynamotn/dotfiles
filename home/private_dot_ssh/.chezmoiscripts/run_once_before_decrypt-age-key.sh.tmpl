@@ -2,20 +2,29 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
-dybatpho::notice "Decrypting key.age file to decrypt all encrypted files"
-if ! dybatpho::is file "${HOME}/.config/chezmoi/key"; then
-  {{- if eq .kind "container" }}
-  {{ .chezmoi.sourceDir }}/../scripts/expect-age "${AGE_PASSPHRASE}" "{{ .chezmoi.sourceDir }}/../secrets/key.age" "${HOME}/.config/chezmoi/key"
-  {{- else }}
-  age --decrypt --output "${HOME}/.config/chezmoi/key" "{{ .chezmoi.sourceDir }}/../secrets/key.age"
-  {{- end }}
+{{ $types := list }}
+{{- if .decryptPersonal }}
+{{-   $types = append $types "personal" }}
+{{- end }}
+{{- range .decryptEnterprise }}
+{{-   $types = printf "enterprise-%s" . | append $types }}
+{{- end }}
+for type in {{ range $types }}{{ . | quote }} {{ end }}; do
+  dybatpho::notice "Decrypting ${type}.age file to decrypt all encrypted files"
+  if ! dybatpho::is file "${HOME}/.config/chezmoi/${type}.key"; then
+    {{- if eq .kind "container" }}
+    {{ .chezmoi.sourceDir }}/../scripts/expect-age "${AGE_PASSPHRASE}" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age" "${HOME}/.config/chezmoi/${type}.key"
+    {{- else }}
+    age --decrypt --output "${HOME}/.config/chezmoi/${type}.key" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age"
+    {{- end }}
 
-  if [ $? -eq 0 ]; then
-    chmod 400 "${HOME}/.config/chezmoi/key"
-    dybatpho::success "Successfully decrypted key.age file"
+    if [ $? -eq 0 ]; then
+      chmod 400 "${HOME}/.config/chezmoi/${type}.key"
+      dybatpho::success "Successfully decrypted ${type}.age file"
+    else
+      dybatpho::error "Failed to decrypt ${type}.age file"
+    fi
   else
-    dybatpho::error "Failed to decrypt key.age file"
+    dybatpho::info "Not need to decrypt ${type}.age file"
   fi
-else
-  dybatpho::info "Not need to decrypt key.age file"
-fi
+done

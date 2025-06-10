@@ -8,10 +8,6 @@ progress: true
 add:
   templateSymlinks: true
 
-age:
-  identity: {{ .chezmoi.homeDir }}/.config/chezmoi/key
-  recipient: age1fzajmt2yy4naas2wtcn3v2vjea3f5rgvmz2elp02zvvmdtcgwcdsqxnd5a
-
 diff:
   pager: delta --pager="ov -F --section-delimiter '^(added:|removed:|renamed:|Δ)' --section-header --pattern '•'"
 
@@ -40,6 +36,24 @@ data:
   {{- else }}
   company:
   {{- end }}
+  {{ $decryptPersonal := promptBoolOnce . "decryptPersonal" "Do you want to decrypt personal's secrets? (y/n)" true }}
+  decryptPersonal: {{ $decryptPersonal }}
+  {{ $decryptEnterprise := promptBool "Do you want to decrypt enterprise's secrets? (y/n)" true }}
+  {{- $listDecryptEnterprise := list }}
+  {{- if $decryptEnterprise }}
+  decryptEnterprise:
+    {{- range until 10 }}
+    {{-   $company := promptString "Fill your company code to decrypt (empty to end this list)" }}
+    {{-   if $company }}
+    {{-     $listDecryptEnterprise = append $listDecryptEnterprise $company }}
+    - {{ $company }}
+    {{-   else }}
+    {{-     break }}
+    {{-   end }}
+  {{-   end }}
+  {{- else }}
+  decryptEnterprise: []
+  {{- end }}
   {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is? (W for Wayland, X for XOrg, M for Mac, 0 for CLI-only)" (list "W" "X" "M" "0") "0" }}
   guiServer: {{ $guiServer | quote }}
   {{- if ne $guiServer "0" }}
@@ -51,11 +65,48 @@ data:
   guiWinManager:
   browser:
   {{- end }}
+  terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use? (T for tmux, Z for Zellij)" (list "T" "Z") "Z" | quote }}
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" false }}
-  terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use? (T for tmux, Z for Zellij)" (list "T" "Z") "Z" | quote }}
-  httpProxy: {{ promptStringOnce . "httpProxy" "Does this machine need HTTP(S) proxy? Fill proxy address, empty for not using:" | quote }}
-  socksProxy: {{ promptStringOnce . "httpProxy" "Does this machine need SOCKS v5 proxy? Fill proxy address, empty for not using:" | quote }}
+  {{ $hasProxy := promptBool "Does this machine need HTTP(S) or SOCKS proxy? (y/n)" false }}
+  {{- if $hasProxy }}
+  httpProxy: {{ promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using:" | quote }}
+  socksProxy: {{ promptStringOnce . "socksProxy" "Fill SOCKS proxy address, empty for not using:" | quote }}
+  noProxyAddresses:
+    {{- range until 100 }}
+    {{-   $address := promptString "Fill address that not use proxy (empty to end this list)" }}
+    {{-  if $address }}
+    - {{ $address }}
+    {{-  else }}
+    {{-    break }}
+    {{-  end }}
+    {{- end }}
+  {{- else }}
+  httpProxy:
+  socksProxy:
   noProxyAddresses: []
+  {{- end }}
   preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git? (y/n)" true }}
   blockedGitlab: {{ promptBoolOnce . "blockedGitlab" "Is this machines blocked to access Gitlab? (y/n)" false }}
+
+age:
+  identities:
+    {{ if $decryptPersonal -}}
+    - {{ .chezmoi.homeDir }}/.config/chezmoi/personal.key
+    {{- end }}
+    {{ if $decryptEnterprise }}
+    {{-  range $listDecryptEnterprise -}}
+    - {{ $.chezmoi.homeDir }}/.config/chezmoi/enterprise-{{ . }}.key
+    {{-  end }}
+    {{- end }}
+  recipients:
+    {{ if $decryptPersonal -}}
+    - age1fzajmt2yy4naas2wtcn3v2vjea3f5rgvmz2elp02zvvmdtcgwcdsqxnd5a
+    {{- end }}
+    {{- if $decryptEnterprise }}
+    {{-   range $listDecryptEnterprise -}}
+    {{      if eq . "F1" -}}
+    - age1t7nuzf3ys4890tn8frjk2mtalkhy3kyr0dqeajk7pn6fjnag6fys85fm39
+    {{-     end }}
+    {{-   end }}
+    {{- end }}
