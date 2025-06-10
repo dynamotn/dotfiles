@@ -32,14 +32,14 @@
 
 This repository contains all my dotfiles managed by [chezmoi](https://github.com/twpayne/chezmoi).
 Please note that this is my own personal dotfiles for Linux
-(Gentoo, Arch, Ubuntu) and Android (Termux), with experimental version on MacOS.
+(Gentoo, Arch, Ubuntu), Android (Termux) and MacOS.
 I don't use X applications anymore.
 
 ## :brain:&nbsp; Philosophy
 
 - Everything must be under control
 - Everything must be easy to initial or change
-- Everything must be automatically, with few manual steps before setup
+- Everything must be automatically, with fewest manual steps before setup
 - Everything must be dynamic, on every places
 - Everything must have same pastel, with harmony
 
