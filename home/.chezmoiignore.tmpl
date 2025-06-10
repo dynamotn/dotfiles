@@ -186,10 +186,10 @@ Multimedia
 {{- if empty .decryptEnterprise }}
 .config/firefox/startpage/profiles/enterprise/config.js
 .config/rclone/rclone.conf
-{{-   if not has "F1" .decryptEnterprise }}
+{{- end }}
+{{- if not has "F1" .decryptEnterprise }}
 Working/enterprise/F1/.gitconfig
 Working/enterprise/F1/OP/.kube/config
 Working/enterprise/F1/OP/.docker/config.json
 .ssh/key/enterprise-F1_*
-{{-   end }}
 {{- end }}
