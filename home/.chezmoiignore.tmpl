@@ -187,7 +187,7 @@ Multimedia
 .config/firefox/startpage/profiles/enterprise/config.js
 .config/rclone/rclone.conf
 {{- end }}
-{{- if not has "F1" .decryptEnterprise }}
+{{- if not (has "F1" .decryptEnterprise) }}
 Working/enterprise/F1/.gitconfig
 Working/enterprise/F1/OP/.kube/config
 Working/enterprise/F1/OP/.docker/config.json
