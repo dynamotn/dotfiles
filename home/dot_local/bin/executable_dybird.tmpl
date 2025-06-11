@@ -11,11 +11,12 @@ dybatpho::register_err_handler
 {{-   else }}
 {{-     $process = "/usr/lib/thunderbird" }}
 {{-   end }}
-{{-   $profiles := list }}
-{{-   if eq .kind "container" "vm" }}
-{{-     $profiles = list "public" }}
-{{-   else }}
-{{-     $profiles = list "personal" "enterprise" }}
+{{-   $profiles := list "public" }}
+{{-   if .decryptPersonal }}
+{{-     $profiles = append $profiles "personal" }}
+{{-   end }}
+{{-   range .decryptEnterprise }}
+{{-     $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{-   end }}
 
 function _update_dotfiles {

@@ -24,11 +24,12 @@ dybatpho::register_err_handler
 {{-       $process = "/opt/zen-browser-bin/zen" }}
 {{-     end }}
 {{-   end }}
-{{-   $profiles := list }}
-{{-   if eq .kind "container" "vm" }}
-{{-     $profiles = list "public" }}
-{{-   else }}
-{{-     $profiles = list "personal" "enterprise" }}
+{{-   $profiles := list "public" }}
+{{-   if .decryptPersonal }}
+{{-     $profiles = append $profiles "personal" }}
+{{-   end }}
+{{-   range .decryptEnterprise }}
+{{-     $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{-   end }}
 
 function _update_dotfiles {

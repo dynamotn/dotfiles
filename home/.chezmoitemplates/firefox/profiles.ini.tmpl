@@ -28,28 +28,33 @@
 {{- if eq .kind "container" }}
 Default={{- $configPath }}/public
 {{- else if eq .place "office" }}
-Default={{- $configPath }}/enterprise
+Default={{ $configPath }}/enterprise-{{ .company }}
 {{- else }}
-Default={{- $configPath }}/personal
+Default={{ $configPath }}/personal
 {{- end }}
 Locked=1
 
-{{- if eq .kind "pc" "laptop" }}
-[Profile2]
-Name=Enterprise
-IsRelative=0
-Path={{- $configPath }}/enterprise
-
-[Profile1]
-Name=Personal
-IsRelative=0
-Path={{- $configPath }}/personal
-{{- end }}
-
-[Profile0]
+{{ $index := 0 }}
+[Profile{{ $index }}]
 Name=Public
 IsRelative=0
-Path={{- $configPath }}/public
+Path={{ $configPath }}/public
+
+{{  if .decryptPersonal }}
+{{- $index := add1 $index }}
+[Profile{{ $index }}]
+Name=Personal
+IsRelative=0
+Path={{ $configPath }}/personal
+{{- end }}
+
+{{  range .decryptEnterprise }}
+{{- $index := add1 $index }}
+[Profile{{ $index }}]
+Name=Enterprise-{{ . }}
+IsRelative=0
+Path={{ $configPath }}/enterprise-{{ . }}
+{{- end }}
 
 [General]
 StartWithLastProfile=1
