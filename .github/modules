@@ -19,20 +19,16 @@
   url = git@github.com:black7375/Firefox-UI-Fix.git
 [submodule "firefox-personal"]
   path = home/dot_config/firefox/profiles/personal
-  url = git@github.com:dynamotn/firefox.git
-  branch = personal
-[submodule "firefox-enterprise"]
-  path = home/dot_config/firefox/profiles/enterprise
-  url = git@github.com:dynamotn/firefox.git
-  branch = enterprise
-[submodule "thunderbird-enterprise"]
-  path = home/dot_config/thunderbird/profiles/enterprise
-  url = git@github.com:dynamotn/thunderbird.git
-  branch = enterprise
+  url = git@github.com:dynamotn/firefox-personal.git
+[submodule "firefox-enterprise-F1"]
+  path = home/dot_config/firefox/profiles/enterprise-F1
+  url = git@github.com:dynamotn/firefox-enterprise-F1.git
 [submodule "thunderbird-personal"]
   path = home/dot_config/thunderbird/profiles/personal
-  url = git@github.com:dynamotn/thunderbird.git
-  branch = personal
+  url = git@github.com:dynamotn/thunderbird-personal.git
+[submodule "thunderbird-enterprise-F1"]
+  path = home/dot_config/thunderbird/profiles/enterprise-F1
+  url = git@github.com:dynamotn/thunderbird-enterprise-F1.git
 [submodule "scripts/lib/dybatpho"]
   path = scripts/lib/dybatpho
   url = https://github.com/dynamotn/dybatpho.git

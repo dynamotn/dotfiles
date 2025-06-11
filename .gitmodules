@@ -19,14 +19,14 @@
 [submodule "firefox-personal"]
   path = home/dot_config/firefox/profiles/personal
   url = git@gitlab.com:dynamo-config/firefox/personal.git
-[submodule "firefox-enterprise"]
-        path = home/dot_config/firefox/profiles/enterprise-F1
+[submodule "firefox-enterprise-F1"]
+  path = home/dot_config/firefox/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/firefox/enterprise-F1.git
 [submodule "thunderbird-personal"]
   path = home/dot_config/thunderbird/profiles/personal
   url = git@gitlab.com:dynamo-config/thunderbird/personal.git
-[submodule "thunderbird-enterprise"]
-        path = home/dot_config/thunderbird/profiles/enterprise-F1
+[submodule "thunderbird-enterprise-F1"]
+  path = home/dot_config/thunderbird/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/thunderbird/enterprise-F1.git
 [submodule "scripts/lib/dybatpho"]
   path = scripts/lib/dybatpho

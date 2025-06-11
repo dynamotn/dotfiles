@@ -10,7 +10,7 @@ after-startup-command = [
   ## Kitty
   'exec-and-forget open -na kitty --args zellij',
   ## Firefox/Zen
-  'exec-and-forget open -na {{ $appFirefox }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise{{ end }} --safe-mode=false',
+  'exec-and-forget open -na {{ $appFirefox }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} --safe-mode=false',
   ## Obsidian
   'exec-and-forget open -a Obsidian',
 ]
@@ -183,9 +183,9 @@ alt-esc = 'mode apps'
 alt-enter = 'exec-and-forget open -na kitty --args zellij'
 {{- if eq .place "home" }}
 alt-e = 'exec-and-forget open -na {{ $appFirefox }} --args -P Personal --safe-mode=false'
-alt-q = 'exec-and-forget open -na {{ $appFirefox }} --args -P Enterprise --safe-mode=false'
+alt-q = 'exec-and-forget open -na {{ $appFirefox }} --args -P Enterprise-F1 --safe-mode=false'
 {{- else if eq .place "office" }}
-alt-e = 'exec-and-forget open -na {{ $appFirefox }} --args -P Enterprise --safe-mode=false'
+alt-e = 'exec-and-forget open -na {{ $appFirefox }} --args -P Enterprise-{{ .company }} --safe-mode=false'
 alt-q = 'exec-and-forget open -na {{ $appFirefox }} --args -P Personal --safe-mode=false'
 {{- end }}
 
