@@ -146,12 +146,6 @@ Library
 {{- if ne .kind "laptop" }}
 .config/shikane
 {{- end }}
-{{- if eq .kind "container" "vm" }}
-.config/firefox/profiles/personal
-.config/firefox/profiles/enterprise
-.config/thunderbird/profiles/personal
-.config/thunderbird/profiles/enterprise
-{{- end }}
 
 {/* Self-managed folders */}
 {{- if not (eq .kind "pc" "laptop") }}
@@ -166,8 +160,10 @@ Multimedia
 .npmrc
 {{- end }}
 
-{/* Secret files */}
+{/* Secret files and Private submodules */}
 {{- if not .decryptPersonal }}
+Library/Application Support/rbw
+.config/firefox/profiles/personal
 .config/fish-ai.ini
 .config/fish/secret.fish
 .config/github-copilot/hosts.json
@@ -175,7 +171,7 @@ Multimedia
 .config/himalaya
 .config/.jira
 .config/rbw
-.config/rbw-*
+.config/thunderbird/profiles/personal
 .config/tstruct/auth.json
 .kube/config
 .terraformrc
@@ -186,10 +182,16 @@ Multimedia
 {{- if empty .decryptEnterprise }}
 .config/firefox/startpage/profiles/enterprise/config.js
 .config/rclone/rclone.conf
+Library/Application Support/rbw-*
+.config/rbw-*
 {{- end }}
 {{- if not (has "F1" .decryptEnterprise) }}
+Library/Application Support/rbw-enterprise-F1
 Working/enterprise/F1/.gitconfig
 Working/enterprise/F1/OP/.kube/config
 Working/enterprise/F1/OP/.docker/config.json
+.config/firefox/profiles/enterprise-F1
+.config/rbw-enterprise-F1
+.config/thunderbird/profiles/enterprise-F1
 .ssh/key/enterprise-F1_*
 {{- end }}

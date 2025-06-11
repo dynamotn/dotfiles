@@ -199,9 +199,11 @@
 [filter "space8"]
         smudge = unexpand --tabs=8 --first-only
         clean = expand --tabs=8 --initial
-# Include config file from enterprise projects
-[includeIf "gitdir/i:~/Working/enterprise/F1/**"]
-        path = ~/Working/enterprise/F1/.gitconfig
+{{- range .decryptEnterprise }}
+[includeIf "gitdir/i:~/Working/enterprise/{{ . }}/**"]
+        # Include config file from enterprise {{ . }} projects
+        path = ~/Working/enterprise/{{ . }}/.gitconfig
+{{- end }}
 {{- if .preferGitSSH }}
 [url "git@github.com:"]
         # Prefer SSH than HTTPS for github

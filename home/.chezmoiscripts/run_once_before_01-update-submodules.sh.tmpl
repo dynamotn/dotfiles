@@ -10,8 +10,9 @@ cp .github/modules .gitmodules
 git submodule sync --recursive
 {{- end }}
 {{- if not .preferGitSSH }}
-sed -i 's#git@gitlab.com:#https://gitlab.com/#g' .gitmodules
-sed -i 's#git@github.com:#https://github.com/#g' .gitmodules
+sed -i -e 's#git@gitlab.com:#https://gitlab.com/#g' \
+  -e 's#git@github.com:#https://github.com/#g' \
+  .gitmodules
 git submodule sync --recursive
 git update-index --assume-unchanged .gitmodules
 {{- end }}
@@ -23,15 +24,21 @@ git submodule update --init --remote --recursive \
   {{- if eq .browser "F" }}
   home/.chezmoitemplates/firefox/chrome/lepton \
   {{- end }}
-  {{- if not (eq .kind "vm" "container") }}
-  {{-   if eq .browser "F" }}
-  home/dot_config/firefox/profiles \
-  {{-   else if eq .browser "Z" }}
-  home/dot_config/firefox/profiles \
+  {{- if eq .browser "F" "Z" }}
+  {{-   if .decryptPersonal }}
+  home/dot_config/firefox/profiles/personal \
+  {{-   end }}
+  {{-   range .decryptEnterprise }}
+  home/dot_config/firefox/profiles/enterprise-{{ . }} \
   {{-   end }}
   {{- end }}
-  {{- if and (ne .guiServer "0") (not (eq .kind "vm" "container")) }}
-  home/dot_config/thunderbird/profiles \
+  {{- if ne .guiServer "0" }}
+  {{-   if .decryptPersonal }}
+  home/dot_config/thunderbird/profiles/personal \
+  {{-   end }}
+  {{-   range .decryptEnterprise }}
+  home/dot_config/thunderbird/profiles/enterprise-{{ . }} \
+  {{-   end }}
   {{- end }}
   {{- if eq .terminalMultiplexer "T" }}
   silos/tmux \
