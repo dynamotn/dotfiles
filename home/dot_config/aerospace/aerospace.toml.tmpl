@@ -1,12 +1,18 @@
+{{- $appFirefox := "" }}
+{{- if eq .browser "F" }}
+{{-   $appFirefox = "Firefox" }}
+{{- else if eq .browser "Z" }}
+{{-   $appFirefox = "Zen" }}
+{{- end }}
 after-startup-command = [
   ## SketchyBar
   'exec-and-forget sketchybar --reload ~/.config/sketchybar/sketchybarrc',
   ## Kitty
-  'exec-and-forget kitty zellij',
+  'exec-and-forget open -na kitty --args zellij',
   ## Firefox/Zen
-  'exec-and-forget open -a /Applications/{{ if eq .browser "F" }}Firefox{{ else if eq .browser "Z" }}Zen{{ end }}.app',
+  'exec-and-forget open -na {{ $appFirefox }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise{{ end }} --safe-mode=false',
   ## Obsidian
-  'exec-and-forget open -a /Applications/Obsidian.app',
+  'exec-and-forget open -a Obsidian',
 ]
 exec-on-workspace-change = [
   ## SketchyBar
@@ -62,7 +68,7 @@ if.app-name-regex-substring = 'kitty'
 run = 'move-node-to-workspace 1'
 
 [[on-window-detected]]
-if.app-name-regex-substring = '{{ if eq .browser "F" }}Firefox{{ else if eq .browser "Z" }}Zen{{ end }}'
+if.app-name-regex-substring = 'Firefox|Zen'
 run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
@@ -174,19 +180,13 @@ alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 alt-semicolon = 'mode service'
 alt-esc = 'mode apps'
 
-alt-enter = 'exec-and-forget kitty zellij'
-{{- $process := "" }}
-{{- if eq .browser "F" }}
-{{-   $process = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
-{{- else }}
-{{-   $process = "/Applications/Zen.app/Contents/MacOS/zen" }}
-{{- end }}
+alt-enter = 'exec-and-forget open -na kitty --args zellij'
 {{- if eq .place "home" }}
-alt-e = 'exec-and-forget {{ $process }} -P Personal'
-alt-q = 'exec-and-forget {{ $process }} -P Enterprise'
+alt-e = 'exec-and-forget open -na {{ $appFirefox }} --args -P Personal --safe-mode=false'
+alt-q = 'exec-and-forget open -na {{ $appFirefox }} --args -P Enterprise --safe-mode=false'
 {{- else if eq .place "office" }}
-alt-e = 'exec-and-forget {{ $process }} -P Enterprise'
-alt-q = 'exec-and-forget {{ $process }} -P Personal'
+alt-e = 'exec-and-forget open -na {{ $appFirefox }} --args -P Enterprise --safe-mode=false'
+alt-q = 'exec-and-forget open -na {{ $appFirefox }} --args -P Personal --safe-mode=false'
 {{- end }}
 
 # 'service' binding mode declaration.
