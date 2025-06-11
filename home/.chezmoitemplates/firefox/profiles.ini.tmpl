@@ -25,7 +25,7 @@
 {{-   end -}}
 {{- end -}}
 [Install{{- $releaseId -}}]
-{{- if eq .kind "container" "vm" }}
+{{- if eq .kind "container" }}
 Default={{- $configPath }}/public
 {{- else if eq .place "office" }}
 Default={{- $configPath }}/enterprise
@@ -34,22 +34,22 @@ Default={{- $configPath }}/personal
 {{- end }}
 Locked=1
 
-{{- if eq .kind "container" "vm" }}
-[Profile0]
-Name=Personal
-IsRelative=0
-Path={{- $configPath }}/public
-{{- else }}
-[Profile1]
+{{- if eq .kind "pc" "laptop" }}
+[Profile2]
 Name=Enterprise
 IsRelative=0
 Path={{- $configPath }}/enterprise
 
-[Profile0]
+[Profile1]
 Name=Personal
 IsRelative=0
 Path={{- $configPath }}/personal
 {{- end }}
+
+[Profile0]
+Name=Public
+IsRelative=0
+Path={{- $configPath }}/public
 
 [General]
 StartWithLastProfile=1
