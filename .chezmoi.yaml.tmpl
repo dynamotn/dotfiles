@@ -86,7 +86,7 @@ data:
   socksProxy:
   noProxyAddresses: []
   {{- end }}
-  preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git? (y/n)" true }}
+  preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git? (y/n)" false }}
   blockedGitlab: {{ promptBoolOnce . "blockedGitlab" "Is this machines blocked to access Gitlab? (y/n)" false }}
 
 age:
