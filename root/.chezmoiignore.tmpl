@@ -68,6 +68,6 @@ etc/ca-certificates
 etc/NetworkManager/system-connections/Office.nmconnection
 etc/NetworkManager/system-connections/Office-Project.nmconnection
 {{- end }}
-{{- if ne .kind "pc" "laptop" }}
+{{- if not (eq .kind "pc" "laptop") }}
 etc/NetworkManager/system-connections/Dynamo.nmconnection
 {{- end }}
