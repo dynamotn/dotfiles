@@ -36,9 +36,9 @@ data:
   {{- else }}
   company:
   {{- end }}
-  {{ $decryptPersonal := promptBoolOnce . "decryptPersonal" "Do you want to decrypt personal's secrets? (y/n)" true }}
+  {{ $decryptPersonal := promptBoolOnce . "decryptPersonal" "Do you want to decrypt personal's secrets? (y/n)" false }}
   decryptPersonal: {{ $decryptPersonal }}
-  {{ $decryptEnterprise := promptBool "Do you want to decrypt enterprise's secrets? (y/n)" true }}
+  {{ $decryptEnterprise := promptBool "Do you want to decrypt enterprise's secrets? (y/n)" false }}
   {{- $listDecryptEnterprise := list }}
   {{- if $decryptEnterprise }}
   decryptEnterprise:

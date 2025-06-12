@@ -22,7 +22,6 @@ dybatpho::register_err_handler
 function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      {{- if not (eq .kind "container" "vm") }}
       if dybatpho::is file ~/.config/thunderbird/profiles/${profile}/prefs.js; then
         dybatpho::progress "Update toolbar setting for profile ${profile}"
         grep "browser.uiCustomization.state" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/01-toolbar.js
@@ -32,7 +31,6 @@ function _update_dotfiles {
         grep "extensions.webextensions.ExtensionStorageIDB.migrated" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
         grep "privacy.userContext.extension" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
       fi
-      {{- end }}
 
       dybatpho::progress "Update extensions data for profile ${profile}"
       chezmoi add ~/.config/thunderbird/profiles/${profile}/extensions || true

@@ -35,7 +35,6 @@ dybatpho::register_err_handler
 function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      {{- if not (eq .kind "container" "vm") }}
       if dybatpho::is file ~/.config/firefox/profiles/${profile}/prefs.js; then
         dybatpho::progress "Update toolbar setting for profile ${profile}"
         grep "browser.uiCustomization.state" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/01-toolbar.js
@@ -45,7 +44,6 @@ function _update_dotfiles {
         grep "extensions.webextensions.ExtensionStorageIDB.migrated" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js || true
         grep "privacy.userContext.extension" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js || true
       fi
-      {{- end }}
 
       dybatpho::progress "Update extensions data for profile ${profile}"
       chezmoi add ~/.config/firefox/profiles/${profile}/extensions || true
