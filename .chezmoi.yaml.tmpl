@@ -91,20 +91,20 @@ data:
 
 age:
   identities:
-    {{ if $decryptPersonal -}}
+    {{ if $decryptPersonal }}
     - {{ .chezmoi.homeDir }}/.config/chezmoi/personal.key
     {{- end }}
     {{ if $decryptEnterprise }}
-    {{-  range $listDecryptEnterprise -}}
+    {{-  range $listDecryptEnterprise }}
     - {{ $.chezmoi.homeDir }}/.config/chezmoi/enterprise-{{ . }}.key
     {{-  end }}
     {{- end }}
   recipients:
-    {{ if $decryptPersonal -}}
+    {{ if $decryptPersonal }}
     - age1fzajmt2yy4naas2wtcn3v2vjea3f5rgvmz2elp02zvvmdtcgwcdsqxnd5a
     {{- end }}
     {{- if $decryptEnterprise }}
-    {{-   range $listDecryptEnterprise -}}
+    {{-   range $listDecryptEnterprise }}
     {{      if eq . "F1" -}}
     - age1t7nuzf3ys4890tn8frjk2mtalkhy3kyr0dqeajk7pn6fjnag6fys85fm39
     {{-     end }}
