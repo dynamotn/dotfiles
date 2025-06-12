@@ -68,7 +68,6 @@ Run these commands:
 curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | bash -
 git clone --depth 1 https://github.com/dynamotn/dotfiles.git # or https://gitlab.com/dynamo-config/dotfiles.git
 cd dotfiles || exit
-git submodule update --init --remote --recursive scripts
 ./script/setup.sh
 ```
 

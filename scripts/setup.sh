@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 SETUP_DIR=$(dirname "$(readlink -f "$0")")
+BIN_DIR="$HOME/.local/bin"
+
+# Update necessary submodules
+cd "$SETUP_DIR" || exit
+git submodule update --init --remote --recursive "$SETUP_DIR"/lib/dybatpho
+
 # shellcheck source=lib/dybatpho/init.sh
 . "$SETUP_DIR/lib/dybatpho/init.sh"
-
 dybatpho::register_err_handler
-BIN_DIR="$HOME/.local/bin"
 
 function _spec_main {
   dybatpho::opts::setup "Setup your machine from dotfiles" MAIN_ARGS action:"_main"
