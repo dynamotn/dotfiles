@@ -25,7 +25,7 @@ IsRelative=0
 Path={{ $configPath }}/public
 
 {{  if .decryptPersonal }}
-{{- $index := add1 $index }}
+{{- $index = add1 $index }}
 [Profile{{ $index }}]
 Name=Personal
 IsRelative=0
@@ -33,7 +33,7 @@ Path={{ $configPath }}/personal
 {{- end }}
 
 {{  range .decryptEnterprise }}
-{{- $index := add1 $index }}
+{{- $index = add1 $index }}
 [Profile{{ $index }}]
 Name=Enterprise-{{ . }}
 IsRelative=0

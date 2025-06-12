@@ -53,7 +53,11 @@ exec-once = kitty zellij
 {{- if eq .browser "F" }}
 $browser = "firefox"
 {{- else if eq .browser "Z" }}
+{{-   if eq .osid "linux-gentoo" }}
+$browser = "zen-bin"
+{{-   else }}
 $browser = "zen-browser"
+{{-   end }}
 {{- end }}
 {{- if eq .place "home" }}
 exec-once = $browser -P Personal
