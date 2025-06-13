@@ -72,7 +72,7 @@ _extract_tar() {
     bash $TEMP_HOOK_BEFORE
     readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
     for path in "${paths[@]}"; do
-      tar ${param} -C "$BIN_DIR" $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
+      tar ${param} -C "$location" $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
     done
     export param=$param
     bash $TEMP_HOOK_AFTER
@@ -89,7 +89,7 @@ _extract_zip() {
     bash $TEMP_HOOK_BEFORE
     readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
     for path in "${paths[@]}"; do
-      unzip -qqoj $TEMP_COMPRESSED -d $BIN_DIR $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
+      unzip -qqoj $TEMP_COMPRESSED -d $location $(echo ${path%%*( )} | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g")
     done
     bash $TEMP_HOOK_AFTER
   fi
@@ -101,7 +101,7 @@ _extract_zip() {
 _extract_bzip2() {
   bash $TEMP_HOOK_BEFORE
   readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
-  bzip2 -cd $TEMP_COMPRESSED > $BIN_DIR/$2
+  bzip2 -cd $TEMP_COMPRESSED > $location/$2
   bash $TEMP_HOOK_AFTER
 }
 
@@ -130,9 +130,9 @@ _update() {
     echo > "$TEMP_HOOK_AFTER"
     rm -rf "$TEMP_COMPRESSED"
   else
-    curl -SL "$1" -o "$BIN_DIR/$2"
+    curl -SL "$1" -o "$location/$2"
   fi
-  chmod +x "$BIN_DIR/$2"
+  chmod +x "$location/$2"
   dybatpho::progress "Installed $2"
 }
 
@@ -141,7 +141,12 @@ _update() {
 # $1: YAML string of tool
 _parse_github_release() {
   name=$(echo "$1" | yq e '.name')
-  if [ "$FLAG_NOT_EXIST" = true ] && [ -f "$BIN_DIR/$name" ]; then
+  location=$(echo "$1" | yq e '.location')
+  if [ "$location" = "null" ]; then
+    location=$BIN_DIR
+  fi
+  mkdir -p $location
+  if [ "$FLAG_NOT_EXIST" = true ] && [ -f "$location/$name" ]; then
     return
   fi
 
@@ -184,7 +189,7 @@ _parse_github_release() {
   fi
 
   export TEMP_COMPRESSED=$TEMP_COMPRESSED
-  export BIN_DIR=$BIN_DIR
+  export location=$location
   export MAN_DIR=$MAN_DIR
   export version=$version
   _update "https://github.com/${repo}/releases/download/${version}/${release_asset}" "${name}" "${paths}" "${strip_components}"
@@ -195,7 +200,12 @@ _parse_github_release() {
 # $1: YAML string of tool
 _parse_gitlab_release() {
   name=$(echo "$1" | yq e '.name')
-  if [ "$FLAG_NOT_EXIST" = true ] && [ -f "$BIN_DIR/$name" ]; then
+  location=$(echo "$1" | yq e '.location')
+  if [ "$location" = "null" ]; then
+    location=$BIN_DIR
+  fi
+  mkdir -p $location
+  if [ "$FLAG_NOT_EXIST" = true ] && [ -f "$location/$name" ]; then
     return
   fi
 
@@ -241,7 +251,7 @@ _parse_gitlab_release() {
   fi
 
   export TEMP_COMPRESSED=$TEMP_COMPRESSED
-  export BIN_DIR=$BIN_DIR
+  export location=$location
   export MAN_DIR=$MAN_DIR
   export version=$version
   _update "https://gitlab.com/${repo}/-/releases/${version}/downloads/${release_asset}" "${name}" "${paths}" "${strip_components}"
