@@ -1,6 +1,5 @@
 # *.enc diff=sopsdiffer
 *.sqlite diff=sqlite3
 *.json diff=json
-.gitmodules filter=space8
 .gitconfig filter=space8
 .gitattributes filter=space8
