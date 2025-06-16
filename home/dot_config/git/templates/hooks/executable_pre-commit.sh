@@ -1,4 +1,4 @@
-#!/bin/bash
+#!{{ .bash }}
 
 conflicts=$(git diff --cached --name-only -G"<<<<<|=====|>>>>>")
 if [[ -n "$conflicts" ]]; then

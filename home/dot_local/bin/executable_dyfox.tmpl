@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
@@ -54,7 +54,7 @@ function _update_dotfiles {
       dybatpho::progress "Update search engines for profile ${profile}"
       chezmoi add ~/.config/firefox/profiles/${profile}/search.json.mozlz4 --create || true
 
-      dybatpho::progress "Update bookmarks and history for profile ${profile}"
+      dybatpho::progress "Update bookmarks, history and workspaces for profile ${profile}"
       chezmoi add ~/.config/firefox/profiles/${profile}/favicons.sqlite --create || true
       chezmoi add ~/.config/firefox/profiles/${profile}/places.sqlite --create || true
 
