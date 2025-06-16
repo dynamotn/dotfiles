@@ -29,10 +29,10 @@ Library/Fonts/Iosevka:
   refreshPeriod: 168h
 {{- end }}
 {{- if eq .chezmoi.os "darwin" }}
-{{- $version := "v3.011" }}
+{{- $repo := "googlefonts/roboto-3-classic" }}
 Library/Fonts/Roboto:
   type: archive
-  url: 'https://github.com/googlefonts/roboto-3-classic/releases/download/{{ $version }}/Roboto_{{ $version }}.zip'
+  url: {{ (gitHubLatestRelease $repo).TagName | toString | printf "Roboto_%s.zip" | gitHubLatestReleaseAssetURL $repo | quote }}
   stripComponents: 2
   include:
     - hinted/static/**
