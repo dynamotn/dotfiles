@@ -1,0 +1,21 @@
+[user]
+        {{- $commonSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/common.yaml.age" | include | decrypt | fromYaml }}
+        email = {{ $commonSecret.account.username }}@{{ $commonSecret.account.domain }}
+        # Signing SSH key
+        signingkey = ~/.ssh/key/enterprise-F1_ed25519.pub
+[core]
+        # Custom global ignore file
+        excludesfile = ~/Working/enterprise/F1/.gitignore
+        # Custom SSH command with separated ssh config
+        sshCommand = ssh -F ~/Working/enterprise/F1/.ssh/config
+{{- range $commonSecret.git.servers }}
+{{-   if $.preferGitSSH }}
+[url {{ .ssh | quote }}]
+        # Prefer SSH than HTTPS for github
+        insteadOf = {{ .https }}
+{{-   else }}
+[url {{ .https | quote }}]
+        # Prefer HTTPS than for github
+        insteadOf = {{ .ssh }}
+{{-   end }}
+{{- end }}
