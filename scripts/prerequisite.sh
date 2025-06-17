@@ -3,6 +3,12 @@ set -Eeuo pipefail
 
 if command -v sw_vers &> /dev/null; then
   # MacOS
+  sudo -v
+  while true; do
+    sudo -n true
+    sleep 60
+    kill -0 "$$" || exit
+  done 2> /dev/null &
   curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash - || :
   (
     echo
