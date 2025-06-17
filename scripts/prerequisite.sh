@@ -39,3 +39,4 @@ else
 fi
 
 git clone https://github.com/dynamotn/dotfiles ~/Dotfiles
+bash ~/Dotfiles/scripts/setup.sh
