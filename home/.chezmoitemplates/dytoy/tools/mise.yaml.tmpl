@@ -20,3 +20,6 @@ github:
   version: v2024.12.24
   {{- end }}
   release_asset: mise-%v-{{ $os }}-{{ $arch }}{{ $suffix }}
+hook:
+  after: |-
+    mise use -g usage
