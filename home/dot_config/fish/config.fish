@@ -79,7 +79,10 @@ end
 
 ## Other tools {
 # mise
-type -q mise; and mise activate fish | source
+if type -q mise
+    mise activate fish | source
+    mise completion fish | source
+end
 
 if status is-interactive
     # Theme
