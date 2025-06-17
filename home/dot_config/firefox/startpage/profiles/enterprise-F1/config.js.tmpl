@@ -1,0 +1,102 @@
+{{- $commonSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/common.yaml.age" | include | decrypt | fromYaml }}
+let saved_config = JSON.parse(localStorage.getItem("LOADED_CONFIG"));
+
+const default_config = {
+  openLastVisitedTab: true,
+  tabs: [
+    {
+      name: "work",
+      background_url: "../../src/img/tabs/work.gif",
+      tab_color: "sapphire",
+      categories: [
+        {
+          name: "communicate",
+          links: [
+            {
+              name: "outlook",
+              url: "https://outlook.office.com",
+              icon: "󰴢",
+              icon_color: "red",
+            },
+            {
+              name: "teams",
+              url: "https://teams.microsoft.com",
+              icon: "󰊻",
+              icon_color: "purple",
+            },
+          ],
+        },
+        {
+          name: "development",
+          links: {{ toJson $commonSecret.firefox.startpage.config.development }},
+        },
+        {
+          name: "management",
+          links: {{ toJson $commonSecret.firefox.startpage.config.management }},
+        },
+      ],
+    },
+    {
+      name: "misc",
+      background_url: "../../src/img/tabs/misc.webp",
+      tab_color: "lavender",
+      categories: [
+        {
+          name: "shared",
+          links: {{ toJson $commonSecret.firefox.startpage.config.shared }},
+        },
+        {
+          name: "vdi",
+          links: {{ toJson $commonSecret.firefox.startpage.config.vdi }},
+        },
+      ],
+    },
+    {
+      name: "human",
+      background_url: "../../src/img/tabs/human.webp",
+      tab_color: "mauve",
+      categories: [
+        {
+          name: "C&B",
+          links: {{ toJson $commonSecret.firefox.startpage.config.cnb }},
+        },
+        {
+          name: "L&D",
+          links: {{ toJson $commonSecret.firefox.startpage.config.lnd }},
+        },
+      ],
+    },
+    {
+      name: "chill",
+      background_url: "../../src/img/tabs/chill.gif",
+      tab_color: "maroon",
+      categories: [
+        {
+          name: "multimedia",
+          links: [
+            {
+              name: "youtube",
+              url: "https://youtube.com",
+              icon: "",
+              icon_color: "red",
+            },
+            {
+              name: "spotify",
+              url: "https://open.spotify.com",
+              icon: "",
+              icon_color: "green",
+            },
+            {
+              name: "netflix",
+              url: "https://netflix.com",
+              icon: "󰝆",
+              icon_color: "red",
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+const LOADED_CONFIG = new Config(saved_config ?? default_config);
