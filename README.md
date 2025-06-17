@@ -62,14 +62,13 @@ TODO: List all screenshots
 
 ## :inbox_tray:&nbsp; Installation
 
-Run these commands:
+Run only one command:
 
 ```sh
 curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | bash -
-git clone --depth 1 https://github.com/dynamotn/dotfiles.git # or https://gitlab.com/dynamo-config/dotfiles.git
-cd dotfiles || exit
-./script/setup.sh
 ```
+
+Answer questions, and wait to finish all setup scripts. My dotfiles will be located in `$HOME/Dotfiles`
 
 ## :scroll:&nbsp; Cheatsheet
 
