@@ -10,7 +10,6 @@ app-editors/neovim
 app-eselect/eselect-repository
 app-i18n/fcitx-bamboo
 app-misc/grc
-app-misc/ollama
 app-misc/resolve-march-native
 app-misc/tmux
 app-misc/zellij
@@ -77,6 +76,7 @@ net-misc/rustdesk
 net-vpn/tailscale
 net-vpn/wireguard-tools
 net-wireless/iwd
+sci-ml/ollama
 sys-apps/bat
 sys-apps/etckeeper
 sys-apps/ethtool
@@ -96,7 +96,7 @@ sys-libs/zlib
 sys-process/cronie
 sys-process/parallel
 www-client/w3m
-www-client/zen-browser
+www-client/zen-bin
 x11-base/xorg-proto
 x11-base/xwayland
 x11-drivers/nvidia-drivers
