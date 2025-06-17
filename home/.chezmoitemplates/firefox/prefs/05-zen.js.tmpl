@@ -10,5 +10,7 @@ user_pref("zen.theme.accent-color", "#8bd5ca");
 user_pref("zen.tabs.show-newtab-vertical", false);
 /* Enable container-specific essentials */
 user_pref("zen.workspaces.container-specific-essentials-enabled", true);
+{{- if ne .guiWinManager "G" }}
 /* Enable transparency for widget on Linux */
 user_pref("zen.widget.linux.transparency", true);
+{{- end }}
