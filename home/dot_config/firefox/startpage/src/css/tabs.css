@@ -2,7 +2,7 @@
   width: 100%;
   height: 100%;
   position: absolute;
-  background-image: url("../img/background.png");
+  background-image: url("https://picsum.photos/seed/picsum/1920/1080");
   background-repeat: round;
   background-size: cover;
 }
@@ -16,7 +16,7 @@
   top: 80px;
   bottom: 0;
   margin: auto;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   background: var(--bg);
   position: relative;
 }
@@ -33,7 +33,7 @@
   width: 100%;
   height: 100%;
   right: 100%;
-  transition: all .6s;
+  transition: all 0.6s;
   position: absolute;
 }
 
@@ -93,8 +93,8 @@
 }
 
 .slides .bookmarks li:not(:last-child) {
-  box-shadow: 0 1px 0 rgba(212, 190, 152, .25);
-  padding: 0 0 .5em 0;
+  box-shadow: 0 1px 0 rgba(212, 190, 152, 0.25);
+  padding: 0 0 0.5em 0;
   margin-bottom: 1.5em;
 }
 
@@ -119,27 +119,32 @@
 }
 
 .categories .link:not(:last-child) {
-  margin-right: .5em;
+  margin-right: 0.5em;
 }
 
 .categories .link a {
   color: var(--text);
   text-decoration: none;
   font: 700 18px sans-serif;
-  transition: all .2s;
+  transition: all 0.2s;
   display: inline-flex;
   align-items: center;
-  padding: .4em .7em;
+  padding: 0.4em 0.7em;
   background: var(--surface);
-  box-shadow: 0 4px rgba(0, 0, 0, 0.5), 0 5px 10px rgb(0 0 0 / 20%);
+  box-shadow:
+    0 4px rgba(0, 0, 0, 0.5),
+    0 5px 10px rgb(0 0 0 / 20%);
   border-radius: 2px;
-  margin-bottom: .7em;
+  margin-bottom: 0.7em;
 }
 
 .categories .link a:hover {
   color: var(--flavour);
   transform: translate(0, 4px);
-  box-shadow: 0 0 rgba(0, 0, 0, 0.25), 0 0 0 rgba(0, 0, 0, .5), 0 -0px 5px rgba(0, 0, 0, .1);
+  box-shadow:
+    0 0 rgba(0, 0, 0, 0.25),
+    0 0 0 rgba(0, 0, 0, 0.5),
+    0 -0px 5px rgba(0, 0, 0, 0.1);
 }
 
 .categories .link a p:nth-child(2) {
