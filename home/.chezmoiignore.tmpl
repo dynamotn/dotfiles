@@ -39,7 +39,8 @@ Library/Application Support/Firefox
 {{- else if ne .browser "Z" }}
 .zen
 Library/Application Support/zen
-{{- else if empty .browser }}
+{{- end }}
+{{- if empty .browser }}
 .config/tridactyl
 .mozilla
 .zen
