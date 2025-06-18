@@ -76,9 +76,13 @@ bind = $mainMod, Return, exec, kitty zellij
 {{- if eq .place "home" }}
 bind = $mainMod, E, exec, $browser -P Personal
 bind = $mainMod, Q, exec, $browser -P Enterprise-F1
+bind = $mainMod, M, exec, $mailClient -P Personal
+bind = $mainMod, K, exec, $mailClient -P Enterprise-F1
 {{- else if eq .place "office" }}
 bind = $mainMod, E, exec, $browser -P Enterprise-{{ .company }}
 bind = $mainMod, Q, exec, $browser -P Personal
+bind = $mainMod, M, exec, $mailClient -P Enterprise-{{ .company }}
+bind = $mainMod, K, exec, $mailClient -P Personal
 {{- end }}
 bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy

@@ -1,8 +1,14 @@
-{{- $appFirefox := "" }}
+{{- $browser := "" }}
 {{- if eq .browser "F" }}
-{{-   $appFirefox = "Firefox" }}
+{{-   $browser = "Firefox" }}
 {{- else if eq .browser "Z" }}
-{{-   $appFirefox = "Zen" }}
+{{-   $browser = "Zen" }}
+{{- end }}
+{{- $mailClient := "" }}
+{{- if eq .mailClient "T" }}
+{{-   $mailClient = "Thunderbird" }}
+{{- else if eq .mailClient "B" }}
+{{-   $mailClient = "Betterbird" }}
 {{- end }}
 after-startup-command = [
   ## SketchyBar
@@ -10,7 +16,9 @@ after-startup-command = [
   ## Kitty
   'exec-and-forget open -na kitty --args zellij',
   ## Firefox/Zen
-  'exec-and-forget open -na {{ $appFirefox }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} --safe-mode=false',
+  'exec-and-forget open -na {{ $browser }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} --safe-mode=false',
+  ## Thunderbird/Betterbird
+  'exec-and-forget open -na {{ $mailClient }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} --safe-mode=false',
   ## Obsidian
   'exec-and-forget open -a Obsidian',
 ]
@@ -72,7 +80,7 @@ if.app-name-regex-substring = 'Firefox|Zen'
 run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'Thunderbird'
+if.app-name-regex-substring = 'Thunderbird|Betterbird'
 run = 'move-node-to-workspace 3'
 
 [[on-window-detected]]
@@ -182,11 +190,15 @@ alt-esc = 'mode apps'
 
 alt-enter = 'exec-and-forget open -na kitty --args zellij'
 {{- if eq .place "home" }}
-alt-e = 'exec-and-forget open -na {{ $appFirefox }} --args -P Personal --safe-mode=false'
-alt-q = 'exec-and-forget open -na {{ $appFirefox }} --args -P Enterprise-F1 --safe-mode=false'
+alt-e = 'exec-and-forget open -na {{ $browser }} --args -P Personal --safe-mode=false'
+alt-q = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-F1 --safe-mode=false'
+alt-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal --safe-mode=false'
+alt-k = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-F1 --safe-mode=false'
 {{- else if eq .place "office" }}
-alt-e = 'exec-and-forget open -na {{ $appFirefox }} --args -P Enterprise-{{ .company }} --safe-mode=false'
-alt-q = 'exec-and-forget open -na {{ $appFirefox }} --args -P Personal --safe-mode=false'
+alt-e = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-{{ .company }} --safe-mode=false'
+alt-q = 'exec-and-forget open -na {{ $browser }} --args -P Personal --safe-mode=false'
+alt-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-{{ .company }} --safe-mode=false'
+alt-k = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal --safe-mode=false'
 {{- end }}
 
 # 'service' binding mode declaration.
