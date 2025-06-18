@@ -66,10 +66,19 @@ exec-once = $browser -P Enterprise
 {{- end }}
 
 # Email client
+{{- if eq .mailClient "T" }}
+$mailClient = "thunderbird"
+{{- else if eq .mailClient "B" }}
+{{-   if eq .osid "linux-gentoo" }}
+$browser = "betterbird-bin"
+{{-   else }}
+$browser = "betterbird"
+{{-   end }}
+{{- end }}
 {{- if eq .place "home" }}
-exec-once = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Personal
+exec-once = $mailClient -P Personal
 {{- else if eq .place "office" }}
-exec-once = thunderbird{{ if eq .chezmoi.osRelease.id "gentoo" }}-bin{{ end }} -P Enterprise
+exec-once = $mailClient -P Enterprise
 {{- end }}
 
 # Note-taking
