@@ -37,10 +37,16 @@ __add_folder_to_path $HOME/.yarn/bin
 __add_folder_to_path $HOME/.cargo/bin
 __add_folder_to_path $HOME/.go/bin
 __add_folder_to_path $HOME/.local/share/nvim/mason/bin
-type -q brew; and brew shellenv | source
 
 __add_folder_to_manpath $HOME/.local/man
 __add_folder_to_manpath $CONFIG_PATH/../scripts/man
+
+# Package manager
+type -q brew; and brew shellenv | source
+if type -q mise
+    mise activate fish | source
+    mise completion fish | source
+end
 
 # Set default editor
 abbr -a v vim
@@ -78,12 +84,6 @@ end
 ## }
 
 ## Other tools {
-# mise
-if type -q mise
-    mise activate fish | source
-    mise completion fish | source
-end
-
 if status is-interactive
     # Theme
     fish_config theme choose catppuccin
