@@ -18,7 +18,6 @@ git update-index --assume-unchanged .gitmodules
 {{- end }}
 git submodule update --init --remote --recursive \
   {{- if eq .guiServer "W" "X" }}
-  home/Multimedia/Pictures/Wallpaper \
   silos/icon \
   {{- end }}
   {{- if eq .browser "F" }}
@@ -33,6 +32,7 @@ git submodule update --init --remote --recursive \
   {{-   end }}
   {{- end }}
   {{- if ne .guiServer "0" }}
+  home/Multimedia/Pictures/Wallpaper \
   {{-   if .decryptPersonal }}
   home/dot_config/thunderbird/profiles/personal \
   {{-   end }}
