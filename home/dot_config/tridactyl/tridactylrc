@@ -1,3 +1,4 @@
+" vim:ft=vim
 "------------------------------------------------------------------------------
 " Core settings
 "------------------------------------------------------------------------------
@@ -20,7 +21,7 @@ set allowautofocus false
 set smoothscroll true
 
 " Colorscheme
-colourscheme --url https://raw.githubusercontent.com/lonepie/catppuccin-tridactyl/main/catppuccin.css catppuccin
+colourscheme catppuccin
 
 " Set editor to neovim
 set editorcmd kitty nvim
@@ -41,7 +42,7 @@ jsb browser.webRequest.onHeadersReceived.addListener(tri.request.clobberCSP,{url
 " This (clearly) is remotely hosted code. Google will be sent the whole
 " contents of the page you are on if you run `:translate`
 " From https://github.com/jeremiahlee/page-translator
-command translate js let googleTranslateCallback = document.createElement('script'); googleTranslateCallback.innerHTML = "function googleTranslateElementInit(){ new google.translate.TranslateElement(); }"; document.body.insertBefore(googleTranslateCallback, document.body.firstChild); let googleTranslateScript = document.createElement('script'); googleTranslateScript.charset="UTF-8"; googleTranslateScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&tl=&sl=&hl="; document.body.insertBefore(googleTranslateScript, document.body.firstChild);
+command translate js let googleTranslateCallback = document.createElement('script'); googleTranslateCallback.innerHTML = "function googleTranslateElementInit(){ new google.translate.TranslateElement(); }"; document.body.insertBefore(googleTranslateCallback, document.body.firstChild); let googleTranslateScript = document.createElement('script'); googleTranslateScript.charset="UTF-8"; googleTranslateScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&tl=vi&sl=&hl="; document.body.insertBefore(googleTranslateScript, document.body.firstChild);
 
 "------------------------------------------------------------------------------
 " Key bindings
@@ -53,6 +54,19 @@ comclear
 " Previous/next tab.
 bind J tabprev
 bind K tabnext
+
+" Find
+bind / fillcmdline find
+bind ? fillcmdline find --reverse
+bind n findnext --search-from-view
+bind N findnext --search-from-view --reverse
+bind gn findselect
+bind gN composite findnext --search-from-view --reverse; findselect
+bind ,<Space> nohlsearch
+
+" Close tab
+unbind d
+bind x tabclose
 
 " Backward/forward in history.
 bind h back
@@ -70,6 +84,13 @@ bind --mode=visual t composite js document.getSelection().toString() | fillcmdli
 
 " Open right click menu on links
 bind ;C composite hint_focus; !s xdotool key Menu
+
+" Open videos in MPV
+bind ,v composite js document.location.href | mpv
+bind ;v composite hint -W mpv
+
+" Git{Hub,Lab} git clone via SSH yank
+bind yg composite js "git clone " + document.location.href.replace(/https?:\/\//,"git@").replace("/",":").replace(/$/,".git") | clipboard yank
 
 " Use Firefox default keybind
 " search
@@ -91,3 +112,14 @@ bind ;c hint -Jc [class*="expand"],[class="togg"],[class="comment_folder"]
 
 " Take back to subreddit from comments
 bindurl reddit.com gu urlparent 4
+
+" Only hint search results on Google and DDG
+bindurl www.google.com ;f hint -Jc #search a
+bindurl www.google.com ;F hint -Jbc #search a
+
+" Make `gi` on GitHub take you to the search box
+bindurl ^https://github.com gi hint -Vc .AppHeader-searchButton
+
+" Isolate Facebook in its own container
+set auconcreatecontainer true
+autocontain facebook\.com facebook
