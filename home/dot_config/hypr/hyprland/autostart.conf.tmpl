@@ -70,9 +70,9 @@ exec-once = $browser -P Enterprise
 $mailClient = "thunderbird"
 {{- else if eq .mailClient "B" }}
 {{-   if eq .osid "linux-gentoo" }}
-$browser = "betterbird-bin"
+$mailClient = "betterbird-bin"
 {{-   else }}
-$browser = "betterbird"
+$mailClient = "betterbird"
 {{-   end }}
 {{- end }}
 {{- if eq .place "home" }}
