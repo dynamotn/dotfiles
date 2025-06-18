@@ -1,4 +1,3 @@
-app-admin/secret-service
 app-admin/sudo
 app-admin/syslog-ng
 app-arch/7zip
@@ -23,12 +22,9 @@ dev-build/automake
 dev-build/cmake
 dev-build/meson
 dev-build/ninja
-dev-java/openjdk-jre-bin
 dev-lang/go
 dev-lang/rust-bin
 dev-libs/wayland
-dev-python/jinja2
-dev-python/pycryptodome
 dev-util/ccache
 dev-util/kcov
 dev-util/pkgdev
@@ -37,8 +33,6 @@ dev-vcs/git
 games-util/game-device-udev-rules
 gui-apps/eww
 gui-apps/grim
-gui-apps/hyprlock
-gui-apps/hyprshade
 gui-apps/regreet
 gui-apps/slurp
 gui-apps/swappy
@@ -46,7 +40,6 @@ gui-apps/swayidle
 gui-apps/swaylock-effects
 gui-apps/swaync
 gui-apps/swww
-gui-apps/swww::guru
 gui-apps/wev
 gui-apps/wl-clipboard
 gui-apps/wofi
@@ -63,8 +56,6 @@ media-fonts/noto
 media-fonts/noto-cjk
 media-fonts/roboto
 media-gfx/fontforge
-media-gfx/imagemagick
-media-gfx/ueberzugpp
 media-sound/playerctl
 media-video/mpv
 media-video/pipewire
@@ -86,7 +77,6 @@ sys-auth/pam_u2f
 sys-boot/grub
 sys-devel/distcc
 sys-devel/gcc
-sys-devel/gcc:14
 sys-fs/btrfs-progs
 sys-fs/ntfs3g
 sys-kernel/gentoo-kernel-bin
@@ -96,12 +86,16 @@ sys-libs/zlib
 sys-process/cronie
 sys-process/parallel
 www-client/w3m
+{{- if eq .browser "F" }}
+www-client/firefox-bin
+{{- else if eq .browser "Z" }}
 www-client/zen-bin
-x11-base/xorg-proto
+{{- end }}
 x11-base/xwayland
+x11-base/xorg-proto
+{{- if eq .guiDriver "N" }}
 x11-drivers/nvidia-drivers
+{{- end }}
 x11-libs/libnotify
-x11-libs/xcb-util
 x11-misc/xdg-user-dirs
-x11-terms/ghostty
 x11-terms/kitty
