@@ -31,8 +31,7 @@ git submodule update --init --remote --recursive \
   home/dot_config/firefox/profiles/enterprise-{{ . }} \
   {{-   end }}
   {{- end }}
-  {{- if ne .guiServer "0" }}
-  home/Multimedia/Pictures/Wallpaper \
+  {{- if eq .mailClient "T" "B" }}
   {{-   if .decryptPersonal }}
   home/dot_config/thunderbird/profiles/personal \
   {{-   end }}
@@ -42,6 +41,9 @@ git submodule update --init --remote --recursive \
   {{- end }}
   {{- if eq .terminalMultiplexer "T" }}
   silos/tmux \
+  {{- end }}
+  {{- if ne .guiServer "0" }}
+  home/Multimedia/Pictures/Wallpaper \
   {{- end }}
   home/dot_config/nvim
 dybatpho::success "Updated submodules"

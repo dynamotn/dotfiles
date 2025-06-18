@@ -1,29 +1,28 @@
 {{- $configPath := joinPath .chezmoi.homeDir ".config/firefox/profiles" }}
 
-{{- $releaseId := "0" }}
+{{- $path := "" }}
 {{- if eq .chezmoi.os "darwin" }}
-{{- $appName := "" }}
-{{- if eq .browser "F" }}
-{{-     $appName = "Firefox" }}
+{{-   if eq .browser "F" }}
+{{-     $path = printf "/Applications/%s.app/Contents/MacOS" "Firefox" }}
 {{-   else if eq .browser "Z" }}
-{{-     $appName = "Zen" }}
+{{-     $path = printf "/Applications/%s.app/Contents/MacOS" "Zen" }}
 {{-   end }}
-{{-   $releaseId = (printf "/Applications/%s.app/Contents/MacOS" $appName | mozillaInstallHash) }}
 {{- else if eq .chezmoi.os "linux" }}
 {{-   if eq .browser "F" }}
 {{-     if eq .osid "linux-gentoo" }}
-{{-       $releaseId = mozillaInstallHash "/usr/lib64/firefox" }}
+{{-       $path = "/opt/firefox" }}
 {{-     else }}
-{{-       $releaseId = mozillaInstallHash "/usr/lib/firefox" }}
+{{-       $path = "/usr/lib/firefox" }}
 {{-     end }}
 {{-   else if eq .browser "Z" }}
 {{-     if eq .osid "linux-gentoo" }}
-{{-       $releaseId = mozillaInstallHash "/opt/zen" }}
+{{-       $path = "/opt/zen" }}
 {{-     else }}
-{{-       $releaseId = mozillaInstallHash "/opt/zen-browser-bin" }}
+{{-       $path = "/opt/zen-browser-bin" }}
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
+{{- $releaseId := mozillaInstallHash $path }}
 [Install{{- $releaseId -}}]
 {{- if eq .kind "container" }}
 Default={{- $configPath }}/public

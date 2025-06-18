@@ -59,11 +59,13 @@ data:
   {{- if ne $guiServer "0" }}
   guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is? (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" (list "N" "I" "A" "M" "V") | quote }}
   guiWinManager: {{ promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is? (A for aerospace, H for hyprland, G for gnome)" (list "H" "A" "G") "H" | quote }}
-  browser: {{ promptChoiceOnce . "browser" "What browser do you use? (F for Firefox, Z for Zen Browser)" (list "F" "Z") "Z" | quote }}
+  browser: {{ promptChoiceOnce . "browser" "What web browser do you use? (F for Firefox, Z for Zen Browser)" (list "F" "Z") "Z" | quote }}
+  mailClient: {{ promptChoiceOnce . "mailClient" "What email client do you use? (T for Thunderbird, B for Betterbird)" (list "T" "B") "B" | quote }}
   {{- else }}
   guiDriver:
   guiWinManager:
   browser:
+  mailClient:
   {{- end }}
   terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use? (T for tmux, Z for Zellij)" (list "T" "Z") "Z" | quote }}
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}

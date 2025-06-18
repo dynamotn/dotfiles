@@ -10,9 +10,9 @@ dybatpho::register_err_handler
 {{-     if eq .chezmoi.os "darwin" }}
 {{-       $process = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
 {{-     else if eq .osid "linux-gentoo" }}
-{{-       $process = "/usr/lib64/firefox" }}
+{{-       $process = "/usr/lib64/firefox/firefox" }}
 {{-     else }}
-{{-       $process = "/usr/lib/firefox" }}
+{{-       $process = "/usr/lib/firefox/firefox" }}
 {{-     end }}
 {{-   else if eq .browser "Z" }}
 {{-     $appName = "zen" }}
@@ -68,7 +68,7 @@ function _update_dotfiles {
 }
 
 function _main {
-  dybatpho::info "Your browser in chezmoi settings is {{ $appName }}"
+  dybatpho::info "Your web browser in chezmoi settings is {{ $appName }}"
   if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 1 ]; then
     dybatpho::fatal "{{ $appName }} is running"
   else
