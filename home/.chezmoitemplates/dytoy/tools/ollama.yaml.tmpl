@@ -9,17 +9,16 @@ gentoo:
       sudo rc-service ollama start
 arch:
   packages:
-    {{- if eq .guiServer "W" }}
-    {{- if eq .guiDriver "I" }}
-    - name: ollama
-    {{- else if eq .guiDriver "N" }}
+    {{- if eq .guiDriver "N" }}
     - name: ollama-cuda
     {{- else if eq .guiDriver "A" }}
     - name: ollama-rocm
-    {{- end }}
     {{- else }}
     - name: ollama
     {{- end }}
   hook:
     after: |-
       sudo systemctl enable --now ollama
+macos:
+  packages:
+    - name: ollama
