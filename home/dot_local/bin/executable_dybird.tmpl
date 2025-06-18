@@ -2,14 +2,27 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
-{{- if ne .guiServer "0" }}
+{{- if .mailClient }}
 {{-   $process := "" }}
-{{-   if eq .chezmoi.os "darwin" }}
-{{-     $process = "/Applications/Thunderbird.app/Contents/MacOS/thunderbird" }}
-{{-   else if eq .osid "linux-gentoo" }}
-{{-     $process = "/opt/thunderbird" }}
-{{-   else }}
-{{-     $process = "/usr/lib/thunderbird" }}
+{{-   $appName := "" }}
+{{-   if eq .mailClient "T" }}
+{{-     $appName = "thunderbird" }}
+{{-     if eq .chezmoi.os "darwin" }}
+{{-       $process = "/Applications/Thunderbird.app/Contents/MacOS" }}
+{{-     else if eq .osid "linux-gentoo" }}
+{{-       $process = "/opt/thunderbird/thunderbird" }}
+{{-     else }}
+{{-       $process = "/usr/lib/thunderbird/thunderbird" }}
+{{-     end }}
+{{-   else if eq .mailClient "B" }}
+{{-     $appName = "betterbird" }}
+{{-     if eq .chezmoi.os "darwin" }}
+{{-       $process = "/Applications/Betterbird.app/Contents/MacOS/betterbird" }}
+{{-     else if eq .osid "linux-gentoo" }}
+{{-       $process = "/opt/betterbird/betterbird-bin" }}
+{{-     else }}
+{{-       $process = "/opt/betterbird-bin/betterbird" }}
+{{-     end }}
 {{-   end }}
 {{-   $profiles := list "public" }}
 {{-   if .decryptPersonal }}
@@ -55,17 +68,18 @@ function _update_dotfiles {
 }
 
 function _main {
+  dybatpho::info "Your email client in chezmoi settings is {{ $appName }}"
   if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 1 ]; then
-    dybatpho::fatal "thunderbird is running"
+    dybatpho::fatal "{{ $appName }} is running"
   else
-    dybatpho::notice "Update thunderbird settings"
+    dybatpho::notice "Update {{ $appName }} settings"
     _update_dotfiles
-    dybatpho::success "Update thunderbird settings"
+    dybatpho::success "Update {{ $appName }} settings"
   fi
 }
 
 function _spec_main {
-  dybatpho::opts::setup "Update your live data of thunderbird to your dotfiles" MAIN_ARGS action:"_main"
+  dybatpho::opts::setup "Update your live data of {{ $appName }} client to your dotfiles" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"_validate_profile"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"

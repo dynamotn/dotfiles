@@ -51,7 +51,11 @@ gui-libs/xdg-desktop-portal-wlr
 gui-wm/hyprland
 llvm-core/clang
 llvm-core/llvm
+{{- if eq .mailClient "T" }}
 mail-client/thunderbird-bin
+{{- else if eq .mailClient "B" }}
+mail-client/betterbird-bin
+{{- end }}
 media-fonts/noto
 media-fonts/noto-cjk
 media-fonts/roboto

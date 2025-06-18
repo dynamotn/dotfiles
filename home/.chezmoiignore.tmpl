@@ -21,16 +21,7 @@
 
 {/* Browser and mail client files */}
 {/* Based on GUI window manager */}
-{{- if eq .guiServer "0" }}
-.config/tridactyl
-.mozilla
-.zen
-.config/firefox
-.thunderbird
-.config/thunderbird
-.local/bin/dyfox
-.local/bin/dybird
-{{- else if eq .guiServer "M" }}
+{{- if eq .guiServer "M" }}
 .mozilla
 .zen
 .thunderbird
@@ -44,11 +35,22 @@ Library/thunderbird
 .mozilla
 Library/Application Support/Firefox
 .config/firefox/profiles/*/chrome
+!.config/firefox/profiles/*/chrome/js
 {{- else if ne .browser "Z" }}
 .zen
 Library/Application Support/zen
 {{- else if empty .browser }}
+.config/tridactyl
+.mozilla
+.zen
 .config/firefox
+.local/bin/dyfox
+{{- end }}
+{/* Based on type of mail client */}
+{{- if empty .mailClient }}
+.thunderbird
+.config/thunderbird
+.local/bin/dybird
 {{- end }}
 {/* Ignore when running */}
 {{- $processFirefox := "" }}
@@ -57,9 +59,9 @@ Library/Application Support/zen
 {{-   if eq .chezmoi.os "darwin" }}
 {{-     $processFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
 {{-   else if eq .osid "linux-gentoo" }}
-{{-     $processFirefox = "/usr/lib64/firefox" }}
+{{-     $processFirefox = "/opt/firefox/firefox" }}
 {{-   else }}
-{{-     $processFirefox = "/usr/lib/firefox" }}
+{{-     $processFirefox = "/usr/lib/firefox/firefox" }}
 {{-   end }}
 {{- else if eq .browser "Z" }}
 {{-   if eq .chezmoi.os "darwin" }}
@@ -70,12 +72,22 @@ Library/Application Support/zen
 {{-     $processFirefox = "/opt/zen-browser-bin/zen" }}
 {{-   end }}
 {{- end }}
-{{- if eq .chezmoi.os "darwin" }}
-{{-   $processThunderbird = "/Applications/Thunderbird.app/Contents/MacOS/thunderbird" }}
-{{- else if eq .osid "linux-gentoo" }}
-{{-   $processThunderbird = "/opt/thunderbird" }}
-{{- else }}
-{{-   $processThunderbird = "/usr/lib/thunderbird" }}
+{{- if eq .mailClient "T" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $processThunderbird = "/Applications/Thunderbird.app/Contents/MacOS/thunderbird" }}
+{{-   else if eq .osid "linux-gentoo" }}
+{{-     $processThunderbird = "/opt/thunderbird/thunderbird" }}
+{{-   else }}
+{{-     $processThunderbird = "/usr/lib/thunderbird/thunderbird" }}
+{{-   end }}
+{{- else if eq .mailClient "B" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $processThunderbird = "/Applications/Thunderbird.app/Contents/MacOS/betterbird" }}
+{{-   else if eq .osid "linux-gentoo" }}
+{{-     $processThunderbird = "/opt/betterbird/betterbird-bin" }}
+{{-   else }}
+{{-     $processThunderbird = "/opt/betterbird-bin/betterbird" }}
+{{-   end }}
 {{- end }}
 {{- if ne .guiServer "0" }}
 {{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 1 }}

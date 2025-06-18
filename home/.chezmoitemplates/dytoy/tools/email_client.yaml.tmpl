@@ -1,4 +1,4 @@
-{{- if eq .guiServer "W" "M" }}
+{{- if eq .mailClient "T" }}
 name: thunderbird
 method: os
 is_essential: true
@@ -15,4 +15,23 @@ macos:
   packages:
     - name: thunderbird
       is_cask: true
+{{- else if eq .mailClient "B" }}
+name: betterbird
+is_essential: true
+{{-   if eq .osid "linux-gentoo" "linux-arch" }}
+method: os
+gentoo:
+  packages:
+    - name: mail-client/betterbird-bin
+arch:
+  packages:
+    - name: betterbird-bin
+{{- else if eq .chezmoi.os "darwin" }}
+method: shell
+content: |-
+  dybatpho::create_temp temp_file ".dmg"
+  dybatpho::curl_download https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=release $temp_file
+  mount_dir=$(hdiutil mount -plist $temp_file | grep -oE '/Volumes/[^"<]+' | head -n 1)
+  sudo cp -r $mount_dir/BetterBird.app /Applications
+{{-   end }}
 {{- end }}
