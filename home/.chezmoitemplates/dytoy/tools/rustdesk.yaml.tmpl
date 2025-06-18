@@ -1,0 +1,16 @@
+{{- if eq .kind "laptop" }}
+name: rustdesk
+is_essential: true
+method: os
+arch:
+  packages:
+    - name: rustdesk
+macos:
+  packages:
+    - name: rustdesk
+      is_cask: true
+gentoo:
+  packages:
+    - name: net-misc/rustdesk
+      repo: gentoo-zh
+{{- end }}

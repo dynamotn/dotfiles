@@ -27,6 +27,8 @@
 |[thunderbird](https://www.thunderbird.net/)|Email client|`silos/thunderbird`|
 |[nvtop](https://github.com/Syllo/nvtop)|Monitor resources of GPU|`silos/hyprland`, `silos/awesome`|
 |[obsidian](https://obsidian.md/)|Note-taking app|`silos/hyprland`|
+|[vmware-horizon-client](https://www.omnissa.com/)|Virtual machine client to remote||
+|[rustdesk](https://github.com/rustdesk/rustdesk)|Self-hosted remote desktop||
 
 # Wayland server applications
 
