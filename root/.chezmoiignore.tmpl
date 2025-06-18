@@ -7,6 +7,7 @@ Applications
 etc
 usr
 opt
+var
 {{- end }}
 
 {/* Window manager and WM-related files */}
@@ -47,6 +48,7 @@ etc/pacman.conf
 {{- if ne .osid "linux-gentoo" }}
 etc/ntp
 etc/portage
+var/lib/portage
 {{- end }}
 {{- if not (eq .osid "linux-ubuntu" "linux-debian") }}
 etc/apt
