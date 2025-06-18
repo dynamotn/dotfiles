@@ -1,0 +1,8 @@
+{{- if eq .guiDriver "N" }}
+sci-ml/ollama cuda AMDGPU_TARGETS: -*
+acct-user/ollama cuda
+{{- else if eq .guiDriver "A" }}
+sci-ml/ollama rocm
+{{- else if eq .guiDriver "I" }}
+sci-ml/ollama AMDGPU_TARGETS: -*
+{{- end }}
