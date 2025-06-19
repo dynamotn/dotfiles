@@ -3,6 +3,7 @@ let saved_config = JSON.parse(localStorage.getItem("LOADED_CONFIG"));
 
 const default_config = {
   openLastVisitedTab: true,
+  wallpaper: {{ $commonSecret.firefox.startpage.wallpaper | quote }},
   tabs: [
     {
       name: "work",
