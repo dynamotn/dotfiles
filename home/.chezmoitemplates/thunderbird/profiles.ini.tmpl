@@ -1,4 +1,9 @@
-{{- $configPath := joinPath .chezmoi.homeDir ".config/thunderbird/profiles" }}
+{{- $configPath := "" }}
+{{- $relative := 1 }}
+{{- if eq .mailClient "T" }}
+{{-   $relative = 0 }}
+{{-   $configPath = joinPath .chezmoi.homeDir ".config/thunderbird/profiles/" }}
+{{- end }}
 
 {{- $path := "" }}
 {{- if eq .chezmoi.os "darwin" }}
@@ -25,34 +30,34 @@
 {{- $releaseId := mozillaInstallHash $path }}
 [Install{{- $releaseId -}}]
 {{- if eq .kind "container" }}
-Default={{- $configPath }}/public
+Default={{- $configPath }}public
 {{- else if eq .place "office" }}
-Default={{ $configPath }}/enterprise-{{ .company }}
+Default={{ $configPath }}enterprise-{{ .company }}
 {{- else }}
-Default={{ $configPath }}/personal
+Default={{ $configPath }}personal
 {{- end }}
 Locked=1
 
 {{ $index := 0 }}
 [Profile{{ $index }}]
 Name=Public
-IsRelative=0
-Path={{ $configPath }}/public
+IsRelative={{ $relative }}
+Path={{ $configPath }}public
 
 {{  if .decryptPersonal }}
 {{- $index = add1 $index }}
 [Profile{{ $index }}]
 Name=Personal
-IsRelative=0
-Path={{ $configPath }}/personal
+IsRelative={{ $relative }}
+Path={{ $configPath }}personal
 {{- end }}
 
 {{  range .decryptEnterprise }}
 {{- $index = add1 $index }}
 [Profile{{ $index }}]
 Name=Enterprise-{{ . }}
-IsRelative=0
-Path={{ $configPath }}/enterprise-{{ . }}
+IsRelative={{ $relative }}
+Path={{ $configPath }}enterprise-{{ . }}
 {{- end }}
 
 [General]

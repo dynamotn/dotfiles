@@ -48,6 +48,10 @@ Library/Application Support/zen
 .local/bin/dyfox
 {{- end }}
 {/* Based on type of mail client */}
+{{- if ne .mailClient "B" }}
+.thunderbird/*
+!.thunderbird/profiles.ini
+{{- end }}
 {{- if empty .mailClient }}
 .thunderbird
 .config/thunderbird
