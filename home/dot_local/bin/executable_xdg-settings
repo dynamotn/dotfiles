@@ -727,7 +727,7 @@ read_kde_browser()
         # since Plasma >= 5.19
         ret=`get_browser_mime "x-scheme-handler/http"`
     fi
-    
+
     echo $ret
 }
 
@@ -1102,7 +1102,7 @@ get_url_scheme_handler_kde()
         else
             get_browser_mime "x-scheme-handler/$1"
         fi
-    else 
+    else
         get_browser_mime "x-scheme-handler/$1"
     fi
 }
