@@ -1,12 +1,14 @@
+{{- if or .socksProxy .httpProxy }}
 [Service]
-{{- with .httpProxy }}
+{{-   with .httpProxy }}
 Environment="http_proxy={{ . }}"
 Environment="https_proxy={{ . }}"
-{{- end }}
-{{- with .socksProxy }}
+{{-   end }}
+{{-   with .socksProxy }}
 Environment="http_proxy={{ . }}"
 Environment="https_proxy={{ . }}"
-{{- end }}
-{{- with .noProxyAddresses }}
+{{-   end }}
+{{-   with .noProxyAddresses }}
 Environment="no_proxy={{ join "," . }}"
+{{-   end }}
 {{- end }}
