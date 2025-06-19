@@ -8,7 +8,10 @@ dybatpho::notice "Setup PAM"
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
 if dybatpho::is file /etc/pam.d/system-local-login; then
-  sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
+  if ! grep -q '^auth\s*include\s*u2f' /etc/pam.d/system-local-login; then
+    dybatpho::notice "Adding pam_u2f to system-local-login"
+    sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
+  fi
 fi
 {{- if eq .chezmoi.osRelease.id "arch" "ubuntu" }}
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su
