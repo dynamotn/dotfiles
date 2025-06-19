@@ -2,9 +2,6 @@
   width: 100%;
   height: 100%;
   position: absolute;
-  background-image: url("https://picsum.photos/seed/picsum/1920/1080");
-  background-repeat: round;
-  background-size: cover;
 }
 
 .panel {

@@ -1,7 +1,16 @@
 let saved_config = JSON.parse(localStorage.getItem("LOADED_CONFIG"));
 
+let currentDate = new Date().toISOString().split("T")[0];
+
 const default_config = {
 	openLastVisitedTab: true,
+        wallpaper:
+                "https://picsum.photos/seed/dynamo-" +
+                currentDate +
+                "/" +
+                screen.width +
+                "/" +
+                screen.height,
 	tabs: [
 		{
 			name: "work",
@@ -14,7 +23,7 @@ const default_config = {
 						{
 							name: "proton",
 							url: "https://mail.proton.me",
-							icon: "https://mail.proton.me/assets/favicon.d47d3d0bef6d338e377a.svg?v=5.0.32.6",
+                                                        icon: "P",
 							icon_color: "lavender",
 						},
 						{
