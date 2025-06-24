@@ -1,0 +1,29 @@
+---
+description: com.raycast.macos
+data:
+  com.raycast.macos:
+    fallbackSearches_didMigrateScriptCommands: true
+    floatingNotes_didCreateOnboardingNote: true
+    floatingNotes_didMigrateFloatingNotesHotkeysAndAliases: true
+    floatingNotes_didMigrateFloatingNotesRecords: true
+    hasQueuedStatusBarHint: false
+    hasShownStatusBarHintAfterOnboarding: true
+    mainWindowPositionCache:
+      "1(0.0, 0.0, 1512.0, 982.0)": "{381, 845}"
+    mainWindow_isMonitoringGlobalHotkeys: true
+    onboardingSkipped: true
+    onboarding_raycastShortcuts:
+      - Esc
+    onboarding_setupHotkey: true
+    onboarding_showTasksProgress: true
+    raycastAI_ollamaModelsList: 5b5d
+    raycastGlobalHotkey: Command-120
+    raycastPreferredWindowMode: default
+    raycastShouldFollowSystemAppearance: true
+    raycastUI_preferredTextSize: large
+    showGettingStartedLink: true
+    store_migratedHackerNews: true
+    store_migratedNative: true
+    store_migratedReminders: true
+    subscriptions_active: false
+    useHyperKeyIcon: false
