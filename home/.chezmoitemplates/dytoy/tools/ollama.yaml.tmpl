@@ -22,3 +22,6 @@ arch:
 macos:
   packages:
     - name: ollama
+  hook:
+    after: |-
+      brew services start ollama
