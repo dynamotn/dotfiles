@@ -16,6 +16,7 @@
 .config/Trolltech.conf
 .config/user-dirs.dirs
 .local/bin/xdg-*
+.xprofile
 {{- end }}
 
 
@@ -129,6 +130,7 @@ Library/thunderbird
 {{- end }}
 {{- if ne .guiWinManager "G" }}
 .config/ibus-bamboo
+.xprofile
 {{- end }}
 {{- if ne .guiWinManager "A" }}
 .config/aerospace
