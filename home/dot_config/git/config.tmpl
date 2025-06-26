@@ -5,11 +5,26 @@
         email = me@dynamotn.dev
         # Signing SSH key
         signingkey = ~/.ssh/key/personal_ed25519.pub
+[feature]
+        # Optimize for repos with many files in the working directory
+        manyFiles = true
+[advice]
+        # I don't like git advice
+        skippedCherryPicks = false
+        addEmptyPathspec = false
+        detachedHead = false
+        statusHints = false
 [gpg]
         # Use SSH instead of GPG to sign
         format = ssh
 [commit]
         # Always sign commit
+        gpgsign = true
+[tag]
+        # Sort tags by version
+        sort = version:refname
+        # Always sign tag
+        forceSignAnnotated = true
         gpgsign = true
 {{- if lookPath "git" }}
 {{- if gt (semver "2.35" | (output "bash" "-c" "git --version | cut -f3 -d' '" | trim | semver).Compare ) 0 }}
@@ -17,6 +32,13 @@
         conflictstyle = zdiff3
 {{- end}}
 {{- end}}
+[rerere]
+        enabled = true
+        autoupdate = true
+[versionsort]
+        suffix = ""
+        suffix = "-rc"
+        suffix = "-pre"
 [diff]
         # Diff with vim
         tool = nvimdiff
@@ -92,6 +114,7 @@
         # Use delta to prettier diff
         pager = delta --pager='ov -F'
 [pager]
+        # Use ov for pager
         show = delta --features ov-diff
         diff = delta --features ov-diff
         log = delta --features ov-log
@@ -133,11 +156,33 @@
         pager = ov -F --section-delimiter '^(commit|added:|removed:|renamed:|Δ)' --section-header --pattern '•'
 [delta "ov-log"]
         pager = ov -F --section-delimiter '^(commit|\\* commit|\\* \\w{7})' --section-header-num 1
+[status]
+        # Show summary of submodule
+        submoduleSummary = true
 [apply]
         # Auto fix white space
         whitespace = fix
 [rebase]
+        # More clear when rebase
         instructionFormat = "[%an - %ar] %s"
+[stash]
+        # Show stash with diff
+        showPatch = true
+[transfer]
+        # Avoid paranoid
+        fsckobjects = true
+[fetch]
+        # Prune remote-tracking branches that no longer exist on the remote
+        prune = true
+        pruneTags = true
+[push]
+        # Only push current branch to same name branch
+        default = current
+        # Push follow tags
+        followTags = true
+[submodule]
+        # Fetch submodules parallel
+        fetchJobs = 0
 [alias]
         # Get main branch
         main = "!_() { git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'; }; _"
@@ -175,11 +220,6 @@
         update-main = !bash ~/.config/git/helper.sh update_main
         # Unshallow
         unshallow = "!_() { git fetch --unshallow; git config remote.$1.fetch "+refs/heads/*:refs/remotes/$1/*"; git fetch $1; }; _"
-[push]
-        # Only push current branch to same name branch
-        default = current
-        # Push follow tags
-        followTags = true
 [gc]
         # Don't auto git gc, with large project can slow when working
         auto = 0
