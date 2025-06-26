@@ -87,6 +87,10 @@ end
 if status is-interactive
     # Theme
     fish_config theme choose catppuccin
+    # Plugins
+    set sponge_successful_exit_codes 0 127
+    set sponge_purge_only_on_exit true
+
     # Hooks
     # Fzf config
     type -q __fzf_setup; and __fzf_setup
