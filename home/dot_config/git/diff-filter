@@ -1,0 +1,46 @@
+# vim:expandtab:shiftwidth=8:tabstop=8:softtabstop=8:ft=gitconfig
+[filter "lfs"]
+        # LFS subcommand
+        clean = git-lfs clean -- %f
+        smudge = git-lfs smudge -- %f
+        process = git-lfs filter-process
+        required = true
+[filter "space2"]
+        smudge = unexpand --tabs=2 --first-only
+        clean = expand --tabs=2 --initial
+[filter "space4"]
+        smudge = unexpand --tabs=4 --first-only
+        clean = expand --tabs=4 --initial
+[filter "space8"]
+        smudge = unexpand --tabs=8 --first-only
+        clean = expand --tabs=8 --initial
+[diff "sopsdiffer"]
+        # A differ for secret encoded
+        textconv = sops -d
+[diff "sqlite3"]
+        # A differ for sqlite file
+        binary = true
+        textconv = "echo .dump | sqlite3"
+[diff "json"]
+        # A differ for json file
+        textconv = "jq ."
+[diff "epub"]
+        binary = true
+        cachetextconv = true
+        textconv = pandoc --standalone --from=epub --to=plain
+[diff "pdf"]
+        binary = true
+        cachetextconv = true
+        textconv = pandoc --standalone --pdf-engine=typst --from=pdf --to=plain
+[diff "docx"]
+        binary = true
+        cachetextconv = true
+        textconv = pandoc --standalone --from=docx --to=plain
+[diff "xlsx"]
+        binary = true
+        cachetextconv = true
+        textconv = xlsx2csv
+[diff "pptx"]
+        binary = true
+        cachetextconv = true
+        textconv = "sh -c 'pptx2md --disable_image --disable_wmf -i $0 -o ~/.cache/git/presentation.md >/dev/null && cat ~/.cache/git/presentation.md'"

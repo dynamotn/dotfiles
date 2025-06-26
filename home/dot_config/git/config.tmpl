@@ -51,16 +51,6 @@
         algorithm = histogram
         # Detect move blocks
         colorMoved = default
-[diff "sopsdiffer"]
-        # A differ for secret encoded
-        textconv = sops -d
-[diff "sqlite3"]
-        # A differ for sqlite file
-        binary = true
-        textconv = "echo .dump | sqlite3"
-[diff "json"]
-        # A differ for json file
-        textconv = "jq ."
 [mergetool]
         # Not prompt launch apps, I have no time to confirm that don't think why I used it
         prompt = false
@@ -229,21 +219,8 @@
 [init]
         defaultBranch = main
         templatedir = ~/.config/git/templates
-[filter "lfs"]
-        # LFS subcommand
-        clean = git-lfs clean -- %f
-        smudge = git-lfs smudge -- %f
-        process = git-lfs filter-process
-        required = true
-[filter "space2"]
-        smudge = unexpand --tabs=2 --first-only
-        clean = expand --tabs=2 --initial
-[filter "space4"]
-        smudge = unexpand --tabs=4 --first-only
-        clean = expand --tabs=4 --initial
-[filter "space8"]
-        smudge = unexpand --tabs=8 --first-only
-        clean = expand --tabs=8 --initial
+[include]
+        path = ~/.config/git/diff-filter
 {{- range .decryptEnterprise }}
 [includeIf "gitdir/i:~/Working/enterprise/{{ . }}/**"]
         # Include config file from enterprise {{ . }} projects
