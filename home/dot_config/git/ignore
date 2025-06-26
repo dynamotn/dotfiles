@@ -1,14 +1,63 @@
+# vim: ft=gitignore
 # Tags generate by ctags
 tags
 
-# ASDF version file
-.tool-versions
-
-# Vim configuration for project
+# Editors
 .vim
-
-# Direnv
-.envrc
-
-# Session file of vim
+.idea
 Session.vim
+
+# Compiled sources
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.py[co]
+*.rbc
+
+# Compressed
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.xz
+*.zip
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlitedb
+
+# OS Files
+.AppleDB
+.AppleDesktop
+.AppleDouble
+.DS_Store
+.DS_Store?
+.DocumentRevisions-V100
+.LSOverride
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+._*
+.apdisk
+.com.apple.timemachine.donotpresent
+.directory
+.fseventsd
+.netrwhist
+Icon
+Network Trash Folder
+Temporary Items
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Temporary and backup files
+tmp/
+*.tmp
+*.bak
