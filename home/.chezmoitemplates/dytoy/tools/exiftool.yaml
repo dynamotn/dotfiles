@@ -1,0 +1,17 @@
+name: exiftool
+method: os
+gentoo:
+  packages:
+    - name: media-libs/exiftool
+arch:
+  packages:
+    - name: exiftool
+ubuntu:
+  packages:
+    - name: exiftool
+termux:
+  packages:
+    - name: exiftool
+macos:
+  packages:
+    - name: exiftool

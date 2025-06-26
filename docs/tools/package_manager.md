@@ -17,6 +17,7 @@
 |[radare2](https://github.com/radareorg/radare2)|Reverse engineering framework|Security tool|
 |[lynis](https://github.com/CISOfy/lynis)|Security auditing and hardening tool|Security tool|
 |[pandoc](https://github.com/jgm/pandoc)|Universal markup converter|Miscellaneous|
+|[exiftool](https://github.com/exiftool/exiftool)|Meta information reader/writer for image|Multimedia tool|
 
 # Both Wayland and Mac applications
 
