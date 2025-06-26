@@ -44,3 +44,6 @@
         binary = true
         cachetextconv = true
         textconv = "sh -c 'pptx2md --disable_image --disable_wmf -i $0 -o ~/.cache/git/presentation.md >/dev/null && cat ~/.cache/git/presentation.md'"
+[diff "exif"]
+        binary = true
+        textconv = "exiftool"

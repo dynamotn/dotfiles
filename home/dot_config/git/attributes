@@ -7,5 +7,6 @@
 *.docx diff=docx
 *.xlsx diff=xlsx
 *.pptx diff=pptx
+*.{png,jpg,jpeg,gif} diff=exif
 .gitconfig filter=space8
 .gitattributes filter=space8
