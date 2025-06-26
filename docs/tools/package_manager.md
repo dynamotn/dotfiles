@@ -16,8 +16,6 @@
 |[bcc](https://github.com/iovisor/bcc)|Toolkit for IO analysis, networking, monitoring...|SysOps tool|
 |[radare2](https://github.com/radareorg/radare2)|Reverse engineering framework|Security tool|
 |[lynis](https://github.com/CISOfy/lynis)|Security auditing and hardening tool|Security tool|
-|[pandoc](https://github.com/jgm/pandoc)|Universal markup converter|Miscellaneous|
-|[exiftool](https://github.com/exiftool/exiftool)|Meta information reader/writer for image|Multimedia tool|
 
 # Both Wayland and Mac applications
 
@@ -96,3 +94,6 @@
 |[bluez](https://github.com/bluez/bluez)|Bluetooth controller|Multimedia tool|
 |[sonyheadphones](https://github.com/Plutoberth/SonyHeadphonesClient)|Control Sony Headphones|Multimedia tool|
 |[mpv](https://github.com/mpv-player/mpv)|Media player|Multimedia tool|
+|[pandoc](https://github.com/jgm/pandoc)|Universal markup converter|Miscellaneous|
+|[exiftool](https://github.com/exiftool/exiftool)|Meta information reader/writer for image|Multimedia tool|
+|[ImageMagick](https://github.com/ImageMagick/ImageMagick)|Image manipulation tool|Multimedia tool|
