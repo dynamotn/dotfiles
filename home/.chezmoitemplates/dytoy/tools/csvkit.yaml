@@ -1,0 +1,5 @@
+name: csvkit
+method: shell
+dependencies:
+  - uv
+content: uv tool install csvkit

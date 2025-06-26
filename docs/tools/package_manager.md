@@ -16,6 +16,7 @@
 |[bcc](https://github.com/iovisor/bcc)|Toolkit for IO analysis, networking, monitoring...|SysOps tool|
 |[radare2](https://github.com/radareorg/radare2)|Reverse engineering framework|Security tool|
 |[lynis](https://github.com/CISOfy/lynis)|Security auditing and hardening tool|Security tool|
+|[pandoc](https://github.com/jgm/pandoc)|Universal markup converter|Miscellaneous|
 
 # Both Wayland and Mac applications
 

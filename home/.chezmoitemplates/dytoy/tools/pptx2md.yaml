@@ -1,0 +1,5 @@
+name: pptx2md
+method: shell
+dependencies:
+  - uv
+content: uv tool install pptx2md

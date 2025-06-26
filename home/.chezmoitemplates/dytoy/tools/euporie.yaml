@@ -1,5 +1,5 @@
 name: euporie
 method: shell
 dependencies:
-  - python
-content: pipx install euporie
+  - uv
+content: uv tool install euporie

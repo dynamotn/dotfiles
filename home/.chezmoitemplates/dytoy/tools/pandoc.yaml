@@ -1,0 +1,17 @@
+name: pandoc
+method: os
+gentoo:
+  packages:
+    - name: app-text/pandoc
+arch:
+  packages:
+    - name: pandoc
+ubuntu:
+  packages:
+    - name: pandoc
+termux:
+  packages:
+    - name: pandoc
+macos:
+  packages:
+    - name: pandoc
