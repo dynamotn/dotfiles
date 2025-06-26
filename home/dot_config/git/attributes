@@ -1,5 +1,11 @@
+# vim:ft=gitattributes
 # *.enc diff=sopsdiffer
 *.sqlite diff=sqlite3
 *.json diff=json
+*.epub diff=epub
+*.pdf diff=pdf
+*.docx diff=docx
+*.xlsx diff=xlsx
+*.pptx diff=pptx
 .gitconfig filter=space8
 .gitattributes filter=space8
