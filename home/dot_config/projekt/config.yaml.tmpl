@@ -52,10 +52,7 @@ folders:
     regex: ""
     priority: 0
   {{- end }}
-  {{- if or (eq .kind "pc" "laptop") (and (eq .kind "vm") (eq .place "office")) }}
-  - path: {{ .chezmoi.homeDir }}/Working/enterprise/F1/OP
-    prefix: "op"
-    is_workspace: true
-    regex: ""
-    priority: 0
+  {{- range .decryptEnterprise }}
+  {{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{-   $commonSecret.projekt.folders | replaceAllRegex "\\$HOME" $.chezmoi.homeDir | nindent 2 }}
   {{- end }}
