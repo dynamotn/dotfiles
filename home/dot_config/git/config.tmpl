@@ -20,6 +20,9 @@
 [commit]
         # Always sign commit
         gpgsign = true
+        # Use my template for commit message
+        template = ~/.config/git/COMMITMSG
+        cleanup = scissors
 [tag]
         # Sort tags by version
         sort = version:refname
