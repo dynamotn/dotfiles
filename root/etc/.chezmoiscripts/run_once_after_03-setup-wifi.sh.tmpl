@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+{{- if and (eq .chezmoi.os "linux") (eq .kind "pc" "laptop") }}
+dybatpho::notice "Setup Wi-Fi"
+if ! command -v nmcli &>/dev/null; then
+  dybatpho::warn "nmcli is not installed. Please install NetworkManager if need."
+  exit
+fi
+
+rm -rf /etc/NetworkManager/system-connections/*
+device=$(nmcli --get-values GENERAL.DEVICE,GENERAL.TYPE device show | sed '/^wifi/!{h;d;};x')
+{{-   if .decryptPersonal }}
+# hash: {{ joinPath .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.age" | include | sha256sum }}
+{{-     $wifiSecret := join .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.age" | include | decrypt | fromYaml }}
+{{-     range $wifiSecret }}
+nmcli connection add type wifi \
+  ifname "${device}" \
+  con-name "{{ .name }}" \
+  autoconnect yes \
+  ssid "{{ .ssid }}" \
+  wifi-sec.key-mgmt "{{ .type }}" \
+{{-       if eq .type "wpa-psk" }}
+  password "{{ .password }}"
+{{-       else if eq .type "wpa-eap" }}
+  802-1x.identity "{{ .identity }}" \
+  802-1x.password "{{ .password }}" \
+  {{- .params | nindent 2}}
+{{-       end }}
+{{-     end }}
+{{-   end }}
+{{-   range .decryptEnterprise }}
+# hash: {{ printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
+# hash: {{ printf "../secrets/data/enterprise-%s/wifi.yaml.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
+{{-     $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-     $wifiSecret := printf "../secrets/data/enterprise-%s/wifi.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-     range $wifiSecret }}
+nmcli connection add type wifi \
+  ifname "${device}" \
+  con-name "{{ .name }}" \
+  autoconnect yes \
+  ssid "{{ .ssid }}" \
+  wifi-sec.key-mgmt "{{ .type }}" \
+{{-       if eq .type "wpa-psk" }}
+  password "{{ .password | replaceAllRegex "\\$ACCOUNT_PASSWORD" $commonSecret.account.password }}" \
+{{-       else if eq .type "wpa-eap" }}
+  802-1x.identity "{{ .identity | replaceAllRegex "\\$ACCOUNT_USERNAME" $commonSecret.account.username }}" \
+  802-1x.password "{{ .password | replaceAllRegex "\\$ACCOUNT_PASSWORD" $commonSecret.account.password }}" \
+  {{- .params | nindent 2}}
+{{-       end }}
+{{-     end }}
+{{-   end }}
+
+{{- if eq .chezmoi.osRelease.id "arch" "ubuntu" }}
+systemctl restart NetworkManager
+{{- else if eq .chezmoi.osRelease.id "gentoo" }}
+rc-service NetworkManager restart
+{{- end }}
+dybatpho::success "Setup Wi-Fi"
+{{- end }}

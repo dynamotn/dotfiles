@@ -4,3 +4,4 @@ secrets/data/personal/**/*.age diff=personal-age
 home/private_dot_ssh/key/enterprise-F1_*.age diff=enterprise-F1-age
 home/Working/enterprise/F1/**/*.age diff=enterprise-F1-age
 secrets/data/enterprise-F1/**/*.age diff=enterprise-F1-age
+root/etc/ca-certificate/**/*.age diff=enterprise-F1-age
