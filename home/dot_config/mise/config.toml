@@ -2,6 +2,7 @@
 GLAMOUR_STYLE = '~/.config/glamour/catppuccin.json'
 
 [tools]
+usage = "latest"
 gcloud = "latest"
 helm = "latest"
 node = "latest"
@@ -12,11 +13,8 @@ awscli = "latest"
 uv = "latest"
 python = "system"
 azure = "latest"
-bat = "latest"
 fzf = "latest"
 deno = "latest"
 lazygit = "latest"
 go = "latest"
 java = "latest"
-neovim = "latest"
-usage = "latest"
