@@ -11,3 +11,4 @@ archive:
   hook:
     after: |
       tar $param --strip=4 -C "$MAN_DIR/man1" --wildcards gh_${version:1}_linux_{{ .chezmoi.arch }}/share/man/man1/*
+      gh extension install dlvhdr/gh-dash
