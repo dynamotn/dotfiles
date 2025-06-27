@@ -67,8 +67,10 @@ etc/pam.d
 {/* Secret files */}
 {{- if or (ne .kind "office") (ne .company "F1") }}
 etc/ca-certificates
-etc/NetworkManager/system-connections/Office.nmconnection
-etc/NetworkManager/system-connections/Office-Project.nmconnection
+{{- else }}
+{{-   if ne .osid "linux-arch" }}
+etc/ca-certificates/trust-source
+{{-   end }}
 {{- end }}
 {{- if not (eq .kind "pc" "laptop") }}
 etc/NetworkManager/system-connections/Dynamo.nmconnection

@@ -4,18 +4,18 @@ dybatpho::register_err_handler
 
 {{- if eq .chezmoi.os "linux" }}
 dybatpho::notice "Setup PAM"
-{{- range (joinPath .chezmoi.sourceDir "etc/pam.d/*" | glob) }}
+{{-   range (joinPath .chezmoi.sourceDir "etc/pam.d/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
-{{- end }}
+{{-   end }}
 if dybatpho::is file /etc/pam.d/system-local-login; then
   if ! grep -q '^auth\s*include\s*u2f' /etc/pam.d/system-local-login; then
     dybatpho::notice "Adding pam_u2f to system-local-login"
     sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
   fi
 fi
-{{- if eq .chezmoi.osRelease.id "arch" "ubuntu" }}
+{{-   if eq .chezmoi.osRelease.id "arch" "ubuntu" }}
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su-l
-{{- end }}
+{{-   end }}
 dybatpho::success "Setup PAM"
 {{- end }}
