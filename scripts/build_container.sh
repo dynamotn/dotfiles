@@ -3,7 +3,7 @@ set -Eeou pipefail
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
 # Install custom certs
-[ "$INTERNAL_CERT" != "" ] && echo "$INTERNAL_CERT" | sudo tee /etc/ca-certificates/trust-source/anchors/ssl_decryption.crt
+[ "${INTERNAL_CERT:-x}" != "x" ] && echo "$INTERNAL_CERT" | sudo tee /etc/ca-certificates/trust-source/anchors/ssl_decryption.crt
 sudo update-ca-trust
 
 # Choose mirror for VN
