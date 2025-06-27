@@ -1,0 +1,7 @@
+{{- $officialPlugins := list "argocd" "flux" "helm-values" "helm-default-values" "helm-diff" "job-suspend" "keda-toggle" "ai-incident-investigation" "node-root-shell" "openssl" "resource-recommendations" "watch-events" }}
+{{- range $officialPlugins }}
+.config/k9s/plugins/{{ . }}.yaml:
+  type: file
+  url: 'https://raw.githubusercontent.com/derailed/k9s/refs/heads/master/plugins/{{ . }}.yaml'
+  refreshPeriod: 168h
+{{- end }}
