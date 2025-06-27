@@ -1,11 +1,29 @@
-[tasks.docker]
+[env]
+DOCKER_IMAGE = "registry.gitlab.com/dynamo-config/dotfiles"
+
+[tasks.docker-enterprise-F1]
 run = """
 #!/usr/bin/env bash
 docker build --network=host --build-arg \
   INTERNAL_CERT="$(\
-    age -d -i ~/.config/chezmoi/key \
+    age -d -i ~/.config/chezmoi/enterprise-F1.key \
       root/etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age
   )" \
   --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
-  -t registry.gitlab.com/dynamo-config/dotfiles .
+  -t $DOCKER_IMAGE .
+"""
+
+[tasks.docker-personal]
+run = """
+#!/usr/bin/env bash
+docker build --network=host \
+  --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
+  -t $DOCKER_IMAGE .
+"""
+
+[tasks.docker-ci]
+run = """
+#!/usr/bin/env bash
+docker build --network=host \
+  -t $DOCKER_IMAGE .
 """
