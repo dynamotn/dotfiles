@@ -27,6 +27,7 @@
 |[docker-buildx](https://github.com/docker/buildx)|Extended build capabilities for Docker|DevOps tool|
 |[lazydocker](https://github.com/jesseduffield/lazydocker)|Interactive TUI with Docker and Compose|DevOps tool|
 |[dive](https://github.com/wagoodman/dive)|Explore each layer in Docker images|DevOps tool|
+|[diffoci](https://github.com/reproducible-containers/diffoci)|Diff Docker and OCI container images|DevOps tool|
 |[k9s](https://github.com/derailed/k9s)|Interactive TUI with Kubernetes cluster|DevOps tool|
 |[k0sctl](https://github.com/k0sproject/k0sctl)|Bootstrap and manage k0s cluster|DevOps tool|
 |[talosctl](https://github.com/siderolabs/talos)|Bootstrap and manage Talos Linux cluster|DevOps tool|
