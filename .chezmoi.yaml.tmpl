@@ -26,7 +26,7 @@ data:
   place: {{ $place | quote }}
   {{ $kind := promptChoiceOnce . "kind" "What kind of this machine is it?"  (list "pc" "laptop" "workstation" "tablet" "vm" "sbc" "container") "container" }}
   kind: {{ $kind | quote }}
-  code: {{ promptStringOnce . "code" "What is this machine's name?" | quote }}
+  code: {{ promptStringOnce . "code" "What is this machine's name?" "t00lb0x" | quote }}
   {{- if eq $place "office" }}
   company: {{ promptStringOnce . "company" "What code of owner company is?" | quote }}
   {{- else }}
