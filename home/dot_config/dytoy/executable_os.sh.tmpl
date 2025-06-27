@@ -149,7 +149,7 @@ _main() {
   {{- else if eq .chezmoi.os "android" }}
   _termux_init && _termux_run
   {{- else if eq .chezmoi.os "darwin" }}
-  _macos_run
+  _macos_init && _macos_run
   {{- end }}
 
   dybatpho::success "Installed package tools"
