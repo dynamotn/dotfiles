@@ -67,6 +67,10 @@ _termux_install() {
   dpkg-query -s "$1" > /dev/null 2>&1 || pkg install -y "$1"
 }
 
+_macos_init() {
+  brew install mas
+}
+
 _macos_install() {
   brew ls | grep -E "^$1$" || (
     if [ -z "$3" ]; then
