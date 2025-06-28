@@ -37,6 +37,7 @@ __add_folder_to_path $HOME/.yarn/bin
 __add_folder_to_path $HOME/.cargo/bin
 __add_folder_to_path $HOME/.go/bin
 __add_folder_to_path $HOME/.local/share/nvim/mason/bin
+__add_folder_to_path $HOME/.krew/bin
 
 __add_folder_to_manpath $HOME/.local/man
 __add_folder_to_manpath $CONFIG_PATH/../scripts/man
