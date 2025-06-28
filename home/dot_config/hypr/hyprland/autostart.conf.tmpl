@@ -51,7 +51,11 @@ exec-once = kitty zellij
 
 # Browser
 {{- if eq .browser "F" }}
+{{-   if eq .osid "linux-gentoo" }}
 $browser = "firefox"
+{{-   else }}
+$browser = "firefox-bin"
+{{-   end }}
 {{- else if eq .browser "Z" }}
 {{-   if eq .osid "linux-gentoo" }}
 $browser = "zen-bin"
@@ -67,7 +71,11 @@ exec-once = $browser -P Enterprise
 
 # Email client
 {{- if eq .mailClient "T" }}
+{{-   if eq .osid "linux-gentoo" }}
+$mailClient = "thunderbird-bin"
+{{-   else }}
 $mailClient = "thunderbird"
+{{-   end }}
 {{- else if eq .mailClient "B" }}
 {{-   if eq .osid "linux-gentoo" }}
 $mailClient = "betterbird-bin"
