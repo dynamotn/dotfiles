@@ -7,12 +7,19 @@ app-containers/docker
 app-containers/docker-cli
 app-editors/neovim
 app-eselect/eselect-repository
+{{- if eq .guiWinManager "H" }}
 app-i18n/fcitx-bamboo
+{{- end }}
 app-misc/grc
 app-misc/resolve-march-native
+{{- if eq .terminalMultiplexer "T" }}
 app-misc/tmux
+{{- else if eq .terminalMultiplexer "Z" }}
 app-misc/zellij
+{{- end }}
+{{- if eq .guiServer "W" "M" }}
 app-office/obsidian
+{{- end }}
 app-portage/cpuid2cpuflags
 app-portage/gentoolkit
 app-shells/fish
@@ -24,13 +31,16 @@ dev-build/meson
 dev-build/ninja
 dev-lang/go
 dev-lang/rust-bin
+{{- if eq .guiServer "W" }}
 dev-libs/wayland
+{{- end }}
 dev-util/ccache
 dev-util/kcov
 dev-util/pkgdev
 dev-util/sccache
 dev-vcs/git
 games-util/game-device-udev-rules
+{{- if eq .guiServer "W" }}
 gui-apps/eww
 gui-apps/grim
 gui-apps/regreet
@@ -45,9 +55,14 @@ gui-apps/wofi
 gui-apps/wtype
 gui-libs/display-manager-init
 gui-libs/greetd
+{{- end }}
+{{- if eq .guiServer "W" "X" }}
 gui-libs/gtk
+{{- end }}
+{{- if eq .guiWinManager "H" }}
 gui-libs/xdg-desktop-portal-wlr
 gui-wm/hyprland
+{{- end }}
 llvm-core/clang
 llvm-core/llvm
 {{- if eq .mailClient "T" }}
@@ -55,14 +70,18 @@ mail-client/thunderbird-bin
 {{- else if eq .mailClient "B" }}
 mail-client/betterbird-bin
 {{- end }}
+{{- if eq .guiServer "W" "X" }}
 media-fonts/noto
 media-fonts/noto-cjk
 media-fonts/roboto
 media-gfx/fontforge
 media-gfx/imagemagick
+{{- end }}
+{{- if .hasSound }}
 media-sound/playerctl
 media-video/mpv
 media-video/pipewire
+{{- end }}
 net-analyzer/fail2ban
 net-analyzer/openbsd-netcat
 net-firewall/nftables
@@ -70,7 +89,9 @@ net-firewall/nftables
 net-im/telegram-desktop-bin
 {{- end }}
 net-misc/ntp
+{{- if eq .guiServer "W" "X" }}
 net-misc/rustdesk
+{{- end }}
 net-vpn/tailscale
 net-vpn/wireguard-tools
 net-wireless/iwd
@@ -103,6 +124,8 @@ x11-base/xwayland
 {{- if eq .guiDriver "N" }}
 x11-drivers/nvidia-drivers
 {{- end }}
+{{- if eq .guiServer "W" "X" }}
 x11-libs/libnotify
 x11-misc/xdg-user-dirs
 x11-terms/kitty
+{{- end }}
