@@ -32,7 +32,7 @@ Library/Fonts/Iosevka:
 {{- $repo := "googlefonts/roboto-3-classic" }}
 Library/Fonts/Roboto:
   type: archive
-  url: {{ (gitHubLatestRelease $repo).TagName | toString | printf "Roboto_%s.zip" | gitHubLatestReleaseAssetURL $repo | quote }}
+  url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "Roboto_%s.zip" | gitHubLatestReleaseAssetURL $repo | quote }}
   stripComponents: 2
   include:
     - hinted/static/**
