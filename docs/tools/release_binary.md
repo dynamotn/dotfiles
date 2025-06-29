@@ -37,7 +37,7 @@
 |[sops](https://github.com/getsops/sops)|Managing secrets in Git repositories|DevOps tool|
 |[argocd](https://github.com/argoproj/argo-cd)|Interactive with ArgoCD on Kubenetes cluster|DevOps tool|
 |[flux](https://github.com/fluxcd/flux2)|Interactive with Flux on Kubenetes cluster|DevOps tool|
-|[fly](https://github.com/supefly/flyctl)|CLI tool for cloud application on fly.io with container|DevOps tool|
+|[fly](https://github.com/superfly/flyctl)|CLI tool for cloud application on fly.io with container|DevOps tool|
 |[terragrunt](https://github.com/gruntwork-io/terragrunt)|Wrapper for Terraform to provide extra tool|DevOps tool|
 |[terraformer](https://github.com/GoogleCloudPlatform/terraformer)|Generate Terraform from existing infrastructure|DevOps tool|
 |[terraform-docs](https://github.com/terraform-docs/terraform-docs)|Generate documents for Terraform modules|DevOps tool|
@@ -69,11 +69,11 @@
 |[websocat](https://github.com/vi/websocat)|Netcat, curl and socat for websocket|Network tool|
 |[flarectl](https://github.com/cloudflare/cloudflare-go)|Interactive CLI with Cloudflare|Network tool|
 |[oryx](https://github.com/pythops/oryx)|TUI for sniffing network traffic using eBPF|Network tool|
-|[httptap](https://github.com/andrew-d/httptap)|CLI to view HTTP requests per command|Network tool|
+|[httptap](https://github.com/monasticacademy/httptap)|CLI to view HTTP requests per command|Network tool|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|Developer tool|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|Developer tool|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|Developer tool|
-|[svu](https://github.com/)|Get Sematic version|Developer tool|
+|[svu](https://github.com/caarlos0/svu)|Get Semantic version|Developer tool|
 |[hugo](https://github.com/gohugoio/hugo)|Build static website|Developer tool|
 |[trdsql](https://github.com/noborus/trdsql)|CLI execute SQL queries tool|Developer tool|
 |[step](https://github.com/smallstep/cli)|CLI tool for PKI systems and workflows|Developer tool|
