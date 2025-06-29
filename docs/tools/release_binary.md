@@ -94,6 +94,7 @@
 |[viu](https://github.com/atanunq/viu)|View image on CLI|Miscellaneous|
 |[patat](https://github.com/jaspervdj/patat)|CLI presentation tool|Miscellaneous|
 |[ncspot](https://github.com/hrkfdn/ncspot)|Spotify CLI client|Miscellaneous|
+|[telegram-desktop](https://desktop.telegram.org/)|Telegram desktop client|Miscellaneous|
 |[fabric](https://github.com/danielmiessler/fabric)|Framework for augmenting humans using AI|AI tool|
 |[pint](https://github.com/cloudflare/pint)|Linter for Prometheus rules|Linter|
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tool|
