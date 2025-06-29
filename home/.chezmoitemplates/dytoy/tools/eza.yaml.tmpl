@@ -1,6 +1,6 @@
 name: eza
 is_essential: true
-{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+{{- if eq .chezmoi.os "android" "darwin" }}
 method: os
 termux:
   packages:
