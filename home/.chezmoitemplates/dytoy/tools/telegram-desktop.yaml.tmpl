@@ -1,0 +1,14 @@
+{{- if ne .guiServer "0" }}
+name: telegram-desktop
+method: os
+gentoo:
+  packages:
+    - name: net-im/telegram-desktop-bin
+arch:
+  packages:
+    - name: telegram-desktop
+macos:
+  packages:
+    - name: telegram-desktop
+      is_cask: true
+{{- end }}

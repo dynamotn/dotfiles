@@ -66,6 +66,9 @@ media-video/pipewire
 net-analyzer/fail2ban
 net-analyzer/openbsd-netcat
 net-firewall/nftables
+{{- if eq .guiServer "W" "X" }}
+net-im/telegram-desktop-bin
+{{- end }}
 net-misc/ntp
 net-misc/rustdesk
 net-vpn/tailscale
