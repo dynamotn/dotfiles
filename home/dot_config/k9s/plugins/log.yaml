@@ -1,0 +1,18 @@
+plugins:
+  stern:
+    shortCut: Ctrl-Y
+    confirm: false
+    description: "Logs <Stern>"
+    scopes:
+      - pods
+    command: kubectl
+    background: false
+    args:
+      - stern
+      - --tail
+      - 50
+      - $FILTER
+      - -n
+      - $NAMESPACE
+      - --context
+      - $CONTEXT
