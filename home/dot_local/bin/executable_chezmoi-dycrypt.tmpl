@@ -1,0 +1,109 @@
+#!{{ .bash }}
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+function _spec_main {
+  dybatpho::opts::setup "Utilities to work with my secrets data" MAIN_ARGS
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::cmd decrypt _spec_decrypt
+  dybatpho::opts::cmd encrypt _spec_encrypt
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+function _spec_decrypt {
+  dybatpho::opts::setup "Decrypt secrets data" DECRYPT_ARGS action:"_decrypt \$DECRYPT_ARGS"
+  dybatpho::opts::param "Identity type" IDENTITY_TYPE --identity-type -i init:="personal"
+  dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_decrypt"
+}
+
+function _spec_encrypt {
+  dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS action:"_encrypt \$ENCRYPT_ARGS"
+  dybatpho::opts::param "Identity type" IDENTITY_TYPE --identity-type -i init:="personal"
+  dybatpho::opts::param \
+    "Folder of input file, default is \`data\` for encryption to \`secrets/data\` in dotfiles folder" \
+    FOLDER --folder -f init:="data"
+  dybatpho::opts::param "List of attributes for chezmoi source file, separate by \`,\`" ATTRIBUTES --attributes -a init:=""
+  dybatpho::opts::param "Remove source file after encryption" REMOVE --remove -r init:="false"
+  dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_encrypt"
+}
+
+function _encrypt {
+  dybatpho::expect_args filename -- "$@"
+  local input output
+  if [ "${FOLDER}" = "data" ]; then
+    input="{{ .chezmoi.sourceDir }}/../secrets/data/${IDENTITY_TYPE}/${filename}"
+    output="${input}.age"
+  else
+    input="${FOLDER}/${filename}"
+    output="{{ .chezmoi.sourceDir }}/../$(_gen_cz_attrs "${input}" "encrypted,$ATTRIBUTES").age"
+  fi
+
+  if ! dybatpho::is file "${input}"; then
+    dybatpho::die "Input ${input} is not a file"
+  fi
+  dybatpho::info "Encrypt ${input} to ${output}"
+  mkdir -p "$(dirname "$output")"
+  age -e -a -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o $output $input
+  if dybatpho::is true "${REMOVE}"; then
+    dybatpho::info "Remove input file ${input}"
+    rm -f $input
+  fi
+}
+
+function _decrypt {
+  dybatpho::expect_args filename -- "$@"
+  local output="{{ .chezmoi.sourceDir }}/../secrets/data/${IDENTITY_TYPE}/${filename}"
+  local input="${output}.age"
+  if ! dybatpho::is file "${input}"; then
+    dybatpho::die "Input ${input} is not a file"
+  fi
+  dybatpho::info "Decrypt ${input} to ${output}"
+  age -d -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o $output $input
+}
+
+function _gen_cz_attrs {
+  dybatpho::expect_args target_path attributes -- "$@"
+
+  local relative_path
+  local base_prefix
+  if [[ "$target_path" == "$HOME"* ]]; then
+    base_prefix="home/"
+    relative_path="${target_path#$HOME/}"
+  elif [[ "$target_path" == "~"* ]]; then
+    base_prefix="home/"
+    relative_path="${target_path#~/}"
+  elif [[ "$target_path" == /* ]]; then
+    base_prefix="root/"
+    relative_path="${target_path#/}"
+  else
+    dybatpho::die "Target path $target_path must be started with / or \$HOME or ~."
+  fi
+
+  local processed_components=()
+  IFS='/' read -r -a components <<< "$relative_path"
+  local last_index=$((${#components[@]} - 1))
+
+  for i in "${!components[@]}"; do
+    local component="${components[$i]}"
+    if [[ "$component" == .* ]]; then
+      component="dot_${component#.}"
+    fi
+
+    if [[ $i -eq $last_index && -n "$attributes" ]]; then
+      local reversed_attrs
+      IFS=',' read -r -a attrs_array <<< "$attributes"
+      for ((j=${#attrs_array[@]}-1; j>=0; j--)); do
+        component="${attrs_array[j]}_${component}"
+      done
+    fi
+    processed_components+=("$component")
+  done
+
+  local final_path
+  local IFS="/"
+  final_path="${processed_components[*]}"
+
+  echo "${base_prefix}${final_path}"
+}
+
+dybatpho::generate_from_spec _spec_main "$@"
