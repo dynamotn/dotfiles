@@ -2,10 +2,10 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
-{{- if ne .guiServer "0" }}
+{{- if eq .browser "F" "Z" }}
 dybatpho::create_temp TEMP_FILE ".sh"
 dybatpho::notice "Setup tridactyl"
-dybatpho::curl_do https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh "$TEMP_FILE"
+dybatpho::curl_download https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh "$TEMP_FILE"
 bash "$TEMP_FILE" master
 dybatpho::success "Setup tridactyl"
 {{- end }}
