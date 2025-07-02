@@ -5,6 +5,7 @@ dybatpho::register_err_handler
 function _spec_main {
   dybatpho::opts::setup "Utilities to work with my secrets data" MAIN_ARGS
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
   dybatpho::opts::cmd decrypt _spec_decrypt
   dybatpho::opts::cmd encrypt _spec_encrypt
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
@@ -42,11 +43,11 @@ function _encrypt {
     dybatpho::die "Input ${input} is not a file"
   fi
   dybatpho::info "Encrypt ${input} to ${output}"
-  mkdir -p "$(dirname "$output")"
-  age -e -a -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o $output $input
+  dybatpho::dry_run mkdir -p "$(dirname "$output")"
+  dybatpho::dry_run age -e -a -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o "$output" "$input"
   if dybatpho::is true "${REMOVE}"; then
     dybatpho::info "Remove input file ${input}"
-    rm -f $input
+    dybatpho::dry_run rm -f $input
   fi
 }
 
@@ -58,7 +59,7 @@ function _decrypt {
     dybatpho::die "Input ${input} is not a file"
   fi
   dybatpho::info "Decrypt ${input} to ${output}"
-  age -d -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o $output $input
+  dybatpho::dry_run age -d -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o "$output" "$input"
 }
 
 function _gen_cz_attrs {
@@ -90,7 +91,6 @@ function _gen_cz_attrs {
     fi
 
     if [[ $i -eq $last_index && -n "$attributes" ]]; then
-      local reversed_attrs
       IFS=',' read -r -a attrs_array <<< "$attributes"
       for ((j=${#attrs_array[@]}-1; j>=0; j--)); do
         component="${attrs_array[j]}_${component}"

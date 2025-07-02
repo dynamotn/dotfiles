@@ -32,45 +32,59 @@ dybatpho::register_err_handler
 {{-     $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{-   end }}
 
+function _refresh_live {
+  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
+    if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
+      dybatpho::dry_run rm -rf ~/.config/thunderbird/profiles/${profile}
+      dybatpho::dry_run chezmoi apply ~/.config/thunderbird/profiles/${profile} --force || true
+    else
+      dybatpho::debug "$PROFILE"
+    fi
+  done
+}
+
 function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
       if dybatpho::is file ~/.config/thunderbird/profiles/${profile}/prefs.js; then
         dybatpho::progress "Update toolbar setting for profile ${profile}"
-        grep "browser.uiCustomization.state" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/01-toolbar.js
+        dybatpho::dry_run "grep \"browser.uiCustomization.state\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/01-toolbar.js" || true
 
         dybatpho::progress "Update addon setting for profile ${profile}"
-        grep "extensions.webextensions.uuids" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
-        grep "extensions.webextensions.ExtensionStorageIDB.migrated" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
-        grep "privacy.userContext.extension" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js || true
+        dybatpho::dry_run "grep \"extensions.webextensions.uuids\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
+        dybatpho::dry_run "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
+        dybatpho::dry_run "grep \"privacy.userContext.extension\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
       fi
 
       dybatpho::progress "Update extensions data for profile ${profile}"
       for filename in addons.json addonStartup.json.lz4 extension*.json; do
-        chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename} || true
+        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename} || true
       done
 
       dybatpho::progress "Update search engines for profile ${profile}"
-      chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
+      dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
 
       dybatpho::progress "Update bookmarks, history and workspaces for profile ${profile}"
       if [ "${profile}" = "public" ]; then
         for filename in favicons places; do
-          chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename}.sqlite --create || true
+          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename}.sqlite --create || true
         done
       else
         declare -a filenames=("favicons" "places")
-        printf "%s\n" "${filenames[@]}" | xargs -P$(nproc) -I{} chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "{}.sqlite" || true
+        printf "%s\n" "${filenames[@]}" | xargs -P$(nproc) -I{} bash -c "dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a 'create' '{}.sqlite'" || true
       fi
 
       dybatpho::progress "Update storage data for profile ${profile}"
       if [ "${profile}" = "public" ]; then
-        chezmoi add ~/.config/thunderbird/profiles/${profile}/storage.sqlite --create || true
-        chezmoi add ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* --create || true
+        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/storage.sqlite --create || true
+        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* --create || true
       else
-        export -f _encrypt_storage_data
-        chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "storage.sqlite" || true
-        command find ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+        dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "storage.sqlite" || true
+        if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/storage/default; then
+          export -f _encrypt_storage_data
+          command find ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} \
+            bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+        fi
       fi
     else
       dybatpho::debug "$PROFILE"
@@ -82,13 +96,17 @@ function _encrypt_storage_data {
   dybatpho::expect_args profile file -- "$@"
   local folder="$(dirname "$file")"
   local filename="$(basename "$file")"
-  chezmoi-dycrypt encrypt -i ${profile} -f $folder -a "create" $filename
+  dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f $folder -a "create" $filename
 }
 
 function _main {
   dybatpho::info "Your email client in chezmoi settings is {{ $appName }}"
   if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 1 ]; then
     dybatpho::fatal "{{ $appName }} is running"
+  elif dybatpho::is true "${REFRESH}"; then
+    dybatpho::notice "Refresh from scratch {{ $appName }} settings"
+    _refresh_live
+    dybatpho::success "Refresh from scratch {{ $appName }} settings"
   else
     dybatpho::notice "Update {{ $appName }} settings"
     _update_dotfiles
@@ -97,7 +115,7 @@ function _main {
 }
 
 function _spec_main {
-  dybatpho::opts::setup "Update your live data of {{ $appName }} client to your dotfiles" MAIN_ARGS action:"_main"
+  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} client to/from your dotfiles" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"_validate_profile"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
