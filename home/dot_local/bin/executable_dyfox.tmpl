@@ -60,7 +60,7 @@ function _update_dotfiles {
         done
       else
         declare -a filenames=("favicons" "places")
-        printf "%s\n" "${filenames[@]}" | xargs -P$(nproc) -I{} chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "{}.sqlite"
+        printf "%s\n" "${filenames[@]}" | xargs -P$(nproc) -I{} chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "{}.sqlite" || true
       fi
 
       dybatpho::progress "Update storage data for profile ${profile}"
@@ -69,8 +69,8 @@ function _update_dotfiles {
         chezmoi add ~/.config/firefox/profiles/${profile}/storage/default/moz-extension+++* --create || true
       else
         export -f _encrypt_storage_data
-        chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "storage.sqlite"
-        command find ~/.config/firefox/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} bash -c "_encrypt_storage_data '${profile}' '{}'"
+        chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "storage.sqlite" || true
+        command find ~/.config/firefox/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} bash -c "_encrypt_storage_data '${profile}' '{}'" || true
       fi
     else
       dybatpho::debug "$PROFILE"
