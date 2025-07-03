@@ -1,8 +1,8 @@
-home/**/*.age diff=personal-age
-root/**/*.age diff=personal-age
-secrets/data/personal/**/*.age diff=personal-age
-home/dot_config/firefox/startpage/src/img/background/*F1.png.age diff=enterprise-F1-age
-home/private_dot_ssh/key/enterprise-F1_*.age diff=enterprise-F1-age
-home/Working/enterprise/F1/**/*.age diff=enterprise-F1-age
-secrets/data/enterprise-F1/**/*.age diff=enterprise-F1-age
-root/etc/ca-certificate/**/*.age diff=enterprise-F1-age
+home/**/*.age diff=age-personal
+root/**/*.age diff=age-personal
+secrets/data/personal/**/*.age diff=age-personal
+home/dot_config/firefox/startpage/src/img/background/*F1.png.age diff=age-enterprise-F1
+home/private_dot_ssh/key/enterprise-F1_*.age diff=age-enterprise-F1
+home/Working/enterprise/F1/**/*.age diff=age-enterprise-F1
+secrets/data/enterprise-F1/**/*.age diff=age-enterprise-F1
+root/etc/ca-certificate/**/*.age diff=age-enterprise-F1
