@@ -1,0 +1,8 @@
+{{- if eq .browser "F" "Z" }}
+name: lz4jsoncat
+method: shell
+content: |-
+  dybatpho::create_temp temp_file ".c"
+  dybatpho::curl_download https://raw.githubusercontent.com/andikleen/lz4json/refs/heads/master/lz4jsoncat.c $temp_file
+  gcc -g -O2 -Wall $temp_file -llz4 -o ~/.local/bin/lz4jsoncat
+{{- end }}

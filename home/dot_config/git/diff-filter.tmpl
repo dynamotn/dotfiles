@@ -61,3 +61,6 @@
 [diff "exif"]
         binary = true
         textconv = "exiftool"
+[diff "lz4json"]
+        binary = true
+        textconv = "sh -c 'lz4jsoncat $0 | jq .'"

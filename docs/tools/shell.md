@@ -8,3 +8,4 @@
 |[euporie](https://github.com/joouha/euporie)|Jupyter notebooks in CLI|Developer tool|
 |[pptx2md](https://github.com/ssine/pptx2md)|Convert PowerPoint presentations to Markdown|Miscellaneous|
 |[in2csv](https://github.com/wireservice/csvkit)|Convert various data formats to CSV|Miscellaneous|
+|[lz4json](https://github.com/andikleen/lz4json)|C decompress tool for mozilla lz4json format|Miscellaneous|
