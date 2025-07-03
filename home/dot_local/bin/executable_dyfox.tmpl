@@ -58,7 +58,7 @@ function _update_dotfiles {
 
       dybatpho::progress "Update extensions data for profile ${profile}"
       for filename in addons.json addonStartup.json.lz4 extension*.json; do
-        dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/${filename} || true
+        dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/${filename} --create || true
       done
 
       dybatpho::progress "Update search engines for profile ${profile}"
