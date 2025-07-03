@@ -14,6 +14,20 @@
 [filter "space8"]
         smudge = unexpand --tabs=8 --first-only
         clean = expand --tabs=8 --initial
+{{- if .decryptPersonal }}
+[diff "age-personal"]
+        textconv = "bash ~/.config/git/scripts/decrypt_chezmoi.sh _normal personal"
+[diff "sqlite3-personal"]
+        binary = true
+        textconv = "bash ~/.config/git/scripts/decrypt_chezmoi.sh _sqlite personal"
+{{- end }}
+{{- range .decryptEnterprise }}
+[diff "age-enterprise-{{ . }}"]
+        textconv = "bash ~/.config/git/scripts/decrypt_chezmoi.sh _normal enterprise-{{ . }}"
+[diff "sqlite3-enterprise-{{ . }}"]
+        binary = true
+        textconv = "bash ~/.config/git/scripts/decrypt_chezmoi.sh _sqlite enterprise-{{ . }}"
+{{- end }}
 [diff "sopsdiffer"]
         # A differ for secret encoded
         textconv = sops -d

@@ -1,0 +1,29 @@
+#!{{ .bash }}
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+function _normal {
+  identity="$1"
+  encrypted_file="$2"
+
+  age -d -i ~/.config/chezmoi/"$identity".key "$encrypted_file" 2> /dev/null
+}
+
+function _sqlite {
+  identity="$1"
+  encrypted_file="$2"
+  decrypted_file="$(mktemp --suffix=.sqlite)"
+
+  age -d -i ~/.config/chezmoi/"$identity".key "$encrypted_file" > "$decrypted_file" 2> /dev/null
+  if [ $? -ne 0 ]; then
+    echo "Error: Could not decrypt SQLite file." >&2
+    rm -f "$decrypted_file"
+    exit 1
+  fi
+  sqlite3 "$decrypted_file" .dump
+  rm -f "$decrypted_file"
+}
+
+cmd="$1"
+shift
+${cmd} "$@"

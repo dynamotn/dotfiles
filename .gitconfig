@@ -1,4 +1,0 @@
-[diff "personal-age"]
-  textconv = "age -d -i ~/.config/chezmoi/personal.key"
-[diff "enterprise-F1-age"]
-  textconv = "age -d -i ~/.config/chezmoi/enterprise-F1.key"
