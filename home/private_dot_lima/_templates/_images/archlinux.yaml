@@ -1,0 +1,4 @@
+images:
+  - location: "https://github.com/mschirrmeister/archlinux-lima/releases/download/20250514-0/Arch-Linux-aarch64-cloudimg-20250514.0.qcow2.xz"
+    arch: "aarch64"
+    digest: "sha512:4bcc5cb02aea5a63fd2d29ea3b07476cdc336338ed3a0e0ea2c5703d60317cc54e7d9457bc9cc5fd6ad805a38ee779a5de48f18a053b4746d6beeac508c5ba41"
