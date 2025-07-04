@@ -1,0 +1,5 @@
+name: wol
+method: shell
+dependencies:
+  - go
+content: go install github.com/sabhiram/go-wol/cmd/wol@latest
