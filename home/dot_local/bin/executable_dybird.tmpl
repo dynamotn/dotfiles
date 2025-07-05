@@ -57,7 +57,7 @@ function _update_dotfiles {
       fi
 
       dybatpho::progress "Update extensions data for profile ${profile}"
-      for filename in addons.json addonStartup.json.lz4 extension*.json; do
+      for filename in addons.json addonStartup.json.lz4 extensions.json extension-preferences.json; do
         dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename} --create || true
       done
 
@@ -86,6 +86,15 @@ function _update_dotfiles {
             bash -c "_encrypt_storage_data '${profile}' '{}'" || true
         fi
       fi
+
+      if dybatpho::is true "${COOKIES}"; then
+        dybatpho::progress "Update cookies for profile ${profile}"
+        if [ "${profile}" = "public" ]; then
+          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/cookies.sqlite --create || true
+        else
+          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "cookies.sqlite" || true
+        fi
+      fi
     else
       dybatpho::debug "$PROFILE"
     fi
@@ -101,7 +110,7 @@ function _encrypt_storage_data {
 
 function _main {
   dybatpho::info "Your email client in chezmoi settings is {{ $appName }}"
-  if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 1 ]; then
+  if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 0 ]; then
     dybatpho::fatal "{{ $appName }} is running"
   elif dybatpho::is true "${REFRESH}"; then
     dybatpho::notice "Refresh from scratch {{ $appName }} settings"
@@ -117,7 +126,10 @@ function _main {
 function _spec_main {
   dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} client to/from your dotfiles" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
   dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"_validate_profile"
+  dybatpho::opts::flag "Refresh from scratch live data" REFRESH --refresh -r on:true off:false init:="false"
+  dybatpho::opts::flag "Include cookies" COOKIES --cookies --no-cookies -c on:true off:false init:="true"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
 }
 
@@ -127,6 +139,7 @@ function _validate_profile {
       return 0
     fi
   done
+  dybatpho::error "Profile must be one of this list: {{ range $profiles }}'{{ . }}' {{ end }}"
   return 1
 }
 

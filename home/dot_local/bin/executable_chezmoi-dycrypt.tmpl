@@ -36,7 +36,7 @@ function _encrypt {
     output="${input}.age"
   else
     input="${FOLDER}/${filename}"
-    output="{{ .chezmoi.sourceDir }}/../$(_gen_cz_attrs "${input}" "encrypted,$ATTRIBUTES").age"
+    output="{{ .chezmoi.sourceDir }}/../$(_gen_cz_attrs "${input}" "$ATTRIBUTES").age"
   fi
 
   if ! dybatpho::is file "${input}"; then
@@ -109,6 +109,7 @@ function _gen_cz_attrs {
         component="${attrs_array[j]}_${component}"
       done
     fi
+    component="encrypted_${component}"
     processed_components+=("$component")
   done
 

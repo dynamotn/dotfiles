@@ -91,15 +91,17 @@ Library/Application Support/zen
 {{-     $processThunderbird = "/opt/betterbird-bin/betterbird" }}
 {{-   end }}
 {{- end }}
-{{- if ne .guiServer "0" }}
-{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 1 }}
+{{- if eq .browser "F" "Z" }}
+{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 0 }}
 .config/firefox
 .mozilla
 .zen
 Library/Application Support/Firefox
 Library/Application Support/zen
 {{-   end }}
-{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) 1 }}
+{{- end }}
+{{- if eq .mailClient "T" "B" }}
+{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) 0 }}
 .config/thunderbird
 .thunderbird
 Library/thunderbird
