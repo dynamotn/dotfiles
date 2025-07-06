@@ -108,9 +108,7 @@ function _encrypt_storage_data {
   dybatpho::expect_args profile file -- "$@"
   local folder="$(dirname "$file")"
   local filename="$(basename "$file")"
-  if ! [[ "$filename" =~ \.sqlite-wal$ ]]; then
-    dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f $folder -a "create" $filename
-  fi
+  dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f $folder -a "create" $filename
 }
 
 function _main {

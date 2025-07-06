@@ -104,12 +104,12 @@ function _gen_cz_attrs {
     fi
 
     if [[ $i -eq $last_index && -n "$attributes" ]]; then
+      component="encrypted_${component}"
       IFS=',' read -r -a attrs_array <<< "$attributes"
       for ((j=${#attrs_array[@]}-1; j>=0; j--)); do
         component="${attrs_array[j]}_${component}"
       done
     fi
-    component="encrypted_${component}"
     processed_components+=("$component")
   done
 
