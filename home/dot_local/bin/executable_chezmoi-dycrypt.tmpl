@@ -97,6 +97,7 @@ function _gen_cz_attrs {
   IFS='/' read -r -a components <<< "$relative_path"
   local last_index=$((${#components[@]} - 1))
 
+  local priority=("create" "encrypted" "private" "readonly" "empty" "executable")
   for i in "${!components[@]}"; do
     local component="${components[$i]}"
     if [[ "$component" == .* ]]; then
@@ -104,11 +105,18 @@ function _gen_cz_attrs {
     fi
 
     if [[ $i -eq $last_index && -n "$attributes" ]]; then
-      component="encrypted_${component}"
+      attributes="${attributes},encrypted"
       IFS=',' read -r -a attrs_array <<< "$attributes"
-      for ((j=${#attrs_array[@]}-1; j>=0; j--)); do
-        component="${attrs_array[j]}_${component}"
+      component_prefix=""
+      for attr in "${priority[@]}"; do
+        for user_attr in "${attrs_array[@]}"; do
+          if [[ "$user_attr" == "$attr" ]]; then
+            component_prefix+="${attr}_"
+            break
+          fi
+        done
       done
+      component="${component_prefix}${component}"
     fi
     processed_components+=("$component")
   done
