@@ -1,13 +1,13 @@
 {{/* Include all userscripts in order */}}
 {{- $settings := glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/prefs/*.js*") }}
 {{- if regexMatch ".*personal/user\\.js\\.tmpl" .chezmoi.sourceFile }}
-{{- $settings = concat $settings (glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/prefs/personal/*.js*")) }}
+{{-   $settings = concat $settings (glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/prefs/personal/*.js*")) }}
 {{- else if regexMatch ".*enterprise-F1/user\\.js\\.tmpl" .chezmoi.sourceFile }}
-{{- $settings = concat $settings (glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/prefs/enterprise-F1/*.js*")) }}
+{{-   $settings = concat $settings (glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/prefs/enterprise-F1/*.js*")) }}
 {{- end }}
 {{- if ne .browser "Z" }}
-{{- $settings = concat $settings (list (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/chrome/lepton/user.js")) }}
+{{-   $settings = concat $settings (list (joinPath .chezmoi.sourceDir ".chezmoitemplates/firefox/chrome/lepton/user.js")) }}
 {{- end }}
 {{- range ($settings) }}
-{{- includeTemplate . $ }}
+{{-   includeTemplate . $ }}
 {{- end }}
