@@ -1,33 +1,29 @@
 display-name = "Trần Đức Nam"
 signature = "Trân trọng cảm ơn,"
-email-listing-page-size = 50
 
-[personal]
+[accounts.personal]
 default = true
 email = "me@dynamotn.dev"
 downloads-dir = "~/Misc/Emails/personal"
 sync = true
 
-backend = "imap"
-imap-host = "127.0.0.1"
-imap-port = 1143
-imap-login = "me@dynamotn.dev"
-imap-auth = "passwd"
-imap-starttls = true
-imap-insecure = true
-imap-passwd = { cmd = "cat ~/.local/share/himalaya/personal-passwd" }
+folder.aliases.inbox = "INBOX"
+folder.aliases.sent = "Sent"
+folder.aliases.drafts = "Drafts"
+folder.aliases.trash = "Trash"
 
-sender = "smtp"
-smtp-host = "127.0.0.1"
-smtp-port = 1025
-smtp-login = "me@dynamotn.dev"
-smtp-auth = "passwd"
-smtp-starttls = true
-smtp-insecure = true
-smtp-passwd = { cmd = "cat ~/.local/share/himalaya/personal-passwd" }
+backend.type = "imap"
+backend.host = "10.200.1.194"
+backend.port = 143
+backend.encryption.type = "start-tls"
+backend.login = "me@dynamotn.dev"
+backend.auth.type = "password"
+backend.auth.cmd = "rbw get 'Proton' --field 'Pass via IMAP bridge'"
 
-[personal.folder-aliases]
-inbox = "INBOX"
-sent = "Sent"
-drafts = "Drafts"
-trash = "Trash"
+message.send.backend.type = "smtp"
+message.send.backend.host = "10.200.1.194"
+message.send.backend.port = 25
+message.send.backend.encryption.type = "start-tls"
+message.send.backend.login = "me@dynamotn.dev"
+message.send.backend.auth.type = "password"
+message.send.backend.auth.cmd = "rbw get 'Proton' --field 'Pass via IMAP bridge'"
