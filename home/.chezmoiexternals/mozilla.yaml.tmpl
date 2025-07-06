@@ -78,41 +78,43 @@
   url: "https://addons.mozilla.org/firefox/downloads/file/4442132/sidebery-{{ $version }}.xpi"
   refreshPeriod: 168h
 {{-     end }}
-{{-     if eq . "personal" }}
+{{-     if ne . "public" }}
 {{-       $version = "6.10.83" }}
 .config/firefox/profiles/{{ . }}/extensions/wappalyzer@crunchlabz.com.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4498612/wappalyzer-{{ $version }}.xpi"
-  refreshPeriod: 168h
-{{-       $version = "1.7" }}
-.config/firefox/profiles/{{ . }}/extensions/leechblockng@proginosko.com.xpi:
-  type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4507296/leechblock_ng-{{ $version }}.xpi"
   refreshPeriod: 168h
 {{-       $version = "0.11.8" }}
 .config/firefox/profiles/{{ . }}/extensions/clipper@obsidian.md.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4497129/web_clipper_obsidian-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-       $version = "6.0.0" }}
-.config/firefox/profiles/{{ . }}/extensions/@react-devtools.xpi:
-  type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4360002/react_devtools-{{ $version }}.xpi"
-  refreshPeriod: 168h
 {{-       $version = "25.5.18" }}
 .config/firefox/profiles/{{ . }}/extensions/{a4c4eda4-fb84-4a84-b4a1-f7c1cbf2a1ad}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4495758/refined_github-{{ $version }}.xpi"
+  refreshPeriod: 168h
+{{-       $version = "1.9.2" }}
+.config/firefox/profiles/{{ . }}/extensions/{c607c8df-14a7-4f28-894f-29e8722976af}.xpi:
+  type: file
+  url: "https://addons.mozilla.org/firefox/downloads/file/3723251/temporary_containers-{{ $version }}.xpi"
   refreshPeriod: 168h
 {{-       $version = "2.3.14" }}
 .config/firefox/profiles/{{ . }}/extensions/{7a7a4a92-a2a0-41d1-9fd7-1e92480d612d}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4451438/styl_us-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-       $version = "1.9.2" }}
-.config/firefox/profiles/{{ . }}/extensions/{c607c8df-14a7-4f28-894f-29e8722976af}.xpi:
+{{-     end }}
+{{-     if eq . "personal" }}
+{{-       $version = "1.7" }}
+.config/firefox/profiles/{{ . }}/extensions/leechblockng@proginosko.com.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/3723251/temporary_containers-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4507296/leechblock_ng-{{ $version }}.xpi"
+  refreshPeriod: 168h
+{{-       $version = "6.0.0" }}
+.config/firefox/profiles/{{ . }}/extensions/@react-devtools.xpi:
+  type: file
+  url: "https://addons.mozilla.org/firefox/downloads/file/4360002/react_devtools-{{ $version }}.xpi"
   refreshPeriod: 168h
 {{-       $version = "2.31.0" }}
 .config/firefox/profiles/{{ . }}/extensions/{aecec67f-0d10-4fa7-b7c7-609a2db280cf}.xpi:
