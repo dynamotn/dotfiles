@@ -1,0 +1,11 @@
+{{- if eq .browser "Z" }}
+{{-   if regexMatch ".*personal/chrome/userChrome\\.css\\.tmpl" .chezmoi.sourceFile }}
+@import "sidebar/personal.css";
+{{-   end }}
+{{-   if regexMatch ".*enterprise-F1/chrome/userChrome\\.css\\.tmpl" .chezmoi.sourceFile }}
+@import "sidebar/enterprise-F1.css";
+{{-   end }}
+{{- else }}
+@import "lepton/css/leptonChrome.css";
+@import "tabline/tabline.css";
+{{- end }}

@@ -35,8 +35,6 @@ Library/thunderbird
 {{- if ne .browser "F" }}
 .mozilla
 Library/Application Support/Firefox
-.config/firefox/profiles/*/chrome
-!.config/firefox/profiles/*/chrome/js
 {{- else if ne .browser "Z" }}
 .zen
 Library/Application Support/zen
