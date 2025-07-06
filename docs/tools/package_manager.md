@@ -11,6 +11,7 @@
 |`tar`, `unzip`, `gzip`,`bzip2`|Uncompress file|Prerequisite, in `home/dot_config/dynamo`|
 |[tree-sitter](https://github.com/tree-sitter/tree-sitter)|Parser generator tool for syntax|`silos/neovim`|
 |[w3m](https://github.com/acg/w3m)|Text-based web browser|Frequently used tool|
+|[git-lfs](https://github.com/git-lfs/git-lfs)|Git extension for large files|Frequently used tool|
 |[tshark](https://www.wireshark.org/docs/man-pages/tshark.html)|CLI of Wireshark, network packet analysis|Network tool|
 |`nc`|TCP/IP swiss army knife|`silos/eww`|
 |[bcc](https://github.com/iovisor/bcc)|Toolkit for IO analysis, networking, monitoring...|SysOps tool|
