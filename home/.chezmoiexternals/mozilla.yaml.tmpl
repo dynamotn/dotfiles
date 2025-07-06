@@ -5,10 +5,47 @@
 {{- range .decryptEnterprise }}
 {{-   $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{- end }}
+{{- $processFirefox := "" }}
+{{- $processThunderbird := "" }}
+{{- if eq .browser "F" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $processFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
+{{-   else if eq .osid "linux-gentoo" }}
+{{-     $processFirefox = "/opt/firefox/firefox" }}
+{{-   else }}
+{{-     $processFirefox = "/usr/lib/firefox/firefox" }}
+{{-   end }}
+{{- else if eq .browser "Z" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $processFirefox = "/Applications/Zen.app/Contents/MacOS/zen" }}
+{{-   else if eq .osid "linux-gentoo" }}
+{{-     $processFirefox = "/opt/zen/zen-bin" }}
+{{-   else }}
+{{-     $processFirefox = "/opt/zen-browser-bin/zen" }}
+{{-   end }}
+{{- end }}
+{{- if eq .mailClient "T" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $processThunderbird = "/Applications/Thunderbird.app/Contents/MacOS/thunderbird" }}
+{{-   else if eq .osid "linux-gentoo" }}
+{{-     $processThunderbird = "/opt/thunderbird/thunderbird" }}
+{{-   else }}
+{{-     $processThunderbird = "/usr/lib/thunderbird/thunderbird" }}
+{{-   end }}
+{{- else if eq .mailClient "B" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $processThunderbird = "/Applications/Betterbird.app/Contents/MacOS/betterbird" }}
+{{-   else if eq .osid "linux-gentoo" }}
+{{-     $processThunderbird = "/opt/betterbird/betterbird-bin" }}
+{{-   else }}
+{{-     $processThunderbird = "/opt/betterbird-bin/betterbird" }}
+{{-   end }}
+{{- end }}
 {{- $dotfilesFolder := splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}
 {{- $repo := "" }}
 {{- $version := "" }}
 {{- if eq .browser "F" "Z" }}
+{{-   if eq (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 1 }}
 {{ $dotfilesFolder }}/.chezmoitemplates/firefox/prefs/00-arkenfox.js:
   type: file
   url: 'https://raw.githubusercontent.com/arkenfox/user.js/master/user.js'
@@ -17,106 +54,106 @@
   type: file
   url: 'https://github.com/aminomancer/uc.css.js/raw/refs/heads/master/JS/extensionOptionsPanel.uc.js'
   refreshPeriod: 168h
-{{-   range $profiles }}
+{{-     range $profiles }}
 .config/firefox/profiles/{{ . }}/extensions/tridactyl.vim.betas.nonewtab@cmcaine.co.uk.xpi:
   type: file
   url: 'https://tridactyl.cmcaine.co.uk/betas/nonewtab/tridactyl_no_new_tab_beta-latest.xpi'
   refreshPeriod: 168h
-{{-     $repo = "gorhill/uBlock" }}
+{{-       $repo = "gorhill/uBlock" }}
 .config/firefox/profiles/{{ . }}/extensions/uBlock0@raymondhill.net.xpi:
   type: file
   url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "uBlock0_%s.firefox.signed.xpi" | gitHubLatestReleaseAssetURL $repo | quote }}
   refreshPeriod: 168h
-{{-     $version = "4.9.106" }}
+{{-       $version = "4.9.106" }}
 .config/firefox/profiles/{{ . }}/extensions/addon@darkreader.org.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4488139/darkreader-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     $version = "0.2.16" }}
+{{-       $version = "0.2.16" }}
 .config/firefox/profiles/{{ . }}/extensions/firenvim@lacamb.re.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4279173/firenvim-{{ $version }}.xpi"
-{{-     $version = "2025.5.0" }}
+{{-       $version = "2025.5.0" }}
 .config/firefox/profiles/{{ . }}/extensions/{446900e4-71c2-419f-a6a7-df9c091e268b}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4493940/bitwarden_password_manager-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     $version = "8.19.4" }}
+{{-       $version = "8.19.4" }}
 .config/firefox/profiles/{{ . }}/extensions/languagetool-webextension@languagetool.org.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4470413/languagetool-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     $version = "9.2" }}
+{{-       $version = "9.2" }}
 .config/firefox/profiles/{{ . }}/extensions/foxyproxy@eric.h.jung.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4472757/foxyproxy_standard-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     $version = "6.0.1" }}
+{{-       $version = "6.0.1" }}
 .config/firefox/profiles/{{ . }}/extensions/{e5b6e4ac-ec96-44f5-b257-e4d3c8291b41}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4306398/linguist_translator-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     $version = "0.6.3" }}
+{{-       $version = "0.6.3" }}
 .config/firefox/profiles/{{ . }}/extensions/{06def8b7-bcc3-4f1e-add7-7d8222ca0efc}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/3547900/virustotal_scan-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     $version = "2025.5.30" }}
+{{-       $version = "2025.5.30" }}
 .config/firefox/profiles/{{ . }}/extensions/jid1-MnnxcxisBPnSXQ@jetpack.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4504218/privacy_badger17-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     $version = "2.1.7" }}
+{{-       $version = "2.1.7" }}
 .config/firefox/profiles/{{ . }}/extensions/FirefoxColor@mozilla.com.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/3643624/firefox_color-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     if eq $.browser "F" }}
-{{-       $version = "5.3.3" }}
+{{-       if eq $.browser "F" }}
+{{-         $version = "5.3.3" }}
 .config/firefox/profiles/{{ . }}/extensions/{3c078156-979c-498b-8990-85f7987dd929}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4442132/sidebery-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     end }}
-{{-     if ne . "public" }}
-{{-       $version = "6.10.83" }}
+{{-       end }}
+{{-       if ne . "public" }}
+{{-         $version = "6.10.83" }}
 .config/firefox/profiles/{{ . }}/extensions/wappalyzer@crunchlabz.com.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4498612/wappalyzer-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-       $version = "0.11.8" }}
+{{-         $version = "0.11.8" }}
 .config/firefox/profiles/{{ . }}/extensions/clipper@obsidian.md.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4497129/web_clipper_obsidian-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-       $version = "25.5.18" }}
+{{-         $version = "25.5.18" }}
 .config/firefox/profiles/{{ . }}/extensions/{a4c4eda4-fb84-4a84-b4a1-f7c1cbf2a1ad}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4495758/refined_github-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-       $version = "1.9.2" }}
+{{-         $version = "1.9.2" }}
 .config/firefox/profiles/{{ . }}/extensions/{c607c8df-14a7-4f28-894f-29e8722976af}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/3723251/temporary_containers-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-       $version = "2.3.14" }}
+{{-         $version = "2.3.14" }}
 .config/firefox/profiles/{{ . }}/extensions/{7a7a4a92-a2a0-41d1-9fd7-1e92480d612d}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4451438/styl_us-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-     end }}
-{{-     if eq . "personal" }}
-{{-       $version = "1.7" }}
+{{-       end }}
+{{-       if eq . "personal" }}
+{{-         $version = "1.7" }}
 .config/firefox/profiles/{{ . }}/extensions/leechblockng@proginosko.com.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4507296/leechblock_ng-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-       $version = "6.0.0" }}
+{{-         $version = "6.0.0" }}
 .config/firefox/profiles/{{ . }}/extensions/@react-devtools.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4360002/react_devtools-{{ $version }}.xpi"
   refreshPeriod: 168h
-{{-       $version = "2.31.0" }}
+{{-         $version = "2.31.0" }}
 .config/firefox/profiles/{{ . }}/extensions/{aecec67f-0d10-4fa7-b7c7-609a2db280cf}.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4455138/violentmonkey-{{ $version }}.xpi"
@@ -125,21 +162,23 @@
   type: file
   url: "https://gitflic.ru/project/magnolia1234/bpc_uploads/blob/raw?file=bypass_paywalls_clean-latest.xpi"
   refreshPeriod: 168h
-{{-       $repo = "filecxx/FileCentipede" }}
+{{-         $repo = "filecxx/FileCentipede" }}
 .config/firefox/profiles/{{ . }}/extensions/{01de531b-ca21-4597-b352-18d787f00cac}.xpi:
   type: file
   url: {{ gitHubLatestReleaseAssetURL $repo "firefox.xpi" | quote }}
   refreshPeriod: 168h
+{{-       end }}
 {{-     end }}
 {{-   end }}
 {{- end }}
 {{- if eq .mailClient "T" "B" }}
+{{-   if eq (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) 1 }}
 {{ $dotfilesFolder }}/.chezmoitemplates/thunderbird/prefs/00-arkenfox.js:
   type: file
   url: https://raw.githubusercontent.com/HorlogeSkynet/thunderbird-user.js/master/user.js
   refreshPeriod: 168h
-{{-   range $profiles }}
-{{-     $repo = "gorhill/uBlock" }}
+{{-     range $profiles }}
+{{-       $repo = "gorhill/uBlock" }}
 .config/thunderbird/profiles/{{ . }}/extensions/uBlock.xpi:
   type: file
   url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "uBlock0_%s.thunderbird.xpi" | gitHubLatestReleaseAssetURL $repo | quote }}
@@ -148,10 +187,11 @@
   type: file
   url: "https://addons.thunderbird.net/thunderbird/downloads/latest/darkreader/addon-988018-latest.xpi"
   refreshPeriod: 168h
-{{-     $repo := "catppuccin/thunderbird" }}
+{{-       $repo := "catppuccin/thunderbird" }}
 .config/thunderbird/profiles/{{ . }}/extensions/{d3f3abb5-21aa-57fd-80e3-a9a1887b1d16}.xpi:
   type: file
   url: 'https://github.com/catppuccin/thunderbird/raw/refs/heads/main/themes/macchiato/macchiato-teal.xpi'
   refreshPeriod: 168h
+{{-     end }}
 {{-   end }}
 {{- end }}
