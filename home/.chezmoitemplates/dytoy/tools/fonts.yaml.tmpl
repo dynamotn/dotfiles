@@ -1,4 +1,4 @@
-{{- if eq .guiServer "W" "X" }}
+{{- if ne .guiServer "0" }}
 name: fonts
 is_essential: true
 method: os
@@ -17,4 +17,12 @@ ubuntu:
     - name: fonts-roboto
     - name: fonts-noto
     - name: fonts-noto-cjk
+macos:
+  packages:
+    - name: font-roboto
+      is_cask: true
+    - name: font-noto-serif
+      is_cask: true
+    - name: font-noto-serif-cjk
+      is_cask: true
 {{- end }}
