@@ -1,1 +1,2 @@
-{{- template "thunderbird/user.js.tmpl" . -}}
+{{- $top := merge . (dict "mailProfile" "public") }}
+{{- template "thunderbird/user.js.tmpl" $top -}}

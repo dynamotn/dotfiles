@@ -1,10 +1,6 @@
 {{/* Include all userscripts in order */}}
-{{- $settings := glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/thunderbird/prefs/*.js") }}
-{{- if regexMatch ".*personal/user\\.js\\.tmpl" .chezmoi.sourceFile }}
-{{-   $settings = concat $settings (glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/thunderbird/prefs/personal/*.js")) }}
-{{- else if regexMatch ".*enterprise-F1/user\\.js\\.tmpl" .chezmoi.sourceFile }}
-{{-   $settings = concat $settings (glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/thunderbird/prefs/enterprise-F1/*.js")) }}
-{{- end }}
+{{- $settings := glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/thunderbird/prefs/*.js*") }}
+{{- $settings = concat $settings (glob (printf ".chezmoitemplates/thunderbird/prefs/%s/*.js*" .mailProfile | joinPath .chezmoi.sourceDir)) }}
 {{- range ($settings) }}
-{{-   output "chezmoi" "execute-template" (include .) }}
+{{-   includeTemplate . $ }}
 {{- end }}
