@@ -1,0 +1,6 @@
+{{- if regexMatch ".*personal/chrome/userChrome\\.css\\.tmpl" .chezmoi.sourceFile }}
+@import "toolbar/personal.css";
+{{- end }}
+{{- if regexMatch ".*enterprise-F1/chrome/userChrome\\.css\\.tmpl" .chezmoi.sourceFile }}
+@import "toolbar/enterprise-F1.css";
+{{- end }}
