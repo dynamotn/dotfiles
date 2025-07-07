@@ -18,7 +18,7 @@ function _spec_decrypt {
 }
 
 function _spec_encrypt {
-  dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS action:"_encrypt \$ENCRYPT_ARGS"
+  dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS action:"_encrypt \"\$ENCRYPT_ARGS\""
   dybatpho::opts::param "Identity type" IDENTITY_TYPE --identity-type -i init:="personal"
   dybatpho::opts::param \
     "Folder of input file, default is \`data\` for encryption to \`secrets/data\` in dotfiles folder" \

@@ -115,7 +115,7 @@ function _encrypt_storage_data {
   dybatpho::expect_args profile file -- "$@"
   local folder="$(dirname "$file")"
   local filename="$(basename "$file")"
-  dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f $folder -a "create" $filename
+  dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "${filename}"
 }
 
 function _main {
