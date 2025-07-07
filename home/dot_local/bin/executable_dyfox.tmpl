@@ -98,6 +98,13 @@ function _update_dotfiles {
           dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "cookies.sqlite" || true
         fi
       fi
+
+      {{ if eq .browser "Z" -}}
+      dybatpho::progress "Update Zen customization for profile ${profile}"
+      for filename in zen-themes.json zen-keyboard-shortcuts.json; do
+        dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/${filename} --create || true
+      done
+      {{- end }}
     else
       dybatpho::debug "$PROFILE"
     fi
