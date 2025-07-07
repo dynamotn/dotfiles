@@ -162,11 +162,6 @@
   type: file
   url: "https://gitflic.ru/project/magnolia1234/bpc_uploads/blob/raw?file=bypass_paywalls_clean-latest.xpi"
   refreshPeriod: 168h
-{{-         $repo = "filecxx/FileCentipede" }}
-.config/firefox/profiles/{{ . }}/extensions/{01de531b-ca21-4597-b352-18d787f00cac}.xpi:
-  type: file
-  url: {{ gitHubLatestReleaseAssetURL $repo "firefox.xpi" | quote }}
-  refreshPeriod: 168h
 {{-       end }}
 {{-     end }}
 {{-   end }}
@@ -179,7 +174,7 @@
   refreshPeriod: 168h
 {{-     range $profiles }}
 {{-       $repo = "gorhill/uBlock" }}
-.config/thunderbird/profiles/{{ . }}/extensions/uBlock.xpi:
+.config/thunderbird/profiles/{{ . }}/extensions/uBlock0@raymondhill.net.xpi:
   type: file
   url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "uBlock0_%s.thunderbird.xpi" | gitHubLatestReleaseAssetURL $repo | quote }}
   refreshPeriod: 168h
@@ -192,6 +187,29 @@
   type: file
   url: 'https://github.com/catppuccin/thunderbird/raw/refs/heads/main/themes/macchiato/macchiato-teal.xpi'
   refreshPeriod: 168h
+.config/thunderbird/profiles/{{ . }}/extensions/languagetool-mailextension@languagetool.org.xpi:
+  type: file
+  url: "https://addons.thunderbird.net/thunderbird/downloads/latest/grammar-and-spell-checker/addon-988138-latest.xpi"
+  refreshPeriod: 168h
+.config/thunderbird/profiles/{{ . }}/extensions/cardbook@vigneau.philippe.xpi:
+  type: file
+  url: "https://addons.thunderbird.net/thunderbird/downloads/latest/cardbook/addon-634298-latest.xpi"
+  refreshPeriod: 168h
+.config/thunderbird/profiles/{{ . }}/extensions/{2ab1b709-ba03-4361-abf9-c50b964ff75d}.xpi:
+  type: file
+  url: "https://addons.thunderbird.net/thunderbird/downloads/latest/signature-switch/addon-611-latest.xpi"
+  refreshPeriod: 168h
+{{-       if eq . "enterprise-F1" }}
+# https://github.com/jobisoft/TbSync/issues/748
+.config/thunderbird/profiles/{{ . }}/extensions/tbsync@jobisoft.de.xpi:
+  type: file
+  url: "https://github.com/user-attachments/files/21034205/TBSync_140.zip"
+  refreshPeriod: 168h
+.config/thunderbird/profiles/{{ . }}/extensions/eas4tbsync@jobisoft.de.xpi:
+  type: file
+  url: "https://github.com/user-attachments/files/21034206/EAS-4-TbSync_140.zip"
+  refreshPeriod: 168h
+{{-       end }}
 {{-     end }}
 {{-   end }}
 {{- end }}
