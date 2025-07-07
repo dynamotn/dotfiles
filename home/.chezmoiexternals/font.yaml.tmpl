@@ -28,12 +28,3 @@ Library/Fonts/Iosevka:
   url: https://github.com/dynamotn/Iosevka-Dynamo/releases/latest/download/iosevka-dynamo-nerd-regular.ttf
   refreshPeriod: 168h
 {{- end }}
-{{- if eq .chezmoi.os "darwin" }}
-{{- $repo := "googlefonts/roboto-3-classic" }}
-Library/Fonts/Roboto:
-  type: archive
-  url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "Roboto_%s.zip" | gitHubLatestReleaseAssetURL $repo | quote }}
-  stripComponents: 2
-  include:
-    - hinted/static/**
-{{- end }}
