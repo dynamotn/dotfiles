@@ -1,0 +1,2 @@
+{{- $top := merge . (dict "browserProfileName" "Public") }}
+{{- template "firefox/chrome/css/sidebar.css.tmpl" $top -}}

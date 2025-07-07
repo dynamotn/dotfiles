@@ -1,0 +1,2 @@
+{{- $top := merge . (dict "mailProfileName" "Public") }}
+{{- template "thunderbird/chrome/css/toolbar.css.tmpl" $top -}}

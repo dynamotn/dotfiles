@@ -1,1 +1,2 @@
-{{- template "firefox/user.js.tmpl" . -}}
+{{- $top := merge . (dict "browserProfile" "public") }}
+{{- template "firefox/user.js.tmpl" $top -}}
