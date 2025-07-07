@@ -47,8 +47,8 @@ function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
       if dybatpho::is file ~/.config/thunderbird/profiles/${profile}/prefs.js; then
-        dybatpho::progress "Update toolbar setting for profile ${profile}"
-        dybatpho::dry_run "grep \"browser.uiCustomization.state\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/01-toolbar.js" || true
+        dybatpho::progress "Update account setting for profile ${profile}"
+        dybatpho::dry_run "grep \"mail.server.server\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/01-accounts.js" || true
 
         dybatpho::progress "Update addon setting for profile ${profile}"
         dybatpho::dry_run "grep \"extensions.webextensions.uuids\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
@@ -63,16 +63,6 @@ function _update_dotfiles {
 
       dybatpho::progress "Update search engines for profile ${profile}"
       dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
-
-      dybatpho::progress "Update bookmarks, history and workspaces for profile ${profile}"
-      if [ "${profile}" = "public" ]; then
-        for filename in favicons places; do
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename}.sqlite --create || true
-        done
-      else
-        declare -a filenames=("favicons" "places")
-        printf "%s\n" "${filenames[@]}" | xargs -P$(nproc) -I{} bash -c "dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a 'create' '{}.sqlite'" || true
-      fi
 
       dybatpho::progress "Update storage data for profile ${profile}"
       if [ "${profile}" = "public" ]; then
@@ -95,6 +85,25 @@ function _update_dotfiles {
           dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "cookies.sqlite" || true
         fi
       fi
+
+      if dybatpho::is true "${MAIL}"; then
+        dybatpho::progress "Update mail/feeds data for profile ${profile}"
+        if [ "${profile}" = "public" ]; then
+          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/ImapMail --create || true
+          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/Mail --create || true
+        else
+          if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/ImapMail; then
+            export -f _encrypt_storage_data
+            command find ~/.config/thunderbird/profiles/${profile}/ImapMail -type f | xargs -P$(nproc) -I{} \
+              bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+          fi
+          if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/Mail; then
+            export -f _encrypt_storage_data
+            command find ~/.config/thunderbird/profiles/${profile}/Mail -type f | xargs -P$(nproc) -I{} \
+              bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+          fi
+        fi
+      fi
     else
       dybatpho::debug "$PROFILE"
     fi
@@ -105,7 +114,7 @@ function _encrypt_storage_data {
   dybatpho::expect_args profile file -- "$@"
   local folder="$(dirname "$file")"
   local filename="$(basename "$file")"
-  dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f $folder -a "create" $filename
+  dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "${filename}"
 }
 
 function _main {
@@ -130,6 +139,7 @@ function _spec_main {
   dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"_validate_profile"
   dybatpho::opts::flag "Refresh from scratch live data" REFRESH --refresh -r on:true off:false init:="false"
   dybatpho::opts::flag "Include cookies" COOKIES --cookies --no-cookies -c on:true off:false init:="true"
+  dybatpho::opts::flag "Include mail/feeds data" MAIL --mail --no-mail -c on:true off:false init:="true"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
 }
 
