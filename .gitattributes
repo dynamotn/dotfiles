@@ -2,6 +2,7 @@ home/**/*.age diff=age-personal
 root/**/*.age diff=age-personal
 secrets/data/personal/**/*.age diff=age-personal
 home/dot_config/firefox/startpage/src/img/background/*F1.png.age diff=age-enterprise-F1
+home/dot_config/rbw-enterprise-f1/*.age diff=age-enterprise-F1
 home/private_dot_ssh/key/enterprise-F1_*.age diff=age-enterprise-F1
 home/Working/enterprise/F1/**/*.age diff=age-enterprise-F1
 secrets/data/enterprise-F1/**/*.age diff=age-enterprise-F1
