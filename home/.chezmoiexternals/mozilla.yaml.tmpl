@@ -60,10 +60,12 @@
   url: 'https://tridactyl.cmcaine.co.uk/betas/nonewtab/tridactyl_no_new_tab_beta-latest.xpi'
   refreshPeriod: 168h
 {{-       $repo = "gorhill/uBlock" }}
+{{-       if and (ne $.place "office") (ne $.kind "vm") (ne . "enterprise-F1") }}
 .config/firefox/profiles/{{ . }}/extensions/uBlock0@raymondhill.net.xpi:
   type: file
   url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "uBlock0_%s.firefox.signed.xpi" | gitHubLatestReleaseAssetURL $repo | quote }}
   refreshPeriod: 168h
+{{-       end }}
 {{-       $version = "4.9.106" }}
 .config/firefox/profiles/{{ . }}/extensions/addon@darkreader.org.xpi:
   type: file
@@ -174,10 +176,12 @@
   refreshPeriod: 168h
 {{-     range $profiles }}
 {{-       $repo = "gorhill/uBlock" }}
+{{-       if and (ne $.place "office") (ne $.kind "vm") (ne . "enterprise-F1") }}
 .config/thunderbird/profiles/{{ . }}/extensions/uBlock0@raymondhill.net.xpi:
   type: file
   url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "uBlock0_%s.thunderbird.xpi" | gitHubLatestReleaseAssetURL $repo | quote }}
   refreshPeriod: 168h
+{{-       end }}
 .config/thunderbird/profiles/{{ . }}/extensions/addon@darkreader.org.xpi:
   type: file
   url: "https://addons.thunderbird.net/thunderbird/downloads/latest/darkreader/addon-988018-latest.xpi"
