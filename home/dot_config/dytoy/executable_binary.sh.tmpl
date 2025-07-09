@@ -105,6 +105,16 @@ _extract_bzip2() {
   bash $TEMP_HOOK_AFTER
 }
 
+# Extract from gzip compressed release file
+# $1: URL of file
+# $2: File name of command
+_extract_gzip() {
+  bash $TEMP_HOOK_BEFORE
+  readarray paths < <(echo "$2" | yq e -o=j -I=0 -r '.[]')
+  gzip -cd $TEMP_COMPRESSED > $location/$2
+  bash $TEMP_HOOK_AFTER
+}
+
 # Update tool by get from release file
 # $1: URL of file
 # $2: File name of command
@@ -126,6 +136,12 @@ _update() {
   elif [[ "$1" =~ \.bz2$ ]]; then
     curl -SL "$1" -o "$TEMP_COMPRESSED"
     _extract_bzip2 "$1" "$2"
+    echo > "$TEMP_HOOK_BEFORE"
+    echo > "$TEMP_HOOK_AFTER"
+    rm -rf "$TEMP_COMPRESSED"
+  elif [[ "$1" =~ \.gz$ ]]; then
+    curl -SL "$1" -o "$TEMP_COMPRESSED"
+    _extract_gzip "$1" "$2"
     echo > "$TEMP_HOOK_BEFORE"
     echo > "$TEMP_HOOK_AFTER"
     rm -rf "$TEMP_COMPRESSED"
