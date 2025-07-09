@@ -1,0 +1,9 @@
+{{- range .decryptEnterprise }}
+{{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   range $gitSecret.servers }}
+{{-     if not .preferGitSSH }}
+machine {{ .https | trimPrefix "https://" }} login {{ $commonSecret.account.username }} password {{ .token }}
+{{-     end }}
+{{-   end }}
+{{- end }}

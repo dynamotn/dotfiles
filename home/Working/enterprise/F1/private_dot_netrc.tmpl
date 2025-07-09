@@ -1,4 +1,0 @@
-{{- $commonSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/common.yaml.age" | include | decrypt | fromYaml }}
-{{- range $commonSecret.git.servers }}
-machine {{ .https | trimPrefix "https://" }} login {{ $commonSecret.account.username }} password {{ .token }}
-{{- end }}

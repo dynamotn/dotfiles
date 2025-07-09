@@ -53,6 +53,6 @@ folders:
     priority: 0
   {{- end }}
   {{- range .decryptEnterprise }}
-  {{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
-  {{-   $commonSecret.projekt.folders | replaceAllRegex "\\$HOME" $.chezmoi.homeDir | nindent 2 }}
+  {{-   $projektSecret := printf "../secrets/data/enterprise-%s/projekt.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{-   $projektSecret.folders | replaceAllRegex "\\$HOME" $.chezmoi.homeDir | nindent 2 }}
   {{- end }}
