@@ -1,7 +1,6 @@
 [env]
 KUBECONFIG = "{{config_root}}/.kube/config"
 DOCKER_CONFIG = "{{config_root}}/.docker"
-CURLOPT_NETRC_FILE = "{{config_root}}/../.netrc"
 
 [tools]
 python = "latest"

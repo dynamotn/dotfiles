@@ -1,9 +1,9 @@
-{{- $commonSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/common.yaml.age" | include | decrypt | fromYaml }}
+{{- $firefoxSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/firefox.yaml.age" | include | decrypt | fromYaml }}
 let saved_config = JSON.parse(localStorage.getItem("LOADED_CONFIG"));
 
 const default_config = {
   openLastVisitedTab: true,
-  wallpaper: {{ $commonSecret.firefox.startpage.wallpaper | quote }},
+  wallpaper: {{ $firefoxSecret.startpage.wallpaper | quote }},
   tabs: [
     {
       name: "work",
@@ -29,11 +29,11 @@ const default_config = {
         },
         {
           name: "development",
-          links: {{ toJson $commonSecret.firefox.startpage.config.development }},
+          links: {{ toJson $firefoxSecret.startpage.config.development }},
         },
         {
           name: "management",
-          links: {{ toJson $commonSecret.firefox.startpage.config.management }},
+          links: {{ toJson $firefoxSecret.startpage.config.management }},
         },
       ],
     },
@@ -44,11 +44,11 @@ const default_config = {
       categories: [
         {
           name: "shared",
-          links: {{ toJson $commonSecret.firefox.startpage.config.shared }},
+          links: {{ toJson $firefoxSecret.startpage.config.shared }},
         },
         {
           name: "vdi",
-          links: {{ toJson $commonSecret.firefox.startpage.config.vdi }},
+          links: {{ toJson $firefoxSecret.startpage.config.vdi }},
         },
       ],
     },
@@ -59,11 +59,11 @@ const default_config = {
       categories: [
         {
           name: "C&B",
-          links: {{ toJson $commonSecret.firefox.startpage.config.cnb }},
+          links: {{ toJson $firefoxSecret.startpage.config.cnb }},
         },
         {
           name: "L&D",
-          links: {{ toJson $commonSecret.firefox.startpage.config.lnd }},
+          links: {{ toJson $firefoxSecret.startpage.config.lnd }},
         },
       ],
     },
