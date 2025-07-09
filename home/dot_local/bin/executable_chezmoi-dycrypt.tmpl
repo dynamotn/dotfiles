@@ -30,6 +30,7 @@ function _spec_encrypt {
 
 function _encrypt {
   dybatpho::expect_args filename -- "$@"
+  filename=$(dybatpho::trim "${filename}")
   local input output
   if [ "${FOLDER}" = "data" ]; then
     input="{{ .chezmoi.sourceDir }}/../secrets/data/${IDENTITY_TYPE}/${filename}"
