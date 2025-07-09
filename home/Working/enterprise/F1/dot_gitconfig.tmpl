@@ -9,7 +9,7 @@
         # Custom SSH command with separated ssh config
         sshCommand = ssh -F ~/Working/enterprise/F1/.ssh/config
 {{- range $commonSecret.git.servers }}
-{{-   if $.preferGitSSH }}
+{{-   if and $.preferGitSSH .preferGitSSH }}
 [url {{ .ssh | quote }}]
         # Prefer SSH than HTTPS for github
         insteadOf = {{ .https }}
@@ -18,4 +18,7 @@
         # Prefer HTTPS than for github
         insteadOf = {{ .ssh }}
 {{-   end }}
+{{- end }}
+{{- with $commonSecret.git.config }}
+{{    . }}
 {{- end }}
