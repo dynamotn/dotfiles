@@ -37,7 +37,7 @@ function _encrypt {
     output="${input}.age"
   else
     input="${FOLDER}/${filename}"
-    output="{{ .chezmoi.sourceDir }}/../$(_gen_cz_attrs "${input}" "$ATTRIBUTES").age"
+    output="{{ .chezmoi.sourceDir }}/../$(_gen_cz_attrs "${input}" "$ATTRIBUTES,encrypted").age"
   fi
 
   if ! dybatpho::is file "${input}"; then
@@ -106,7 +106,6 @@ function _gen_cz_attrs {
     fi
 
     if [[ $i -eq $last_index && -n "$attributes" ]]; then
-      attributes="${attributes},encrypted"
       IFS=',' read -r -a attrs_array <<< "$attributes"
       component_prefix=""
       for attr in "${priority[@]}"; do
