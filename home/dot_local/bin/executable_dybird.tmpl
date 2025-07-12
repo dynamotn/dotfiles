@@ -47,14 +47,24 @@ function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
       if dybatpho::is file ~/.config/thunderbird/profiles/${profile}/prefs.js; then
-        dybatpho::progress "Update account setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"mail.account\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/01-accounts.js" || true
-        dybatpho::dry_run eval "grep \"mail.server.server\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/01-accounts.js" || true
-
         dybatpho::progress "Update addon setting for profile ${profile}"
         dybatpho::dry_run eval "grep \"extensions.webextensions.uuids\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
         dybatpho::dry_run eval "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
         dybatpho::dry_run eval "grep \"privacy.userContext.extension\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
+
+        dybatpho::progress "Update email setting for profile ${profile}"
+        dybatpho::dry_run eval "grep \"mail.account\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"mail.server.server\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"mail.identity.id\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"mail.smtpserver.smtp\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"mail.smtpservers\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"mail.smtpservers\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
+
+        dybatpho::progress "Update address book setting for profile ${profile}"
+        dybatpho::dry_run eval "grep \"ldap_2.servers\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/04-address-book.js.tmpl" || true
+
+        dybatpho::progress "Update calendar setting for profile ${profile}"
+        dybatpho::dry_run eval "grep \"calendar.registry\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/05-calendar.js.tmpl" || true
       fi
 
       dybatpho::progress "Update extensions data for profile ${profile}"
@@ -65,50 +75,78 @@ function _update_dotfiles {
       dybatpho::progress "Update search engines for profile ${profile}"
       dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
 
+      export -f _encrypt_storage_data
       dybatpho::progress "Update storage data for profile ${profile}"
       if [ "${profile}" = "public" ]; then
         dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/storage.sqlite --create || true
         dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* --create || true
+        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/global-messages-db.sqlite --create || true
       else
         dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "storage.sqlite" || true
         if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/storage/default; then
-          export -f _encrypt_storage_data
           command find ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} \
             bash -c "_encrypt_storage_data '${profile}' '{}'" || true
         fi
       fi
 
       if dybatpho::is true "${COOKIES}"; then
-        dybatpho::progress "Update cookies for profile ${profile}"
+        dybatpho::progress "Update cookies, passwords for profile ${profile}"
         if [ "${profile}" = "public" ]; then
-          for filename in cookies.sqlite logins.json key4.db; do
+          for filename in cookies.sqlite logins.json key4.db folderTree.json; do
             dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename} --create || true
           done
         else
-          for filename in cookies.sqlite logins.json key4.db; do
+          for filename in cookies.sqlite logins.json key4.db folderTree.json; do
             dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "${filename}" || true
           done
         fi
       fi
 
       if dybatpho::is true "${MAIL}"; then
-        dybatpho::progress "Update mail/feeds data for profile ${profile}"
+        dybatpho::progress "Update mail data for profile ${profile}"
         if [ "${profile}" = "public" ]; then
           dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/ImapMail --create || true
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/Mail --create || true
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/global-messages-db.sqlite --create || true
         else
           if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/ImapMail; then
-            export -f _encrypt_storage_data
             command find ~/.config/thunderbird/profiles/${profile}/ImapMail -type f | xargs -P$(nproc) -I{} \
               bash -c "_encrypt_storage_data '${profile}' '{}'" || true
           fi
-          if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/Mail; then
-            export -f _encrypt_storage_data
+        fi
+      fi
+
+      if dybatpho::is true "${FEEDS}"; then
+        dybatpho::progress "Update feeds data for profile ${profile}"
+        if [ "${profile}" = "public" ]; then
+          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/Mail/Feeds --create || true
+        else
+          if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/Mail/Feeds; then
             command find ~/.config/thunderbird/profiles/${profile}/Mail -type f | xargs -P$(nproc) -I{} \
               bash -c "_encrypt_storage_data '${profile}' '{}'" || true
           fi
-          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "global-messages-db.sqlite" || true
+        fi
+      fi
+
+      if dybatpho::is true "${ADDRESSES}"; then
+        dybatpho::progress "Update address book data for profile ${profile}"
+        if [ "${profile}" = "public" ]; then
+          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/history.sqlite --create || true
+          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/abook*.sqlite --create || true
+        else
+          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "history.sqlite" || true
+          command find ~/.config/thunderbird/profiles/${profile}/abook*.sqlite -type f | xargs -P$(nproc) -I{} \
+            bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+        fi
+      fi
+
+      if dybatpho::is true "${CALENDAR}"; then
+        dybatpho::progress "Update calendar data for profile ${profile}"
+        if [ "${profile}" = "public" ]; then
+          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/calendar-data --create || true
+        else
+          if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/calendar-data; then
+            command find ~/.config/thunderbird/profiles/${profile}/calendar-data/*.sqlite -type f | xargs -P$(nproc) -I{} \
+              bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+          fi
         fi
       fi
     else
@@ -146,7 +184,10 @@ function _spec_main {
   dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"_validate_profile"
   dybatpho::opts::flag "Refresh from scratch live data" REFRESH --refresh -r on:true off:false init:="false"
   dybatpho::opts::flag "Include cookies" COOKIES --cookies --no-cookies -c on:true off:false init:="true"
-  dybatpho::opts::flag "Include mail/feeds data" MAIL --mail --no-mail -c on:true off:false init:="false"
+  dybatpho::opts::flag "Include mail data" MAIL --mail --no-mail -m on:true off:false init:="false"
+  dybatpho::opts::flag "Include feeds data" FEEDS --feeds --no-feeds -f on:true off:false init:="true"
+  dybatpho::opts::flag "Include address book data" ADDRESSES --addresses --no-addresses -a on:true off:false init:="false"
+  dybatpho::opts::flag "Include calendar data" CALENDAR --calendar --no-calendar -C on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
 }
 
