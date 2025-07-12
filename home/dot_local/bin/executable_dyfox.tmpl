@@ -48,12 +48,12 @@ function _update_dotfiles {
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
       if dybatpho::is file ~/.config/firefox/profiles/${profile}/prefs.js; then
         dybatpho::progress "Update toolbar setting for profile ${profile}"
-        dybatpho::dry_run "grep \"browser.uiCustomization.state\" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/01-toolbar.js" || true
+        dybatpho::dry_run eval "grep \"browser.uiCustomization.state\" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/01-toolbar.js" || true
 
         dybatpho::progress "Update addon setting for profile ${profile}"
-        dybatpho::dry_run "grep \"extensions.webextensions.uuids\" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
-        dybatpho::dry_run "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
-        dybatpho::dry_run "grep \"privacy.userContext.extension\" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
+        dybatpho::dry_run eval "grep \"extensions.webextensions.uuids\" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
+        dybatpho::dry_run eval "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
+        dybatpho::dry_run eval "grep \"privacy.userContext.extension\" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
       fi
 
       dybatpho::progress "Update containers for profile ${profile}"
