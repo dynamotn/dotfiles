@@ -97,11 +97,11 @@ function _update_dotfiles {
       if dybatpho::is true "${COOKIES}"; then
         dybatpho::progress "Update cookies, passwords for profile ${profile}"
         if [ "${profile}" = "public" ]; then
-          for filename in cookies.sqlite logins.json key4.db folderTree.json; do
+          for filename in cookies.sqlite logins.json key4.db folderTree.json folderCache.json; do
             dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename} --create || true
           done
         else
-          for filename in cookies.sqlite logins.json key4.db folderTree.json; do
+          for filename in cookies.sqlite logins.json key4.db folderTree.json folderCache.json; do
             dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "${filename}" || true
           done
         fi
@@ -121,14 +121,7 @@ function _update_dotfiles {
 
       if dybatpho::is true "${FEEDS}"; then
         dybatpho::progress "Update feeds data for profile ${profile}"
-        if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/Mail/Feeds --create || true
-        else
-          if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/Mail/Feeds; then
-            command find ~/.config/thunderbird/profiles/${profile}/Mail -type f | xargs -P$(nproc) -I{} \
-              bash -c "_encrypt_storage_data '${profile}' '{}'" || true
-          fi
-        fi
+        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/Mail/Feeds --create || true
       fi
 
       if dybatpho::is true "${ADDRESSES}"; then
