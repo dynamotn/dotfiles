@@ -42,7 +42,6 @@
 {{-   end }}
 {{- end }}
 {{- $dotfilesFolder := splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}
-{{- $repo := "" }}
 {{- $version := "" }}
 {{- if eq .browser "F" "Z" }}
 {{-   if eq (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 1 }}
@@ -59,106 +58,94 @@
   type: file
   url: 'https://tridactyl.cmcaine.co.uk/betas/nonewtab/tridactyl_no_new_tab_beta-latest.xpi'
   refreshPeriod: 168h
-{{-       $repo = "gorhill/uBlock" }}
-{{-       if and (ne $.place "office") (ne $.kind "vm") (ne . "enterprise-F1") }}
 .config/firefox/profiles/{{ . }}/extensions/uBlock0@raymondhill.net.xpi:
   type: file
-  url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "uBlock0_%s.firefox.signed.xpi" | gitHubLatestReleaseAssetURL $repo | quote }}
+  url: "https://addons.mozilla.org/firefox/downloads/file/4492375/"
   refreshPeriod: 168h
-{{-       end }}
-{{-       $version = "4.9.106" }}
 .config/firefox/profiles/{{ . }}/extensions/addon@darkreader.org.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4488139/darkreader-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4488139/"
   refreshPeriod: 168h
-{{-       $version = "0.2.16" }}
 .config/firefox/profiles/{{ . }}/extensions/firenvim@lacamb.re.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4279173/firenvim-{{ $version }}.xpi"
-{{-       $version = "2025.5.0" }}
+  url: "https://addons.mozilla.org/firefox/downloads/file/4279173/"
+# Bitwarden
 .config/firefox/profiles/{{ . }}/extensions/{446900e4-71c2-419f-a6a7-df9c091e268b}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4493940/bitwarden_password_manager-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4493940/"
   refreshPeriod: 168h
-{{-       $version = "8.19.4" }}
 .config/firefox/profiles/{{ . }}/extensions/languagetool-webextension@languagetool.org.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4470413/languagetool-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4470413/"
   refreshPeriod: 168h
-{{-       $version = "9.2" }}
 .config/firefox/profiles/{{ . }}/extensions/foxyproxy@eric.h.jung.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4472757/foxyproxy_standard-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4472757/"
   refreshPeriod: 168h
-{{-       $version = "6.0.1" }}
+# Linguist
 .config/firefox/profiles/{{ . }}/extensions/{e5b6e4ac-ec96-44f5-b257-e4d3c8291b41}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4306398/linguist_translator-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4306398/"
   refreshPeriod: 168h
-{{-       $version = "0.6.3" }}
+# Virus Total
 .config/firefox/profiles/{{ . }}/extensions/{06def8b7-bcc3-4f1e-add7-7d8222ca0efc}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/3547900/virustotal_scan-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/3547900/"
   refreshPeriod: 168h
-{{-       $version = "2025.5.30" }}
+# Privacy Badger
 .config/firefox/profiles/{{ . }}/extensions/jid1-MnnxcxisBPnSXQ@jetpack.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4504218/privacy_badger17-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4504218/"
   refreshPeriod: 168h
-{{-       $version = "2.1.7" }}
 .config/firefox/profiles/{{ . }}/extensions/FirefoxColor@mozilla.com.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/3643624/firefox_color-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/3643624/"
   refreshPeriod: 168h
 {{-       if eq $.browser "F" }}
-{{-         $version = "5.3.3" }}
+# Sideberry
 .config/firefox/profiles/{{ . }}/extensions/{3c078156-979c-498b-8990-85f7987dd929}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4442132/sidebery-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4442132/"
   refreshPeriod: 168h
 {{-       end }}
 {{-       if ne . "public" }}
-{{-         $version = "6.10.83" }}
 .config/firefox/profiles/{{ . }}/extensions/wappalyzer@crunchlabz.com.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4498612/wappalyzer-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4498612/"
   refreshPeriod: 168h
-{{-         $version = "0.11.8" }}
 .config/firefox/profiles/{{ . }}/extensions/clipper@obsidian.md.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4497129/web_clipper_obsidian-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4497129/"
   refreshPeriod: 168h
-{{-         $version = "25.5.18" }}
+# Refined Github
 .config/firefox/profiles/{{ . }}/extensions/{a4c4eda4-fb84-4a84-b4a1-f7c1cbf2a1ad}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4495758/refined_github-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4495758/"
   refreshPeriod: 168h
-{{-         $version = "1.9.2" }}
+# Temporary containers
 .config/firefox/profiles/{{ . }}/extensions/{c607c8df-14a7-4f28-894f-29e8722976af}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/3723251/temporary_containers-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/3723251/"
   refreshPeriod: 168h
-{{-         $version = "2.3.14" }}
+# Stylus
 .config/firefox/profiles/{{ . }}/extensions/{7a7a4a92-a2a0-41d1-9fd7-1e92480d612d}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4451438/styl_us-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4451438/"
   refreshPeriod: 168h
 {{-       end }}
 {{-       if eq . "personal" }}
-{{-         $version = "1.7" }}
 .config/firefox/profiles/{{ . }}/extensions/leechblockng@proginosko.com.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4507296/leechblock_ng-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4507296/"
   refreshPeriod: 168h
-{{-         $version = "6.0.0" }}
 .config/firefox/profiles/{{ . }}/extensions/@react-devtools.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4360002/react_devtools-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4360002/"
   refreshPeriod: 168h
-{{-         $version = "2.31.0" }}
+# Violentmonkey
 .config/firefox/profiles/{{ . }}/extensions/{aecec67f-0d10-4fa7-b7c7-609a2db280cf}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4455138/violentmonkey-{{ $version }}.xpi"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4455138/"
   refreshPeriod: 168h
 .config/firefox/profiles/{{ . }}/extensions/magnolia@12.34.xpi:
   type: file
@@ -175,18 +162,14 @@
   url: https://raw.githubusercontent.com/HorlogeSkynet/thunderbird-user.js/master/user.js
   refreshPeriod: 168h
 {{-     range $profiles }}
-{{-       $repo = "gorhill/uBlock" }}
-{{-       if and (ne $.place "office") (ne $.kind "vm") (ne . "enterprise-F1") }}
 .config/thunderbird/profiles/{{ . }}/extensions/uBlock0@raymondhill.net.xpi:
   type: file
-  url: {{ (gitHubLatestRelease $repo).TagName | trimAll "\"" | toString | printf "uBlock0_%s.thunderbird.xpi" | gitHubLatestReleaseAssetURL $repo | quote }}
+  url: 'https://addons.thunderbird.net/thunderbird/downloads/latest/ublock-origin/addon-988489-latest.xpi'
   refreshPeriod: 168h
-{{-       end }}
 .config/thunderbird/profiles/{{ . }}/extensions/addon@darkreader.org.xpi:
   type: file
   url: "https://addons.thunderbird.net/thunderbird/downloads/latest/darkreader/addon-988018-latest.xpi"
   refreshPeriod: 168h
-{{-       $repo := "catppuccin/thunderbird" }}
 .config/thunderbird/profiles/{{ . }}/extensions/{d3f3abb5-21aa-57fd-80e3-a9a1887b1d16}.xpi:
   type: file
   url: 'https://github.com/catppuccin/thunderbird/raw/refs/heads/main/themes/macchiato/macchiato-teal.xpi'
