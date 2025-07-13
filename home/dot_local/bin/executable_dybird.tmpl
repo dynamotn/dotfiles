@@ -64,13 +64,18 @@ function _update_dotfiles {
         dybatpho::dry_run eval "grep \"ldap_2.servers\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/04-address-book.js.tmpl" || true
 
         dybatpho::progress "Update calendar setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"calendar.registry\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/05-calendar.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"calendar.list.sortOrder\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/05-calendar.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"calendar.registry\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/05-calendar.js.tmpl" || true
       fi
 
       dybatpho::progress "Update extensions data for profile ${profile}"
       for filename in addons.json addonStartup.json.lz4 extensions.json extension-preferences.json; do
         dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename} --create || true
       done
+      if [[ "${profile}" =~ enterprise-.* ]]; then
+        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/TbSync/account*.json --create || true
+        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/TbSync/folder*.json --create || true
+      fi
 
       dybatpho::progress "Update search engines for profile ${profile}"
       dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
