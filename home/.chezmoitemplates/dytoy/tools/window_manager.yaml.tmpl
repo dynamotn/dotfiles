@@ -32,4 +32,12 @@ macos:
   packages:
     - name: nikitabobko/tap/aerospace
       is_cask: true
+    - name: autoraise
+      param: --HEAD
+  hook:
+    before: |-
+      brew tap dimentium/autoraise
+    after: |-
+      /usr/bin/osascript -e 'tell application "System Events" to make new login item at end with properties {name:"Aerospace.app", path:"/Applications/Aerospace.app", kind:"Application", hidden:true}'
+      brew services start autoraise
 {{- end }}
