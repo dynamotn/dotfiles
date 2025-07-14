@@ -98,6 +98,7 @@
 |[ncspot](https://github.com/hrkfdn/ncspot)|Spotify CLI client|Miscellaneous|
 |[telegram-desktop](https://desktop.telegram.org/)|Telegram desktop client|Miscellaneous|
 |[fabric](https://github.com/danielmiessler/fabric)|Framework for augmenting humans using AI|AI tool|
+|[aichat](https://github.com/sigoden/aichat)|All-in-one LLM CLI tool|AI tool|
 |[pint](https://github.com/cloudflare/pint)|Linter for Prometheus rules|Linter|
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|Project management tool|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|Project management tool|
