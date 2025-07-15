@@ -88,8 +88,24 @@ if.app-name-regex-substring = 'Obsidian'
 run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'Telegram'
+run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'mpv'
+run = 'move-node-to-workspace 6'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Bluestacks'
+run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
 if.app-name-regex-substring = 'Omnissa'
-run = ['layout floating', 'move-node-to-workspace 0']
+run = ['layout floating', 'move-node-to-workspace 8']
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Finder'
+run = ['layout floating', 'move-node-to-workspace 8']
 
 # Possible values: (qwerty|dvorak)
 # See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
