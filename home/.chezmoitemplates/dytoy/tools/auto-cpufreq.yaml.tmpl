@@ -5,6 +5,10 @@ is_essential: true
 gentoo:
   packages:
     - name: sys-power/auto-cpufreq
+  hook:
+    after: |-
+      sudo rc-update add auto-cpufreq default
+      sudo rc-service auto-cpufreq restart
 arch:
   packages:
     - name: auto-cpufreq
