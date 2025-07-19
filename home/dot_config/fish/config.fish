@@ -45,7 +45,7 @@ __add_folder_to_manpath $CONFIG_PATH/../scripts/man
 # Package manager
 type -q brew; and brew shellenv | source
 if type -q mise
-    mise activate fish | source
+    set -gx MISE_PREFER_OFFLINE true
     mise completion fish | source
 end
 
