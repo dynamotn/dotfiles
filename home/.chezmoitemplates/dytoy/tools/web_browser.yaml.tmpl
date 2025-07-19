@@ -22,11 +22,12 @@ gentoo:
   packages:
     - name: www-client/zen-bin
       repo: guru
+      uri: https://github.com/gentoo-mirror/guru.git
 arch:
   packages:
     - name: zen-browser-bin
 macos:
   packages:
     - name: zen
-      is_cask: true
+      type: cask
 {{- end }}

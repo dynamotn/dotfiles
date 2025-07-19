@@ -8,9 +8,10 @@ arch:
 macos:
   packages:
     - name: rustdesk
-      is_cask: true
+      type: cask
 gentoo:
   packages:
     - name: net-misc/rustdesk
       repo: gentoo-zh
+      uri: https://github.com/gentoo-mirror/gentoo-zh.git
 {{- end }}

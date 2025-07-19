@@ -14,7 +14,7 @@ ubuntu:
 macos:
   packages:
     - name: thunderbird
-      is_cask: true
+      type: cask
 {{- else if eq .mailClient "B" }}
 name: betterbird
 is_essential: true

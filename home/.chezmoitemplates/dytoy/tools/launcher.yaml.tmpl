@@ -18,7 +18,7 @@ is_essential: true
 macos:
   packages:
     - name: raycast
-      is_cask: true
+      type: cask
   hook:
     after: |-
       /usr/bin/osascript -e 'tell application "System Events" to make new login item at end with properties {name:"Raycast.app", path:"/Applications/Raycast.app", kind:"Application", hidden:true}'
