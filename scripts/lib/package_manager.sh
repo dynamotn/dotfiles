@@ -93,6 +93,24 @@ function _ubuntu_init {
   _ubuntu_sync_repo
 }
 
+function _alpine_sync_repo {
+  sudo apk update
+}
+
+function _alpine_check_installed {
+  dybatpho::expect_args package -- "$@"
+  apk info -e "$package" > /dev/null 2>&1
+}
+
+function _alpine_install {
+  dybatpho::expect_args package -- "$@"
+  dybatpho::dry_run sudo apk add --no-cache --no-interactive "$package"
+}
+
+function _alpine_init {
+  _alpine_sync_repo
+}
+
 function _termux_sync_repo {
   pkg update
 }

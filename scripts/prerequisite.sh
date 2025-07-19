@@ -33,6 +33,9 @@ elif command -v pacman &> /dev/null; then
 elif command -v emerge &> /dev/null; then
   # Gentoo
   sudo emerge -uDN dev-vcs/git net-misc/curl net-misc/openssh app-portage/cpuid2cpuflag app-misc/resolve-march-native
+elif command -v apk &> /dev/null; then
+  # Alpine Linux
+  sudo apk update && sudo apk add --no-cache git curl openssh
 else
   echo "Your OS/distro is not supported"
   exit 1

@@ -27,6 +27,9 @@ function _spec_main {
 {{- else if eq .osid "linux-debian" "linux-ubuntu" }}
 {{- $shortCode = "ubuntu" }}
 {{- $name = "Debian-based Linux" }}
+{{- else if eq .osid "linux-alpine" }}
+{{- $shortCode = "alpine" }}
+{{- $name = "Alpine" }}
 {{- else if eq .osid "android" }}
 {{- $shortCode = "termux" }}
 {{- $name = "Android" }}
@@ -163,6 +166,8 @@ function _main {
   _arch_init && _arch_run
   {{- else if eq .osid "linux-debian" "linux-ubuntu" }}
   _ubuntu_init && _ubuntu_run
+  {{- else if eq .osid "linux-alpine" }}
+  _alpine_init && _alpine_run
   {{- else if eq .chezmoi.os "android" }}
   _termux_init && _termux_run
   {{- else if eq .chezmoi.os "darwin" }}
