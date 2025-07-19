@@ -1,9 +1,7 @@
 {{- if eq .guiWinManager "H" }}
 name: hyprshade
 method: os
-{{-   if not (and (eq .kind "pc") (eq .place "home")) }}
 is_essential: true
-{{-   end }}
 gentoo:
   packages:
     - name: gui-apps/hyprshade
