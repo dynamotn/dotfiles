@@ -31,9 +31,9 @@ method: os
 macos:
   packages:
     - name: nikitabobko/tap/aerospace
-      is_cask: true
+      type: cask
     - name: autoraise
-      param: --HEAD
+      unstable: true
   hook:
     before: |-
       brew tap dimentium/autoraise

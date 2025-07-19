@@ -3,31 +3,17 @@ source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 source {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
 dybatpho::register_err_handler
 
-TEMP_HOOK_BEFORE=$(mktemp)
-TEMP_HOOK_AFTER=$(mktemp)
-dybatpho::cleanup_file_on_exit "$TEMP_HOOK_BEFORE"
-dybatpho::cleanup_file_on_exit "$TEMP_HOOK_AFTER"
+dybatpho::create_temp TEMP_HOOK_BEFORE ".sh"
+dybatpho::create_temp TEMP_HOOK_AFTER ".sh"
 
-_usage() {
-  echo "$0 usage:" && grep -E " \w) #" "$0" | sed -e 's/\(.\)) #/-\1/g'
-  exit 0
-}
-
-_parse_args() {
-  while getopts ":het:" arg; do
-    case $arg in
-      e) # Update only essential tool
-        FLAG_IS_ESSENTIAL=true
-        ;;
-      t) # Only one specific tool
-        TOOL=$OPTARG
-        ;;
-      h) # Display help
-        _usage
-        ;;
-      *) ;;
-    esac
-  done
+function _spec_main {
+  dybatpho::opts::setup "Utilities to install binary tools" MAIN_ARGS action:"_main"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
+  dybatpho::opts::param "Specific tool" TOOL  --tool -t init:="@empty"
+  dybatpho::opts::flag "Install only essential tool" ONLY_ESSENTIAL --essential -e on:true off:false init:="false"
+  dybatpho::opts::flag "Install only not installed tool" ONLY_NOT_INSTALLED --check-installed --no-check-installed -i on:true off:false init:="true"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
 {{- $shortCode := "" }}
@@ -49,14 +35,14 @@ _parse_args() {
 {{- $name = "MacOS" }}
 {{- end }}
 
-_{{ $shortCode }}_run() {
+function _{{ $shortCode }}_run {
   for tool in "${package_tools[@]}"; do
     tool_name=$(echo "$tool" | yq e '.name')
-    if [ "$TOOL" != "" ] && [ "$TOOL" != "$tool_name" ]; then
+    if [ "$TOOL" != "@empty" ] && [ "$TOOL" != "$tool_name" ]; then
       continue
     fi
     is_essential=$(echo "$tool" | yq e '.is_essential')
-    if [ "$FLAG_IS_ESSENTIAL" = true ] && [ "$is_essential" != "true" ]; then
+    if dybatpho::is true "$ONLY_ESSENTIAL" && ! dybatpho::is true "$is_essential"; then
       continue
     fi
 
@@ -67,7 +53,16 @@ _{{ $shortCode }}_run() {
       echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_BEFORE}"
       echo "dybatpho::progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
       echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
-      bash ${TEMP_HOOK_BEFORE}
+    else
+      echo > "${TEMP_HOOK_BEFORE}"
+    fi
+    if [ "$hook_after" != "null" ]; then
+      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
+      echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_AFTER}"
+      echo "dybatpho::progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
+      echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
+    else
+      echo > "${TEMP_HOOK_AFTER}"
     fi
 
     readarray packages < <(echo "$tool" | yq e -o=j -I=0 -r '.{{ $shortCode }}.packages.[]')
@@ -79,11 +74,15 @@ _{{ $shortCode }}_run() {
 
       {{- if eq .osid "linux-gentoo" }}
       repo=$(echo "$package" | yq e '.repo')
+      uri=$(echo "$package" | yq e '.uri')
 
       if [[ "$repo" != "null" ]]; then
-        _gentoo_install "$package_name::$repo"
-      else
+        _gentoo_add_repo "$repo" "$uri" > /dev/null
+      fi
+      if dybatpho::is false $ONLY_NOT_INSTALLED || ! _gentoo_check_installed "$package_name"; then
+        _run_hook "$TEMP_HOOK_BEFORE"
         _gentoo_install "$package_name"
+        _run_hook "$TEMP_HOOK_AFTER"
       fi
       {{- else if eq .osid "linux-debian" "linux-ubuntu" }}
       repo=$(echo "$package" | yq e '.repo')
@@ -95,42 +94,62 @@ _{{ $shortCode }}_run() {
 
         [[ "$repo_name" == "null" ]] && repo_name=$package_name
         [[ "$distro_version" == "null" ]] && distro_version=$(grep -is {{ if eq .osid "linux-ubuntu" }}UBUNTU_CODENAME{{ else }}VERSION_CODENAME{{ end }} /etc/os-release | cut -d= -f2)
-        repo=$(echo ${repo} | sed "s/%v/${distro_version}/g")
-        if [ ! -f "/etc/apt/sources.list.d/$repo_name.list" ]; then
-          echo "deb $repo $distro_version $repo_version" | sudo tee /"etc/apt/sources.list.d/$repo_name.list"
-          curl -sSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" | sudo apt-key add -
-        fi
-        _ubuntu_repo_sync
+        repo_code=$(echo ${repo} | sed "s/%v/${distro_version}/g")
+        _ubuntu_add_repo "$repo_name" "$repo_code" "$distro_version" "$repo_version" "$key" > /dev/null
+        _ubuntu_sync_repo
       fi
-      _ubuntu_install "$package_name"
+      if dybatpho::is false $ONLY_NOT_INSTALLED || ! _ubuntu_check_installed "$package_name"; then
+        _run_hook "$TEMP_HOOK_BEFORE"
+        _ubuntu_install "$package_name"
+        _run_hook "$TEMP_HOOK_AFTER"
+      fi
       {{- else if eq .osid "darwin" }}
-      package_param=$(echo "$package" | yq e '.param')
-      package_is_cask=$(echo "$package" | yq e '.is_cask')
-      if [[ "$package_param" == "null" ]]; then
-        package_param=""
-      fi
-      if [[ "$package_is_cask" == "true" ]]; then
-        brew_param="--cask"
+      package_type=$(echo "$package" | yq e '.type')
+      if [[ "$package_type" == "store" ]]; then
+        if dybatpho::is false $ONLY_NOT_INSTALLED || ! _macos_mas_check_installed "$package_name"; then
+          _run_hook "$TEMP_HOOK_BEFORE"
+          _macos_mas_install "$package_name"
+          _run_hook "$TEMP_HOOK_AFTER"
+        fi
       else
-        brew_param="--formula"
+        unstable=$(echo "$package" | yq e '.unstable')
+        if [[ "$package_type" == "cask" ]]; then
+          brew_param="--cask"
+        else
+          brew_param="--formula"
+        fi
+        if [[ "$unstable" == "true" ]]; then
+          brew_param="$brew_param --HEAD"
+        fi
+        if dybatpho::is false $ONLY_NOT_INSTALLED || ! _macos_brew_check_installed "$package_name"; then
+          _run_hook "$TEMP_HOOK_BEFORE"
+          _macos_brew_install "$package_name" "$brew_param"
+          _run_hook "$TEMP_HOOK_AFTER"
+        fi
       fi
-      _macos_install "$package_name" "$brew_param" "$package_param"
       {{- else }}
-      _{{ $shortCode }}_install "$package_name"
+      if dybatpho::is false $ONLY_NOT_INSTALLED || ! _{{ $shortCode }}_check_installed "$package_name"; then
+        _run_hook "$TEMP_HOOK_BEFORE"
+        _{{ $shortCode }}_install "$package_name"
+        _run_hook "$TEMP_HOOK_AFTER"
+      fi
       {{- end }}
     done
-    if [ "$hook_after" != "null" ]; then
-      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
-      echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_AFTER}"
-      echo "dybatpho::progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
-      echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
-      bash ${TEMP_HOOK_AFTER}
-    fi
   done
 }
 
-_main() {
-  if [ "$TOOL" = "" ]; then
+function _run_hook {
+  local hook_file="$1"
+  if dybatpho::is true "$DRY_RUN"; then
+    echo "DRY_RUN: $hook_file"
+    dybatpho::show_file "$hook_file"
+  else
+    . "$hook_file"
+  fi
+}
+
+function _main {
+  if [ "$TOOL" = "@empty" ]; then
     dybatpho::info "Install package tools"
   else
     dybatpho::info "Install package tool: $TOOL"
@@ -138,25 +157,23 @@ _main() {
   readarray package_tools < <(yq e -o=j -I=0 'filter(.method == "os") | .[]' ~/.config/dytoy/tools.yaml )
 
   dybatpho::info "Distro of this machine is {{ $name }}."
-  {{- if eq .chezmoi.os "linux" }}
-  {{- if eq .chezmoi.osRelease.id "gentoo" }}
+  {{- if eq .osid "linux-gentoo" }}
   _gentoo_run
-  {{- else if eq .chezmoi.osRelease.id "arch" }}
+  {{- else if eq .osid "linux-arch" }}
   _arch_init && _arch_run
-  {{- else if eq .chezmoi.osRelease.id "debian" "ubuntu" }}
+  {{- else if eq .osid "linux-debian" "linux-ubuntu" }}
   _ubuntu_init && _ubuntu_run
-  {{- end }}
   {{- else if eq .chezmoi.os "android" }}
   _termux_init && _termux_run
   {{- else if eq .chezmoi.os "darwin" }}
   _macos_init && _macos_run
   {{- end }}
 
-  dybatpho::success "Installed package tools"
+  if [ "$TOOL" = "@empty" ]; then
+    dybatpho::success "Installed package tools"
+  else
+    dybatpho::success "Installed package tool: $TOOL"
+  fi
 }
 
-TOOL=
-FLAG_IS_ESSENTIAL=false
-_parse_args "$@"
-
-_main
+dybatpho::generate_from_spec _spec_main "$@"
