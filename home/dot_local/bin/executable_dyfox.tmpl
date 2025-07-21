@@ -1,4 +1,6 @@
 #!{{ .bash }}
+# @file dyfox
+# @brief Update/Refresh your live data of firefox/zen browser to/from your dotfiles
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
@@ -32,6 +34,9 @@ dybatpho::register_err_handler
 {{-     $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{-   end }}
 
+#######################################
+# @description Refresh current live data of {{ $appName }} browser from dotfiles
+#######################################
 function _refresh_live {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
@@ -43,6 +48,9 @@ function _refresh_live {
   done
 }
 
+#######################################
+# @description Update current live data of {{ $appName }} browser to dotfiles
+#######################################
 function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
@@ -84,9 +92,9 @@ function _update_dotfiles {
       else
         dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "storage.sqlite" || true
         if dybatpho::is dir ~/.config/firefox/profiles/${profile}/storage/default; then
-          export -f _encrypt_storage_data
+          export -f _encrypt_file
           command find ~/.config/firefox/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} \
-            bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+            bash -c "_encrypt_file '${profile}' '{}'" || true
         fi
       fi
 
@@ -111,13 +119,21 @@ function _update_dotfiles {
   done
 }
 
-function _encrypt_storage_data {
+#######################################
+# @description Encrypt a file with chezmoi-dycrypt
+# @arg $1 string ID of profile
+# @arg $2 string Path of file
+#######################################
+function _encrypt_file {
   dybatpho::expect_args profile file -- "$@"
   local folder="$(dirname "$file")"
   local filename="$(basename "$file")"
   dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "${filename}"
 }
 
+#######################################
+# @description Main function
+#######################################
 function _main {
   dybatpho::info "Your web browser in chezmoi settings is {{ $appName }}"
 
@@ -134,16 +150,22 @@ function _main {
   fi
 }
 
+#######################################
+# @description Spec of dyfox cli
+#######################################
 function _spec_main {
   dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} browser to/from your dotfiles" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
-  dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"_validate_profile"
+  dybatpho::opts::param "Profile code" PROFILE --profile -p validate:"_validate_profile"
   dybatpho::opts::flag "Refresh from scratch live data" REFRESH --refresh -r on:true off:false init:="false"
   dybatpho::opts::flag "Include cookies" COOKIES --cookies --no-cookies -c on:true off:false init:="true"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
 }
 
+#######################################
+# @description Validate profile code
+#######################################
 function _validate_profile {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$OPTARG" = "" ] || [ "$OPTARG" = "$profile" ]; then
