@@ -1,4 +1,6 @@
 #!{{ .bash }}
+# @file dytoy_os
+# @brief Install package tools for the current OS
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 source {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
 dybatpho::register_err_handler
@@ -6,6 +8,9 @@ dybatpho::register_err_handler
 dybatpho::create_temp TEMP_HOOK_BEFORE ".sh"
 dybatpho::create_temp TEMP_HOOK_AFTER ".sh"
 
+#######################################
+# @description Spec of dytoy_os
+#######################################
 function _spec_main {
   dybatpho::opts::setup "Utilities to install binary tools" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
@@ -38,6 +43,9 @@ function _spec_main {
 {{- $name = "MacOS" }}
 {{- end }}
 
+#######################################
+# @description Install tool
+#######################################
 function _{{ $shortCode }}_run {
   for tool in "${package_tools[@]}"; do
     tool_name=$(echo "$tool" | yq e '.name')
@@ -141,8 +149,12 @@ function _{{ $shortCode }}_run {
   done
 }
 
+#######################################
+# @description Run a hook script
+# @arg $1 string Hook file path
+#######################################
 function _run_hook {
-  local hook_file="$1"
+  dybatpho::expect_args hook_file -- "$@"
   if dybatpho::is true "$DRY_RUN"; then
     echo "DRY_RUN: $hook_file"
     dybatpho::show_file "$hook_file"
@@ -151,6 +163,9 @@ function _run_hook {
   fi
 }
 
+#######################################
+# @description Main function
+#######################################
 function _main {
   if [ "$TOOL" = "@empty" ]; then
     dybatpho::info "Install package tools"
@@ -160,19 +175,7 @@ function _main {
   readarray package_tools < <(yq e -o=j -I=0 'filter(.method == "os") | .[]' ~/.config/dytoy/tools.yaml )
 
   dybatpho::info "Distro of this machine is {{ $name }}."
-  {{- if eq .osid "linux-gentoo" }}
-  _gentoo_run
-  {{- else if eq .osid "linux-arch" }}
-  _arch_init && _arch_run
-  {{- else if eq .osid "linux-debian" "linux-ubuntu" }}
-  _ubuntu_init && _ubuntu_run
-  {{- else if eq .osid "linux-alpine" }}
-  _alpine_init && _alpine_run
-  {{- else if eq .chezmoi.os "android" }}
-  _termux_init && _termux_run
-  {{- else if eq .chezmoi.os "darwin" }}
-  _macos_init && _macos_run
-  {{- end }}
+  _{{ $shortCode }}_init && _{{ $shortCode }}_run
 
   if [ "$TOOL" = "@empty" ]; then
     dybatpho::success "Installed package tools"

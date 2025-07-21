@@ -1,4 +1,6 @@
 #!{{ .bash }}
+# @file dybird
+# @brief Update/Refresh your live data of thundebird/betterbird mail client to/from your dotfiles
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_err_handler
 
@@ -32,6 +34,9 @@ dybatpho::register_err_handler
 {{-     $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{-   end }}
 
+#######################################
+# @description Refresh current live data of {{ $appName }} mail client from dotfiles
+#######################################
 function _refresh_live {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
@@ -43,6 +48,9 @@ function _refresh_live {
   done
 }
 
+#######################################
+# @description Update current live data of {{ $appName }} mail client to dotfiles
+#######################################
 function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
@@ -80,7 +88,7 @@ function _update_dotfiles {
       dybatpho::progress "Update search engines for profile ${profile}"
       dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
 
-      export -f _encrypt_storage_data
+      export -f _encrypt_file
       dybatpho::progress "Update storage data for profile ${profile}"
       if [ "${profile}" = "public" ]; then
         dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/storage.sqlite --create || true
@@ -90,7 +98,7 @@ function _update_dotfiles {
         dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "storage.sqlite" || true
         if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/storage/default; then
           command find ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} \
-            bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+            bash -c "_encrypt_file '${profile}' '{}'" || true
         fi
       fi
 
@@ -114,7 +122,7 @@ function _update_dotfiles {
         else
           if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/ImapMail; then
             command find ~/.config/thunderbird/profiles/${profile}/ImapMail -type f | xargs -P$(nproc) -I{} \
-              bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+              bash -c "_encrypt_file '${profile}' '{}'" || true
           fi
         fi
       fi
@@ -132,7 +140,7 @@ function _update_dotfiles {
         else
           dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "history.sqlite" || true
           command find ~/.config/thunderbird/profiles/${profile}/abook*.sqlite -type f | xargs -P$(nproc) -I{} \
-            bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+            bash -c "_encrypt_file '${profile}' '{}'" || true
         fi
       fi
 
@@ -143,7 +151,7 @@ function _update_dotfiles {
         else
           if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/calendar-data; then
             command find ~/.config/thunderbird/profiles/${profile}/calendar-data/*.sqlite -type f | xargs -P$(nproc) -I{} \
-              bash -c "_encrypt_storage_data '${profile}' '{}'" || true
+              bash -c "_encrypt_file '${profile}' '{}'" || true
           fi
         fi
       fi
@@ -153,13 +161,21 @@ function _update_dotfiles {
   done
 }
 
-function _encrypt_storage_data {
+#######################################
+# @description Encrypt a file with chezmoi-dycrypt
+# @arg $1 string ID of profile
+# @arg $2 string Path of file
+#######################################
+function _encrypt_file {
   dybatpho::expect_args profile file -- "$@"
   local folder="$(dirname "$file")"
   local filename="$(basename "$file")"
   dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "${filename}"
 }
 
+#######################################
+# @description Main function
+#######################################
 function _main {
   dybatpho::info "Your email client in chezmoi settings is {{ $appName }}"
   if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 0 ]; then
@@ -175,6 +191,9 @@ function _main {
   fi
 }
 
+#######################################
+# @description Spec of dybird cli
+#######################################
 function _spec_main {
   dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} client to/from your dotfiles" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
@@ -189,6 +208,9 @@ function _spec_main {
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
 }
 
+#######################################
+# @description Validate profile code
+#######################################
 function _validate_profile {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
     if [ "$OPTARG" = "" ] || [ "$OPTARG" = "$profile" ]; then
