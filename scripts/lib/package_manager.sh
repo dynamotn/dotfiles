@@ -5,7 +5,8 @@
 # @description Sync repositories of Gentoo
 #######################################
 function _gentoo_sync_repo {
-  sudo emerge --sync
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run sudo emaint sync --allrepos
 }
 
 #######################################
@@ -16,12 +17,12 @@ function _gentoo_sync_repo {
 function _gentoo_add_repo {
   dybatpho::expect_args repo_name uri -- "$@"
   if [ ! -d "/etc/portage/repos.conf/$repo_name.conf" ]; then
-    sudo mkdir -p /etc/portage/repos.conf
-    echo "[$repo_name]" | sudo tee /etc/portage/repos.conf/"$repo_name.conf"
-    echo "location = /var/db/repos/$repo_name" | sudo tee -a /etc/portage/repos.conf/"$repo_name.conf"
-    echo "sync-type = git" | sudo tee -a /etc/portage/repos.conf/"$repo_name.conf"
-    echo "sync-uri = $uri" | sudo tee -a /etc/portage/repos.conf/"$repo_name.conf"
-    emaint sync --repo "$repo_name" || dybatpho::die "Failed to sync repository $repo_name."
+    dybatpho::dry_run sudo mkdir -p /etc/portage/repos.conf
+    dybatpho::dry_run eval "echo \"[$repo_name]\" | sudo tee /etc/portage/repos.conf/$repo_name.conf"
+    dybatpho::dry_run eval "echo \"location = /var/db/repos/$repo_name\" | sudo tee -a /etc/portage/repos.conf/$repo_name.conf"
+    dybatpho::dry_run eval "echo \"sync-type = git\" | sudo tee -a /etc/portage/repos.conf/$repo_name.conf"
+    dybatpho::dry_run eval "echo \"sync-uri = $uri\" | sudo tee -a /etc/portage/repos.conf/$repo_name.conf"
+    dybatpho::dry_run sudo emaint sync --yes --repo "$repo_name" || dybatpho::die "Failed to sync repository $repo_name"
   fi
 }
 
@@ -41,6 +42,7 @@ function _gentoo_check_installed {
 #######################################
 function _gentoo_install {
   dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package"
   dybatpho::dry_run sudo emerge --ask n --noreplace "$package"
 }
 
@@ -49,10 +51,12 @@ function _gentoo_install {
 #######################################
 function _gentoo_init {
   _gentoo_sync_repo
-  if [ ! -x '/usr/bin/equery' ]; then
+  if ! dybatpho::is command equery; then
+    dybatpho::progress "Installing \`equery\` for day-to-day package management"
     _gentoo_install app-portage/gentoolkit
   fi
-  if [ ! -x '/usr/bin/qlist' ]; then
+  if ! dybatpho::is command qlist; then
+    dybatpho::progress "Installing \`qlist\` for querying installed packages"
     _gentoo_install app-portage/portage-utils
   fi
 }
@@ -61,10 +65,11 @@ function _gentoo_init {
 # @description Sync repositories of Arch
 #######################################
 function _arch_sync_repo {
+  dybatpho::progress "Syncing package repositories"
   if ! command -v paru > /dev/null; then
-    sudo pacman -Sy
+    dybatpho::dry_run sudo pacman -Sy
   else
-    paru -Sy
+    dybatpho::dry_run paru -Sy
   fi
 }
 
@@ -83,6 +88,7 @@ function _arch_check_installed {
 #######################################
 function _arch_install {
   dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package"
   dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$package"
 }
 
@@ -92,12 +98,13 @@ function _arch_install {
 function _arch_init {
   _arch_sync_repo
   if ! command -v paru > /dev/null; then
-    sudo pacman -S --needed git base-devel rust
-    git clone https://aur.archlinux.org/paru.git /tmp/paru
-    cd /tmp/paru || exit
-    makepkg -si --noconfirm
-    rm -rf /tmp/paru
-    sudo pacman -Rscn --noconfirm rust
+    dybatpho::progress "Installing \`paru\` for managing AUR packages"
+    dybatpho::dry_run sudo pacman -S --needed git base-devel rust
+    dybatpho::dry_run git clone https://aur.archlinux.org/paru.git /tmp/paru
+    dybatpho::dry_run cd /tmp/paru
+    dybatpho::dry_run makepkg -si --noconfirm
+    dybatpho::dry_run rm -rf /tmp/paru
+    dybatpho::dry_run sudo pacman -Rscn --noconfirm rust
   fi
 }
 
@@ -105,7 +112,8 @@ function _arch_init {
 # @description Sync repositories of Ubuntu
 #######################################
 function _ubuntu_sync_repo {
-  sudo apt update
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run sudo apt update
 }
 
 #######################################
@@ -119,8 +127,13 @@ function _ubuntu_sync_repo {
 function _ubuntu_add_repo {
   dybatpho::expect_args repo_name repo_code distro_version repo_version key -- "$@"
   if [ ! -f "/etc/apt/sources.list.d/$repo_name.list" ]; then
-    echo "deb $repo_code $distro_version $repo_version" | sudo tee /"etc/apt/sources.list.d/$repo_name.list"
-    curl -sSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" | sudo apt-key add -
+    dybatpho::debug "Adding repository $repo_name."
+    dybatpho::dry_run eval "echo \"deb $repo_code $distro_version $repo_version\" | sudo tee \"/etc/apt/sources.list.d/$repo_name.list\""
+    dybatpho::create_temp temp_key ".gpg"
+    dybatpho::dry_run dybatpho::curl_do "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" "$temp_key"
+    dybatpho::dry_run sudo apt-key add "$temp_key"
+  else
+    dybatpho::debug "Repository $repo_name already exists, skipping."
   fi
 }
 
@@ -139,6 +152,7 @@ function _ubuntu_check_installed {
 #######################################
 function _ubuntu_install {
   dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package"
   dybatpho::dry_run sudo apt install -y "$package"
 }
 
@@ -153,7 +167,8 @@ function _ubuntu_init {
 # @description Sync repositories of Alpine
 #######################################
 function _alpine_sync_repo {
-  sudo apk update
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run sudo apk update
 }
 
 #######################################
@@ -171,6 +186,7 @@ function _alpine_check_installed {
 #######################################
 function _alpine_install {
   dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package"
   dybatpho::dry_run sudo apk add --no-cache --no-interactive "$package"
 }
 
@@ -185,7 +201,8 @@ function _alpine_init {
 # @description Sync repositories of Termux
 #######################################
 function _termux_sync_repo {
-  pkg update
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run pkg update
 }
 
 #######################################
@@ -203,6 +220,7 @@ function _termux_check_installed {
 #######################################
 function _termux_install {
   dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package"
   dybatpho::dry_run pkg install -y "$package"
 }
 
@@ -217,7 +235,8 @@ function _termux_init {
 # @description Sync repositories of MacOS
 #######################################
 function _macos_sync_repo {
-  brew update
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run brew update
 }
 
 #######################################
@@ -244,6 +263,7 @@ function _macos_mas_check_installed {
 #######################################
 function _macos_brew_install {
   dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package"
   dybatpho::dry_run brew install "$@" "$package"
 }
 
@@ -253,6 +273,7 @@ function _macos_brew_install {
 #######################################
 function _macos_mas_install {
   dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing app $(mas info "$package" | head -n 1)"
   dybatpho::dry_run mas install "$package"
 }
 
@@ -262,5 +283,8 @@ function _macos_mas_install {
 #######################################
 function _macos_init {
   _macos_sync_repo
-  brew install mas
+  if ! dybatpho::is command mas; then
+    dybatpho::progress "Installing \`mas\` for managing Apple Store apps"
+    _macos_brew_install mas
+  fi
 }
