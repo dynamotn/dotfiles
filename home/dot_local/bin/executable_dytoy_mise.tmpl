@@ -1,0 +1,86 @@
+#!{{ .bash }}
+source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+#######################################
+# @description Spec of dytoy_mise
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Utilities to install binary tools" MAIN_ARGS action:"_main"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
+  dybatpho::opts::param "Specific tool" TOOL  --tool -t init:="@empty"
+  dybatpho::opts::flag "Install only essential tool" ONLY_ESSENTIAL --essential -e on:true off:false init:="false"
+  dybatpho::opts::flag "Install only not installed tool" ONLY_NOT_INSTALLED --check-installed --no-check-installed -i on:true off:false init:="true"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Main function
+#######################################
+function _main {
+  if ! command -v mise 2>&1 >/dev/null; then
+    "$SCRIPT_DIR/dytoy_binary" -t mise
+    # Trust ~/.config/mise/config.toml
+    dybatpho::dry_run mise trust
+  fi
+  if [ "$TOOL" = "@empty" ]; then
+    dybatpho::info "Install mise tools"
+  else
+    dybatpho::info "Install mise tool: $TOOL"
+  fi
+  readarray mise_tools < <(yq e -o=j -I=0 'filter(.method == "mise") | .[]' ~/.config/dytoy/tools.yaml )
+
+  for tool in "${mise_tools[@]}"; do
+    local tool_name=$(echo "$tool" | yq e '.name')
+    if [ "$TOOL" != "@empty" ] && [ "$TOOL" != "$tool_name" ]; then
+      continue
+    fi
+    local is_essential=$(echo "$tool" | yq e '.is_essential')
+    if dybatpho::is true "$ONLY_ESSENTIAL" && ! dybatpho::is true "$is_essential"; then
+      continue
+    fi
+    if dybatpho::is true "$ONLY_NOT_INSTALLED" && dybatpho::is command "$tool_name"; then
+      dybatpho::debug "Tool $tool_name is already installed, skipping"
+      continue
+    fi
+
+    readarray dependencies < <(echo "$tool" | yq e -o=j -I=0 -r '.dependencies.[]')
+    for dependency in "${dependencies[@]}"; do
+      dybatpho::debug "Need dependency: $dependency"
+      dependency=${dependency%$'\n'}
+      method=$(yq e -o=j -I=0 'filter(.name == "'"$dependency"'") | .[].method | .' ~/.config/dytoy/tools.yaml)
+      method=${method%\"}
+      method=${method#\"}
+      dybatpho::dry_run "$SCRIPT_DIR/dytoy_$method" -i -t "$dependency"
+    done
+
+    backend=$(echo "$tool" | yq e '.backend')
+    if [[ "$backend" = "null" ]]; then
+      backend=${tool_name}
+    fi
+
+    version=$(echo "$tool" | yq e '.version')
+    {{- $command := "mise" }}
+    {{- if eq .chezmoi.os "android" }}
+    {{- $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl mise" }}
+    {{- end }}
+
+    if [[ "$version" = "null" ]]; then
+      dybatpho::dry_run {{ $command }} use -g ${backend}@latest
+    elif [[ "$version" = "system" ]]; then
+      dybatpho::dry_run {{ $command }} use -g ${backend}@system
+    else
+      dybatpho::dry_run {{ $command }} use -g ${backend}@${version}
+    fi
+    dybatpho::success "Installed mise tool: $tool_name"
+  done
+
+  if [ "$TOOL" = "@empty" ]; then
+    dybatpho::success "Installed all mise tools"
+  fi
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

@@ -7,6 +7,6 @@ archive:
   strip_components: 2
   paths:
     - d2-%v/bin/d2
-  hook:
-    after: |
-      tar $param -C "$MAN_DIR/man1" "d2-$version/man/d2.1"
+hook:
+  after: |
+    tar ${param[@]} -C "$MAN_DIR/man1" "d2-$version/man/d2.1"

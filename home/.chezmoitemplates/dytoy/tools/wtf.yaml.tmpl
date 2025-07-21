@@ -7,6 +7,6 @@ archive:
   paths:
     - wtf_%1v_linux_{{ .chezmoi.arch }}/wtfutil
   strip_components: 1
-  hook:
-    after: |
-      mv ~/.local/bin/wtfutil ~/.local/bin/wtf
+hook:
+  after: |
+    mv ~/.local/bin/wtfutil ~/.local/bin/wtf

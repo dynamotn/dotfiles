@@ -6,6 +6,6 @@ github:
 archive:
   paths:
     - pint-linux-{{ .chezmoi.arch }}
-  hook:
-    after: |
-      mv ~/.local/bin/pint-linux-{{ .chezmoi.arch }} ~/.local/bin/pint
+hook:
+  after: |
+    mv ~/.local/bin/pint-linux-{{ .chezmoi.arch }} ~/.local/bin/pint

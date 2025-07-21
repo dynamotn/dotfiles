@@ -1,0 +1,85 @@
+#!{{ .bash }}
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+dybatpho::create_temp TEMP_SCRIPT ".sh"
+
+#######################################
+# @description Spec of dytoy_shell
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Utilities to install binary tools" MAIN_ARGS action:"_main"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
+  dybatpho::opts::param "Specific tool" TOOL  --tool -t init:="@empty"
+  dybatpho::opts::flag "Install only essential tool" ONLY_ESSENTIAL --essential -e on:true off:false init:="false"
+  dybatpho::opts::flag "Install only not installed tool" ONLY_NOT_INSTALLED --check-installed --no-check-installed -i on:true off:false init:="true"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Main function
+#######################################
+_main() {
+  if [ "$TOOL" = "@empty" ]; then
+    dybatpho::info "Install shell tools"
+  else
+    dybatpho::info "Install shell tool: $TOOL"
+  fi
+  readarray shell_tools < <(yq e -o=j -I=0 'filter(.method == "shell") | .[]' ~/.config/dytoy/tools.yaml )
+
+  for tool in "${shell_tools[@]}"; do
+    tool_name=$(echo "$tool" | yq e '.name')
+    if [ "$TOOL" != "@empty" ] && [ "$TOOL" != "$tool_name" ]; then
+      continue
+    fi
+    local is_essential=$(echo "$tool" | yq e '.is_essential')
+    if dybatpho::is true "$ONLY_ESSENTIAL" && ! dybatpho::is true "$is_essential"; then
+      continue
+    fi
+    if dybatpho::is true "$ONLY_NOT_INSTALLED" && dybatpho::is command "$tool_name"; then
+      dybatpho::debug "Tool $tool_name is already installed, skipping"
+      continue
+    fi
+
+    readarray dependencies < <(echo "$tool" | yq e -o=j -I=0 -r '.dependencies.[]')
+    for dependency in "${dependencies[@]}"; do
+      dybatpho::debug "Need dependency: $dependency"
+      dependency=${dependency%$'\n'}
+      method=$(yq e -o=j -I=0 'filter(.name == "'"$dependency"'") | .[].method | .' ~/.config/dytoy/tools.yaml)
+      method=${method%\"}
+      method=${method#\"}
+      dybatpho::dry_run "$SCRIPT_DIR/dytoy_$method" -i -t "$dependency"
+    done
+    content=$(echo "$tool" | yq e '.content')
+    echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_SCRIPT}"
+    echo "dybatpho::register_err_handler" >> "${TEMP_SCRIPT}"
+    echo "dybatpho::progress \"Running command to install ${tool_name}\"" >> "${TEMP_SCRIPT}"
+    echo -e "${content}" >> "${TEMP_SCRIPT}"
+    _run_script "${TEMP_SCRIPT}"
+    dybatpho::success "Installed tool: $tool_name"
+  done
+
+  if [ "$TOOL" = "@empty" ]; then
+    dybatpho::success "Installed all shell tools"
+  fi
+}
+
+#######################################
+# @description Run a shell script
+# @arg $1 string Hook file path
+#######################################
+function _run_script {
+  dybatpho::expect_args script_file -- "$@"
+  if dybatpho::is true "$DRY_RUN"; then
+    echo "DRY_RUN: $script_file"
+    dybatpho::show_file "$script_file"
+  else
+    . "$script_file"
+  fi
+  echo > "${script_file}" # Clear the script file after running
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

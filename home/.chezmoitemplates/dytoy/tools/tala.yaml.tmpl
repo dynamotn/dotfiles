@@ -7,7 +7,7 @@ archive:
   strip_components: 2
   paths:
     - tala-%v/bin/d2plugin-tala
-  hook:
-    after: |
-      tar $param -C "$MAN_DIR/man1" "tala-$version/man/tala.1"
-      tar $param -C "$MAN_DIR/man1" "tala-$version/man/d2plugin-tala.1"
+hook:
+  after: |
+    tar ${param[@]} -C "$MAN_DIR/man1" "tala-$version/man/tala.1"
+    tar ${param[@]} -C "$MAN_DIR/man1" "tala-$version/man/d2plugin-tala.1"

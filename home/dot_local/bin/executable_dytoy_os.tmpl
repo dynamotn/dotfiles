@@ -61,13 +61,13 @@ function _{{ $shortCode }}_run {
     hook_before=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.before")
     hook_after=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.after")
     if [ "$hook_before" != "null" ]; then
-      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
+      echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
       echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_BEFORE}"
       echo "dybatpho::progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
       echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
     fi
     if [ "$hook_after" != "null" ]; then
-      echo "source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
+      echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
       echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_AFTER}"
       echo "dybatpho::progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
       echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
