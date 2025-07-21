@@ -9,10 +9,10 @@ archive:
   strip_components: 1
   paths:
     - ./krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}
-  hook:
-    after: |-
-      mv ~/.local/bin/krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }} \
-        ~/.local/bin/kubectl-krew
-      kubectl krew install access-matrix cert-manager deprecations \
-        ingress-nginx pv-migrate tree ktop advise-policy df-pv explore \
-        pv-mounter sniff stern
+hook:
+  after: |-
+    mv ~/.local/bin/krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }} \
+      ~/.local/bin/kubectl-krew
+    kubectl krew install access-matrix cert-manager deprecations \
+      ingress-nginx pv-migrate tree ktop advise-policy df-pv explore \
+      pv-mounter sniff stern

@@ -19,6 +19,6 @@ archive:
   strip_components: 1
   paths:
     - trippy-%v-{{ $arch }}-{{ $os }}/trip
-  hook:
-    after: |
-      mv ~/.local/bin/trip ~/.local/bin/trippy
+hook:
+  after: |
+    mv ~/.local/bin/trip ~/.local/bin/trippy

@@ -8,9 +8,9 @@ github:
 archive:
   paths:
     - rclone-%v-linux-{{ .chezmoi.arch }}/rclone
-  hook:
-    after: |
-      unzip -qqoj $TEMP_COMPRESSED rclone-$version-linux-{{ .chezmoi.arch }}/rclone.1 -d $MAN_DIR/man1
+hook:
+  after: |
+    unzip ${param} rclone-$version-linux-{{ .chezmoi.arch }}/rclone.1 -d $MAN_DIR/man1
 {{- else if eq .chezmoi.os "android" }}
 method: os
 termux:

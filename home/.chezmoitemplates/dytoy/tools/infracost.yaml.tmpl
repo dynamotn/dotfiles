@@ -8,7 +8,7 @@ github:
 archive:
   paths:
     - infracost-linux-{{ .chezmoi.arch }}
-  hook:
-    after: |
-      mv ~/.local/bin/infracost-linux-{{ .chezmoi.arch }} ~/.local/bin/infracost
+hook:
+  after: |
+    mv ~/.local/bin/infracost-linux-{{ .chezmoi.arch }} ~/.local/bin/infracost
 {{- end }}

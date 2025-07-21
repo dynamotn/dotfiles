@@ -8,7 +8,7 @@ archive:
   strip_components: 1
   paths:
     - patat-%v-linux-x86_64/patat
-  hook:
-    after: |
-      tar $param -C "$MAN_DIR/man1" "patat-$version-linux-x86_64/patat.1"
+hook:
+  after: |
+    tar ${param[@]} -C "$MAN_DIR/man1" "patat-$version-linux-x86_64/patat.1"
 {{- end }}

@@ -29,12 +29,12 @@ archive:
   {{- else if eq .chezmoi.arch "arm64" }}
     - fd-%v-aarch64-unknown-linux-gnu/fd
   {{- end }}
-  hook:
-    after: |
-      {{- if eq .chezmoi.arch "amd64" }}
-      arch=x86_64
-      {{- else if eq .chezmoi.arch "arm64" }}
-      arch=aarch64
-      {{- end }}
-      tar $param -C "$MAN_DIR/man1" "fd-$version-$arch-unknown-linux-gnu/fd.1"
+hook:
+  after: |
+    {{- if eq .chezmoi.arch "amd64" }}
+    arch=x86_64
+    {{- else if eq .chezmoi.arch "arm64" }}
+    arch=aarch64
+    {{- end }}
+    tar ${param[@]} -C "$MAN_DIR/man1" "fd-$version-$arch-unknown-linux-gnu/fd.1"
 {{- end }}

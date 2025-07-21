@@ -1,0 +1,275 @@
+#!{{ .bash }}
+# @file dytoy_binary
+# @brief Install binary tools from GitHub or GitLab releases
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_err_handler
+
+dybatpho::create_temp TEMP_HOOK_BEFORE ".sh"
+dybatpho::create_temp TEMP_HOOK_AFTER ".sh"
+dybatpho::create_temp TEMP_VERSION ".txt"
+dybatpho::create_temp TEMP_DOWNLOAD ".z"
+
+# HACK: export dirs to use in hook scripts
+BIN_DIR=$HOME/.local/bin
+MAN_DIR=$HOME/.local/man
+GITHUB_API_USERNAME=${GITHUB_API_USERNAME:-dynamotn}
+GITHUB_API_TOKEN=${GITHUB_API_TOKEN:-}
+GITLAB_API_USERNAME=${GITLAB_API_USERNAME:-dynamo.foss}
+GITLAB_API_TOKEN=${GITLAB_API_TOKEN:-}
+
+#######################################
+# @description Spec of dytoy_binary
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Utilities to install binary tools" MAIN_ARGS action:"_main"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
+  dybatpho::opts::param "Specific tool" TOOL  --tool -t init:="@empty"
+  dybatpho::opts::flag "Install only essential tool" ONLY_ESSENTIAL --essential -e on:true off:false init:="false"
+  dybatpho::opts::flag "Install only not installed tool" ONLY_NOT_INSTALLED --check-installed -i on:true off:false init:="true"
+  dybatpho::opts::flag "List files in compressed instead of extract" LIST_CONTENTS --list -L on:true off:false init:="false"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Extract from tar compressed release file
+# @arg $1 string URL of file
+# @arg $2 string Path of files in archive
+# @arg $3 number Strip components
+#######################################
+function _extract_tar {
+  dybatpho::expect_args url paths_spec strip -- "$@"
+  local param=("-C $location")
+  if dybatpho::is true "$LIST_CONTENTS"; then
+    param+=("-vt")
+  else
+    param+=("-x")
+  fi
+  if [[ "$url" =~ \.(tar\.gz|tgz)$ ]]; then
+    param+=("-z")
+  elif [[ "$url" =~ \.(tar\.xz|xz)$ ]]; then
+    param+=("-J")
+  elif [[ "$url" =~ \.(tar\.bz2|tbz2|tbz)$ ]]; then
+    param+=("-j")
+  elif [[ "$url" =~ \.(tar\.zst)$ ]]; then
+    param+=("--zstd")
+  fi
+
+  if [ "$strip" != "null" ]; then
+    param+=("--strip=$strip")
+  fi
+  param+=("-f $TEMP_DOWNLOAD")
+  dybatpho::debug "File $(file "$TEMP_DOWNLOAD")"
+  dybatpho::debug "Extracting with params: ${param[*]}"
+  if dybatpho::is true "$LIST_CONTENTS"; then
+    dybatpho::dry_run tar "${param[@]}"
+  else
+    readarray paths < <(echo "$paths_spec" | yq e -o=j -I=0 -r '.[]')
+    for path in "${paths[@]}"; do
+      dybatpho::dry_run tar ${param[@]} $(echo ${path%%*( )} | _replace_version_string "$version")
+    done
+  fi
+  # HACK: export param to use in hook scripts
+  export param=$param
+}
+
+#######################################
+# @description Extract from zip compressed release file
+# @arg $1 string Path of file in archive
+#######################################
+function _extract_zip {
+  dybatpho::expect_args paths_spec -- "$@"
+  local param=("-d \"$location\"")
+  if dybatpho::is true "$LIST_CONTENTS"; then
+    param+=("-Zl $TEMP_DOWNLOAD")
+    dybatpho::dry_run unzip "${param[@]}"
+  else
+    readarray paths < <(echo "$paths_spec" | yq e -o=j -I=0 -r '.[]')
+    param+=("-qqoj $TEMP_DOWNLOAD")
+    for path in "${paths[@]}"; do
+      dybatpho::dry_run unzip ${param[@]} $(echo ${path%%*( )} | _replace_version_string "$version")
+    done
+  fi
+  # HACK: export param to use in hook scripts
+  export param=$param
+}
+
+#######################################
+# @description Extract from bzip2 compressed release file
+# @arg $1 string File name of command
+#######################################
+function _extract_bzip2 {
+  dybatpho::expect_args command -- "$@"
+  bzip2 -cd $TEMP_DOWNLOAD > $location/$command
+}
+
+#######################################
+# @description Extract from gzip compressed release file
+# @arg $1 string File name of command
+#######################################
+function _extract_gzip {
+  dybatpho::expect_args command -- "$@"
+  gzip -cd $TEMP_DOWNLOAD > $location/$command
+}
+
+#######################################
+# @description Update tool by get from release file
+# @arg $1 string URL of file
+# @arg $2 string File name of command
+# @arg $3 string Path of file in archive
+# @arg $4 number Strip components
+#######################################
+function _update {
+  dybatpho::expect_args url command paths_spec strip -- "$@"
+  _run_hook "$TEMP_HOOK_BEFORE"
+  dybatpho::debug "Downloaded $url to $TEMP_DOWNLOAD"
+  dybatpho::dry_run dybatpho::curl_download "$url" "$TEMP_DOWNLOAD"
+  if [[ "$url" =~ \.(tar\.gz|tgz|tar\.xz|tar\.bz2|tbz2|xz|tar|tar\.zst|tbz)$ ]]; then
+    _extract_tar "$url" "$paths_spec" "$strip"
+  elif [[ "$url" =~ \.zip$ ]]; then
+    _extract_zip "$paths_spec"
+  elif [[ "$url" =~ \.bz2$ ]]; then
+    _extract_bzip2 "$command"
+  elif [[ "$url" =~ \.gz$ ]]; then
+    _extract_gzip "$command"
+  else
+    mv "$TEMP_DOWNLOAD" "$location/$command"
+  fi
+  _run_hook "$TEMP_HOOK_AFTER"
+  dybatpho::dry_run chmod +x "$location/$command"
+  dybatpho::success "Installed binary tool: $command"
+}
+
+#######################################
+# @description Parse config file and update tool
+# by get from Github/Gitlab release file
+# @arg $1 string YAML string of tool
+# @arg $2 string "github" or "gitlab"
+#######################################
+function _parse_release {
+  dybatpho::expect_args yaml type -- "$@"
+  name=$(echo "$yaml" | yq e '.name')
+  location=$(echo "$yaml" | yq e '.location')
+  if [ "$location" = "null" ]; then
+    location=$BIN_DIR
+  fi
+  if dybatpho::is true "$ONLY_NOT_INSTALLED" && dybatpho::is file "$location/$name"; then
+    return
+  fi
+  is_essential=$(echo "$yaml" | yq e '.is_essential')
+  if dybatpho::is true "$ONLY_ESSENTIAL" && ! dybatpho::is true "$is_essential"; then
+    return
+  fi
+  dybatpho::debug "Download tool ${name} to ${location}"
+
+  dybatpho::progress "Installing ${name}"
+  dybatpho::dry_run mkdir -p $location
+  if [ "$type" = "github" ]; then
+    host="github.com"
+  elif [ "$type" = "gitlab" ]; then
+    host=$(echo "$yaml" | yq e '.gitlab.host')
+    if [ "$host" = "null" ]; then
+      host="gitlab.com"
+    fi
+  fi
+  dybatpho::debug "Host is ${host}"
+  repo=$(echo "$yaml" | yq e ".${type}.repo")
+  version=$(echo "$yaml" | yq e ".${type}.version")
+  release_asset=$(echo "$yaml" | yq e ".${type}.release_asset")
+  strip_components=$(echo "$yaml" | yq e '.archive.strip_components')
+  paths=$(echo "$yaml" | yq e '.archive.paths')
+
+  if [ "$version" = "latest" ] || [ "$version" = "null" ]; then
+    dybatpho::progress "Get version ${name} from https://${host}/${repo}"
+    if [ "$type" = "github" ]; then
+      dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$TEMP_VERSION" -u "${GITHUB_API_USERNAME}:${GITHUB_API_TOKEN}"
+      version=$(grep -Po "tag_name\": \"(\K.*)(?=\",)" "$TEMP_VERSION")
+    elif [ "$type" = "gitlab" ]; then
+      dybatpho::curl_do "https://${host}/api/v4/projects/$(echo $repo | sed -e "s/\//%2f/g")/releases/permalink/latest" "$TEMP_VERSION" -u "${GITLAB_API_USERNAME}:${GITLAB_API_TOKEN}"
+      version=$(yq ".tag_name" "$TEMP_VERSION")
+    fi
+  fi
+  if [ "$version" = "" ]; then
+    dybatpho::die "Version is not specified or you're limited request to ${type} API"
+  fi
+  export -f _replace_version_string
+  release_asset=$(echo ${release_asset} | _replace_version_string "$version")
+  dybatpho::info "Using version ${version} for https://${host}/${repo}"
+  dybatpho::debug "Release asset is ${release_asset}"
+
+  hook_before=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].hook.before" ~/.config/dytoy/tools.yaml | _replace_version_string "$version")
+  hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].hook.after" ~/.config/dytoy/tools.yaml | _replace_version_string "$version")
+  if [ "$hook_before" != "null" ]; then
+    echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
+    echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_BEFORE}"
+    echo "dybatpho::progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
+    echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
+  fi
+  if [ "$hook_after" != "null" ]; then
+    echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
+    echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_AFTER}"
+    echo "dybatpho::progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
+    echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
+  fi
+
+  export TEMP_DOWNLOAD
+  export location
+  export MAN_DIR
+  export version
+  _update "https://github.com/${repo}/releases/download/${version}/${release_asset}" "${name}" "${paths}" "${strip_components}"
+}
+
+#######################################
+# @description Replace version of tool in release assets file name or hook scripts
+# @arg $1 string Version of tool
+# @stdin $2 string Input stream
+#######################################
+function _replace_version_string {
+  dybatpho::expect_args version -- "$@"
+  cat - | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g"
+}
+
+#######################################
+# @description Run a hook script
+# @arg $1 string Hook file path
+#######################################
+function _run_hook {
+  dybatpho::expect_args hook_file -- "$@"
+  if dybatpho::is true "$DRY_RUN"; then
+    echo "DRY_RUN: $hook_file"
+    dybatpho::show_file "$hook_file"
+  else
+    . "$hook_file"
+  fi
+  echo > "${hook_file}" # Clear the hook file after running
+}
+
+#######################################
+# @description Main function
+#######################################
+function _main {
+  if [ "$TOOL" = "@empty" ]; then
+    dybatpho::info "Install binary tools"
+  else
+    dybatpho::info "Install binary tool: $TOOL"
+  fi
+  readarray binary_tools < <(yq e -o=j -I=0 'filter(.method == "binary") | .[]' ~/.config/dytoy/tools.yaml )
+  for binary in "${binary_tools[@]}"; do
+    local name=$(echo "$binary" | yq e '.name')
+    if [ "$TOOL" = "@empty" ] || [ "$TOOL" = "$name" ]; then
+      local type=""
+      if [ "$(echo "$binary" | yq e '.github')" != "null" ]; then
+        type="github"
+      elif [ "$(echo "$binary" | yq e '.gitlab')" != "null" ]; then
+        type="gitlab"
+      fi
+      _parse_release "$binary" "$type"
+    fi
+  done
+
+  if [ "$TOOL" = "@empty" ]; then
+    dybatpho::success "Installed binary tools"
+  fi
+}
+
+dybatpho::generate_from_spec _spec_main "$@"
