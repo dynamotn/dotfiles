@@ -11,3 +11,6 @@ root/etc/ca-certificate/**/*.age diff=age-enterprise-F1
 
 home/Working/enterprise/ZOO/**/*.age diff=age-enterprise-ZOO
 secrets/data/enterprise-ZOO/*.age diff=age-enterprise-ZOO
+
+home/Working/enterprise/T1/**/*.age diff=age-enterprise-T1
+secrets/data/enterprise-T1/*.age diff=age-enterprise-T1
