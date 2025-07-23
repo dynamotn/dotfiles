@@ -1,6 +1,5 @@
 app-admin/sudo
 app-admin/syslog-ng
-app-arch/7zip
 app-arch/unzip
 app-arch/zip
 app-containers/docker
@@ -29,8 +28,6 @@ dev-build/automake
 dev-build/cmake
 dev-build/meson
 dev-build/ninja
-dev-lang/go
-dev-lang/rust-bin
 {{- if eq .guiServer "W" }}
 dev-libs/wayland
 {{- end }}
@@ -39,10 +36,12 @@ dev-util/kcov
 dev-util/pkgdev
 dev-util/sccache
 dev-vcs/git
+dev-vcs/git-lfs
 games-util/game-device-udev-rules
 {{- if eq .guiServer "W" }}
 gui-apps/eww
 gui-apps/grim
+gui-apps/hyprshade
 gui-apps/regreet
 gui-apps/slurp
 gui-apps/swappy
@@ -77,7 +76,10 @@ media-fonts/roboto
 media-gfx/fontforge
 media-gfx/imagemagick
 {{- end }}
+media-libs/exiftool
 {{- if .hasSound }}
+media-sound/alsa-utils
+media-sound/cava
 media-sound/playerctl
 media-video/mpv
 media-video/pipewire
@@ -94,6 +96,9 @@ net-misc/rustdesk
 {{- end }}
 net-vpn/tailscale
 net-vpn/wireguard-tools
+{{- if .hasBluetooth }}
+net-wireless/bluez
+{{- end }}
 net-wireless/iwd
 sci-ml/ollama
 sys-apps/etckeeper
@@ -128,4 +133,5 @@ x11-drivers/nvidia-drivers
 x11-libs/libnotify
 x11-misc/xdg-user-dirs
 x11-terms/kitty
+x11-terms/kitty-terminfo
 {{- end }}
