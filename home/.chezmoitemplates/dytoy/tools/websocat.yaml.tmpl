@@ -2,12 +2,16 @@ name: websocat
 method: binary
 github:
   repo: vi/websocat
+  {{- $os := "" }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "apple-darwin" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "unknown-linux-musl" }}
+  {{- end }}
   {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: websocat.x86_64-unknown-linux-musl
+  {{- $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{- if eq .chezmoi.os "linux" }}
-  release_asset: websocat.aarch64-unknown-linux-musl
-  {{- else if eq .chezmoi.os "android" }}
-  release_asset: websocat.aarch64-linux-android
+  {{- $arch = "aarch64" }}
   {{- end }}
-  {{- end }}
+  release_asset: websocat.{{ $arch }}-{{ $os }}

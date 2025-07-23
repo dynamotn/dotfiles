@@ -12,6 +12,9 @@ ubuntu:
 termux:
   packages:
     - name: git-lfs
+alpine:
+  packages:
+    - name: git-lfs
 macos:
   packages:
     - name: git-lfs

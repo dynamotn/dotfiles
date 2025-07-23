@@ -1,8 +1,6 @@
-{{- if eq .chezmoi.os "linux" }}
 name: terraformer
 method: binary
 github:
   repo: GoogleCloudPlatform/terraformer
   version: latest
-  release_asset: terraformer-all-linux-{{ .chezmoi.arch }}
-{{- end }}
+  release_asset: terraformer-all-{{ .chezmoi.os }}-{{ .chezmoi.arch }}

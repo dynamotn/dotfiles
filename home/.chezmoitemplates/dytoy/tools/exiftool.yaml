@@ -15,3 +15,6 @@ termux:
 macos:
   packages:
     - name: exiftool
+alpine:
+  packages:
+    - name: exiftool

@@ -3,8 +3,14 @@ method: binary
 github:
   repo: kubescape/kubescape
   version: latest
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: kubescape-ubuntu-latest
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: kubescape-arm64-ubuntu-latest
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "linux" }}
+  {{- $os = "ubuntu" }}
+  {{- else if eq .chezmoi.os "darwin" }}
+  {{- $os = "macos" }}
   {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64-" }}
+  {{- end }}
+  release_asset: kubescape-{{ $arch }}{{ $os }}-latest

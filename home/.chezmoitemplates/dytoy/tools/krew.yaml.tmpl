@@ -6,9 +6,8 @@ github:
   repo: kubernetes-sigs/krew
   release_asset: krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
 archive:
-  strip_components: 1
-  paths:
-    - ./krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}
+  - path: ./krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}
+    strip: 1
 hook:
   after: |-
     mv ~/.local/bin/krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }} \

@@ -1,12 +1,4 @@
-{{- if eq .guiServer "X" }}
-name: greenclip
-method: binary
-is_essential: true
-github:
-  repo: erebe/greenclip
-  version: latest
-  release_asset: greenclip
-{{- else if eq .guiServer "W" }}
+{{- if eq .guiServer "W" }}
 name: cliphist
 method: binary
 is_essential: true

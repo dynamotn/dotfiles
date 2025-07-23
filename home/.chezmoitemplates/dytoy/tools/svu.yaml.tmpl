@@ -2,7 +2,10 @@ name: svu
 method: binary
 github:
   repo: caarlos0/svu
+  {{- if eq .chezmoi.os "darwin" }}
+  release_asset: svu_%1v_darwin_all.tar.gz
+  {{- else }}
   release_asset: svu_%1v_linux_{{ .chezmoi.arch }}.tar.gz
+  {{- end }}
 archive:
-  paths:
-    - svu
+  - path: svu

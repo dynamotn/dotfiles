@@ -1,8 +1,9 @@
+{{- if eq .chezmoi.os "linux" }}
 name: hugo
 method: binary
 github:
   repo: gohugoio/hugo
   release_asset: hugo_%1v_linux-{{ .chezmoi.arch }}.tar.gz
 archive:
-  paths:
-    - hugo
+  - path: hugo
+{{- end }}

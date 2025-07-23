@@ -4,13 +4,24 @@ method: os
 termux:
   packages:
     - name: procs
-{{- else if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "amd64") }}
+{{- else }}
 method: binary
 github:
   repo: dalance/procs
   version: latest
-  release_asset: procs-%v-x86_64-linux.zip
+  {{- $os := "" }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "mac" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: procs-%v-{{ $arch }}-{{ $os }}.zip
 archive:
-  paths:
-    - procs
+  - path: procs
 {{- end }}

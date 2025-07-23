@@ -16,8 +16,7 @@ github:
   {{- end }}
   release_asset: flyctl_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
-  paths:
-    - flyctl
+  - path: flyctl
 hook:
   after: |
     mv ~/.local/bin/flyctl ~/.local/bin/fly

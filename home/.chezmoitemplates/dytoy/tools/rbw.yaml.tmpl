@@ -8,9 +8,8 @@ github:
   version: latest
   release_asset: rbw_%v_linux_amd64.tar.gz
 archive:
-  paths:
-    - rbw
-    - rbw-agent
+  - path: rbw
+  - path: rbw-agent
 {{-   else if eq .chezmoi.os "darwin" }}
 method: os
 macos:

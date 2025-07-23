@@ -2,8 +2,14 @@ name: yt-dlp
 method: binary
 github:
   repo: yt-dlp/yt-dlp
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: yt-dlp_linux
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset:  yt-dlp_linux_aarch64
+  {{- $suffix := "" }}
+  {{- if eq .chezmoi.os "linux" "android" }}
+  {{-   if eq .chezmoi.arch "amd64" }}
+  {{- $suffix = "linux" }}
+  {{-   else if eq .chezmoi.arch "arm64" }}
+  {{- $suffix = "linux_aarch64" }}
+  {{-   end  }}
+  {{- else if eq .chezmoi.os "darwin" }}
+  {{- $suffix = "macos" }}
   {{- end  }}
+  release_asset:  yt-dlp_{{ $suffix }}

@@ -13,3 +13,6 @@ ubuntu:
 termux:
   packages:
     - name: git
+alpine:
+  packages:
+    - name: git

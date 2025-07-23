@@ -1,5 +1,7 @@
+{{- if ne .chezmoi.os "android" }}
 name: argocd
 method: binary
 github:
   repo: argoproj/argo-cd
-  release_asset: argocd-linux-{{ .chezmoi.arch }}
+  release_asset: argocd-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
+{{- end }}

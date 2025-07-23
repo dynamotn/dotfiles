@@ -3,14 +3,21 @@ method: binary
 github:
   repo: arduino/arduino-cli
   version: latest
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: arduino-cli_%1v_Linux_64bit.tar.gz
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: arduino-cli_%1v_Linux_ARM64.tar.gz
+  {{- $os := "" }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "Darwin" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "Linux" }}
   {{- end }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "64bit" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "ARM64" }}
+  {{- end }}
+  release_asset: arduino-cli_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
-  paths:
-    - arduino-cli
+  - path: arduino-cli
 hook:
   after: |
     mv ~/.local/bin/arduino-cli ~/.local/bin/arduino

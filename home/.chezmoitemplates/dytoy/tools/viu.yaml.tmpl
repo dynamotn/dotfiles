@@ -1,11 +1,17 @@
-{{- if eq .chezmoi.os "linux" }}
 name: viu
 method: binary
 github:
   repo: atanunq/viu
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: viu-x86_64-unknown-linux-musl
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: viu-aarch64-unknown-linux-musl
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "apple-darwin" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "unknown-linux-musl" }}
   {{- end }}
-{{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: viu-{{ $arch }}-{{ $os }}

@@ -14,6 +14,9 @@ ubuntu:
 termux:
   packages:
     - name: tmux
+alpine:
+  packages:
+    - name: tmux
 {{- else if eq .terminalMultiplexer "Z" }}
 name: zellij
 is_essential: true
@@ -29,6 +32,9 @@ termux:
   packages:
     - name: zellij
 macos:
+  packages:
+    - name: zellij
+alpine:
   packages:
     - name: zellij
 {{- else }}

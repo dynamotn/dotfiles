@@ -12,6 +12,9 @@ ubuntu:
 termux:
   packages:
     - name: imagemagick
+alpine:
+  packages:
+    - name: imagemagick
 macos:
   packages:
     - name: imagemagick

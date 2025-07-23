@@ -16,27 +16,20 @@ method: binary
 github:
   repo: BurntSushi/ripgrep
   version: latest
+  {{- $arch := "" }}
+  {{- $suffix := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: ripgrep-%v-x86_64-unknown-linux-musl.tar.gz
+  {{- $arch = "x86_64" }}
+  {{- $suffix = "musl" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: ripgrep-%v-arm-unknown-linux-gnueabihf.tar.gz
+  {{- $arch = "arm" }}
+  {{- $suffix = "gnueabihf" }}
   {{- end }}
+  release_asset: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}.tar.gz
 archive:
-  strip_components: 1
-  paths:
-  {{- if eq .chezmoi.arch "amd64" }}
-    - ripgrep-%v-x86_64-unknown-linux-musl/rg
-  {{- else if eq .chezmoi.arch "arm64" }}
-    - ripgrep-%v-arm-unknown-linux-gnueabihf/rg
-  {{- end }}
-hook:
-  after: |
-    {{- if eq .chezmoi.arch "amd64" }}
-    arch=x86_64
-    libc=musl
-    {{- else if eq .chezmoi.arch "arm64" }}
-    arch=aarch64
-    libc=gnueabihf
-    {{- end }}
-    tar ${param[@]} --strip=2 -C "$MAN_DIR/man1" "ripgrep-$version-$arch-unknown-linux-$libc/doc/rg.1"
+  - path: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}/rg
+    strip: 1
+  - path: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}/doc/rg.1
+    strip: 2
+    location: $MAN_DIR/man1
 {{- end }}

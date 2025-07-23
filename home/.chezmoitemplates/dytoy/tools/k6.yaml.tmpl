@@ -3,8 +3,11 @@ method: binary
 github:
   repo: grafana/k6
   version: latest
-  release_asset: k6-%v-linux-{{ .chezmoi.arch }}.tar.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "macos" }}
+  {{- end }}
+  release_asset: k6-%v-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:
-  strip_components: 1
-  paths:
-    - k6-%v-linux-{{ .chezmoi.arch }}/k6
+  - path: k6-%v-{{ $os }}-{{ .chezmoi.arch }}/k6
+    strip: 1

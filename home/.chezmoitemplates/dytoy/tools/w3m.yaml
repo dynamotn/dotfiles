@@ -13,3 +13,6 @@ ubuntu:
 termux:
   packages:
     - name: w3m
+alpine:
+  packages:
+    - name: w3m

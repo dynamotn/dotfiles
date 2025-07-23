@@ -7,7 +7,7 @@ github:
   {{- $arch := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "macos" }}
-  {{- else if eq .chezmoi.os "linux" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
   {{- $os = "linux" }}
   {{- end }}
   {{- if eq .chezmoi.arch "amd64" }}
@@ -17,5 +17,4 @@ github:
   {{- end }}
   release_asset: viddy-%v-{{ $os }}-{{ $arch }}.tar.gz
 archive:
-  paths:
-    - viddy
+  - path: viddy

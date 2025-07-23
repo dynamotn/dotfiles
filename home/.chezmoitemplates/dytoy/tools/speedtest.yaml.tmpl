@@ -16,8 +16,7 @@ github:
   {{- end }}
   release_asset: speedtest-go_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
-  paths:
-    - speedtest-go
+  - path: speedtest-go
 hook:
   after: |
     mv ~/.local/bin/speedtest{-go,}

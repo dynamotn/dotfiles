@@ -94,7 +94,6 @@
 |[tldr](https://github.com/dbrgn/tealdeer)|Cheatsheet CLI tool|Miscellaneous|
 |[yt-dlp](https://github.com/yt-dlp/yt-dlp)|Download videos tool|Miscellaneous|
 |[viu](https://github.com/atanunq/viu)|View image on CLI|Miscellaneous|
-|[patat](https://github.com/jaspervdj/patat)|CLI presentation tool|Miscellaneous|
 |[ncspot](https://github.com/hrkfdn/ncspot)|Spotify CLI client|Miscellaneous|
 |[telegram-desktop](https://desktop.telegram.org/)|Telegram desktop client|Miscellaneous|
 |[fabric](https://github.com/danielmiessler/fabric)|Framework for augmenting humans using AI|AI tool|

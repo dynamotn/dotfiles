@@ -1,4 +1,3 @@
-{{- if eq .kind "pc" "laptop" }}
 name: glab
 method: binary
 gitlab:
@@ -6,7 +5,5 @@ gitlab:
   version: latest
   release_asset: glab_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
 archive:
-  strip_components: 1
-  paths:
-    - bin/glab
-{{- end }}
+  - path: bin/glab
+    strip: 1

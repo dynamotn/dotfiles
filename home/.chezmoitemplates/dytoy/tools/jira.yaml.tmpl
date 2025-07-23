@@ -4,17 +4,18 @@ method: binary
 github:
   repo: ankitpokhrel/jira-cli
   version: latest
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: jira_%1v_linux_x86_64.tar.gz
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: jira_%1v_linux_arm64.tar.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "macOS" }}
   {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64" }}
+  {{- end }}
+  release_asset: jira_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
-  strip_components: 2
-  paths:
-    {{- if eq .chezmoi.arch "amd64" }}
-    - jira_%1v_linux_x86_64/bin/jira
-    {{- else if eq .chezmoi.arch "arm64" }}
-    - jira_%1v_linux_arm64/bin/jira
-    {{- end }}
+  - path: jira_%1v_{{ $os }}_{{ $arch }}/bin/jira
+    strip: 2
 {{- end }}

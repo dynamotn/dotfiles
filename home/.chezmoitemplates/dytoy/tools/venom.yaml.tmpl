@@ -2,4 +2,8 @@ name: venom
 method: binary
 github:
   repo: ovh/venom
-  release_asset: venom.linux-{{ .chezmoi.arch }}
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: venom.{{ $os }}-{{ .chezmoi.arch }}

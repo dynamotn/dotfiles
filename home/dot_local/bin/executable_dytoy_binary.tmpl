@@ -12,10 +12,8 @@ dybatpho::create_temp TEMP_DOWNLOAD ".z"
 # HACK: export dirs to use in hook scripts
 BIN_DIR=$HOME/.local/bin
 MAN_DIR=$HOME/.local/man
-GITHUB_API_USERNAME=${GITHUB_API_USERNAME:-dynamotn}
-GITHUB_API_TOKEN=${GITHUB_API_TOKEN:-}
-GITLAB_API_USERNAME=${GITLAB_API_USERNAME:-dynamo.foss}
-GITLAB_API_TOKEN=${GITLAB_API_TOKEN:-}
+GITHUB_API_TOKEN=${GITHUB_TOKEN:-}
+GITLAB_API_TOKEN=${GITLAB_TOKEN:-}
 
 #######################################
 # @description Spec of dytoy_binary
@@ -26,20 +24,21 @@ function _spec_main {
   dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
   dybatpho::opts::param "Specific tool" TOOL  --tool -t init:="@empty"
   dybatpho::opts::flag "Install only essential tool" ONLY_ESSENTIAL --essential -e on:true off:false init:="false"
-  dybatpho::opts::flag "Install only not installed tool" ONLY_NOT_INSTALLED --check-installed -i on:true off:false init:="true"
+  dybatpho::opts::flag "Install only not installed tool" ONLY_NOT_INSTALLED --check-installed --no-check-installed -i on:true off:false init:="true"
   dybatpho::opts::flag "List files in compressed instead of extract" LIST_CONTENTS --list -L on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
 #######################################
 # @description Extract from tar compressed release file
-# @arg $1 string URL of file
-# @arg $2 string Path of files in archive
-# @arg $3 number Strip components
+# @arg $1 string Location to extract file
+# @arg $2 string URL of file
+# @arg $3 string Path of files in archive
 #######################################
 function _extract_tar {
-  dybatpho::expect_args url paths_spec strip -- "$@"
-  local param=("-C $location")
+  dybatpho::expect_args location url archive -- "$@"
+  local param=("--warning=no-unknown-keyword")
+  param+=("--wildcards")
   if dybatpho::is true "$LIST_CONTENTS"; then
     param+=("-vt")
   else
@@ -55,88 +54,108 @@ function _extract_tar {
     param+=("--zstd")
   fi
 
-  if [ "$strip" != "null" ]; then
-    param+=("--strip=$strip")
-  fi
   param+=("-f $TEMP_DOWNLOAD")
   dybatpho::debug "File $(file "$TEMP_DOWNLOAD")"
-  dybatpho::debug "Extracting with params: ${param[*]}"
   if dybatpho::is true "$LIST_CONTENTS"; then
-    dybatpho::dry_run tar "${param[@]}"
+    dybatpho::debug "List with params: ${param[*]}"
+    dybatpho::dry_run eval "tar ${param[@]} >&2"
   else
-    readarray paths < <(echo "$paths_spec" | yq e -o=j -I=0 -r '.[]')
-    for path in "${paths[@]}"; do
-      dybatpho::dry_run tar ${param[@]} $(echo ${path%%*( )} | _replace_version_string "$version")
+    readarray archive < <(echo "$archive" | yq e -o=j -I=0 -r '.[]')
+    for path_spec in "${archive[@]}"; do
+      local extract_param=("${param[@]}")
+      local path=$(echo "$path_spec" | yq e -o=j -I=0 -r '.path')
+      local file_location=$(echo "$path_spec" | yq e -o=j -I=0 -r '.location')
+      if [ "$file_location" = "null" ]; then
+        extract_param+=("-C $location")
+      else
+        extract_param+=("-C $file_location")
+      fi
+      local strip=$(echo "$path_spec" | yq e -o=j -I=0 -r '.strip')
+      if [ "$strip" != "null" ]; then
+        extract_param+=("--strip=$strip")
+      fi
+      extract_param+=("$(echo ${path%%*( )} | _replace_version_string "$version")")
+      dybatpho::debug "Extracting with params: ${extract_param[*]}"
+      dybatpho::dry_run eval "tar ${extract_param[@]} >&2"
     done
   fi
-  # HACK: export param to use in hook scripts
-  export param=$param
 }
 
 #######################################
 # @description Extract from zip compressed release file
-# @arg $1 string Path of file in archive
+# @arg $1 string Location to extract file
+# @arg $2 string Path of file in archive
 #######################################
 function _extract_zip {
-  dybatpho::expect_args paths_spec -- "$@"
-  local param=("-d \"$location\"")
+  dybatpho::expect_args location archive -- "$@"
   if dybatpho::is true "$LIST_CONTENTS"; then
-    param+=("-Zl $TEMP_DOWNLOAD")
-    dybatpho::dry_run unzip "${param[@]}"
+    local param=("-Zl $TEMP_DOWNLOAD")
+    dybatpho::dry_run eval "unzip ${param[@]} >&2"
   else
-    readarray paths < <(echo "$paths_spec" | yq e -o=j -I=0 -r '.[]')
-    param+=("-qqoj $TEMP_DOWNLOAD")
-    for path in "${paths[@]}"; do
-      dybatpho::dry_run unzip ${param[@]} $(echo ${path%%*( )} | _replace_version_string "$version")
+    readarray archive < <(echo "$archive" | yq e -o=j -I=0 -r '.[]')
+    for path_spec in "${archive[@]}"; do
+      local param=("-qqoj $TEMP_DOWNLOAD")
+      path=$(echo "$path_spec" | yq e -o=j -I=0 -r '.path')
+      local file_location=$(echo "$path_spec" | yq e -o=j -I=0 -r '.location')
+      if [ "$file_location" = "null" ]; then
+        param+=("-d $location")
+      else
+        param+=("-d $file_location")
+      fi
+      param+=("$(echo ${path%%*( )} | _replace_version_string "$version")")
+      dybatpho::debug "Extracting with params: ${param[*]}"
+      dybatpho::dry_run eval "unzip ${param[@]} >&2"
     done
   fi
-  # HACK: export param to use in hook scripts
-  export param=$param
 }
 
 #######################################
 # @description Extract from bzip2 compressed release file
-# @arg $1 string File name of command
+# @arg $1 string Location to extract file
+# @arg $2 string File name of command
 #######################################
 function _extract_bzip2 {
-  dybatpho::expect_args command -- "$@"
+  dybatpho::expect_args location command -- "$@"
   bzip2 -cd $TEMP_DOWNLOAD > $location/$command
 }
 
 #######################################
 # @description Extract from gzip compressed release file
-# @arg $1 string File name of command
+# @arg $1 string Location to extract file
+# @arg $2 string File name of command
 #######################################
 function _extract_gzip {
-  dybatpho::expect_args command -- "$@"
+  dybatpho::expect_args location command -- "$@"
   gzip -cd $TEMP_DOWNLOAD > $location/$command
 }
 
 #######################################
 # @description Update tool by get from release file
-# @arg $1 string URL of file
-# @arg $2 string File name of command
-# @arg $3 string Path of file in archive
-# @arg $4 number Strip components
+# @arg $1 string Location to download/extract file
+# @arg $2 string URL of file
+# @arg $3 string File name of command
+# @arg $4 string Path of file in archive
 #######################################
 function _update {
-  dybatpho::expect_args url command paths_spec strip -- "$@"
+  dybatpho::expect_args location url command archive -- "$@"
   _run_hook "$TEMP_HOOK_BEFORE"
   dybatpho::debug "Downloaded $url to $TEMP_DOWNLOAD"
   dybatpho::dry_run dybatpho::curl_download "$url" "$TEMP_DOWNLOAD"
   if [[ "$url" =~ \.(tar\.gz|tgz|tar\.xz|tar\.bz2|tbz2|xz|tar|tar\.zst|tbz)$ ]]; then
-    _extract_tar "$url" "$paths_spec" "$strip"
+    _extract_tar "$location" "$url" "$archive"
   elif [[ "$url" =~ \.zip$ ]]; then
-    _extract_zip "$paths_spec"
+    _extract_zip "$location" "$archive"
   elif [[ "$url" =~ \.bz2$ ]]; then
-    _extract_bzip2 "$command"
+    _extract_bzip2 "$location" "$command"
   elif [[ "$url" =~ \.gz$ ]]; then
-    _extract_gzip "$command"
+    _extract_gzip "$location" "$command"
   else
     mv "$TEMP_DOWNLOAD" "$location/$command"
   fi
   _run_hook "$TEMP_HOOK_AFTER"
-  dybatpho::dry_run chmod +x "$location/$command"
+  if ! dybatpho::is true "$LIST_CONTENTS"; then
+    dybatpho::dry_run chmod +x "$location/$command"
+  fi
   dybatpho::success "Installed binary tool: $command"
 }
 
@@ -164,28 +183,23 @@ function _parse_release {
 
   dybatpho::progress "Installing ${name}"
   dybatpho::dry_run mkdir -p $location
-  if [ "$type" = "github" ]; then
-    host="github.com"
-  elif [ "$type" = "gitlab" ]; then
-    host=$(echo "$yaml" | yq e '.gitlab.host')
-    if [ "$host" = "null" ]; then
-      host="gitlab.com"
-    fi
+  host=$(echo "$yaml" | yq e ".${type}.host")
+  if [ "$host" = "null" ]; then
+    host="${type}.com"
   fi
   dybatpho::debug "Host is ${host}"
   repo=$(echo "$yaml" | yq e ".${type}.repo")
   version=$(echo "$yaml" | yq e ".${type}.version")
   release_asset=$(echo "$yaml" | yq e ".${type}.release_asset")
-  strip_components=$(echo "$yaml" | yq e '.archive.strip_components')
-  paths=$(echo "$yaml" | yq e '.archive.paths')
+  archive=$(echo "$yaml" | yq e '.archive')
 
   if [ "$version" = "latest" ] || [ "$version" = "null" ]; then
     dybatpho::progress "Get version ${name} from https://${host}/${repo}"
     if [ "$type" = "github" ]; then
-      dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$TEMP_VERSION" -u "${GITHUB_API_USERNAME}:${GITHUB_API_TOKEN}"
+      dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$TEMP_VERSION" -H "Authorization: Bearer ${GITHUB_API_TOKEN}"
       version=$(grep -Po "tag_name\": \"(\K.*)(?=\",)" "$TEMP_VERSION")
     elif [ "$type" = "gitlab" ]; then
-      dybatpho::curl_do "https://${host}/api/v4/projects/$(echo $repo | sed -e "s/\//%2f/g")/releases/permalink/latest" "$TEMP_VERSION" -u "${GITLAB_API_USERNAME}:${GITLAB_API_TOKEN}"
+      dybatpho::curl_do "https://${host}/api/v4/projects/$(echo $repo | sed -e "s/\//%2f/g")/releases/permalink/latest" "$TEMP_VERSION" -H "Authorization: Bearer ${GITLAB_API_TOKEN}"
       version=$(yq ".tag_name" "$TEMP_VERSION")
     fi
   fi
@@ -212,11 +226,14 @@ function _parse_release {
     echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
   fi
 
-  export TEMP_DOWNLOAD
-  export location
-  export MAN_DIR
   export version
-  _update "https://github.com/${repo}/releases/download/${version}/${release_asset}" "${name}" "${paths}" "${strip_components}"
+  local url
+  if [ "$type" = "github" ]; then
+    url="https://${host}/${repo}/releases/download/${version}/${release_asset}"
+  elif [ "$type" = "gitlab" ]; then
+    url="https://${host}/${repo}/-/releases/${version}/downloads/${release_asset}"
+  fi
+  _update "${location}" "${url}" "${name}" "${archive}"
 }
 
 #######################################

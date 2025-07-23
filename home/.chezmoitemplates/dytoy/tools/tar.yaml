@@ -13,3 +13,6 @@ ubuntu:
 termux:
   packages:
     - name: tar
+alpine:
+  packages:
+    - name: tar

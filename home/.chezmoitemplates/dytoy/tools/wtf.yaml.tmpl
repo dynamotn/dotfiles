@@ -2,11 +2,14 @@ name: wtf
 method: binary
 github:
   repo: wtfutil/wtf
-  release_asset: wtf_%1v_linux_{{ .chezmoi.arch }}.tar.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: wtf_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
 archive:
-  paths:
-    - wtf_%1v_linux_{{ .chezmoi.arch }}/wtfutil
-  strip_components: 1
+  - path: wtf_%1v_{{ $os }}_{{ .chezmoi.arch }}/wtfutil
+    strip: 1
 hook:
   after: |
     mv ~/.local/bin/wtfutil ~/.local/bin/wtf
