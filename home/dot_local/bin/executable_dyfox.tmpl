@@ -30,7 +30,7 @@ dybatpho::register_err_handler
 {{-   if .decryptPersonal }}
 {{-     $profiles = append $profiles "personal" }}
 {{-   end }}
-{{-   range .decryptEnterprise }}
+{{-   range .browserEnterpriseProfiles }}
 {{-     $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{-   end }}
 
