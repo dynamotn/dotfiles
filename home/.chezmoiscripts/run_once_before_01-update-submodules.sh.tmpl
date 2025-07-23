@@ -27,7 +27,7 @@ git submodule update --init --remote --recursive \
   {{-   if .decryptPersonal }}
   home/dot_config/firefox/profiles/personal \
   {{-   end }}
-  {{-   range .decryptEnterprise }}
+  {{-   range .browserEnterpriseProfiles }}
   home/dot_config/firefox/profiles/enterprise-{{ . }} \
   {{-   end }}
   {{- end }}
@@ -35,7 +35,7 @@ git submodule update --init --remote --recursive \
   {{-   if .decryptPersonal }}
   home/dot_config/thunderbird/profiles/personal \
   {{-   end }}
-  {{-   range .decryptEnterprise }}
+  {{-   range .mailEnterpriseProfiles }}
   home/dot_config/thunderbird/profiles/enterprise-{{ . }} \
   {{-   end }}
   {{- end }}
