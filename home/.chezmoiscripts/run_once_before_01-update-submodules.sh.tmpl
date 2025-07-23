@@ -16,7 +16,7 @@ sed -i -e 's#git@gitlab.com:#https://gitlab.com/#g' \
 git submodule sync --recursive
 git update-index --assume-unchanged .gitmodules
 {{- end }}
-git submodule update --init --remote --recursive \
+git submodule update --init --recursive \
   {{- if eq .guiServer "W" "X" }}
   silos/icon \
   {{- end }}
