@@ -1,0 +1,8 @@
+[env]
+JIRA_CONFIG_FILE = "{{ "{{" }}config_root{{ " }}" }}/.jira/config.yaml"
+{{- $commonSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/common.yaml.age" | include | decrypt | fromYaml }}
+JIRA_API_TOKEN = {{ $commonSecret.jira.token | quote }}
+
+[tools]
+python = "latest"
+pre-commit = "latest"
