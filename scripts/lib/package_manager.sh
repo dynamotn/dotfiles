@@ -245,7 +245,7 @@ function _macos_sync_repo {
 #######################################
 function _macos_brew_check_installed {
   dybatpho::expect_args package -- "$@"
-  brew ls --versions "$1" > /dev/null
+  grep -qE "^$package$" <(brew ls -1)
 }
 
 #######################################

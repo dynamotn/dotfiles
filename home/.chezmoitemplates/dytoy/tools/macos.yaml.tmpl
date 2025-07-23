@@ -4,5 +4,8 @@ method: os
 is_essential: true
 macos:
   packages:
-    - name: dsully/tap/macos-defaults
+    - name: macos-defaults
+  hook:
+    before: |-
+      brew tap dsully/tap
 {{- end }}
