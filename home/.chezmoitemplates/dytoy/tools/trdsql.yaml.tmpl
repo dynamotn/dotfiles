@@ -2,8 +2,11 @@ name: trdsql
 method: binary
 github:
   repo: noborus/trdsql
-  release_asset: trdsql_%v_linux_{{ .chezmoi.arch }}.zip
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: trdsql_%v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.zip
 archive:
-  strip_components: 1
-  paths:
-    - trdsql_%v_linux_{{ .chezmoi.arch }}/trdsql
+  - path: trdsql_%v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}/trdsql
+    strip: 1

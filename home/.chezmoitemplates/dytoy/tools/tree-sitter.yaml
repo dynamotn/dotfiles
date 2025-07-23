@@ -9,3 +9,6 @@ arch:
 ubuntu:
   packages:
     - name: tree-sitter-cli
+alpine:
+  packages:
+    - name: tree-sitter-cli

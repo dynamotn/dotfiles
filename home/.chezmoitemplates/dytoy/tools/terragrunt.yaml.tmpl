@@ -3,4 +3,4 @@ method: binary
 github:
   repo: gruntwork-io/terragrunt
   version: latest
-  release_asset: terragrunt_linux_{{ .chezmoi.arch }}
+  release_asset: terragrunt_{{ .chezmoi.os }}_{{ .chezmoi.arch }}

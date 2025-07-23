@@ -8,6 +8,9 @@ arch:
 termux:
   packages:
     - name: vivid
+alpine:
+  packages:
+    - name: vivid
 macos:
   packages:
     - name: vivid
@@ -16,17 +19,14 @@ method: binary
 github:
   repo: sharkdp/vivid
   version: latest
+  {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: vivid-%v-x86_64-unknown-linux-gnu.tar.gz
+  {{- $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: vivid-%v-aarch64-unknown-linux-gnu.tar.gz
+  {{- $arch = "aarch64" }}
   {{- end }}
+  release_asset: vivid-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
 archive:
-  strip_components: 1
-  paths:
-  {{- if eq .chezmoi.arch "amd64" }}
-    - vivid-%v-x86_64-unknown-linux-gnu/vivid
-  {{- else if eq .chezmoi.arch "arm64" }}
-    - vivid-%v-aarch64-unknown-linux-gnu/vivid
-  {{- end }}
+  - path: vivid-%v-{{ $arch }}-unknown-linux-gnu/vivid
+    strip: 1
 {{- end }}

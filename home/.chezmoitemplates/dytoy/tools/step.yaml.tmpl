@@ -2,8 +2,11 @@ name: step
 method: binary
 github:
   repo: smallstep/cli
-  release_asset: step_linux_%1v_{{ .chezmoi.arch }}.tar.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: step_{{ $os }}_%1v_{{ .chezmoi.arch }}.tar.gz
 archive:
-  strip_components: 2
-  paths:
-    - step_%1v/bin/step
+  - path: step_%1v/bin/step
+    strip: 2

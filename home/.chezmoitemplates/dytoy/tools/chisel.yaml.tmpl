@@ -1,9 +1,11 @@
 name: chisel
 method: binary
+{{- if eq .kind "container" }}
+is_essential: true
+{{- end }}
 github:
   repo: jpillora/chisel
   version: latest
   release_asset: chisel_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.gz
 archive:
-  paths:
-    - chisel
+  - path: chisel

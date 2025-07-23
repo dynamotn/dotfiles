@@ -4,8 +4,7 @@ method: binary
 github:
   repo: cointop-sh/cointop
   version: latest
-  release_asset: cointop_%1v_linux_amd64.tar.gz
+  release_asset: cointop_%1v_{{ .chezmoi.os }}_amd64.tar.gz
 archive:
-  paths:
-    - cointop
+  - path: cointop
 {{- end }}

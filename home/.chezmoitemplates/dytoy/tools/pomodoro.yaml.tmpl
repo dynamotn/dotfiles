@@ -1,13 +1,10 @@
-{{- if eq .kind "pc" "laptop" }}
+{{- if and (eq .kind "pc" "laptop") (eq .chezmoi.os "linux" "android") }}
 name: pomodoro
 method: binary
 is_essential: true
-{{- if eq .chezmoi.os "linux" "android" }}
 github:
   repo: open-pomodoro/openpomodoro-cli
   release_asset: openpomodoro-cli_%1v_linux_{{ .chezmoi.arch }}.tar.gz
 archive:
-  paths:
-    - pomodoro
-{{- end }}
+  - path: pomodoro
 {{- end }}

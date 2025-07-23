@@ -1,4 +1,3 @@
-{{- if eq .chezmoi.arch "amd64" }}
 name: bandwhich
 method: binary
 github:
@@ -6,9 +5,7 @@ github:
   version: latest
   release_asset: bandwhich-%v-x86_64-unknown-linux-gnu.tar.gz
 archive:
-  paths:
-    - bandwhich
+  - path: bandwhich
 hook:
   after: |
     sudo setcap cap_sys_ptrace,cap_dac_read_search,cap_net_raw,cap_net_admin+ep ~/.local/bin/bandwhich
-{{- end }}

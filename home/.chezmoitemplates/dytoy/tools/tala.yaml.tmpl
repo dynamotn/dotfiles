@@ -2,12 +2,17 @@ name: d2plugin-tala
 method: binary
 github:
   repo: terrastruct/TALA
-  release_asset:  tala-%v-linux-{{ .chezmoi.arch }}.tar.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: tala-%v-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:
-  strip_components: 2
-  paths:
-    - tala-%v/bin/d2plugin-tala
-hook:
-  after: |
-    tar ${param[@]} -C "$MAN_DIR/man1" "tala-$version/man/tala.1"
-    tar ${param[@]} -C "$MAN_DIR/man1" "tala-$version/man/d2plugin-tala.1"
+  - path: tala-%v/bin/d2plugin-tala
+    strip: 2
+  - path: tala-%v/man/tala.1
+    strip: 2
+    location: $MAN_DIR/man1
+  - path: tala-%v/man/d2plugin-tala.1
+    strip: 2
+    location: $MAN_DIR/man1

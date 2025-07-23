@@ -8,7 +8,6 @@ github:
   version: latest
   release_asset: projekt_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
 archive:
-  paths:
-    - projekt
-    - t
-    - b
+  - path: projekt
+  - path: t
+  - path: b

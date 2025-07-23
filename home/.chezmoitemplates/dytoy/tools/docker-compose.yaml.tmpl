@@ -1,12 +1,15 @@
-{{- if eq .chezmoi.os "linux" }}
 name: docker-compose
 method: binary
 github:
   repo: docker/compose
-  version: latest
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: docker-compose-linux-x86_64
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: docker-compose-linux-aarch64
+  {{- $os := .chezmoi.os }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
   {{- end }}
-{{- end }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: docker-compose-{{ $os }}-{{ $arch }}

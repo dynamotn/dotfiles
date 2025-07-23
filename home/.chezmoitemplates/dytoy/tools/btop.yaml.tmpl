@@ -12,9 +12,8 @@ github:
   release_asset: btop-aarch64-linux-gnu.tbz
   {{- end }}
 archive:
-  strip_components: 3
-  paths:
-    - ./btop/bin/btop
+  - path: ./btop/bin/btop
+    strip: 3
 {{- else }}
 method: os
 arch:

@@ -1,6 +1,7 @@
 {{- if and (eq .chezmoi.os "linux") (ne .kind "container") }}
 name: networkmanager
 method: os
+is_essential: true
 gentoo:
   packages:
     - name: net-misc/networkmanager

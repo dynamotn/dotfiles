@@ -1,38 +1,25 @@
 name: pastel
-{{- if eq .chezmoi.os "linux" }}
-method: binary
-github:
-  repo: sharkdp/pastel
-  version: latest
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: pastel-%v-x86_64-unknown-linux-gnu.tar.gz
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: pastel-%v-aarch64-unknown-linux-gnu.tar.gz
-  {{- end }}
-archive:
-  strip_components: 1
-  paths:
-  {{- if eq .chezmoi.arch "amd64" }}
-    - pastel-%v-x86_64-unknown-linux-gnu/pastel
-  {{- else if eq .chezmoi.arch "arm64" }}
-    - pastel-%v-aarch64-unknown-linux-gnu/pastel
-  {{- end }}
-hook:
-  after: |
-    {{- if eq .chezmoi.arch "amd64" }}
-    arch=x86_64
-    {{- else if eq .chezmoi.arch "arm64" }}
-    arch=aarch64
-    {{- end }}
-    if [ -d ~/.config/fish/completions ]; then
-      tar ${param[@]} --strip=2 -C ~/.config/fish/completions pastel-$version-$arch-unknown-linux-gnu/autocomplete/pastel.fish
-    fi
-    if [ -d ~/Working/personal/fish/caran/completions ]; then
-      tar ${param[@]} --strip=2 -C ~/Working/personal/fish/caran/completions pastel-$version-$arch-unknown-linux-gnu/autocomplete/pastel.fish
-    fi
-{{- else if eq .chezmoi.os "android" }}
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
 method: os
 termux:
   packages:
     - name: pastel
+{{- else }}
+method: binary
+github:
+  repo: sharkdp/pastel
+  version: latest
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: pastel-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
+archive:
+  - path: pastel-%v-{{ $arch }}-unknown-linux-gnu/pastel
+    strip: 1
+  - path: pastel-%v-{{ $arch }}-unknown-linux-gnu/autocomplete/pastel.fish
+    location: $HOME/.config/fish/completions
+    strip: 2
 {{- end }}

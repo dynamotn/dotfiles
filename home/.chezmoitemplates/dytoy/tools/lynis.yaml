@@ -9,3 +9,6 @@ arch:
 ubuntu:
   packages:
     - name: lynis
+alpine:
+  packages:
+    - name: lynis

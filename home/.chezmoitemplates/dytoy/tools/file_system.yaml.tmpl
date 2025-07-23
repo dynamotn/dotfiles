@@ -1,0 +1,13 @@
+{{- if eq .kind "laptop" "pc" "sbc" "workstation" }}
+name: file_system
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-fs/btrfs-progs
+    - name: sys-fs/ntfs3g
+arch:
+  packages:
+    - name: btrfs-progs
+    - name: ntfs-3g
+{{- end }}

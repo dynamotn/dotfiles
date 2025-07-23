@@ -19,3 +19,6 @@ termux:
 macos:
   packages:
     - name: fish
+alpine:
+  packages:
+    - name: fish

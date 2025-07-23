@@ -5,12 +5,24 @@ method: os
 arch:
   packages:
     - name: tealdeer
-{{- else if eq .chezmoi.arch "amd64" }}
+{{- else }}
 name: tldr
 is_essential: true
 method: binary
 github:
   repo: dbrgn/tealdeer
   version: latest
-  release_asset: tealdeer-linux-x86_64-musl
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  {{- $variant := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $variant = printf "macos-%s" $arch }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $variant = printf "linux-%s-musl" $arch }}
+  {{- end }}
+  release_asset: tealdeer-{{ $variant }}
 {{- end }}

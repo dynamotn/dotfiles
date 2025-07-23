@@ -13,3 +13,6 @@ ubuntu:
 termux:
   packages:
     - name: bzip2
+alpine:
+  packages:
+    - name: bzip2

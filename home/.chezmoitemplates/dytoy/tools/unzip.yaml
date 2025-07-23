@@ -13,3 +13,6 @@ ubuntu:
 termux:
   packages:
     - name: unzip
+alpine:
+  packages:
+    - name: unzip

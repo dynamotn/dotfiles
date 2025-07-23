@@ -1,9 +1,2 @@
 name: go
-method: os
-is_essential: true
-gentoo:
-  packages:
-    - name: dev-lang/go
-arch:
-  packages:
-    - name: go
+method: mise

@@ -1,22 +1,21 @@
-name: fly
+name: lazygit
+is_essential: true
 method: binary
 github:
-  repo: superfly/flyctl
+  repo: jesseduffield/lazygit
+  version: latest
   {{- $os := "" }}
-  {{- $arch := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "Darwin" }}
   {{- else if eq .chezmoi.os "linux" }}
   {{- $os = "Linux" }}
   {{- end }}
+  {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
   {{- $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
   {{- $arch = "arm64" }}
   {{- end }}
-  release_asset: flyctl_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  release_asset: lazygit_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
-  - path: flyctl
-hook:
-  after: |
-    mv ~/.local/bin/flyctl ~/.local/bin/fly
+  - path: lazygit

@@ -3,16 +3,19 @@ method: binary
 github:
   repo: gcla/termshark
   version: latest
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: termshark_%1v_linux_x64.tar.gz
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: termshark_%1v_linux_arm64.tar.gz
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "macOS" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "linux" }}
   {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64" }}
+  {{- end }}
+  release_asset: termshark_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
-  strip_components: 1
-  paths:
-    {{- if eq .chezmoi.arch "amd64" }}
-    - termshark_%1v_linux_x64/termshark
-    {{- else if eq .chezmoi.arch "arm64" }}
-    - termshark_%1v_linux_arm64/termshark
-    {{- end }}
+  - path: termshark_%1v_{{ $os }}_{{ $arch }}/termshark
+    strip: 1

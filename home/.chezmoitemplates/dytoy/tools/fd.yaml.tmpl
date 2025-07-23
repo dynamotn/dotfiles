@@ -2,13 +2,16 @@ name: fd
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
 method: os
+arch:
+  packages:
+    - name: fd
 termux:
   packages:
     - name: fd
-macos:
+alpine:
   packages:
     - name: fd
-arch:
+macos:
   packages:
     - name: fd
 {{- else }}
@@ -16,25 +19,17 @@ method: binary
 github:
   repo: sharkdp/fd
   version: latest
+  {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: fd-%v-x86_64-unknown-linux-gnu.tar.gz
+  {{- $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: fd-%v-aarch64-unknown-linux-gnu.tar.gz
+  {{- $arch = "aarch64" }}
   {{- end }}
+  release_asset: fd-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
 archive:
-  strip_components: 1
-  paths:
-  {{- if eq .chezmoi.arch "amd64" }}
-    - fd-%v-x86_64-unknown-linux-gnu/fd
-  {{- else if eq .chezmoi.arch "arm64" }}
-    - fd-%v-aarch64-unknown-linux-gnu/fd
-  {{- end }}
-hook:
-  after: |
-    {{- if eq .chezmoi.arch "amd64" }}
-    arch=x86_64
-    {{- else if eq .chezmoi.arch "arm64" }}
-    arch=aarch64
-    {{- end }}
-    tar ${param[@]} -C "$MAN_DIR/man1" "fd-$version-$arch-unknown-linux-gnu/fd.1"
+  - path: fd-%v-{{ $arch }}-unknown-linux-gnu/fd
+    strip: 1
+  - path: fd-%v-{{ $arch }}-unknown-linux-gnu/fd.1
+    strip: 1
+    location: $MAN_DIR/man1
 {{- end }}

@@ -2,13 +2,16 @@ name: zoxide
 {{- if or (eq .chezmoi.os "darwin" "android") (eq .kind "container") }}
 method: os
 is_essential: true
-macos:
+arch:
   packages:
     - name: zoxide
 termux:
   packages:
     - name: zoxide
-arch:
+alpine:
+  packages:
+    - name: zoxide
+macos:
   packages:
     - name: zoxide
 {{- else }}
@@ -22,15 +25,11 @@ github:
   release_asset: zoxide-%1v-aarch64-unknown-linux-musl.tar.gz
   {{- end }}
 archive:
-  paths:
-    - zoxide
-hook:
-  after: |
-    tar ${param[@]} --strip=2 -C "$MAN_DIR/man1" --wildcards man/man1/*
-    if [ -d ~/.config/fish/completions ]; then
-      tar ${param[@]} --strip=1 -C ~/.config/fish/completions completions/zoxide.fish
-    fi
-    if [ -d ~/Working/personal/fish/caran/completions ]; then
-      tar ${param[@]} --strip=1 -C ~/Working/personal/fish/caran/completions completions/zoxide.fish
-    fi
+  - path: zoxide
+  - path: man/man1/*
+    strip: 2
+    location: $MAN_DIR/man1
+  - path: completions/zoxide.fish
+    strip: 1
+    location: ~/.config/fish/completions
 {{- end }}

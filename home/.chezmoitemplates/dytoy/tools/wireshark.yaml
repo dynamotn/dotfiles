@@ -12,3 +12,6 @@ ubuntu:
 termux:
   packages:
     - name: tshark
+alpine:
+  packages:
+    - name: tshark

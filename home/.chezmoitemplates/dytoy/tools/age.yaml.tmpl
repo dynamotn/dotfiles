@@ -11,6 +11,9 @@ macos:
 arch:
   packages:
     - name: age
+alpine:
+  packages:
+    - name: age
 {{- else }}
 method: binary
 github:
@@ -18,8 +21,8 @@ github:
   version: latest
   release_asset: age-%v-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz
 archive:
-  strip_components: 1
-  paths:
-    - age/age
-    - age/age-keygen
+  - path: age/age
+    strip: 1
+  - path: age/age-keygen
+    strip: 1
 {{- end }}

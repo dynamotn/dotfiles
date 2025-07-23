@@ -8,17 +8,18 @@ termux:
 macos:
   packages:
     - name: eza
-{{- else }}
+{{- else if eq .chezmoi.os "linux" }}
 method: binary
 github:
   repo: eza-community/eza
   version: latest
+  {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: eza_x86_64-unknown-linux-gnu.tar.gz
+  {{- $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: eza_aarch64-unknown-linux-gnu.tar.gz
+  {{- $arch = "aarch64" }}
   {{- end }}
+  release_asset: eza_{{ $arch }}-unknown-linux-gnu.tar.gz
 archive:
-  paths:
-    - ./eza
+  - path: ./eza
 {{- end }}

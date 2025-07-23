@@ -1,33 +1,34 @@
 name: watchexec
 method: binary
-{{- if eq .chezmoi.os "linux" }}
-github:
-  repo: watchexec/watchexec
-  version: latest
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: watchexec-%1v-x86_64-unknown-linux-gnu.tar.xz
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: watchexec-%1v-aarch64-unknown-linux-gnu.tar.xz
-  {{- end }}
-archive:
-  strip_components: 1
-  paths:
-    {{- if eq .chezmoi.arch "amd64" }}
-    - watchexec-%1v-x86_64-unknown-linux-gnu/watchexec
-    {{- else if eq .chezmoi.arch "arm64" }}
-    - watchexec-%1v-aarch64-unknown-linux-gnu/watchexec
-    {{- end }}
-hook:
-  after: |
-    {{- if eq .chezmoi.arch "amd64" }}
-    arch=x86_64
-    {{- else if eq .chezmoi.arch "arm64" }}
-    arch=aarch64
-    {{- end }}
-    tar ${param[@]} -C "$MAN_DIR/man1" "watchexec-${version:1}-$arch-unknown-linux-gnu/watchexec"
-{{- else if eq .chezmoi.os "android" }}
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
 method: os
+arch:
+  packages:
+    - name: watchexec
 termux:
   packages:
     - name: watchexec
+alpine:
+  packages:
+    - name: watchexec
+macos:
+  packages:
+    - name: watchexec
+{{- else }}
+github:
+  repo: watchexec/watchexec
+  version: latest
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: watchexec-%1v-{{ $arch }}-unknown-linux-gnu.tar.gz
+archive:
+  - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec
+    strip: 1
+  - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec.1
+    strip: 1
+    location: $MAN_DIR/man1
 {{- end }}

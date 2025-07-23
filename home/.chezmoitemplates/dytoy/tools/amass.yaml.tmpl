@@ -2,8 +2,13 @@ name: amass
 method: binary
 github:
   repo: owasp-amass/amass
-  release_asset: amass_Linux_{{ .chezmoi.arch }}.zip
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "Darwin" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "Linux" }}
+  {{- end }}
+  release_asset: amass_{{ $os }}_{{ .chezmoi.arch }}.zip
 archive:
-  strip_components: 1
-  paths:
-    - amass_Linux_{{ .chezmoi.arch }}/amass
+  - path: amass_{{ $os }}_{{ .chezmoi.arch }}/amass
+    strip: 1

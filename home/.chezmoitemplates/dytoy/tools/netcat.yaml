@@ -13,3 +13,6 @@ ubuntu:
 termux:
   packages:
     - name: netcat-openbsd
+alpine:
+  packages:
+    - name: netcat-openbsd

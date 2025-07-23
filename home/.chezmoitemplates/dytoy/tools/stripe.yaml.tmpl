@@ -2,11 +2,18 @@ name: stripe
 method: binary
 github:
   repo: stripe/stripe-cli
-  {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: stripe_%1v_linux_x86_64.tar.gz
-  {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: stripe_%1v_linux_arm64.tar.gz
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "mac-os" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "linux" }}
   {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64" }}
+  {{- end }}
+  release_asset: stripe_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
-  paths:
-    - stripe
+  - path: stripe
