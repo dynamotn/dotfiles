@@ -32,12 +32,13 @@ is_essential: true
 method: os
 macos:
   packages:
-    - name: nikitabobko/tap/aerospace
+    - name: aerospace
       type: cask
     - name: autoraise
       unstable: true
   hook:
     before: |-
+      brew tap nikitabobko/tap
       brew tap dimentium/autoraise
     after: |-
       /usr/bin/osascript -e 'tell application "System Events" to make new login item at end with properties {name:"Aerospace.app", path:"/Applications/Aerospace.app", kind:"Application", hidden:true}'
