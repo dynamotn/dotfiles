@@ -52,7 +52,12 @@ folders:
     regex: ""
     priority: 0
   {{- end }}
+  {{- $top := . }}
   {{- range .decryptEnterprise }}
   {{-   $projektSecret := printf "../secrets/data/enterprise-%s/projekt.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
-  {{-   $projektSecret.folders | replaceAllRegex "\\$HOME" $.chezmoi.homeDir | nindent 2 }}
+  {{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{-   range $projektSecret.folders }}
+  {{-     $folder := . }}
+  - {{-   $folder | toYaml | replaceAllRegex "\\$HOME" $top.chezmoi.homeDir | nindent 4 }}
+  {{-   end }}
   {{- end }}
