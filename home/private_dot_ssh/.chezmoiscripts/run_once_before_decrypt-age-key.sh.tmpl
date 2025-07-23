@@ -5,9 +5,11 @@ dybatpho::register_err_handler
 {{ $types := list }}
 {{- if .decryptPersonal }}
 {{-   $types = append $types "personal" }}
+# personal hash: {{ joinPath .chezmoi.sourceDir "../secrets/personal.age" | include | sha256sum }}
 {{- end }}
 {{- range .decryptEnterprise }}
 {{-   $types = printf "enterprise-%s" . | append $types }}
+# {{ . }} hash: {{ printf "../secrets/enterprise-%s.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
 {{- end }}
 for type in {{ range $types }}{{ . | quote }} {{ end }}; do
   dybatpho::notice "Decrypting ${type}.age file to decrypt all encrypted files"
