@@ -1,0 +1,2 @@
+{{- $top := merge . (dict "enterprise" "T1") }}
+{{- template "git/enterprise.config.tmpl" $top -}}
