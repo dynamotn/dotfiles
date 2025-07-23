@@ -7,6 +7,10 @@
 {{- end }}
 {{- $processFirefox := "" }}
 {{- $processThunderbird := "" }}
+{{- $numberOfRunningProcess := 0 }}
+{{- if eq .chezmoi.os "linux" }}
+{{-   $numberOfRunningProcess = 1 }}
+{{- end }}
 {{- if eq .browser "F" }}
 {{-   if eq .chezmoi.os "darwin" }}
 {{-     $processFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
@@ -44,7 +48,7 @@
 {{- $dotfilesFolder := splitList (printf "%s/" .chezmoi.homeDir) .chezmoi.sourceDir | last }}
 {{- $version := "" }}
 {{- if eq .browser "F" "Z" }}
-{{-   if eq (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 1 }}
+{{-   if le (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
 {{ $dotfilesFolder }}/.chezmoitemplates/firefox/prefs/00-arkenfox.js:
   type: file
   url: 'https://raw.githubusercontent.com/arkenfox/user.js/master/user.js'
@@ -161,7 +165,7 @@
 {{-   end }}
 {{- end }}
 {{- if eq .mailClient "T" "B" }}
-{{-   if eq (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) 1 }}
+{{-   if le (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) $numberOfRunningProcess }}
 {{ $dotfilesFolder }}/.chezmoitemplates/thunderbird/prefs/00-arkenfox.js:
   type: file
   url: https://raw.githubusercontent.com/HorlogeSkynet/thunderbird-user.js/master/user.js

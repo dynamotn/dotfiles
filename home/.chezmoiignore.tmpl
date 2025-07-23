@@ -55,6 +55,10 @@ Library/Application Support/zen
 {/* Ignore when running */}
 {{- $processFirefox := "" }}
 {{- $processThunderbird := "" }}
+{{- $numberOfRunningProcess := 0 }}
+{{- if eq .chezmoi.os "linux" }}
+{{-   $numberOfRunningProcess = 1 }}
+{{- end }}
 {{- if eq .browser "F" }}
 {{-   if eq .chezmoi.os "darwin" }}
 {{-     $processFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
@@ -90,7 +94,7 @@ Library/Application Support/zen
 {{-   end }}
 {{- end }}
 {{- if eq .browser "F" "Z" }}
-{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) 1 }}
+{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
 .config/firefox
 .mozilla
 .zen
@@ -99,7 +103,7 @@ Library/Application Support/zen
 {{-   end }}
 {{- end }}
 {{- if eq .mailClient "T" "B" }}
-{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) 1 }}
+{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) $numberOfRunningProcess }}
 .config/thunderbird
 .thunderbird
 Library/thunderbird
