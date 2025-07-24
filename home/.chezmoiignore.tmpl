@@ -182,35 +182,41 @@ Multimedia
 
 {/* Secret files and Private submodules */}
 {{- if not .decryptPersonal }}
-Library/Application Support/rbw
+.ssh/config.d/personal.config
+.ssh/key/personal*
 .config/firefox/profiles/personal
+.config/firefox/startpage/profiles/personal
+.config/thunderbird/profiles/personal
 .config/fish-ai.ini
-.config/fish/secret.fish
 .config/github-copilot/hosts.json
 .config/glab-cli/config.yml
 .config/himalaya
 .config/.jira
 .config/rbw
-.config/thunderbird/profiles/personal
+Library/Application Support/rbw
 .config/tstruct/auth.json
 .kube/config
 .terraformrc
 .docker/config.json
-.ssh/config.d/personal.config
-.ssh/key/personal*
 {{- end }}
 {{- if empty .decryptEnterprise }}
 Library/Application Support/rbw-*
 .config/rbw-*
 {{- end }}
 {{- if not (has "F1" .decryptEnterprise) }}
-Library/Application Support/rbw-enterprise-f1
-Working/enterprise/F1/.jira
-Working/enterprise/F1/OP/.kube/config
-Working/enterprise/F1/OP/.docker/config.json
+.ssh/key/enterprise-F1_*
+Working/enterprise/F1
 .config/firefox/profiles/enterprise-F1
 .config/firefox/startpage/profiles/enterprise-F1
-.config/rbw-enterprise-f1
 .config/thunderbird/profiles/enterprise-F1
-.ssh/key/enterprise-F1_*
+.config/rbw-enterprise-f1
+Library/Application Support/rbw-enterprise-f1
+{{- end }}
+{{- if not (has "ZOO" .decryptEnterprise) }}
+.ssh/key/enterprise-ZOO_*
+Working/enterprise/ZOO
+{{- end }}
+{{- if not (has "T1" .decryptEnterprise) }}
+.ssh/key/enterprise-T1_*
+Working/enterprise/T1
 {{- end }}
