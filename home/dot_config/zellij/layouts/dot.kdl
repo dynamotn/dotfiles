@@ -30,6 +30,15 @@ layout {
       }
     }
   }
+  tab name="devcontainer" cwd="~/Working/personal/container-dotfiles" split_direction="vertical" {
+    pane focus=true
+    floating_panes {
+      pane {
+        command "git"
+        args "pull"
+      }
+    }
+  }
   tab name="nvim" cwd="~/Dotfiles/silos/neovim" split_direction="vertical" {
     pane focus=true
     floating_panes {
