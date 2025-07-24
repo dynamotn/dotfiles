@@ -12,9 +12,6 @@ layout {
   tab name="working-personal" cwd="~/Working/personal" {
     pane
   }
-  tab name="working-enterprise" cwd="~/Working/enterprise" {
-    pane
-  }
   tab name="other" cwd="~" {
     pane
   }
