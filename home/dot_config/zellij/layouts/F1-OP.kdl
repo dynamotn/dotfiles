@@ -1,0 +1,48 @@
+layout {
+  default_tab_template {
+    children
+    pane size=1 borderless=true {
+      plugin location="status-bar"
+    }
+    pane size=1 borderless=true {
+      plugin location="zjstatus"
+    }
+  }
+
+  tab name="connect" cwd="~/Working/enterprise/F1/OP" split_direction="vertical" {
+    pane {
+      command "fish"
+      args "-c" "k9s --context uat"
+    }
+    floating_panes {
+      pane {
+        command "chisel"
+        args "client" "localhost:2468" "3000"
+      }
+    }
+  }
+  tab name="prd-devops" cwd="~/Working/enterprise/F1/OP" {
+    pane {
+      command "fish"
+      args "-c" "k9s --context prd-devops"
+    }
+  }
+  tab name="prd-apps" cwd="~/Working/enterprise/F1/OP" {
+    pane {
+      command "fish"
+      args "-c" "k9s --context prd-apps"
+    }
+  }
+  tab name="docker" cwd="~/Working/enterprise/F1/OP/docker" {
+    pane
+  }
+  tab name="iac" cwd="~/Working/enterprise/F1/OP/iac" {
+    pane
+  }
+  tab name="cicd" cwd="~/Working/enterprise/F1/OP/cicd" {
+    pane
+  }
+  tab name="docs" cwd="~/Working/enterprise/F1/OP/docs" {
+    pane
+  }
+}
