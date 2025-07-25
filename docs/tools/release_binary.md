@@ -87,6 +87,7 @@
 |[k6](https://github.com/grafana/k6)|Load testing tool|Testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|Testing tool|
 |[oha](https://github.com/hatoo/oha)|HTTP load generator tool|Testing tool|
+|[scc](github.com/boyter/scc)|Display statistics about code|Miscellaneous|
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|Miscellaneous|
 |[cointop](https://github.com/arduino/arduino-cli)|TUI to track coin stats|Miscellaneous|
 |[tickrs](https://github.com/tarkah/tickrs)|TUI to track stock stats|Miscellaneous|
