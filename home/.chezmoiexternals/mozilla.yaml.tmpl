@@ -136,6 +136,16 @@
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4451438/"
   refreshPeriod: 168h
+# Get Tech Stack Github
+.config/firefox/profiles/{{ . }}/extensions/a778917369@gmail.com.xpi:
+  type: file
+  url: "https://addons.mozilla.org/firefox/downloads/file/4196975/"
+  refreshPeriod: 168h
+# I still don't care about cookies
+.config/firefox/profiles/{{ . }}/extensions/idcac-pub@guus.ninja.xpi:
+  type: file
+  url: "https://addons.mozilla.org/firefox/downloads/file/4216095/"
+  refreshPeriod: 168h
 {{-       end }}
 {{-       if eq . "personal" }}
 .config/firefox/profiles/{{ . }}/extensions/leechblockng@proginosko.com.xpi:
@@ -154,11 +164,6 @@
 .config/firefox/profiles/{{ . }}/extensions/magnolia@12.34.xpi:
   type: file
   url: "https://gitflic.ru/project/magnolia1234/bpc_uploads/blob/raw?file=bypass_paywalls_clean-latest.xpi"
-  refreshPeriod: 168h
-# Get Tech Stack Github
-.config/firefox/profiles/{{ . }}/extensions/a778917369@gmail.com.xpi:
-  type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4196975/"
   refreshPeriod: 168h
 {{-       end }}
 {{-     end }}
