@@ -18,12 +18,11 @@ macos:
 method: binary
 github:
   repo: sharkdp/bat
-  version: latest
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  {{- $arch = "x86_64" }}
+  {{-   $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{- $arch = "aarch64" }}
+  {{-   $arch = "aarch64" }}
   {{- end }}
   release_asset: bat-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
 archive:

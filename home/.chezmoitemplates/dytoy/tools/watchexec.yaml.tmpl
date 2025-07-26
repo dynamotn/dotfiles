@@ -17,7 +17,6 @@ macos:
 {{- else }}
 github:
   repo: watchexec/watchexec
-  version: latest
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
   {{- $arch = "x86_64" }}

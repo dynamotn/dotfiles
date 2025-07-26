@@ -2,7 +2,6 @@ name: terrascan
 method: binary
 github:
   repo: tenable/terrascan
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "Darwin" }}

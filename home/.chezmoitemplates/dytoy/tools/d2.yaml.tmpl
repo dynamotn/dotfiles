@@ -2,7 +2,13 @@ name: d2
 method: binary
 github:
   repo: terrastruct/d2
-  release_asset:  d2-%v-linux-{{ .chezmoi.arch }}.tar.gz
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "macos" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset:  d2-%v-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:
   - path: d2-%v/bin/d2
     strip: 2

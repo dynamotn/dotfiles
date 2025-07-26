@@ -2,7 +2,6 @@ name: kubescape
 method: binary
 github:
   repo: kubescape/kubescape
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "linux" }}
   {{- $os = "ubuntu" }}

@@ -2,11 +2,10 @@ name: k9s
 method: binary
 github:
   repo: derailed/k9s
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "Darwin" }}
-  {{- else if eq .chezmoi.os "linux" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
   {{- $os = "Linux" }}
   {{- end }}
   release_asset: k9s_{{ $os }}_{{ .chezmoi.arch }}.tar.gz

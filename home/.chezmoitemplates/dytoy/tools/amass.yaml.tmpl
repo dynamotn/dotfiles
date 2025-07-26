@@ -4,9 +4,9 @@ github:
   repo: owasp-amass/amass
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{- $os = "Darwin" }}
+  {{-   $os = "Darwin" }}
   {{- else if eq .chezmoi.os "linux" "android" }}
-  {{- $os = "Linux" }}
+  {{-   $os = "Linux" }}
   {{- end }}
   release_asset: amass_{{ $os }}_{{ .chezmoi.arch }}.zip
 archive:

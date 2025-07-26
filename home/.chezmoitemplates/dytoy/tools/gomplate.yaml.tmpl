@@ -2,9 +2,8 @@ name: gomplate
 method: binary
 github:
   repo: hairyhenderson/gomplate
-  version: latest
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset:  gomplate_{{ $os }}-{{ .chezmoi.arch }}

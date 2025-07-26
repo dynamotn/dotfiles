@@ -1,5 +1,7 @@
+{{- if ne .chezmoi.os "android" }}
 name: diffoci
 method: binary
 github:
   repo: reproducible-containers/diffoci
   release_asset: diffoci-%v.{{ .chezmoi.os }}-{{ .chezmoi.arch }}
+{{- end }}

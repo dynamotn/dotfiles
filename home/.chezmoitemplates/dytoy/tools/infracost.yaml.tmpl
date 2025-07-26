@@ -1,13 +1,15 @@
-{{- if eq .chezmoi.os "linux" }}
 name: infracost
 method: binary
 github:
   repo: infracost/infracost
   version: latest
-  release_asset: infracost-linux-{{ .chezmoi.arch }}.tar.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: infracost-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:
-  - path: infracost-linux-{{ .chezmoi.arch }}
+  - path: infracost-{{ $os }}-{{ .chezmoi.arch }}
 hook:
   after: |
-    mv ~/.local/bin/infracost-linux-{{ .chezmoi.arch }} ~/.local/bin/infracost
-{{- end }}
+    mv ~/.local/bin/infracost-{{ $os }}-{{ .chezmoi.arch }} ~/.local/bin/infracost

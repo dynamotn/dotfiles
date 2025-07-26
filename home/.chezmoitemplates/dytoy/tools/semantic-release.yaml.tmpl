@@ -2,5 +2,8 @@ name: semantic-release
 method: binary
 github:
   repo: go-semantic-release/semantic-release
-  version: latest
-  release_asset: semantic-release_%v_linux_{{ .chezmoi.arch }}
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: semantic-release_%v_{{ $os }}_{{ .chezmoi.arch }}

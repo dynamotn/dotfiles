@@ -1,9 +1,12 @@
-{{- if eq .chezmoi.os "linux" }}
 name: hugo
 method: binary
 github:
   repo: gohugoio/hugo
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  release_asset: hugo_%1v_darwin-universal.tar.gz
+  {{- else if eq .chezmoi.os "linux" "android" }}
   release_asset: hugo_%1v_linux-{{ .chezmoi.arch }}.tar.gz
+  {{- end }}
 archive:
   - path: hugo
-{{- end }}

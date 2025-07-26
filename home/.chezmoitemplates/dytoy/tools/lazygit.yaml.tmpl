@@ -7,7 +7,7 @@ github:
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "Darwin" }}
-  {{- else if eq .chezmoi.os "linux" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
   {{- $os = "Linux" }}
   {{- end }}
   {{- $arch := "" }}
