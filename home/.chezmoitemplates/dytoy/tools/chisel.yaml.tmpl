@@ -1,11 +1,14 @@
 name: chisel
 method: binary
-{{- if eq .kind "container" }}
+{{- if eq .kind "container" "vm" }}
 is_essential: true
 {{- end }}
 github:
   repo: jpillora/chisel
-  version: latest
-  release_asset: chisel_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: chisel_%1v_{{ $os }}_{{ .chezmoi.arch }}.gz
 archive:
   - path: chisel

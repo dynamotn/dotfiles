@@ -2,7 +2,11 @@ name: flarectl
 method: binary
 github:
   repo: cloudflare/cloudflare-go
-  release_asset: flarectl_%1v_linux_{{ .chezmoi.arch }}.tar.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: flarectl_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
   version: v0.115.0
 archive:
   - path: flarectl

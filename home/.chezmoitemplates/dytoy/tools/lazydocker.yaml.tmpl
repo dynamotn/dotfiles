@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "android" }}
 name: lazydocker
 method: binary
 github:
@@ -18,3 +19,4 @@ github:
   release_asset: lazydocker_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
   - path: lazydocker
+{{- end }}

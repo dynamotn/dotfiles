@@ -2,5 +2,8 @@ name: terragrunt
 method: binary
 github:
   repo: gruntwork-io/terragrunt
-  version: latest
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
   release_asset: terragrunt_{{ .chezmoi.os }}_{{ .chezmoi.arch }}

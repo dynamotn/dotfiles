@@ -2,5 +2,8 @@ name: restic
 method: binary
 github:
   repo: restic/restic
-  version: latest
-  release_asset: restic_%1v_linux_{{ .chezmoi.arch }}.bz2
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: restic_%1v_{{ $os }}_{{ .chezmoi.arch }}.bz2

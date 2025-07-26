@@ -1,9 +1,8 @@
 name: rclone
-{{- if eq .chezmoi.os "linux" }}
+{{- if eq .chezmoi.os "linux" "darwin" }}
 method: binary
 github:
   repo: rclone/rclone
-  version: latest
   release_asset: rclone-%v-linux-{{ .chezmoi.arch }}.zip
 archive:
   - path: rclone-%v-linux-{{ .chezmoi.arch }}/rclone

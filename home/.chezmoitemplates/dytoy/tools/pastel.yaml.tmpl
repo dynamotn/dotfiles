@@ -8,7 +8,6 @@ termux:
 method: binary
 github:
   repo: sharkdp/pastel
-  version: latest
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
   {{- $arch = "x86_64" }}

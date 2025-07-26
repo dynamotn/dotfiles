@@ -1,4 +1,3 @@
-{{- if eq .kind "pc" "laptop" }}
 name: jira
 method: binary
 github:
@@ -7,6 +6,8 @@ github:
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "macOS" }}
+  {{- else if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
@@ -18,4 +19,3 @@ github:
 archive:
   - path: jira_%1v_{{ $os }}_{{ $arch }}/bin/jira
     strip: 2
-{{- end }}
