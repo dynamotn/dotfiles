@@ -2,7 +2,6 @@ name: jira
 method: binary
 github:
   repo: ankitpokhrel/jira-cli
-  version: latest
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "macOS" }}

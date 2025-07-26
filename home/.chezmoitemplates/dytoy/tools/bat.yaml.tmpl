@@ -1,14 +1,19 @@
 name: bat
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS, and container environments
+# cuz it's essential tool
 method: os
 arch:
   packages:
     - name: bat
-termux:
+ubuntu:
   packages:
     - name: bat
 alpine:
+  packages:
+    - name: bat
+termux:
   packages:
     - name: bat
 macos:

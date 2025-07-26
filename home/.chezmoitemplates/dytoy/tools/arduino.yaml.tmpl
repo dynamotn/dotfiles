@@ -2,7 +2,6 @@ name: arduino
 method: binary
 github:
   repo: arduino/arduino-cli
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{-   $os = "Darwin" }}

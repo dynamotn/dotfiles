@@ -27,7 +27,7 @@ function _gentoo_add_repo {
 }
 
 #######################################
-# @description Check if a package is installed in Gentoo.
+# @description Check if a package is installed on Gentoo.
 # Need _gentoo_init to be called first to ensure `qlist` is available.
 # @arg $1 string Package name
 #######################################
@@ -74,7 +74,7 @@ function _arch_sync_repo {
 }
 
 #######################################
-# @description Check if a package is installed in Arch
+# @description Check if a package is installed on Arch
 # @arg $1 string Package name
 #######################################
 function _arch_check_installed {
@@ -138,7 +138,7 @@ function _ubuntu_add_repo {
 }
 
 #######################################
-# @description Check if a package is installed in Ubuntu
+# @description Check if a package is installed on Ubuntu
 # @arg $1 string Package name
 #######################################
 function _ubuntu_check_installed {
@@ -172,7 +172,7 @@ function _alpine_sync_repo {
 }
 
 #######################################
-# @description Check if a package is installed in Alpine
+# @description Check if a package is installed on Alpine
 # @arg $1 string Package name
 #######################################
 function _alpine_check_installed {
@@ -206,7 +206,7 @@ function _termux_sync_repo {
 }
 
 #######################################
-# @description Check if a package is installed in Termux
+# @description Check if a package is installed on Termux
 # @arg $1 string Package name
 #######################################
 function _termux_check_installed {
@@ -240,7 +240,7 @@ function _macos_sync_repo {
 }
 
 #######################################
-# @description Check if a package is installed in MacOS via brew
+# @description Check if a package is installed on MacOS via brew
 # @arg $1 string Package name
 #######################################
 function _macos_brew_check_installed {
@@ -249,16 +249,26 @@ function _macos_brew_check_installed {
 }
 
 #######################################
-# @description Check if a package is installed in MacOS via Apple Store.
+# @description Check if a package is installed on MacOS via Apple Store.
 # Needs `mas` to be installed first.
-# @arg $1 string Package name
+# @arg $1 string Apple Store app ID
 #######################################
 function _macos_mas_check_installed {
-  dybatpho::expect_args package -- "$@"
-  mas list | grep -q "$package"
+  dybatpho::expect_args app_id -- "$@"
+  mas list | grep -q "$app_id"
 }
 
-# @description Check if a package is installed in MacOS via Apple Store
+#######################################
+# @description Check if a package is installed on MacOS via download and copy
+# to /Applications
+# @arg $1 string Name of application
+#######################################
+function _macos_download_check_installed {
+  dybatpho::expect_args app_name -- "$@"
+  find /Applications -maxdepth 1 -name "${app_name}.app" -print -quit | grep -q "${app_name}.app"
+}
+
+# @description Check if a package is installed on MacOS via Apple Store
 # @arg $1 string Package name
 #######################################
 function _macos_brew_install {
@@ -272,9 +282,25 @@ function _macos_brew_install {
 # @arg $1 string Package name
 #######################################
 function _macos_mas_install {
-  dybatpho::expect_args package -- "$@"
-  dybatpho::progress "Installing app $(mas info "$package" | head -n 1)"
-  dybatpho::dry_run mas install "$package"
+  dybatpho::expect_args app_id -- "$@"
+  dybatpho::progress "Installing app $(mas info "$app_id" | head -n 1)"
+  dybatpho::dry_run mas install "$app_id"
+}
+
+#######################################
+# @description Install a package in MacOS via download and copy to /Applications
+# @arg $1 string Name of application
+# @arg $2 string URL to download
+#######################################
+function _macos_download_install {
+  dybatpho::expect_args app_name url -- "$@"
+  dybatpho::progress "Installing app $app_name"
+  dybatpho::create_temp temp_file ".dmg"
+  dybatpho::curl_download "$url" "$temp_file"
+  local mount_dir
+  mount_dir=$(hdiutil mount -plist "$temp_file" | grep -oE '/Volumes/[^"<]+' | head -n 1)
+  sudo cp -r "${mount_dir}/${app_name}.app" /Applications
+  sudo hdiutil unmount "$mount_dir"
 }
 
 #######################################

@@ -83,8 +83,13 @@ data:
   mailEnterpriseProfiles: []
   {{- end }}
   terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use? (T for tmux, Z for Zellij)" (list "T" "Z") "Z" | quote }}
+  {{- if ne .kind "container" }}
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" false }}
+  {{- else }}
+  hasSound: false
+  hasBluetooth: false
+  {{- end }}
   {{ $hasProxy := promptBool "Does this machine need HTTP(S) or SOCKS proxy? (y/n)" false }}
   {{- if $hasProxy }}
   httpProxy: {{ promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using:" | quote }}

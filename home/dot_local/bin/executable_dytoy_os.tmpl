@@ -3,6 +3,7 @@
 # @brief Install package tools for the current OS
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh
 dybatpho::register_err_handler
 
 dybatpho::create_temp TEMP_HOOK_BEFORE ".sh"
@@ -119,34 +120,48 @@ function _{{ $shortCode }}_run {
       fi
       {{- else if eq .osid "darwin" }}
       package_type=$(echo "$package" | yq e '.type')
-      if [[ "$package_type" == "store" ]]; then
-        if dybatpho::is false $ONLY_NOT_INSTALLED || ! _macos_mas_check_installed "$package_name"; then
-          _run_hook "$TEMP_HOOK_BEFORE"
-          _macos_mas_install "$package_name"
-          _run_hook "$TEMP_HOOK_AFTER"
-          dybatpho::debug "Installed app: $package_name"
-        else
-          dybatpho::debug "App $package_name is already installed, skipping."
-        fi
-      else
-        unstable=$(echo "$package" | yq e '.unstable')
-        if [[ "$package_type" == "cask" ]]; then
-          brew_param="--cask"
-        else
-          brew_param="--formula"
-        fi
-        if [[ "$unstable" == "true" ]]; then
-          brew_param="$brew_param --HEAD"
-        fi
-        if dybatpho::is false $ONLY_NOT_INSTALLED || ! _macos_brew_check_installed "$package_name"; then
-          _run_hook "$TEMP_HOOK_BEFORE"
-          _macos_brew_install "$package_name" "$brew_param"
-          _run_hook "$TEMP_HOOK_AFTER"
-          dybatpho::debug "Installed package: $package_name"
-        else
-          dybatpho::debug "Package $package_name is already installed, skipping."
-        fi
-      fi
+      case "$package_type" in
+        store)
+          if dybatpho::is false $ONLY_NOT_INSTALLED || ! _macos_mas_check_installed "$package_name"; then
+            _run_hook "$TEMP_HOOK_BEFORE"
+            _macos_mas_install "$package_name"
+            _run_hook "$TEMP_HOOK_AFTER"
+            dybatpho::debug "Installed app: $package_name"
+          else
+            dybatpho::debug "App $package_name is already installed, skipping."
+          fi
+          ;;
+        download)
+          url=$(echo "$package" | yq e '.url')
+          if dybatpho::is false $ONLY_NOT_INSTALLED || ! _macos_download_check_installed "$package_name"; then
+            _run_hook "$TEMP_HOOK_BEFORE"
+            _macos_download_install "$package_name" "$url"
+            _run_hook "$TEMP_HOOK_AFTER"
+            dybatpho::debug "Installed app: $package_name"
+          else
+            dybatpho::debug "App $package_name is already installed, skipping."
+          fi
+          ;;
+        *)
+          unstable=$(echo "$package" | yq e '.unstable')
+          if [[ "$package_type" == "cask" ]]; then
+            brew_param="--cask"
+          else
+            brew_param="--formula"
+          fi
+          if [[ "$unstable" == "true" ]]; then
+            brew_param="$brew_param --HEAD"
+          fi
+          if dybatpho::is false $ONLY_NOT_INSTALLED || ! _macos_brew_check_installed "$package_name"; then
+            _run_hook "$TEMP_HOOK_BEFORE"
+            _macos_brew_install "$package_name" "$brew_param"
+            _run_hook "$TEMP_HOOK_AFTER"
+            dybatpho::debug "Installed package: $package_name"
+          else
+            dybatpho::debug "Package $package_name is already installed, skipping."
+          fi
+          ;;
+      esac
       {{- else }}
       if dybatpho::is false $ONLY_NOT_INSTALLED || ! _{{ $shortCode }}_check_installed "$package_name"; then
         _run_hook "$TEMP_HOOK_BEFORE"
@@ -157,6 +172,17 @@ function _{{ $shortCode }}_run {
         dybatpho::debug "Package $package_name is already installed, skipping."
       fi
       {{- end }}
+    done
+
+    readarray services < <(echo "$tool" | yq e -o=j -I=0 -r '.{{ $shortCode }}.services.[]')
+    for service in "${services[@]}"; do
+      service_name=$(echo "$service" | yq e '.name')
+      if [[ "$service_name" == "null" ]]; then
+        continue
+      fi
+
+      is_system=$(echo "$service" | yq e '.is_system')
+      _{{ $shortCode }}_enable_service "$service_name" "$is_system"
     done
     dybatpho::success "Installed os tool: $tool_name"
   done

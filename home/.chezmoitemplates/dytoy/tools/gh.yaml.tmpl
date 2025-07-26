@@ -2,7 +2,6 @@ name: gh
 method: binary
 github:
   repo: cli/cli
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "macOS" }}
