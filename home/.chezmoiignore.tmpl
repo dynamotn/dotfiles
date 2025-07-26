@@ -202,6 +202,7 @@ Library/Application Support/rbw-*
 .config/rbw-*
 {{- end }}
 {{- if not (has "F1" .decryptEnterprise) }}
+.ssh/config.d/enterprise-F1.config
 .ssh/key/enterprise-F1_*
 Working/enterprise/F1
 .config/firefox/profiles/enterprise-F1
@@ -211,10 +212,12 @@ Working/enterprise/F1
 Library/Application Support/rbw-enterprise-f1
 {{- end }}
 {{- if not (has "ZOO" .decryptEnterprise) }}
+.ssh/config.d/enterprise-ZOO.config
 .ssh/key/enterprise-ZOO_*
 Working/enterprise/ZOO
 {{- end }}
 {{- if not (has "T1" .decryptEnterprise) }}
+.ssh/config.d/enterprise-T1.config
 .ssh/key/enterprise-T1_*
 Working/enterprise/T1
 {{- end }}
