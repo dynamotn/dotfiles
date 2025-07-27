@@ -85,7 +85,7 @@ bind = $mainMod, M, exec, $mailClient -P Enterprise-{{ .company }}
 bind = $mainMod, K, exec, $mailClient -P Personal
 {{- end }}
 bind = $mainMod, N, exec, swaync-client -t -sw
-bind = $mainMod, X, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
+bind = $mainMod, J, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
 bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise-{{ .company }}{{- end }} bitrofi"
 bind = $mainMod, T, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise-{{ .company }}{{- end }} bitrofi totp"
 bind = $mainMod, L, exec, loginctl lock-session
