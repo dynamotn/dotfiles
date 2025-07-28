@@ -1,4 +1,5 @@
 {{- if eq .guiServer "W" }}
+# Only available packages for Gentoo and Arch
 name: eww
 method: os
 is_essential: true
@@ -6,7 +7,7 @@ gentoo:
   packages:
     - name: gui-apps/eww
       repo: guru
-      uri: https://github.com/gentoo-mirror/guru.git
+      url: https://github.com/gentoo-mirror/guru.git
 arch:
   packages:
     - name: eww-git

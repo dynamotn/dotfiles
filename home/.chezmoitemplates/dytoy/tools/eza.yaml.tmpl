@@ -1,7 +1,12 @@
 name: eza
 is_essential: true
-{{- if eq .chezmoi.os "android" "darwin" }}
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
 method: os
+arch:
+  packages:
+    - name: eza
 termux:
   packages:
     - name: eza

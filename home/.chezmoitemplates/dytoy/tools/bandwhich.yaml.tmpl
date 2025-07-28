@@ -1,4 +1,3 @@
-{{- if eq .chezmoi.os "linux" "darwin" }}
 name: bandwhich
 method: binary
 github:
@@ -8,6 +7,8 @@ github:
   {{-   $os = "apple-darwin" }}
   {{- else if eq .chezmoi.os "linux" }}
   {{-   $os = "unknown-linux-gnu" }}
+  {{- else if eq .chezmoi.os "android" }}
+  {{-   $os = "linux-android" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
@@ -18,9 +19,8 @@ github:
   release_asset: bandwhich-%v-{{ $arch }}-{{ $os }}.tar.gz
 archive:
   - path: bandwhich
-{{-   if eq .chezmoi.os "linux" }}
+{{- if eq .chezmoi.os "linux" }}
 hook:
   after: |
     sudo setcap cap_sys_ptrace,cap_dac_read_search,cap_net_raw,cap_net_admin+ep ~/.local/bin/bandwhich
-{{-   end }}
 {{- end }}

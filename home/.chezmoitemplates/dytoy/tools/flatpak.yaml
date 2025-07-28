@@ -1,0 +1,25 @@
+name: flatpak
+method: os
+gentoo:
+  packages:
+    - name: sys-apps/flatpak
+  hook:
+    after: flatpak install com.github.tchx84.Flatseal
+arch:
+  packages:
+    - name: flatpak
+  hook:
+    after: flatpak install com.github.tchx84.Flatseal
+ubuntu:
+  packages:
+    - name: flatpak
+  hook:
+    after: flatpak install com.github.tchx84.Flatseal
+alpine:
+  packages:
+    - name: flatpak
+  hook:
+    after: flatpak install com.github.tchx84.Flatseal
+termux: # Not suppported
+macos: # Not used for
+flatpak: # Are you serious?

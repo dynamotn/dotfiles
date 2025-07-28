@@ -2,7 +2,6 @@ name: gh
 method: binary
 github:
   repo: cli/cli
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "macOS" }}
@@ -16,7 +15,7 @@ archive:
     strip: 2
   - path: gh_${version:1}_{{ $os }}_{{ .chezmoi.arch }}/share/man/man1/*
     strip: 4
-    location: "$MAN_DIR/man1"
+    location: "$HOME/.local/man/man1"
 hook:
   after: |
     gh auth login

@@ -10,9 +10,9 @@ arch:
 ubuntu:
   packages:
     - name: bzip2
-termux:
+alpine:
   packages:
     - name: bzip2
-alpine:
+termux:
   packages:
     - name: bzip2
