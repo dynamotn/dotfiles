@@ -1,10 +1,26 @@
-{{- if eq .chezmoi.arch "amd64" }}
+{{- if and (eq .chezmoi.os "linux") (eq .chezmoi.arch "amd64") }}
+# Only available for amd64 on Linux
 name: cointop
 method: binary
 github:
   repo: cointop-sh/cointop
-  version: latest
-  release_asset: cointop_%1v_{{ .chezmoi.os }}_amd64.tar.gz
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset: cointop_%1v_{{ $os }}_amd64.tar.gz
 archive:
   - path: cointop
+{{- else if eq .chezmoi.os "android" "darwin" }}
+# Use package manager for Android, macOS
+name: cointop
+method: os
+termux:
+  packages:
+    - name: cointop
+macos:
+  packages:
+    - name: cointop
+{{- else }}
+# Not support
 {{- end }}

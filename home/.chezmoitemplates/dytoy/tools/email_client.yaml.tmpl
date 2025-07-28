@@ -11,14 +11,20 @@ arch:
 ubuntu:
   packages:
     - name: thunderbird
+alpine:
+  packages:
+    - name: thunderbird
+termux:
+  packages:
+    - name: thunderbird
 macos:
   packages:
     - name: thunderbird
       type: cask
 {{- else if eq .mailClient "B" }}
+# Only available on Gentoo, Arch, macOS
 name: betterbird
 is_essential: true
-{{-   if eq .osid "linux-gentoo" "linux-arch" }}
 method: os
 gentoo:
   packages:
@@ -26,13 +32,12 @@ gentoo:
 arch:
   packages:
     - name: betterbird-bin
-{{- else if eq .chezmoi.os "darwin" }}
-method: shell
-content: |-
-  dybatpho::create_temp temp_file ".dmg"
-  dybatpho::curl_download "https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=release" "$temp_file"
-  mount_dir=$(hdiutil mount -plist $temp_file | grep -oE '/Volumes/[^"<]+' | head -n 1)
-  sudo cp -r $mount_dir/BetterBird.app /Applications
-  sudo hdiutil unmount $mount_dir
-{{-   end }}
+macos:
+  packages:
+    - name: Betterbird
+      type: download
+      url: https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=release
+flatpak:
+  packages:
+    - name: org.betterbird.Betterbird
 {{- end }}
