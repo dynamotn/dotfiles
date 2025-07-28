@@ -2,18 +2,17 @@ name: duf
 method: binary
 github:
   repo: muesli/duf
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{- $os = "Darwin" }}
+  {{-   $os = "Darwin" }}
   {{- else if eq .chezmoi.os "linux" "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  {{- $arch = "x86_64" }}
+  {{-   $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{- $arch = "aarch64" }}
+  {{-   $arch = "aarch64" }}
   {{- end }}
   release_asset:  duf_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:

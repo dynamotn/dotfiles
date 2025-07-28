@@ -3,10 +3,11 @@ method: os
 gentoo:
   packages:
     - name: app-misc/ollama
+  services:
+    - name: ollama
   hook:
     after: |-
-      sudo rc-update add ollama default
-      sudo rc-service ollama start
+      sudo gpasswd -a ollama video
 arch:
   packages:
     {{- if eq .guiDriver "N" }}
@@ -16,12 +17,10 @@ arch:
     {{- else }}
     - name: ollama
     {{- end }}
-  hook:
-    after: |-
-      sudo systemctl enable --now ollama
+  services:
+    - name: ollama
 macos:
   packages:
     - name: ollama
-  hook:
-    after: |-
-      brew services start ollama
+  services:
+    - name: ollama

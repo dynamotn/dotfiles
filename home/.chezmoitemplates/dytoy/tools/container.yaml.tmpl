@@ -1,54 +1,57 @@
-{{- if eq .kind "pc" "vm" "laptop" }}
+{{- if eq .kind "pc" "laptop" "sbc" "workstation" "vm" }}
 name: container
 method: os
 is_essential: true
-{{- if eq .chezmoi.os "linux" }}
 gentoo:
   packages:
     - name: app-containers/docker
     - name: app-containers/docker-cli
   hook:
     after: |-
-      sudo usermod -aG docker $USER || true
-      {{- if ne .kind "container" }}
-      sudo rc-update add docker default
-      sudo rc-service docker start
-      {{- end }}
+      sudo usermod -aG docker $USER || :
+  services:
+    - name: docker
 arch:
   packages:
     - name: docker
   hook:
     after: |-
-      sudo groupadd docker || true
-      sudo usermod -aG docker $USER || true
-      {{- if ne .kind "container" }}
-      sudo systemctl enable --now docker containerd
-      {{- end }}
+      sudo groupadd docker || :
+      sudo usermod -aG docker $USER || :
+  services:
+    - name: docker
+    - name: containerd
 ubuntu:
   packages:
     - name: docker-ce
     - name: docker-ce-cli
   hook:
     after: |-
-      sudo groupadd docker || true
-      sudo usermod -aG docker $USER || true
-      {{- if ne .kind "container" }}
-      sudo systemctl enable --now docker containerd
-      {{- end }}
-{{- end }}
+      sudo groupadd docker || :
+      sudo usermod -aG docker $USER || :
+  services:
+    - name: docker
+    - name: containerd
+alpine:
+  packages:
+    - name: docker
+  hook:
+    after: |-
+      sudo addgroup $USER docker || :
+  services:
+    - name: docker
 macos:
   packages:
     - name: lima
     - name: docker
+  {{- if eq .chezmoi.arch "arm64" }}
+  need_rosetta: true
+  {{- end }}
   hook:
-    {{- if eq .chezmoi.arch "arm64" }}
-    before: |-
-      softwareupdate --install-rosetta --agree-to-license
-    {{- end }}
     after: |-
-      limactl list dyker || limactl start -y template://dyker || true
+      limactl list dyker || limactl start -y template://dyker || :
       limactl start-at-login dyker
       docker context create lima-dyker --docker "host=unix://${HOME}/.lima/dyker/sock/docker.sock" \
         && docker context use lima-dyker \
-        || true
+        || :
 {{- end }}

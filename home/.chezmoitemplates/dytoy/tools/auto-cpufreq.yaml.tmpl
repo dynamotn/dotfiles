@@ -1,4 +1,5 @@
 {{- if eq .kind "laptop" }}
+# Use auto-cpufreq only on my laptop (Gentoo and Arch)
 name: auto-cpufreq
 method: os
 is_essential: true
@@ -15,4 +16,5 @@ arch:
   hook:
     after: |-
       sudo systemctl enable --now auto-cpufreq
+macos: # Not needed
 {{- end }}

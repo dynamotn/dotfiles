@@ -1,17 +1,22 @@
 name: age
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS, and container environments
+# cuz it's essential tool
 method: os
-termux:
-  packages:
-    - name: age
-macos:
-  packages:
-    - name: age
 arch:
   packages:
     - name: age
 alpine:
+  packages:
+    - name: age
+ubuntu:
+  packages:
+    - name: age
+termux:
+  packages:
+    - name: age
+macos:
   packages:
     - name: age
 {{- else }}

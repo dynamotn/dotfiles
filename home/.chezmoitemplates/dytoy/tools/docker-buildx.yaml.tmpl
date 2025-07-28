@@ -1,10 +1,9 @@
+{{- if ne .chezmoi.os "android" }}
+# Can't use docker and container on Android
 name: docker-buildx
 method: binary
 github:
   repo: docker/buildx
-  {{- $os := .chezmoi.os }}
-  {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
-  {{- end }}
-  release_asset: buildx-%v.{{ $os }}-{{ .chezmoi.arch }}
+  release_asset: buildx-%v.{{ .chezmoi.os }}-{{ .chezmoi.arch }}
 location: {{ .chezmoi.homeDir }}/.docker/cli-plugins
+{{- end }}

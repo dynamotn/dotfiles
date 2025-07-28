@@ -1,4 +1,5 @@
-{{- if .hasBluetooth }}
+{{- if and (eq .chezmoi.os "linux") .hasBluetooth }}
+# Only on Linux
 name: bluetooth
 method: os
 is_essential: true
@@ -6,17 +7,28 @@ gentoo:
   packages:
     - name: net-wireless/bluez
   {{- if ne .kind "container" }}
-  hook:
-    after: |-
-      sudo rc-update add bluetooth default
-      sudo rc-service bluetooth restart
+  services:
+    - name: bluetooth
   {{- end }}
 arch:
   packages:
     - name: bluez
   {{- if ne .kind "container" }}
-  hook:
-    after: |-
-      sudo systemctl enable --now bluetooth
+  services:
+    - name: bluetooth
+  {{- end }}
+ubuntu:
+  packages:
+    - name: bluez
+  {{- if ne .kind "container" }}
+  services:
+    - name: bluetooth
+  {{- end }}
+alpine:
+  packages:
+    - name: bluez
+  {{- if ne .kind "container" }}
+  services:
+    - name: bluetooth
   {{- end }}
 {{- end }}

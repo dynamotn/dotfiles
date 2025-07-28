@@ -1,72 +1,20 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # shellcheck disable=2154
 
 #######################################
 # @description Sync repositories of Gentoo
 #######################################
-function _gentoo_sync_repo {
+function pkg::sync_portage_repo {
   dybatpho::progress "Syncing package repositories"
   dybatpho::dry_run sudo emaint sync --allrepos
 }
 
 #######################################
-# @description Add repository to Gentoo portage
-# @arg $1 string Name of repository
-# @arg $2 string URI of the repository
-#######################################
-function _gentoo_add_repo {
-  dybatpho::expect_args repo_name uri -- "$@"
-  if [ ! -d "/etc/portage/repos.conf/$repo_name.conf" ]; then
-    dybatpho::dry_run sudo mkdir -p /etc/portage/repos.conf
-    dybatpho::dry_run eval "echo \"[$repo_name]\" | sudo tee /etc/portage/repos.conf/$repo_name.conf"
-    dybatpho::dry_run eval "echo \"location = /var/db/repos/$repo_name\" | sudo tee -a /etc/portage/repos.conf/$repo_name.conf"
-    dybatpho::dry_run eval "echo \"sync-type = git\" | sudo tee -a /etc/portage/repos.conf/$repo_name.conf"
-    dybatpho::dry_run eval "echo \"sync-uri = $uri\" | sudo tee -a /etc/portage/repos.conf/$repo_name.conf"
-    dybatpho::dry_run sudo emaint sync --yes --repo "$repo_name" || dybatpho::die "Failed to sync repository $repo_name"
-  fi
-}
-
-#######################################
-# @description Check if a package is installed in Gentoo.
-# Need _gentoo_init to be called first to ensure `qlist` is available.
-# @arg $1 string Package name
-#######################################
-function _gentoo_check_installed {
-  dybatpho::expect_args package -- "$@"
-  qlist -I "$package" > /dev/null
-}
-
-#######################################
-# @description Install a package in Gentoo
-# @arg $1 string Package name
-#######################################
-function _gentoo_install {
-  dybatpho::expect_args package -- "$@"
-  dybatpho::progress "Installing package $package"
-  dybatpho::dry_run sudo emerge --ask n --noreplace "$package"
-}
-
-#######################################
-# @description Initialize Gentoo package manager
-#######################################
-function _gentoo_init {
-  _gentoo_sync_repo
-  if ! dybatpho::is command equery; then
-    dybatpho::progress "Installing \`equery\` for day-to-day package management"
-    _gentoo_install app-portage/gentoolkit
-  fi
-  if ! dybatpho::is command qlist; then
-    dybatpho::progress "Installing \`qlist\` for querying installed packages"
-    _gentoo_install app-portage/portage-utils
-  fi
-}
-
-#######################################
 # @description Sync repositories of Arch
 #######################################
-function _arch_sync_repo {
+function pkg::sync_pacman_repo {
   dybatpho::progress "Syncing package repositories"
-  if ! command -v paru > /dev/null; then
+  if ! dybatpho::is command paru; then
     dybatpho::dry_run sudo pacman -Sy
   else
     dybatpho::dry_run paru -Sy
@@ -74,30 +22,58 @@ function _arch_sync_repo {
 }
 
 #######################################
-# @description Check if a package is installed in Arch
-# @arg $1 string Package name
+# @description Sync repositories of Ubuntu, Debian...
 #######################################
-function _arch_check_installed {
-  dybatpho::expect_args package -- "$@"
-  pacman -Qi "$package" > /dev/null
+function pkg::sync_apt_repo {
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run sudo apt update
 }
 
 #######################################
-# @description Install a package in Arch
-# @arg $1 string Package name
+# @description Sync repositories of Alpine
 #######################################
-function _arch_install {
-  dybatpho::expect_args package -- "$@"
-  dybatpho::progress "Installing package $package"
-  dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$package"
+function pkg::sync_apk_repo {
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run sudo apk update
+}
+
+#######################################
+# @description Sync repositories of Termux
+#######################################
+function pkg::sync_termux_repo {
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run pkg update
+}
+
+#######################################
+# @description Sync repositories of MacOS
+#######################################
+function pkg::sync_brew_repo {
+  dybatpho::progress "Syncing package repositories"
+  dybatpho::dry_run brew update
+}
+
+#######################################
+# @description Initialize Gentoo package manager
+#######################################
+function pkg::init_gentoo {
+  pkg::sync_portage_repo
+  if ! dybatpho::is command equery; then
+    dybatpho::progress "Installing \`equery\` for day-to-day package management"
+    pkg::install_via_gentoo app-portage/gentoolkit
+  fi
+  if ! dybatpho::is command qlist; then
+    dybatpho::progress "Installing \`qlist\` for querying installed packages"
+    pkg::install_via_gentoo app-portage/portage-utils
+  fi
 }
 
 #######################################
 # @description Initialize Arch package manager
 #######################################
-function _arch_init {
-  _arch_sync_repo
-  if ! command -v paru > /dev/null; then
+function pkg::init_arch {
+  pkg::sync_aur_repo
+  if ! dybatpho::is command paru; then
     dybatpho::progress "Installing \`paru\` for managing AUR packages"
     dybatpho::dry_run sudo pacman -S --needed git base-devel rust
     dybatpho::dry_run git clone https://aur.archlinux.org/paru.git /tmp/paru
@@ -109,159 +85,265 @@ function _arch_init {
 }
 
 #######################################
-# @description Sync repositories of Ubuntu
+# @description Initialize Ubuntu package manager
 #######################################
-function _ubuntu_sync_repo {
-  dybatpho::progress "Syncing package repositories"
-  dybatpho::dry_run sudo apt update
+function pkg::init_ubuntu {
+  pkg::sync_apt_repo
 }
 
 #######################################
-# @description Add repository of PPA to Ubuntu
+# @description Initialize Alpine package manager
+#######################################
+function pkg::init_alpine {
+  pkg::sync_apk_repo
+}
+
+#######################################
+# @description Initialize Termux package manager
+#######################################
+function pkg::init_termux {
+  pkg::sync_termux_repo
+}
+
+#######################################
+# @description Initialize Flatpak package manager
+#######################################
+function pkg::init_flatpak {
+  pkg::add_repo_flatpak flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+}
+
+#######################################
+# @description Initialize MacOS package manager
+# and install `mas` for Apple Store apps
+#######################################
+function pkg::init_macos {
+  pkg::sync_brew_repo
+  if ! dybatpho::is command mas; then
+    dybatpho::progress "Installing \`mas\` for managing Apple Store apps"
+    pkg::install_via_macos_brew mas
+  fi
+}
+
+#######################################
+# @description Add repository to Gentoo portage
+# @arg $1 string Name of repository
+# @arg $2 string URL of the repository
+#######################################
+function pkg::add_overlay {
+  local name url
+  dybatpho::expect_args name url -- "$@"
+  if [ ! -d "/etc/portage/repos.conf/$name.conf" ]; then
+    dybatpho::dry_run sudo mkdir -p /etc/portage/repos.conf
+    dybatpho::dry_run eval "echo \"[$name]\" | sudo tee /etc/portage/repos.conf/$name.conf"
+    dybatpho::dry_run eval "echo \"location = /var/db/repos/$name\" | sudo tee -a /etc/portage/repos.conf/$name.conf"
+    dybatpho::dry_run eval "echo \"sync-type = git\" | sudo tee -a /etc/portage/repos.conf/$name.conf"
+    dybatpho::dry_run eval "echo \"sync-uri = $url\" | sudo tee -a /etc/portage/repos.conf/$name.conf"
+    dybatpho::dry_run sudo emaint sync --yes --repo "$name" || dybatpho::die "Failed to sync repository $name"
+  fi
+}
+
+#######################################
+# @description Add repository of APT (include PPA) to Ubuntu, Debian, Termux...
 # @arg $1 string Name of repository
 # @arg $2 string Code of repository
 # @arg $3 string Distro version (e.g., focal, bionic)
 # @arg $4 string Repository version (e.g., main, universe)
 # @arg $5 string GPG key of repository
 #######################################
-function _ubuntu_add_repo {
-  dybatpho::expect_args repo_name repo_code distro_version repo_version key -- "$@"
-  if [ ! -f "/etc/apt/sources.list.d/$repo_name.list" ]; then
-    dybatpho::debug "Adding repository $repo_name."
-    dybatpho::dry_run eval "echo \"deb $repo_code $distro_version $repo_version\" | sudo tee \"/etc/apt/sources.list.d/$repo_name.list\""
+function pkg::add_apt_repo {
+  local name code distro_version version key
+  dybatpho::expect_args name code distro_version version key -- "$@"
+  local path
+  if ! dybatpho::is command termux-setup-storage; then
+    path="$PREFIX/etc/apt/sources.list.d/$name.list"
+  else
+    path="/etc/apt/sources.list.d/$name.list"
+  fi
+  if ! dybatpho::is file "$path"; then
+    dybatpho::debug "Adding repository $name."
+    dybatpho::dry_run eval "echo \"deb $code $distro_version $version\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
     dybatpho::create_temp temp_key ".gpg"
     dybatpho::dry_run dybatpho::curl_do "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" "$temp_key"
     dybatpho::dry_run sudo apt-key add "$temp_key"
   else
-    dybatpho::debug "Repository $repo_name already exists, skipping."
+    dybatpho::debug "Repository $name already exists, skipping."
   fi
 }
 
 #######################################
-# @description Check if a package is installed in Ubuntu
+# @description Add repository of Flatpak
+# @arg $1 string Name of repository
+# @arg $2 string URL of the repository
+#######################################
+function pkg::add_flatpak_repo {
+  local name url
+  dybatpho::expect_args name url -- "$@"
+  if ! dybatpho::is command flatpak; then
+    dybatpho::die "Flatpak is not installed. Please install it first."
+  fi
+  if ! flatpak remote-list | grep -q "^$name"; then
+    dybatpho::progress "Adding Flatpak repository $name"
+    dybatpho::dry_run flatpak remote-add --user --if-not-exists "$name" "$url"
+  else
+    dybatpho::debug "Flatpak repository $name already exists, skipping."
+  fi
+}
+
+#######################################
+# @description Check if a package is installed on Gentoo.
+# Need pkg::init_gentoo to be called first to ensure `qlist` is available.
 # @arg $1 string Package name
 #######################################
-function _ubuntu_check_installed {
+function pkg::check_installed_portage {
+  local package
+  dybatpho::expect_args package -- "$@"
+  qlist -I "$package" > /dev/null
+}
+
+#######################################
+# @description Check if a package is installed on Arch
+# @arg $1 string Package name
+#######################################
+function pkg::check_installed_pacman {
+  local package
+  dybatpho::expect_args package -- "$@"
+  pacman -Qi "$package" > /dev/null
+}
+
+#######################################
+# @description Check if a package is installed on Ubuntu, Debian, Termux...
+# @arg $1 string Package name
+#######################################
+function pkg::check_installed_apt {
+  local package
   dybatpho::expect_args package -- "$@"
   dpkg-query -s "$package" > /dev/null 2>&1
+}
+
+#######################################
+# @description Check if a package is installed on Alpine
+# @arg $1 string Package name
+#######################################
+function pkg::check_installed_apk {
+  local package
+  dybatpho::expect_args package -- "$@"
+  apk info -e "$package" > /dev/null 2>&1
+}
+
+#######################################
+# @description Check if a package is installed via Flatpak
+# @arg $1 string Application ID
+#######################################
+function pkg::check_installed_flatpak {
+  local package
+  dybatpho::expect_args package -- "$@"
+  flatpak list --app | awk '{print $2}' | grep -q "^$package$"
+}
+
+#######################################
+# @description Check if a package is installed on MacOS via brew
+# @arg $1 string Package name
+#######################################
+function pkg::check_installed_brew {
+  local package
+  dybatpho::expect_args package -- "$@"
+  grep -q "^$package$" <(brew ls -1)
+}
+
+#######################################
+# @description Check if a package is installed on MacOS via Apple Store.
+# Needs `mas` to be installed first.
+# @arg $1 string Apple Store app ID
+#######################################
+function pkg::check_installed_mas {
+  local app_id
+  dybatpho::expect_args app_id -- "$@"
+  mas list | grep -q "$app_id"
+}
+
+#######################################
+# @description Check if a package is installed on MacOS via download .dmg file
+# and copy to /Applications
+# @arg $1 string Name of application
+#######################################
+function pkg::check_installed_dmg {
+  local app_name
+  dybatpho::expect_args app_name -- "$@"
+  find /Applications -maxdepth 1 -name "${app_name}.app" -print -quit | grep -q "${app_name}.app"
+}
+
+#######################################
+# @description Install a package in Gentoo
+# @arg $1 string Package name
+#######################################
+function pkg::install_via_portage {
+  local package
+  dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package"
+  dybatpho::dry_run sudo emerge --ask n --noreplace "$package"
+}
+
+#######################################
+# @description Install a package in Arch
+# @arg $1 string Package name
+#######################################
+function pkg::install_via_pacman {
+  local package
+  dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package"
+  dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$package"
 }
 
 #######################################
 # @description Install a package in Ubuntu
 # @arg $1 string Package name
 #######################################
-function _ubuntu_install {
+function pkg::install_via_apt {
+  local package
   dybatpho::expect_args package -- "$@"
   dybatpho::progress "Installing package $package"
   dybatpho::dry_run sudo apt install -y "$package"
 }
 
 #######################################
-# @description Initialize Ubuntu package manager
-#######################################
-function _ubuntu_init {
-  _ubuntu_sync_repo
-}
-
-#######################################
-# @description Sync repositories of Alpine
-#######################################
-function _alpine_sync_repo {
-  dybatpho::progress "Syncing package repositories"
-  dybatpho::dry_run sudo apk update
-}
-
-#######################################
-# @description Check if a package is installed in Alpine
-# @arg $1 string Package name
-#######################################
-function _alpine_check_installed {
-  dybatpho::expect_args package -- "$@"
-  apk info -e "$package" > /dev/null 2>&1
-}
-
-#######################################
 # @description Install a package in Alpine
 # @arg $1 string Package name
 #######################################
-function _alpine_install {
+function pkg::install_via_apk {
+  local package
   dybatpho::expect_args package -- "$@"
   dybatpho::progress "Installing package $package"
   dybatpho::dry_run sudo apk add --no-cache --no-interactive "$package"
 }
 
 #######################################
-# @description Initialize Alpine package manager
-#######################################
-function _alpine_init {
-  _alpine_sync_repo
-}
-
-#######################################
-# @description Sync repositories of Termux
-#######################################
-function _termux_sync_repo {
-  dybatpho::progress "Syncing package repositories"
-  dybatpho::dry_run pkg update
-}
-
-#######################################
-# @description Check if a package is installed in Termux
-# @arg $1 string Package name
-#######################################
-function _termux_check_installed {
-  dybatpho::expect_args package -- "$@"
-  dpkg-query -s "$package" > /dev/null 2>&1
-}
-
-#######################################
 # @description Install a package in Termux
 # @arg $1 string Package name
 #######################################
-function _termux_install {
+function pkg::install_via_termux {
+  local package
   dybatpho::expect_args package -- "$@"
   dybatpho::progress "Installing package $package"
   dybatpho::dry_run pkg install -y "$package"
 }
 
 #######################################
-# @description Initialize Termux package manager
+# @description Install a flatpak application
+# @arg $1 string Application ID
+# @arg $2 string Repository name
 #######################################
-function _termux_init {
-  _termux_sync_repo
+function pkg::install_via_flatpak {
+  local app_id repo
+  dybatpho::expect_args app_id repo -- "$@"
+  dybatpho::progress "Installing Flatpak app $app_id from $repo repo"
+  dybatpho::dry_run flatpak install -y --user "$repo" "$app_id"
 }
 
-#######################################
-# @description Sync repositories of MacOS
-#######################################
-function _macos_sync_repo {
-  dybatpho::progress "Syncing package repositories"
-  dybatpho::dry_run brew update
-}
-
-#######################################
-# @description Check if a package is installed in MacOS via brew
+# @description Check if a package is installed on MacOS via Apple Store
 # @arg $1 string Package name
 #######################################
-function _macos_brew_check_installed {
-  dybatpho::expect_args package -- "$@"
-  grep -qE "^$package$" <(brew ls -1)
-}
-
-#######################################
-# @description Check if a package is installed in MacOS via Apple Store.
-# Needs `mas` to be installed first.
-# @arg $1 string Package name
-#######################################
-function _macos_mas_check_installed {
-  dybatpho::expect_args package -- "$@"
-  mas list | grep -q "$package"
-}
-
-# @description Check if a package is installed in MacOS via Apple Store
-# @arg $1 string Package name
-#######################################
-function _macos_brew_install {
+function pkg::install_via_brew {
+  local package
   dybatpho::expect_args package -- "$@"
   dybatpho::progress "Installing package $package"
   dybatpho::dry_run brew install "$@" "$package"
@@ -269,22 +351,29 @@ function _macos_brew_install {
 
 #######################################
 # @description Install a package in MacOS via Apple Store
-# @arg $1 string Package name
+# @arg $1 string Apple Store app ID
 #######################################
-function _macos_mas_install {
-  dybatpho::expect_args package -- "$@"
-  dybatpho::progress "Installing app $(mas info "$package" | head -n 1)"
-  dybatpho::dry_run mas install "$package"
+function pkg::install_via_mas {
+  local app_id
+  dybatpho::expect_args app_id -- "$@"
+  dybatpho::progress "Installing app $(mas info "$app_id" | head -n 1)"
+  dybatpho::dry_run mas install "$app_id"
 }
 
 #######################################
-# @description Initialize MacOS package manager
-# and install `mas` for Apple Store apps
+# @description Install a package in MacOS via download .dmg file
+# and copy to /Applications
+# @arg $1 string Name of application
+# @arg $2 string URL to download
 #######################################
-function _macos_init {
-  _macos_sync_repo
-  if ! dybatpho::is command mas; then
-    dybatpho::progress "Installing \`mas\` for managing Apple Store apps"
-    _macos_brew_install mas
-  fi
+function pkg::install_via_dmg {
+  local app_name url
+  dybatpho::expect_args app_name url -- "$@"
+  dybatpho::progress "Installing app $app_name"
+  dybatpho::create_temp temp_file ".dmg"
+  dybatpho::curl_download "$url" "$temp_file"
+  local mount_dir
+  mount_dir=$(hdiutil mount -plist "$temp_file" | grep -oE '/Volumes/[^"<]+' | head -n 1)
+  sudo cp -r "${mount_dir}/${app_name}.app" /Applications
+  sudo hdiutil unmount "$mount_dir"
 }

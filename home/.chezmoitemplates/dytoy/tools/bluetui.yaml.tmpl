@@ -1,4 +1,5 @@
 {{- if and (eq .chezmoi.os "linux") .hasBluetooth }}
+# Only on Linux, use blueutil for MacOS
 name: bluetui
 method: binary
 is_essential: true

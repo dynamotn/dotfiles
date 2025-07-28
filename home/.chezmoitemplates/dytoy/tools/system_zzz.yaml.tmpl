@@ -34,8 +34,6 @@ gentoo:
     - name: sys-apps/ethtool
     {{- if and (eq .kind "pc") (eq .place "home") }}
     - name: media-gfx/fontforge
-    - name: games-util/game-device-udev-rules
-    - name: sys-apps/flatpak
     {{- end }}
 arch:
   packages:

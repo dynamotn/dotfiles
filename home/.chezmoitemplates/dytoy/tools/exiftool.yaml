@@ -9,12 +9,12 @@ arch:
 ubuntu:
   packages:
     - name: exiftool
+alpine:
+  packages:
+    - name: exiftool
 termux:
   packages:
     - name: exiftool
 macos:
-  packages:
-    - name: exiftool
-alpine:
   packages:
     - name: exiftool

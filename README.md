@@ -32,7 +32,7 @@
 
 This repository contains all my dotfiles managed by [chezmoi](https://github.com/twpayne/chezmoi).
 Please note that this is my own personal dotfiles for Linux
-(Gentoo, Arch, Ubuntu, Alpine for container), Android (Termux) and MacOS.
+(Gentoo, Arch, Ubuntu 24.04 LTS and above, Alpine for container), Android (Termux) and MacOS.
 I don't use X applications anymore.
 
 ## :brain:&nbsp; Philosophy

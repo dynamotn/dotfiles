@@ -11,7 +11,6 @@ is_essential: true
 method: binary
 github:
   repo: dbrgn/tealdeer
-  version: latest
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
   {{- $arch = "x86_64" }}

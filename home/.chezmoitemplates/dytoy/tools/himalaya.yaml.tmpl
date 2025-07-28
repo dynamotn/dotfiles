@@ -6,7 +6,6 @@ is_essential: true
 {{- end }}
 github:
   repo: soywod/himalaya
-  version: latest
   {{- if eq .chezmoi.arch "amd64" }}
   release_asset: himalaya.x86_64-linux.tgz
   {{- else if eq .chezmoi.arch "arm64" }}

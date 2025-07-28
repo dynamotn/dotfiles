@@ -7,7 +7,7 @@ github:
 archive:
   - path: rclone-%v-linux-{{ .chezmoi.arch }}/rclone
   - path: rclone-$version-linux-{{ .chezmoi.arch }}/rclone.1
-    location: $MAN_DIR/man1
+    location: $HOME/.local/man/man1
 {{- else if eq .chezmoi.os "android" }}
 method: os
 termux:
