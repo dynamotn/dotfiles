@@ -3,7 +3,6 @@ name: lazydocker
 method: binary
 github:
   repo: jesseduffield/lazydocker
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "Darwin" }}
