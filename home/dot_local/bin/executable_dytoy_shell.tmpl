@@ -54,6 +54,8 @@ _main() {
       dybatpho::dry_run "$SCRIPT_DIR/dytoy_$method" -i -t "$dependency"
     done
     content=$(echo "$tool" | yq e '.content')
+    local version=$(echo "$tool" | yq e '.version')
+    export DYTOY_VERSION=$version
     echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_SCRIPT}"
     echo "dybatpho::register_err_handler" >> "${TEMP_SCRIPT}"
     echo "dybatpho::progress \"Running command to install ${tool_name}\"" >> "${TEMP_SCRIPT}"

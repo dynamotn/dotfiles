@@ -28,9 +28,11 @@ arch:
     - name: betterbird-bin
 {{- else if eq .chezmoi.os "darwin" }}
 method: shell
+# TODO: change version to release when Betterbird release v140 stable
+version: future
 content: |-
   dybatpho::create_temp temp_file ".dmg"
-  dybatpho::curl_download "https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=release" "$temp_file"
+  dybatpho::curl_download "https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=${DYTOY_VERSION:-release}" "$temp_file"
   mount_dir=$(hdiutil mount -plist $temp_file | grep -oE '/Volumes/[^"<]+' | head -n 1)
   sudo cp -r $mount_dir/BetterBird.app /Applications
   sudo hdiutil unmount $mount_dir
