@@ -106,6 +106,17 @@ unbind --mode=ex <C-c>
 
 " Ignore sites
 blacklistadd teams.microsoft.com
+{{- range .decryptEnterprise }}
+{{-   $firefoxSecretFile := printf "../secrets/data/enterprise-%s/firefox.yaml.age" . | joinPath $.chezmoi.sourceDir }}
+{{-   if stat $firefoxSecretFile }}
+{{-     $firefoxSecret := $firefoxSecretFile | include | decrypt | fromYaml }}
+{{-     if $firefoxSecret.tridactyl.blacklist }}
+{{-       range $firefoxSecret.tridactyl.blacklist }}
+blacklistadd {{ . }}
+{{-       end }}
+{{-     end }}
+{{-   end }}
+{{- end }}
 
 " Comment toggler for Reddit, Hacker News and Lobste.rs
 bind ;c hint -Jc [class*="expand"],[class="togg"],[class="comment_folder"]
