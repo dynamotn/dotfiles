@@ -64,6 +64,7 @@
 |[trivy](https://github.com/aquasecurity/trivy)|Security scanner|SecOps tool|
 |[amass](https://github.com/owasp-amass/amass)|Network mapping of attack surfaces and external asset discovery|SecOps tool|
 |[osintui](https://github.com/wssheldon/osintui)|Open source intelligence tool|Security tool|
+|[tsui](https://github.com/neuralinkcorp/tsui)|TUI for Tailscale|Security tool|
 |[termshark](https://github.com/gcla/termshark)|TUI to network packet analysis|Network tool|
 |[curlie](https://github.com/rs/curlie)|Alternative to `curl` with the ease of use from `httpie`|Network tool|
 |[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|Network tool|
