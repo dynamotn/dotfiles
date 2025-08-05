@@ -1,0 +1,11 @@
+name: otel
+method: binary
+github:
+  repo: equinix-labs/otel-cli
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset: otel-cli_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+archive:
+  - path: otel-cli

@@ -57,6 +57,7 @@
 |[goaccess](https://github.com/allinurl/goaccess)|Real-time web log analyzer|SysOps tool|
 |[hl](https://github.com/pamburus/hl)|Log viewer and processor that translates JSON or logfmt logs into a pretty human-readable format|SysOps tool|
 |[trippy](https://github.com/fujiapple852/trippy)|CLI tool for network diagnostic|SysOps tool|
+|[otel-cli](https://github.com/equinix-labs/otel-cli)|CLI tool to send OpenTelemetry traces|SysOps tool|
 |[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|FinOps tool|
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|SecOps tool|
 |[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|SecOps tool|
