@@ -15,7 +15,7 @@ for type in {{ range $types }}{{ . | quote }} {{ end }}; do
   dybatpho::notice "Decrypting ${type}.age file to decrypt all encrypted files"
   if ! dybatpho::is file "${HOME}/.config/chezmoi/${type}.key"; then
     {{- if eq .kind "container" }}
-    {{ .chezmoi.sourceDir }}/../scripts/expect-age "${AGE_PASSPHRASE}" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age" "${HOME}/.config/chezmoi/${type}.key"
+    {{ .chezmoi.sourceDir }}/../scripts/lib/expect-age/expect-age "${AGE_PASSPHRASE}" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age" "${HOME}/.config/chezmoi/${type}.key"
     {{- else }}
     age --decrypt --output "${HOME}/.config/chezmoi/${type}.key" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age"
     {{- end }}

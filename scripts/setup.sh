@@ -4,7 +4,7 @@ BIN_DIR="$HOME/.local/bin"
 
 # Update necessary submodules
 cd "$SETUP_DIR" || exit
-git submodule update --init --remote --recursive "$SETUP_DIR"/lib/dybatpho
+git submodule update --init --remote "$SETUP_DIR"/lib/dybatpho "$SETUP_DIR"/lib/expect-age
 
 # shellcheck source=lib/dybatpho/init.sh
 . "$SETUP_DIR/lib/dybatpho/init.sh"

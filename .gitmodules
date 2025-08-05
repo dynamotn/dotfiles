@@ -31,3 +31,6 @@
 [submodule "scripts/lib/dybatpho"]
   path = scripts/lib/dybatpho
   url = https://github.com/dynamotn/dybatpho.git
+[submodule "scripts/lib/expect-age"]
+	path = scripts/lib/expect-age
+	url = git@github.com:dynamotn/expect-age.git
