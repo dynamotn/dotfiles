@@ -1,0 +1,18 @@
+{{- if eq .chezmoi.os "linux" "darwin" }}
+name: tsui
+method: binary
+is_essential: true
+github:
+  repo: neuralinkcorp/tsui
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "macos" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: tsui-{{ $os }}-{{ $arch }}
+{{- end }}
