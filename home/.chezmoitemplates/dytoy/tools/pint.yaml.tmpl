@@ -9,6 +9,3 @@ github:
   release_asset: pint-%1v-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:
   - path: pint-{{ $os }}-{{ .chezmoi.arch }}
-hook:
-  after: |
-    mv ~/.local/bin/pint-{{ $os }}-{{ .chezmoi.arch }} ~/.local/bin/pint
