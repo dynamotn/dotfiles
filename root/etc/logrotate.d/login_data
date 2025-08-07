@@ -1,0 +1,24 @@
+# /etc/logrotate.d/login_data
+
+# This data is normally in the global root, but isn't maintained by any
+# package. To keep the system consistent, it seems to belong here a lot more.
+
+/var/log/wtmp {
+  create 0664 root utmp
+
+  monthly
+  rotate 3
+}
+
+/var/log/btmp {
+  create 0600 root utmp
+  missingok
+
+  monthly
+  rotate 3
+}
+
+# Note: /var/log/lastlog isn't rotated intentionally. It is not an append-style
+# file and can be read with the `lastlog` binary. This keeps the last timestamp
+# each user has logged into the system. Useful for disabling user accounts that
+# haven't been used in some time.

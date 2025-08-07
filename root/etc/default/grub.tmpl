@@ -1,20 +1,24 @@
-{{- if eq .chezmoi.osRelease.id "gentoo" -}}
+{{- if eq .osid "linux-gentoo" -}}
 GRUB_DISTRIBUTOR="Gentoo"
-{{- else if eq .chezmoi.osRelease.id "arch" -}}
+{{- else if eq .osid "linux-arch" -}}
 GRUB_DISTRIBUTOR="Arch"
+{{- else if eq .osid "linux-ubuntu" -}}
+GRUB_DISTRIBUTOR="Ubuntu"
 {{- end }}
 
 # Default menu entry
 #GRUB_DEFAULT=0
 
 # Boot the default entry this many seconds after the menu is displayed
-GRUB_TIMEOUT=5
+GRUB_TIMEOUT=3
 GRUB_TIMEOUT_STYLE=menu
 
 {{ $machine := printf "%s_%s" .place .kind -}}
 {{- $cmdline := "vt.default_red=36,237,166,238,138,245,139,184,91,237,166,238,138,245,139,165 vt.default_grn=39,135,218,212,173,189,213,192,96,135,218,212,173,189,213,173 vt.default_blu=58,150,149,159,244,230,202,224,120,150,149,159,244,230,202,203" }}
 {{- if eq $machine "home_pc" -}}
 {{- $cmdline = printf "resume=UUID=38bb8bfd-5a4b-4c37-b614-29b6229dec92 nvidia_drm.modeset=1 %s" $cmdline -}}
+{{- else if eq .kind "vm" }}
+{{- $cmdline = printf "console=tty0 console=ttyS0 %s" $cmdline -}}
 {{- end -}}
 # Append parameters to the linux kernel command line
 GRUB_CMDLINE_LINUX={{ $cmdline | quote }}
@@ -31,7 +35,12 @@ GRUB_CMDLINE_LINUX={{ $cmdline | quote }}
 #GRUB_CMDLINE_LINUX_DEFAULT=""
 
 # Uncomment to disable graphical terminal (grub-pc only)
-#GRUB_TERMINAL=console
+{{- if eq .kind "vm" }}
+GRUB_TERMINAL="console serial"
+GRUB_SERIAL_COMMAND="serial --speed=115200 --unit=0 --word=8 --parity=no --stop=1"
+{{- else }}
+GRUB_TERMINAL="console"
+{{- end }}
 
 # The resolution used on graphical terminal.
 # Note that you can use only modes which your graphic card supports via VBE.

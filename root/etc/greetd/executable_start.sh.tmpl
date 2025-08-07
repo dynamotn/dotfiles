@@ -1,5 +1,5 @@
 #!/bin/sh
-{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{- if eq .osid "linux-gentoo" }}
 export XDG_RUNTIME_DIR=/tmp/user-$(id -u)
 {{- else }}
 export XDG_RUNTIME_DIR=/run/user/$(id -u)

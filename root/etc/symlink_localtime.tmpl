@@ -1,0 +1,5 @@
+{{- $timezone := "Asia/Ho_Chi_Minh" }}
+{{- if eq .code "pr0m4n" }}
+{{- $timezone = "Asia/Hong_Kong" }}
+{{- end -}}
+/usr/share/zoneinfo/{{ $timezone }}
