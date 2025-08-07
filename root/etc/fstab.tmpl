@@ -1,0 +1,42 @@
+# /etc/fstab: static file system information.
+#
+# See the manpage fstab(5) for more information.
+#
+# NOTE: The root filesystem should have a pass number of either 0 or 1.
+#       All other filesystems should have a pass number of 0 or greater than 1.
+#
+# NOTE: Even though we list ext4 as the type here, it will work with ext2/ext3
+#       filesystems.  This just tells the kernel to use the ext4 driver.
+#
+# NOTE: You can use full paths to devices like /dev/sda3, but it is often
+#       more reliable to use filesystem labels or UUIDs. See your filesystem
+#       documentation for details on setting a label. To obtain the UUID, use
+#       the blkid(8) command.
+
+# <fs>			<mountpoint>	<type>		<opts>		<dump> <pass>
+{{- $machine := printf "%s_%s" .place .kind }}
+{{- if eq $machine "home_pc" }}
+# /dev/nvme0n1p4 LABEL=System
+UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/         	btrfs     	rw,noatime,compress=zstd:3,ssd,discard,space_cache=v2,autodefrag,subvolid=259,subvol=/_active/root	0 0
+
+# /dev/nvme0n1p4 LABEL=System
+UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/boot     	btrfs     	rw,noatime,compress=zstd:3,ssd,discard,space_cache=v2,autodefrag,subvolid=258,subvol=/_active/boot	0 0
+
+# /dev/nvme0n1p1
+UUID=AA29-CB6F      	/boot/efi 	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 2
+
+# /dev/nvme0n1p3 LABEL=Data
+UUID=5ccb0e95-f187-492d-968a-d051861ef409	/home     	btrfs     	rw,noatime,compress=zstd:3,ssd,discard,space_cache=v2,autodefrag,subvolid=258,subvol=/_active/home	0 0
+
+# /dev/nvme0n1p4 LABEL=System
+UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/snapshot/system	btrfs     	rw,noatime,compress=zstd:3,ssd,discard,space_cache=v2,autodefrag,subvolid=257,subvol=/_snapshot	0 0
+
+# /dev/nvme0n1p3 LABEL=Data
+UUID=5ccb0e95-f187-492d-968a-d051861ef409	/snapshot/data	btrfs     	rw,noatime,compress=zstd:3,ssd,discard,space_cache=v2,autodefrag,subvolid=257,subvol=/_snapshot	0 0
+
+# /dev/nvme0n1p4 LABEL=System
+UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/var      	btrfs     	rw,noatime,compress=zstd:3,ssd,discard,space_cache=v2,autodefrag,subvolid=260,subvol=/_active/var	0 0
+
+# /dev/nvme0n1p2
+UUID=38bb8bfd-5a4b-4c37-b614-29b6229dec92	none      	swap      	defaults  	0 0
+{{- end }}

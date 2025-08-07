@@ -1,39 +1,46 @@
+# By default the Linux kernel will enable any line disciplines requested which
+# is a potential security issue
 dev.tty.ldisc_autoload = 0
+
+# Provide protection against ToCToU races
 fs.protected_fifos = 2
 fs.protected_hardlinks = 1
 fs.protected_regular = 2
 fs.protected_symlinks = 1
+
+# Prevent SUID executables from creating core dumps, should be set to '2' if an
+# administrator needs a dump from one of these executables
 fs.suid_dumpable = 0
+
+# Add process ID to core dump file
 kernel.core_uses_pid = 1
+
+# Ignore Ctrl-Alt-Del key behavior
 kernel.ctrl-alt-del = 0
+
+# Prevent unprivileged users from viewing the dmesg output
 kernel.dmesg_restrict = 1
+
+# Disable kexec
+kernel.kexec_load_disabled = 1
+
+# Make locating kernel addresses more difficult
 kernel.kptr_restrict = 2
-# kernel.modules_disabled = 1
+
+# Restrict perf calls to only be done by root
 kernel.perf_event_paranoid = 3
+
+# Full randomization of a process's virtual address space
 kernel.randomize_va_space = 2
+
+# Disable the magic sysrq key
 kernel.sysrq = 0
+
+# Prevent unprivileged use of BPF for generic hooks and networking programmings
 kernel.unprivileged_bpf_disabled = 1
-{{- if ne .chezmoi.osRelease.id "gentoo" }}
-kernel.yama.ptrace_scope = 2
-{{- end }}
 net.core.bpf_jit_harden = 2
-net.ipv4.conf.all.accept_redirects = 0
-net.ipv4.conf.all.accept_source_route = 0
-net.ipv4.conf.all.bootp_relay = 0
-net.ipv4.conf.all.forwarding = 0
-net.ipv4.conf.all.log_martians = 1
-net.ipv4.conf.all.mc_forwarding = 0
-net.ipv4.conf.all.proxy_arp = 0
-net.ipv4.conf.all.rp_filter = 1
-net.ipv4.conf.all.send_redirects = 0
-net.ipv4.conf.default.accept_redirects = 0
-net.ipv4.conf.default.accept_source_route = 0
-net.ipv4.conf.default.log_martians =  1
-net.ipv4.icmp_echo_ignore_broadcasts = 1
-net.ipv4.icmp_ignore_bogus_error_responses = 1
-net.ipv4.tcp_syncookies = 1
-net.ipv4.tcp_timestamps = 1
-net.ipv6.conf.all.accept_redirects = 0
-net.ipv6.conf.all.accept_source_route = 0
-net.ipv6.conf.default.accept_redirects = 0
-net.ipv6.conf.default.accept_source_route = 0
+
+# Increase the bits of entropy used for the kernel ASLR. There is a compat
+# control as well but that only applies to 32 bit compatible applications which
+# are not supported by my kernel.
+vm.mmap_rnd_bits = 32

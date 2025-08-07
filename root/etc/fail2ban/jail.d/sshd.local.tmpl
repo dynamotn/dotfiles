@@ -1,5 +1,5 @@
 [sshd]
 enabled = true
-{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{- if eq .osid "linux-gentoo" }}
 logpath = /var/log/messages
 {{- end }}

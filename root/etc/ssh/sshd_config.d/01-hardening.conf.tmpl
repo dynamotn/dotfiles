@@ -7,7 +7,7 @@ LogLevel VERBOSE
 PermitRootLogin No
 Protocol 2
 X11Forwarding no
-{{- if eq .chezmoi.osRelease.id "ubuntu" "debian" }}
+{{- if eq .osid "linux-ubuntu" "linux-debian" }}
 DebianBanner no
 {{- end }}
 MaxAuthTries 3
