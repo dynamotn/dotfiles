@@ -1,6 +1,6 @@
 #!{{ .bash }}
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 {{- if eq .guiServer "G" }}
 dybatpho::require "dconf"

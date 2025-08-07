@@ -1,6 +1,6 @@
 #!{{ .bash }}
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 dybatpho::notice "Setup fish shell"
 # plugins hash: {{ joinPath .chezmoi.homeDir ".config/fish/plugins.list" | include | sha256sum }}

@@ -3,7 +3,7 @@
 # @brief Install package tools for the current OS
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 dybatpho::create_temp TEMP_HOOK_BEFORE ".sh"
 dybatpho::create_temp TEMP_HOOK_AFTER ".sh"
@@ -62,13 +62,13 @@ function _{{ $shortCode }}_run {
     hook_after=$(echo "$tool" | yq e -o=j -I=0 -r ".{{ $shortCode }}.hook.after")
     if [ "$hook_before" != "null" ]; then
       echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
-      echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_BEFORE}"
+      echo "dybatpho::register_common_handlers" >> "${TEMP_HOOK_BEFORE}"
       echo "dybatpho::progress \"Running hook before install ${tool_name}\"" >> "${TEMP_HOOK_BEFORE}"
       echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
     fi
     if [ "$hook_after" != "null" ]; then
       echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
-      echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_AFTER}"
+      echo "dybatpho::register_common_handlers" >> "${TEMP_HOOK_AFTER}"
       echo "dybatpho::progress \"Running hook after install ${tool_name}\"" >> "${TEMP_HOOK_AFTER}"
       echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
     fi

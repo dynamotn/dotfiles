@@ -1,6 +1,6 @@
 #!{{ .bash }}
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 dotfiles=$(realpath $(chezmoi execute-template '{{ .chezmoi.sourceDir }}')/..)
 sudo env "PATH=$PATH" \

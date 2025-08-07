@@ -1,6 +1,6 @@
 #!{{ .bash }}
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
@@ -57,7 +57,7 @@ _main() {
     local version=$(echo "$tool" | yq e '.version')
     export DYTOY_VERSION=$version
     echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_SCRIPT}"
-    echo "dybatpho::register_err_handler" >> "${TEMP_SCRIPT}"
+    echo "dybatpho::register_common_handlers" >> "${TEMP_SCRIPT}"
     echo "dybatpho::progress \"Running command to install ${tool_name}\"" >> "${TEMP_SCRIPT}"
     echo -e "${content}" >> "${TEMP_SCRIPT}"
     _run_script "${TEMP_SCRIPT}"

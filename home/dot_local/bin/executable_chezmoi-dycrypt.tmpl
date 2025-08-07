@@ -2,7 +2,7 @@
 # @file chezmoi-dycrypt
 # @brief Decrypt and encrypt secrets data in chezmoi dotfiles with single custom identity
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 #######################################
 # @description Spec of chezmoi-dycrypt
