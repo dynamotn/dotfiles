@@ -2,7 +2,7 @@
 # @file dyfox
 # @brief Update/Refresh your live data of firefox/zen browser to/from your dotfiles
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 {{- if .browser }}
 {{-   $process := "" }}

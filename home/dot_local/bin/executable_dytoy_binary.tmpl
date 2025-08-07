@@ -2,7 +2,7 @@
 # @file dytoy_binary
 # @brief Install binary tools from GitHub or GitLab releases
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 dybatpho::create_temp TEMP_HOOK_BEFORE ".sh"
 dybatpho::create_temp TEMP_HOOK_AFTER ".sh"
@@ -215,13 +215,13 @@ function _parse_release {
   hook_after=$(yq e -o=j -I=0 -r "filter(.name == \"${name}\") | .[].hook.after" ~/.config/dytoy/tools.yaml | _replace_version_string "$version")
   if [ "$hook_before" != "null" ]; then
     echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_BEFORE}"
-    echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_BEFORE}"
+    echo "dybatpho::register_common_handlers" >> "${TEMP_HOOK_BEFORE}"
     echo "dybatpho::progress \"Running hook before install ${name}\"" >> "${TEMP_HOOK_BEFORE}"
     echo -e "${hook_before}" >> "${TEMP_HOOK_BEFORE}"
   fi
   if [ "$hook_after" != "null" ]; then
     echo ". {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" > "${TEMP_HOOK_AFTER}"
-    echo "dybatpho::register_err_handler" >> "${TEMP_HOOK_AFTER}"
+    echo "dybatpho::register_common_handlers" >> "${TEMP_HOOK_AFTER}"
     echo "dybatpho::progress \"Running hook after install ${name}\"" >> "${TEMP_HOOK_AFTER}"
     echo -e "${hook_after}" >> "${TEMP_HOOK_AFTER}"
   fi

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 {{- if and (eq .kind "office") (eq .company "F1") }}
 dybatpho::notice "Setup SSL"

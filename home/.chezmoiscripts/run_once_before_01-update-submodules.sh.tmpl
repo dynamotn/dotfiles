@@ -1,6 +1,6 @@
 #!{{ .bash }}
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 dybatpho::notice "Update submodules"
 # modules hash: {{ joinPath .chezmoi.sourceDir "../.gitmodules" | include | sha256sum }}
