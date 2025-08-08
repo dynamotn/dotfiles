@@ -1,3 +1,4 @@
+# Use pbcopy/pbpaste
 {{- if eq .guiServer "W" }}
 name: wl-clipboard
 method: os
@@ -9,6 +10,9 @@ arch:
   packages:
     - name: wl-clipboard
 ubuntu:
+  packages:
+    - name: wl-clipboard
+alpine:
   packages:
     - name: wl-clipboard
 {{- end }}

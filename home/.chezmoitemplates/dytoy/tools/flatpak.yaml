@@ -1,0 +1,18 @@
+name: flatpak
+method: os
+gentoo:
+  packages:
+    - name: sys-apps/flatpak
+  hook:
+arch:
+  packages:
+    - name: flatpak
+ubuntu:
+  packages:
+    - name: flatpak
+alpine:
+  packages:
+    - name: flatpak
+termux: # Not suppported
+macos: # Not used for
+flatpak: # Are you serious?

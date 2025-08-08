@@ -28,4 +28,11 @@ hook:
     ln -s cert.pem certs.pem
     ln -s cert.pem certs/ca-certificates.crt
     {{- end }}
-    mise use -g usage
+    {{- $command := "$HOME/.local/bin/mise" }}
+    {{- if eq .chezmoi.os "android" }}
+    {{- $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl $HOME/.local/bin/mise" }}
+    {{- end }}
+    chmod +x ~/.local/bin/mise
+    # Trust global config
+    {{ $command }} trust
+    {{ $command }} use -g usage

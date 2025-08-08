@@ -7,17 +7,31 @@ gentoo:
     - name: gui-libs/greetd
     - name: gui-apps/regreet
       repo: dynamo
-      uri: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
+      url: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
     - name: gui-libs/display-manager-init
+    {{- if eq .initSystem "openrc" }}
+    - name: sys-auth/seatd
+    {{- end }}
+  services:
+    - name: display-manager
+    - name: seatd
   hook:
     after: |-
-      sudo rc-update add display-manager default
-      sudo rc-service display-manager start
+      sudo gpasswd -a $USER video
+      sudo gpasswd -a $USER seat
+      sudo gpasswd -a greetd wheel
+      sudo gpasswd -a greetd video
+      sudo gpasswd -a greetd seat
 arch:
   packages:
     - name: greetd
     - name: greetd-regreet
-  hook:
-    after: |-
-      sudo systemctl enable greetd
+  services:
+    - name: greetd
+ubuntu:
+  packages:
+    - name: greetd
+  services:
+    - name: greetd
+alpine: # Not needed
 {{- end }}
