@@ -7,16 +7,19 @@ gentoo:
     - name: media-fonts/roboto
     - name: media-fonts/noto
     - name: media-fonts/noto-cjk
+    - name: media-fonts/noto-emoji
 arch:
   packages:
     - name: ttf-roboto
     - name: noto-fonts
     - name: noto-fonts-cjk
+    - name: noto-fonts-emoji
 ubuntu:
   packages:
     - name: fonts-roboto
     - name: fonts-noto
     - name: fonts-noto-cjk
+    - name: fonts-noto-color-emoji
 macos:
   packages:
     - name: font-roboto
@@ -27,4 +30,5 @@ macos:
       type: cask
     - name: font-noto-sans-cjk
       type: cask
+    # Not need Noto Color Emoji, use builtin Apple Color Emoji
 {{- end }}
