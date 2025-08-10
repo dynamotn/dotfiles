@@ -140,11 +140,11 @@ function _main {
   if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 0 ]; then
     dybatpho::fatal "{{ $appName }} is running"
   elif dybatpho::is true "${REFRESH}"; then
-    dybatpho::notice "Refresh from scratch {{ $appName }} settings"
+    dybatpho::header "Refresh from scratch {{ $appName }} settings"
     _refresh_live
     dybatpho::success "Refresh from scratch {{ $appName }} settings"
   else
-    dybatpho::notice "Update {{ $appName }} settings"
+    dybatpho::header "Update {{ $appName }} settings"
     _update_dotfiles
     dybatpho::success "Update {{ $appName }} settings"
   fi

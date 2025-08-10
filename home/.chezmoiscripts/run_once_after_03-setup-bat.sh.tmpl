@@ -3,7 +3,7 @@
 dybatpho::register_common_handlers
 
 dybatpho::require "bat"
-dybatpho::notice "Setup bat"
+dybatpho::header "Setup bat"
 # theme hash: {{ joinPath .chezmoi.homeDir ".config/bat/themes/catppuccin.tmTheme" | include | sha256sum }}
 export PATH=~/.local/bin:$PATH
 bat cache --build
