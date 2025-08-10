@@ -4,7 +4,7 @@ dybatpho::register_common_handlers
 
 {{- if eq .guiServer "G" }}
 dybatpho::require "dconf"
-dybatpho::notice "Setup ibus-bamboo"
+dybatpho::header "Setup ibus-bamboo"
 dconf load / < ~/.config/ibus-bamboo/dconf
 dybatpho::success "Setup ibus-bamboo"
 {{- end }}

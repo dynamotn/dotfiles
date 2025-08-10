@@ -3,13 +3,13 @@ source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 {{- if eq .chezmoi.os "linux" }}
-dybatpho::notice "Setup PAM"
+dybatpho::header "Setup PAM"
 {{-   range (joinPath .chezmoi.sourceDir "etc/pam.d/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{-   end }}
 if dybatpho::is file /etc/pam.d/system-local-login; then
   if ! grep -q '^auth\s*include\s*u2f' /etc/pam.d/system-local-login; then
-    dybatpho::notice "Adding pam_u2f to system-local-login"
+    dybatpho::header "Adding pam_u2f to system-local-login"
     sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
   fi
 fi

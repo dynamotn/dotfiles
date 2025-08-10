@@ -3,7 +3,7 @@ source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 {{- if eq .terminalMultiplexer "T" }}
-dybatpho::notice "Setup tmux"
+dybatpho::header "Setup tmux"
 # config hash: {{ joinPath .chezmoi.sourceDir "../silos/tmux/config" | include | sha256sum }}
 mkdir -p {{ .chezmoi.homeDir }}/.local/share/tmux/plugins
 

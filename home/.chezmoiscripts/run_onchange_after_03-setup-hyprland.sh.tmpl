@@ -11,7 +11,7 @@ dybatpho::register_common_handlers
 if ! [[ -v HYPRLAND_INSTANCE_SIGNATURE ]]; then
   exit
 fi
-dybatpho::notice "Setup hyprland"
+dybatpho::header "Setup hyprland"
 
 dybatpho::progress "Install hyprland's header"
 hyprpm update

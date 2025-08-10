@@ -2,6 +2,6 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-dybatpho::notice "Setup neovim"
+dybatpho::header "Setup neovim"
 nvim --headless "+Lazy! sync" +qa
 dybatpho::success "Setup neovim"

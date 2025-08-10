@@ -4,7 +4,7 @@ dybatpho::register_common_handlers
 
 {{- if eq .browser "F" "Z" }}
 dybatpho::create_temp TEMP_FILE ".sh"
-dybatpho::notice "Setup tridactyl"
+dybatpho::header "Setup tridactyl"
 dybatpho::curl_download https://raw.githubusercontent.com/tridactyl/native_messenger/master/installers/install.sh "$TEMP_FILE"
 bash "$TEMP_FILE" master
 dybatpho::success "Setup tridactyl"

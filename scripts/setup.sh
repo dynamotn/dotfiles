@@ -19,7 +19,7 @@ function _spec_main {
 
 _install_chezmoi() {
   if [ ! "$(command -v chezmoi)" ]; then
-    dybatpho::notice "Install chezmoi"
+    dybatpho::header "Install chezmoi"
     if command -v termux-setup-storage &> /dev/null; then
       pkg install -y chezmoi
       return
@@ -37,7 +37,7 @@ _install_chezmoi() {
 
 _install_age() {
   if [ ! "$(command -v age)" ]; then
-    dybatpho::notice "Install age"
+    dybatpho::header "Install age"
     if command -v termux-setup-storage &> /dev/null; then
       pkg install -y age
       return
@@ -69,11 +69,11 @@ _main() {
 
   # Modify source directory of chezmoi, manipulate chezmoi config and generate
   # to chezmoi's default config template
-  dybatpho::notice "Initialize chezmoi"
+  dybatpho::header "Initialize chezmoi"
   echo "sourceDir: \"$(readlink -f "$SETUP_DIR"/..)\"" > "$SETUP_DIR"/../home/.chezmoi.yaml.tmpl
   cat "$SETUP_DIR"/../.chezmoi.yaml.tmpl >> "$SETUP_DIR"/../home/.chezmoi.yaml.tmpl
   mkdir -p "$HOME/.config/chezmoi/hooks/diff" && touch "$HOME/.config/chezmoi/hooks/diff/pre.sh"
-  dybatpho::notice "Please answer the following questions"
+  dybatpho::header "Please answer the following questions"
   # shellcheck disable=SC2086
   if [ "$USE_DEFAULT" = "true" ]; then
     prompt="--promptDefaults"
@@ -83,7 +83,7 @@ _main() {
   chezmoi init -S "$SETUP_DIR/.." "$prompt"
 
   # Apply configuration by order
-  dybatpho::notice "Setup SSH"
+  dybatpho::header "Setup SSH"
   _install_age
   # shellcheck disable=SC2086
   if dybatpho::compare_log_level debug; then
@@ -91,7 +91,7 @@ _main() {
   else
     chezmoi apply "$HOME"/.ssh
   fi
-  dybatpho::notice "Setup other dotfiles"
+  dybatpho::header "Setup other dotfiles"
   # shellcheck disable=SC2086
   if dybatpho::compare_log_level debug; then
     chezmoi apply --debug
@@ -103,12 +103,12 @@ _main() {
     ! command -v termux-setup-storage &> /dev/null
     and ! command -v sw_vers &> /dev/null
   then
-    dybatpho::notice "Setup operating system"
+    dybatpho::header "Setup operating system"
     ~/.local/bin/scz apply
   fi
 
   # Modify remote url of dotfiles
-  dybatpho::notice "Setup remote url of dotfiles"
+  dybatpho::header "Setup remote url of dotfiles"
   cd "$SETUP_DIR/.." || exit
   git remote set-url origin git@gitlab.com:dynamo-config/dotfiles
   git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git

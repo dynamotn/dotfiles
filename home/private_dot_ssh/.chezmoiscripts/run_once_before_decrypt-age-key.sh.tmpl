@@ -12,7 +12,7 @@ dybatpho::register_common_handlers
 # {{ . }} hash: {{ printf "../secrets/enterprise-%s.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
 {{- end }}
 for type in {{ range $types }}{{ . | quote }} {{ end }}; do
-  dybatpho::notice "Decrypting ${type}.age file to decrypt all encrypted files"
+  dybatpho::header "Decrypting ${type}.age file to decrypt all encrypted files"
   if ! dybatpho::is file "${HOME}/.config/chezmoi/${type}.key"; then
     {{- if eq .kind "container" }}
     {{ .chezmoi.sourceDir }}/../scripts/lib/expect-age/expect-age "${AGE_PASSPHRASE}" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age" "${HOME}/.config/chezmoi/${type}.key"

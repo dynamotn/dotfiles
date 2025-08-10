@@ -6,7 +6,7 @@ dybatpho::register_common_handlers
 {{- range (joinPath .chezmoi.sourceDir "dot_macos/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
-dybatpho::notice "Setup MacOS"
+dybatpho::header "Setup MacOS"
 macos-defaults apply ~/.macos
 
 # Disable the sound effects on boot

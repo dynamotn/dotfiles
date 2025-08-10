@@ -2,7 +2,7 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-dybatpho::notice "Setup fish shell"
+dybatpho::header "Setup fish shell"
 # plugins hash: {{ joinPath .chezmoi.homeDir ".config/fish/plugins.list" | include | sha256sum }}
 {{- if ne .kind "container" }}
 if [[ $SHELL != "$(which fish)" ]]; then
