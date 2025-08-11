@@ -12,8 +12,5 @@ user_pref("network.trr.mode", 0);
 {{- if eq .code "h1tl3r" }}
 {{- $ratio = 1.1 }}
 {{- end }}
-{{- if eq .code "v0n9uy3n914p" }}
-{{- $ratio = 1.0 }}
-{{- end }}
 /* Setting the font size of entire UI */
 user_pref("layout.css.devPixelsPerPx", {{ $ratio | quote }});
