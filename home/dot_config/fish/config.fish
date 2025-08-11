@@ -44,14 +44,14 @@ __add_folder_to_manpath $CONFIG_PATH/../scripts/man
 
 # Package manager
 type -q brew; and brew shellenv | source
-if type -q mise
+if command -sq mise
     set -gx MISE_PREFER_OFFLINE true
     mise completion fish | source
 end
 
 # Set default editor
 abbr -a v vim
-command -s nvim >/dev/null; and begin
+command -sq nvim; and begin
     set -gx EDITOR nvim
     alias vim nvim
     alias vimdiff 'nvim -d'
@@ -63,7 +63,7 @@ or begin
 end
 ## }
 
-## Fish or shell miscelaneous config {
+## Fish or shell miscellaneous config {
 # Enable vi key bindings
 if test -n "$TERM"
     fish_vi_key_bindings
@@ -71,7 +71,7 @@ end
 
 # grc for color output
 if type -q grc
-    set -U grcplugin_ls --color -Chl --group-directories-first
+    set -gx grcplugin_ls --color -Chl --group-directories-first
     set -x grcplugin_df -H
 end
 
@@ -95,7 +95,7 @@ if status is-interactive
     # Hooks
     # Fzf config
     type -q __fzf_setup; and __fzf_setup
-    set -U FZF_DEFAULT_OPTS "\
+    set -gx FZF_DEFAULT_OPTS "\
   --color=bg+:#363a4f,bg:#24273a,spinner:#f4dbd6,hl:#ed8796 \
   --color=fg:#cad3f5,header:#ed8796,info:#c6a0f6,pointer:#f4dbd6 \
   --color=marker:#f4dbd6,fg+:#cad3f5,prompt:#c6a0f6,hl+:#ed8796 \
@@ -106,9 +106,9 @@ if status is-interactive
         alias fd fdfind
     end
     if type -q fd
-        set -U FZF_FIND_FILE_COMMAND "fd -Ht f -E .git . \$dir 2> /dev/null"
-        set -U FZF_CD_COMMAND "fd -t d . \$dir 2> /dev/null"
-        set -U FZF_CD_WITH_HIDDEN_COMMAND "fd -Ht d -E .git . \$dir 2> /dev/null"
+        set -gx FZF_FIND_FILE_COMMAND "fd -Ht f -E .git . \$dir 2> /dev/null"
+        set -gx FZF_CD_COMMAND "fd -t d . \$dir 2> /dev/null"
+        set -gx FZF_CD_WITH_HIDDEN_COMMAND "fd -Ht d -E .git . \$dir 2> /dev/null"
         fd --gen-completions fish | source
     end
 
@@ -129,10 +129,10 @@ if status is-interactive
         ov --completion fish | source
     end
     # Vivid
-    type -q vivid; and set -Ux LS_COLORS (vivid generate catppuccin-macchiato)
+    type -q vivid; and set -gx LS_COLORS (vivid generate catppuccin-macchiato)
     # Zellij
     if type -q zellij
-        set -U ZELLIJ_AUTO_ATTACH true
+        set -gx ZELLIJ_AUTO_ATTACH true
         zellij setup --generate-completion fish | source
     end
 
@@ -157,8 +157,5 @@ end
 ## Load per-machine & secret config {
 if test -e $HOME/.config/fish/per_machine.fish
     source $HOME/.config/fish/per_machine.fish
-end
-if test -e $HOME/.config/fish/secret.fish
-    source $HOME/.config/fish/secret.fish
 end
 ## }
