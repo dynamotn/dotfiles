@@ -1,10 +1,17 @@
 {{- if ne .guiServer "0" }}
 name: telegram-desktop
 method: os
+# https://repology.org/project/telegram-desktop/versions
 gentoo:
   packages:
     - name: net-im/telegram-desktop-bin
 arch:
+  packages:
+    - name: telegram-desktop
+ubuntu:
+  packages:
+    - name: telegram-desktop
+alpine:
   packages:
     - name: telegram-desktop
 macos:

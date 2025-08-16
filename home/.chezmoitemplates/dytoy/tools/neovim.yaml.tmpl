@@ -1,17 +1,19 @@
 name: neovim
 is_essential: true
 {{- if ne .osid "linux-ubuntu" }}
+# I need version 0.11 and Ubuntu not have
 method: os
+# https://repology.org/project/neovim/versions
 gentoo:
   packages:
     - name: app-editors/neovim
 arch:
   packages:
     - name: neovim
-termux:
+alpine:
   packages:
     - name: neovim
-alpine:
+termux:
   packages:
     - name: neovim
 macos:

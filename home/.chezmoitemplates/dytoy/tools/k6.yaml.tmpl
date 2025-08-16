@@ -2,7 +2,6 @@ name: k6
 method: binary
 github:
   repo: grafana/k6
-  version: latest
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "darwin" }}
   {{- $os = "macos" }}

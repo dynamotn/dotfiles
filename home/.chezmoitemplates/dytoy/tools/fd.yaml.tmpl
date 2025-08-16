@@ -1,14 +1,20 @@
 name: fd
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
 method: os
+# https://repology.org/project/fd-find/versions
 arch:
   packages:
     - name: fd
-termux:
+ubuntu:
+  packages:
+    - name: rust-fd-find
+alpine:
   packages:
     - name: fd
-alpine:
+termux:
   packages:
     - name: fd
 macos:
@@ -30,5 +36,5 @@ archive:
     strip: 1
   - path: fd-%v-{{ $arch }}-unknown-linux-gnu/fd.1
     strip: 1
-    location: $MAN_DIR/man1
+    location: $HOME/.local/man/man1
 {{- end }}

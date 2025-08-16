@@ -1,18 +1,18 @@
 {{- if eq .kind "laptop" }}
+# Use auto-cpufreq only on my laptop (Gentoo and Arch)
 name: auto-cpufreq
 method: os
+# https://repology.org/project/auto-cpufreq/versions
 is_essential: true
 gentoo:
   packages:
     - name: sys-power/auto-cpufreq
-  hook:
-    after: |-
-      sudo rc-update add auto-cpufreq default
-      sudo rc-service auto-cpufreq restart
+  services:
+    - name: auto-cpufreq
 arch:
   packages:
     - name: auto-cpufreq
-  hook:
-    after: |-
-      sudo systemctl enable --now auto-cpufreq
+  services:
+    - name: auto-cpufreq
+macos:  # Not needed
 {{- end }}

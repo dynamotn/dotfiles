@@ -1,31 +1,32 @@
   {{- if ne .kind "container" }}
 name: cron
 method: os
+# https://repology.org/project/cronie/versions
 is_essential: true
 gentoo:
   packages:
     - name: sys-process/cronie
-  hook:
-    after: |-
-      sudo rc-update add cronie default
-      sudo rc-service cronie restart
+  services:
+    - name: cronie
 arch:
   packages:
     - name: cronie
-  hook:
-    after: |-
-      sudo systemctl enable --now cronie
+  services:
+    - name: cronie
 ubuntu:
   packages:
+    - name: cronie
+  services:
     - name: cron
-  hook:
-    after: |-
-      sudo systemctl enable --now cron
+alpine:
+  packages:
+    - name: cronie
+  services:
+    - name: cronie
 termux:
   packages:
     - name: cronie
-  hook:
-    after: |-
-      sv-enable crond
-      sv up crond
+  services:
+    - name: crond
+macos: # Not needed
 {{- end }}

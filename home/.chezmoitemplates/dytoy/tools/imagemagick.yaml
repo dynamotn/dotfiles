@@ -1,5 +1,6 @@
 name: imagemagick
 method: os
+# https://repology.org/project/imagemagick/versions
 gentoo:
   packages:
     - name: media-gfx/imagemagick
@@ -9,10 +10,10 @@ arch:
 ubuntu:
   packages:
     - name: imagemagick
-termux:
+alpine:
   packages:
     - name: imagemagick
-alpine:
+termux:
   packages:
     - name: imagemagick
 macos:

@@ -1,6 +1,7 @@
 {{- if eq .terminalMultiplexer "T" }}
 name: tmux
 method: os
+# https://repology.org/project/tmux/versions
 is_essential: true
 gentoo:
   packages:
@@ -11,10 +12,13 @@ arch:
 ubuntu:
   packages:
     - name: tmux
+alpine:
+  packages:
+    - name: tmux
 termux:
   packages:
     - name: tmux
-alpine:
+macos:
   packages:
     - name: tmux
 {{- else if eq .terminalMultiplexer "Z" }}
@@ -22,19 +26,20 @@ name: zellij
 is_essential: true
 {{- if ne .osid "linux-ubuntu" }}
 method: os
+# https://repology.org/project/zellij/versions
 gentoo:
   packages:
     - name: app-misc/zellij
 arch:
   packages:
     - name: zellij
+alpine:
+  packages:
+    - name: zellij
 termux:
   packages:
     - name: zellij
 macos:
-  packages:
-    - name: zellij
-alpine:
   packages:
     - name: zellij
 {{- else }}

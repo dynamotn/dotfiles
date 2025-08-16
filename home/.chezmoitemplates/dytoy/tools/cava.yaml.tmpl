@@ -1,6 +1,7 @@
 {{- if .hasSound }}
 name: cava
 method: os
+# https://repology.org/project/cava/versions
 gentoo:
   packages:
     - name: media-sound/cava
@@ -8,6 +9,11 @@ arch:
   packages:
     - name: cava
 ubuntu:
+  packages:
+    - name: cava
+alpine:  # Not needed
+termux:  # Not needed
+macos:
   packages:
     - name: cava
 {{- end }}

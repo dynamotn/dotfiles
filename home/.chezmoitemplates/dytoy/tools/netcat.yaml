@@ -1,5 +1,6 @@
 name: netcat
 method: os
+# https://repology.org/project/netcat-openbsd-debian/versions
 is_essential: true
 gentoo:
   packages:
@@ -10,9 +11,10 @@ arch:
 ubuntu:
   packages:
     - name: netcat-openbsd
-termux:
-  packages:
-    - name: netcat-openbsd
 alpine:
   packages:
     - name: netcat-openbsd
+termux:
+  packages:
+    - name: netcat-openbsd
+macos: # Use builtin netcat

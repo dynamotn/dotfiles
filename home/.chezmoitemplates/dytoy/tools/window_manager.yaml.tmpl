@@ -1,6 +1,7 @@
 {{- if eq .guiWinManager "H" }}
 name: hyprland
 method: os
+# https://repology.org/project/hyprland/versions
 is_essential: true
 gentoo:
   packages:
@@ -26,6 +27,7 @@ arch:
     - name: cmake
     - name: meson
     - name: xorg-xwayland
+ubuntu: # Not have package on LTS version
 {{- else if eq .guiWinManager "A" }}
 name: aerospace
 is_essential: true
@@ -34,13 +36,12 @@ macos:
   packages:
     - name: aerospace
       type: cask
+      repo: nikitabobko/tap
     - name: autoraise
       unstable: true
-  hook:
-    before: |-
-      brew tap nikitabobko/tap
-      brew tap dimentium/autoraise
-    after: |-
-      /usr/bin/osascript -e 'tell application "System Events" to make new login item at end with properties {name:"Aerospace.app", path:"/Applications/Aerospace.app", kind:"Application", hidden:true}'
-      brew services start autoraise
+      repo: dimentium/autoraise
+  services:
+    - name: Aerospace
+      is_system: false
+    - name: autoraise
 {{- end }}

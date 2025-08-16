@@ -1,6 +1,8 @@
 {{- if and (eq .guiServer "W") (eq .kind "laptop") }}
+# Use wdisplays only on my laptop (Gentoo and Arch)
 name: wdisplays
 method: os
+# https://repology.org/project/wdisplays/versions
 is_essential: true
 gentoo:
   packages:

@@ -1,17 +1,16 @@
-{{- if eq .kind "container" }}
 name: tldr
 is_essential: true
+{{- if and (eq .kind "container") (eq .chezmoi.os "linux-arch") }}
+# Use package only on Archlinux container
 method: os
+# https://repology.org/project/tealdeer/versions
 arch:
   packages:
     - name: tealdeer
 {{- else }}
-name: tldr
-is_essential: true
 method: binary
 github:
   repo: dbrgn/tealdeer
-  version: latest
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
   {{- $arch = "x86_64" }}

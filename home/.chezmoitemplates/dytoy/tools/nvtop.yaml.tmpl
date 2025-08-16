@@ -1,6 +1,7 @@
-{{- if eq .guiServer "W" }}
+{{- if and (eq .guiServer "W" "H") (ne .osid "linux-alpine") }}
 name: nvtop
 method: os
+# https://repology.org/project/nvtop/versions
 gentoo:
   packages:
     - name: sys-process/nvtop
@@ -10,6 +11,8 @@ arch:
 ubuntu:
   packages:
     - name: nvtop
+alpine: # Only have package in testing repository
+termux: # Not needed
 macos:
   packages:
     - name: nvtop

@@ -1,5 +1,6 @@
 name: git-lfs
 method: os
+# https://repology.org/project/git-lfs/versions
 gentoo:
   packages:
     - name: dev-vcs/git-lfs
@@ -9,10 +10,10 @@ arch:
 ubuntu:
   packages:
     - name: git-lfs
-termux:
+alpine:
   packages:
     - name: git-lfs
-alpine:
+termux:
   packages:
     - name: git-lfs
 macos:

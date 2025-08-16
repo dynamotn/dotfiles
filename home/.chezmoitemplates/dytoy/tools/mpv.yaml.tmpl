@@ -1,6 +1,7 @@
 {{- if ne .guiServer "0" }}
 name: mpv
 method: os
+# https://repology.org/project/mpv/versions
 gentoo:
   packages:
     - name: media-video/mpv
@@ -8,6 +9,9 @@ arch:
   packages:
     - name: mpv
 ubuntu:
+  packages:
+    - name: mpv
+alpine:
   packages:
     - name: mpv
 macos:
