@@ -1,0 +1,37 @@
+{{- if and (eq .guiDriver "N" "A" "M") (ne .osid "android") }}
+name: ollama
+{{-   if not (eq .osid "linux-alpine" "linux-ubuntu") }}
+method: os
+# https://repology.org/project/ollama/versions
+gentoo:
+  packages:
+    - name: sci-ml/ollama
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+      service: ollama
+  hook:
+    after: |-
+      sudo gpasswd -a ollama video
+arch:
+  packages:
+    {{- if eq .guiDriver "N" }}
+    - name: ollama-cuda
+    {{- else if eq .guiDriver "A" }}
+    - name: ollama-rocm
+    {{- else }}
+    - name: ollama
+    {{- end }}
+      service: ollama
+ubuntu: # Not have package
+alpine: # Only have package in edge distro version
+termux: # I don't want to run ollama on termux
+macos:
+  packages:
+    - name: ollama
+      service: ollama
+{{-   else }}
+method: shell
+content: |-
+  curl -fsSL https://ollama.com/install.sh | sh
+{{-   end }}
+{{- end }}

@@ -1,0 +1,13 @@
+{{- if eq .chezmoi.os "linux" "android" }}
+name: httptap
+method: binary
+github:
+  repo: monasticacademy/httptap
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: httptap_linux_x86_64.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: httptap_linux_arm64.tar.gz
+  {{- end }}
+archive:
+  - path: httptap
+{{- end }}

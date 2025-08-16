@@ -1,0 +1,24 @@
+name: keyboard_input
+method: os
+is_essential: true
+# Not need on Termux
+{{- if eq .guiServer "W" }}
+# https://repology.org/project/wtype/versions
+gentoo:
+  packages:
+    - name: gui-apps/wtype
+arch:
+  packages:
+    - name: wtype
+ubuntu:
+  packages:
+    - name: wtype
+alpine:
+  packages:
+    - name: wtype
+{{- else if eq .guiServer "M" }}
+macos:
+  packages:
+    - name: hammerspoon
+      type: cask
+{{- end }}

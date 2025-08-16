@@ -1,0 +1,19 @@
+{{- if eq .kind "pc" "laptop" }}
+# Use rustdesk only on my pc & laptop (Gentoo, Arch and MacOS)
+name: rustdesk
+is_essential: true
+# https://repology.org/project/rustdesk/versions
+method: os
+gentoo:
+  packages:
+    - name: net-misc/rustdesk
+      repo: gentoo-zh
+      url: https://github.com/gentoo-mirror/gentoo-zh.git
+arch:
+  packages:
+    - name: rustdesk-bin
+macos:
+  packages:
+    - name: rustdesk
+      type: cask
+{{- end }}

@@ -1,0 +1,19 @@
+name: git
+method: os
+# https://repology.org/project/git/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: dev-vcs/git
+arch:
+  packages:
+    - name: git
+ubuntu:
+  packages:
+    - name: git
+alpine:
+  packages:
+    - name: git
+termux:
+  packages:
+    - name: git

@@ -32,7 +32,7 @@
 
 This repository contains all my dotfiles managed by [chezmoi](https://github.com/twpayne/chezmoi).
 Please note that this is my own personal dotfiles for Linux
-(Gentoo, Arch, Ubuntu, Alpine for container), Android (Termux) and MacOS.
+(Gentoo, Arch, Ubuntu 24.04 LTS and above, Alpine for container), Android (Termux) and MacOS.
 I don't use X applications anymore.
 
 ## :brain:&nbsp; Philosophy
@@ -48,7 +48,7 @@ I don't use X applications anymore.
 - Manage all configurations by only chezmoi, not use any other tool
 (`dotbot`, `comtrya`, `stow`...) or IaC tool (`ansible`, `nix`...).
 Use script and template of chezmoi to do anything.
-- Manage my home folders, and some of OS configurations across multiple machine
+- Manage my home folders, and some of OS configurations across multiple machines
 - Must convert configurations of a tool to use Git submodule as a part
 of dotfiles, if match any of below conditions:
   - Not existed in any machine, and has large disk usage (>=1MiB)
@@ -68,7 +68,13 @@ Run only one command:
 curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | bash -
 ```
 
-Answer questions, and wait to finish all setup scripts. My dotfiles will be located in `$HOME/Dotfiles`
+Answer questions, and wait to finish all setup scripts.
+My dotfiles will be located in `$HOME/Dotfiles`.
+> [!NOTE]
+>
+> - If you aren't me, need to answer no (`n`) for "Do you want to decrypt... secrets?" questions.
+> Don't ask me why :)
+> - My chezmoi configuration are stored in [my private chezmoi repo for all machines](https://github.com/dynamotn/chezmoi-keeper)
 
 ## :scroll:&nbsp; Cheatsheet
 
@@ -76,22 +82,10 @@ TODO: Link to another configs' cheatsheet
 
 ## :wrench:&nbsp; Tools & Packages
 
-### via OS package manager
+### via my `dytoy` scripts
 
-See [package_manager](docs/tools/package_manager.md)
-
-### via chezmoi external
-
-See [chezmoi](docs/tools/chezmoi.md)
-
-### via Github Release binary
-
-See [release_binary](docs/tools/release_binary.md)
-
-### via mise
-
-See [mise](docs/tools/mise.md)
+See [dytoy](docs/dytoy.md)
 
 ### via Mason of neovim
 
-All LSP servers, debuggers, formatters, linters when I used with `neovim` will be managed by [mason plugin](https://github.com/williamboman/mason.nvim/) and use my [custom registry](https://github.com/dynamotn/mason-registry/)
+All LSP servers, debuggers, formatters, linters when I used with `neovim` will be managed by [mason plugin](https://github.com/williamboman/mason.nvim/). I also have custom registry in `neovim` config.

@@ -1,0 +1,9 @@
+{{- if and (eq .kind "laptop") (eq .chezmoi.os "linux") }}
+# Use shikane only on my laptop
+name: shikane
+method: shell
+is_essential: true
+dependencies:
+  - rust
+content: cargo install shikane
+{{- end }}

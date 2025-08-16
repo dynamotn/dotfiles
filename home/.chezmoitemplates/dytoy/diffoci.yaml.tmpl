@@ -1,0 +1,8 @@
+{{- if ne .chezmoi.os "android" }}
+# Can't use docker and container on non-rooted Android
+name: diffoci
+method: binary
+github:
+  repo: reproducible-containers/diffoci
+  release_asset: diffoci-%v.{{ .chezmoi.os }}-{{ .chezmoi.arch }}
+{{- end }}

@@ -1,0 +1,24 @@
+name: gh
+method: binary
+github:
+  repo: cli/cli
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "macOS" }}
+  release_asset: gh_%1v_{{ $os }}_{{ .chezmoi.arch }}.zip
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "linux" }}
+  release_asset: gh_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+  {{- end }}
+archive:
+  - path: gh_%1v_{{ $os }}_{{ .chezmoi.arch }}/bin/gh
+    strip: 2
+  - path: gh_${version:1}_{{ $os }}_{{ .chezmoi.arch }}/share/man/man1/*
+    strip: 4
+    location: "$HOME/.local/man/man1"
+hook:
+  after: |
+    if [ -z "$GITHUB_TOKEN" ]; then
+      gh auth login
+    fi
+    gh extension install dlvhdr/gh-dash

@@ -1,0 +1,46 @@
+{{- if eq .mailClient "T" }}
+name: thunderbird
+method: os
+# https://repology.org/project/thunderbird/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: mail-client/thunderbird-bin
+arch:
+  packages:
+    - name: thunderbird
+ubuntu:
+  packages:
+    - name: thunderbird
+alpine:
+  packages:
+    - name: thunderbird
+termux:
+  packages:
+    - name: thunderbird
+macos:
+  packages:
+    - name: thunderbird
+      type: cask
+{{- else if and (eq .mailClient "B") (eq .osid "darwin" "linux-gentoo" "linux-arch") }}
+# Only available on Gentoo, Arch, macOS
+name: betterbird
+is_essential: true
+method: os
+gentoo:
+  packages:
+    - name: mail-client/betterbird-bin
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+arch:
+  packages:
+    - name: betterbird-bin
+macos:
+  packages:
+    - name: Betterbird
+      type: download
+      url: https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=future
+flatpak:
+  packages:
+    - name: org.betterbird.Betterbird
+{{- end }}

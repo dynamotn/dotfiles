@@ -1,0 +1,15 @@
+{{- if eq .guiWinManager "H" }}
+# Need screen shader only on Hyprland
+name: hyprshade
+method: os
+# https://repology.org/project/hyprshade/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/hyprshade
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+arch:
+  packages:
+    - name: hyprshade
+{{- end }}

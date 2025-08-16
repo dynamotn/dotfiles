@@ -1,0 +1,35 @@
+name: btop
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for macOS, and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/btop/versions
+arch:
+  packages:
+    - name: btop
+ubuntu:
+  packages:
+    - name: btop
+alpine:
+  packages:
+    - name: btop
+termux:
+  packages:
+    - name: htop # https://github.com/termux/termux-packages/issues/8566
+macos:
+  packages:
+    - name: btop
+{{- else }}
+method: binary
+is_essential: true
+github:
+  repo: aristocratos/btop
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: btop-x86_64-linux-musl.tbz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: btop-aarch64-linux-gnu.tbz
+  {{- end }}
+archive:
+  - path: ./btop/bin/btop
+    strip: 3
+{{- end }}

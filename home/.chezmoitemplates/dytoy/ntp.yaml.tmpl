@@ -1,0 +1,50 @@
+{{- if ne .kind "container" }}
+name: ntp
+method: os
+# https://repology.org/project/ntp/versions
+# https://repology.org/project/chrony/versions
+is_essential: true
+gentoo:
+  {{- if eq .initSystem "openrc" }}
+  packages:
+    - name: net-misc/ntp
+      service: ntp-client
+  {{- else if eq .initSystem "systemd" }}
+  packages:
+    - name:  sys-apps/systemd
+      service: systemd-timesyncd
+  {{- end }}
+  hook:
+    after: |-
+      {{- if eq .initSystem "systemd" }}
+      sudo timedatectl set-ntp true
+      sudo timedatectl set-local-rtc 1
+      {{- end }}
+      sudo hwclock --systohc
+arch:
+  packages:
+    - name: systemd
+      service: systemd-timesyncd
+  hook:
+    after: |-
+      sudo timedatectl set-ntp true
+      sudo timedatectl set-local-rtc 1
+      sudo hwclock --systohc
+ubuntu:
+  packages:
+    - name: systemd
+      service: systemd-timesyncd
+  hook:
+    after: |-
+      sudo timedatectl set-ntp true
+      sudo timedatectl set-local-rtc 1
+alpine:
+  packages:
+    - name: chrony
+      service: chronyd
+  hook:
+    after: |-
+      hwclock --systohc
+termux: # Use system builtin time sync feature
+macos: # Use system builtin time sync feature
+{{- end }}

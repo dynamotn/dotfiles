@@ -1,0 +1,33 @@
+name: tailscale
+method: os
+# https://repology.org/project/tailscale/versions
+{{- if eq .kind "pc" "laptop" }}
+is_essential: true
+{{- end }}
+gentoo:
+  packages:
+    - name: net-vpn/tailscale
+      service: tailscale
+  hook:
+    after: sudo tailscale up
+arch:
+  packages:
+    - name: tailscale
+      service: tailscaled
+  hook:
+    after: sudo tailscale up
+ubuntu:
+  packages:
+    - name: tailscale
+      service: tailscale
+  hook:
+    before: |-
+      curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg \
+        | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/nul
+    after: sudo tailscale up
+macos:
+  packages:
+    - name: tailscale
+      type: cask
+  hook:
+    after: sudo tailscale up

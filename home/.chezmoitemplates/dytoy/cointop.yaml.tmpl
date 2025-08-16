@@ -1,0 +1,24 @@
+name: cointop
+{{- if eq .chezmoi.os "android" "darwin" }}
+# Use package manager for Android, macOS
+method: os
+# https://repology.org/project/cointop/versions
+termux:
+  packages:
+    - name: cointop
+macos:
+  packages:
+    - name: cointop
+{{- else if (eq .chezmoi.arch "amd64") }}
+# Release binary is only available for amd64 on Linux
+method: binary
+github:
+  repo: cointop-sh/cointop
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset: cointop_%1v_{{ $os }}_amd64.tar.gz
+archive:
+  - path: cointop
+{{- end }}

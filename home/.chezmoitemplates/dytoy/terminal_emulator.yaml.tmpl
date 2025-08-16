@@ -1,0 +1,26 @@
+{{- if ne .guiServer "0" }}
+name: kitty
+method: os
+# https://repology.org/project/kitty-terminal/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: x11-terms/kitty
+    - name: x11-terms/kitty-terminfo
+arch:
+  packages:
+    - name: kitty
+    - name: kitty-terminfo
+ubuntu:
+  packages:
+    - name: kitty
+    - name: kitty-terminfo
+alpine:
+  packages:
+    - name: kitty
+    - name: kitty-terminfo
+macos:
+  packages:
+    - name: kitty
+      type: cask
+{{- end }}

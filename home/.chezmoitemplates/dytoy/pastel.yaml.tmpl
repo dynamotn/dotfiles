@@ -1,0 +1,28 @@
+name: pastel
+{{- if eq .chezmoi.os "android" "darwin" }}
+method: os
+# https://repology.org/project/pastel-sharkdp/versions
+termux:
+  packages:
+    - name: pastel
+macos:
+  packages:
+    - name: pastel
+{{- else }}
+method: binary
+github:
+  repo: sharkdp/pastel
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: pastel-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
+archive:
+  - path: pastel-%v-{{ $arch }}-unknown-linux-gnu/pastel
+    strip: 1
+  - path: pastel-%v-{{ $arch }}-unknown-linux-gnu/autocomplete/pastel.fish
+    location: $HOME/.config/fish/completions
+    strip: 2
+{{- end }}

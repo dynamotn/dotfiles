@@ -1,0 +1,16 @@
+name: curlie
+{{- if eq .chezmoi.os "android" }}
+# On Github release assets, not having a specific asset for Android
+method: os
+# https://repology.org/project/curlie/versions
+termux:
+  packages:
+    - name: curlie
+{{- else }}
+method: binary
+github:
+  repo: rs/curlie
+  release_asset: curlie_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
+archive:
+  - path: curlie
+{{- end }}

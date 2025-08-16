@@ -1,0 +1,25 @@
+{{- if eq .chezmoi.os "linux" }}
+# BPF only work on Linux
+name: bcc
+method: os
+# https://repology.org/project/bcc-bpf/versions
+gentoo:
+  packages:
+    - name: dev-util/bcc
+arch:
+  packages:
+    - name: bcc
+    - name: bcc-tools
+    - name: python-bcc
+ubuntu:
+  packages:
+    - name: bcc-tools
+      repo: https://repo.iovisor.org/apt/%v
+      repo_version: main
+      key: 4052245BD4284CDD
+    - name: libbcc-examples
+alpine:
+  packages:
+    - name: bcc
+    - name: bcc-tools
+{{- end }}

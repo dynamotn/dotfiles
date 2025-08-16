@@ -1,0 +1,20 @@
+# Use pbcopy/pbpaste for MacOS
+# Use termux-clipboard-set/termux-clipboard-get for Termux
+{{- if eq .guiServer "W" }}
+name: wl-clipboard
+method: os
+# https://repology.org/project/wl-clipboard/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/wl-clipboard
+arch:
+  packages:
+    - name: wl-clipboard
+ubuntu:
+  packages:
+    - name: wl-clipboard
+alpine:
+  packages:
+    - name: wl-clipboard
+{{- end }}
