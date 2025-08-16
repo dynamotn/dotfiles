@@ -1,14 +1,23 @@
-name: rg
+name: ripgrep
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
 method: os
+# https://repology.org/project/ripgrep/versions
+arch:
+  packages:
+    - name: ripgrep
+ubuntu:
+  packages:
+    - name: rust-ripgrep
+alpine:
+  packages:
+    - name: ripgrep
 termux:
   packages:
     - name: ripgrep
 macos:
-  packages:
-    - name: ripgrep
-arch:
   packages:
     - name: ripgrep
 {{- else }}
@@ -30,5 +39,5 @@ archive:
     strip: 1
   - path: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}/doc/rg.1
     strip: 2
-    location: $MAN_DIR/man1
+    location: $HOME/.local/man/man1
 {{- end }}

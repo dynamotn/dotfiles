@@ -1,5 +1,6 @@
 name: bzip2
 method: os
+# https://repology.org/project/bzip2/versions
 is_essential: true
 gentoo:
   packages:
@@ -10,9 +11,12 @@ arch:
 ubuntu:
   packages:
     - name: bzip2
+alpine:
+  packages:
+    - name: bzip2
 termux:
   packages:
     - name: bzip2
-alpine:
+macos:
   packages:
     - name: bzip2

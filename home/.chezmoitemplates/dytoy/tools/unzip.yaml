@@ -1,5 +1,6 @@
 name: unzip
 method: os
+# https://repology.org/project/unzip/versions
 is_essential: true
 gentoo:
   packages:
@@ -10,9 +11,12 @@ arch:
 ubuntu:
   packages:
     - name: unzip
+alpine:
+  packages:
+    - name: unzip
 termux:
   packages:
     - name: unzip
-alpine:
+macos:
   packages:
     - name: unzip

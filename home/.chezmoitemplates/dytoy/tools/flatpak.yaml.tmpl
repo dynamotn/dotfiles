@@ -1,0 +1,18 @@
+{{- if eq .chezmoi.os "linux" }}
+name: flatpak
+method: os
+# https://repology.org/project/flatpak/versions
+gentoo:
+  packages:
+    - name: sys-apps/flatpak
+  hook:
+arch:
+  packages:
+    - name: flatpak
+ubuntu:
+  packages:
+    - name: flatpak
+alpine:
+  packages:
+    - name: flatpak
+{{- end }}

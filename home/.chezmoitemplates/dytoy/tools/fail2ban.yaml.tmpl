@@ -1,24 +1,33 @@
 {{- if ne .kind "container" }}
+# Not need in container
 name: fail2ban
 method: os
+# https://repology.org/project/fail2ban/versions
 is_essential: true
 gentoo:
   packages:
     - name: net-analyzer/fail2ban
-  hook:
-    after: |-
-      sudo rc-update add fail2ban default
-      sudo rc-service fail2ban restart
+  services:
+    - name: fail2ban
 arch:
   packages:
     - name: fail2ban
-  hook:
-    after: |-
-      sudo systemctl enable --now fail2ban
+  services:
+    - name: fail2ban
+ubuntu:
+  packages:
+    - name: fail2ban
+  services:
+    - name: fail2ban
+alpine:
+  packages:
+    - name: fail2ban
+  services:
+    - name: fail2ban
+termux: # Not have prebuilt package
 macos:
   packages:
     - name: fail2ban
-  hook:
-    after: |-
-      sudo brew services restart fail2ban
+  services:
+    - name: fail2ban
 {{- end }}

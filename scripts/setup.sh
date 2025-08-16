@@ -8,7 +8,7 @@ git submodule update --init --remote "$SETUP_DIR"/lib/dybatpho "$SETUP_DIR"/lib/
 
 # shellcheck source=lib/dybatpho/init.sh
 . "$SETUP_DIR/lib/dybatpho/init.sh"
-dybatpho::register_err_handler
+dybatpho::register_common_handlers
 
 function _spec_main {
   dybatpho::opts::setup "Setup your machine from dotfiles" MAIN_ARGS action:"_main"

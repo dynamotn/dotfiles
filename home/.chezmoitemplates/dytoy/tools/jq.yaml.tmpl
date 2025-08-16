@@ -1,14 +1,20 @@
 name: jq
 is_essential: true
 {{- if or (eq .chezmoi.os "darwin" "android") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
 method: os
+# https://repology.org/project/jq/versions
 arch:
   packages:
     - name: jq
-termux:
+ubuntu:
   packages:
     - name: jq
 alpine:
+  packages:
+    - name: jq
+termux:
   packages:
     - name: jq
 macos:

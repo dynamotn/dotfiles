@@ -1,12 +1,16 @@
+{{- if and (eq .guiDriver "N" "A" "M") (ne .osid "android") }}
 name: ollama
+{{-   if not (eq .osid "linux-alpine" "linux-ubuntu") }}
 method: os
+# https://repology.org/project/ollama/versions
 gentoo:
   packages:
     - name: app-misc/ollama
+  services:
+    - name: ollama
   hook:
     after: |-
-      sudo rc-update add ollama default
-      sudo rc-service ollama start
+      sudo gpasswd -a ollama video
 arch:
   packages:
     {{- if eq .guiDriver "N" }}
@@ -16,12 +20,19 @@ arch:
     {{- else }}
     - name: ollama
     {{- end }}
-  hook:
-    after: |-
-      sudo systemctl enable --now ollama
+  services:
+    - name: ollama
+ubuntu: # Not have package
+alpine: # Only have package in edge distro version
+termux: # I don't want to run ollama on termux
 macos:
   packages:
     - name: ollama
-  hook:
-    after: |-
-      brew services start ollama
+  services:
+    - name: ollama
+{{-   else }}
+method: shell
+content: |-
+  curl -fsSL https://ollama.com/install.sh | sh
+{{-   end }}
+{{- end }}

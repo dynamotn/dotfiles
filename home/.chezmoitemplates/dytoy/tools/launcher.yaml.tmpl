@@ -1,7 +1,9 @@
+# Not need on Termux
 {{- if eq .guiServer "W" }}
 name: wofi
 method: os
 is_essential: true
+# https://repology.org/project/wofi/versions
 gentoo:
   packages:
     - name: gui-apps/wofi
@@ -9,6 +11,9 @@ arch:
   packages:
     - name: wofi
 ubuntu:
+  packages:
+    - name: wofi
+alpine:
   packages:
     - name: wofi
 {{- else if eq .guiServer "M" }}

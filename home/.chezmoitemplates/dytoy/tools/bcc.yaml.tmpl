@@ -1,6 +1,8 @@
 {{- if eq .chezmoi.os "linux" }}
+# BPF only work on Linux
 name: bcc
 method: os
+# https://repology.org/project/bcc-bpf/versions
 gentoo:
   packages:
     - name: dev-util/bcc

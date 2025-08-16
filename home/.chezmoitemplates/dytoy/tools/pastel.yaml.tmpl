@@ -1,7 +1,11 @@
 name: pastel
-{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+{{- if eq .chezmoi.os "android" "darwin" }}
 method: os
+# https://repology.org/project/pastel-sharkdp/versions
 termux:
+  packages:
+    - name: pastel
+macos:
   packages:
     - name: pastel
 {{- else }}
