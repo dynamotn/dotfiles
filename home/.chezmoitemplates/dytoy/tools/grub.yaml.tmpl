@@ -1,6 +1,7 @@
-{{- if eq .kind "pc" "laptop" }}
+{{- if eq .chezmoi.os "linux" }}
 name: grub
 method: os
+# https://repology.org/project/grub/versions
 is_essential: true
 gentoo:
   packages:
@@ -12,6 +13,9 @@ arch:
     - name: sbsigntools
     {{- end }}
 ubuntu:
+  packages:
+    - name: grub
+alpine:
   packages:
     - name: grub
 {{- end }}

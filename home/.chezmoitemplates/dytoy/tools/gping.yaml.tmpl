@@ -1,21 +1,26 @@
 name: gping
 is_essential: true
-{{- if or (eq .chezmoi.os "darwin" "android") (eq .kind "container") }}
+{{- if or (eq .chezmoi.os "darwin" "android") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
 method: os
-macos:
+# https://repology.org/project/gping/versions
+arch:
+  packages:
+    - name: gping
+alpine:
   packages:
     - name: gping
 termux:
   packages:
     - name: gping
-arch:
+macos:
   packages:
     - name: gping
 {{- else }}
 method: binary
 github:
   repo: orf/gping
-  version: latest
   {{- if eq .chezmoi.arch "amd64" }}
   release_asset: gping-Linux-gnu-x86_64.tar.gz
   {{- else if eq .chezmoi.arch "arm64" }}

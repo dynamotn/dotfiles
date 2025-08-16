@@ -1,7 +1,10 @@
 name: watchexec
-method: binary
+is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
 method: os
+# https://repology.org/project/watchexec/versions
 arch:
   packages:
     - name: watchexec
@@ -15,6 +18,7 @@ macos:
   packages:
     - name: watchexec
 {{- else }}
+method: binary
 github:
   repo: watchexec/watchexec
   {{- $arch := "" }}
@@ -29,5 +33,5 @@ archive:
     strip: 1
   - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec.1
     strip: 1
-    location: $MAN_DIR/man1
+    location: $HOME/.local/man/man1
 {{- end }}

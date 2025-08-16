@@ -1,7 +1,6 @@
-{{- if eq .kind "pc" "laptop" }}
 name: wireguard
 method: os
-is_essential: true
+# https://repology.org/project/wireguard-tools/versions
 gentoo:
   packages:
     - name: net-vpn/wireguard-tools
@@ -11,4 +10,12 @@ arch:
 ubuntu:
   packages:
     - name: wireguard-tools
-{{- end }}
+alpine:
+  packages:
+    - name: wireguard-tools
+termux:
+  packages:
+    - name: wireguard-tools
+macos:
+  packages:
+    - name: wireguard-tools

@@ -1,6 +1,7 @@
 {{- if eq .browser "F" }}
 name: firefox
 method: os
+# https://repology.org/project/firefox/versions
 is_essential: true
 gentoo:
   packages:
@@ -11,21 +12,27 @@ arch:
 ubuntu:
   packages:
     - name: firefox
+alpine:
+  packages:
+    - name: firefox
 macos:
   packages:
     - name: firefox
 {{- else if eq .browser "Z" }}
 name: zen-browser
 method: os
+# https://repology.org/project/zen-browser/versions
 is_essential: true
 gentoo:
   packages:
     - name: www-client/zen-bin
       repo: guru
-      uri: https://github.com/gentoo-mirror/guru.git
+      url: https://github.com/gentoo-mirror/guru.git
 arch:
   packages:
     - name: zen-browser-bin
+ubuntu: # Not have package
+alpine: # Not have package
 macos:
   packages:
     - name: zen

@@ -2,6 +2,11 @@
 name: vmware-horizon-client
 is_essential: true
 method: os
+# https://repology.org/project/watchexec/versions
+gentoo:
+  packages:
+    - name: app-emulation/vmware-horizon-client-bin
+      repo: zGentoo
 arch:
   packages:
     - name: vmware-horizon-client
@@ -9,8 +14,4 @@ macos:
   packages:
     - name: omnissa-horizon-client
       type: cask
-gentoo:
-  packages:
-    - name: app-emulation/vmware-horizon-client-bin
-      repo: zGentoo
 {{- end }}

@@ -1,5 +1,6 @@
 name: w3m
 method: os
+# https://repology.org/project/w3m/versions
 is_essential: true
 gentoo:
   packages:
@@ -10,9 +11,12 @@ arch:
 ubuntu:
   packages:
     - name: w3m
+alpine:
+  packages:
+    - name: w3m
 termux:
   packages:
     - name: w3m
-alpine:
+macos:
   packages:
     - name: w3m

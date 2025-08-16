@@ -1,26 +1,31 @@
 {{- if and (eq .chezmoi.os "linux") (ne .kind "container") }}
 name: networkmanager
 method: os
+# https://repology.org/project/networkmanager/versions
 is_essential: true
 gentoo:
   packages:
     - name: net-misc/networkmanager
+  services:
+    - name: NetworkManager
   hook:
+    before: |-
+      sudo rc-update del dhcpcd default
     after: |-
       sudo usermod -aG plugdev $USER
-      sudo rc-update del dhcpcd default
-      sudo rc-update add NetworkManager default
-      sudo rc-service NetworkManager restart
 arch:
   packages:
     - name: networkmanager
-  hook:
-    after: |-
-      sudo systemctl enable --now NetworkManager
+  services:
+    - name: NetworkManager
 ubuntu:
   packages:
     - name: network-manager
-  hook:
-    after: |-
-      sudo systemctl enable --now NetworkManager
+  services:
+    - name: NetworkManager
+alpine:
+  packages:
+    - name: networkmanager
+  services:
+    - name: NetworkManager
 {{- end }}

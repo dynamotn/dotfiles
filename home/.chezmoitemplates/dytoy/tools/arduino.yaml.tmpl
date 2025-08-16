@@ -2,7 +2,6 @@ name: arduino
 method: binary
 github:
   repo: arduino/arduino-cli
-  version: latest
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{-   $os = "Darwin" }}
@@ -18,6 +17,3 @@ github:
   release_asset: arduino-cli_%1v_{{ $os }}_{{ $arch }}.tar.gz
 archive:
   - path: arduino-cli
-hook:
-  after: |
-    mv ~/.local/bin/arduino-cli ~/.local/bin/arduino

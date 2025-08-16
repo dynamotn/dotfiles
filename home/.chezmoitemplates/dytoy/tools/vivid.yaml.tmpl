@@ -1,7 +1,10 @@
 name: vivid
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
 method: os
+# https://repology.org/project/vivid/versions
 arch:
   packages:
     - name: vivid

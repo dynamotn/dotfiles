@@ -1,6 +1,7 @@
-{{- if eq .kind "pc" "laptop" "workstation" "sbc" }}
+{{- if and (eq .chezmoi.os "linux") (eq .kind "pc" "laptop" "workstation" "sbc") }}
 name: pam-u2f
 method: os
+# https://repology.org/project/pam-u2f/versions
 is_essential: true
 gentoo:
   packages:
@@ -23,6 +24,15 @@ arch:
 ubuntu:
   packages:
     - name: libpam-u2f
+  hook:
+    after: |-
+      if [ ! -d ~/.config/Yubico ]; then
+        mkdir -p ~/.config/Yubico
+        pamu2fcfg > ~/.config/Yubico/u2f_keys
+      fi
+ubuntu:
+  packages:
+    - name: pam-u2f
   hook:
     after: |-
       if [ ! -d ~/.config/Yubico ]; then

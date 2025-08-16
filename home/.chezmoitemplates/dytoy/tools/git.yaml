@@ -1,5 +1,6 @@
 name: git
 method: os
+# https://repology.org/project/git/versions
 is_essential: true
 gentoo:
   packages:
@@ -10,9 +11,9 @@ arch:
 ubuntu:
   packages:
     - name: git
-termux:
+alpine:
   packages:
     - name: git
-alpine:
+termux:
   packages:
     - name: git

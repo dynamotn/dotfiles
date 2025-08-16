@@ -1,7 +1,17 @@
 name: eza
 is_essential: true
-{{- if eq .chezmoi.os "android" "darwin" }}
+{{- if or (eq .chezmoi.os "android" "darwin") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
 method: os
+# https://repology.org/project/eza/versions
+arch:
+  packages:
+    - name: eza
+ubuntu: # container need to use binary method
+alpine:
+  packages:
+    - name: eza
 termux:
   packages:
     - name: eza

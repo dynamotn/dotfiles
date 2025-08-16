@@ -1,6 +1,7 @@
 name: procs
 {{- if eq .chezmoi.os "android" }}
 method: os
+# https://repology.org/project/procs/versions
 termux:
   packages:
     - name: procs
@@ -8,7 +9,6 @@ termux:
 method: binary
 github:
   repo: dalance/procs
-  version: latest
   {{- $os := "" }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.os "darwin" }}

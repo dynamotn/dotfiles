@@ -1,13 +1,9 @@
 name: hyperfine
-{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+{{- if eq .chezmoi.os "android" "darwin" }}
+# Use package manager for Android, macOS
 method: os
-arch:
-  packages:
-    - name: hyperfine
+# https://repology.org/project/hyperfine/versions
 termux:
-  packages:
-    - name: hyperfine
-alpine:
   packages:
     - name: hyperfine
 macos:
@@ -29,7 +25,7 @@ archive:
     strip: 1
   - path: hyperfine-%v-{{ $arch }}-unknown-linux-gnu/hyperfine.1
     strip: 1
-    location: $MAN_DIR/man1
+    location: $HOME/.local/man/man1
   - path: hyperfine-%v-{{ $arch }}-unknown-linux-gnu/autocomplete/hyperfine.fish
     location: $HOME/.config/fish/completions
     strip: 2

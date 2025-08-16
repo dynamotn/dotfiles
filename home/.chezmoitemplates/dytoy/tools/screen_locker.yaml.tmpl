@@ -1,6 +1,8 @@
 {{- if eq .guiServer "W" }}
+# Need screen locker only on Wayland
 name: hyprlock
 method: os
+# https://repology.org/project/hyprlock/versions
 {{-   if not (and (eq .kind "pc") (eq .place "home")) }}
 is_essential: true
 {{-   end }}
@@ -10,4 +12,6 @@ gentoo:
 arch:
   packages:
     - name: hyprlock
+ubuntu: # Not have package
+alpine: # Not have package
 {{- end }}

@@ -1,12 +1,13 @@
 {{- if eq .guiWinManager "G" }}
 name: ibus-bamboo
 method: os
+# https://repology.org/project/ibus-bamboo/versions
 is_essential: true
 gentoo:
   packages:
     - name: app-i18n/ibus-bamboo
       repo: dynamo
-      uri: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
+      url: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
 arch:
   packages:
     - name: ibus-bamboo-git
@@ -17,18 +18,22 @@ ubuntu:
       repo_version: main
       key: 5AD2E0B68A0409AD907D462D36ED424E9659D014
 {{- else if eq .guiWinManager "H" }}
-name: fcitx-bamboo
+name: fcitx5-bamboo
 method: os
+# https://repology.org/project/fcitx5-bamboo/versions
 is_essential: true
 gentoo:
   packages:
     - name: app-i18n/fcitx-bamboo
       repo: dynamo
-      uri: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
+      url: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
 arch:
   packages:
     - name: fcitx5-bamboo-git
 ubuntu:
   packages:
-    - name: fcitx-bamboo
+    - name: fcitx5-bamboo
+alpine:
+  packages:
+    - name: fcitx5-bamboo
 {{- end }}

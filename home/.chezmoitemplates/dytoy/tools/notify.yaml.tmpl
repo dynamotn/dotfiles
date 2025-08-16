@@ -1,0 +1,23 @@
+name: notify
+method: os
+# https://repology.org/project/libnotify/versions
+# https://repology.org/project/terminal-notifier/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: x11-libs/libnotify
+arch:
+  packages:
+    - name: libnotify
+ubuntu:
+  packages:
+    - name: libnotify
+alpine:
+  packages:
+    - name: libnotify
+termux:
+  packages:
+    - name: termux-api # Use termux-notification
+macos:
+  packages:
+    - name: terminal-notifier
