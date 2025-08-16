@@ -1,0 +1,12 @@
+name: amass
+method: binary
+github:
+  repo: owasp-amass/amass
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "linux" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset: amass_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+archive:
+  - path: amass_{{ $os }}_{{ .chezmoi.arch }}/amass
+    strip: 1

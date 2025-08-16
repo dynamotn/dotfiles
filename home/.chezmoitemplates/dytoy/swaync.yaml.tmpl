@@ -1,0 +1,20 @@
+{{- if eq .guiServer "W" }}
+name: swaync
+method: os
+# https://repology.org/project/sway-notification-center/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/swaync
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+arch:
+  packages:
+    - name: swaync
+ubuntu:
+  packages:
+    - name: sway-notification-center
+arch:
+  packages:
+    - name: swaync
+{{- end }}

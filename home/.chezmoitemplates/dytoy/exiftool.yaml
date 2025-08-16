@@ -1,0 +1,21 @@
+name: exiftool
+method: os
+# https://repology.org/project/exiftool/versions
+gentoo:
+  packages:
+    - name: media-libs/exiftool
+arch:
+  packages:
+    - name: exiftool
+ubuntu:
+  packages:
+    - name: exiftool
+alpine:
+  packages:
+    - name: exiftool
+termux:
+  packages:
+    - name: exiftool
+macos:
+  packages:
+    - name: exiftool

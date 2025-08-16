@@ -1,0 +1,37 @@
+name: watchexec
+is_essential: true
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/watchexec/versions
+arch:
+  packages:
+    - name: watchexec
+termux:
+  packages:
+    - name: watchexec
+alpine:
+  packages:
+    - name: watchexec
+macos:
+  packages:
+    - name: watchexec
+{{- else }}
+method: binary
+github:
+  repo: watchexec/watchexec
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: watchexec-%1v-{{ $arch }}-unknown-linux-gnu.tar.gz
+archive:
+  - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec
+    strip: 1
+  - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec.1
+    strip: 1
+    location: $HOME/.local/man/man1
+{{- end }}

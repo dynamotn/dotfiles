@@ -1,0 +1,27 @@
+{{- if and (eq .chezmoi.os "linux") (ne .kind "container") }}
+name: networkmanager
+method: os
+# https://repology.org/project/networkmanager/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: net-misc/networkmanager
+      service: NetworkManager
+  hook:
+    before: |-
+      sudo rc-update del dhcpcd default
+    after: |-
+      sudo usermod -aG plugdev $USER
+arch:
+  packages:
+    - name: networkmanager
+      service: NetworkManager
+ubuntu:
+  packages:
+    - name: network-manager
+      service: NetworkManager
+alpine:
+  packages:
+    - name: networkmanager
+      service: NetworkManager
+{{- end }}

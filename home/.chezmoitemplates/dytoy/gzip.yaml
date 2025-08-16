@@ -1,0 +1,22 @@
+name: gzip
+method: os
+# https://repology.org/project/gzip/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: app-arch/gzip
+arch:
+  packages:
+    - name: gzip
+ubuntu:
+  packages:
+    - name: gzip
+alpine:
+  packages:
+    - name: gzip
+termux:
+  packages:
+    - name: gzip
+macos:
+  packages:
+    - name: gzip

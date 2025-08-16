@@ -1,0 +1,29 @@
+name: rbw
+is_essential: true
+{{- if or (eq .chezmoi.os "android" "darwin") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/rbw/versions
+arch:
+  packages:
+    - name: rbw
+ubuntu: # Not have package
+alpine:
+  packages:
+    - name: rbw
+termux:
+  packages:
+    - name: rbw
+macos:
+  packages:
+    - name: rbw
+{{- else }}
+method: binary
+github:
+  repo: doy/rbw
+  release_asset: rbw_%v_linux_amd64.tar.gz
+archive:
+  - path: rbw
+  - path: rbw-agent
+{{- end }}

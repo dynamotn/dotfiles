@@ -1,0 +1,16 @@
+{{- if eq .kind "laptop" }}
+# Use auto-cpufreq only on my laptop (Gentoo and Arch)
+name: auto-cpufreq
+method: os
+# https://repology.org/project/auto-cpufreq/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-power/auto-cpufreq
+      service: auto-cpufreq
+arch:
+  packages:
+    - name: auto-cpufreq
+      service: auto-cpufreq
+macos:  # Not needed
+{{- end }}

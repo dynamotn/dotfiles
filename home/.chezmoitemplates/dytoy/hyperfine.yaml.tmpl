@@ -1,0 +1,32 @@
+name: hyperfine
+{{- if eq .chezmoi.os "android" "darwin" }}
+# Use package manager for Android, macOS
+method: os
+# https://repology.org/project/hyperfine/versions
+termux:
+  packages:
+    - name: hyperfine
+macos:
+  packages:
+    - name: hyperfine
+{{- else }}
+method: binary
+github:
+  repo: sharkdp/hyperfine
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: hyperfine-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
+archive:
+  - path: hyperfine-%v-{{ $arch }}-unknown-linux-gnu/hyperfine
+    strip: 1
+  - path: hyperfine-%v-{{ $arch }}-unknown-linux-gnu/hyperfine.1
+    strip: 1
+    location: $HOME/.local/man/man1
+  - path: hyperfine-%v-{{ $arch }}-unknown-linux-gnu/autocomplete/hyperfine.fish
+    location: $HOME/.config/fish/completions
+    strip: 2
+{{- end }}

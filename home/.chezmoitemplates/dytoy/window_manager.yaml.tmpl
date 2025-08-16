@@ -1,0 +1,46 @@
+{{- if eq .guiWinManager "H" }}
+name: hyprland
+method: os
+# https://repology.org/project/hyprland/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-wm/hyprland
+    - name: x11-libs/xcb-util
+    {{- if ne .place "home" }}
+    - name: gui-apps/hypridle
+    {{- end }}
+    - name: x11-base/xwayland
+arch:
+  packages:
+    {{- if eq .guiDriver "N" }}
+    - name: hyprland-nvidia-git
+    {{- else }}
+    - name: hyprland
+    {{- end }}
+    - name: xdg-desktop-portal-wlr
+    - name: xdg-desktop-portal-hyprland
+    {{- if ne .place "home" }}
+    - name: hypridle
+    {{- end }}
+    - name: cpio
+    - name: cmake
+    - name: meson
+    - name: xorg-xwayland
+ubuntu: # Not have package on LTS version
+{{- else if eq .guiWinManager "A" }}
+name: aerospace
+is_essential: true
+method: os
+macos:
+  packages:
+    - name: aerospace
+      type: cask
+      repo: nikitabobko/tap
+      service: Aerospace
+      is_user_service: true
+    - name: autoraise
+      unstable: true
+      repo: dimentium/autoraise
+      service: autoraise
+{{- end }}

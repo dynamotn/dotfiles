@@ -1,0 +1,19 @@
+{{- if and .hasSound (eq .chezmoi.os "linux") }}
+# Not needed on Android or MacOS
+name: playerctl
+method: os
+# https://repology.org/project/playerctl/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: media-sound/playerctl
+arch:
+  packages:
+    - name: playerctl
+ubuntu:
+  packages:
+    - name: playerctl
+alpine:
+  packages:
+    - name: playerctl
+{{- end }}

@@ -1,0 +1,18 @@
+{{- if and (eq .chezmoi.os "linux") (ne .guiServer "0" ) }}
+name: xdg-user-dirs
+method: os
+# https://repology.org/project/xdg-user-dirs/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: x11-misc/xdg-user-dirs
+arch:
+  packages:
+    - name: xdg-user-dirs
+ubuntu:
+  packages:
+    - name: xdg-user-dirs
+alpine:
+  packages:
+    - name: xdg-user-dirs
+{{- end }}

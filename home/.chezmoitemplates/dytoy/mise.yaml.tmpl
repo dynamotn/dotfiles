@@ -1,0 +1,38 @@
+name: mise
+method: binary
+is_essential: true
+github:
+  repo: jdx/mise
+  {{- $os := "" }}
+  {{- $arch := "" }}
+  {{- $suffix := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "macos" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64" }}
+  {{- end }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $suffix = "-musl" }}
+  {{- end }}
+  release_asset: mise-%v-{{ $os }}-{{ $arch }}{{ $suffix }}
+hook:
+  after: |-
+    {{- if eq .chezmoi.os "android" }}
+    cd $PREFIX/etc/tls
+    mkdir certs
+    ln -s cert.pem certs.pem
+    ln -s cert.pem certs/ca-certificates.crt
+    {{- end }}
+    {{- $command := "$HOME/.local/bin/mise" }}
+    {{- if eq .chezmoi.os "android" }}
+    {{- $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl $HOME/.local/bin/mise" }}
+    {{- end }}
+    chmod +x ~/.local/bin/mise
+    # Trust global config
+    {{ $command }} trust
+    {{ $command }} use -g usage

@@ -1,0 +1,21 @@
+name: wireshark
+method: os
+# https://repology.org/project/wireshark/versions
+gentoo:
+  packages:
+    - name: net-analyzer/wireshark
+arch:
+  packages:
+    - name: wireshark-cli
+ubuntu:
+  packages:
+    - name: tshark
+alpine:
+  packages:
+    - name: tshark
+termux:
+  packages:
+    - name: tshark
+macos:
+  packages:
+    - name: wireshark

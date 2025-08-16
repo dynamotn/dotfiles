@@ -1,0 +1,53 @@
+#!{{ .bash }}
+# @file dytoy_binary
+# @brief Install binary tools from GitHub or GitLab releases
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy_yaml.sh
+dybatpho::register_common_handlers
+
+#######################################
+# @description Spec of dytoy
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Utilities to install tools" MAIN_ARGS action:"_main"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
+  dybatpho::opts::param "Specific tool" TOOL  --tool -t init:="@empty"
+  dybatpho::opts::flag "Install only essential tool" ONLY_ESSENTIAL --essential -e on:true off:false init:="false"
+  dybatpho::opts::flag "Install only not installed tool" ONLY_NOT_INSTALLED --check-installed --no-check-installed -i on:true off:false init:="true"
+  dybatpho::opts::flag "Sync package repositories before install" SYNC_REPO --sync --no-sync -s on:true off:false init:="false"
+  dybatpho::opts::flag "List files in compressed instead of extract" LIST_CONTENTS --list -L on:true off:false init:="false"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Main function
+#######################################
+function _main {
+  local param=()
+  if dybatpho::is true "$ONLY_ESSENTIAL"; then
+    param+=("--essential")
+  fi
+  if dybatpho::is false "$ONLY_NOT_INSTALLED"; then
+    param+=("--no-check-installed")
+  fi
+  if dybatpho::is true "$SYNC_REPO"; then
+    param+=("--sync")
+  fi
+  if dybatpho::is true "$LIST_CONTENTS"; then
+    param+=("--list")
+  fi
+  if [ "$TOOL" = "@empty" ]; then
+    # Need to un dytoy_os first
+    dybatpho::dry_run "$HOME/.local/bin/dytoy_os" "${param[@]}"
+    dybatpho::dry_run "$HOME/.local/bin/dytoy_binary" "${param[@]}"
+    dybatpho::dry_run "$HOME/.local/bin/dytoy_mise" "${param[@]}"
+    dybatpho::dry_run "$HOME/.local/bin/dytoy_shell" "${param[@]}"
+  else
+    local method
+    method=$(dytoy::get_yaml "$TOOL" "method")
+    dybatpho::dry_run "$HOME/.local/bin/dytoy_$method" "${param[@]}" -t "$TOOL"
+  fi
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

@@ -1,0 +1,29 @@
+{{- if and (eq .chezmoi.os "linux") .hasSound }}
+name: pipewire
+method: os
+# https://repology.org/project/pipewire/versions
+# https://repology.org/project/wireplumber/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: media-video/pipewire
+    - name: media-video/wireplumber
+arch:
+  packages:
+    - name: pipewire
+    - name: wireplumber
+    - name: pipewire-audio
+    - name: pipewire-pulse
+    - name: pipewire-alsa
+alpine:
+  packages:
+    - name: pipewire
+    - name: wireplumber
+    - name: pipewire-audio
+    - name: pipewire-pulse
+    - name: pipewire-alsa
+ubuntu:
+  packages:
+    - name: pipewire
+    - name: wireplumber
+{{- end }}

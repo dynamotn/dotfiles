@@ -1,0 +1,36 @@
+name: grc
+is_essential: true
+{{- if eq .osid "android" "linux-alpine" }}
+method: shell
+content: |
+  dybatpho::create_temp temp_dir ""
+  git clone https://github.com/garabik/grc $temp_dir
+  cd $temp_dir
+  {{- if eq .osid "android" }}
+  # Fix shebangs
+  find . -type f -exec termux-fix-shebang {} \;
+  # Install into $PREFIX
+  ./install.sh $PREFIX $PREFIX
+  {{- else if eq .osid "linux-alpine" }}
+  ./install.sh ~/.local
+  {{- end }}
+  # Copy config files
+  mkdir ~/.grc
+  cp -r colourfiles ~/.grc
+  cp grc.conf ~/.grc
+{{- else if eq .chezmoi.os "linux" "darwin" }}
+method: os
+# https://repology.org/project/grc/versions
+gentoo:
+  packages:
+    - name: app-misc/grc
+arch:
+  packages:
+    - name: grc
+ubuntu:
+  packages:
+    - name: grc
+macos:
+  packages:
+    - name: grc
+{{- end }}

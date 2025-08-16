@@ -1,0 +1,17 @@
+{{- if eq .chezmoi.os "linux" }}
+name: lynis
+method: os
+# https://repology.org/project/lynis/versions
+gentoo:
+  packages:
+    - name: app-forensics/lynis
+arch:
+  packages:
+    - name: lynis
+ubuntu:
+  packages:
+    - name: lynis
+alpine:
+  packages:
+    - name: lynis
+{{- end }}

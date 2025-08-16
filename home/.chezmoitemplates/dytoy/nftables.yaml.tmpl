@@ -1,0 +1,19 @@
+{{- if ne .kind "container" }}
+name: nftables
+method: os
+# https://repology.org/project/nftables/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: net-firewall/nftables
+arch:
+  packages:
+    - name: nftables
+ubuntu:
+  package:
+    - name: nftables
+alpine:
+  package:
+    - name: nftables
+termux: # Not available for non-rooted Android
+{{- end }}

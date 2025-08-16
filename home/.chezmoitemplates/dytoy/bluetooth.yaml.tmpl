@@ -1,0 +1,31 @@
+{{- if and (eq .chezmoi.os "linux") .hasBluetooth }}
+# Only on Linux
+name: bluetooth
+method: os
+# https://repology.org/project/bluez/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: net-wireless/bluez
+      {{- if ne .kind "container" }}
+      service: bluetooth
+      {{- end }}
+arch:
+  packages:
+    - name: bluez
+      {{- if ne .kind "container" }}
+      service: bluetooth
+      {{- end }}
+ubuntu:
+  packages:
+    - name: bluez
+      {{- if ne .kind "container" }}
+      service: bluetooth
+      {{- end }}
+alpine:
+  packages:
+    - name: bluez
+      {{- if ne .kind "container" }}
+      service: bluetooth
+      {{- end }}
+{{- end }}

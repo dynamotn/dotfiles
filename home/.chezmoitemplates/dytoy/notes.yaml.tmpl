@@ -1,0 +1,19 @@
+{{- if eq .kind "pc" "laptop" "tablet" }}
+# Use obsidian only on my laptop (Gentoo, Arch and MacOS) and Termux
+name: obsidian
+method: os
+# https://repology.org/project/obsidian/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: app-office/obsidian
+arch:
+  packages:
+    - name: obsidian
+    - name: electron
+termux: # TODO: need to get from FDroid
+macos:
+  packages:
+    - name: obsidian
+      type: cask
+{{- end }}

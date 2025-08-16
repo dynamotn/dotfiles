@@ -1,0 +1,21 @@
+name: tree-sitter
+method: os
+# https://repology.org/project/tree-sitter/versions
+gentoo:
+  packages:
+    - name: dev-util/tree-sitter-cli
+arch:
+  packages:
+    - name: tree-sitter-cli
+ubuntu:
+  packages:
+    - name: tree-sitter-cli
+alpine:
+  packages:
+    - name: tree-sitter-cli
+termux:
+  packages:
+    - name: tree-sitter
+macos:
+  packages:
+    - name: tree-sitter

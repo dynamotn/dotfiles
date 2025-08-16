@@ -1,0 +1,19 @@
+name: pandoc
+method: os
+# https://repology.org/project/pandoc/versions
+gentoo:
+  packages:
+    - name: app-text/pandoc
+arch:
+  packages:
+    - name: pandoc
+ubuntu:
+  packages:
+    - name: pandoc
+alpine: # Not have package on Alpine
+termux:
+  packages:
+    - name: pandoc
+macos:
+  packages:
+    - name: pandoc

@@ -1,0 +1,14 @@
+# Although this is essential tool but there isn't any packages on Arch, Alpine,
+# Ubuntu so I will use binary
+name: ov
+method: binary
+is_essential: true
+github:
+  repo: noborus/ov
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: ov_%1v_{{ $os }}_{{ .chezmoi.arch }}.zip
+archive:
+  - path: ov

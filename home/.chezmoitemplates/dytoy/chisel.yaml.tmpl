@@ -1,0 +1,11 @@
+name: chisel
+method: binary
+github:
+  repo: jpillora/chisel
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: chisel_%1v_{{ $os }}_{{ .chezmoi.arch }}.gz
+archive:
+  - path: chisel

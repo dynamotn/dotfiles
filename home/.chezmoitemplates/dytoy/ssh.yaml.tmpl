@@ -1,0 +1,31 @@
+{{- if ne .kind "container" }}
+name: ssh
+method: os
+# https://repology.org/project/openssh/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: net-misc/openssh
+      service: sshd
+arch:
+  packages:
+    - name: openssh
+      service: sshd
+ubuntu:
+  packages:
+    - name: openssh-server
+      service: ssh
+    - name: openssh-client
+alpine:
+  packages:
+    - name: openssh
+      service: sshd
+termux:
+  packages:
+    - name: openssh
+      service: sshd
+macos:
+  packages:
+    - name: openssh
+      service: sshd
+{{- end }}

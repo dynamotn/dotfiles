@@ -1,0 +1,22 @@
+name: tar
+method: os
+# https://repology.org/project/tar/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: app-arch/tar
+arch:
+  packages:
+    - name: tar
+ubuntu:
+  packages:
+    - name: tar
+alpine:
+  packages:
+    - name: tar
+termux:
+  packages:
+    - name: tar
+macos:
+  packages:
+    - name: gnu-tar

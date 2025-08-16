@@ -1,0 +1,40 @@
+name: zoxide
+is_essential: true
+{{- if or (eq .chezmoi.os "darwin" "android") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/zoxide/versions
+arch:
+  packages:
+    - name: zoxide
+ubuntu:
+  packages:
+    - name: rust-zoxide
+termux:
+  packages:
+    - name: zoxide
+alpine:
+  packages:
+    - name: zoxide
+macos:
+  packages:
+    - name: zoxide
+{{- else }}
+method: binary
+github:
+  repo: ajeetdsouza/zoxide
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: zoxide-%1v-x86_64-unknown-linux-musl.tar.gz
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: zoxide-%1v-aarch64-unknown-linux-musl.tar.gz
+  {{- end }}
+archive:
+  - path: zoxide
+  - path: man/man1/*
+    strip: 2
+    location: $HOME/.local/man/man1
+  - path: completions/zoxide.fish
+    strip: 1
+    location: ~/.config/fish/completions
+{{- end }}

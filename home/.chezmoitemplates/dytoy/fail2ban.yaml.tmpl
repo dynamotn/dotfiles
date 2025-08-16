@@ -1,0 +1,28 @@
+{{- if ne .kind "container" }}
+# Not need in container
+name: fail2ban
+method: os
+# https://repology.org/project/fail2ban/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: net-analyzer/fail2ban
+      service: fail2ban
+arch:
+  packages:
+    - name: fail2ban
+      service: fail2ban
+ubuntu:
+  packages:
+    - name: fail2ban
+      service: fail2ban
+alpine:
+  packages:
+    - name: fail2ban
+      service: fail2ban
+termux: # Not have prebuilt package
+macos:
+  packages:
+    - name: fail2ban
+      service: fail2ban
+{{- end }}

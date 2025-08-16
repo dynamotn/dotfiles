@@ -1,0 +1,43 @@
+name: bat
+is_essential: true
+{{- if or (eq .chezmoi.os "android") (eq .kind "container") }}
+# Use package manager for Android, and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/bat-cat/versions
+arch:
+  packages:
+    - name: bat
+ubuntu:
+  packages:
+    - name: bat
+alpine:
+  packages:
+    - name: bat
+termux:
+  packages:
+    - name: bat
+{{- else }}
+method: binary
+github:
+  repo: sharkdp/bat
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{-   $os = "unknown-linux-gnu" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: bat-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
+archive:
+  - path: bat-%v-{{ $arch }}-unknown-linux-gnu/bat
+    strip: 1
+  - path: bat-%v-{{ $arch }}-unknown-linux-gnu/bat.1
+    strip: 1
+    location: $HOME/.local/man/man1
+{{- end }}

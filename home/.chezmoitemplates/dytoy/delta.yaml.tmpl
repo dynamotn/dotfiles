@@ -1,0 +1,36 @@
+name: delta
+is_essential: true
+{{- if or (eq .chezmoi.os "android") (and (eq .kind "container") (ne .osid "linux-ubuntu" "linux-alpine")) }}
+# Use package manager for Android, and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/git-delta/versions
+arch:
+  packages:
+    - name: git-delta
+ubuntu: # container need to use binary method
+alpine: # container need to use binary method
+termux:
+  packages:
+    - name: git-delta
+{{- else }}
+method: binary
+github:
+  repo: dandavison/delta
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{-   $os = "unknown-linux-gnu" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "aarch64" }}
+  {{- end }}
+  release_asset: delta-%v-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: delta-%v-{{ $arch }}-{{ $os }}/delta
+    strip: 1
+{{- end }}

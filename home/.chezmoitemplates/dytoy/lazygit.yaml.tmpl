@@ -1,0 +1,40 @@
+name: lazygit
+is_essential: true
+{{- if or (eq .chezmoi.os "android" "darwin") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/lazygit/versions
+arch:
+  packages:
+    - name: lazygit
+ubuntu: # container need to use binary method
+alpine:
+  packages:
+    - name: lazygit
+termux:
+  packages:
+    - name: lazygit
+macos:
+  packages:
+    - name: lazygit
+{{- else }}
+method: binary
+github:
+  repo: jesseduffield/lazygit
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "Darwin" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{- $os = "Linux" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64" }}
+  {{- end }}
+  release_asset: lazygit_%1v_{{ $os }}_{{ $arch }}.tar.gz
+archive:
+  - path: lazygit
+{{- end }}

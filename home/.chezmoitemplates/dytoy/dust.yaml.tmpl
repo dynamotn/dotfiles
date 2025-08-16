@@ -1,0 +1,29 @@
+name: dust
+{{- if eq .chezmoi.os "darwin" }} }}
+# Binary file is not available for macOS, use Homebrew instead.
+method: os
+# https://repology.org/project/dust/versions
+macos:
+  packages:
+    - name: dust
+{{- else if eq .chezmoi.os "linux" "android" }}
+method: binary
+github:
+  repo: bootandy/dust
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "linux" }}
+  {{-   $os = "unknown-linux-gnu" }}
+  {{- else if eq .chezmoi.os "android" }}
+  {{-   $os = "unknown-linux-musl" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: dust-%v-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: dust-%v-{{ $arch }}-{{ $os }}/dust
+    strip: 1
+{{- end }}

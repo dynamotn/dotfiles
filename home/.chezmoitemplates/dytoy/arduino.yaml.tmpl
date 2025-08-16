@@ -1,0 +1,19 @@
+name: arduino
+method: binary
+github:
+  repo: arduino/arduino-cli
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "Darwin" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{-   $os = "Linux" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "64bit" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "ARM64" }}
+  {{- end }}
+  release_asset: arduino-cli_%1v_{{ $os }}_{{ $arch }}.tar.gz
+archive:
+  - path: arduino-cli

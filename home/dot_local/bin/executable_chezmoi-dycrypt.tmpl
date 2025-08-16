@@ -1,7 +1,7 @@
 #!{{ .bash }}
 # @file chezmoi-dycrypt
 # @brief Decrypt and encrypt secrets data in chezmoi dotfiles with single custom identity
-source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 #######################################

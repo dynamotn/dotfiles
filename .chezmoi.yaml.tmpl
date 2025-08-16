@@ -17,9 +17,21 @@ diff:
 data:
   {{- $osid := .chezmoi.os }}
   {{- if hasKey .chezmoi.osRelease "id" }}
-  {{- $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id }}
+  {{-   $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id }}
   {{- end }}
   osid: {{ $osid }}
+  {{- if eq $osid "android" }}
+  initSystem: "termux"
+  {{- else if eq $osid "darwin" }}
+  initSystem: "launchd"
+  {{- else if eq $osid "linux-gentoo" }}
+  {{-   $initSystem := promptChoiceOnce . "initSystem" "What init system does this machine use?" (list "openrc" "systemd") "openrc" }}
+  initSystem: {{ $initSystem | quote }}
+  {{- else if eq $osid "linux-alpine" }}
+  initSystem: "openrc"
+  {{- else }}
+  initSystem: "systemd"
+  {{- end }}
   {{- if eq .chezmoi.os "android" }}
   bash: {{ lookPath "bash" }}
   {{- else }}
@@ -83,8 +95,13 @@ data:
   mailEnterpriseProfiles: []
   {{- end }}
   terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use? (T for tmux, Z for Zellij)" (list "T" "Z") "Z" | quote }}
+  {{- if ne .kind "container" }}
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" false }}
+  {{- else }}
+  hasSound: false
+  hasBluetooth: false
+  {{- end }}
   {{ $hasProxy := promptBool "Does this machine need HTTP(S) or SOCKS proxy? (y/n)" false }}
   {{- if $hasProxy }}
   httpProxy: {{ promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using:" | quote }}

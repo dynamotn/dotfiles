@@ -1,0 +1,25 @@
+name: fish
+method: os
+# https://repology.org/project/fish/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: app-shells/fish
+arch:
+  packages:
+    - name: fish
+ubuntu:
+  packages:
+    - name: fish
+      repo: http://ppa.launchpad.net/fish-shell/release-4/ubuntu
+      repo_version: main
+      key: 88421E703EDC7AF54967DED473C9FCC9E2BB48DA
+alpine:
+  packages:
+    - name: fish
+termux:
+  packages:
+    - name: fish
+macos:
+  packages:
+    - name: fish

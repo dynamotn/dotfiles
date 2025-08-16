@@ -1,9 +1,0 @@
-{{- if ne .chezmoi.os "android" }}
-name: dive
-method: binary
-github:
-  repo: wagoodman/dive
-  release_asset:  dive_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
-archive:
-  - dive
-{{- end }}

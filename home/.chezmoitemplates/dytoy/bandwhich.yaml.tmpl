@@ -1,0 +1,26 @@
+name: bandwhich
+method: binary
+github:
+  repo: imsnif/bandwhich
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{-   $os = "unknown-linux-gnu" }}
+  {{- else if eq .chezmoi.os "android" }}
+  {{-   $os = "linux-android" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: bandwhich-%v-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: bandwhich
+{{- if eq .chezmoi.os "linux" }}
+hook:
+  after: |
+    sudo setcap cap_sys_ptrace,cap_dac_read_search,cap_net_raw,cap_net_admin+ep ~/.local/bin/bandwhich
+{{- end }}

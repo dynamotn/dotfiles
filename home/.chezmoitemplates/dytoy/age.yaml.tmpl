@@ -1,0 +1,33 @@
+name: age
+is_essential: true
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS, and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/age-encryption/versions
+arch:
+  packages:
+    - name: age
+ubuntu:
+  packages:
+    - name: age
+alpine:
+  packages:
+    - name: age
+termux:
+  packages:
+    - name: age
+macos:
+  packages:
+    - name: age
+{{- else }}
+method: binary
+github:
+  repo: FiloSottile/age
+  release_asset: age-%v-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz
+archive:
+  - path: age/age
+    strip: 1
+  - path: age/age-keygen
+    strip: 1
+{{- end }}
