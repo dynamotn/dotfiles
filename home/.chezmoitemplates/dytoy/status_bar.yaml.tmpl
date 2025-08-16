@@ -1,0 +1,23 @@
+{{- if and (eq .guiServer "W") (eq .osid "linux-gentoo" "linux-arch") }}
+# Only available packages for Gentoo and Arch
+name: eww
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/eww
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+arch:
+  packages:
+    - name: eww-git
+{{- else if eq .guiWinManager "A" }}
+name: sketchybar
+method: os
+is_essential: true
+macos:
+  packages:
+    - name: sketchybar
+      repo: FelixKratz/formulae
+      service: sketchybar
+{{- end }}

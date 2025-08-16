@@ -1,0 +1,19 @@
+name: helm-docs
+method: binary
+github:
+  repo: norwoodj/helm-docs
+  {{- $os := "" }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{- $os = "Darwin" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{- $os = "Linux" }}
+  {{- end }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm64" }}
+  {{- end }}
+  release_asset: helm-docs_%1v_{{ $os }}_{{ $arch }}.tar.gz
+archive:
+  - path: helm-docs

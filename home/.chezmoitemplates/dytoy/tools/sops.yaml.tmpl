@@ -1,8 +1,0 @@
-{{- if eq .chezmoi.os "linux" "darwin" }}
-name: sops
-method: binary
-github:
-  repo: getsops/sops
-  version: latest
-  release_asset: sops-%v.{{ .chezmoi.os }}.{{ .chezmoi.arch }}
-{{- end }}

@@ -1,0 +1,24 @@
+name: goaccess
+method: os
+# https://repology.org/project/goaccess/versions
+gentoo:
+  packages:
+    - name: net-analyzer/goaccess
+arch:
+  packages:
+    - name: goaccess
+ubuntu:
+  packages:
+    - name: goaccess
+      repo: https
+      repo_version: main
+      key: i03645B99FA4163FE8C2508BC3A788ED11EFFCAF
+alpine:
+  packages:
+    - name: goaccess
+termux:
+  packages:
+    - name: goaccess
+macos:
+  packages:
+    - name: goaccess

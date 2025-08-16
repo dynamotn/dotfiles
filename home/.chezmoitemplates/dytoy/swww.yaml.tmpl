@@ -1,0 +1,18 @@
+{{- if eq .guiServer "W" }}
+name: swww
+method: os
+# https://repology.org/project/swww/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/swww
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+arch:
+  packages:
+    - name: swww
+ubuntu: # Not have package
+alpine:
+  packages:
+    - name: swww
+{{- end }}

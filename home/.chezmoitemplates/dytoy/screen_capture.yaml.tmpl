@@ -1,0 +1,29 @@
+{{- if eq .guiServer "W" }}
+# Need screen capture only on Wayland
+name: screen_capture
+method: os
+# https://repology.org/project/grim/versions
+# https://repology.org/project/slurp/versions
+# https://repology.org/project/swappy/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/grim
+    - name: gui-apps/slurp
+    - name: gui-apps/swappy
+arch:
+  packages:
+    - name: grim
+    - name: slurp
+    - name: swappy
+ubuntu:
+  packages:
+    - name: grim
+    - name: slurp
+    # - name: swappy: Not have package on LTS version
+alpine:
+  packages:
+    - name: grim
+    - name: slurp
+    - name: swappy
+{{- end }}

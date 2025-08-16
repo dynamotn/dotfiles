@@ -1,0 +1,39 @@
+{{- if eq .guiServer "W" }}
+name: greetd
+method: os
+is_essential: true
+# https://repology.org/project/greetd/versions
+# https://repology.org/project/regreet/versions
+gentoo:
+  packages:
+    - name: gui-libs/greetd
+    - name: gui-apps/regreet
+      repo: dynamo
+      url: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
+    - name: gui-libs/display-manager-init
+      service: display-manager
+    {{- if eq .initSystem "openrc" }}
+    - name: sys-auth/seatd
+      service: seatd
+    {{- end }}
+  hook:
+    after: |-
+      sudo gpasswd -a $USER video
+      sudo gpasswd -a $USER seat
+      sudo gpasswd -a greetd wheel
+      sudo gpasswd -a greetd video
+      sudo gpasswd -a greetd seat
+arch:
+  packages:
+    - name: greetd
+      service: greetd
+    - name: greetd-regreet
+ubuntu:
+  packages:
+    - name: greetd
+      service: greetd
+alpine:
+  packages:
+    - name: greetd
+      service: greetd
+{{- end }}

@@ -1,0 +1,27 @@
+  {{- if ne .kind "container" }}
+name: cron
+method: os
+# https://repology.org/project/cronie/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-process/cronie
+      service: cronie
+arch:
+  packages:
+    - name: cronie
+      service: cronie
+ubuntu:
+  packages:
+    - name: cronie
+      service: cron
+alpine:
+  packages:
+    - name: cronie
+      service: cronie
+termux:
+  packages:
+    - name: cronie
+      service: crond
+macos: # Not needed
+{{- end }}

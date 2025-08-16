@@ -1,0 +1,43 @@
+name: rg
+is_essential: true
+{{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/ripgrep/versions
+arch:
+  packages:
+    - name: ripgrep
+ubuntu:
+  packages:
+    - name: rust-ripgrep
+alpine:
+  packages:
+    - name: ripgrep
+termux:
+  packages:
+    - name: ripgrep
+macos:
+  packages:
+    - name: ripgrep
+{{- else }}
+method: binary
+github:
+  repo: BurntSushi/ripgrep
+  {{- $arch := "" }}
+  {{- $suffix := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{- $arch = "x86_64" }}
+  {{- $suffix = "musl" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{- $arch = "arm" }}
+  {{- $suffix = "gnueabihf" }}
+  {{- end }}
+  release_asset: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}.tar.gz
+archive:
+  - path: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}/rg
+    strip: 1
+  - path: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}/doc/rg.1
+    strip: 2
+    location: $HOME/.local/man/man1
+{{- end }}

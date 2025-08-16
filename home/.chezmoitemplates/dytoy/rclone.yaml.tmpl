@@ -1,0 +1,17 @@
+name: rclone
+{{- if eq .chezmoi.os "linux" "darwin" }}
+method: binary
+github:
+  repo: rclone/rclone
+  release_asset: rclone-%v-linux-{{ .chezmoi.arch }}.zip
+archive:
+  - path: rclone-%v-linux-{{ .chezmoi.arch }}/rclone
+  - path: rclone-$version-linux-{{ .chezmoi.arch }}/rclone.1
+    location: $HOME/.local/man/man1
+{{- else if eq .chezmoi.os "android" }}
+method: os
+# https://repology.org/project/rclone/versions
+termux:
+  packages:
+    - name: rclone
+{{- end }}

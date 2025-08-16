@@ -1,0 +1,13 @@
+# TODO: Use blueutil for MacOS
+{{- if and (eq .chezmoi.os "linux") .hasBluetooth }}
+name: bluetui
+method: binary
+is_essential: true
+github:
+  repo: pythops/bluetui
+  {{- if eq .chezmoi.arch "amd64" }}
+  release_asset: bluetui-x86_64-linux-gnu
+  {{- else if eq .chezmoi.arch "arm64" }}
+  release_asset: bluetui-aarch64-linux-gnu
+  {{- end }}
+{{- end }}

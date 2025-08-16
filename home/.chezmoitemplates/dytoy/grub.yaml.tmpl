@@ -1,0 +1,21 @@
+{{- if eq .chezmoi.os "linux" }}
+name: grub
+method: os
+# https://repology.org/project/grub/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-boot/grub
+arch:
+  packages:
+    - name: grub
+    {{- if and (eq .kind "laptop") (eq .place "office") }}
+    - name: sbsigntools
+    {{- end }}
+ubuntu:
+  packages:
+    - name: grub
+alpine:
+  packages:
+    - name: grub
+{{- end }}

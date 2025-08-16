@@ -1,0 +1,12 @@
+name: flarectl
+method: binary
+github:
+  repo: cloudflare/cloudflare-go
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{- $os = "linux" }}
+  {{- end }}
+  release_asset: flarectl_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+  version: v0.115.0 # Need to specific version cuz this is monorepo
+archive:
+  - path: flarectl

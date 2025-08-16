@@ -1,0 +1,23 @@
+{{- if eq .osid "linux-gentoo" "linux-arch" "darwin" }}
+# I play games only on Gentoo, Arch, or macOS
+name: steam
+method: os
+gentoo:
+  packages:
+    - name: games-util/game-device-udev-rules
+arch:
+  packages:
+    - name: game-devices-udev
+macos:
+  packages:
+    - name: steam
+  {{- if eq .chezmoi.arch "arm64" }}
+  need_rosetta: true
+  {{- end }}
+flatpak:
+  packages:
+    - name: com.valvesoftware.Steam
+  hook:
+    after: |
+      flatpak permission-set background background com.valvesoftware.Steam yes
+{{- end }}
