@@ -24,8 +24,5 @@ termux:
   packages:
     - name: openssh
       service: sshd
-macos:
-  packages:
-    - name: openssh
-      service: sshd
+macos: # Use builtin OpenSSH
 {{- end }}
