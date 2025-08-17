@@ -88,6 +88,12 @@ end
 if status is-interactive
     # Theme
     fish_config theme choose catppuccin
+    {{- if not .darkMode }}
+    set -gx canaudua_host_context_fg brwhite
+    set -gx canaudua_pwd_bg white
+    set -gx canaudua_pwd_fg black
+    set -gx canaudua_git_fg brwhite
+    {{- end }}
     # Glamour integrated tools
     set -gx GLAMOUR_STYLE "$HOME/.config/glamour/catppuccin.json"
     # Plugins
