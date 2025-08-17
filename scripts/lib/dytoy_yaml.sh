@@ -339,10 +339,11 @@ function dytoy::install_flatpak_package {
   local url=$(echo "$yaml" | yq e '.url')
   [[ "$repo" != "null" ]] && pkg::add_flatpak_repo "$repo" "$url" > /dev/null
 
-  ! dytoy::is_installed_package "$name" "flatpak" \
-    && pkg::install_via_flatpak "$name" "$repo" \
-    && dybatpho::debug "Installed flatpak application: $name" \
-    || dybatpho::die "Can't install application: $name"
+  if ! dytoy::is_installed_package "$name" "flatpak"; then
+    pkg::install_via_flatpak "$name" "$repo" \
+      && dybatpho::debug "Installed flatpak application: $name" \
+      || dybatpho::die "Can't install application: $name"
+  fi
 }
 
 #######################################
@@ -356,17 +357,19 @@ function dytoy::install_macos_package {
   local type=$(echo "$yaml" | yq e '.type')
   case "$type" in
     store)
-      ! dytoy::is_installed_package "$name" "mas" \
-        && pkg::install_via_mas "$name" \
-        && dybatpho::debug "Installed application: $name" \
-        || dybatpho::die "Can't install application: $name"
+      if ! dytoy::is_installed_package "$name" "mas"; then
+        pkg::install_via_mas "$name" \
+          && dybatpho::debug "Installed application: $name" \
+          || dybatpho::die "Can't install application: $name"
+      fi
       ;;
     download)
       url=$(echo "$yaml" | yq e '.url')
-      ! dytoy::is_installed_package "$name" "dmg" \
-        && pkg::install_via_dmg "$name" "$url" \
-        && dybatpho::debug "Installed application: $name" \
-        || dybatpho::die "Can't install application: $name"
+      if ! dytoy::is_installed_package "$name" "dmg"; then
+        pkg::install_via_dmg "$name" "$url" \
+          && dybatpho::debug "Installed application: $name" \
+          || dybatpho::die "Can't install application: $name"
+      fi
       ;;
     *)
       unstable=$(echo "$yaml" | yq e '.unstable')
@@ -380,11 +383,12 @@ function dytoy::install_macos_package {
       fi
       local repo=$(echo "$yaml" | yq e '.repo')
       [[ "$repo" != "null" ]] && pkg::add_brew_tap "$repo" > /dev/null
-      ! dytoy::is_installed_package "$name" "brew" \
-        && pkg::install_via_brew "$name" \
-        && dybatpho::debug "Installed package: $name" \
-        && dytoy::enable_service "$yaml" "launchd" \
-        || dybatpho::die "Can't install package: $name"
+      if ! dytoy::is_installed_package "$name" "brew"; then
+        pkg::install_via_brew "$name" \
+          && dybatpho::debug "Installed package: $name" \
+          && dytoy::enable_service "$yaml" "launchd" \
+          || dybatpho::die "Can't install package: $name"
+      fi
       ;;
   esac
 }
@@ -395,6 +399,5 @@ function dytoy::install_macos_package {
 #######################################
 function dytoy::install_macos_rosetta {
   ! dybatpho::is file /usr/libexec/rosetta/runtime \
-    && softwareupdate --install-rosetta --agree-to-license \
-    || :
+    && softwareupdate --install-rosetta --agree-to-license
 }
