@@ -3,7 +3,7 @@
 dybatpho::register_common_handlers
 
 export PATH=~/.local/bin:$PATH
-{{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/tools/*" | glob) }}
+{{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
 {{ .chezmoi.homeDir  }}/.local/bin/dytoy_mise -e -i
