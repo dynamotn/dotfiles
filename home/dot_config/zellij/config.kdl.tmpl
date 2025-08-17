@@ -371,7 +371,11 @@ load_plugins {
 // Default: default
 //
 // theme "dracula"
-theme "catppuccin"
+{{- if .darkMode }}
+theme "catppuccin-macchiato"
+{{- else }}
+theme "catppuccin-latte"
+{{- end }}
 
 ui {
     pane_frames {
