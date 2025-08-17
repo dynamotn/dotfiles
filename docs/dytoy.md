@@ -17,6 +17,7 @@
 |`ntp`|NTP client to sync system clock|
 |[auto-cpufreq](https://github.com/AdnanHodzic/auto-cpufreq)|Automatic CPU speed & power optimizer|
 |[grub](https://www.gnu.org/software/grub/)|Bootloader for system|
+|[flatpak](https://github.com/flatpak/flatpak)|Linux application sandboxing and distribution framework|
 
 # Everyday terminal applications
 
@@ -31,7 +32,6 @@
 |[tree-sitter](https://github.com/tree-sitter/tree-sitter)|Parser generator tool for syntax|
 |[w3m](https://github.com/acg/w3m)|Text-based web browser|
 |[git-lfs](https://github.com/git-lfs/git-lfs)|Git extension for large files|
-|[macos-defaults](https://github.com/dsully/macos-defaults)|Managing macOS defaults declaratively via YAML files|
 |[jq](https://github.com/stedolan/jq)|JSON processor|
 |[delta](https://github.com/dandavison/delta)|Syntax highlighting pager for git, diff, and grep output|
 |[bat](https://github.com/sharkdp/bat)|Alternative to `cat` with syntax highlighting and Git integration|
@@ -74,6 +74,7 @@
 |[thunderbird](https://www.thunderbird.net/)|Email client|
 |[nvtop](https://github.com/Syllo/nvtop)|Monitor resources of GPU|
 |[obsidian](https://obsidian.md/)|Note-taking app|
+|[steam](https://store.steampowered.com/about/)|Online game platform|
 
 # Wayland server applications
 
