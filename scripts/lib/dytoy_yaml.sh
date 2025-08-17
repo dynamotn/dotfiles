@@ -304,7 +304,7 @@ function dytoy::install_alpine_package {
   dybatpho::expect_args yaml -- "$@"
   local name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "apk"; then
-    pkg::install_via_termux "$apk" \
+    pkg::install_via_alpine "$apk" \
       && dybatpho::debug "Installed package: $name" \
       && dytoy::enable_service "$yaml" "openrc" \
       || dybatpho::die "Can't install package: $name"
@@ -379,7 +379,7 @@ function dytoy::install_macos_package {
         brew_param="$brew_param --HEAD"
       fi
       local repo=$(echo "$yaml" | yq e '.repo')
-      [[ "$repo" != "null" ]] && pkg::add_brew_tap "$repo" "$url" > /dev/null
+      [[ "$repo" != "null" ]] && pkg::add_brew_tap "$repo" > /dev/null
       ! dytoy::is_installed_package "$name" "brew" \
         && pkg::install_via_brew "$name" \
         && dybatpho::debug "Installed package: $name" \
