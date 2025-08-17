@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+export SKETCHY_MAUVE=0xff8839ef
+export SKETCHY_RED=0xffd20f39
+export SKETCHY_YELLOW=0xffdf8e1d
+export SKETCHY_GREEN=0xff40a02b
+export SKETCHY_TEAL=0xff179299
+export SKETCHY_BLUE=0xff1e66f5
+export SKETCHY_SUBTEXT_1=0xff5c5f77
+export SKETCHY_SUBTEXT_0=0xff6c6f85
+export SKETCHY_SURFACE_2=0xffacb0be
+export SKETCHY_SURFACE_1=0xffbcc0cc
+export SKETCHY_SURFACE_0=0xffccd0da
+export SKETCHY_MANTLE=0xffe6e9ef

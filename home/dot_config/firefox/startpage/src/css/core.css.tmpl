@@ -32,6 +32,7 @@
 }
 
 :root {
+  {{- if .darkMode }}
   --rosewater: #f4dbd6;
   --flamingo: #f0c6c6;
   --pink: #f5bde6;
@@ -49,6 +50,25 @@
   --text: #cad3f5;
   --bg: #24273a;
   --surface: #363a4f;
+  {{- else }}
+  --rosewater: #dc8a78;
+  --flamingo: #dd7878;
+  --pink: #ea76cb;
+  --mauve: #8839ef;
+  --red: #d20f39;
+  --maroon: #e64553;
+  --peach: #fe640b;
+  --yellow: #df8e1d;
+  --green: #40a02b;
+  --teal: #179299;
+  --sky: #04a5e5;
+  --sapphire: #209fb5;
+  --blue: #1e66f5;
+  --lavender: #7287fd;
+  --text: #4c4f69;
+  --bg: #eff1f5;
+  --surface: #ccd0da;
+  {{- end }}
 }
 
 body {

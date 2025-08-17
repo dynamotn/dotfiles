@@ -1,8 +1,16 @@
+{{- if .darkMode }}
 @define-color blue #8aadf4;
 @define-color lavender #b7bdf8;
 @define-color txt #cad3f5;
 @define-color base #24273a;
 @define-color surface1 #494d64;
+{{- else }}
+@define-color blue #1e66f5;
+@define-color lavender #7287fd;
+@define-color txt #4c4f69;
+@define-color base #eff1f5;
+@define-color surface1 #bcc0cc;
+{{- end }}
 
 * {
   font-family: 'Iosevka Dynamo', monospace;
