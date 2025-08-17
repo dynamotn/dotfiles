@@ -158,7 +158,7 @@
 
 |Tool|Purpose|
 |----|-------|
-|[shdoc](https://github.com/mbucc/shmig)|Generate documents for Bash shell scripts|
+|[shdoc](https://github.com/reconquest/shdoc)|Generate documents for Bash shell scripts|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|
@@ -260,7 +260,7 @@
 |[exiftool](https://github.com/exiftool/exiftool)|Meta information reader/writer for image|
 |[ImageMagick](https://github.com/ImageMagick/ImageMagick)|Image manipulation tool|
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|
-|[cointop](https://github.com/arduino/arduino-cli)|TUI to track coin stats|
+|[cointop](https://github.com/cointop-sh/cointop)|TUI to track coin stats|
 |[tickrs](https://github.com/tarkah/tickrs)|TUI to track stock stats|
 |[pastel](https://github.com/sharkdp/pastel)|Generate, manipulate, convert colors CLI tool|
 |[cht](https://cht.sh)|Access to community cheat sheet|

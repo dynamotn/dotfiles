@@ -27,11 +27,12 @@ function binary::get_latest_version {
 # @arg $1 string File name of command
 # @arg $2 string Location to download/extract file
 # @arg $3 string URL of file
+# @arg $4 string Version of tool
 # @env LIST_CONTENTS boolean If false, grant execute permission extracted file
 #######################################
 function binary::download_and_extract {
-  local name location url
-  dybatpho::expect_args name location url -- "$@"
+  local name location url version
+  dybatpho::expect_args name location url version -- "$@"
   dybatpho::create_temp temp_file ".z"
   dybatpho::debug "Downloaded $url to $temp_file"
   dybatpho::dry_run dybatpho::curl_download "$url" "$temp_file"
@@ -41,9 +42,9 @@ function binary::download_and_extract {
   dytoy::run_script "$before_path"
 
   if [[ "$url" =~ \.(tar\.gz|tgz|tar\.xz|tar\.bz2|tbz2|xz|tar|tar\.zst|tbz)$ ]]; then
-    compressed:extract_tar "$name" "$temp_file" "$location" "$url"
+    compressed:extract_tar "$name" "$temp_file" "$location" "$url" "$version"
   elif [[ "$url" =~ \.zip$ ]]; then
-    compressed:extract_zip "$name" "$temp_file" "$location"
+    compressed:extract_zip "$name" "$temp_file" "$location" "$version"
   elif [[ "$url" =~ \.bz2$ ]]; then
     compressed:extract_bzip2 "$name" "$temp_file" "$location"
   elif [[ "$url" =~ \.gz$ ]]; then

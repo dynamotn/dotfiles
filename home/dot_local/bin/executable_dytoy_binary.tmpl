@@ -67,7 +67,7 @@ function _parse_release {
   elif [ "$type" = "gitlab" ]; then
     url="https://${host}/${repo}/-/releases/${version}/downloads/${release_asset}"
   fi
-  binary::download_and_extract "${name}" "${location}" "${url}"
+  binary::download_and_extract "${name}" "${location}" "${url}" "${version}"
 }
 
 

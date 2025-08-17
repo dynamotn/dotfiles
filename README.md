@@ -74,7 +74,7 @@ My dotfiles will be located in `$HOME/Dotfiles`.
 >
 > - If you aren't me, need to answer no (`n`) for "Do you want to decrypt... secrets?" questions.
 > Don't ask me why :)
-> - My chezmoi configuration are stored in [my private chezmoi repo for all machines](https://github.com/dynamotn/chezmoi-keeper)
+> - My chezmoi configurations are stored in [my private chezmoi repo for all machines](https://github.com/dynamotn/chezmoi-keeper)
 
 ## :scroll:&nbsp; Cheatsheet
 
@@ -88,4 +88,6 @@ See [dytoy](docs/dytoy.md)
 
 ### via Mason of neovim
 
-All LSP servers, debuggers, formatters, linters when I used with `neovim` will be managed by [mason plugin](https://github.com/williamboman/mason.nvim/). I also have custom registry in `neovim` config.
+All LSP servers, debuggers, formatters, linters when I used with `neovim`
+will be managed by [mason plugin](https://github.com/williamboman/mason.nvim/).
+I also have a custom registry in `neovim` config.

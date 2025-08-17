@@ -7,11 +7,12 @@
 # @arg $2 string Location to extract
 # @arg $3 string URL of file when downloading
 # @arg $4 string File name of command
+# @arg $4 string Version of tool
 # @env LIST_CONTENTS boolean If true, list contents of archive instead of extracting
 #######################################
 function compressed:extract_tar {
-  local name path location url
-  dybatpho::expect_args name path location url -- "$@"
+  local name path location url version
+  dybatpho::expect_args name path location url version -- "$@"
   local param=("--warning=no-unknown-keyword")
   param+=("--wildcards")
   if dybatpho::is true "$LIST_CONTENTS"; then
@@ -48,7 +49,7 @@ function compressed:extract_tar {
       extract_param+=("-C $file_location")
       local strip=$(echo "$path_spec" | yq e -o=j -I=0 -r '.strip')
       if [ "$strip" != "null" ]; then
-        extract_param+=("--strip=$strip")
+        extract_param+=("--strip-components=$strip")
       fi
       extract_param+=("$(echo "${path%%*( )}" | misc::replace_version "$version")")
       dybatpho::debug "Extracting with params: ${extract_param[*]}"
@@ -69,11 +70,12 @@ function compressed:extract_tar {
 # @arg $1 string File name of command
 # @arg $2 string Compressed file location to extract
 # @arg $3 string Location to extract
+# @arg $4 string Version of tool
 # @env LIST_CONTENTS boolean If true, list contents of archive instead of extracting
 #######################################
 function compressed:extract_zip {
-  local name path location
-  dybatpho::expect_args name path location -- "$@"
+  local name path location version
+  dybatpho::expect_args name path location version -- "$@"
   if dybatpho::is true "$LIST_CONTENTS"; then
     local param=("-Zl $path")
     # shellcheck disable=2145
