@@ -122,6 +122,7 @@ data:
   {{- end }}
   preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git? (y/n)" false }}
   blockedGitlab: {{ promptBoolOnce . "blockedGitlab" "Is this machines blocked to access Gitlab? (y/n)" false }}
+  darkMode: {{ promptBoolOnce . "darkMode" "Do you want to use dark mode? (y/n)" true }}
 
 age:
   identities:

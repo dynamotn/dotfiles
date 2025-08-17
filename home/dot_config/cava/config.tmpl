@@ -82,8 +82,8 @@
 ; method = pulse
 ; source = auto
 
-method = pipewire
-source = auto
+; method = pipewire
+; source = auto
 
 ; method = alsa
 ; source = hw:Loopback,1
@@ -105,6 +105,13 @@ source = auto
 
 ; method = jack
 ; source = default
+
+{{ if eq .chezmoi.os "linux" }}
+method = pipewire
+{{ else if eq .chezmoi.os "darwin" }}
+method = portaudio
+{{ end }}
+source = auto
 
 # The options 'sample_rate', 'sample_bits', 'channels' and 'autoconnect' can be configured for some input methods:
 #   sample_rate: fifo, pipewire, sndio, oss
@@ -238,8 +245,8 @@ source = auto
 ; gradient_color_7 = '#cc5933'
 ; gradient_color_8 = '#cc3333'
 
+{{ if .darkMode }}
 gradient = 1
-
 gradient_color_1 = '#8bd5ca'
 gradient_color_2 = '#91d7e3'
 gradient_color_3 = '#7dc4e4'
@@ -248,7 +255,17 @@ gradient_color_5 = '#c6a0f6'
 gradient_color_6 = '#f5bde6'
 gradient_color_7 = '#ee99a0'
 gradient_color_8 = '#ed8796'
-
+{{ else }}
+gradient = 1
+gradient_color_1 = '#179299'
+gradient_color_2 = '#04a5e5'
+gradient_color_3 = '#209fb5'
+gradient_color_4 = '#1e66f5'
+gradient_color_5 = '#8839ef'
+gradient_color_6 = '#ea76cb'
+gradient_color_7 = '#e64553'
+gradient_color_8 = '#d20f39'
+{{ end }}
 
 [smoothing]
 

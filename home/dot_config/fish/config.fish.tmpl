@@ -88,6 +88,8 @@ end
 if status is-interactive
     # Theme
     fish_config theme choose catppuccin
+    # Glamour integrated tools
+    set -gx GLAMOUR_STYLE "$HOME/.config/glamour/catppuccin.json"
     # Plugins
     set sponge_successful_exit_codes 0 127
     set sponge_purge_only_on_exit true
@@ -95,12 +97,25 @@ if status is-interactive
     # Hooks
     # Fzf config
     type -q __fzf_setup; and __fzf_setup
+    {{- if .darkMode }}
+    set -Ux FZF_COLOR_OPTS "\
+        --color=bg+:#363A4F,bg:#24273A,spinner:#F4DBD6,hl:#ED8796 \
+        --color=fg:#CAD3F5,header:#ED8796,info:#C6A0F6,pointer:#F4DBD6 \
+        --color=marker:#B7BDF8,fg+:#CAD3F5,prompt:#C6A0F6,hl+:#ED8796 \
+        --color=selected-bg:#494D64 \
+        --color=border:#6E738D,label:#CAD3F5"
+    {{- else }}
+    set -Ux FZF_COLOR_OPTS "\
+        --color=bg+:#CCD0DA,bg:#EFF1F5,spinner:#DC8A78,hl:#D20F39 \
+        --color=fg:#4C4F69,header:#D20F39,info:#8839EF,pointer:#DC8A78 \
+        --color=marker:#7287FD,fg+:#4C4F69,prompt:#8839EF,hl+:#D20F39 \
+        --color=selected-bg:#BCC0CC \
+        --color=border:#9CA0B0,label:#4C4F69"
+    {{- end }}
     set -gx FZF_DEFAULT_OPTS "\
-  --color=bg+:#363a4f,bg:#24273a,spinner:#f4dbd6,hl:#ed8796 \
-  --color=fg:#cad3f5,header:#ed8796,info:#c6a0f6,pointer:#f4dbd6 \
-  --color=marker:#f4dbd6,fg+:#cad3f5,prompt:#c6a0f6,hl+:#ed8796 \
-  --cycle --layout=reverse --preview-window=wrap \
-  --marker=\"*\" --prompt=\" \" --pointer=\"=>\""
+        $FZF_COLOR_OPTS \
+        --cycle --layout=reverse --preview-window=wrap \
+        --marker=\"*\" --prompt=\" \" --pointer=\"=>\""
     type -q tmux; and test -n "$TMUX"; and set -g FZF_TMUX 1
     if type -q fdfind
         alias fd fdfind
@@ -129,7 +144,7 @@ if status is-interactive
         ov --completion fish | source
     end
     # Vivid
-    type -q vivid; and set -gx LS_COLORS (vivid generate catppuccin-macchiato)
+    type -q vivid; and set -gx LS_COLORS (vivid generate catppuccin-{{ if .darkMode }}macchiato{{ else }}latte{{ end }})
     # Zellij
     if type -q zellij
         set -gx ZELLIJ_AUTO_ATTACH true

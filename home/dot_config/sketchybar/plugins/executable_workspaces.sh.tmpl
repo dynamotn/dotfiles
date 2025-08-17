@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-source "${CONFIG_DIR}/themes/catppuccin-macchiato.sh"
+{{- $theme := "macchiatto" }}
+{{- if not .darkMode }}
+{{-   $theme = "latte" }}
+{{- end }}
+source "${CONFIG_DIR}/themes/catppuccin-{{ $theme }}.sh"
 
 workspace_id=$1
 focus_workspace_ids="${FOCUSED_WORKSPACE}"

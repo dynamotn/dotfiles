@@ -1,5 +1,4 @@
 [env]
-GLAMOUR_STYLE = '~/.config/glamour/catppuccin.json'
 
 [tools]
 usage = "latest"
