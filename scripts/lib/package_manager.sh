@@ -83,7 +83,7 @@ function pkg::init_gentoo {
 # @noargs
 #######################################
 function pkg::init_arch {
-  pkg::sync_aur_repo
+  pkg::sync_pacman_repo
   if ! dybatpho::is command paru; then
     dybatpho::progress "Installing \`paru\` for managing AUR packages"
     dybatpho::dry_run sudo pacman -S --needed git base-devel rust
