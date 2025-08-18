@@ -87,10 +87,10 @@ function pkg::init_arch {
   if ! dybatpho::is command paru; then
     dybatpho::progress "Installing \`paru\` for managing AUR packages"
     dybatpho::dry_run sudo pacman -S --needed git base-devel rust
-    dybatpho::dry_run git clone https://aur.archlinux.org/paru.git /tmp/paru
-    dybatpho::dry_run cd /tmp/paru
+    dybatpho::create_temp paru ""
+    dybatpho::dry_run git clone https://aur.archlinux.org/paru.git "$paru"
+    dybatpho::dry_run cd "$paru"
     dybatpho::dry_run makepkg -si --noconfirm
-    dybatpho::dry_run rm -rf /tmp/paru
     dybatpho::dry_run sudo pacman -Rscn --noconfirm rust
   fi
 }
