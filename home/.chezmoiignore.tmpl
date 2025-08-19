@@ -151,7 +151,7 @@ Library/thunderbird
 {{- end }}
 
 {/* Linux related files */}
-{{- if eq .osid "linux-gentoo" "darwin" "android" }}
+{{- if ne .initSystem "systemd" }}
 .config/systemd
 {{- end }}
 
@@ -168,7 +168,9 @@ Library
 {{- end }}
 
 {/* Self-managed folders */}
-{{- if ne .guiServer "0" "M" }}
+{{- if ne .guiServer "0" }}
+Documents
+Misc
 Multimedia
 {{- end }}
 

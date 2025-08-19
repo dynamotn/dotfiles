@@ -15,7 +15,7 @@ Wants=network-online.target
 
 [Service]
 Type=notify
-ExecStartPre=-/usr/bin/mkdir -p %h/Sync/%i
+ExecStartPre=-/usr/bin/mkdir -p %h/Documents/%i
 ExecStart= \
   %h/.local/bin/rclone mount \
     --config=%h/.config/rclone/rclone.conf \
@@ -25,7 +25,7 @@ ExecStart= \
     --log-file /tmp/rclone-%i.log \
     --umask 022 \
     %i: %h/Sync/%i
-ExecStop=/bin/fusermount -u %h/Sync/%i
+ExecStop=/bin/fusermount -u %h/Documents/%i
 
 [Install]
 WantedBy=default.target
