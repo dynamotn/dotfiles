@@ -274,7 +274,7 @@ function dytoy::add_apt_repo {
   fi
   repo_code="${repo//%v/${distro_version}}"
   pkg::add_apt_repo "$repo_name" "$repo_code" "$distro_version" "$repo_version" "$key"
-  pkg::sync_ubuntu_repo
+  pkg::sync_apt_repo
 }
 
 #######################################

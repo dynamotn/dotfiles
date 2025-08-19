@@ -95,7 +95,7 @@ data:
   mailEnterpriseProfiles: []
   {{- end }}
   terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use? (T for tmux, Z for Zellij)" (list "T" "Z") "Z" | quote }}
-  {{- if ne .kind "container" }}
+  {{- if ne $kind "container" }}
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" false }}
   {{- else }}
