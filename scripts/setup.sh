@@ -45,9 +45,9 @@ _install_age() {
 
     temp=$(mktemp)
     if [ "$(command -v curl)" ]; then
-      curl -sSL -o "$temp" https://dl.filippo.io/age/latest?for=linux/amd64
+      curl -sSL -o "$temp" "https://dl.filippo.io/age/latest?for=linux/amd64"
     elif [ "$(command -v wget)" ]; then
-      wget -qO "$temp" https://dl.filippo.io/age/latest?for=linux/amd64
+      wget -qO "$temp" "https://dl.filippo.io/age/latest?for=linux/amd64"
     else
       _error "To install age, you must have curl or wget installed."
     fi
