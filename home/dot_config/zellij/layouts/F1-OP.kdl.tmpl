@@ -9,17 +9,19 @@ layout {
     }
   }
 
-  tab name="connect" cwd="~/Working/enterprise/F1/OP" split_direction="vertical" {
+  tab name="uat" cwd="~/Working/enterprise/F1/OP" split_direction="vertical" {
     pane {
       command "fish"
       args "-c" "k9s --context uat"
     }
+    {{- if ne .code "CVP00156075I" }}
     floating_panes {
       pane {
         command "chisel"
         args "client" "localhost:2468" "3000"
       }
     }
+    {{- end }}
   }
   {{- if eq .code "CVP00156075I" }}
   tab name="prd-devops" cwd="~/Working/enterprise/F1/OP" {
