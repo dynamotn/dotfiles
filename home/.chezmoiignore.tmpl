@@ -168,10 +168,7 @@ Library
 {{- end }}
 
 {/* Self-managed folders */}
-{{- if not (eq .kind "pc" "laptop") }}
-{{-   if not (eq .kind "container" "vm") }}
-Working
-{{-   end }}
+{{- if ne .guiServer "0" "M" }}
 Multimedia
 {{- end }}
 
