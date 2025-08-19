@@ -47,6 +47,11 @@ arch:
     - name: sof-firmware
     - name: alsa-firmware
     {{- end }}
+ubuntu:
+  packages:
+    # System tools
+    - name: build-essential
+    - name: make
 termux:
   packages:
     # System tools
