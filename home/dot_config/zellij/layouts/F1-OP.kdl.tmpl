@@ -21,6 +21,7 @@ layout {
       }
     }
   }
+  {{- if eq .code "CVP00156075I" }}
   tab name="prd-devops" cwd="~/Working/enterprise/F1/OP" {
     pane {
       command "fish"
@@ -33,6 +34,7 @@ layout {
       args "-c" "k9s --context prd-apps"
     }
   }
+  {{- end }}
   tab name="docker" cwd="~/Working/enterprise/F1/OP/docker" {
     pane
   }
