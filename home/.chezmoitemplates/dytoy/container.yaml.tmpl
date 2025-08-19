@@ -20,9 +20,8 @@ arch:
       sudo usermod -aG docker $USER || :
 ubuntu:
   packages:
-    - name: docker-ce
+    - name: docker.io
       service: docker
-    - name: docker-ce-cli
   hook:
     after: |-
       sudo groupadd docker || :
