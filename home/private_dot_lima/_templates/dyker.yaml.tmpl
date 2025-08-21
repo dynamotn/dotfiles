@@ -4,6 +4,9 @@ base:
   - template://_images/archlinux
   - template://_default/mounts
 
+additionalDisks:
+- docker
+
 # containerd is managed by Docker, not by Lima, so the values are set to false here.
 containerd:
   system: false
@@ -29,13 +32,27 @@ provision:
     script: |
       #!/bin/bash
       set -eux -o pipefail
+
+      MNT=/mnt/lima-docker
+      ROOT_DOCKER=/var/lib/docker
+      USER_DOCKER=/home/{{ "{{" }}.User{{ "}}" }}/.local/share/docker
+
+      mkdir -p $MNT/root $MNT/user $ROOT_DOCKER $USER_DOCKER
+      mount --bind /$MNT/root $ROOT_DOCKER
+      mount --bind /$MNT/user $USER_DOCKER
+
+      chown -R {{ "{{" }}.User{{ "}}" }}:{{ "{{" }}.User{{ "}}" }} $USER
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
       command -v docker >/dev/null 2>&1 && exit 0
       if [ ! -e /etc/systemd/system/docker.socket.d/override.conf ]; then
         mkdir -p /etc/systemd/system/docker.socket.d
         # Alternatively we could just add the user to the "docker" group, but that requires restarting the user session
         cat <<-EOF >/etc/systemd/system/docker.socket.d/override.conf
-        [Socket]
-        SocketUser={{ "{{" }}.User{{ "}}" }}
+      [Socket]
+      SocketUser={{ "{{" }}.User{{ "}}" }}
       EOF
       fi
       pacman -Sy --noconfirm docker
