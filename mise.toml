@@ -10,6 +10,7 @@ docker build --network=host --build-arg \
       root/etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age
   )" \
   --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
+  --build-arg IDENTITIES="F1" \
   -t $DOCKER_IMAGE .
 """
 
@@ -18,6 +19,7 @@ run = """
 #!/usr/bin/env bash
 docker build --network=host \
   --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
+  --build-arg IDENTITIES="personal" \
   -t $DOCKER_IMAGE .
 """
 

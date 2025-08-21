@@ -57,10 +57,12 @@ data:
     {{-   $company := promptString "Fill your company code to decrypt (empty to end this list)" }}
     {{-   if $company }}
     {{-     $listDecryptEnterprise = append $listDecryptEnterprise $company }}
-    - {{ $company }}
     {{-   else }}
     {{-     break }}
     {{-   end }}
+  {{-   end }}
+  {{-   range $listDecryptEnterprise }}
+  - {{ . }}
   {{-   end }}
   {{- else }}
   decryptEnterprise: []
