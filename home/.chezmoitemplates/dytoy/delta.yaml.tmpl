@@ -1,6 +1,6 @@
 name: delta
 is_essential: true
-{{- if or (eq .chezmoi.os "android") (and (eq .kind "container") (ne .osid "linux-ubuntu" "linux-alpine")) }}
+{{- if or (eq .chezmoi.os "android") (and (eq .kind "container") (not (eq .osid "linux-ubuntu" "linux-alpine"))) }}
 # Use package manager for Android, and container environments
 # cuz it's essential tool
 method: os
