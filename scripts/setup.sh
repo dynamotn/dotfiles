@@ -13,7 +13,8 @@ dybatpho::register_common_handlers
 function _spec_main {
   dybatpho::opts::setup "Setup your machine from dotfiles" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
-  dybatpho::opts::param "Use default values of chezmoi" USE_DEFAULT --use-default -d optional:true
+  dybatpho::opts::flag "Use default values of chezmoi" USE_DEFAULT --use-default -d on:true off:false init:="false"
+  dybatpho::opts::param "List of identities to decrypt, separated by \`,\`" IDENTITIES --identities -i optional:true on:
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
@@ -61,6 +62,30 @@ _install_age() {
   fi
 }
 
+_generate_chezmoi_config() {
+  local origin_config="$SETUP_DIR/../.chezmoi.yaml.tmpl"
+  local dest_config="$SETUP_DIR/../home/.chezmoi.yaml.tmpl"
+  echo "sourceDir: \"$(readlink -f "$SETUP_DIR"/..)\"" > "$dest_config"
+  cat "$origin_config" >> "$dest_config"
+  if [[ "$IDENTITIES" =~ /*personal*/ ]]; then
+    sed -i 's#decryptPersonal: .*#decryptPersonal: true#g' "$dest_config"
+    sed -i "s#\(\$decryptPersonal := .*\) false }}#\1 true }}#g" "$dest_config"
+  fi
+  local identities=()
+  IFS=',' read -r -a identities <<< "$IDENTITIES"
+  local enterpriseIdentities=()
+  for identity in "${identities[@]}"; do
+    if [ -n "$identity" ] && [ "$identity" != "personal" ]; then
+      enterpriseIdentities+=("$identity")
+    fi
+  done
+  sed -i "s#\(\$decryptEnterprise := .*\) false }}#\1 true }}#g" "$dest_config"
+  sed -i "s#\$company := \(.*\) }}#\$company := \"\" }}#g" "$dest_config"
+  for identity in "${enterpriseIdentities[@]}"; do
+    sed -i "s#\(\$listDecryptEnterprise := .*\) }}#\1 \"${identity}\" }}#g" "$dest_config"
+  done
+}
+
 _main() {
   # Install chezmoi and age
   mkdir -p "$BIN_DIR"
@@ -70,9 +95,8 @@ _main() {
   # Modify source directory of chezmoi, manipulate chezmoi config and generate
   # to chezmoi's default config template
   dybatpho::header "Initialize chezmoi"
-  echo "sourceDir: \"$(readlink -f "$SETUP_DIR"/..)\"" > "$SETUP_DIR"/../home/.chezmoi.yaml.tmpl
-  cat "$SETUP_DIR"/../.chezmoi.yaml.tmpl >> "$SETUP_DIR"/../home/.chezmoi.yaml.tmpl
-  mkdir -p "$HOME/.config/chezmoi/hooks/diff" && touch "$HOME/.config/chezmoi/hooks/diff/pre.sh"
+  _generate_chezmoi_config
+
   dybatpho::header "Please answer the following questions"
   # shellcheck disable=SC2086
   if [ "$USE_DEFAULT" = "true" ]; then
