@@ -3,6 +3,19 @@
 # Path of Fish config
 set -gx CONFIG_PATH (dirname (readlink -f (status --current-filename)))
 
+{{- if eq .chezmoi.os "linux" }}
+# XDG base directories
+set -gx XDG_CACHE_HOME $HOME/.cache
+set -gx XDG_CONFIG_HOME $HOME/.config
+set -gx XDG_DATA_HOME $HOME/.local/share
+set -gx XDG_STATE_HOME $HOME/.local/state
+{{- if eq .chezmoi.osRelease.id "gentoo" }}
+set -gx XDG_RUNTIME_DIR /tmp/user-(id -u)
+{{- else }}
+set -gx XDG_RUNTIME_DIR /run/user/(id -u)
+{{- end }}
+{{- end }}
+
 # GPG interface to insert passphrase
 set -gx GPG_TTY (tty)
 
