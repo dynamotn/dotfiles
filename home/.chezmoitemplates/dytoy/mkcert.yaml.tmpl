@@ -1,2 +1,9 @@
 name: mkcert
-method: mise
+method: binary
+github:
+  repo: FiloSottile/mkcert
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset:  mkcert-%v-{{ $os }}-{{ .chezmoi.arch }}
