@@ -30,7 +30,7 @@ layout {
       }
     }
   }
-  tab name="devcontainer" cwd="~/Working/personal/container-dotfiles" split_direction="vertical" {
+  tab name="devcontainer" cwd="~/Working/personal/infra/container-toolbox" split_direction="vertical" {
     pane focus=true
     floating_panes {
       pane {
