@@ -1,2 +1,4 @@
 name: helm
 method: mise
+hook:
+  after: helm plugin install https://github.com/databus23/helm-diff
