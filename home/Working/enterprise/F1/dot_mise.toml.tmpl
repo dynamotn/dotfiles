@@ -1,13 +1,4 @@
 [env]
-JIRA_CONFIG_FILE = "{{ "{{" }} config_root {{ "}}" }}/.jira/config.yaml"
-{{- $commonSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/common.yaml.age" | include | decrypt | fromYaml }}
-JIRA_API_TOKEN = {{ $commonSecret.jira.token | quote }}
-{{- $gitSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/git.yaml.age" | include | decrypt | fromYaml }}
-{{- range $gitSecret.servers }}
-{{-   if eq .type "github" }}
-{{ .prefix | upper }}GITHUB_TOKEN = {{ .token | quote }}
-{{-   end }}
-{{-   if eq .type "gitlab" }}
-{{ .prefix | upper }}GITLAB_TOKEN = {{ .token | quote }}
-{{-   end }}
-{{- end }}
+{{ $top := merge . (dict "enterprise" "F1") }}
+{{- template "mise/env_jira.toml.tmpl" $top }}
+{{- template "mise/env_git.toml.tmpl" $top }}

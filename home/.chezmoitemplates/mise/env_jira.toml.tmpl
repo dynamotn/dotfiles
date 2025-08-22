@@ -1,0 +1,8 @@
+{{- $commonSecret := dict }}
+{{- if index . "personal" }}
+{{-   $commonSecret = join .chezmoi.sourceDir "../secrets/data/personal/common.yaml.age" | include | decrypt | fromYaml }}
+{{- else if index . "enterprise" }}
+{{-   $commonSecret = printf "../secrets/data/enterprise-%s/common.yaml.age" .enterprise | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{- end }}
+JIRA_CONFIG_FILE = "{{ "{{" }} config_root {{ "}}" }}/.jira/config.yaml"
+JIRA_API_TOKEN = {{ $commonSecret.jira.token | quote }}
