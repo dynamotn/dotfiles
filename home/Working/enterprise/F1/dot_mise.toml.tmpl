@@ -1,8 +1,13 @@
 [env]
-JIRA_CONFIG_FILE = "{{ "{{" }}config_root{{ " }}" }}/.jira/config.yaml"
+JIRA_CONFIG_FILE = "{{ "{{" }} config_root {{ "}}" }}/.jira/config.yaml"
 {{- $commonSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/common.yaml.age" | include | decrypt | fromYaml }}
 JIRA_API_TOKEN = {{ $commonSecret.jira.token | quote }}
-
-[tools]
-python = "latest"
-pre-commit = "latest"
+{{- $gitSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/git.yaml.age" | include | decrypt | fromYaml }}
+{{- range $gitSecret.servers }}
+{{-   if eq .type "github" }}
+{{ .prefix | upper }}GITHUB_TOKEN = {{ .token | quote }}
+{{-   end }}
+{{-   if eq .type "gitlab" }}
+{{ .prefix | upper }}GITLAB_TOKEN = {{ .token | quote }}
+{{-   end }}
+{{- end }}
