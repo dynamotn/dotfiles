@@ -1,0 +1,14 @@
+{{- $gitSecret := dict }}
+{{- if index . "personal" }}
+{{-   $gitSecret = join .chezmoi.sourceDir "../secrets/data/personal/git.yaml.age" | include | decrypt | fromYaml }}
+{{- else if index . "enterprise" }}
+{{-   $gitSecret = printf "../secrets/data/enterprise-%s/git.yaml.age" .enterprise | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{- end }}
+{{- range $gitSecret.servers }}
+{{-   if eq .type "github" }}
+{{ .prefix | upper }}GITHUB_TOKEN = {{ .token | quote }}
+{{-   end }}
+{{-   if eq .type "gitlab" }}
+{{ .prefix | upper }}GITLAB_TOKEN = {{ .token | quote }}
+{{-   end }}
+{{- end }}
