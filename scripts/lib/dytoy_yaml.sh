@@ -253,27 +253,27 @@ function dytoy::add_apt_repo {
   local repo=$(echo "$yaml" | yq e '.repo')
   [[ "$repo" == "null" ]] && return
 
-  repo_name=$(echo "$yaml" | yq e '.repo_name')
-  repo_version=$(echo "$yaml" | yq e '.repo_version')
-  distro_version=$(echo "$yaml" | yq e '.distro_version')
-  key=$(echo "$yaml" | yq e '.key')
+  local repo_name=$(echo "$yaml" | yq e '.repo_name')
+  local components=$(echo "$yaml" | yq e '.components')
+  local suite=$(echo "$yaml" | yq e '.suite')
+  local key=$(echo "$yaml" | yq e '.key')
 
   [[ "$repo_name" == "null" ]] && repo_name=$name
-  if [[ "$distro_version" == "null" ]]; then
+  if [[ "$suite" == "null" ]]; then
     case "$os" in
       ubuntu)
-        distro_version=$(grep -is UBUNTU_CODENAME /etc/os-release | cut -d= -f2)
+        suite=$(grep -is UBUNTU_CODENAME /etc/os-release | cut -d= -f2)
         ;;
       debian)
-        distro_version=$(grep -is VERSION_CODENAME /etc/os-release | cut -d= -f2)
+        suite=$(grep -is VERSION_CODENAME /etc/os-release | cut -d= -f2)
         ;;
       termux)
-        distro_version=""
+        suite=""
         ;;
     esac
   fi
-  repo_code="${repo//%v/${distro_version}}"
-  pkg::add_apt_repo "$repo_name" "$repo_code" "$distro_version" "$repo_version" "$key"
+  local url="${repo//%v/${suite}}"
+  pkg::add_apt_repo "$repo_name" "$url" "$suite" "$components" "$key"
   pkg::sync_apt_repo
 }
 
@@ -304,7 +304,7 @@ function dytoy::install_alpine_package {
   dybatpho::expect_args yaml -- "$@"
   local name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "apk"; then
-    pkg::install_via_alpine "$apk" \
+    pkg::install_via_apk "$name" \
       && dybatpho::debug "Installed package: $name" \
       && dytoy::enable_service "$yaml" "openrc" \
       || dybatpho::die "Can't install package: $name"

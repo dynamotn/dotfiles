@@ -161,14 +161,14 @@ function pkg::add_overlay {
 #######################################
 # @description Add repository of APT (include PPA) to Ubuntu, Debian, Termux...
 # @arg $1 string Name of repository
-# @arg $2 string Code of repository
-# @arg $3 string Distro version (e.g., focal, bionic)
-# @arg $4 string Repository version (e.g., main, universe)
+# @arg $2 string URL of repository
+# @arg $3 string Suite of repository (e.g., bionic, focal, stable)
+# @arg $4 string Components (e.g., main, universe)
 # @arg $5 string GPG key of repository
 #######################################
 function pkg::add_apt_repo {
-  local name code distro_version version key
-  dybatpho::expect_args name code distro_version version key -- "$@"
+  local name url suite components key
+  dybatpho::expect_args name url suite components key -- "$@"
   local path
   if dybatpho::is command termux-setup-storage; then
     path="$PREFIX/etc/apt/sources.list.d/$name.list"
@@ -177,7 +177,7 @@ function pkg::add_apt_repo {
   fi
   if ! dybatpho::is file "$path"; then
     dybatpho::debug "Adding repository $name."
-    dybatpho::dry_run eval "echo \"deb $code $distro_version $version\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
+    dybatpho::dry_run eval "echo \"deb ${url} ${suite} ${components}\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
     dybatpho::create_temp temp_key ".gpg"
     dybatpho::dry_run dybatpho::curl_do "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" "$temp_key"
     dybatpho::dry_run sudo apt-key add "$temp_key"

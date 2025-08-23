@@ -15,7 +15,7 @@ ubuntu:
   packages:
     - name: ibus-bamboo
       repo: http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu
-      repo_version: main
+      components: main
       key: 5AD2E0B68A0409AD907D462D36ED424E9659D014
 {{- else if eq .guiWinManager "H" }}
 name: fcitx5-bamboo
