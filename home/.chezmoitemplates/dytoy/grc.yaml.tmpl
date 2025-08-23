@@ -9,15 +9,17 @@ content: |
   {{- if eq .osid "android" }}
   # Fix shebangs
   find . -type f -exec termux-fix-shebang {} \;
+  {{- else if eq .osid "linux-alpine" }}
+  PREFIX="$HOME/.local"
+  {{- end }}
   # Install into $PREFIX
   ./install.sh $PREFIX $PREFIX
-  {{- else if eq .osid "linux-alpine" }}
-  ./install.sh ~/.local
-  {{- end }}
+  {{- if eq .osid "android" }}
   # Copy config files
   mkdir ~/.grc
   cp -r colourfiles ~/.grc
   cp grc.conf ~/.grc
+  {{- end }}
 {{- else if eq .chezmoi.os "linux" "darwin" }}
 method: os
 # https://repology.org/project/grc/versions

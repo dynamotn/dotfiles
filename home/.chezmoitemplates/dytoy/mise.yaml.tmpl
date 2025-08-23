@@ -1,6 +1,27 @@
 name: mise
-method: binary
 is_essential: true
+{{- if eq .kind "container" }}
+# Use package manager for Android, macOS and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/mise/versions
+arch:
+  packages:
+    - name: mise
+ubuntu:
+  packages:
+    - name: mise
+      repo: https://mise.jdx.dev/deb
+      components: stable
+alpine:
+  packages:
+    - name: mise
+termux: # Not have package
+macos:
+  packages:
+    - name: mise
+{{- else }}
+method: binary
 github:
   repo: jdx/mise
   {{- $os := "" }}
@@ -20,6 +41,7 @@ github:
   {{- $suffix = "-musl" }}
   {{- end }}
   release_asset: mise-%v-{{ $os }}-{{ $arch }}{{ $suffix }}
+{{- end }}
 hook:
   after: |-
     {{- if eq .chezmoi.os "android" }}
@@ -31,8 +53,10 @@ hook:
     {{- $command := "$HOME/.local/bin/mise" }}
     {{- if eq .chezmoi.os "android" }}
     {{- $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl $HOME/.local/bin/mise" }}
+    {{- else if eq .kind "container" }}
+    {{- $command = "mise" }}
+    # {{ $command }} settings disable_backends=asdf,ubi
     {{- end }}
-    chmod +x ~/.local/bin/mise
     # Trust global config
     {{ $command }} trust
-    {{ $command }} use -g usage
+    {{ $command }} use -g aqua:jdx/usage

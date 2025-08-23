@@ -30,7 +30,7 @@ ubuntu:
         mkdir -p ~/.config/Yubico
         pamu2fcfg > ~/.config/Yubico/u2f_keys
       fi
-ubuntu:
+alpine:
   packages:
     - name: pam-u2f
   hook:
