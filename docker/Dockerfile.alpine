@@ -1,0 +1,24 @@
+FROM alpine:3.22.1
+ARG INTERNAL_CERT
+ARG AGE_PASSPHRASE
+ARG IDENTITIES=""
+ARG GITHUB_TOKEN
+
+ENV USER dynamo
+ENV UID 1000
+ENV GID 1000
+ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+
+# Create user and setup permissions on /etc/sudoers
+RUN apk add --no-cache bash sudo ca-certificates && \
+    addgroup -S $USER -g $GID && \
+    adduser -s /bin/bash -u $UID -S $USER -G $USER && \
+    echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+    chmod 0440 /etc/sudoers
+
+USER $UID
+COPY --chown=${USER}:${USER} . /home/${USER}/dotfiles
+WORKDIR /home/${USER}
+ENV LOG_LEVEL=debug
+RUN /home/${USER}/dotfiles/docker/build.sh "${IDENTITIES}"
+ENTRYPOINT [ "/usr/bin/fish" ]
