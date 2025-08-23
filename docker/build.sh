@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# @file build.sh
+# @brief Build container and setup dotfiles
+set -Eeou pipefail
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")/../scripts"
+
+#######################################
+# @description Install custom SSL certificates if provided via the SSL_CERT environment variable.
+# @set SSL_CERT string The SSL certificate content to be installed.
+#######################################
+function _install_ssl_certs {
+  if [ "${SSL_CERT:-x}" != "x" ]; then
+    folder=""
+    if command -v apk &> /dev/null; then
+      folder="/usr/local/share/ca-certificates"
+      command="update-ca-certificates"
+    elif command -v pacman &> /dev/null; then
+      folder="/etc/ca-certificates/trust-source/anchors"
+      command="update-ca-trust"
+    fi
+
+    echo "$SSL_CERT" | sudo tee "$folder/ssl_decryption.crt"
+    sudo "$command"
+  fi
+}
+
+#######################################
+# @description Install packages required for setting up dotfiles.
+#######################################
+function _install_packages {
+  if command -v pacman &> /dev/null; then
+    # Choose mirror for VN
+    echo "Server = http://mirror.bizflycloud.vn/archlinux/\$repo/os/\$arch" | sudo tee /etc/pacman.d/mirrorlist
+    # Container only tools
+    sudo pacman -Sy --noconfirm expect
+    # Install for cloning code
+    sudo pacman -Sy --noconfirm git curl openssh
+    # Install chezmoi tools
+    sudo pacman -Sy --noconfirm chezmoi age expect
+  elif command -v apk &> /dev/null; then
+    sudo apk update
+    # Container only tools
+    sudo apk add --no-cache expect
+    # GNU compatible tools
+    sudo apk add --no-cache coreutils grep file
+    # Install for cloning code
+    sudo apk add --no-cache git curl openssh
+    # Install chezmoi tools
+    sudo apk add --no-cache chezmoi age
+  fi
+}
+
+#######################################
+# @description Main function to setup dotfiles.
+# @arg $1 string Comma-separated list of identities to decrypt.
+#######################################
+function _main {
+  _install_ssl_certs
+  _install_packages
+
+  # Disable SSH host key checking
+  export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
+  # Setup dotfiles
+  "$SCRIPT_DIR"/setup.sh -d -i"$1"
+  # Generate SSH key
+  ssh-keygen -t ed25519 -f ~/.ssh/key/public_ed25519 -P ""
+}
+
+_main "$@"

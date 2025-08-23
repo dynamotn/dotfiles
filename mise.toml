@@ -5,13 +5,16 @@ DOCKER_IMAGE = "registry.gitlab.com/dynamo-config/dotfiles"
 run = """
 #!/usr/bin/env bash
 docker build --network=host --build-arg \
-  INTERNAL_CERT="$(\
+  SSL_CERT="$(\
     age -d -i ~/.config/chezmoi/enterprise-F1.key \
       root/etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age
   )" \
   --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
+  --build-arg GITHUB_TOKEN="$GITHUB_TOKEN" \
   --build-arg IDENTITIES="F1" \
-  -t $DOCKER_IMAGE .
+  --no-cache \
+  -f "{{ config_root }}/docker/Dockerfile.alpine" \
+  -t $DOCKER_IMAGE "{{ config_root }}"
 """
 
 [tasks.docker-personal]
@@ -19,13 +22,19 @@ run = """
 #!/usr/bin/env bash
 docker build --network=host \
   --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
+  --build-arg GITHUB_TOKEN="$GITHUB_TOKEN" \
   --build-arg IDENTITIES="personal" \
-  -t $DOCKER_IMAGE .
+  --no-cache \
+  -f "{{ config_root }}/docker/Dockerfile.alpine" \
+  -t $DOCKER_IMAGE "{{ config_root }}"
 """
 
 [tasks.docker-ci]
 run = """
 #!/usr/bin/env bash
 docker build --network=host \
-  -t $DOCKER_IMAGE .
+  --build-arg GITHUB_TOKEN="$GITHUB_TOKEN" \
+  --no-cache \
+  -f "{{ config_root }}/docker/Dockerfile.alpine" \
+  -t $DOCKER_IMAGE "{{ config_root }}"
 """
