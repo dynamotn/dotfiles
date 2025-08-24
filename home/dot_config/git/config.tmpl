@@ -213,6 +213,8 @@
         update-main = !bash ~/.config/git/scripts/update_main.sh
         # Unshallow
         unshallow = "!_() { git fetch --unshallow; git config remote.$1.fetch "+refs/heads/*:refs/remotes/$1/*"; git fetch $1; }; _"
+        # Generate patch from git diff
+        gen-patch = "!_() { git -c diff.noprefix=false diff --output $1; }; _"
 [gc]
         # Don't auto git gc, with large project can slow when working
         auto = 0
