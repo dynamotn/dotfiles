@@ -102,23 +102,29 @@ EOF
 function dytoy::iterate {
   local command
   dybatpho::expect_args command -- "$@"
+  # shellcheck disable=SC2153
   if [ "$TOOL" = "@empty" ]; then
     dybatpho::info "Install ${METHOD} tools"
     readarray tools < <(
       yq e -r -o=j -I=0 "filter(.method == \"${METHOD}\") | .[].name" \
         ~/.config/dytoy/tools.yaml
     )
-    dybatpho::is function "$command" \
-      && for tool in "${tools[@]}"; do
+    if dybatpho::is function "$command"; then
+      for tool in "${tools[@]}"; do
         tool=${tool%$'\n'}
         "$command" "$tool"
-      done \
-      || dybatpho::die "${command} function of ${METHOD} method is not defined"
+      done
+    else
+      dybatpho::die "${command} function of ${METHOD} method is not defined"
+    fi
     dybatpho::success "Installed all ${METHOD} tools"
   else
     dybatpho::info "Install ${METHOD} tool: ${TOOL}"
-    dybatpho::is function "$command" && "$command" "$TOOL" \
-      || dybatpho::die "${command} function of ${METHOD} method is not defined"
+    if dybatpho::is function "$command"; then
+      "$command" "$TOOL"
+    else
+      dybatpho::die "${command} function of ${METHOD} method is not defined"
+    fi
   fi
 }
 
@@ -218,6 +224,7 @@ function dytoy::install_gentoo_package {
   [[ "$repo" != "null" ]] && pkg::add_overlay "$repo" "$url" > /dev/null
 
   if ! dytoy::is_installed_package "$name" "portage"; then
+    # shellcheck disable=SC2015
     pkg::install_via_portage "$name" \
       && dybatpho::debug "Installed package: $name" \
       && dytoy::enable_service "$yaml" "$init_system" \
@@ -234,6 +241,7 @@ function dytoy::install_arch_package {
   dybatpho::expect_args yaml -- "$@"
   local name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "pacman"; then
+    # shellcheck disable=SC2015
     pkg::install_via_pacman "$name" \
       && dybatpho::debug "Installed package: $name" \
       && dytoy::enable_service "$yaml" "systemd" \
@@ -288,6 +296,7 @@ function dytoy::install_ubuntu_package {
 
   local name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "apt"; then
+    # shellcheck disable=SC2015
     pkg::install_via_apt "$name" \
       && dybatpho::debug "Installed package: $name" \
       && dytoy::enable_service "$yaml" "systemd" \
@@ -304,6 +313,7 @@ function dytoy::install_alpine_package {
   dybatpho::expect_args yaml -- "$@"
   local name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "apk"; then
+    # shellcheck disable=SC2015
     pkg::install_via_apk "$name" \
       && dybatpho::debug "Installed package: $name" \
       && dytoy::enable_service "$yaml" "openrc" \
@@ -320,6 +330,7 @@ function dytoy::install_termux_package {
   dybatpho::expect_args yaml -- "$@"
   local name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "apt"; then
+    # shellcheck disable=SC2015
     pkg::install_via_termux "$name" \
       && dybatpho::debug "Installed package: $name" \
       && dytoy::enable_service "$yaml" "termux" \
@@ -340,6 +351,7 @@ function dytoy::install_flatpak_package {
   [[ "$repo" != "null" ]] && pkg::add_flatpak_repo "$repo" "$url" > /dev/null
 
   if ! dytoy::is_installed_package "$name" "flatpak"; then
+    # shellcheck disable=SC2015
     pkg::install_via_flatpak "$name" "$repo" \
       && dybatpho::debug "Installed flatpak application: $name" \
       || dybatpho::die "Can't install application: $name"
@@ -358,6 +370,7 @@ function dytoy::install_macos_package {
   case "$type" in
     store)
       if ! dytoy::is_installed_package "$name" "mas"; then
+        # shellcheck disable=SC2015
         pkg::install_via_mas "$name" \
           && dybatpho::debug "Installed application: $name" \
           || dybatpho::die "Can't install application: $name"
@@ -366,6 +379,7 @@ function dytoy::install_macos_package {
     download)
       url=$(echo "$yaml" | yq e '.url')
       if ! dytoy::is_installed_package "$name" "dmg"; then
+        # shellcheck disable=SC2015
         pkg::install_via_dmg "$name" "$url" \
           && dybatpho::debug "Installed application: $name" \
           || dybatpho::die "Can't install application: $name"
@@ -384,6 +398,7 @@ function dytoy::install_macos_package {
       local repo=$(echo "$yaml" | yq e '.repo')
       [[ "$repo" != "null" ]] && pkg::add_brew_tap "$repo" > /dev/null
       if ! dytoy::is_installed_package "$name" "brew"; then
+        # shellcheck disable=SC2015
         pkg::install_via_brew "$name" \
           && dybatpho::debug "Installed package: $name" \
           && dytoy::enable_service "$yaml" "launchd" \

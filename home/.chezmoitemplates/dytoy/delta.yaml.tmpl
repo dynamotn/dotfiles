@@ -1,6 +1,6 @@
 name: delta
 is_essential: true
-{{- if or (eq .chezmoi.os "android") (and (eq .kind "container") (not (eq .osid "linux-ubuntu" "linux-alpine"))) }}
+{{- if or (eq .chezmoi.os "android") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}
 # Use package manager for Android, and container environments
 # cuz it's essential tool
 method: os
@@ -9,7 +9,9 @@ arch:
   packages:
     - name: git-delta
 ubuntu: # container need to use binary method
-alpine: # container need to use binary method
+alpine:
+  packages:
+    - name: delta
 termux:
   packages:
     - name: git-delta

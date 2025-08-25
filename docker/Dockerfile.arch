@@ -1,22 +1,19 @@
 FROM archlinux:base-devel
-ARG INTERNAL_CERT
-ARG AGE_PASSPHRASE
-ARG IDENTITIES=""
-ARG GITHUB_TOKEN
 
-ENV USER dynamo
-ENV UID 1000
-ENV GID 1000
-ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+ENV USER=dynamo
+ENV UID=1000
+ENV GID=1000
 
 # Create user and setup permissions on /etc/sudoers
+# hadolint ignore=DL3046
 RUN useradd -m -s /bin/bash -U -u $UID $USER && \
-    echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
-    chmod 0440 /etc/sudoers && \
-    chmod g+w /etc/passwd
+    echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 USER $UID
-COPY --chown=${USER}:${USER} . /home/${USER}/dotfiles
+COPY --chown=${USER}:${USER} . /home/${USER}/Dotfiles
 WORKDIR /home/${USER}
-RUN /home/${USER}/dotfiles/docker/build.sh "${IDENTITIES}"
+RUN --mount=type=secret,id=github_token,env=GITHUB_TOKEN \
+    --mount=type=secret,id=age_passphrases \
+    --mount=type=secret,id=ssl_cert \
+    /home/${USER}/Dotfiles/docker/build.sh
 ENTRYPOINT [ "/usr/bin/fish" ]

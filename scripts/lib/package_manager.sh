@@ -88,6 +88,7 @@ function pkg::init_arch {
     dybatpho::progress "Installing \`paru\` for managing AUR packages"
     dybatpho::dry_run sudo pacman -S --needed --noconfirm git base-devel rust
     dybatpho::create_temp paru ""
+    # shellcheck disable=SC2154
     dybatpho::dry_run git clone https://aur.archlinux.org/paru.git "$paru"
     dybatpho::dry_run cd "$paru"
     dybatpho::dry_run makepkg -si --noconfirm
@@ -179,6 +180,7 @@ function pkg::add_apt_repo {
     dybatpho::debug "Adding repository $name."
     dybatpho::dry_run eval "echo \"deb ${url} ${suite} ${components}\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
     dybatpho::create_temp temp_key ".gpg"
+    # shellcheck disable=SC2154
     dybatpho::dry_run dybatpho::curl_do "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" "$temp_key"
     dybatpho::dry_run sudo apt-key add "$temp_key"
   else
@@ -400,6 +402,7 @@ function pkg::install_via_dmg {
   dybatpho::expect_args app_name url -- "$@"
   dybatpho::progress "Installing app $app_name"
   dybatpho::create_temp temp_file ".dmg"
+  # shellcheck disable=SC2154
   dybatpho::curl_download "$url" "$temp_file"
   local mount_dir
   mount_dir=$(hdiutil mount -plist "$temp_file" | grep -oE '/Volumes/[^"<]+' | head -n 1)

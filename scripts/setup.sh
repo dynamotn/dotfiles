@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @file setup.sh
 # @brief Setup your machine from dotfiles
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 BIN_DIR="$HOME/.local/bin"
 
 #######################################
@@ -19,8 +19,8 @@ function _spec_main {
 # @description Update git submodules for running this script only
 #######################################
 function _update_git_modules {
-  cd "$SETUP_DIR" || exit
-  git submodule update --init --remote "$SETUP_DIR"/lib/dybatpho "$SETUP_DIR"/lib/expect-age
+  cd "$SCRIPT_DIR" || exit
+  git submodule update --init --remote "$SCRIPT_DIR/lib/dybatpho" "$SCRIPT_DIR/lib/expect-age"
 }
 
 #######################################
@@ -38,6 +38,7 @@ function _install_chezmoi {
 function _install_age {
   dybatpho::require "tar"
   dybatpho::create_temp "temp" "tar.gz"
+  # shellcheck disable=SC2154
   dybatpho::curl_download "https://dl.filippo.io/age/latest?for=linux/amd64" "$temp"
   tar -C "$BIN_DIR" -xzf "$temp" --strip=1 age/age
 }
@@ -56,6 +57,7 @@ function _generate_chezmoi_config {
   cat "$origin_config" >> "$dest_config"
 
   # Generate decrypt config
+  # shellcheck disable=SC2153
   if [[ "$IDENTITIES" =~ /*personal*/ ]]; then
     sed -i 's#decryptPersonal: .*#decryptPersonal: true#g' "$dest_config"
     sed -i "s#\(\$decryptPersonal := .*\) false }}#\1 true }}#g" "$dest_config"
@@ -110,8 +112,8 @@ function _main {
 
   # Apply OS specific configuration if not Termux or MacOS
   if
-    ! command -v termux-setup-storage &> /dev/null
-    and ! command -v sw_vers &> /dev/null
+    ! dybatpho::is command termux-setup-storage \
+      && dybatpho::is command sw_vers
   then
     dybatpho::header "Setup operating system"
     ~/.local/bin/scz apply
