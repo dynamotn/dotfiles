@@ -1,17 +1,16 @@
-[env]
-DOCKER_IMAGE = "registry.gitlab.com/dynamo-config/dotfiles"
-
 [tasks.docker-enterprise-F1]
 run = """
 #!/usr/bin/env bash
-docker build --network=host --build-arg \
-  SSL_CERT="$(\
-    age -d -i ~/.config/chezmoi/enterprise-F1.key \
-      root/etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age
-  )" \
-  --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
-  --build-arg GITHUB_TOKEN="$GITHUB_TOKEN" \
-  --build-arg IDENTITIES="F1" \
+DOCKER_IMAGE="git.example.com/dynamo/toolbox"
+export AGE_PASSPHRASES="F1=$(rbw get 'Age Dotfiles')"
+export SSL_CERT="$(
+  age -d -i ~/.config/chezmoi/enterprise-F1.key \
+    root/etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age
+)"
+docker buildx build --platform linux/amd64 --network=host \
+  --secret id=github_token,env=GITHUB_TOKEN \
+  --secret id=age_passphrases,env=AGE_PASSPHRASES \
+  --secret id=ssl_cert,env=SSL_CERT \
   --no-cache \
   -f "{{ config_root }}/docker/Dockerfile.alpine" \
   -t $DOCKER_IMAGE "{{ config_root }}"
@@ -20,20 +19,36 @@ docker build --network=host --build-arg \
 [tasks.docker-personal]
 run = """
 #!/usr/bin/env bash
+DOCKER_IMAGE="git.dynamotn.dev/config/dotfiles"
+export AGE_PASSPHRASES="personal=$(rbw get 'Age Dotfiles')"
 docker build --network=host \
-  --build-arg AGE_PASSPHRASE="$(rbw get 'Age Dotfiles')" \
-  --build-arg GITHUB_TOKEN="$GITHUB_TOKEN" \
   --build-arg IDENTITIES="personal" \
+  --secret id=github_token,env=GITHUB_TOKEN \
+  --secret id=age_passphrases,env=AGE_PASSPHRASES \
   --no-cache \
   -f "{{ config_root }}/docker/Dockerfile.alpine" \
   -t $DOCKER_IMAGE "{{ config_root }}"
 """
 
-[tasks.docker-ci]
+[tasks.docker-personal-arch]
 run = """
 #!/usr/bin/env bash
+DOCKER_IMAGE="git.dynamotn.dev/config/dotfiles:arch"
+export AGE_PASSPHRASES="personal=$(rbw get 'Age Dotfiles')"
 docker build --network=host \
-  --build-arg GITHUB_TOKEN="$GITHUB_TOKEN" \
+  --secret id=github_token,env=GITHUB_TOKEN \
+  --secret id=age_passphrases,env=AGE_PASSPHRASES \
+  --no-cache \
+  -f "{{ config_root }}/docker/Dockerfile.arch" \
+  -t $DOCKER_IMAGE "{{ config_root }}"
+"""
+
+[tasks.docker-public]
+run = """
+#!/usr/bin/env bash
+DOCKER_IMAGE="dynamotn/toolbox"
+docker build --network=host \
+  --secret id=github_token,env=GITHUB_TOKEN \
   --no-cache \
   -f "{{ config_root }}/docker/Dockerfile.alpine" \
   -t $DOCKER_IMAGE "{{ config_root }}"

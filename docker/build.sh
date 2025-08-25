@@ -9,7 +9,7 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")/../scripts"
 # @set SSL_CERT string The SSL certificate content to be installed.
 #######################################
 function _install_ssl_certs {
-  if [ "${SSL_CERT:-x}" != "x" ]; then
+  if [ -f /run/secrets/ssl_cert ]; then
     folder=""
     if command -v apk &> /dev/null; then
       folder="/usr/local/share/ca-certificates"
@@ -19,7 +19,7 @@ function _install_ssl_certs {
       command="update-ca-trust"
     fi
 
-    echo "$SSL_CERT" | sudo tee "$folder/ssl_decryption.crt"
+    sudo cp /run/secrets/ssl_cert "$folder/ssl_decryption.crt"
     sudo "$command"
   fi
 }
@@ -52,7 +52,6 @@ function _install_packages {
 
 #######################################
 # @description Main function to setup dotfiles.
-# @arg $1 string Comma-separated list of identities to decrypt.
 #######################################
 function _main {
   _install_ssl_certs
@@ -60,10 +59,23 @@ function _main {
 
   # Disable SSH host key checking
   export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
+  # Get identities from secrets
+  if [ -f /run/secrets/age_passphrases ]; then
+    local age_passphrases
+    age_passphrases=$(sudo cat /run/secrets/age_passphrases)
+    local identities=""
+    for passphrase in $age_passphrases; do
+      IFS='=' read -r key _ <<< "$passphrase"
+      identities="${identities}${key},"
+    done
+  else
+    exit 1
+  fi
+
   # Setup dotfiles
-  "$SCRIPT_DIR"/setup.sh -d -i"$1"
+  "$SCRIPT_DIR"/setup.sh -d -i"$identities"
   # Generate SSH key
   ssh-keygen -t ed25519 -f ~/.ssh/key/public_ed25519 -P ""
 }
 
-_main "$@"
+_main

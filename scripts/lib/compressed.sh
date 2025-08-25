@@ -59,7 +59,9 @@ function compressed:extract_tar {
       # Move first file to command name
       if dybatpho::is true "$is_first_file"; then
         is_first_file=false
-        [[ ${path##*/} != "$name" ]] && dybatpho::dry_run mv "${file_location}/${path##*/}" "${file_location}/${name}"
+        if [[ ${path##*/} != "$name" ]]; then
+          dybatpho::dry_run mv "${file_location}/${path##*/}" "${file_location}/${name}"
+        fi
       fi
     done
   fi

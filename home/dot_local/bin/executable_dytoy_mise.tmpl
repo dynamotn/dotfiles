@@ -41,7 +41,7 @@ function _install_tool {
   fi
 
   local version=$(dytoy::get_yaml "$name" "version")
-  {{- $command := "$HOME/.local/bin/mise" }}
+  {{- $command := "mise" }}
   {{- if eq .chezmoi.os "android" }}
   {{- $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl $HOME/.local/bin/mise" }}
   {{- end }}

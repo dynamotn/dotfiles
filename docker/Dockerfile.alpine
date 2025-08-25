@@ -1,15 +1,11 @@
 FROM alpine:3.22.1
-ARG INTERNAL_CERT
-ARG AGE_PASSPHRASE
-ARG IDENTITIES=""
-ARG GITHUB_TOKEN
 
-ENV USER dynamo
-ENV UID 1000
-ENV GID 1000
-ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+ENV USER=dynamo
+ENV UID=1000
+ENV GID=1000
 
 # Create user and setup permissions on /etc/sudoers
+# hadolint ignore=DL3018
 RUN apk add --no-cache bash sudo ca-certificates && \
     addgroup -S $USER -g $GID && \
     adduser -s /bin/bash -u $UID -S $USER -G $USER && \
@@ -17,8 +13,10 @@ RUN apk add --no-cache bash sudo ca-certificates && \
     chmod 0440 /etc/sudoers
 
 USER $UID
-COPY --chown=${USER}:${USER} . /home/${USER}/dotfiles
+COPY --chown=${USER}:${USER} . /home/${USER}/Dotfiles
 WORKDIR /home/${USER}
-ENV LOG_LEVEL=debug
-RUN /home/${USER}/dotfiles/docker/build.sh "${IDENTITIES}"
+RUN --mount=type=secret,id=github_token,env=GITHUB_TOKEN \
+    --mount=type=secret,id=age_passphrases \
+    --mount=type=secret,id=ssl_cert \
+    /home/${USER}/Dotfiles/docker/build.sh
 ENTRYPOINT [ "/usr/bin/fish" ]
