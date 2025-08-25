@@ -1,6 +1,10 @@
 keybinds clear-defaults=true {
     locked {
-        bind "Ctrl s" { SwitchToMode "normal"; }
+        {{- $defaultKeybinds := "Ctrl s" }}
+        {{- if eq .kind "container" "vm" }}
+        {{- $defaultKeybinds = "Ctrl a" }}
+        {{- end }}
+        bind "{{ $defaultKeybinds }}" { SwitchToMode "normal"; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
