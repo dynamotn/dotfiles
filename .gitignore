@@ -4,3 +4,4 @@ docs/styles
 secrets/**
 !secrets/**/
 !secrets/**/*.age
+.dockerignore

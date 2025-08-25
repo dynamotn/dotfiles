@@ -1,13 +1,17 @@
 [tasks.docker-enterprise-F1]
 run = """
 #!/usr/bin/env bash
-DOCKER_IMAGE="git.example.com/dynamo/toolbox"
-export AGE_PASSPHRASES="F1=$(rbw get 'Age Dotfiles')"
+ENTERPRISE="F1"
+DOCKER_IMAGE="git.example.com/dynamo/toolbox:${ENTERPRISE}"
+export TOOLBOX_TYPE="${ENTERPRISE}"
+export AGE_PASSPHRASES="${ENTERPRISE}=$(rbw get 'Age Dotfiles')"
 export SSL_CERT="$(
-  age -d -i ~/.config/chezmoi/enterprise-F1.key \
-    root/etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age
+  age -d -i ~/.config/chezmoi/enterprise-${ENTERPRISE}.key \
+    secrets/data/enterprise-${ENTERPRISE}/ssl.crt.age
 )"
-docker buildx build --platform linux/amd64 --network=host \
+export PATH="~/.local/bin:$PATH"
+gomplate -f {{ config_root }}/.dockerignore.tmpl -o {{ config_root }}/.dockerignore
+docker build --network=host \
   --secret id=github_token,env=GITHUB_TOKEN \
   --secret id=age_passphrases,env=AGE_PASSPHRASES \
   --secret id=ssl_cert,env=SSL_CERT \
@@ -20,7 +24,10 @@ docker buildx build --platform linux/amd64 --network=host \
 run = """
 #!/usr/bin/env bash
 DOCKER_IMAGE="git.dynamotn.dev/config/dotfiles"
+export TOOLBOX_TYPE="personal"
 export AGE_PASSPHRASES="personal=$(rbw get 'Age Dotfiles')"
+export PATH="~/.local/bin:$PATH"
+gomplate -f {{ config_root }}/.dockerignore.tmpl -o {{ config_root }}/.dockerignore
 docker build --network=host \
   --build-arg IDENTITIES="personal" \
   --secret id=github_token,env=GITHUB_TOKEN \
@@ -34,7 +41,10 @@ docker build --network=host \
 run = """
 #!/usr/bin/env bash
 DOCKER_IMAGE="git.dynamotn.dev/config/dotfiles:arch"
+export TOOLBOX_TYPE="personal"
+export PATH="~/.local/bin:$PATH"
 export AGE_PASSPHRASES="personal=$(rbw get 'Age Dotfiles')"
+gomplate -f {{ config_root }}/.dockerignore.tmpl -o {{ config_root }}/.dockerignore
 docker build --network=host \
   --secret id=github_token,env=GITHUB_TOKEN \
   --secret id=age_passphrases,env=AGE_PASSPHRASES \
@@ -47,6 +57,9 @@ docker build --network=host \
 run = """
 #!/usr/bin/env bash
 DOCKER_IMAGE="dynamotn/toolbox"
+export TOOLBOX_TYPE=""
+export PATH="~/.local/bin:$PATH"
+gomplate -f {{ config_root }}/.dockerignore.tmpl -o {{ config_root }}/.dockerignore
 docker build --network=host \
   --secret id=github_token,env=GITHUB_TOKEN \
   --no-cache \

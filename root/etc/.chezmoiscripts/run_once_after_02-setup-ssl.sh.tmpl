@@ -2,9 +2,9 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-{{- if and (eq .kind "office") (eq .company "F1") }}
+{{- if eq .kind "office" }}
 dybatpho::header "Setup SSL"
-# hash: {{ joinPath .chezmoi.sourceDir "etc/ca-certificates/trust-source/anchors/encrypted_ssl_decryption.crt.age" | include | sha256sum }}
+# hash: {{ printf "etc/ca-certificates/trust-source/anchors/encrypted_%s.crt.age" .company | joinPath .chezmoi.sourceDir "" | include | sha256sum }}
 update-ca-trust
 dybatpho::success "Setup SSL"
 {{- end }}

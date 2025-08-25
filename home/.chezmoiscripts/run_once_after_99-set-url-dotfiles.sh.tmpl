@@ -1,0 +1,10 @@
+#!{{ .bash }}
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_common_handlers
+
+{{- if ne .kind "container" }}
+dybatpho::header "Setup remote url of dotfiles"
+cd {{ .chezmoi.sourceDir }}/..
+git remote set-url origin git@gitlab.com:dynamo-config/dotfiles
+git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git
+{{- end }}

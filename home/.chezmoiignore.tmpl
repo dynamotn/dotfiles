@@ -2,6 +2,7 @@
 **/.git/**
 **/.gitignore
 **/.gitmodules
+!Dotfiles/.gitmodules
 **/*.sqlite-wal
 **/.DS_Store
 **/.uuid
@@ -165,6 +166,9 @@ Library
 {/* Machine type files */}
 {{- if ne .kind "laptop" }}
 .config/shikane
+{{- end }}
+{{- if eq .kind "container" }}
+.netrc
 {{- end }}
 
 {/* Self-managed folders */}

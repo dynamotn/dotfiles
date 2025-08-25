@@ -1,3 +1,4 @@
+{{- if ne .kind "container" }}
 .local/bin/anti-ddos:
   type: file
   url: 'https://raw.githubusercontent.com/anti-ddos/Anti-DDOS/master/anti-ddos.sh'
@@ -13,6 +14,7 @@
   url: 'https://raw.githubusercontent.com/apankrat/now.sh/master/now.sh'
   executable: true
   refreshPeriod: 168h
+{{- end }}
 {{- if .hasSound }}
 .local/bin/pulsemixer:
   type: file
@@ -20,6 +22,7 @@
   executable: true
   refreshPeriod: 168h
 {{- end  }}
+{{- if ne .kind "container" }}
 .local/bin/qrify:
   type: file
   url: https://raw.githubusercontent.com/alexanderepstein/Bash-Snippets/master/qrify/qrify
@@ -50,6 +53,7 @@
   url: 'https://raw.githubusercontent.com/soimort/translate-shell/gh-pages/trans'
   executable: true
   refreshPeriod: 168h
+{{- end }}
 {{- if eq .terminalMultiplexer "T" }}
 .local/bin/fzf-tmux:
   type: file
