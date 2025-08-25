@@ -1,5 +1,8 @@
 name: process-compose
 method: binary
+{{- if eq .kind "container" "vm" }}
+is_essential: true
+{{- end }}
 github:
   repo: F1bonacc1/process-compose
   release_asset: process-compose_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
