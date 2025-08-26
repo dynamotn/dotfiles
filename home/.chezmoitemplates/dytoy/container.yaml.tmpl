@@ -1,7 +1,9 @@
 name: container
 method: os
 # https://repology.org/project/docker/versions
+{{- if ne .kind "container" }}
 is_essential: true
+{{- end }}
 gentoo:
   packages:
     - name: app-containers/docker

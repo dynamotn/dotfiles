@@ -1,0 +1,94 @@
+[submodule "scripts/lib/dybatpho"]
+  path = scripts/lib/dybatpho
+  url = https://github.com/dynamotn/dybatpho.git
+[submodule "scripts/lib/expect-age"]
+  path = scripts/lib/expect-age
+  url = https://github.com/dynamotn/expect-age.git
+{{- $github := "git@github.com:" }}
+{{- $gitlab := "git@gitlab.com:" }}
+{{- if not .preferGitSSH }}
+{{-   $github = "https://github.com/" }}
+{{-   $gitlab = "https://gitlab.com/" }}
+{{- end }}
+[submodule "neovim"]
+  path = home/dot_config/nvim
+  {{- if .blockedGitlab }}
+  url = {{ $github }}dynamotn/neovim-config.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/neovim.git
+  {{- end }}
+{{- if eq .terminalMultiplexer "T" }}
+[submodule "tmux"]
+  path = silos/tmux
+  {{- if .blockedGitlab }}
+  url = {{ $github }}dynamotn/tmux-config.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/tmux.git
+  {{- end }}
+{{- end }}
+{{- if eq .guiServer "X" }}
+[submodule "awesome"]
+  path = home/dot_config/awesome
+  {{- if .blockedGitlab }}
+  url = {{ $github }}dynamotn/awesomewm-config.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/awesome.git
+  {{- end }}
+{{- end }}
+{{- if ne .guiServer "0" }}
+[submodule "wallpaper"]
+  path = home/Multimedia/Pictures/Wallpaper
+  {{- if .blockedGitlab }}
+  url = {{ $github }}dynamotn/wallpapers-collection.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/wallpaper.git
+  {{- end }}
+{{- end }}
+{{- if eq .guiServer "W" "X" }}
+[submodule "icon"]
+  path = silos/icon
+  {{- if .blockedGitlab }}
+  url = {{ $github }}dynamotn/Dynamo-Icon.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-theme/icon.git
+  {{- end }}
+{{- end }}
+{{- if eq .browser "F" }}
+[submodule "lepton"]
+  path = home/.chezmoitemplates/firefox/chrome/lepton
+  url = {{ $github }}black7375/Firefox-UI-Fix.git
+{{- end }}
+{{- if eq .browser "F" "Z" }}
+{{-   if .decryptPersonal }}
+[submodule "firefox-personal"]
+  path = home/dot_config/firefox/profiles/personal
+  {{- if .blockedGitlab }}
+  url = {{ $github }}dynamotn/firefox-personal.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/firefox/personal.git
+  {{- end }}
+[submodule "thunderbird-personal"]
+  path = home/dot_config/thunderbird/profiles/personal
+  {{- if .blockedGitlab }}
+  url = {{ $github }}dynamotn/thunderbird-personal.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/thunderbird/personal.git
+  {{- end }}
+{{-   end }}
+{{-   range .browserEnterpriseProfiles }}
+[submodule "firefox-enterprise-{{ . }}"]
+  path = home/dot_config/firefox/profiles/enterprise-{{ . }}
+  {{- if $.blockedGitlab }}
+  url = {{ $github }}dynamotn/firefox-enterprise-{{ . }}.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/firefox/enterprise-{{ . }}.git
+  {{- end }}
+[submodule "thunderbird-enterprise-{{ . }}"]
+  path = home/dot_config/thunderbird/profiles/enterprise-{{ . }}
+  {{- if $.blockedGitlab }}
+  url = {{ $github }}dynamotn/thunderbird-enterprise-{{ . }}.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/thunderbird/enterprise-{{ . }}.git
+  {{- end }}
+{{-   end }}
+{{- end }}

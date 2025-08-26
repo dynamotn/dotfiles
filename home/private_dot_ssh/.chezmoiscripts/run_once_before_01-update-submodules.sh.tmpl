@@ -5,17 +5,9 @@ dybatpho::register_common_handlers
 dybatpho::header "Update submodules"
 # modules hash: {{ joinPath .chezmoi.sourceDir "../.gitmodules" | include | sha256sum }}
 cd {{ .chezmoi.sourceDir }}/..
-{{- if .blockedGitlab }}
-cp .github/modules .gitmodules
-git submodule sync --recursive
-{{- end }}
-{{- if not .preferGitSSH }}
-sed -i -e 's#git@gitlab.com:#https://gitlab.com/#g' \
-  -e 's#git@github.com:#https://github.com/#g' \
-  .gitmodules
+git add .gitmodules
 git submodule sync --recursive
 git update-index --assume-unchanged .gitmodules
-{{- end }}
 git submodule update --init --recursive \
   {{- if eq .guiServer "W" "X" }}
   silos/icon \

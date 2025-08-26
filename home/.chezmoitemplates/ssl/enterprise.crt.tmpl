@@ -1,0 +1,1 @@
+{{- printf "../secrets/data/enterprise-%s/ssl.crt.age" .enterprise | join .chezmoi.sourceDir | include | decrypt }}

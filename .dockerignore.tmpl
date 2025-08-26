@@ -1,0 +1,15 @@
+docker/Dockerfile.*
+{{- if ne .Env.TOOLBOX_TYPE "personal" }}
+secrets/personal.age
+secrets/data/personal/
+{{- end }}
+{{- range coll.Slice "F1" "T1" "ZOO" }}
+{{-   if ne $.Env.TOOLBOX_TYPE . }}
+secrets/enterprise-{{ . }}.age
+secrets/data/enterprise-{{ . }}/
+{{-   end }}
+{{- end }}
+
+home/private_dot_ssh/key
+home/dot_config/rbw*
+home/dot_config/firefox/startpage

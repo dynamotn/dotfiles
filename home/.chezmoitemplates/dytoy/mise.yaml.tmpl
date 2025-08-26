@@ -55,7 +55,6 @@ hook:
     {{- $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl $HOME/.local/bin/mise" }}
     {{- else if eq .kind "container" }}
     {{- $command = "mise" }}
-    # {{ $command }} settings disable_backends=asdf,ubi
     {{- end }}
     # Trust global config
     {{ $command }} trust

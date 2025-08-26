@@ -59,7 +59,7 @@ __add_folder_to_manpath $CONFIG_PATH/../scripts/man
 type -q brew; and brew shellenv | source
 if command -sq mise
     set -gx MISE_PREFER_OFFLINE true
-    mise completion fish | source
+    command -sq usage; and mise completion fish | source
 end
 
 # Set default editor
