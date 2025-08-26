@@ -32,16 +32,19 @@ dev-build/ninja
 {{- if eq .guiServer "W" }}
 dev-libs/wayland
 {{- end }}
+dev-util/bcc
 dev-util/ccache
 dev-util/kcov
 dev-util/pkgdev
 dev-util/sccache
+dev-util/tree-sitter-cli
 dev-vcs/git
 dev-vcs/git-lfs
 games-util/game-device-udev-rules
 {{- if eq .guiServer "W" }}
 gui-apps/eww
 gui-apps/grim
+gui-apps/hyprlock
 gui-apps/hyprshade
 gui-apps/regreet
 gui-apps/slurp
@@ -73,6 +76,7 @@ mail-client/betterbird-bin
 {{- if eq .guiServer "W" "X" }}
 media-fonts/noto
 media-fonts/noto-cjk
+media-fonts/noto-emoji
 media-fonts/roboto
 media-gfx/fontforge
 media-gfx/imagemagick
@@ -109,6 +113,9 @@ sys-apps/ethtool
 sys-apps/flatpak
 sys-apps/portage
 sys-auth/pam_u2f
+{{- if eq .guiServer "W" }}
+sys-auth/seatd
+{{- end }}
 sys-boot/grub
 sys-devel/distcc
 sys-devel/gcc
@@ -121,6 +128,9 @@ sys-kernel/linux-firmware
 sys-kernel/modprobed-db
 sys-libs/zlib
 sys-process/cronie
+{{- if eq .guiServer "W" }}
+sys-process/nvtop
+{{- end }}
 sys-process/parallel
 www-client/w3m
 {{- if eq .browser "F" }}

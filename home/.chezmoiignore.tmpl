@@ -2,7 +2,9 @@
 **/.git/**
 **/.gitignore
 **/.gitmodules
+{{- if ne .code "l30n4rd0d4v1nc1" }}
 !Dotfiles/.gitmodules
+{{- end }}
 **/*.sqlite-wal
 **/.DS_Store
 **/.uuid
