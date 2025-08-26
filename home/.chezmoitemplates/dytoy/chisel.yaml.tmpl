@@ -1,5 +1,8 @@
 name: chisel
 method: binary
+{{- if eq .kind "container" "vm" }}
+is_essential: true
+{{- end }}
 github:
   repo: jpillora/chisel
   {{- $os := .chezmoi.os }}

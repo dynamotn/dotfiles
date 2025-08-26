@@ -5,8 +5,7 @@ set -Eeou pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")/../scripts"
 
 #######################################
-# @description Install custom SSL certificates if provided via the SSL_CERT environment variable.
-# @set SSL_CERT string The SSL certificate content to be installed.
+# @description Install custom SSL certificates if provided in Docker secrets.
 #######################################
 function _install_ssl_certs {
   if [ -f /run/secrets/ssl_cert ]; then
@@ -74,8 +73,17 @@ function _main {
 
   # Setup dotfiles
   "$SCRIPT_DIR"/setup.sh -d -i"$identities"
-  # Generate SSH key
-  ssh-keygen -t ed25519 -f ~/.ssh/key/public_ed25519 -P ""
+
+  # Delete sensitive data
+  rm -rf ~/.config/chezmoi/*.key ~/Dotfiles/secrets
+  # Delete unnecessary data
+  rm -rf ~/.cache/chezmoi ~/Dotfiles/.git*
+  # Uninstall packages
+  if command -v pacman &> /dev/null; then
+    sudo pacman -Rnsc --noconfirm chezmoi
+  elif command -v apk &> /dev/null; then
+    sudo apk del chezmoi
+  fi
 }
 
 _main

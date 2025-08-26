@@ -86,29 +86,25 @@ function _main {
 
   # Initialize chezmoi config from user input
   dybatpho::header "Please answer the following questions"
+  local prompt="--prompt"
   # shellcheck disable=SC2086
   if [ "$USE_DEFAULT" = "true" ]; then
     prompt="--promptDefaults"
-  else
-    prompt="--prompt"
   fi
   chezmoi init -S "$SCRIPT_DIR/.." "$prompt"
 
   # Apply configuration by order
+  local params=()
+  # shellcheck disable=SC2086
+  if dybatpho::compare_log_level debug; then
+    params=("--debug")
+  fi
+  dybatpho::header "Setup Git modules"
+  chezmoi apply "$HOME"/Dotfiles/.gitmodules "${params[@]}"
   dybatpho::header "Setup SSH"
-  # shellcheck disable=SC2086
-  if dybatpho::compare_log_level debug; then
-    chezmoi apply --debug "$HOME"/.ssh
-  else
-    chezmoi apply "$HOME"/.ssh
-  fi
+  chezmoi apply "$HOME"/.ssh "${params[@]}"
   dybatpho::header "Setup other dotfiles"
-  # shellcheck disable=SC2086
-  if dybatpho::compare_log_level debug; then
-    chezmoi apply --debug
-  else
-    chezmoi apply
-  fi
+  chezmoi apply "${params[@]}"
 
   # Apply OS specific configuration if not Termux or MacOS
   if
@@ -118,12 +114,6 @@ function _main {
     dybatpho::header "Setup operating system"
     ~/.local/bin/scz apply
   fi
-
-  # Modify remote url of dotfiles
-  dybatpho::header "Setup remote url of dotfiles"
-  cd "$SCRIPT_DIR/.." || exit
-  git remote set-url origin git@gitlab.com:dynamo-config/dotfiles
-  git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git
 
   dybatpho::success "Setup complete"
 }

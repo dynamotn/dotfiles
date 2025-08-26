@@ -1,0 +1,4 @@
+{{- range .decryptEnterprise }}
+{{-   $top := merge $ (dict "enterprise" .) }}
+{{-   template "ssl/enterprise.crt.tmpl" $top }}
+{{- end }}
