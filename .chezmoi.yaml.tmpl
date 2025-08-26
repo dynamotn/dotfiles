@@ -72,7 +72,7 @@ data:
   {{- if ne $guiServer "0" }}
   guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is? (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" (list "N" "I" "A" "M" "V") | quote }}
   guiWinManager: {{ promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is? (A for aerospace, H for hyprland, G for gnome)" (list "H" "A" "G") "H" | quote }}
-  browser: {{ promptChoiceOnce . "browser" "What web browser do you use? (F for Firefox, Z for Zen Browser)" (list "F" "Z") "Z" | quote }}
+  browser: {{ promptChoiceOnce . "browser" "What web browser do you use? (F for Firefox, Z for Zen Browser, or empty)" (list "F" "Z" "") "Z" | quote }}
   browserEnterpriseProfiles:
     {{- range $listDecryptEnterprise }}
     {{-   $hasProfile := promptBool (printf "Does %s company has a browser profile? (y/n)" .) false }}
@@ -80,7 +80,7 @@ data:
     - {{ . }}
     {{-   end }}
     {{- end }}
-  mailClient: {{ promptChoiceOnce . "mailClient" "What email client do you use? (T for Thunderbird, B for Betterbird)" (list "T" "B") "B" | quote }}
+  mailClient: {{ promptChoiceOnce . "mailClient" "What email client do you use? (T for Thunderbird, B for Betterbird, or empty)" (list "T" "B" "") "B" | quote }}
   mailEnterpriseProfiles:
     {{- range $listDecryptEnterprise }}
     {{-   $hasProfile := promptBool (printf "Does %s company has a email profile? (y/n)" .) false }}

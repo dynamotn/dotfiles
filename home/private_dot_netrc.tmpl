@@ -4,7 +4,11 @@
 {{-   $top := $ }}
 {{-   range $gitSecret.servers }}
 {{-     if and (not .preferGitSSH) (regexMatch .regexDevices (printf "%s-%s" $top.place $top.kind)) }}
-machine {{ .https | trimPrefix "https://" }} login {{ $commonSecret.account.username }} password {{ .token }}
+{{-       $username := $commonSecret.account.username }}
+{{-       if index . "username" }}
+{{-         $username = .username }}
+{{-       end }}
+machine {{ .https | trimPrefix "https://" | trimSuffix "/" }} login {{ $username }} password {{ .token }}
 {{-     end }}
 {{-   end }}
 {{- end }}
