@@ -1,4 +1,4 @@
-{{- if and (eq .chezmoi.os "linux") (ne .kind "container") }}
+{{- if and (eq .chezmoi.os "linux") .hasWifi }}
 name: networkmanager
 method: os
 # https://repology.org/project/networkmanager/versions

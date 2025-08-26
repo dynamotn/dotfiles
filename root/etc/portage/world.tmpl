@@ -91,6 +91,9 @@ net-firewall/nftables
 {{- if eq .guiServer "W" "X" }}
 net-im/telegram-desktop-bin
 {{- end }}
+{{- if .hasWifi }}
+net-misc/networkmanager
+{{- end }}
 net-misc/ntp
 {{- if eq .guiServer "W" "X" }}
 net-misc/rustdesk
@@ -100,7 +103,6 @@ net-vpn/wireguard-tools
 {{- if .hasBluetooth }}
 net-wireless/bluez
 {{- end }}
-net-wireless/iwd
 sci-ml/ollama
 sys-apps/etckeeper
 sys-apps/ethtool

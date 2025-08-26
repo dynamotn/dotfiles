@@ -100,9 +100,11 @@ data:
   {{- if ne $kind "container" }}
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
   hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" false }}
+  hasWifi: {{ promptBoolOnce . "hasWifi" "Does this machine has a wifi device? (y/n)" false }}
   {{- else }}
   hasSound: false
   hasBluetooth: false
+  hasWifi: false
   {{- end }}
   {{ $hasProxy := promptBool "Does this machine need HTTP(S) or SOCKS proxy? (y/n)" false }}
   {{- if $hasProxy }}
