@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @file setup.sh
 # @brief Setup your machine from dotfiles
-SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 BIN_DIR="$HOME/.local/bin"
 
 #######################################

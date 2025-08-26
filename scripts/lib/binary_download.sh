@@ -15,14 +15,14 @@ function binary::get_latest_version {
   dybatpho::debug "Get version ${name} from https://${host}/${repo}"
   if [ "$type" = "github" ]; then
     local param=()
-    if [ "${GITHUB_TOKEN:-x}" = "x" ]; then
+    if [ "${GITHUB_TOKEN:-x}" != "x" ]; then
       param=("-H" "'Authorization: Bearer ${GITHUB_TOKEN}'")
     fi
     dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$temp_file" "${param[@]}"
     grep -Po "tag_name\": \"(\K.*)(?=\",)" "$temp_file"
   elif [ "$type" = "gitlab" ]; then
     local param=()
-    if [ "${GITLAB_TOKEN:-x}" = "x" ]; then
+    if [ "${GITLAB_TOKEN:-x}" != "x" ]; then
       param=("-H" "'Authorization: Bearer ${GITLAB_TOKEN}'")
     fi
     dybatpho::curl_do "https://${host}/api/v4/projects/$(echo "$repo" | sed -e "s/\//%2f/g")/releases/permalink/latest" "$temp_file" "${param[@]}"
