@@ -27,7 +27,7 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{- $arch = "aarch64" }}
   {{- end }}
-  release_asset: watchexec-%1v-{{ $arch }}-unknown-linux-gnu.tar.gz
+  release_asset: watchexec-%1v-{{ $arch }}-unknown-linux-gnu.tar.xz
 archive:
   - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec
     strip: 1

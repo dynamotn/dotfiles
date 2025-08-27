@@ -2,9 +2,7 @@
 **/.git/**
 **/.gitignore
 **/.gitmodules
-{{- if ne .code "l30n4rd0d4v1nc1" }}
 !Dotfiles/.gitmodules
-{{- end }}
 **/*.sqlite-wal
 **/.DS_Store
 **/.uuid
@@ -206,6 +204,9 @@ Library/Application Support/rbw
 {{- if empty .decryptEnterprise }}
 Library/Application Support/rbw-*
 .config/rbw-*
+{{- end }}
+{{- if and (not .decryptPersonal) (empty .decryptEnterprise) }}
+.ssh/key/public*
 {{- end }}
 {{- if not (has "F1" .decryptEnterprise) }}
 .ssh/config.d/enterprise-F1.config

@@ -127,7 +127,7 @@ _update_git_modules
 dybatpho::register_common_handlers
 dybatpho::require "git"
 dybatpho::require "curl"
-dybatpho::require "chezmoi" || _install_chezmoi
-dybatpho::require "age" || _install_age
+dybatpho::require "chezmoi" 0 || _install_chezmoi
+dybatpho::require "age" 0 || _install_age
 
 dybatpho::generate_from_spec _spec_main "$@"
