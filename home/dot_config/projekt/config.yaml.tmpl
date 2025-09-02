@@ -46,6 +46,11 @@ folders:
     regex: ""
     priority: 0
   {{- if eq .kind "pc" "laptop" }}
+  - path: {{ .chezmoi.homeDir }}/Working/personal/finance
+    prefix: "finance"
+    is_workspace: true
+    regex: ""
+    priority: 0
   - path: {{ .chezmoi.homeDir }}/Documents/Notes
     prefix: ""
     is_workspace: false
