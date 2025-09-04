@@ -8,4 +8,4 @@ user_pref("browser.ml.chat.provider", "https://gemini.google.com");
 user_pref("browser.ml.chat.shortcuts", true);
 user_pref("browser.ml.chat.shortcuts.custom", true);
 /* Show sidebar of AI chat */
-user_pref("browser.ml.chat.sidebar", true);)
+user_pref("browser.ml.chat.sidebar", true);
