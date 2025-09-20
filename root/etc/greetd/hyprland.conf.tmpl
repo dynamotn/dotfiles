@@ -3,7 +3,7 @@ exec-once = bash {{ .chezmoi.sourceDir }}/../../.config/hypr/hyprland/scripts/gt
 
 {{- template "hyprland/monitor" . -}}
 
-{{- if eq .guiServer "N" }}
+{{- if eq .guiDriver "N" }}
 # NVIDIA setting
 env = LIBVA_DRIVER_NAME, nvidia
 env = __GLX_VENDOR_LIBRARY_NAME, nvidia
