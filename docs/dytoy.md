@@ -275,3 +275,5 @@
 |[pptx2md](https://github.com/ssine/pptx2md)|Convert PowerPoint presentations to Markdown|
 |[in2csv](https://github.com/wireservice/csvkit)|Convert various data formats to CSV|
 |[lz4json](https://github.com/andikleen/lz4json)|C decompress tool for mozilla lz4json format|
+|[waydroid](https://github.com/waydroid/waydroid)|Android environment on Linux with container-based approach|
+|[bluestacks](https://www.bluestacks.com/)|Android environment on MacOS|
