@@ -165,7 +165,7 @@ function pkg::add_overlay {
 # @arg $2 string URL of repository
 # @arg $3 string Suite of repository (e.g., bionic, focal, stable)
 # @arg $4 string Components (e.g., main, universe)
-# @arg $5 string GPG key of repository
+# @arg $5 string URL of repository's GPG apt-key or fingerprint (can be with or without 0x prefix)
 #######################################
 function pkg::add_apt_repo {
   local name url suite components key
@@ -178,11 +178,14 @@ function pkg::add_apt_repo {
   fi
   if ! dybatpho::is file "$path"; then
     dybatpho::debug "Adding repository $name."
-    dybatpho::dry_run eval "echo \"deb ${url} ${suite} ${components}\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
+    if ! [[ "$key" =~ ^https://.* ]]; then
+      key="https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${key#0x}"
+    fi
     dybatpho::create_temp temp_key ".gpg"
     # shellcheck disable=SC2154
-    dybatpho::dry_run dybatpho::curl_do "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key" "$temp_key"
-    dybatpho::dry_run sudo apt-key add "$temp_key"
+    dybatpho::dry_run dybatpho::curl_download "$key" "$temp_key"
+    dybatpho::dry_run sudo cp "$temp_key" "/etc/apt/keyrings/${name}.gpg"
+    dybatpho::dry_run eval "echo \"deb [signed-by=/etc/apt/keyrings/${name}.gpg] ${url} ${suite} ${components}\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
   else
     dybatpho::debug "Repository $name already exists, skipping."
   fi
