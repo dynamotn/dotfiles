@@ -20,10 +20,10 @@ ubuntu:
   packages:
     - name: tailscale
       service: tailscale
+      repo: https://pkgs.tailscale.com/stable/ubuntu
+      components: main
+      key: https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg
   hook:
-    before: |-
-      curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg \
-        | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
     after: sudo tailscale up
 alpine:
   packages:
