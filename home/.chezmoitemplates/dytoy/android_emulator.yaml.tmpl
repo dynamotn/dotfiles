@@ -1,0 +1,38 @@
+{{- if ne .chezmoi.os "android" }}
+# I don't need Android emulator on Android
+name: android_emulator
+method: os
+# https://repology.org/project/waydroid/versions
+# https://repology.org/project/bluestacks/versions
+gentoo:
+  packages:
+    - name: waydroid
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+      {{- if eq .initSystem "openrc" }}
+      service: waydroid
+      {{- else if eq .initSystem "systemd" }}
+      service: waydroid-container
+      {{- end }}
+  hook:
+    after: waydroid init -s GAPPS
+arch:
+  packages:
+    - name: waydroid
+      service: waydroid-container
+  hook:
+    after: waydroid init -s GAPPS
+ubuntu:
+  packages:
+    - name: waydroid
+      service: waydroid-container
+      repo: https://repo.waydro.id
+      components: main
+      key: https://repo.waydro.id/waydroid.gpg
+  hook:
+    after: waydroid init -s GAPPS
+macos:
+  packages:
+    - name: bluestacks
+      type: cask
+{{- end }}
