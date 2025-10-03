@@ -23,8 +23,16 @@ ubuntu:
   hook:
     before: |-
       curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg \
-        | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/nul
+        | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
     after: sudo tailscale up
+alpine:
+  packages:
+    - name: tailscale
+  hook:
+    after: |
+      sudo tailscaled
+      sudo tailscale up
+termux: # Install via F-Droid
 macos:
   packages:
     - name: tailscale
