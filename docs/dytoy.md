@@ -133,6 +133,7 @@
 |[chisel](https://github.com/jpillora/chisel)|CLI to create TCP/UDP tunnel over HTTP|
 |[vmware-horizon-client](https://www.omnissa.com/)|Virtual machine client to remote|
 |[rustdesk](https://github.com/rustdesk/rustdesk)|Self-hosted remote desktop|
+|[teleport](https://github.com/gravitational/teleport)|Identity-aware access proxy|
 
 # Security tools
 
