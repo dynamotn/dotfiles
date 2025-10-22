@@ -47,6 +47,7 @@ function compressed:extract_tar {
         file_location="$location"
       fi
       extract_param+=("-C $file_location")
+      mkdir -p "$file_location"
       local strip=$(echo "$path_spec" | yq e -o=j -I=0 -r '.strip')
       if [ "$strip" != "null" ]; then
         extract_param+=("--strip-components=$strip")
