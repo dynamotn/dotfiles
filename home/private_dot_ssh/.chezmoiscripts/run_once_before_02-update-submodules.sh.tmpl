@@ -8,7 +8,7 @@ cd {{ .chezmoi.sourceDir }}/..
 git add .gitmodules
 git submodule sync --recursive
 git update-index --assume-unchanged .gitmodules
-git submodule update --init --recursive \
+git submodule update --init \
   {{- if eq .guiServer "W" "X" }}
   silos/icon \
   {{- end }}
