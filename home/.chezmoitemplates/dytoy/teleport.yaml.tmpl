@@ -1,0 +1,22 @@
+name: teleport
+method: binary
+github:
+  repo: gravitational/teleport
+  release_asset: teleport-%v-{{ .chezmoi.os }}-{{ .chezmoi.arch }}-bin.tar.gz
+  artifact_host: https://cdn.teleport.dev
+archive:
+  - path: teleport/teleport
+    strip: 1
+  - path: teleport/tbot
+    strip: 1
+  {{- if eq .chezmoi.os "darwin" }}
+  - path: teleport/tsh.app/Contents/MacOS/tsh
+    strip: 4
+  - path: teleport/tctl.app/Contents/MacOS/tctl
+    strip: 4
+  {{- else }}
+  - path: teleport/tsh
+    strip: 1
+  - path: teleport/tctl
+    strip: 1
+  {{- end }}

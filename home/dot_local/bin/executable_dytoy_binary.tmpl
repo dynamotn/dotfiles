@@ -62,14 +62,18 @@ function _parse_release {
   dybatpho::debug "Release asset is ${release_asset}"
 
   local url
-  if [ "$type" = "github" ]; then
-    url="https://${host}/${repo}/releases/download/${version}/${release_asset}"
-  elif [ "$type" = "gitlab" ]; then
-    url="https://${host}/${repo}/-/releases/${version}/downloads/${release_asset}"
+  artifact_host=$(dytoy::get_yaml "$name" "${type}.artifact_host")
+  if [ "$artifact_host" = "null" ]; then
+    if [ "$type" = "github" ]; then
+      url="https://${host}/${repo}/releases/download/${version}/${release_asset}"
+    elif [ "$type" = "gitlab" ]; then
+      url="https://${host}/${repo}/-/releases/${version}/downloads/${release_asset}"
+    fi
+  else
+    url="${artifact_host}/${release_asset}"
   fi
   binary::download_and_extract "${name}" "${location}" "${url}" "${version}"
 }
-
 
 #######################################
 # @description Install tool
