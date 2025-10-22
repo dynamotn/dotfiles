@@ -1,7 +1,7 @@
 {{- $gitSecret := dict }}
 {{- if and (eq .place "home") .decryptPersonal }}
 {{-   $gitSecret = printf "../secrets/data/%s/git.yaml.age" "personal" | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
-{{- else if and (eq .place "office") (index .decryptEnterprise .company) }}
+{{- else if and (eq .place "office") (has .company .decryptEnterprise) }}
 {{-   $gitSecret = printf "../secrets/data/enterprise-%s/git.yaml.age" .company | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{- end }}
 {{- if index $gitSecret "copilot" }}
