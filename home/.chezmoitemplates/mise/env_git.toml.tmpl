@@ -7,8 +7,10 @@
 {{- range $gitSecret.servers }}
 {{-   if eq .type "github" }}
 {{ .prefix | upper }}GITHUB_TOKEN = {{ .token | quote }}
+{{ .prefix | upper }}GITHUB_HOST = {{ .https | quote }}
 {{-   end }}
 {{-   if eq .type "gitlab" }}
 {{ .prefix | upper }}GITLAB_TOKEN = {{ .token | quote }}
+{{ .prefix | upper }}GITLAB_HOST = {{ .https | quote }}
 {{-   end }}
 {{- end }}
