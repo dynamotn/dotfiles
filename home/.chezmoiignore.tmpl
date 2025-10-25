@@ -20,7 +20,6 @@
 .xprofile
 {{- end }}
 
-
 {/* Browser and mail client files */}
 {/* Based on GUI window manager */}
 {{- if eq .guiServer "M" }}
@@ -73,6 +72,8 @@ Library/Application Support/zen
 {{-     $processFirefox = "/Applications/Zen.app/Contents/MacOS/zen" }}
 {{-   else if eq .osid "linux-gentoo" }}
 {{-     $processFirefox = "/opt/zen/zen-bin" }}
+{{-   else if eq .osid "linux-ubuntu" }}
+{{-     $processFirefox = "/app/zen/zen" }}
 {{-   else }}
 {{-     $processFirefox = "/opt/zen-browser-bin/zen" }}
 {{-   end }}
