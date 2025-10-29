@@ -195,6 +195,7 @@
 |[lazydocker](https://github.com/jesseduffield/lazydocker)|Interactive TUI with Docker and Compose|
 |[dive](https://github.com/wagoodman/dive)|Explore each layer in Docker images|
 |[diffoci](https://github.com/reproducible-containers/diffoci)|Diff Docker and OCI container images|
+|[skopeo](https://github.com/containers/skopeo)|CLI tool for various operations with remote image repositories|
 |[k9s](https://github.com/derailed/k9s)|Interactive TUI with Kubernetes cluster|
 |[krew](https://github.com/kubernetes-sigs/krew)|Plugin manager for kubectl|
 |[k0sctl](https://github.com/k0sproject/k0sctl)|Bootstrap and manage k0s cluster|
