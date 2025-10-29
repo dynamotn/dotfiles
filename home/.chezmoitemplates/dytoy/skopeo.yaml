@@ -1,0 +1,19 @@
+name: skopeo
+method: os
+# https://repology.org/project/skopeo/versions
+gentoo:
+  packages:
+    - name: app-containers/skopeo
+arch:
+  packages:
+    - name: skopeo
+ubuntu:
+  packages:
+    - name: skopeo
+alpine:
+  packages:
+    - name: skopeo
+termux: # Still no skopeo package for Termux
+macos:
+  packages:
+    - name: skopeo
