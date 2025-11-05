@@ -16,9 +16,9 @@ after-startup-command = [
   ## Kitty
   'exec-and-forget open -na kitty --args zellij',
   ## Firefox/Zen
-  'exec-and-forget open -na {{ $browser }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} --safe-mode=false',
+  'exec-and-forget open -na {{ $browser }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} ',
   ## Thunderbird/Betterbird
-  'exec-and-forget open -na {{ $mailClient }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} --safe-mode=false',
+  'exec-and-forget open -na {{ $mailClient }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} ',
   ## Obsidian
   'exec-and-forget open -a Obsidian',
 ]
@@ -206,15 +206,15 @@ cmd-esc = 'mode apps'
 
 cmd-enter = 'exec-and-forget open -na kitty --args zellij'
 {{- if eq .place "home" }}
-cmd-e = 'exec-and-forget open -na {{ $browser }} --args -P Personal --safe-mode=false'
-cmd-q = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-F1 --safe-mode=false'
-cmd-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal --safe-mode=false'
-cmd-k = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-F1 --safe-mode=false'
+cmd-e = 'exec-and-forget open -na {{ $browser }} --args -P Personal '
+cmd-q = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-F1 '
+cmd-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal '
+cmd-k = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-F1 '
 {{- else if eq .place "office" }}
-cmd-e = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-{{ .company }} --safe-mode=false'
-cmd-q = 'exec-and-forget open -na {{ $browser }} --args -P Personal --safe-mode=false'
-cmd-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-{{ .company }} --safe-mode=false'
-cmd-k = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal --safe-mode=false'
+cmd-e = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-{{ .company }} '
+cmd-q = 'exec-and-forget open -na {{ $browser }} --args -P Personal '
+cmd-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-{{ .company }} '
+cmd-k = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal '
 {{- end }}
 
 # 'service' binding mode declaration.
