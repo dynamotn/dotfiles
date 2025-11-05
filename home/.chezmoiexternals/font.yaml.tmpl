@@ -1,26 +1,38 @@
-{{- if eq .guiServer "X" "W" }}
-.local/share/fonts/Nerd/SymbolsNerdFont-Regular.ttf:
+{{- if eq .guiServer "X" "W" "M" }}
+{{-   $fontFolder := ".local/share/fonts" }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $fontFolder = "Library/Fonts" }}
+{{-   end }}
+{{ $fontFolder }}/Nerd/SymbolsNerdFont-Regular.ttf:
   type: file
   url: 'https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFont-Regular.ttf'
   refreshPeriod: 168h
-.local/share/fonts/Iosevka:
+{{ $fontFolder }}/Iosevka:
   type: archive
   url: 'https://github.com/dynamotn/Iosevka-Dynamo/releases/latest/download/iosevka-dynamo.tar.gz'
   refreshPeriod: 168h
   exact: true
   stripComponents: 1
-{{- end }}
-{{- if eq .guiServer "M" }}
-Library/Fonts/Nerd/SymbolsNerdFont-Regular.ttf:
+{{ $fontFolder }}/PlaywriteVN.ttf:
   type: file
-  url: 'https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/NerdFontsSymbolsOnly/SymbolsNerdFont-Regular.ttf'
+  url: 'https://github.com/google/fonts/raw/main/ofl/playwritevn/PlaywriteVN%5Bwght%5D.ttf'
   refreshPeriod: 168h
-Library/Fonts/Iosevka:
+{{ $fontFolder }}/Pacifico.ttf:
+  type: file
+  url: 'https://github.com/google/fonts/raw/main/ofl/pacifico/Pacifico-Regular.ttf'
+  refreshPeriod: 168h
+{{ $fontFolder }}/Caveat.ttf:
+  type: file
+  url: 'https://github.com/google/fonts/raw/main/ofl/caveat/Caveat%5Bwght%5D.ttf'
+  refreshPeriod: 168h
+{{ $fontFolder }}/Finesse:
   type: archive
-  url: 'https://github.com/dynamotn/Iosevka-Dynamo/releases/latest/download/iosevka-dynamo.tar.gz'
+  url: 'https://republi.sh/finesse-v2-0/'
   refreshPeriod: 168h
   exact: true
-  stripComponents: 1
+  stripComponents: 2
+  include:
+    - Finesse-v2.0/Fonts/*.otf
 {{- end }}
 {{- if eq .chezmoi.os "android" }}
 .termux/font.ttf:
