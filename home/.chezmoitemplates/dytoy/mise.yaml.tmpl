@@ -46,9 +46,9 @@ hook:
   after: |-
     {{- if eq .chezmoi.os "android" }}
     cd $PREFIX/etc/tls
-    mkdir certs
-    ln -s cert.pem certs.pem
-    ln -s cert.pem certs/ca-certificates.crt
+    mkdir -p certs
+    ln -sf cert.pem certs.pem
+    ln -sf cert.pem certs/ca-certificates.crt
     {{- end }}
     {{- $command := "$HOME/.local/bin/mise" }}
     {{- if eq .chezmoi.os "android" }}
