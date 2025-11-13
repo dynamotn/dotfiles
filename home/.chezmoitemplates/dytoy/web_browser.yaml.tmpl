@@ -37,7 +37,9 @@ macos:
   packages:
     - name: zen
       type: cask
+{{-   if eq .osid "linux-ubuntu" "linux-alpine" }}
 flatpak:
   packages:
     - name: app.zen_browser.zen
+{{-   end }}
 {{- end }}
