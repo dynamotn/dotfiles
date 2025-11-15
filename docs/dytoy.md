@@ -1,4 +1,23 @@
-# Prerequisite
+# List of tools
+
+<!-- toc -->
+
+- [Prerequisite](#prerequisite)
+- [System core tools](#system-core-tools)
+- [Everyday terminal applications](#everyday-terminal-applications)
+- [Cross platform GUI applications](#cross-platform-gui-applications)
+- [Wayland server applications](#wayland-server-applications)
+- [MacOS GUI applications](#macos-gui-applications)
+- [Network tools](#network-tools)
+- [Security tools](#security-tools)
+- [Development tools](#development-tools)
+- [DevOps tools](#devops-tools)
+- [AI tools](#ai-tools)
+- [Miscellaneous applications](#miscellaneous-applications)
+
+<!-- tocstop -->
+
+## Prerequisite
 
 |Tool|Purpose|
 |----|-------|
@@ -8,7 +27,7 @@
 |[age](https://github.com/FiloSottile/age)|Simple file encryption|
 |`tar`, `unzip`, `gzip`, `bzip2`|Uncompress file|
 
-# System core tools
+## System core tools
 
 |Tool|Purpose|
 |----|-------|
@@ -19,7 +38,7 @@
 |[grub](https://www.gnu.org/software/grub/)|Bootloader for system|
 |[flatpak](https://github.com/flatpak/flatpak)|Linux application sandboxing and distribution framework|
 
-# Everyday terminal applications
+## Everyday terminal applications
 
 |Tool|Purpose|
 |----|-------|
@@ -64,7 +83,7 @@
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|
 
-# Cross platform GUI applications
+## Cross platform GUI applications
 
 |Tool|Purpose|
 |----|-------|
@@ -76,7 +95,7 @@
 |[obsidian](https://obsidian.md/)|Note-taking app|
 |[steam](https://store.steampowered.com/about/)|Online game platform|
 
-# Wayland server applications
+## Wayland server applications
 
 |Tool|Purpose|
 |----|-------|
@@ -102,7 +121,7 @@
 |[fcitx-bamboo](https://github.com/fcitx/fcitx5-bamboo)|Vietnamese input method for Fcitx|
 |[libnotify](https://gitlab.gnome.org/GNOME/libnotify)|Library for sending desktop notifications to a notification daemon|
 
-# MacOS GUI applications
+## MacOS GUI applications
 
 |Tool|Purpose|
 |----|-------|
@@ -111,7 +130,7 @@
 |[raycast](https://www.raycast.com/)|Launcher for everything|
 |[alt-tab](https://github.com/lwouis/alt-tab-macos)|Windows alt-tab on macOS|
 
-# Network tools
+## Network tools
 
 |Tool|Purpose|
 |----|-------|
@@ -135,7 +154,7 @@
 |[rustdesk](https://github.com/rustdesk/rustdesk)|Self-hosted remote desktop|
 |[teleport](https://github.com/gravitational/teleport)|Identity-aware access proxy|
 
-# Security tools
+## Security tools
 
 |Tool|Purpose|
 |----|-------|
@@ -156,7 +175,7 @@
 |[haiti](https://github.com/noraj/haiti)|Hash type identifier|
 |[anti-ddos](https://github.com/anti-ddos/Anti-DDOS)|Anti DDOS|
 
-# Development tools
+## Development tools
 
 |Tool|Purpose|
 |----|-------|
@@ -184,7 +203,7 @@
 |[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|
 |[scc](github.com/boyter/scc)|Display statistics about code|
 
-# DevOps tools
+## DevOps tools
 
 |Tool|Purpose|
 |----|-------|
@@ -232,7 +251,7 @@
 |[az](https://github.com/Azure/azure-cli)|Libraries and tools for interacting with Microsoft Azure products and services|
 |[pint](https://github.com/cloudflare/pint)|Linter for Prometheus rules|
 
-# AI tools
+## AI tools
 
 |Tool|Purpose|
 |----|-------|
@@ -240,7 +259,7 @@
 |[fabric](https://github.com/danielmiessler/fabric)|Framework for augmenting humans using AI|
 |[aichat](https://github.com/sigoden/aichat)|All-in-one LLM CLI tool|
 
-# Miscellaneous applications
+## Miscellaneous applications
 
 |Tool|Purpose|
 |----|-------|
