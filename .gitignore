@@ -1,5 +1,4 @@
 home/.chezmoi.*.tmpl
-docs/styles
 .DS_Store
 secrets/**
 !secrets/**/
