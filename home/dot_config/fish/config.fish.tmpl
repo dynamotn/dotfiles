@@ -48,7 +48,6 @@ __add_folder_to_manpath $HOME/.local/man
 __add_folder_to_manpath $CONFIG_PATH/../scripts/man
 
 # Package manager
-type -q brew; and brew shellenv | source
 if command -sq mise
     set -gx MISE_PREFER_OFFLINE true
     command -sq usage; and mise completion fish | source
