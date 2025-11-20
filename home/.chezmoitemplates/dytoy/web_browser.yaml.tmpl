@@ -20,9 +20,10 @@ macos:
     - name: firefox
 {{- else if eq .browser "Z" }}
 name: zen-browser
+is_essential: true
+{{-   if not (eq .osid "linux-ubuntu" "linux-alpine") }}
 method: os
 # https://repology.org/project/zen-browser/versions
-is_essential: true
 gentoo:
   packages:
     - name: www-client/zen-bin
@@ -37,9 +38,80 @@ macos:
   packages:
     - name: zen
       type: cask
-{{-   if eq .osid "linux-ubuntu" "linux-alpine" }}
-flatpak:
-  packages:
-    - name: app.zen_browser.zen
+{{-   else }}
+method: binary
+github:
+  repo: zen-browser/desktop
+  {{-   $arch := "" }}
+  {{-   if eq .chezmoi.arch "amd64" }}
+  {{-     $arch = "x86_64" }}
+  {{-   else if eq .chezmoi.arch "arm64" }}
+  {{-     $arch = "aarch64" }}
+  {{-   end }}
+  release_asset: zen.linux-{{ $arch }}.tar.xz
+{{      $path := "/opt/zen-browser-bin" }}
+archive:
+  - path: zen
+    location: {{ $path }}
+    strip: 1
+location: {{ $path }}
+hook:
+  before: |-
+    sudo mkdir -p {{ $path }}
+    sudo chown -R $USER {{ $path }}
+  after: |-
+    for i in 16x16 32x32 48x48 64x64 128x128; do
+      install -d /usr/share/icons/hicolor/$i/apps/
+      sudo ln -sf {{ $path }}/browser/chrome/icons/default/default${i/x*}.png \
+        /usr/share/icons/hicolor/$i/apps/zen-browser.png
+    done
+    sudo ln -sf /usr/lib/x86_64-linux-gnu/libnssckbi.so {{ $path }}/libnssckbi.so
+    dybatpho::create_temp "desktop_file" ".desktop"
+    cat <<EOF > "$desktop_file"
+    [Desktop Entry]
+    Name=Zen Browser
+    Comment=Experience tranquillity while browsing the web without people tracking you!
+    Exec={{ $path }}/zen-bin %u
+    Icon=zen-browser
+    Type=Application
+    MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;application/x-xpinstall;application/pdf;application/json;
+    StartupWMClass=zen
+    Categories=Network;WebBrowser;
+    StartupNotify=true
+    Terminal=false
+    X-MultipleArgs=false
+    Keywords=Internet;WWW;Browser;Web;Explorer;
+    Actions=new-window;new-private-window;profilemanager;
+
+    [Desktop Action new-window]
+    Name=Open a New Window
+    Exec={{ $path }}/zen-bin %u
+
+    [Desktop Action new-private-window]
+    Name=Open a New Private Window
+    Exec={{ $path }}/zen-bin --private-window %u
+
+    [Desktop Action profilemanager]
+    Name=Open the Profile Manager
+    Exec={{ $path }}/zen-bin --ProfileManager %u
+    EOF
+    sudo install -m644 "$desktop_file" /usr/share/applications/zen.desktop
+    dybatpho::create_temp "policy_file" ".json"
+    cat <<EOF > "$policy_file"
+    {
+      "policies": {
+        "DisableAppUpdate": true
+      }
+    }
+    EOF
+    sudo mkdir -p "{{ $path }}/distribution"
+    sudo install -m644 "$policy_file" "{{ $path }}/distribution/policies.json"
+    dybatpho::create_temp "exec_file" ".sh"
+    cat <<EOF > "$exec_file"
+    #!/bin/bash
+    exec {{ $path }}/zen-bin "$@"
+    EOF
+    sudo install -m755 "$exec_file" /usr/bin/zen-browser
+    cp "$exec_file" ~/.local/bin/zen-browser
 {{-   end }}
 {{- end }}
