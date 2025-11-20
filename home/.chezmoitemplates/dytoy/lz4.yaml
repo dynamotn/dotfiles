@@ -1,0 +1,22 @@
+name: lz4
+method: os
+# https://repology.org/project/lz4/versions
+gentoo:
+  packages:
+    - name: app-arch/lz4
+arch:
+  packages:
+    - name: lz4
+ubuntu:
+  packages:
+    - name: lz4
+    - name: liblz4-dev
+alpine:
+  packages:
+    - name: lz4
+termux:
+  packages:
+    - name: liblz4
+macos:
+  packages:
+    - name: lz4

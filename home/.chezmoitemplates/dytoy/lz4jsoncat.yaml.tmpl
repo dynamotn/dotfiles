@@ -1,8 +1,17 @@
 {{- if eq .browser "F" "Z" }}
 name: lz4jsoncat
 method: shell
+dependencies:
+  - lz4
 content: |-
   dybatpho::create_temp temp_file ".c"
   dybatpho::curl_download https://raw.githubusercontent.com/andikleen/lz4json/refs/heads/master/lz4jsoncat.c $temp_file
-  gcc -g -O2 -Wall $temp_file -llz4 -o ~/.local/bin/lz4jsoncat
+  local gcc_params=""
+  {{- if eq .chezmoi.os "darwin" }}
+  gcc_params="
+    -I$(readlink -f $(brew --prefix lz4))/include \
+    -L$(readlink -f $(brew --prefix lz4))/lib
+  "
+  {{- end }}
+  gcc -g -O2 -Wall $temp_file -llz4 -o ~/.local/bin/lz4jsoncat $gcc_params
 {{- end }}
