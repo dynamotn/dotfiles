@@ -7,6 +7,10 @@ fish_add_path -pPg /opt/homebrew/opt/gawk/libexec/gnubin
 fish_add_path -pPg /opt/homebrew/opt/gnu-indent/libexec/gnubin
 fish_add_path -pPg /opt/homebrew/opt/gnu-getopt/bin
 fish_add_path -pPg /opt/homebrew/opt/grep/libexec/gnubin
+
+set -gx HOMEBREW_PREFIX "/opt/homebrew"
+set -gx HOMEBREW_CELLAR "/opt/homebrew/Cellar"
+set -gx HOMEBREW_REPOSITORY "/opt/homebrew"
 {{- end }}
 
 {{- if eq .chezmoi.os "linux" }}
