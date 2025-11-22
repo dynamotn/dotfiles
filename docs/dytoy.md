@@ -226,6 +226,7 @@
 |[flux](https://github.com/fluxcd/flux2)|Interactive with Flux on Kubenetes cluster|
 |[fly](https://github.com/superfly/flyctl)|CLI tool for cloud application on fly.io with container|
 |[terraform](https://github.com/hashicorp/terraform)|IaC tool for building, changing, and versioning infrastructure|
+|[opentofu](https://github.com/opentofu/opentofu)|IaC tool for building, changing, and versioning infrastructure (OSS fork from Terraform)|
 |[terragrunt](https://github.com/gruntwork-io/terragrunt)|Wrapper for Terraform to provide extra tool|
 |[terraformer](https://github.com/GoogleCloudPlatform/terraformer)|Generate Terraform from existing infrastructure|
 |[terraform-docs](https://github.com/terraform-docs/terraform-docs)|Generate documents for Terraform modules|
