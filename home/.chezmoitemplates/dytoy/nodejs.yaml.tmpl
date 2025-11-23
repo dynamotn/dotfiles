@@ -4,3 +4,7 @@ backend: nodejs
 {{- if eq .kind "pc" "laptop" }}
 is_essential: true
 {{- end }}
+hook:
+  after: |
+    # Enable corepack
+    npx corepack enable pnpm

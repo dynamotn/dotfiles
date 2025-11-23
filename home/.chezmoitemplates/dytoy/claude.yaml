@@ -1,0 +1,5 @@
+name: claude
+method: shell
+dependencies:
+  - node
+content: npm install -g @anthropic-ai/claude-code
