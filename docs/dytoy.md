@@ -259,6 +259,9 @@
 |[ollama](https://github.com/ollama/ollama)|Get up and running LLMs|
 |[fabric](https://github.com/danielmiessler/fabric)|Framework for augmenting humans using AI|
 |[aichat](https://github.com/sigoden/aichat)|All-in-one LLM CLI tool|
+|[claude](https://github.com/anthropics/claude-code)|CLI tool for Anthropic's Claude LLM|
+|[copilot](https://github.com/github/copilot-cli)|CLI tool for GitHub Copilot|
+|[gemini](https://github.com/google-gemini/gemini-cli)|CLI tool for Google Gemini LLM|
 
 ## Miscellaneous applications
 
