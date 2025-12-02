@@ -1,7 +1,6 @@
 [tools]
 "aqua:jdx/usage" = "latest"
 fzf = "latest"
-pre-commit = "latest"
 python = "system"
 
 [alias]

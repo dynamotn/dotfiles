@@ -1,0 +1,22 @@
+name: prek
+method: binary
+github:
+  repo: j178/prek
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- else if eq .chezmoi.os "android" }}
+  {{-   $os = "unknown-linux-musl" }}
+  {{- else }}
+  {{-   $os = "unknown-linux-gnu" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: prek-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: prek-{{ $arch }}-{{ $os }}/prek
+    strip: 1
