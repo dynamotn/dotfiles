@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Neovim in Kitty
+TryExec=nvim
+Exec=kitty -e nvim %F
+Type=Application
+Keywords=Text;editor;
+Icon=nvim
+Categories=Utility;TextEditor;
+StartupWMClass=nvim
+Comment=File editor
+MimeType=text/*;
