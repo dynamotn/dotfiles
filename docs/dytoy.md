@@ -199,7 +199,7 @@
 |[nodejs](https://github.com/nodejs/node)|JavaScript runtime|
 |[deno](https://github.com/denoland/deno)|JavaScript runtime|
 |[uv](https://github.com/astral-sh/uv)|Modern Python package and project manager|
-|[pre-commit](https://github.com/pre-commit/pre-commit)|Framework for manage pre-commit hooks|
+|[prek](https://github.com/j178/pre-commit)|Framework for manage pre-commit hooks, re-engineered in Rust|
 |[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|
 |[scc](github.com/boyter/scc)|Display statistics about code|
 
