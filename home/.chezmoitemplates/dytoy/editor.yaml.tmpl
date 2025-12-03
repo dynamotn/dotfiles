@@ -9,7 +9,7 @@ gentoo:
     - name: app-editors/neovim
 arch:
   packages:
-    - name: neovim
+    - name: neovim-git
 alpine:
   packages:
     - name: neovim
@@ -19,6 +19,7 @@ termux:
 macos:
   packages:
     - name: neovim
+      unstable: true
 {{- else }}
 method: mise
 {{- end }}
