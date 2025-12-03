@@ -13,7 +13,7 @@ rm -rf /etc/NetworkManager/system-connections/*
 device=$(nmcli --get-values GENERAL.DEVICE,GENERAL.TYPE device show | sed '/^wifi/!{h;d;};x')
 {{-   if .decryptPersonal }}
 # hash: {{ joinPath .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.age" | include | sha256sum }}
-{{-     $wifiSecret := join .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.age" | include | decrypt | fromYaml }}
+{{-     $wifiSecret := join .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.tmpl" | include }}
 {{-     range $wifiSecret }}
 nmcli connection add type wifi \
   ifname "${device}" \
