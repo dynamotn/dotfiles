@@ -8,5 +8,4 @@ github:
   {{- end }}
   release_asset: wtf_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
 archive:
-  - path: wtf_%1v_{{ $os }}_{{ .chezmoi.arch }}/wtfutil
-    strip: 1
+  - path: wtfutil
