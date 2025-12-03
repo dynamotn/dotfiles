@@ -179,13 +179,17 @@ function pkg::add_apt_repo {
   if ! dybatpho::is file "$path"; then
     dybatpho::debug "Adding repository $name."
     if ! [[ "$key" =~ ^https://.* ]]; then
-      key="https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${key#0x}"
+      key="https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x${key#0x}"
     fi
     dybatpho::create_temp temp_key ".gpg"
     # shellcheck disable=SC2154
     dybatpho::dry_run dybatpho::curl_download "$key" "$temp_key"
-    dybatpho::dry_run sudo cp "$temp_key" "/etc/apt/keyrings/${name}.gpg"
-    dybatpho::dry_run eval "echo \"deb [signed-by=/etc/apt/keyrings/${name}.gpg] ${url} ${suite} ${components}\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
+    if ! [[ "$key" =~ ^https://.* ]]; then
+      dybatpho::dry_run sudo cp "$temp_key" "/etc/apt/trusted.gpg.d/${name}.gpg"
+    else
+      dybatpho::dry_run sudo gpg --dearmor -o "/etc/apt/trusted.gpg.d/${name}.gpg" "$temp_key"
+    fi
+    dybatpho::dry_run eval "echo \"deb [signed-by=/etc/apt/trusted.gpg.d/${name}.gpg] ${url} ${suite} ${components}\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
   else
     dybatpho::debug "Repository $name already exists, skipping."
   fi
