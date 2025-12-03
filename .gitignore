@@ -3,4 +3,5 @@ home/.chezmoi.*.tmpl
 secrets/**
 !secrets/**/
 !secrets/**/*.age
+!secrets/**/*.tmpl
 .dockerignore

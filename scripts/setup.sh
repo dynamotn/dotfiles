@@ -103,6 +103,8 @@ function _main {
   chezmoi apply "$HOME"/Dotfiles/.gitmodules "${params[@]}"
   dybatpho::header "Setup SSH"
   chezmoi apply "$HOME"/.ssh "${params[@]}"
+  dybatpho::header "Setup RBW"
+  chezmoi apply "$HOME"/.config/rbw "${params[@]}"
   dybatpho::header "Setup other dotfiles"
   chezmoi apply "${params[@]}"
 
