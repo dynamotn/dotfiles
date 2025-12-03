@@ -1,0 +1,172 @@
+wtf:
+  grid:
+    columns: [16, 16, 16, 16, 16, 16, 16, 16, 16, 16]
+    rows: [6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+  colors:
+    background: "black"
+    border:
+      focusable: "blue"
+      focused: "yellow"
+      normal: "white"
+    checked: "green"
+    highlight:
+      fore: "black"
+      back: "cyan"
+    rows:
+      even: "black"
+      odd: "white"
+  refreshInterval: 1
+
+  mods:
+    clocks:
+      enabled: true
+      title: "🕒 Clocks"
+      colors:
+        rows:
+          even: "cyan"
+          odd: "white"
+      sort: "chronological"
+      locations:
+        Tokyo: "Asia/Tokyo"
+        Chicago: "America/Chicago"
+        New York: "America/New_York"
+        Los Angeles: "America/Los_Angeles"
+        London: "Europe/London"
+        Singapore: "Asia/Singapore"
+        Hà Nội: "Asia/Ho_Chi_Minh"
+        UTC: "UTC"
+      position:
+        top: 0
+        left: 0
+        height: 2
+        width: 3
+      timeFormat: "3:04 PM"
+      refreshInterval: 30s
+
+    system_info:
+      type: "cmdrunner"
+      args: ["-c", "uname -s && uptime | awk '{print \"Load: \" $(NF-2) \" \" $(NF-1) \" \" $NF}' && df -h / | tail -1 | awk '{print \"Disk: \" $4 \" free\"}'"]
+      cmd: "bash"
+      pty: true
+      enabled: true
+      title: "💻 System"
+      position:
+        top: 0
+        left: 3
+        height: 2
+        width: 2
+      refreshInterval: 60
+
+    textfile:
+      enabled: true
+      title: "📝 TODO"
+      filePaths:
+        - "~/Documents/Notes/01_Fleeting/TODO.md"
+      format: true
+      formatStyle: "catppuccin-macchiato"
+      refreshInterval: 15s
+      wrapText: true
+      position:
+        top: 2
+        left: 0
+        height: 2
+        width: 3
+
+    battery:
+      type: power
+      title: "🔋 Power"
+      enabled: true
+      position:
+        top: 2
+        left: 3
+        height: 2
+        width: 2
+      refreshInterval: 30s
+
+    ipinfo:
+      enabled: true
+      title: "🌐 Network"
+      position:
+        top: 4
+        left: 0
+        height: 2
+        width: 3
+      refreshInterval: 300s
+
+    security:
+      enabled: true
+      title: "🛡️ Security"
+      position:
+        top: 4
+        left: 3
+        height: 2
+        width: 2
+      refreshInterval: 3600
+
+    weather_hanoi:
+      type: prettyweather
+      enabled: true
+      title: "🌤️ Weather"
+      city: "Hà Nội"
+      refreshInterval: 10m
+      unit: "m"
+      view: 0
+      language: "vi"
+      position:
+        top: 0
+        left: 5
+        height: 2
+        width: 2
+
+    weather_namdinh:
+      type: prettyweather
+      enabled: true
+      title: "🌤️ Weather"
+      city: "Nam Định"
+      refreshInterval: 10m
+      unit: "m"
+      view: 0
+      language: "vi"
+      position:
+        top: 2
+        left: 5
+        height: 2
+        width: 2
+
+    weather_danang:
+      type: prettyweather
+      enabled: true
+      title: "🌤️ Weather"
+      city: "Đà Nẵng"
+      refreshInterval: 10m
+      unit: "m"
+      view: 0
+      language: "vi"
+      position:
+        top: 4
+        left: 5
+        height: 2
+        width: 2
+
+    hackernews:
+      enabled: true
+      numberOfStories: 20
+      title: "📰 Hacker News"
+      position:
+        top: 0
+        left: 7
+        height: 4
+        width: 4
+      refreshInterval: 10m
+
+    devto:
+      enabled: true
+      numberOfArticles: 15
+      contentTag: "showdev"
+      contentState: "rising"
+      position:
+        top: 4
+        left: 7
+        height: 3
+        width: 4
+      refreshInterval: 15m
