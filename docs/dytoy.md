@@ -167,7 +167,7 @@
 |[lynis](https://github.com/CISOfy/lynis)|Security auditing and hardening tool|
 |[anti-ddos](https://github.com/anti-ddos/Anti-DDOS)|Anti DDOS|
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|
-|[terrascan](https://github.com/tenable/terrascan)|IaC security analyzer|
+|[checkov](https://github.com/bridgecrewio/checkov)|IaC security analyzer|
 |[trivy](https://github.com/aquasecurity/trivy)|Security scanner|
 |[amass](https://github.com/owasp-amass/amass)|Network mapping of attack surfaces and external asset discovery|
 |[osintui](https://github.com/wssheldon/osintui)|Open source intelligence tool|
