@@ -41,7 +41,7 @@ function compressed:extract_tar {
     local is_first_file=true
     for path_spec in "${archive[@]}"; do
       local extract_param=("${param[@]}")
-      local path=$(echo "$path_spec" | yq e -o=j -I=0 -r '.path')
+      local path_in_compress=$(echo "$path_spec" | yq e -o=j -I=0 -r '.path')
       local file_location=$(echo "$path_spec" | yq e -o=j -I=0 -r '.location')
       if [ "$file_location" = "null" ]; then
         file_location="$location"
@@ -52,7 +52,7 @@ function compressed:extract_tar {
       if [ "$strip" != "null" ]; then
         extract_param+=("--strip-components=$strip")
       fi
-      extract_param+=("$(echo "${path%%*( )}" | misc::replace_version "$version")")
+      extract_param+=("$(echo "${path_in_compress%%*( )}" | misc::replace_version "$version")")
       dybatpho::debug "Extracting with params: ${extract_param[*]}"
       # shellcheck disable=2145
       dybatpho::dry_run eval "tar ${extract_param[@]} >&2"
@@ -60,8 +60,8 @@ function compressed:extract_tar {
       # Move first file to command name
       if dybatpho::is true "$is_first_file"; then
         is_first_file=false
-        if [[ ${path##*/} != "$name" ]]; then
-          dybatpho::dry_run mv "${file_location}/${path##*/}" "${file_location}/${name}"
+        if [[ ${path_in_compress##*/} != "$name" ]]; then
+          dybatpho::dry_run mv "${file_location}/${path_in_compress##*/}" "${file_location}/${name}"
         fi
       fi
     done
@@ -87,14 +87,14 @@ function compressed:extract_zip {
     readarray archive < <(dytoy::get_yaml "$name" "archive")
     for path_spec in "${archive[@]}"; do
       local param=("-qqoj $path")
-      path=$(echo "$path_spec" | yq e -o=j -I=0 -r '.path')
+      local path_in_compress=$(echo "$path_spec" | yq e -o=j -I=0 -r '.path')
       local file_location=$(echo "$path_spec" | yq e -o=j -I=0 -r '.location')
       if [ "$file_location" = "null" ]; then
         param+=("-d $location")
       else
         param+=("-d $file_location")
       fi
-      param+=("$(echo "${path%%*( )}" | misc::replace_version "$version")")
+      param+=("$(echo "${path_in_compress%%*( )}" | misc::replace_version "$version")")
       dybatpho::debug "Extracting with params: ${param[*]}"
       # shellcheck disable=2145
       dybatpho::dry_run eval "unzip ${param[@]} >&2"
