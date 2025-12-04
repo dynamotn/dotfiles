@@ -5,14 +5,14 @@ github:
   {{- $os := "" }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{- $os = "apple-darwin" }}
+  {{-   $os = "apple-darwin" }}
   {{- else if eq .chezmoi.os "linux" "android" }}
-  {{- $os = "unknown-linux-gnu" }}
+  {{-   $os = "unknown-linux-gnu" }}
   {{- end }}
   {{- if eq .chezmoi.arch "amd64" }}
-  {{- $arch = "x86_64" }}
+  {{-   $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{- $arch = "aarch64" }}
+  {{-   $arch = "aarch64" }}
   {{- end }}
   release_asset: trippy-%v-{{ $arch }}-{{ $os }}.tar.gz
 archive:

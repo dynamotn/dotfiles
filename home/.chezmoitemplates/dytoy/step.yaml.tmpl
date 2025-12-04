@@ -4,7 +4,7 @@ github:
   repo: smallstep/cli
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: step_{{ $os }}_%1v_{{ .chezmoi.arch }}.tar.gz
 archive:

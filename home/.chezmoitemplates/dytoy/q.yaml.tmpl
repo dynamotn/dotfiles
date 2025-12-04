@@ -5,7 +5,7 @@ github:
   repo: natesales/q
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: q_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
 archive:

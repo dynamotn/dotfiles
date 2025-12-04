@@ -3,10 +3,12 @@ method: binary
 github:
   repo: grafana/k6
   {{- $os := .chezmoi.os }}
+  {{- $extension := "tar.gz" }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{- $os = "macos" }}
+  {{-   $os = "macos" }}
+  {{-   $extension = "zip" }}
   {{- end }}
-  release_asset: k6-%v-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
+  release_asset: k6-%v-{{ $os }}-{{ .chezmoi.arch }}.{{ $extension }}
 archive:
   - path: k6-%v-{{ $os }}-{{ .chezmoi.arch }}/k6
     strip: 1

@@ -4,7 +4,7 @@ github:
   repo: noborus/trdsql
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: trdsql_%v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.zip
 archive:

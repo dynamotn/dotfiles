@@ -4,9 +4,9 @@ github:
   repo: terrastruct/d2
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{- $os = "macos" }}
+  {{-   $os = "macos" }}
   {{- else if eq .chezmoi.os "linux" "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset:  d2-%v-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:

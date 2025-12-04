@@ -4,6 +4,6 @@ github:
   repo: go-semantic-release/semantic-release
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: semantic-release_%v_{{ $os }}_{{ .chezmoi.arch }}

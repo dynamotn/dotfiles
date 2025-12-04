@@ -7,6 +7,6 @@ github:
   repo: jpillora/chisel
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: chisel_%1v_{{ $os }}_{{ .chezmoi.arch }}.gz

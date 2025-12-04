@@ -3,10 +3,14 @@ name: rclone
 method: binary
 github:
   repo: rclone/rclone
-  release_asset: rclone-%v-linux-{{ .chezmoi.arch }}.zip
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "osx" }}
+  {{- end }}
+  release_asset: rclone-%v-{{ $os }}-{{ .chezmoi.arch }}.zip
 archive:
-  - path: rclone-%v-linux-{{ .chezmoi.arch }}/rclone
-  - path: rclone-$version-linux-{{ .chezmoi.arch }}/rclone.1
+  - path: rclone-$version-{{ $os }}-{{ .chezmoi.arch }}/rclone
+  - path: rclone-$version-{{ $os }}-{{ .chezmoi.arch }}/rclone.1
     location: $HOME/.local/man/man1
 {{- else if eq .chezmoi.os "android" }}
 method: os

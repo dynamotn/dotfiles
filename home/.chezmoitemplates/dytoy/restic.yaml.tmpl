@@ -4,6 +4,6 @@ github:
   repo: restic/restic
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: restic_%1v_{{ $os }}_{{ .chezmoi.arch }}.bz2

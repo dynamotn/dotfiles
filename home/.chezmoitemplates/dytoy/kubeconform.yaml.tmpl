@@ -4,7 +4,7 @@ github:
   repo: yannh/kubeconform
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: kubeconform-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:

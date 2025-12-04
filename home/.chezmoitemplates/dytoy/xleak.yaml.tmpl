@@ -2,16 +2,17 @@ name: xleak
 method: binary
 github:
   repo: bgreenwell/xleak
-  {{- $os := "linux" }}
+  {{- $os := "unknown-linux-gnu" }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{-   $os := "macos" }}
+  {{-   $os = "apple-darwin" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
   {{-   $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{-   $arch = "arm64" }}
+  {{-   $arch = "aarch64" }}
   {{- end }}
-  release_asset: xleak-{{ $os }}-{{ $arch }}.tar.gz
+  release_asset: xleak-{{ $arch }}-{{ $os }}.tar.xz
 archive:
-  - path: xleak
+  - path: xleak-{{ $arch }}-{{ $os }}/xleak
+    strip: 1

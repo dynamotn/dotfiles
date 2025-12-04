@@ -5,7 +5,7 @@ github:
   repo: k0sproject/k0sctl
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: k0sctl-{{ $os }}-{{ .chezmoi.arch }}
 {{- end }}

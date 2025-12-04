@@ -4,12 +4,12 @@ github:
   repo: pressly/goose
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  {{- $arch = "x86_64" }}
+  {{-   $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{- $arch = "arm64" }}
+  {{-   $arch = "arm64" }}
   {{- end }}
   release_asset: goose_{{ $os }}_{{ $arch }}
