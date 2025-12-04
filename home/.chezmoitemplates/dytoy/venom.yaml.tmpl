@@ -4,6 +4,6 @@ github:
   repo: ovh/venom
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: venom.{{ $os }}-{{ .chezmoi.arch }}

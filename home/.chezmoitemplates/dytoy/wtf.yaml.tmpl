@@ -4,7 +4,7 @@ github:
   repo: wtfutil/wtf
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: wtf_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
 archive:

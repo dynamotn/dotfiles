@@ -4,7 +4,7 @@ github:
   repo: cloudflare/pint
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: pint-%1v-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:

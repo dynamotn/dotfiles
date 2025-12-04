@@ -27,9 +27,9 @@ github:
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  {{- $arch = "x86_64" }}
+  {{-   $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{- $arch = "aarch64" }}
+  {{-   $arch = "aarch64" }}
   {{- end }}
   release_asset: delta-%v-{{ $arch }}-{{ $os }}.tar.gz
 archive:

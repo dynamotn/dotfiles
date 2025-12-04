@@ -4,6 +4,6 @@ github:
   repo: gruntwork-io/terragrunt
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: terragrunt_{{ .chezmoi.os }}_{{ .chezmoi.arch }}

@@ -7,7 +7,7 @@ github:
   repo: noborus/ov
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "linux" "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: ov_%1v_{{ $os }}_{{ .chezmoi.arch }}.zip
 archive:

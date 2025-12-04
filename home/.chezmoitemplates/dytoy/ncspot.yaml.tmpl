@@ -4,13 +4,16 @@ github:
   repo: hrkfdn/ncspot
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{- $os = "macos" }}
+  {{-   $os = "macos" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  {{- $arch = "x86_64" }}
+  {{-   $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{- $arch = "arm64" }}
+  {{-   $arch = "arm64" }}
+  {{-   if eq .chezmoi.os "darwin" }}
+  {{-     $arch = "aarch64" }}
+  {{-   end }}
   {{- end }}
   release_asset: ncspot-%v-{{ $os }}-{{ $arch }}.tar.gz
 archive:

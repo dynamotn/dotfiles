@@ -4,12 +4,12 @@ github:
   repo: kubescape/kubescape
   {{- $os := "" }}
   {{- if eq .chezmoi.os "linux" }}
-  {{- $os = "ubuntu" }}
+  {{-   $os = "ubuntu" }}
   {{- else if eq .chezmoi.os "darwin" }}
-  {{- $os = "macos" }}
+  {{-   $os = "macos" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "arm64" }}
-  {{- $arch = "arm64-" }}
+  {{-   $arch = "arm64-" }}
   {{- end }}
   release_asset: kubescape-{{ $arch }}{{ $os }}-latest

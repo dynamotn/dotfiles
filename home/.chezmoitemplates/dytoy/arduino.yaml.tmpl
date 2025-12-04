@@ -4,7 +4,7 @@ github:
   repo: arduino/arduino-cli
   {{- $os := "" }}
   {{- if eq .chezmoi.os "darwin" }}
-  {{-   $os = "Darwin" }}
+  {{-   $os = "macOS" }}
   {{- else if eq .chezmoi.os "linux" "android" }}
   {{-   $os = "Linux" }}
   {{- end }}

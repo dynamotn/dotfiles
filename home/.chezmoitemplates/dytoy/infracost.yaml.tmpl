@@ -4,7 +4,7 @@ github:
   repo: infracost/infracost
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
-  {{- $os = "linux" }}
+  {{-   $os = "linux" }}
   {{- end }}
   release_asset: infracost-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
 archive:

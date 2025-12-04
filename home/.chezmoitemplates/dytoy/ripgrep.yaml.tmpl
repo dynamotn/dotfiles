@@ -27,11 +27,11 @@ github:
   {{- $arch := "" }}
   {{- $suffix := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
-  {{- $arch = "x86_64" }}
-  {{- $suffix = "musl" }}
+  {{-   $arch = "x86_64" }}
+  {{-   $suffix = "musl" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{- $arch = "arm" }}
-  {{- $suffix = "gnueabihf" }}
+  {{-   $arch = "arm" }}
+  {{-   $suffix = "gnueabihf" }}
   {{- end }}
   release_asset: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}.tar.gz
 archive:
