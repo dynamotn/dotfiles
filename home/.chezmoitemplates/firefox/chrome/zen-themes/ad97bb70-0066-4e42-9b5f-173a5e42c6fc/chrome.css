@@ -264,7 +264,7 @@
             position: relative !important;
             overflow-x: hidden !important;
         }
-        
+
         .zen-essentials-container {
             position: relative !important;
             margin-top: auto !important;
@@ -275,7 +275,7 @@
         #zen-media-controls-toolbar:not([hidden]) ~ .zen-essentials-container {
             padding-bottom: 10px !important;
         }
-        
+
         #zen-essentials-container, #zen-essentials {
             order: 999 !important;
         }
@@ -589,7 +589,7 @@
         #tabbrowser-arrowscrollbox .zen-workspace-pinned-tabs-section {
             flex: 0 1 0;
         }
-        
+
         #tabbrowser-arrowscrollbox .zen-workspace-normal-tabs-section {
             flex: 1 1 0;
             overflow-y: auto !important;

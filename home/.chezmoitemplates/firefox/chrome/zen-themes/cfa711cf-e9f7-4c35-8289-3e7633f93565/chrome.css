@@ -3,7 +3,7 @@
   :root {
     --w-urlbar-bg_color: #ff6b6b66, #4ecdc466, #ff6b6b66;
   }
-  
+
   #urlbar {
     .urlbar-input-container::before {
       content: "";
@@ -18,13 +18,13 @@
       z-index: -1;
     }
   }
-  
+
   #main-window:has(.tabbrowser-tab[selected][busy])
     .urlbar-input-container::before {
     animation-play-state: running;
     opacity: 1;
   }
-  
+
   @keyframes urlbar-loading-gradient {
     0% {
       background-position: 0% 50%;
@@ -36,5 +36,5 @@
       background-position: 200% 50%;
     }
   }
-  
+
 }

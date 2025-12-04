@@ -16,7 +16,7 @@
   @media (-moz-bool-pref: "mod.lean.show-translation") {
     #urlbar:hover {
       #translations-button {
-        display: inherit !important; 
+        display: inherit !important;
       }
       #translations-button {
         &[hidden="true"] {
@@ -148,7 +148,7 @@
  * Mimicking how it works on Single Toolbar */
 :root:not([zen-single-toolbar="true"]) {
   @media -moz-pref("mod.lean.bookmarks") {
-    #PersonalToolbar:not([collapsed="true"]) {   
+    #PersonalToolbar:not([collapsed="true"]) {
       min-height: 2px !important;
       height: 2px !important;
       opacity: 0;
@@ -159,7 +159,7 @@
         opacity: 1;
         height: 30px !important;
       }
-    }  
+    }
     #zen-appcontent-navbar-container:hover {
       #PersonalToolbar {
         opacity: 1;
@@ -228,14 +228,14 @@
       #zen-sidebar-foot-buttons toolbarbutton:hover {
         background-color: var(--toolbarbutton-hover-background) !important;
       }
-      @media not -moz-pref("mod.lean.pinned-ext.workspaces") {  
+      @media not -moz-pref("mod.lean.pinned-ext.workspaces") {
         #zen-workspaces-button {
-          display: none !important; 
+          display: none !important;
           height: 0 !important;
           min-height: 0 !important;
         }
       }
-      @media -moz-pref("mod.lean.pinned-ext.workspaces") {  
+      @media -moz-pref("mod.lean.pinned-ext.workspaces") {
         #zen-sidebar-foot-buttons {
           gap: 0px !important;
         }
