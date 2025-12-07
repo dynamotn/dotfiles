@@ -1,0 +1,17 @@
+name: gitleaks
+method: binary
+github:
+  repo: gitleaks/gitleaks
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  {{- $arch := .chezmoi.arch }}
+  {{- if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "arm64" }}
+  {{- else if eq .chezmoi.arch "x86_64" }}
+  {{-   $arch = "x64" }}
+  {{- end }}
+  release_asset: gitleaks_%1v_{{ $os }}_{{ $arch }}.tar.gz
+archive:
+  - path: gitleaks
