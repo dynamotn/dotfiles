@@ -174,6 +174,7 @@
 |[tsui](https://github.com/neuralinkcorp/tsui)|TUI for Tailscale|
 |[haiti](https://github.com/noraj/haiti)|Hash type identifier|
 |[anti-ddos](https://github.com/anti-ddos/Anti-DDOS)|Anti DDOS|
+|[gitleaks](https://github.com/gitleaks/gitleaks)|Detect secrets in git repos|
 
 ## Development tools
 

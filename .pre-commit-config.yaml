@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -15,3 +15,8 @@ repos:
         description: Forces to replace line ending by the UNIX 'lf' character.
       - id: trailing-whitespace
         exclude: .*arkenfox.js$
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks-system
+        pass_filenames: false
