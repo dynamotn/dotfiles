@@ -1,0 +1,2 @@
+# Allow write access to sccache cache directory
+SANDBOX_WRITE="/var/cache/sccache/"

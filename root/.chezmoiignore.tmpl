@@ -48,6 +48,7 @@ etc/pacman.conf
 {{- if ne .osid "linux-gentoo" }}
 etc/ntp
 etc/portage
+etc/sandbox.d
 var/lib/portage
 {{- end }}
 {{- if not (eq .osid "linux-ubuntu" "linux-debian") }}
