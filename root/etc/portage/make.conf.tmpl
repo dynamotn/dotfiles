@@ -19,7 +19,7 @@ LC_MESSAGES=C.utf8
 # =================
 {{- $proc := output "nproc" | trim | int }}
 MAKEOPTS="-j{{ add $proc 1 }}"
-EMERGE_DEFAULT_OPTS="--ask --complete-graph --autounmask-write --color=y --with-bdeps=n --keep-going --load-average={{ mulf $proc 0.9 }} --jobs={{ mulf $proc 1.5 }}"
+EMERGE_DEFAULT_OPTS="--ask --tree --complete-graph --autounmask-write --color=y --with-bdeps=n --keep-going --load-average={{ mulf $proc 0.9 }} --jobs={{ mulf $proc 1.5 }}"
 {{- if eq .initSystem "openrc" }}
 INSTALL_MASK="/etc/systemd"
 {{- end }}
@@ -28,8 +28,7 @@ ACCEPT_LICENSE="*"
 
 # Built-time functionality
 # ========================
-USE="-X lto pgo wayland -introspection -vala -llvm udev
-zstd
+USE="-X lto pgo wayland -introspection -vala -llvm udev zstd vulkan
 {{ if eq .initSystem "openrc" }}-systemd{{ end }}
 {{ if .hasSound }}alsa pipewire{{ end }}
 {{ if .hasBluetooth }}bluetooth{{ end }}"
