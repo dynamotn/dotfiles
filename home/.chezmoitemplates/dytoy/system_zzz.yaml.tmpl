@@ -37,6 +37,12 @@ gentoo:
     {{- if and (eq .kind "pc") (eq .place "home") }}
     - name: media-gfx/fontforge
     {{- end }}
+  hook:
+    after: |-
+      # Initial setup sccache
+      sudo mkdir -p /var/cache/sccache
+      sudo chown root:portage /var/cache/sccache
+      sudo chmod 2775 /var/cache/sccache
 arch:
   packages:
     # System tools
