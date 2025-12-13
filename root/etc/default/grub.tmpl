@@ -25,6 +25,9 @@ GRUB_TIMEOUT_STYLE=menu
 {{- else if eq .kind "vm" }}
 {{-   $cmdline = printf "console=tty0 console=ttyS0 %s" $cmdline -}}
 {{- end -}}
+{{- if eq .guiDriver "N" }}
+{{-   $cmdline = printf "nvidia-drm.modeset=1 nvidia-drm.fbdev=1 %s" $cmdline -}}
+{{- end }}
 # Append parameters to the linux kernel command line
 GRUB_CMDLINE_LINUX={{ $cmdline | quote }}
 #
