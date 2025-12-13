@@ -4,7 +4,6 @@ is_essential: true
 gentoo:
   packages:
     # System tools
-    - name: app-eselect/eselect-repository
     - name: app-misc/resolve-march-native
     - name: app-portage/cpuid2cpuflag
     - name: app-portage/gentoolkit
@@ -29,7 +28,9 @@ gentoo:
     - name: dev-util/sccache
     - name: sys-devel/distcc
     # Misc tools
+    {{- if eq .guiServer "W" }}
     - name: gui-apps/wev
+    {{- end }}
     - name: dev-util/kcov
     - name: sys-process/parallel
     - name: sys-apps/ethtool
