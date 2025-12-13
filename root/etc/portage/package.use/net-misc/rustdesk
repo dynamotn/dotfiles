@@ -1,7 +1,0 @@
-# required by net-misc/rustdesk-1.3.7::gentoo-zh
-# required by rustdesk (argument)
->=media-libs/libva-2.22.0 X
-# required by net-misc/rustdesk-1.3.7::gentoo-zh[wayland]
-# required by @selected
-# required by @world (argument)
->=media-video/pipewire-1.4.1 gstreamer

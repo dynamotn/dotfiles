@@ -1,0 +1,17 @@
+{{- if ne .browser "F" }}
+*/www-client/firefox
+{{- end }}
+{{- if ne .guiServer "W" }}
+*/gui-apps
+*/gui-wm
+{{- end }}
+{{- if eq .guiServer "0" }}
+*/net-im/telegram-desktop-bin
+{{- end }}
+{{- if not .hasSound }}
+*/media-video
+{{- end }}
+{{- if eq .place "home" }}
+*/gui-apps/hypridle
+*/gui-apps/hyprlock
+{{- end }}

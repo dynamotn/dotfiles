@@ -1,0 +1,1 @@
+net-misc/networkmanager -gtk-doc -ppp -wext -bluetooth -modemmanager wifi

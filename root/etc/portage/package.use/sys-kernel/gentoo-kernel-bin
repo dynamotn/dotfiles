@@ -1,4 +1,0 @@
-# required by sys-kernel/gentoo-kernel-bin-6.6.16::gentoo[initramfs]
-# required by @selected
-# required by @world (argument)
->=sys-kernel/installkernel-24 dracut

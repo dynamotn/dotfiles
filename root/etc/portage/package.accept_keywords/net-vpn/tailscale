@@ -1,1 +1,2 @@
 net-vpn/tailscale ~amd64
+dev-lang/go ~amd64

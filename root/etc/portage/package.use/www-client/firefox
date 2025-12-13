@@ -1,4 +1,0 @@
-www-client/firefox pulseaudio dbus openh264 system-png -telemetry -gmp-autoupdate
-# required by www-client/firefox-115.6.0::gentoo[system-libvpx]
-# required by firefox (argument)
->=media-libs/libvpx-1.13.1-r1 postproc

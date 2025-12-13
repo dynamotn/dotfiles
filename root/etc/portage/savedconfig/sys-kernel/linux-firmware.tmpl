@@ -1,6 +1,4 @@
-
-
-# Remove files that shall not be installed from this list.
+{{- if eq .code "l30n4rd0d4v1nc1" }}
 amd/amd_sev_fam17h_model0xh.sbin
 amd/amd_sev_fam17h_model3xh.sbin
 amd-ucode/microcode_amd.bin
@@ -45,3 +43,4 @@ rtl_nic/rtl8168fp-3.fw
 rtlwifi/rtl8188efw.bin
 rtlwifi/rtl8188fufw.bin
 rtlwifi/rtl8188eufw.bin
+{{- end }}

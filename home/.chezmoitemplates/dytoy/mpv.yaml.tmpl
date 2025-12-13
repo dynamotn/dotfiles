@@ -1,4 +1,4 @@
-{{- if ne .guiServer "0" }}
+{{- if and (ne .guiServer "0") .hasSound }}
 name: mpv
 method: os
 # https://repology.org/project/mpv/versions
