@@ -23,6 +23,7 @@ gentoo:
       sudo gpasswd -a greetd wheel
       sudo gpasswd -a greetd video
       sudo gpasswd -a greetd seat
+      sudo sed -i 's#use elogind#use seatd elogind#g' /etc/init.d/display-manager
 arch:
   packages:
     - name: greetd
