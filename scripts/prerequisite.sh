@@ -23,7 +23,7 @@ function _setup_gentoo {
   # Cloning code
   sudo emerge -uDN dev-vcs/git net-misc/curl net-misc/openssh
   # Templating of chezmoi
-  sudo emerge -uDN app-portage/cpuid2cpuflag app-misc/resolve-march-native
+  sudo emerge -uDN app-portage/cpuid2cpuflags app-misc/resolve-march-native
 }
 
 #######################################

@@ -22,16 +22,17 @@ macos:
   packages:
     - name: thunderbird
       type: cask
-{{- else if and (eq .mailClient "B") (eq .osid "darwin" "linux-gentoo" "linux-arch") }}
+{{- else if eq .mailClient "B" }}
 # Only available on Gentoo, Arch, macOS
 name: betterbird
 is_essential: true
 method: os
+{{-   if eq .osid "darwin" "linux-gentoo" "linux-arch" }}
 gentoo:
   packages:
     - name: mail-client/betterbird-bin
-      repo: guru
-      url: https://github.com/gentoo-mirror/guru.git
+      repo: dynamo
+      url: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
 arch:
   packages:
     - name: betterbird-bin
@@ -40,7 +41,10 @@ macos:
     - name: Betterbird
       type: download
       url: https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=future
+{{-   else }}
 flatpak:
   packages:
     - name: org.betterbird.Betterbird
+      repo: flathub
+{{-   end }}
 {{- end }}
