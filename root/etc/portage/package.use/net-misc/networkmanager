@@ -1,5 +1,0 @@
-net-misc/networkmanager -gtk-doc -ppp -wext -bluetooth -modemmanager wifi
-# required by net-misc/networkmanager-1.42.6-r2::gentoo[wifi,-iwd]
-# required by @selected
-# required by @world (argument)
->=net-wireless/wpa_supplicant-2.10-r3 dbus

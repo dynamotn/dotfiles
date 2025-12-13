@@ -73,6 +73,3 @@ etc/ca-certificates
 etc/ca-certificates/trust-source
 {{-   end }}
 {{- end }}
-{{- if not (eq .kind "pc" "laptop") }}
-etc/NetworkManager/system-connections/Dynamo.nmconnection
-{{- end }}

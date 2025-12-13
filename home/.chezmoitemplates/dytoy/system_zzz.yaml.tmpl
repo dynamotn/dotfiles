@@ -35,6 +35,7 @@ gentoo:
     - name: sys-process/parallel
     - name: sys-apps/ethtool
     - name: sys-process/lsof
+    - name: sys-libs/gpm
     {{- if and (eq .kind "pc") (eq .place "home") }}
     - name: media-gfx/fontforge
     {{- end }}

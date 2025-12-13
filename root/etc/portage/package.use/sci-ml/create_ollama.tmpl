@@ -1,6 +1,7 @@
 {{- if eq .guiDriver "N" }}
 sci-ml/ollama cuda AMDGPU_TARGETS: -*
 acct-user/ollama cuda
+dev-util/nvidia-cuda-toolkit clang
 {{- else if eq .guiDriver "A" }}
 sci-ml/ollama rocm
 {{- else if eq .guiDriver "I" }}

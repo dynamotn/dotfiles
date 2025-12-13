@@ -11,6 +11,7 @@ gentoo:
     - name: gui-apps/hypridle
     {{- end }}
     - name: x11-base/xwayland
+    - name: gui-libs/xdg-desktop-portal-wlr
 arch:
   packages:
     {{- if eq .guiDriver "N" }}

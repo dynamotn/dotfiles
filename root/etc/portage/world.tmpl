@@ -1,12 +1,12 @@
 app-admin/logrotate
 app-admin/sudo
 app-admin/syslog-ng
+app-alternatives/lex
+app-alternatives/yacc
 app-arch/unzip
-app-arch/zip
 app-containers/docker
 app-containers/docker-cli
 app-editors/neovim
-app-eselect/eselect-repository
 {{- if eq .guiWinManager "H" }}
 app-i18n/fcitx-bamboo
 {{- end }}
@@ -27,29 +27,37 @@ dev-build/autoconf
 dev-build/autoconf-archive
 dev-build/automake
 dev-build/cmake
+dev-build/libtool
 dev-build/meson
 dev-build/ninja
+dev-lang/go
+dev-lang/rust-bin
 {{- if eq .guiServer "W" }}
 dev-libs/wayland
 {{- end }}
+{{- if eq .code "l30n4rd0d4v1nc1" }}
 dev-util/bcc
+{{- end }}
 dev-util/ccache
 dev-util/kcov
 dev-util/pkgdev
 dev-util/sccache
-dev-util/tree-sitter-cli
 dev-vcs/git
+{{- if eq .code "l30n4rd0d4v1nc1" }}
 dev-vcs/git-lfs
+{{- end }}
 games-util/game-device-udev-rules
 {{- if eq .guiServer "W" }}
 gui-apps/eww
 gui-apps/grim
+{{-   if not (and (eq .kind "pc") (eq .place "home")) }}
+gui-apps/hypridle
 gui-apps/hyprlock
+{{-   end }}
 gui-apps/hyprshade
 gui-apps/regreet
 gui-apps/slurp
 gui-apps/swappy
-gui-apps/swayidle
 gui-apps/swaync
 gui-apps/swww
 gui-apps/wev
@@ -67,7 +75,7 @@ gui-libs/xdg-desktop-portal-wlr
 gui-wm/hyprland
 {{- end }}
 llvm-core/clang
-llvm-core/llvm
+llvm-core/clang-common
 {{- if eq .mailClient "T" }}
 mail-client/thunderbird-bin
 {{- else if eq .mailClient "B" }}
@@ -79,7 +87,9 @@ media-fonts/noto-cjk
 media-fonts/noto-emoji
 media-fonts/roboto
 media-gfx/fontforge
+{{-   if eq .code "l30n4rd0d4v1nc1" }}
 media-gfx/imagemagick
+{{-   end }}
 {{- end }}
 media-libs/exiftool
 {{- if .hasSound }}
@@ -95,10 +105,12 @@ net-firewall/nftables
 {{- if eq .guiServer "W" "X" }}
 net-im/telegram-desktop-bin
 {{- end }}
+net-misc/curl
 {{- if .hasWifi }}
 net-misc/networkmanager
 {{- end }}
 net-misc/ntp
+net-misc/openssh
 {{- if eq .guiServer "W" "X" }}
 net-misc/rustdesk
 {{- end }}
@@ -111,7 +123,6 @@ sci-ml/ollama
 sys-apps/etckeeper
 sys-apps/ethtool
 sys-apps/flatpak
-sys-apps/portage
 sys-auth/pam_u2f
 {{- if eq .guiServer "W" }}
 sys-auth/seatd
@@ -119,15 +130,18 @@ sys-auth/seatd
 sys-boot/grub
 sys-devel/distcc
 sys-devel/gcc
+{{- if .hasSound }}
+sys-firmware/sof-firmware
+{{- end }}
 sys-fs/btrfs-progs
 sys-fs/ntfs3g
-sys-kernel/genkernel
-sys-kernel/gentoo-kernel-bin
-sys-kernel/gentoo-sources
+sys-kernel/gentoo-kernel
+sys-kernel/installkernel
 sys-kernel/linux-firmware
 sys-kernel/modprobed-db
-sys-libs/zlib
+sys-libs/gpm
 sys-process/cronie
+sys-process/lsof
 {{- if eq .guiServer "W" }}
 sys-process/nvtop
 {{- end }}
@@ -143,8 +157,8 @@ x11-base/xwayland
 x11-drivers/nvidia-drivers
 {{- end }}
 {{- if eq .guiServer "W" "X" }}
+x11-libs/gtk+
 x11-libs/libnotify
 x11-misc/xdg-user-dirs
 x11-terms/kitty
-x11-terms/kitty-terminfo
 {{- end }}

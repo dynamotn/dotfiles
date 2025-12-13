@@ -1,2 +1,2 @@
-gui-apps/hyprshade ~amd64
+gui-apps/hyprshade **
 dev-python/chevron ~amd64
