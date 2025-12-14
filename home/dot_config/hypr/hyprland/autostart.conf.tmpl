@@ -1,5 +1,8 @@
+{{- $configHash := joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" | include | sha256sum }}
+{{- if ne $configHash "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }}
 # Plugin manager
 exec-once = hyprpm reload -n && hyprctl reload
+{{- end }}
 
 # Authentication agent
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
