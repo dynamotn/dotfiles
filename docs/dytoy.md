@@ -299,6 +299,7 @@
 |[yt-dlp](https://github.com/yt-dlp/yt-dlp)|Download videos tool|
 |[viu](https://github.com/atanunq/viu)|View image on CLI|
 |[ncspot](https://github.com/hrkfdn/ncspot)|Spotify CLI client|
+|[rmpc](https://github.com/mierak/rmpc)|TUI client for Music Player Daemon, with Youtube support|
 |[telegram-desktop](https://desktop.telegram.org/)|Telegram desktop client|
 |[bluetui](https://github.com/pythops/bluetui)|TUI for managing bluetooth|
 |[gtt](https://github.com/eeeXun/gtt)|TUI for Google Translate and other services|

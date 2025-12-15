@@ -1,0 +1,25 @@
+{{- if .hasSound }}
+name: rmpc
+method: binary
+github:
+  repo: mierak/rmpc
+  {{- $os := "unknown-linux-gnu" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: rmpc-%v-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: rmpc
+  - path: man/rmpc.1
+    strip: 1
+    location: ~/.local/man/man1
+  - path: completions/rmpc.fish
+    strip: 1
+    location: ~/.config/fish/completions
+{{- end }}
