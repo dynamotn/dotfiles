@@ -1,3 +1,4 @@
+{{- if .hasSound }}
 name: ncspot
 method: binary
 github:
@@ -18,3 +19,4 @@ github:
   release_asset: ncspot-%v-{{ $os }}-{{ $arch }}.tar.gz
 archive:
   - path: ncspot
+{{- end }}
