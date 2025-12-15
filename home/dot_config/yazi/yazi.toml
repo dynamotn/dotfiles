@@ -1,0 +1,19 @@
+"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+
+[mgr]
+show_hidden = true
+show_symlink = true
+linemode = "size"
+
+[plugin]
+prepend_previewers = [{ url = "*/", run = 'piper -- eza --icons -la@ "$1"' }]
+prepend_fetchers = [
+  { id = "git", name = "*", run = "git" },
+  { id = "git", name = "*/", run = "git" },
+]
+
+[opener]
+edit = [{ run = '$EDITOR "$@"', block = true, for = "unix" }]
+extract = [
+  { run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
+]
