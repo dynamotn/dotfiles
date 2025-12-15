@@ -246,7 +246,6 @@
 |[k6](https://github.com/grafana/k6)|Load testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|
 |[oha](https://github.com/hatoo/oha)|HTTP load generator tool|
-|[shmig](https://github.com/mbucc/shmig)|Database migration tool|
 |[kubectl](https://github.com/kubernetes/kubectl)|Interactive CLI tool with Kubernetes cluster|
 |[helm](https://github.com/helm/helm)|Kubernetes package manager|
 |[gcloud](https://cloud.google.com/sdk)|Libraries and tools for interacting with Google Cloud products and services|
