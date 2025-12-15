@@ -1,0 +1,18 @@
+name: binsider
+method: binary
+github:
+  repo: orhun/binsider
+  {{- $os := "unknown-linux-gnu" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: binsider-%1v-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: binsider-%1v/binsider
+    strip: 1
