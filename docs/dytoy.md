@@ -236,6 +236,7 @@
 |[kubeseal](https://github.com/bitnami-labs/sealed-secrets)|Encrypt secret on Kubernetes cluster|
 |[steampipe](https://github.com/turbot/steampipe)|SQL console for API queries|
 |[goose](https://github.com/pressly/goose)|Database migration tool|
+|[dolphie](https://github.com/charles-001/dolphie)|Realtime analytics tool for MySQL/MariaDB, ProxySQL|
 |[ktea](https://github.com/jonas-grgt/ktea)|TUI client for Kafka|
 |[process-compose](https://github.com/F1bonacc1/process-compose)|Scheduler and orchestrator to manage non-containerized applications|
 |[restic](https://github.com/restic/restic)|Backup program|

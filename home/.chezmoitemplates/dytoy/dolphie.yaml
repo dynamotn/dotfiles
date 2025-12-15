@@ -1,0 +1,5 @@
+name: dolphie
+method: shell
+dependencies:
+  - name: uv
+content: uv tool install dolphie
