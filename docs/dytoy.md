@@ -223,6 +223,7 @@
 |[talosctl](https://github.com/siderolabs/talos)|Bootstrap and manage Talos Linux cluster|
 |[helm-docs](https://github.com/norwoodj/helm-docs)|Generate documents for Helm chart|
 |[kubeconform](https://github.com/yannh/kubeconform)|Validate Kubernetes manifest|
+|[gonzo](https://github.com/control-theory/gonzo)|Log analysis TUI|
 |[sops](https://github.com/getsops/sops)|Managing secrets in Git repositories|
 |[argocd](https://github.com/argoproj/argo-cd)|Interactive with ArgoCD on Kubenetes cluster|
 |[flux](https://github.com/fluxcd/flux2)|Interactive with Flux on Kubenetes cluster|

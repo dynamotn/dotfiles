@@ -1,0 +1,11 @@
+name: gonzo
+method: binary
+github:
+  repo: control-theory/gonzo
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset: gonzo-%1v-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
+archive:
+  - path: gonzo
