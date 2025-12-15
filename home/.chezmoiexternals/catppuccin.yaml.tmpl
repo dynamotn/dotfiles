@@ -1,4 +1,5 @@
 {{- $theme := "macchiato" }}
+{{- $variant := "blue" }}
 {{- if not .darkMode }}
 {{-   $theme = "latte" }}
 {{- end }}
@@ -38,6 +39,9 @@
   type: file
   url: https://raw.githubusercontent.com/devnullvoid/catppuccin-tridactyl/main/themes/catppuccin-{{ $theme }}.css
   refreshPeriod: 168h
+.config/yazi/theme.toml:
+  type: file
+  url: https://raw.githubusercontent.com/catppuccin/yazi/refs/heads/main/themes/{{ $theme }}/catppuccin-{{ $theme }}-{{ $variant }}.toml
 {{- if eq .terminalMultiplexer "Z" }}
 .config/zellij/themes/catppuccin.kdl:
   type: file
@@ -57,29 +61,29 @@
   refreshPeriod: 168h
   stripComponents: 3
   include:
-    - fcitx5-main/src/catppuccin-{{ $theme }}-teal/*
+    - fcitx5-main/src/catppuccin-{{ $theme }}-{{ $variant }}/*
 .local/share/themes/Dynamo:
   type: archive
-  url: https://github.com/catppuccin/gtk/releases/download/v1.0.3/catppuccin-{{ $theme }}-teal-standard+default.zip
+  url: https://github.com/catppuccin/gtk/releases/download/v1.0.3/catppuccin-{{ $theme }}-{{ $variant }}-standard+default.zip
   exact: true
   refreshPeriod: 168h
   stripComponents: 1
   include:
-    - catppuccin-{{ $theme }}-teal-standard+default/gtk-*/*
+    - catppuccin-{{ $theme }}-{{ $variant }}-standard+default/gtk-*/*
 .local/share/icons/Dynamo-Cursor:
   type: archive
-  url: https://github.com/catppuccin/cursors/releases/latest/download/catppuccin-{{ $theme }}-teal-cursors.zip
+  url: https://github.com/catppuccin/cursors/releases/latest/download/catppuccin-{{ $theme }}-{{ $variant }}-cursors.zip
   exact: true
   refreshPeriod: 168h
   stripComponents: 1
   exclude:
-    - catppuccin-{{ $theme }}-teal-cursors/index.theme
+    - catppuccin-{{ $theme }}-{{ $variant }}-cursors/index.theme
 .config/qt5ct/colors/catppuccin.conf:
   type: file
-  url: https://raw.githubusercontent.com/catppuccin/qt5ct/refs/heads/main/themes/catppuccin-{{ $theme }}-teal.conf
+  url: https://raw.githubusercontent.com/catppuccin/qt5ct/refs/heads/main/themes/catppuccin-{{ $theme }}-{{ $variant }}.conf
   refreshPeriod: 168h
 .config/qt6ct/colors/catppuccin.conf:
   type: file
-  url: https://raw.githubusercontent.com/catppuccin/qt5ct/refs/heads/main/themes/catppuccin-{{ $theme }}-teal.conf
+  url: https://raw.githubusercontent.com/catppuccin/qt5ct/refs/heads/main/themes/catppuccin-{{ $theme }}-{{ $variant }}.conf
   refreshPeriod: 168h
 {{- end }}

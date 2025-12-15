@@ -79,6 +79,7 @@
 |[wol](https://github.com/sabhiram/go-wol)|Wake-on-LAN utility|
 |[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|
 |[lazygit](https://github.com/jesseduffield/lazygit)|TUI for git|
+|[yazi](https://github.com/sxyazi/yazi)|TUI file manager|
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|
