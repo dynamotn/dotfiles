@@ -1,0 +1,17 @@
+name: updo
+method: binary
+github:
+  repo: Owloops/updo
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "android" "linux" }}
+  {{-   $os = "Linux" }}
+  {{- else if eq .chezmoi.os "darwin" }}
+  {{-   $os = "Darwin" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "arm64" }}
+  {{- end }}
+  release_asset: updo_{{ $os }}_{{ $arch }}

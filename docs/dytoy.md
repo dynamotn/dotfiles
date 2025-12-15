@@ -247,6 +247,7 @@
 |[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|
 |[k6](https://github.com/grafana/k6)|Load testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|
+|[updo](https://github.com/Owloops/updo)|Uptime monitoring CLI tool|
 |[oha](https://github.com/hatoo/oha)|HTTP load generator tool|
 |[kubectl](https://github.com/kubernetes/kubectl)|Interactive CLI tool with Kubernetes cluster|
 |[helm](https://github.com/helm/helm)|Kubernetes package manager|
