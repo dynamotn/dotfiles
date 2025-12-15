@@ -225,8 +225,9 @@
 |[kubeconform](https://github.com/yannh/kubeconform)|Validate Kubernetes manifest|
 |[gonzo](https://github.com/control-theory/gonzo)|Log analysis TUI|
 |[sops](https://github.com/getsops/sops)|Managing secrets in Git repositories|
-|[argocd](https://github.com/argoproj/argo-cd)|Interactive with ArgoCD on Kubenetes cluster|
-|[flux](https://github.com/fluxcd/flux2)|Interactive with Flux on Kubenetes cluster|
+|[argocd](https://github.com/argoproj/argo-cd)|Interactive with ArgoCD|
+|[argonaut](https://github.com/darksworm/argonaut)|Interactive TUI with ArgoCD|
+|[flux](https://github.com/fluxcd/flux2)|Interactive with Flux CD|
 |[fly](https://github.com/superfly/flyctl)|CLI tool for cloud application on fly.io with container|
 |[terraform](https://github.com/hashicorp/terraform)|IaC tool for building, changing, and versioning infrastructure|
 |[opentofu](https://github.com/opentofu/opentofu)|IaC tool for building, changing, and versioning infrastructure (OSS fork from Terraform)|
