@@ -294,6 +294,7 @@
 |[hyperfine](https://github.com/sharkdp/hyperfine)|Benchmarking tool for CLI apps|
 |[cointop](https://github.com/cointop-sh/cointop)|TUI to track coin stats|
 |[tickrs](https://github.com/tarkah/tickrs)|TUI to track stock stats|
+|[matcha](https://github.com/piqoni/matcha)|Daily digest generator for RSS feeds and Google News with LLM|
 |[pastel](https://github.com/sharkdp/pastel)|Generate, manipulate, convert colors CLI tool|
 |[cht](https://cht.sh)|Access to community cheat sheet|
 |[tldr](https://github.com/dbrgn/tealdeer)|Cheatsheet CLI tool|

@@ -1,0 +1,13 @@
+name: matcha
+{{- if or (eq .chezmoi.os "darwin") (and (eq .chezmoi.os "linux") (eq .chezmoi.arch "amd64")) }}
+# Only have release binary on macOS or Linux AMD64
+method: binary
+github:
+  repo: piqoni/matcha
+  release_asset: matcha-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
+{{- else }}
+method: os
+dependencies:
+  - go
+content: go install github.com/piqoni/matcha@latest
+{{- end }}
