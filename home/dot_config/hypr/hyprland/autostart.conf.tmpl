@@ -69,7 +69,7 @@ $browser = "zen-browser"
 {{- if eq .place "home" }}
 exec-once = $browser -P Personal
 {{- else if eq .place "office" }}
-exec-once = $browser -P Enterprise
+exec-once = $browser -P Enterprise-{{ .company }}
 {{- end }}
 
 # Email client
@@ -89,7 +89,7 @@ $mailClient = "betterbird"
 {{- if eq .place "home" }}
 exec-once = $mailClient -P Personal
 {{- else if eq .place "office" }}
-exec-once = $mailClient -P Enterprise
+exec-once = $mailClient -P Enterprise-{{ .company }}
 {{- end }}
 
 # Note-taking
