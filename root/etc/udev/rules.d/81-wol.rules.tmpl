@@ -1,0 +1,2 @@
+{{- $device := "eno1" -}}
+ACTION=="add", SUBSYSTEM=="net", NAME=="{{ $device }}", RUN+="/usr/bin/ethtool -s {{ $device }} wol g"

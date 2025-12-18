@@ -36,7 +36,7 @@ Applications/Zen.app
 {{- end }}
 
 {/* Linux related files */}
-{{- if not (eq .osid "linux-arch" "linux-ubuntu" "linux-debian") }}
+{{- if ne .initSystem "systemd" }}
 etc/systemd
 etc/vconsole.conf
 {{- end }}
