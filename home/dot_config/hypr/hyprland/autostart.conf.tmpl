@@ -47,7 +47,10 @@ exec-once = wl-paste --type text --watch cliphist store
 exec-once = wl-paste --type image --watch cliphist store
 
 # IM
-exec-once = fcitx5 -d --replace
+exec-once = ibus start --type wayland
+{{- if eq .osid "linux-gentoo" }}
+exec-once = ibus-daemon -drR
+{{- end }}
 
 # Terminal
 exec-once = kitty zellij

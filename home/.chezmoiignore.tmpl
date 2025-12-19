@@ -123,17 +123,19 @@ Library/thunderbird
 {{- end }}
 
 {/* Window manager and WM-related files */}
+{{- if not (eq .guiWinManager "H" "G") }}
+.config/ibus
+.config/ibus-bamboo
+{{- end }}
 {{- if ne .guiWinManager "H" }}
 .config/hypr
 .config/hyprshade
 .wayland_init.fish
-.config/fcitx5
 .config/wofi
 .config/swaylock
 .config/eww
 {{- end }}
 {{- if ne .guiWinManager "G" }}
-.config/ibus-bamboo
 .xprofile
 {{- end }}
 {{- if ne .guiWinManager "A" }}
