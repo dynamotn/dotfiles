@@ -1,14 +1,17 @@
 {{- range .decryptEnterprise }}
 {{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
-{{-   $top := $ }}
-{{-   range $gitSecret.servers }}
-{{-     if and (not .preferGitSSH) (regexMatch .regexDevices (printf "%s-%s" $top.place $top.kind)) }}
-{{-       $username := $commonSecret.account.username }}
-{{-       if index . "username" }}
-{{-         $username = .username }}
-{{-       end }}
+{{-   if not .preferGitSSH }}
+{{-     $top := $ }}
+{{-     range $gitSecret.servers }}
+{{-       $device := printf "%s-%s" $top.place $top.kind }}
+{{-       if and (regexMatch .regexDevices $device) (regexMatch .negativeRegexDevices $device | not) }}
+{{-         $username := $commonSecret.account.username }}
+{{-         if index . "username" }}
+{{-           $username = .username }}
+{{-         end }}
 machine {{ .https | trimPrefix "https://" | trimSuffix "/" }} login {{ $username }} password {{ .token }}
+{{-       end }}
 {{-     end }}
 {{-   end }}
 {{- end }}
