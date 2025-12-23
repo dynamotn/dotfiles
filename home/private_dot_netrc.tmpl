@@ -1,8 +1,8 @@
 {{- range .decryptEnterprise }}
 {{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
-{{-   if not .preferGitSSH }}
-{{-     $top := $ }}
+{{-   $top := $ }}
+{{-   if not $top.preferGitSSH }}
 {{-     range $gitSecret.servers }}
 {{-       $device := printf "%s-%s" $top.place $top.kind }}
 {{-       if and (regexMatch .regexDevices $device) (regexMatch .negativeRegexDevices $device | not) }}
