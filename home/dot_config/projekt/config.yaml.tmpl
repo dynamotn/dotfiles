@@ -60,9 +60,29 @@ folders:
   {{- $top := . }}
   {{- range .decryptEnterprise }}
   {{-   $projektSecret := printf "../secrets/data/enterprise-%s/projekt.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
-  {{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
   {{-   range $projektSecret.folders }}
   {{-     $folder := . }}
   - {{-   $folder | toYaml | replaceAllRegex "\\$HOME" $top.chezmoi.homeDir | nindent 4 }}
+  {{-   end }}
+  {{- end }}
+gitServers:
+  {{- if .decryptPersonal }}
+  {{-   $gitSecret := print "../secrets/data/personal/git.yaml.age" | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{-   range $gitSecret.servers }}
+  - name: {{ .name | quote }}
+    type: {{ .type | quote }}
+    https: {{ .https | quote }}
+    ssh: {{ .ssh | quote }}
+    preferGitSSH: {{ .preferGitSSH }}
+  {{-   end }}
+  {{- end }}
+  {{- range .decryptEnterprise }}
+  {{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{-   range $gitSecret.servers }}
+  - name: {{ .name | quote }}
+    type: {{ .type | quote }}
+    https: {{ .https | quote }}
+    ssh: {{ .ssh | quote }}
+    preferGitSSH: {{ .preferGitSSH }}
   {{-   end }}
   {{- end }}
