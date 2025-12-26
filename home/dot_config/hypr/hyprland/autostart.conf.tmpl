@@ -47,9 +47,10 @@ exec-once = wl-paste --type text --watch cliphist store
 exec-once = wl-paste --type image --watch cliphist store
 
 # IM
-exec-once = ibus start --type wayland
 {{- if eq .osid "linux-gentoo" }}
-exec-once = ibus-daemon -drR
+exec-once = /usr/libexec/ibus-ui-gtk3 --enable-wayland-im --exec-daemon --daemon-args "--panel disable"
+{{- else }}
+exec-once = ibus start --type wayland
 {{- end }}
 
 # Terminal
