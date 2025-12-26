@@ -1,0 +1,7 @@
+{{- if and (eq .chezmoi.os "android") (eq .kind "mobile") }}
+name: immich
+method: os
+fdroid:
+  packages:
+    - name: app.alextran.immich
+{{- end }}
