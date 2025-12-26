@@ -1,0 +1,25 @@
+name: android-tools
+method: os
+{{- if eq .chezmoi.os "android" }}
+is_essential: true
+{{- end }}
+# https://repology.org/project/android-tools/versions
+gentoo:
+  packages:
+    - name: dev-util/android-tools
+arch:
+  packages:
+    - name: android-tools
+ubuntu:
+  packages:
+    - name: android-tools
+alpine:
+  packages:
+    - name: android-tools
+termux:
+  packages:
+    - name: android-tools
+macos:
+  packages:
+    - name: android-platform-tools
+      type: cask
