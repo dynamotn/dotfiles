@@ -134,6 +134,7 @@ function pkg::init_termux {
 #######################################
 function pkg::init_fdroid {
   pkg::sync_fdroid_repo
+  pkg::install_via_fdroidcl com.machiav3lli.fdroid
 }
 
 #######################################

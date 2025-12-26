@@ -23,3 +23,12 @@ macos:
     - name: kitty
       type: cask
 {{- end }}
+{{- if eq .chezmoi.os "android" }}
+name: termux
+method: os
+is_essential: true
+fdroid:
+  packages:
+    - name: com.termux
+    - name: com.termux.styling
+{{- end }}

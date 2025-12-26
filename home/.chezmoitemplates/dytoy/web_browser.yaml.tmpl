@@ -18,6 +18,11 @@ alpine:
 macos:
   packages:
     - name: firefox
+fdroid:
+  packages:
+    - name: org.ironfoxoss.ironfox
+      repo: ironfox
+      url: https://fdroid.ironfoxoss.org/fdroid/repo
 {{- else if eq .browser "Z" }}
 name: zen-browser
 is_essential: true
