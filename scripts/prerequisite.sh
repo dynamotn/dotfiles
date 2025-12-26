@@ -67,7 +67,7 @@ function _setup_termux {
   # Linux compatible tools
   pkg install -y tsu which
   # Termux only tools
-  pkg install -y termux-services tmux-exec proot
+  pkg install -y termux-services termux-exec proot
   # Cloning code
   pkg install -y git curl openssh
   # Chezmoi tools
