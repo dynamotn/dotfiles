@@ -111,15 +111,15 @@ function _main {
   # ArchLinux
   elif command -v pacman &> /dev/null; then
     _setup_arch
+  # Termux
+  elif command -v termux-setup-storage &> /dev/null; then
+    _setup_termux
   # Ubuntu/Debian
   elif command -v apt &> /dev/null; then
     _setup_ubuntu_debian
   # Alpine Linux
   elif command -v apk &> /dev/null; then
     _setup_alpine
-  # Termux
-  elif command -v termux-setup-storage &> /dev/null; then
-    _setup_termux
   # MacOS
   elif command -v sw_vers &> /dev/null; then
     _setup_macos
