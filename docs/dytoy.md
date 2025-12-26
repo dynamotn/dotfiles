@@ -311,3 +311,4 @@
 |[xleak](https://github.com/bgreenwell/xleak)|TUI for view Excel files|
 |[waydroid](https://github.com/waydroid/waydroid)|Android environment on Linux with container-based approach|
 |[bluestacks](https://www.bluestacks.com/)|Android environment on MacOS|
+|[android-tools](developer.android.com/tools/releases/platform-tools)|Android development tools|
