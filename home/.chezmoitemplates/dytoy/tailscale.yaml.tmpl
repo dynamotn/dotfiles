@@ -32,7 +32,9 @@ alpine:
     after: |
       sudo tailscaled
       sudo tailscale up
-termux: # Install via F-Droid
+fdroid:
+  packages:
+    - name: com.tailscale.ipn
 macos:
   packages:
     - name: tailscale
