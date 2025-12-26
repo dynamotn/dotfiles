@@ -1,0 +1,24 @@
+{{- $engines := list "xkb:us::eng" }}
+{{- if has "vi" .languages }}
+{{-   $engines = list "Bamboo" | concat $engines }}
+{{- end }}
+{{- if has "zh" .languages }}
+{{-   $engines = list "rime" "m17n:zh:pinyin" | concat $engines }}
+{{- end }}
+{{- if has "ja" .languages }}
+{{-   $engines = list "mozc" | concat $engines }}
+{{- end }}
+[desktop/ibus/general]
+preload-engines=[{{ range $index, $engine := $engines }}{{- if $index -}},{{ end -}}'{{ $engine }}'{{ end }}]
+use-system-keyboard-layout=true
+engines-order=[{{ range $index, $engine := $engines }}{{- if $index -}},{{ end -}}'{{ $engine }}'{{ end }}]
+
+[desktop/ibus/general/hotkey]
+triggers=['<Super>space']
+
+[desktop/ibus/panel/emoji]
+font='Iosevka Dynamo 16'
+
+[desktop/ibus/panel]
+xkb-icon-rgba='#44c0dd'
+show=0
