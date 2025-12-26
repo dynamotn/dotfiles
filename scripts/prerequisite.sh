@@ -72,6 +72,11 @@ function _setup_termux {
   pkg install -y git curl openssh
   # Chezmoi tools
   pkg install -y chezmoi age
+  # F-Droid tools
+  pkg install -y fdroidcl
+  # Turn on Android Settings, setting Wireless debugging manually
+  am start -a android.settings.SETTINGS
+  # NOTE: use adb to pair & connect localhost Wireless debugging
 }
 
 #######################################

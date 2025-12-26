@@ -72,6 +72,16 @@ function _install_tool {
       dytoy::install_flatpak_package "$package"
     done
   fi
+  {{- else if eq .chezmoi.os "android" }}
+  # Install fdroid applications if defined
+  readarray packages < <(dytoy::get_yaml "$name" "fdroid.packages")
+  if [ ${#packages[@]} -gt 0 ]; then
+    misc::install_tool fdroidcl
+    pkg::init_fdroid
+    for package in "${packages[@]}"; do
+      dytoy::install_fdroid_package "$package"
+    done
+  fi
   {{- end }}
   readarray packages < <(dytoy::get_yaml "$name" "{{ $shortCode }}.packages")
   for package in "${packages[@]}"; do

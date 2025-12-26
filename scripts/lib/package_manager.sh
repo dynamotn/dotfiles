@@ -54,6 +54,15 @@ function pkg::sync_termux_repo {
 }
 
 #######################################
+# @description Sync repositories of F-Droid
+# @noargs
+#######################################
+function pkg::sync_fdroid_repo {
+  dybatpho::progress "Syncing application repositories"
+  dybatpho::dry_run fdroidcl update
+}
+
+#######################################
 # @description Sync repositories of MacOS
 # @noargs
 #######################################
@@ -117,6 +126,14 @@ function pkg::init_alpine {
 #######################################
 function pkg::init_termux {
   pkg::sync_termux_repo
+}
+
+#######################################
+# @description Initialize F-Droid application manager
+# @noargs
+#######################################
+function pkg::init_fdroid {
+  pkg::sync_fdroid_repo
 }
 
 #######################################
@@ -196,6 +213,17 @@ function pkg::add_apt_repo {
 }
 
 #######################################
+# @description Add repository to Gentoo portage
+# @arg $1 string Name of repository
+# @arg $2 string URL of the repository
+#######################################
+function pkg::add_fdroid_repo {
+  local name url
+  dybatpho::expect_args name url -- "$@"
+  dybatpho::dry_run fdroidcl repo add "$name" "$url"
+}
+
+#######################################
 # @description Add repository of Flatpak
 # @arg $1 string Name of repository
 # @arg $2 string URL of the repository
@@ -265,6 +293,13 @@ function pkg::check_installed_apk {
   local package
   dybatpho::expect_args package -- "$@"
   apk info -e "$package" > /dev/null 2>&1
+}
+
+#######################################
+# @description Check if a package is installed on Android via fdroidcl
+#######################################
+function pkg::check_installed_fdroidcl {
+  return 1
 }
 
 #######################################
@@ -362,6 +397,17 @@ function pkg::install_via_termux {
   dybatpho::expect_args package -- "$@"
   dybatpho::progress "Installing package $package"
   dybatpho::dry_run pkg install -y "$package"
+}
+
+#######################################
+# @description Install a package in Android
+# @arg $1 string Application ID
+#######################################
+function pkg::install_via_fdroidcl {
+  local app_id
+  dybatpho::expect_args app_id -- "$@"
+  dybatpho::progress "Installing application $app_id"
+  dybatpho::dry_run fdroidcl install "$app_id"
 }
 
 #######################################
