@@ -2,13 +2,9 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-{{- if eq .guiServer "G" "H" }}
-{{-   $engine := "lotus" }}
-{{-   if eq .osid "linux-ubuntu" }}
-{{-     $engine = "bamboo" }}
-{{-   end }}
+{{- if not (empty .languages) }}
 dybatpho::require "dconf"
-dybatpho::header "Setup ibus-{{ $engine }}"
+dybatpho::header "Setup input method"
 dconf load / < ~/.config/ibus/dconf
-dybatpho::success "Setup ibus-{{ $engine }}"
+dybatpho::success "Setup input method"
 {{- end }}

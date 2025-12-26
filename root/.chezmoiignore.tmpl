@@ -73,3 +73,14 @@ etc/ca-certificates
 etc/ca-certificates/trust-source
 {{-   end }}
 {{- end }}
+
+{/* Input method */}
+{{- if not (has "vi" .languages) }}
+etc/portage/**ibus-lotus
+{{- end }}
+{{- if not (has "ja" .languages) }}
+etc/portage/**mozc
+{{- end }}
+{{- if not (has "zh" .languages) }}
+etc/portage/**ibus-rime
+{{- end }}

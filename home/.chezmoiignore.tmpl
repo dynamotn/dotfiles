@@ -123,9 +123,8 @@ Library/thunderbird
 {{- end }}
 
 {/* Window manager and WM-related files */}
-{{- if not (eq .guiWinManager "H" "G") }}
+{{- if empty .languages }}
 .config/ibus
-.config/ibus-bamboo
 {{- end }}
 {{- if ne .guiWinManager "H" }}
 .config/hypr
