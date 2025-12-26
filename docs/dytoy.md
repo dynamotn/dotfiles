@@ -13,6 +13,7 @@
 - [Development tools](#development-tools)
 - [DevOps tools](#devops-tools)
 - [AI tools](#ai-tools)
+- [Android tools](#android-tools)
 - [Miscellaneous applications](#miscellaneous-applications)
 
 <!-- tocstop -->
@@ -269,6 +270,14 @@
 |[copilot](https://github.com/github/copilot-cli)|CLI tool for GitHub Copilot|
 |[gemini](https://github.com/google-gemini/gemini-cli)|CLI tool for Google Gemini LLM|
 
+## Android tools
+|Tool|Purpose|
+|----|-------|
+|[waydroid](https://github.com/waydroid/waydroid)|Android environment on Linux with container-based approach|
+|[bluestacks](https://www.bluestacks.com/)|Android environment on MacOS|
+|[android-tools](developer.android.com/tools/releases/platform-tools)|Android development tools|
+|[fdroidcl](https://github.com/Hoverth/fdroidcl)|CLI for F-Droid|
+
 ## Miscellaneous applications
 
 |Tool|Purpose|
@@ -309,7 +318,3 @@
 |[in2csv](https://github.com/wireservice/csvkit)|Convert various data formats to CSV|
 |[lz4json](https://github.com/andikleen/lz4json)|C decompress tool for mozilla lz4json format|
 |[xleak](https://github.com/bgreenwell/xleak)|TUI for view Excel files|
-|[waydroid](https://github.com/waydroid/waydroid)|Android environment on Linux with container-based approach|
-|[bluestacks](https://www.bluestacks.com/)|Android environment on MacOS|
-|[android-tools](developer.android.com/tools/releases/platform-tools)|Android development tools|
-|[fdroidcl](https://github.com/Hoverth/fdroidcl)|CLI for F-Droid|
