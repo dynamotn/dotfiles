@@ -176,7 +176,7 @@ function dytoy::is_installed_command {
 #######################################
 # @description Check if package tool is not installed or installed but in force mode
 # @arg $1 string Package name
-# @arg $2 string Tool to use for package management (e.g., "portage", "pacman", "apt", "apk", "brew", "mas", "dmg")
+# @arg $2 string Tool to use for package management (e.g., "portage", "pacman", "apt", "apk", "brew", "mas", "dmg", "fdroidcl")
 # @env ONLY_NOT_INSTALLED boolean Flag to install only not installed tool
 #######################################
 function dytoy::is_installed_package {
@@ -335,6 +335,26 @@ function dytoy::install_termux_package {
       && dybatpho::debug "Installed package: $name" \
       && dytoy::enable_service "$yaml" "termux" \
       || dybatpho::die "Can't install package: $name"
+  fi
+}
+
+#######################################
+# @description Install F-Droid app from the YAML file
+# @arg $1 string YAML content
+#######################################
+function dytoy::install_fdroid_package {
+  local yaml
+  dybatpho::expect_args yaml -- "$@"
+  local name=$(echo "$yaml" | yq e '.name')
+  local repo=$(echo "$yaml" | yq e '.repo')
+  local url=$(echo "$yaml" | yq e '.url')
+  [[ "$repo" != "null" ]] && pkg::add_fdroid_repo "$repo" "$url" > /dev/null
+
+  if ! dytoy::is_installed_package "$name" "fdroidcl"; then
+    # shellcheck disable=SC2015
+    pkg::install_via_fdroidcl "$name" \
+      && dybatpho::debug "Installed F-Droid application: $name" \
+      || dybatpho::die "Can't install application: $name"
   fi
 }
 
