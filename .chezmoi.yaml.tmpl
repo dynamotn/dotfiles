@@ -84,6 +84,7 @@ data:
     {{-   range $languages }}
     - {{ . }}
     {{-   end }}
+    {{- end }}
   browser: {{ promptChoiceOnce . "browser" "What web browser do you use? (F for Firefox, Z for Zen Browser, or empty)" (list "F" "Z" "") "Z" | quote }}
   browserEnterpriseProfiles:
     {{- range $listDecryptEnterprise }}
