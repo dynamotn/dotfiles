@@ -312,3 +312,4 @@
 |[waydroid](https://github.com/waydroid/waydroid)|Android environment on Linux with container-based approach|
 |[bluestacks](https://www.bluestacks.com/)|Android environment on MacOS|
 |[android-tools](developer.android.com/tools/releases/platform-tools)|Android development tools|
+|[fdroidcl](https://github.com/Hoverth/fdroidcl)|CLI for F-Droid|

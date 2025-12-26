@@ -1,0 +1,14 @@
+name: fdroidcl
+{{- if eq .chezmoi.os "android" }}
+method: os
+is_essential: true
+# https://repology.org/project/fdroidcl/versions
+termux:
+  packages:
+    - name: fdroidcl
+{{- else }}
+method: binary
+github:
+  repo: Hoverth/fdroidcl
+  release_asset: fdroidcl_%v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}
+{{- end }}
