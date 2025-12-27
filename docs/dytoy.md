@@ -94,6 +94,7 @@
 |[zen-browser](https://zen-browser.app/)|Web browser with modern features|
 |[thunderbird](https://www.thunderbird.net/)|Email client|
 |[nvtop](https://github.com/Syllo/nvtop)|Monitor resources of GPU|
+|[nvitop](https://github.com/XuehaiPan/nvitop)|Monitor resources of GPU (NVIDIA only)|
 |[obsidian](https://obsidian.md/)|Note-taking app|
 |[steam](https://store.steampowered.com/about/)|Online game platform|
 
