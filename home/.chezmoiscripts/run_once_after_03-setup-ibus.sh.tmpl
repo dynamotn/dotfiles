@@ -2,7 +2,7 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-{{- if not (empty .languages) }}
+{{- if and (eq .chezmoi.os "linux") (not (empty .languages)) }}
 dybatpho::require "dconf"
 dybatpho::header "Setup input method"
 dconf load / < ~/.config/ibus/dconf
