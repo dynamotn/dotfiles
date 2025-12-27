@@ -1,0 +1,7 @@
+{{- if and (eq .guiServer "W") (eq .guiDriver "N") }}
+name: nvitop
+method: shell
+dependencies:
+  - uv
+content: uv tool install nvitop
+{{- end }}
