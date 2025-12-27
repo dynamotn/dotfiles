@@ -1,5 +1,5 @@
 name: checkov
 method: shell
 dependencies:
-  - name: uv
+  - uv
 content: uv tool install checkov
