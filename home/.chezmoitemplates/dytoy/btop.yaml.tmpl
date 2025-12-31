@@ -25,9 +25,9 @@ is_essential: true
 github:
   repo: aristocratos/btop
   {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: btop-x86_64-linux-musl.tbz
+  release_asset: btop-x86_64-unknown-linux-musl.tbz
   {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: btop-aarch64-linux-gnu.tbz
+  release_asset: btop-aarch64-unknown-linux-musl.tbz
   {{- end }}
 archive:
   - path: ./btop/bin/btop
