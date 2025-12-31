@@ -4,3 +4,5 @@
 {{- if ne .kind "container" }}
 {{- template "mise/env_git.toml.tmpl" $top }}
 {{- end }}
+https_proxy = "socks5h://localhost:1080"
+http_proxy = "socks5h://localhost:1080"
