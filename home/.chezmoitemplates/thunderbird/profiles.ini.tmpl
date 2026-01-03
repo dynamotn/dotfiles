@@ -1,28 +1,7 @@
 {{- $configPath := joinPath .chezmoi.homeDir ".config/thunderbird/profiles" }}
 
-{{- $path := "" }}
-{{- if eq .chezmoi.os "darwin" }}
-{{-   if eq .mailClient "T" }}
-{{-     $path = printf "/Applications/%s.app/Contents/MacOS" "Thunderbird" }}
-{{-   else if eq .mailClient "B" }}
-{{-     $path = printf "/Applications/%s.app/Contents/MacOS" "Betterbird" }}
-{{-   end }}
-{{- else if eq .chezmoi.os "linux" }}
-{{-   if eq .mailClient "T" }}
-{{-     if eq .osid "linux-gentoo" }}
-{{-       $path = "/opt/thunderbird" }}
-{{-     else }}
-{{-       $path = "/usr/lib/thunderbird" }}
-{{-     end }}
-{{-   else if eq .mailClient "B" }}
-{{-     if eq .osid "linux-gentoo" }}
-{{-       $path = "/opt/betterbird" }}
-{{-     else }}
-{{-       $path = "/opt/betterbird-bin" }}
-{{-     end -}}
-{{-   end -}}
-{{- end -}}
-{{- $releaseId := mozillaInstallHash $path }}
+{{- $settings := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
+{{- $releaseId := mozillaInstallHash $settings.installFolder }}
 [Install{{- $releaseId -}}]
 {{- if eq .kind "container" }}
 Default={{- $configPath }}/public

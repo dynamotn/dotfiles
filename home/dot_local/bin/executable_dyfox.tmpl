@@ -5,26 +5,13 @@
 dybatpho::register_common_handlers
 
 {{- if .browser }}
-{{-   $process := "" }}
 {{-   $appName := "" }}
+{{-   $settings := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{-   $process := printf "%s/%s" $settings.installFolder $settings.processFile }}
 {{-   if eq .browser "F" }}
 {{-     $appName = "firefox" }}
-{{-     if eq .chezmoi.os "darwin" }}
-{{-       $process = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
-{{-     else if eq .osid "linux-gentoo" }}
-{{-       $process = "/usr/lib64/firefox/firefox" }}
-{{-     else }}
-{{-       $process = "/usr/lib/firefox/firefox" }}
-{{-     end }}
 {{-   else if eq .browser "Z" }}
 {{-     $appName = "zen" }}
-{{-     if eq .chezmoi.os "darwin" }}
-{{-       $process = "/Applications/Zen.app/Contents/MacOS/zen" }}
-{{-     else if eq .osid "linux-gentoo" }}
-{{-       $process = "/opt/zen-browser/zen" }}
-{{-     else }}
-{{-       $process = "/opt/zen-browser-bin/zen" }}
-{{-     end }}
 {{-   end }}
 {{-   $profiles := list "public" }}
 {{-   if .decryptPersonal }}
@@ -78,7 +65,7 @@ function _update_dotfiles {
       dybatpho::progress "Update bookmarks, history and workspaces for profile ${profile}"
       if [ "${profile}" = "public" ]; then
         for filename in favicons places; do
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename}.sqlite --create || true
+          dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/${filename}.sqlite --create || true
         done
       else
         declare -a filenames=("favicons" "places")
@@ -87,7 +74,7 @@ function _update_dotfiles {
 
       dybatpho::progress "Update storage data for profile ${profile}"
       if [ "${profile}" = "public" ]; then
-        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/storage.sqlite --create || true
+        dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/storage.sqlite --create || true
         dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/storage/default/moz-extension+++* --create || true
       else
         dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "storage.sqlite" || true

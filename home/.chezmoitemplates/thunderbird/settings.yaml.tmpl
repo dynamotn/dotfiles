@@ -1,0 +1,38 @@
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $app := "Thunderbird" }}
+{{-   if eq .mailClient "B" }}
+{{-     $app = "Betterbird" }}
+{{-   end }}
+{{-   $installFolder := printf "" $app }}
+installFolder: /Applications/{{ $app }}.app/Contents/MacOS
+executableFile: {{ lower $app }}
+processFile: {{ lower $app }}
+{{- else if eq .chezmoi.os "linux" }}
+{{-   if eq .mailClient "T" }}
+{{-     if eq .osid "linux-gentoo" }}
+installFolder: /opt/thunderbird
+executableFile: thunderbird-bin
+processFile: thunderbird
+{{-     else if eq .osid "linux-arch" }}
+installFolder: /usr/lib/thunderbird
+executableFile: thunderbird
+processFile: thunderbird
+{{-     else }}
+installFolder:
+executableFile:
+processFile:
+{{-     end }}
+{{-   else if eq .mailClient "B" }}
+{{-     if eq .osid "linux-gentoo" }}
+installFolder: /opt/betterbird
+executableFile: betterbird-bin
+{{-     else if eq .osid "linux-arch" }}
+installFolder: /opt/betterbird
+executableFile: betterbird
+{{-     else }}
+installFolder:
+executableFile:
+processFile:
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
