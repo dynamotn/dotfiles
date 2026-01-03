@@ -5,26 +5,13 @@
 dybatpho::register_common_handlers
 
 {{- if .mailClient }}
-{{-   $process := "" }}
 {{-   $appName := "" }}
+{{-   $settings := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
+{{-   $process := printf "%s/%s" $settings.installFolder $settings.processFile }}
 {{-   if eq .mailClient "T" }}
 {{-     $appName = "thunderbird" }}
-{{-     if eq .chezmoi.os "darwin" }}
-{{-       $process = "/Applications/Thunderbird.app/Contents/MacOS" }}
-{{-     else if eq .osid "linux-gentoo" }}
-{{-       $process = "/opt/thunderbird/thunderbird" }}
-{{-     else }}
-{{-       $process = "/usr/lib/thunderbird/thunderbird" }}
-{{-     end }}
 {{-   else if eq .mailClient "B" }}
 {{-     $appName = "betterbird" }}
-{{-     if eq .chezmoi.os "darwin" }}
-{{-       $process = "/Applications/Betterbird.app/Contents/MacOS/betterbird" }}
-{{-     else if eq .osid "linux-gentoo" }}
-{{-       $process = "/opt/betterbird/betterbird-bin" }}
-{{-     else }}
-{{-       $process = "/opt/betterbird-bin/betterbird" }}
-{{-     end }}
 {{-   end }}
 {{-   $profiles := list "public" }}
 {{-   if .decryptPersonal }}

@@ -53,46 +53,15 @@ Library/Application Support/zen
 .local/bin/dybird
 {{- end }}
 {/* Ignore when running */}
-{{- $processFirefox := "" }}
 {{- $processThunderbird := "" }}
 {{- $numberOfRunningProcess := 0 }}
 {{- if eq .chezmoi.os "linux" }}
 {{-   $numberOfRunningProcess = 1 }}
 {{- end }}
-{{- if eq .browser "F" }}
-{{-   if eq .chezmoi.os "darwin" }}
-{{-     $processFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox" }}
-{{-   else if eq .osid "linux-gentoo" }}
-{{-     $processFirefox = "/opt/firefox/firefox" }}
-{{-   else }}
-{{-     $processFirefox = "/usr/lib/firefox/firefox" }}
-{{-   end }}
-{{- else if eq .browser "Z" }}
-{{-   if eq .chezmoi.os "darwin" }}
-{{-     $processFirefox = "/Applications/Zen.app/Contents/MacOS/zen" }}
-{{-   else if eq .osid "linux-gentoo" }}
-{{-     $processFirefox = "/opt/zen/zen-bin" }}
-{{-   else }}
-{{-     $processFirefox = "/opt/zen-browser-bin/zen" }}
-{{-   end }}
-{{- end }}
-{{- if eq .mailClient "T" }}
-{{-   if eq .chezmoi.os "darwin" }}
-{{-     $processThunderbird = "/Applications/Thunderbird.app/Contents/MacOS/thunderbird" }}
-{{-   else if eq .osid "linux-gentoo" }}
-{{-     $processThunderbird = "/opt/thunderbird/thunderbird" }}
-{{-   else }}
-{{-     $processThunderbird = "/usr/lib/thunderbird/thunderbird" }}
-{{-   end }}
-{{- else if eq .mailClient "B" }}
-{{-   if eq .chezmoi.os "darwin" }}
-{{-     $processThunderbird = "/Applications/Betterbird.app/Contents/MacOS/betterbird" }}
-{{-   else if eq .osid "linux-gentoo" }}
-{{-     $processThunderbird = "/opt/betterbird/betterbird-bin" }}
-{{-   else }}
-{{-     $processThunderbird = "/opt/betterbird-bin/betterbird" }}
-{{-   end }}
-{{- end }}
+{{- $settingsFirefox := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{- $processFirefox := printf "%s/%s" $settingsFirefox.installFolder $settingsFirefox.processFile }}
+{{- $settingsThunderbird := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{- $processThunderbird := printf "%s/%s" $settingsThunderbird.installFolder $settingsThunderbird.processFile }}
 {{- if eq .browser "F" "Z" }}
 {{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
 .config/firefox

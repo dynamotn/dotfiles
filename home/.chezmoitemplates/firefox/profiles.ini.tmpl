@@ -1,28 +1,7 @@
 {{- $configPath := joinPath .chezmoi.homeDir ".config/firefox/profiles" }}
 
-{{- $path := "" }}
-{{- if eq .chezmoi.os "darwin" }}
-{{-   if eq .browser "F" }}
-{{-     $path = printf "/Applications/%s.app/Contents/MacOS" "Firefox" }}
-{{-   else if eq .browser "Z" }}
-{{-     $path = printf "/Applications/%s.app/Contents/MacOS" "Zen" }}
-{{-   end }}
-{{- else if eq .chezmoi.os "linux" }}
-{{-   if eq .browser "F" }}
-{{-     if eq .osid "linux-gentoo" }}
-{{-       $path = "/opt/firefox" }}
-{{-     else }}
-{{-       $path = "/usr/lib/firefox" }}
-{{-     end }}
-{{-   else if eq .browser "Z" }}
-{{-     if eq .osid "linux-gentoo" }}
-{{-       $path = "/opt/zen" }}
-{{-     else }}
-{{-       $path = "/opt/zen-browser-bin" }}
-{{-     end -}}
-{{-   end -}}
-{{- end -}}
-{{- $releaseId := mozillaInstallHash $path }}
+{{- $settings := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{- $releaseId := mozillaInstallHash $settings.installFolder }}
 [Install{{- $releaseId -}}]
 {{- if eq .kind "container" }}
 Default={{- $configPath }}/public

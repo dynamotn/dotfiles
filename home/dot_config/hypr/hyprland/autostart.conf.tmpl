@@ -57,19 +57,8 @@ exec-once = ibus start --type wayland
 exec-once = kitty zellij
 
 # Browser
-{{- if eq .browser "F" }}
-{{-   if eq .osid "linux-gentoo" }}
-$browser = "firefox"
-{{-   else }}
-$browser = "firefox-bin"
-{{-   end }}
-{{- else if eq .browser "Z" }}
-{{-   if eq .osid "linux-gentoo" }}
-$browser = "zen"
-{{-   else }}
-$browser = "zen-browser"
-{{-   end }}
-{{- end }}
+{{- $firefoxSettings := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+$browser = {{ $firefoxSettings.executableFile }}
 {{- if eq .place "home" }}
 exec-once = $browser -P Personal
 {{- else if eq .place "office" }}
@@ -77,19 +66,8 @@ exec-once = $browser -P Enterprise-{{ .company }}
 {{- end }}
 
 # Email client
-{{- if eq .mailClient "T" }}
-{{-   if eq .osid "linux-gentoo" }}
-$mailClient = "thunderbird-bin"
-{{-   else }}
-$mailClient = "thunderbird"
-{{-   end }}
-{{- else if eq .mailClient "B" }}
-{{-   if eq .osid "linux-gentoo" }}
-$mailClient = "betterbird-bin"
-{{-   else }}
-$mailClient = "betterbird"
-{{-   end }}
-{{- end }}
+{{- $thunderbirdSettings := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
+$mailClient = {{ $thunderbirdSettings.executableFile }}
 {{- if eq .place "home" }}
 exec-once = $mailClient -P Personal
 {{- else if eq .place "office" }}

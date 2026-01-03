@@ -1,0 +1,41 @@
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $app := "Firefox" }}
+{{-   if eq .mailClient "B" }}
+{{-     $app = "Zen" }}
+{{-   end }}
+{{-   $installFolder := printf "" $app }}
+installFolder: /Applications/{{ $app }}.app/Contents/MacOS
+executableFile: {{ lower $app }}
+processFile: {{ lower $app }}
+{{- else if eq .chezmoi.os "linux" }}
+{{-   if eq .mailClient "T" }}
+{{-     if eq .osid "linux-gentoo" }}
+# If use binary version, change to /usr/lib64/firefox
+installFolder: /opt/firefox
+executableFile: firefox-bin
+processFile: firefox
+{{-     else if eq .osid "linux-arch" }}
+installFolder: /usr/lib/firefox
+executableFile: firefox
+processFile: firefox
+{{-     else }}
+installFolder:
+executableFile:
+processFile:
+{{-     end }}
+{{-   else if eq .mailClient "B" }}
+{{-     if eq .osid "linux-gentoo" }}
+installFolder: /opt/zen
+executableFile: zen
+processFile: zen
+{{-     else if eq .osid "linux-arch" "linux-ubuntu" }}
+installFolder: /opt/zen-browser-bin
+executableFile: zen-browser-bin
+processFile: zen
+{{-     else }}
+installFolder:
+executableFile:
+processFile:
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
