@@ -168,7 +168,6 @@
 |[fail2ban](https://github.com/fail2ban/fail2ban)|Intrusion prevention software framework|
 |[radare2](https://github.com/radareorg/radare2)|Reverse engineering framework|
 |[lynis](https://github.com/CISOfy/lynis)|Security auditing and hardening tool|
-|[anti-ddos](https://github.com/anti-ddos/Anti-DDOS)|Anti DDOS|
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|
 |[checkov](https://github.com/bridgecrewio/checkov)|IaC security analyzer|
 |[trivy](https://github.com/aquasecurity/trivy)|Security scanner|
