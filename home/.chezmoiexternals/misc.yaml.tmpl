@@ -1,9 +1,4 @@
 {{- if ne .kind "container" }}
-.local/bin/anti-ddos:
-  type: file
-  url: 'https://raw.githubusercontent.com/anti-ddos/Anti-DDOS/master/anti-ddos.sh'
-  executable: true
-  refreshPeriod: 168h
 .local/bin/git-quick-stats:
   type: file
   url: https://raw.githubusercontent.com/arzzen/git-quick-stats/master/git-quick-stats
