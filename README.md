@@ -30,11 +30,34 @@
 
 ## :book:&nbsp; Overview
 
-This repository contains all my dotfiles managed by [chezmoi](https://github.com/twpayne/chezmoi).
-Please note that this is my own personal dotfiles for Linux
-(Gentoo, Arch, Ubuntu 24.04 LTS and above, Alpine for container), Android (Termux) and MacOS.
-I don't use X applications anymore.
+This repository contains all my dotfiles and
+working configurations managed by [chezmoi](https://github.com/twpayne/chezmoi).
 
+## 💻 Supported Platforms
+
+|Key|Definition|
+|-|-|
+|✅|Fully supported|
+|❔|Limited supported|
+|❌|Not supported|
+|🧪|Experimental|
+
+### Architecture
+
+|OS/Distro|amd64|armv8 (arm64)|armv7 (arm)|Note|
+|-|-|-|-|-|
+|Gentoo|✅|✅|❔| |
+|Arch Linux|✅|✅|❔|Included ARM version|
+|Ubuntu|✅|❔|❔|Only from 24.04 LTS version|
+|Alpine|✅|✅|❔|Only for container|
+|MacOS|❌|✅|||
+|Android|❔|✅|❌|Not need to rooted|
+|Windows|❌|❌|❌|Some tools on WSL can work, but not tested|
+
+### GUI server protocols
+- Linux Wayland: ✅
+- Linux X11: ❔
+- MacOS Quartz Compositor: ✅
 ## :brain:&nbsp; Philosophy
 
 - Everything must be under control
