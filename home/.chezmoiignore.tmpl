@@ -60,7 +60,7 @@ Library/Application Support/zen
 {{- end }}
 {{- $settingsFirefox := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
 {{- $processFirefox := printf "%s/%s" $settingsFirefox.installFolder $settingsFirefox.processFile }}
-{{- $settingsThunderbird := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{- $settingsThunderbird := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
 {{- $processThunderbird := printf "%s/%s" $settingsThunderbird.installFolder $settingsThunderbird.processFile }}
 {{- if eq .browser "F" "Z" }}
 {{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
