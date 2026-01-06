@@ -26,9 +26,11 @@ processFile:
 {{-     if eq .osid "linux-gentoo" }}
 installFolder: /opt/betterbird
 executableFile: betterbird-bin
+processFile: betterbird-bin
 {{-     else if eq .osid "linux-arch" }}
 installFolder: /opt/betterbird
 executableFile: betterbird
+processFile: betterbird-bin
 {{-     else }}
 installFolder:
 executableFile:
