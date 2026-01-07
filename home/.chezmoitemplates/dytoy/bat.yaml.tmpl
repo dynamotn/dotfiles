@@ -33,11 +33,11 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{-   $arch = "aarch64" }}
   {{- end }}
-  release_asset: bat-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
+  release_asset: bat-%v-{{ $arch }}-{{ $os }}.tar.gz
 archive:
-  - path: bat-%v-{{ $arch }}-unknown-linux-gnu/bat
+  - path: bat-%v-{{ $arch }}-{{ $os }}/bat
     strip: 1
-  - path: bat-%v-{{ $arch }}-unknown-linux-gnu/bat.1
+  - path: bat-%v-{{ $arch }}-{{ $os }}/bat.1
     strip: 1
     location: $HOME/.local/man/man1
 {{- end }}
