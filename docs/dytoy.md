@@ -256,6 +256,7 @@
 |[helm](https://github.com/helm/helm)|Kubernetes package manager|
 |[gcloud](https://cloud.google.com/sdk)|Libraries and tools for interacting with Google Cloud products and services|
 |[aws](https://github.com/aws/aws-cli)|Libraries and tools for interacting with Amazon Web Services products and services|
+|[taws](github.com/huseyinbabal/taws)|Interactive TUI AWS services|
 |[az](https://github.com/Azure/azure-cli)|Libraries and tools for interacting with Microsoft Azure products and services|
 |[pint](https://github.com/cloudflare/pint)|Linter for Prometheus rules|
 

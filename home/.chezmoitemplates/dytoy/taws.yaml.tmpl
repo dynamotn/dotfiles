@@ -1,0 +1,19 @@
+name: taws
+method: binary
+github:
+  repo: huseyinbabal/taws
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{-   $os = "unknown-linux-gnu" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: taws-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: taws
