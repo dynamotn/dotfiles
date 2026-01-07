@@ -7,8 +7,15 @@ app-arch/unzip
 app-containers/docker
 app-containers/docker-cli
 app-editors/neovim
-{{- if eq .guiWinManager "H" }}
-app-i18n/fcitx-bamboo
+{{- if has "vi" .languages }}
+app-i18n/ibus-lotus
+{{- end }}
+{{- if has "ja" .languages }}
+app-i18n/mozc
+{{- end }}
+{{- if has "zh" .languages }}
+app-i18n/ibus-m17n
+app-i18n/ibus-rime
 {{- end }}
 app-misc/grc
 app-misc/resolve-march-native

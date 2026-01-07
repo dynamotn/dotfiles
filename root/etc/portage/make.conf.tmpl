@@ -28,7 +28,7 @@ ACCEPT_LICENSE="*"
 
 # Built-time functionality
 # ========================
-USE="-X lto pgo wayland -introspection -vala -llvm udev zstd vulkan dist-kernel
+USE="-X lto pgo wayland -vala -llvm udev zstd vulkan dist-kernel
 {{ if eq .initSystem "openrc" }}-systemd{{ end }}
 {{ if .hasSound }}alsa pipewire{{ end }}
 {{ if .hasBluetooth }}bluetooth{{ end }}"
