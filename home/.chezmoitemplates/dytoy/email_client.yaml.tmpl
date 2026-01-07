@@ -15,13 +15,14 @@ ubuntu:
 alpine:
   packages:
     - name: thunderbird
-termux:
-  packages:
-    - name: thunderbird
+termux: # Use Fdroid
 macos:
   packages:
     - name: thunderbird
       type: cask
+fdroid:
+  packages:
+    - name: net.thunderbird.android
 {{- else if eq .mailClient "B" }}
 # Only available on Gentoo, Arch, macOS
 name: betterbird
