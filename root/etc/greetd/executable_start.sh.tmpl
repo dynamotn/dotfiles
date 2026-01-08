@@ -6,4 +6,8 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 {{- end }}
 export HOME=$XDG_RUNTIME_DIR
 mkdir -p $XDG_RUNTIME_DIR && chmod 700 $XDG_RUNTIME_DIR
-dbus-run-session Hyprland --config /etc/greetd/hyprland.conf
+{{- $command := "Hyprland" }}
+{{- if lookPath "start-hyprland" }}
+{{-   $command = "start-hyprland" }}
+{{- end }}
+dbus-run-session {{ $command }} --config /etc/greetd/hyprland.conf
