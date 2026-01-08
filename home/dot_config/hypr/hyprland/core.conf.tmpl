@@ -1,4 +1,4 @@
-{{- $version := output "bash" "-c" "hyprland -v | grep -Po 'Hyprland \\K(\\d*\\.\\d*\\.\\d*)'" | trim | semver }}
+{{- $version := output "hyprctl" "version" "-j" | fromJson | jq ".version" | first }}
 general {
   gaps_in = 4
   gaps_out = 8
@@ -70,7 +70,7 @@ input {
   }
 }
 
-{{ if ge (semver "0.51" | $version.Compare) 0 -}}
+{{ if semverCompare ">=0.51" $version -}}
 gesture = 3, horizontal, workspace
 {{ else -}}
 gestures {

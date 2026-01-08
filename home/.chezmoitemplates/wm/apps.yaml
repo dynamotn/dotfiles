@@ -1,0 +1,81 @@
+tags:
+  - name: term
+    classes:
+      - ^(kitty)$
+    workspace: term
+  - name: browser
+    classes:
+      - ^([Ff]irefox(|-esr)|org.mozilla.firefox|[Ff]irefox)$
+      - ^([Zz]en)$
+      - ^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$
+      - ^(chrome-.+-Default)$ # Chrome PWAs
+      - ^(Vivaldi.+)$
+    workspace: web
+  - name: email
+    classes:
+      - ^([Tt]hunderbird(|-esr)|org.mozilla.[Tt]hunderbird|org.gnome.Evolution)$
+      - ^eu.betterbird.[Bb]etterbird$
+    workspace: mail
+  - name: note
+    classes:
+      - ^(obsidian)$
+    workspace: doc
+  - name: viewer
+    classes:
+      - ^(evince)$ # document viewer
+      - ^(eog|org.gnome.Loupe)$ # image viewer
+    workspace: doc
+    float: true
+  - name: office
+    classes:
+      - ^(et|wps|wpp)$ # WPS
+      - ^(libreoffice.*)$ # LibreOffice
+    workspace: doc
+  - name: im
+    classes:
+      - ^([Dd]iscord|[Ww]ebCord|[Vv]esktop)$
+      - ^([Ff]erdium)$
+      - ^([Ww]hatsapp-for-linux)$
+      - ^(org.telegram.desktop|io.github.tdesktop_x64.TDesktop)$
+      - ^(teams-for-linux)$
+    workspace: chat
+  - name: video
+    classes:
+      - ^(mpv)$
+    workspace: media
+  - name: game
+    classes:
+      - ^(gamescope)$
+      - ^(steam_app_\d+)$
+    workspace: game
+    fullscreen: true
+  - name: gamestore
+    classes:
+      - ^([Ss]team)$
+      - ^(net.lutris.Lutris)$
+      - ^(com.heroicgameslauncher.hgl)$
+    workspace: game
+  - name: remote
+    classes:
+      - ^([Vv]mware-view)$
+      - ^([Rr]ustdesk)$
+      - ^(org.remmina.Remmina)$
+    workspace: sys
+  - name: file-manager
+    classes:
+      - ^([Tt]hunar|org.gnome.Nautilus|[Pp]cmanfm-qt)$
+      - ^(app.drey.Warp)$
+    workspace: sys
+  - name: settings
+    classes:
+      - ^(file-roller|org.gnome.FileRoller)$ # archive manager
+      - ^(nm-applet|nm-connection-editor|blueman-manager)$
+      - ^(pavucontrol|org.pulseaudio.pavucontrol|com.saivert.pwvucontrol)$
+      - ^(nwg-look|qt5ct|qt6ct|[Yy]ad)$
+      - ^(xdg-desktop-portal-gtk)$
+      - ^(btop)$
+    float: true
+    center: true
+    size:
+      width: 0.8
+      height: 0.7
