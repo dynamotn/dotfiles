@@ -1,0 +1,27 @@
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $rules.monitors }}
+{{-   $attrs := list }}
+{{-   if get . "disabled" }}
+{{-     $attrs = append $attrs "disable" }}
+{{-   else }}
+{{-     if get . "resolution" }}
+{{-       $attrs = append $attrs .resolution }}
+{{-     else }}
+{{-       $attrs = append $attrs "" }}
+{{-     end }}
+{{-     if get . "position" }}
+{{-       $attrs = append $attrs .position }}
+{{-     else }}
+{{-       $attrs = append $attrs "" }}
+{{-     end }}
+{{-     if get . "scale" }}
+{{-       $attrs = append $attrs .scale }}
+{{-     else }}
+{{-       $attrs = append $attrs "" }}
+{{-     end }}
+{{-     if get . "bonusParams" }}
+{{-       $attrs = append $attrs .bonusParams }}
+{{-     end }}
+{{-   end }}
+monitor = {{ .name }}, {{ join ", " $attrs }}
+{{- end }}

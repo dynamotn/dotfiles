@@ -1,7 +1,7 @@
 exec-once = regreet; hyprctl dispatch exit
 exec-once = bash {{ .chezmoi.sourceDir }}/../../.config/hypr/hyprland/scripts/gtk.sh
 
-{{- template "hyprland/monitor" . -}}
+{{- template "wm/hypr-monitor.conf.tmpl" . -}}
 
 {{- if eq .guiDriver "N" }}
 # NVIDIA setting

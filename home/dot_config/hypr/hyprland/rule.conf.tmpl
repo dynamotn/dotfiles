@@ -50,8 +50,8 @@ workspace = w[tv1], gapsout:0, gapsin:0
 {{- end }}
 
 # Per app #
-{{- $apps := includeTemplate "wm/apps.yaml"  | fromYaml }}
-{{- range $apps.tags }}
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $rules.tags }}
 {{/*  Class to tag */}}
 {{-   $name := .name }}
 {{-   range .classes }}
