@@ -1,93 +1,120 @@
+# TODO: Remove logic for version < 0.53 when 0.53 on Gentoo is stable
+{{- $version := output "hyprctl" "version" "-j" | fromJson | jq ".version" | first }}
+{{- $matchClassKeyword := "class:" }}
+{{- $matchTagKeyword := "tag:" }}
+{{- $windowRuleSection := "windowrulev2" }}
+{{- if semverCompare ">=0.53" $version }}
+{{-   $matchClassKeyword = "match:class " }}
+{{-   $matchTagKeyword = "match:tag " }}
+{{-   $windowRuleSection = "windowrule" }}
+{{- end }}
+# Layer
+{{- $layers := list "wofi" "swaync-control-center" "gtk-layer-shell" }}
+{{- range $layers }}
+{{-   if semverCompare ">=0.53" $version }}
+layerrule = blur on, ignore_alpha 0, match:namespace {{ . }}
+{{-   else }}
+layerrule = blur, {{ . }}
+layerrule = ignorezero, {{ . }}
+{{-   end }}
+{{- end }}
+
 # Common #
 # Floating
-windowrulev2 = float, floating:1
+{{- if semverCompare ">=0.53" $version }}
+{{ $windowRuleSection }} = float on, match:float 1
+{{- else }}
+{{ $windowRuleSection }} = float, floating:1
+{{- end }}
 # Smart gaps
+{{- $workspaces := list "w[tv1]" "f[1]" }}
+{{- range $workspaces }}
 workspace = w[tv1], gapsout:0, gapsin:0
-workspace = f[1], gapsout:0, gapsin:0
-windowrulev2 = bordersize 0, floating:0, onworkspace:w[tv1]
-windowrulev2 = rounding 0, floating:0, onworkspace:w[tv1]
-windowrulev2 = decorate off, floating:0, onworkspace:w[tv1]
-windowrulev2 = noshadow, floating:0, onworkspace:w[tv1]
-windowrulev2 = bordersize 0, floating:0, onworkspace:f[1]
-windowrulev2 = rounding 0, floating:0, onworkspace:f[1]
-windowrulev2 = decorate off, floating:0, onworkspace:f[1]
-windowrulev2 = noshadow, floating:0, onworkspace:f[1]
+{{-   if semverCompare ">=0.53" $version }}
+{{ $windowRuleSection }} = border_size 0, match:float 0, match:workspace {{ . }}
+{{ $windowRuleSection }} = rounding 0, match:float 0, match:workspace {{ . }}
+{{ $windowRuleSection }} = decorate off, match:float 0, match:workspace {{ . }}
+{{ $windowRuleSection }} = no_shadow on, match:float 0, match:workspace {{ . }}
+{{-   else }}
+{{ $windowRuleSection }} = bordersize 0, floating:0, onworkspace:{{ . }}
+{{ $windowRuleSection }} = rounding 0, floating:0, onworkspace:{{ . }}
+{{ $windowRuleSection }} = decorate off, floating:0, onworkspace:{{ . }}
+{{ $windowRuleSection }} = noshadow, floating:0, onworkspace:{{ . }}
+{{-   end }}
+{{- end }}
 # Fix dragging issues with XWayland
-windowrulev2 = nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0
+{{- if semverCompare ">=0.53" $version }}
+{{ $windowRuleSection }} = no_focus on,match:class ^$,match:title ^$,match:xwayland 1,match:float 1,match:fullscreen 0,match:pin 0
+{{- else }}
+{{ $windowRuleSection }} = nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0
+{{- end }}
 
 # Per app #
-# Tags
-windowrulev2 = tag +term, class:^(kitty)$
-windowrulev2 = tag +browser, class:^([Ff]irefox(|-esr)|org.mozilla.firefox|[Ff]irefox)$
-windowrulev2 = tag +browser, class:^([Zz]en)$
-windowrulev2 = tag +browser, class:^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$
-windowrulev2 = tag +browser, class:^(chrome-.+-Default)$ # Chrome PWAs
-windowrulev2 = tag +browser, class:^(Vivaldi.+)$
-windowrulev2 = tag +email, class:^([Tt]hunderbird(|-esr)|org.mozilla.[Tt]hunderbird|org.gnome.Evolution)$
-windowrulev2 = tag +email, class:^eu.betterbird.[Bb]etterbird$
-windowrulev2 = tag +note, class:^(obsidian)$
-windowrulev2 = tag +viewer, class:^(evince)$ # document viewer
-windowrulev2 = tag +viewer, class:^(eog|org.gnome.Loupe)$ # image viewer
-windowrulev2 = tag +im, class:^([Dd]iscord|[Ww]ebCord|[Vv]esktop)$
-windowrulev2 = tag +im, class:^([Ff]erdium)$
-windowrulev2 = tag +im, class:^([Ww]hatsapp-for-linux)$
-windowrulev2 = tag +im, class:^(org.telegram.desktop|io.github.tdesktop_x64.TDesktop)$
-windowrulev2 = tag +im, class:^(teams-for-linux)$
-windowrulev2 = tag +video, class:^(mpv)$
-windowrulev2 = tag +games, class:^(gamescope)$
-windowrulev2 = tag +games, class:^(steam_app_\d+)$
-windowrulev2 = tag +gamestore, class:^([Ss]team)$
-windowrulev2 = tag +gamestore, title:^([Ll]utris)$
-windowrulev2 = tag +gamestore, class:^(com.heroicgameslauncher.hgl)$
-windowrulev2 = tag +remote, class:^([Vv]mware-view)$
-windowrulev2 = tag +file-manager, class:^([Tt]hunar|org.gnome.Nautilus|[Pp]cmanfm-qt)$
-windowrulev2 = tag +file-manager, class:^(app.drey.Warp)$
-windowrulev2 = tag +settings, class:^(file-roller|org.gnome.FileRoller)$ # archive manager
-windowrulev2 = tag +settings, class:^(nm-applet|nm-connection-editor|blueman-manager)$
-windowrulev2 = tag +settings, class:^(pavucontrol|org.pulseaudio.pavucontrol|com.saivert.pwvucontrol)$
-windowrulev2 = tag +settings, class:^(nwg-look|qt5ct|qt6ct|[Yy]ad)$
-windowrulev2 = tag +settings, class:(xdg-desktop-portal-gtk)
-windowrulev2 = tag +settings, class:(btop)
+{{- $apps := includeTemplate "wm/apps.yaml"  | fromYaml }}
+{{- range $apps.tags }}
+{{/*  Class to tag */}}
+{{-   $name := .name }}
+{{-   range .classes }}
+{{ $windowRuleSection }} = tag +{{ $name }}, {{ $matchClassKeyword }}{{ . }}
+{{-   end }}
 
-# Handle workspace
-windowrulev2 = workspace name:term silent, tag:term*
-windowrulev2 = workspace name:web silent, tag:browser*
-windowrulev2 = workspace name:mail silent, tag:email*
-windowrulev2 = workspace name:doc silent, tag:note*
-windowrulev2 = workspace name:doc silent, tag:viewer*
-windowrulev2 = workspace name:chat silent, tag:im*
-windowrulev2 = workspace name:media silent, tag:video*
-windowrulev2 = workspace name:game silent, tag:game*
-windowrulev2 = workspace name:game silent, tag:gamestore*
-windowrulev2 = workspace name:sys silent, tag:remote*
-windowrulev2 = workspace name:sys silent, tag:file-manager*
-# Floating for some apps
-windowrulev2 = float, tag:settings*
-windowrulev2 = float, tag:viewer*
-windowrulev2 = float, initialTitle:^(Calendar Reminders)$
-windowrulev2 = float, title:^(Picture-in-Picture)$
-# Size
-windowrulev2 = size 80% 70%, tag:setting*
-windowrulev2 = keepaspectratio, title:^(Picture-in-Picture)$
-# Pin
-windowrulev2 = pin, title:^(Picture-in-Picture)$
-# Position
-windowrulev2 = center, tag:setting*
-windowrulev2 = move 72% 7%, title:^(Picture-in-Picture)$
-# Blur and fullscreen
-windowrulev2 = noblur, tag:games*
-windowrulev2 = fullscreen, tag:games*
+{{/*  Handle workspace */}}
+{{-   if hasKey . "workspace" }}
+{{ $windowRuleSection }} = workspace name:{{ .workspace }} silent, {{ $matchTagKeyword }}{{ .name }}*
+{{-   end }}
+{{/*  Floating */}}
+{{-   if and (hasKey . "float") (get . "float") }}
+{{ $windowRuleSection }} = float{{ if semverCompare ">=0.53" $version }} on{{ end }}, {{ $matchTagKeyword }}{{ .name }}*
+{{-   end }}
+{{/*  Center */}}
+{{-   if and (hasKey . "center") (get . "center") }}
+{{ $windowRuleSection }} = center{{ if semverCompare ">=0.53" $version }} on{{ end }}, {{ $matchTagKeyword }}{{ .name }}*
+{{-   end }}
+{{/*  Fullscreen and blur */}}
+{{-   if and (hasKey . "fullscreen") (get . "fullscreen") }}
+{{ $windowRuleSection }} = {{ if semverCompare ">=0.53" $version }}no_blur on{{ else }}noblur{{ end }}, {{ $matchTagKeyword }}{{ .name }}*
+{{ $windowRuleSection }} = fullscreen{{ if semverCompare ">=0.53" $version }} on{{ end }}, {{ $matchTagKeyword }}{{ .name }}*
+{{-   end }}
+{{/*  Size */}}
+{{-   if and (hasKey . "size") (get . "size") }}
+{{-     $size := "" }}
+{{-     if semverCompare ">=0.53" $version }}
+{{-       $size = printf "(monitor_w*%.2f) (monitor_h*%.2f)" .size.width .size.height }}
+{{-     else }}
+{{-       $size = printf "%d%% %d%%" (.size.width | mulf 100 | int)  (.size.height | mulf 100 | int) }}
+{{-     end }}
+{{ $windowRuleSection }} = size {{ $size }}, {{ $matchTagKeyword }}{{ .name }}*
+{{-   end }}
+{{- end }}
 
-# Layer
-layerrule = blur, wofi
-layerrule = ignorezero, wofi
-layerrule = blur, swaync-control-center
-layerrule = ignorezero, swaync-control-center
-layerrule = blur, gtk-layer-shell
-layerrule = ignorezero, gtk-layer-shell
-
-# IME
-windowrulev2 = float, class:^(ibus-ui-gtk3)$
-windowrulev2 = noinitialfocus, class:^(ibus-ui-gtk3)$
-windowrulev2 = noborder, class:^(ibus-ui-gtk3)$
-windowrulev2 = pin, class:^(ibus-ui-gtk3)$
+# Other tweaks
+## Calendar Reminders
+{{- if semverCompare ">=0.53" $version }}
+{{ $windowRuleSection }} = float on, match:initial_title ^(Calendar Reminders)$
+{{- else }}
+{{ $windowRuleSection }} = float, initialTitle:^(Calendar Reminders)$
+{{- end }}
+## Picture-in-Picture
+{{- if semverCompare ">=0.53" $version }}
+{{ $windowRuleSection }} = float on, match:title ^(Picture-in-Picture)$
+{{ $windowRuleSection }} = keep_aspect_ratio on, match:title ^(Picture-in-Picture)$
+{{ $windowRuleSection }} = pin on, match:title ^(Picture-in-Picture)$
+{{ $windowRuleSection }} = move (cursor_x-(window_w*0.5)) (cursor_y-(window_h*0.5)), match:title ^(Picture-in-Picture)$
+{{- else }}
+{{ $windowRuleSection }} = float, title:^(Picture-in-Picture)$
+{{ $windowRuleSection }} = keepaspectratio, title:^(Picture-in-Picture)$
+{{ $windowRuleSection }} = pin, title:^(Picture-in-Picture)$
+{{ $windowRuleSection }} = move cursor -50% -50%, title:^(Picture-in-Picture)$
+{{- end }}
+## IME preedit box
+{{- if semverCompare ">=0.53" $version }}
+{{ $windowRuleSection }} = float on, match:class ^(ibus-ui-gtk3)$
+{{ $windowRuleSection }} = no_initial_focus on, match:class ^(ibus-ui-gtk3)$
+{{ $windowRuleSection }} = border_size 0, match:class ^(ibus-ui-gtk3)$
+{{ $windowRuleSection }} = pin on, match:class ^(ibus-ui-gtk3)$
+{{- else }}
+{{ $windowRuleSection }} = float, class:^(ibus-ui-gtk3)$
+{{ $windowRuleSection }} = noinitialfocus, class:^(ibus-ui-gtk3)$
+{{ $windowRuleSection }} = noborder, class:^(ibus-ui-gtk3)$
+{{ $windowRuleSection }} = pin, class:^(ibus-ui-gtk3)$
+{{- end }}
