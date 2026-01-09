@@ -70,8 +70,10 @@ working configurations managed by [chezmoi](https://github.com/twpayne/chezmoi).
 
 - Manage all configurations by only chezmoi, not use any other tool
 (`dotbot`, `comtrya`, `stow`...) or IaC tool (`ansible`, `nix`...).
-Use script and template of chezmoi to do anything.
-- Manage my home folders, and some of OS configurations across multiple machines
+- Use script and template of chezmoi to generate and run anything.
+- Use YAML to store shared config
+- Use age with separated identity for each purpose
+- Manage my home folders, some of OS configurations across multiple machines and working-in-progress folders
 - Must convert configurations of a tool to use Git submodule as a part
 of dotfiles, if match any of below conditions:
   - Not existed in any machine, and has large disk usage (>=1MiB)
