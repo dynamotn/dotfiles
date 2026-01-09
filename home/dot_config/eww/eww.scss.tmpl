@@ -1,0 +1,30 @@
+* {
+  all: unset;
+  transition: 200ms;
+}
+
+{{ $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end -}}
+$bg: {{ $theme.base }};
+$bg-alt: {{ $theme.crust }};
+$fg: {{ $theme.text }};
+$fg-alt: {{ $theme.surface2 }};
+$fg-alt2: {{ $theme.overlay2 }};
+$rosewater: {{ $theme.rosewater }};
+$flamingo: {{ $theme.flamingo }};
+$pink: {{ $theme.pink }};
+$mauve: {{ $theme.mauve }};
+$red: {{ $theme.red }};
+$maroon: {{ $theme.maroon }};
+$peach: {{ $theme.peach }};
+$yellow: {{ $theme.yellow }};
+$green: {{ $theme.green }};
+$teal: {{ $theme.teal }};
+$sky: {{ $theme.sky }};
+$sapphire: {{ $theme.sapphire }};
+$blue: {{ $theme.blue }};
+$lavender: {{ $theme.lavender }};
+
+@import "assets/scss/bar.scss";

@@ -1,11 +1,8 @@
-{{- if .darkMode }}
-$color_text = rgba(cad3f5ff)
-$color_crust = rgba(181926ff)
-$color_teal = rgba(8bd5caff)
-$color_subtext0 = rgba(b8c0e0ff)
-{{- else }}
-$color_text = rgba(4c4f69ff)
-$color_crust = rgba(dce0e8ff)
-$color_teal = rgba(179299ff)
-$color_subtext0 = rgba(6c6f85ff)
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
 {{- end }}
+$color_text = rgba({{ $theme.text | trimPrefix "#" }}ff)
+$color_crust = rgba({{ $theme.crust | trimPrefix "#" }}ff)
+$color_main = rgba({{ get $theme .catppuccin.variant | trimPrefix "#" }}ff)
+$color_subtext0 = rgba({{ $theme.subtext0 | trimPrefix "#" }}ff)

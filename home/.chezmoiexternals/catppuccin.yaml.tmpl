@@ -1,5 +1,5 @@
 {{- $theme := "macchiato" }}
-{{- $variant := "blue" }}
+{{- $variant := .catppuccin.variant }}
 {{- if not .darkMode }}
 {{-   $theme = "latte" }}
 {{- end }}
@@ -14,6 +14,10 @@
 .config/fish/themes/catppuccin.theme:
   type: file
   url: https://raw.githubusercontent.com/catppuccin/fish/refs/heads/main/themes/Catppuccin%20{{ camelcase $theme }}.theme
+  refreshPeriod: 168h
+.config/git/delta:
+  type: file
+  url: https://raw.githubusercontent.com/catppuccin/delta/main/catppuccin.gitconfig
   refreshPeriod: 168h
 .config/glamour/catppuccin.json:
   type: file
@@ -30,10 +34,6 @@
 .config/kitty/diff/color.conf:
   type: file
   url: https://raw.githubusercontent.com/catppuccin/kitty/main/themes/diff-{{ $theme }}.conf
-  refreshPeriod: 168h
-.config/kitty/terminal/color.conf:
-  type: file
-  url: https://raw.githubusercontent.com/catppuccin/kitty/main/themes/{{ $theme }}.conf
   refreshPeriod: 168h
 .config/tridactyl/themes/catppuccin.css:
   type: file

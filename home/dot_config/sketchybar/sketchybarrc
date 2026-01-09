@@ -3,11 +3,7 @@ export CONFIG_DIR=~/.config/sketchybar
 ################################################################################
 # Catpuccin Machiatto Theme
 ################################################################################
-{{- $theme := "macchiato" }}
-{{- if not .darkMode }}
-{{-   $theme = "latte" }}
-{{- end }}
-source "${CONFIG_DIR}/themes/catppuccin-{{ $theme }}.sh"
+source "${CONFIG_DIR}/themes/catppuccin.sh"
 
 ################################################################################
 # Bar properties

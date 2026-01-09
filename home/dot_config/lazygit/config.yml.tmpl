@@ -3,50 +3,29 @@ git:
     colorArg: always
     pager: delta --paging=never
 gui:
-  {{- if .darkMode }}
   theme:
+    {{- $theme := .catppuccin.macchiato }}
+    {{- if not .darkMode }}
+    {{-   $theme = .catppuccin.latte }}
+    {{- end }}
     activeBorderColor:
-      - "#89b4fa"
+      - "{{ get $theme .catppuccin.variant }}"
       - bold
     inactiveBorderColor:
-      - "#a6adc8"
+      - "{{ $theme.subtext0 }}"
     optionsTextColor:
-      - "#89b4fa"
+      - "{{ $theme.sapphire }}"
     selectedLineBgColor:
-      - "#313244"
+      - "{{ $theme.surface0 }}"
     cherryPickedCommitBgColor:
-      - "#45475a"
+      - "{{ $theme.surface2 }}"
     cherryPickedCommitFgColor:
-      - "#89b4fa"
+      - "{{ $theme.blue }}"
     unstagedChangesColor:
-      - "#f38ba8"
+      - "{{ $theme.red }}"
     defaultFgColor:
-      - "#cdd6f4"
+      - "{{ $theme.text }}"
     searchingActiveBorderColor:
-      - "#f9e2af"
+      - "{{ $theme.yellow }}"
   authorColors:
-    '*': '#b7bdf8'
-  {{- else }}
-  theme:
-    activeBorderColor:
-      - '#179299'
-      - bold
-    inactiveBorderColor:
-      - '#6c6f85'
-    optionsTextColor:
-      - '#1e66f5'
-    selectedLineBgColor:
-      - '#ccd0da'
-    cherryPickedCommitBgColor:
-      - '#bcc0cc'
-    cherryPickedCommitFgColor:
-      - '#179299'
-    unstagedChangesColor:
-      - '#d20f39'
-    defaultFgColor:
-      - '#4c4f69'
-    searchingActiveBorderColor:
-      - '#df8e1d'
-  authorColors:
-    '*': '#7287fd'
-  {{- end }}
+    '*': '{{ $theme.mauve }}'

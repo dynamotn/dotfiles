@@ -63,7 +63,7 @@ wtf:
       filePaths:
         - "~/Documents/Notes/01_Fleeting/TODO.md"
       format: true
-      formatStyle: "catppuccin-macchiato"
+      formatStyle: "catppuccin-{{ if .darkMode }}macchiato{{ else }}latte{{ end }}"
       refreshInterval: 15s
       wrapText: true
       position:
