@@ -245,27 +245,19 @@ source = auto
 ; gradient_color_7 = '#cc5933'
 ; gradient_color_8 = '#cc3333'
 
-{{ if .darkMode }}
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end }}
 gradient = 1
-gradient_color_1 = '#8bd5ca'
-gradient_color_2 = '#91d7e3'
-gradient_color_3 = '#7dc4e4'
-gradient_color_4 = '#8aadf4'
-gradient_color_5 = '#c6a0f6'
-gradient_color_6 = '#f5bde6'
-gradient_color_7 = '#ee99a0'
-gradient_color_8 = '#ed8796'
-{{ else }}
-gradient = 1
-gradient_color_1 = '#179299'
-gradient_color_2 = '#04a5e5'
-gradient_color_3 = '#209fb5'
-gradient_color_4 = '#1e66f5'
-gradient_color_5 = '#8839ef'
-gradient_color_6 = '#ea76cb'
-gradient_color_7 = '#e64553'
-gradient_color_8 = '#d20f39'
-{{ end }}
+gradient_color_1 = '{{ $theme.teal }}'
+gradient_color_2 = '{{ $theme.sky }}'
+gradient_color_3 = '{{ $theme.sapphire }}'
+gradient_color_4 = '{{ $theme.blue }}'
+gradient_color_5 = '{{ $theme.mauve }}'
+gradient_color_6 = '{{ $theme.pink }}'
+gradient_color_7 = '{{ $theme.maroon }}'
+gradient_color_8 = '{{ $theme.red }}'
 
 [smoothing]
 

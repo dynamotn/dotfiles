@@ -26,62 +26,59 @@ General:
   MarkStyleWidth: 1
 #  SectionDelimiter: "^#"
 
-# Style
-# String of the color name: Foreground, Background, UnderlineColor
-# Boolean: Bold, Blink, Dim, Italic, Underline
-# Number: UnderlineStyle
-StyleAlternate:
-  Background: "gray"
-StyleHeader:
-  Bold: true
-StyleBody:
-# Add appropriate styles here
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end }}
+  Style:
+    Header:
+      Background: "{{ $theme.mauve }}"
+      Bold: true
+    HeaderBorder:
+    Alternate:
+      Background: "{{ $theme.overlay0 }}"
+      Bold: true
+      Underline: true
+    LineNumber:
+      Bold: true
+    SearchHighlight:
+      Reverse: true
+    ColumnHighlight:
+      Reverse: true
+    MarkLine:
+      Background: "{{ $theme.peach }}"
+    SectionLine:
+      Background: "{{ $theme.surface2 }}"
+    VerticalHeader:
+    Ruler:
+      Background: "{{ $theme.surface1 }}"
+      Foreground: "{{ $theme.subtext1 }}"
+      Bold: true
+    SectionHeaderBorder:
+      Underline: true
+    VerticalHeaderBorder:
+      Background: "{{ $theme.overlay0 }}"
+    MultiColorHighlight:
+      - Foreground: "{{ $theme.flamingo }}"
+      - Foreground: "{{ $theme.pink }}"
+      - Foreground: "{{ $theme.maroon }}"
+      - Foreground: "{{ $theme.rosewater }}"
+      - Foreground: "{{ $theme.green }}"
+      - Foreground: "{{ $theme.sky }}"
+      - Foreground: "{{ $theme.blue }}"
+    ColumnRainbow:
+      - Foreground: "{{ $theme.red }}"
+      - Foreground: "{{ $theme.peach}}"
+      - Foreground: "{{ $theme.yellow }}"
+      - Foreground: "{{ $theme.teal }}"
+      - Foreground: "{{ $theme.sapphire }}"
+      - Foreground: "{{ $theme.lavender }}"
+      - Foreground: "{{ $theme.mauve }}"
+    JumpTargetLine:
+      Underline: true
 StyleOverStrike:
   Bold: true
 StyleOverLine:
-  Underline: true
-StyleLineNumber:
-  Bold: true
-StyleSearchHighlight:
-  Reverse: true
-StyleColumnHighlight:
-  Reverse: true
-StyleMarkLine:
-  Background: "darkgoldenrod"
-StyleSectionLine:
-  Background: "slateblue"
-StyleVerticalHeader:
-# Add appropriate styles here
-StyleRuler:
-  Background: "#333333"
-  Foreground: "#CCCCCC"
-  Bold: true
-StyleHeaderBorder:
-# Add appropriate styles here
-# UnderlineStyle: 2
-StyleSectionHeaderBorder:
-# Add appropriate styles here
-# Underline: true
-# UnderlineColor: "red"
-StyleVerticalHeaderBorder:
-  Background: "#c0c0c0"
-StyleMultiColorHighlight:
-  - Foreground: "red"
-  - Foreground: "aqua"
-  - Foreground: "yellow"
-  - Foreground: "fuchsia"
-  - Foreground: "lime"
-  - Foreground: "blue"
-  - Foreground: "grey"
-StyleColumnRainbow:
-  - Foreground: "white"
-  - Foreground: "crimson"
-  - Foreground: "aqua"
-  - Foreground: "lightsalmon"
-  - Foreground: "lime"
-  - Foreground: "blue"
-  - Foreground: "yellowgreen"
-StyleJumpTargetLine:
   Underline: true
 
 # Keybind

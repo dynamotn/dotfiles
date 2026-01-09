@@ -112,21 +112,16 @@ if status is-interactive
     # Hooks
     # Fzf config
     type -q __fzf_setup; and __fzf_setup
-    {{- if .darkMode }}
-    set -Ux FZF_COLOR_OPTS "\
-        --color=bg+:#363A4F,bg:#24273A,spinner:#F4DBD6,hl:#ED8796 \
-        --color=fg:#CAD3F5,header:#ED8796,info:#C6A0F6,pointer:#F4DBD6 \
-        --color=marker:#B7BDF8,fg+:#CAD3F5,prompt:#C6A0F6,hl+:#ED8796 \
-        --color=selected-bg:#494D64 \
-        --color=border:#6E738D,label:#CAD3F5"
-    {{- else }}
-    set -Ux FZF_COLOR_OPTS "\
-        --color=bg+:#CCD0DA,bg:#EFF1F5,spinner:#DC8A78,hl:#D20F39 \
-        --color=fg:#4C4F69,header:#D20F39,info:#8839EF,pointer:#DC8A78 \
-        --color=marker:#7287FD,fg+:#4C4F69,prompt:#8839EF,hl+:#D20F39 \
-        --color=selected-bg:#BCC0CC \
-        --color=border:#9CA0B0,label:#4C4F69"
+    {{- $theme := .catppuccin.macchiato }}
+    {{- if not .darkMode }}
+    {{-   $theme = .catppuccin.latte }}
     {{- end }}
+    set -Ux FZF_COLOR_OPTS "\
+        --color=bg+:{{ $theme.surface0 }},bg:{{ $theme.base }},spinner:{{ $theme.rosewater }},hl:{{ $theme.red}} \
+        --color=fg:{{ $theme.text }},header:{{ $theme.red }},info:{{ $theme.mauve }},pointer:{{ $theme.rosewater }} \
+        --color=marker:{{ $theme.lavender }},fg+:{{ $theme.text }},prompt:{{ $theme.mauve }},hl+:{{ $theme.red }} \
+        --color=selected-bg:{{ $theme.surface1 }} \
+        --color=border:{{ $theme.overlay0 }},label:{{ $theme.text }}"
     set -gx FZF_DEFAULT_OPTS "\
         $FZF_COLOR_OPTS \
         --cycle --layout=reverse --preview-window=wrap \

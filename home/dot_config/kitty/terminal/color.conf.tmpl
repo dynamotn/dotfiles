@@ -1,0 +1,74 @@
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end }}
+# The basic colors
+foreground              {{ $theme.text }}
+background              {{ $theme.mantle }}
+selection_foreground    {{ $theme.base }}
+selection_background    {{ $theme.rosewater }}
+
+# Cursor colors
+cursor                  {{ get $theme .catppuccin.variant }}
+cursor_text_color       {{ $theme.base }}
+
+# URL underline color when hovering with mouse
+url_color               {{ $theme.blue }}
+
+# Kitty window border colors
+active_border_color     {{ $theme.lavender }}
+inactive_border_color   {{ $theme.overlay0 }}
+bell_border_color       {{ $theme.yellow }}
+
+# OS Window titlebar colors
+wayland_titlebar_color system
+macos_titlebar_color system
+
+# Tab bar colors
+active_tab_foreground   {{ $theme.crust }}
+active_tab_background   {{ get $theme .catppuccin.variant }}
+inactive_tab_foreground {{ $theme.text}}
+inactive_tab_background {{ $theme.mantle }}
+tab_bar_background      {{ $theme.crust }}
+
+# Colors for marks (marked text in the terminal)
+mark1_foreground {{ $theme.base }}
+mark1_background {{ $theme.lavender }}
+mark2_foreground {{ $theme.base }}
+mark2_background {{ $theme.mauve }}
+mark3_foreground {{ $theme.base }}
+mark3_background {{ $theme.sapphire }}
+
+# The 16 terminal colors
+
+# black
+color0 {{ $theme.base }}
+color8 {{ $theme.surface2 }}
+
+# red
+color1 {{ $theme.red }}
+color9 {{ $theme.maroon }}
+
+# green
+color2  {{ $theme.green }}
+color10 {{ $theme.teal }}
+
+# yellow
+color3  {{ $theme.peach }}
+color11 {{ $theme.yellow }}
+
+# blue
+color4  {{ $theme.blue }}
+color12 {{ $theme.lavender }}
+
+# magenta
+color5  {{ $theme.pink }}
+color13 {{ $theme.mauve }}
+
+# cyan
+color6  {{ $theme.sky }}
+color14 {{ $theme.sapphire }}
+
+# white
+color7  {{ $theme.text }}
+color15 {{ $theme.subtext0 }}

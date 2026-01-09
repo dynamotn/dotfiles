@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end }}
+export SKETCHY_MAUVE=0xff{{ trimPrefix "#" $theme.mauve }}
+export SKETCHY_RED=0xff{{ trimPrefix "#" $theme.red }}
+export SKETCHY_YELLOW=0xff{{ trimPrefix "#" $theme.yellow }}
+export SKETCHY_GREEN=0xff{{ trimPrefix "#" $theme.green }}
+export SKETCHY_TEAL=0xff{{ trimPrefix "#" $theme.teal }}
+export SKETCHY_BLUE=0xff{{ trimPrefix "#" $theme.blue }}
+export SKETCHY_SUBTEXT_0=0xff{{ trimPrefix "#" $theme.subtext0 }}
+export SKETCHY_SUBTEXT_1=0xff{{ trimPrefix "#" $theme.subtext1 }}
+export SKETCHY_SURFACE_0=0xff{{ trimPrefix "#" $theme.surface0 }}
+export SKETCHY_SURFACE_1=0xff{{ trimPrefix "#" $theme.surface1 }}
+export SKETCHY_SURFACE_2=0xff{{ trimPrefix "#" $theme.surface2 }}
+export SKETCHY_MANTLE=0xff{{ trimPrefix "#" $theme.mantle }}
