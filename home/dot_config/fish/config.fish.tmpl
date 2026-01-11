@@ -160,6 +160,11 @@ if status is-interactive
         set -gx ZELLIJ_AUTO_ATTACH true
         zellij setup --generate-completion fish | source
     end
+    # OV with other commands
+    if type -q ov
+      type -q psql; and set -gx PSQL_PAGER 'ov -F -C -d "|" -H1 --column-rainbow --align'
+      type -q tspin; and set -gx TAILSPIN_PAGER 'ov -f [FILE]'
+    end
 
     # Other completions generation
     # kubectl
