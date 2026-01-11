@@ -35,24 +35,65 @@ folders:
     is_workspace: true
     regex: ""
     priority: 0
+    git:
+      host: gl
+      group: dynamo-config/fish-packages
+      repos:
+        - name: autopairs
+          path: autopairs
+        - name: bitrofi
+          path: bitrofi
+        - name: canaudua
+          path: canaudua
+        - name: caran
+          path: caran
+        - name: fzf
+          path: fzf
   - path: {{ .chezmoi.homeDir }}/Working/personal/tools
-    prefix: "tools"
+    prefix: "tool"
     is_workspace: true
     regex: ""
     priority: 0
+    git:
+      host: gl
+      group: dynamo-tools
+      repos:
+        - name: projekt
+          path: projekt
+        - name: datme
+          path: datme
   - path: {{ .chezmoi.homeDir }}/Working/personal/infra
     prefix: "infra"
     is_workspace: true
     regex: ""
     priority: 0
+    git:
+      host: gl
+      group: dynamo-infra
+      repos:
+        - name: homeops
+          path: homeops
+        - name: terragrunt
+          path: terragrunt
   {{- if eq .kind "pc" "laptop" }}
   - path: {{ .chezmoi.homeDir }}/Working/personal/finance
     prefix: "finance"
     is_workspace: true
     regex: ""
     priority: 0
+    git:
+      host: gl
+      group: dynamo-finance
+      repos:
+        - name: ledger
+          path: ledger
   - path: {{ .chezmoi.homeDir }}/Documents/Notes
     prefix: ""
+    is_workspace: false
+    regex: ""
+    priority: 0
+  - path: {{ .chezmoi.homeDir }}/Documents/Notes/_assets/books
+    prefix: "book"
     is_workspace: false
     regex: ""
     priority: 0
