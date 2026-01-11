@@ -19,7 +19,7 @@ function _spec_main {
 # @description Update git submodules for running this script only
 #######################################
 function _update_git_modules {
-  if [ ! -d "$SCRIPT_DIR/lib/dybatpho" ]; then
+  if [ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]; then
     cd "$SCRIPT_DIR" || exit
     git submodule update --init --remote "$SCRIPT_DIR/lib/dybatpho" "$SCRIPT_DIR/lib/expect-age"
   fi
