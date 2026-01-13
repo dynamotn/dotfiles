@@ -39,30 +39,20 @@ Library/Application Support/Firefox
 .zen
 Library/Application Support/zen
 {{- end }}
+{{- $numberOfRunningProcess := 0 }}
+{{- if eq .chezmoi.os "linux" }}
+{{-   $numberOfRunningProcess = 1 }}
+{{- end }}
 {{- if empty .browser }}
 .config/tridactyl
 .mozilla
 .zen
 .config/firefox
 .local/bin/dyfox
-{{- end }}
-{/* Based on type of mail client */}
-{{- if empty .mailClient }}
-.thunderbird
-.config/thunderbird
-.local/bin/dybird
-{{- end }}
+{{- else }}
 {/* Ignore when running */}
-{{- $processThunderbird := "" }}
-{{- $numberOfRunningProcess := 0 }}
-{{- if eq .chezmoi.os "linux" }}
-{{-   $numberOfRunningProcess = 1 }}
-{{- end }}
-{{- $settingsFirefox := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
-{{- $processFirefox := printf "%s/%s" $settingsFirefox.installFolder $settingsFirefox.processFile }}
-{{- $settingsThunderbird := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
-{{- $processThunderbird := printf "%s/%s" $settingsThunderbird.installFolder $settingsThunderbird.processFile }}
-{{- if eq .browser "F" "Z" }}
+{{-   $settingsFirefox := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{-   $processFirefox := printf "%s/%s" $settingsFirefox.installFolder $settingsFirefox.processFile }}
 {{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
 .config/firefox
 .mozilla
@@ -71,7 +61,15 @@ Library/Application Support/Firefox
 Library/Application Support/zen
 {{-   end }}
 {{- end }}
-{{- if eq .mailClient "T" "B" }}
+{/* Based on type of mail client */}
+{{- if empty .mailClient }}
+.thunderbird
+.config/thunderbird
+.local/bin/dybird
+{{- else }}
+{/* Ignore when running */}
+{{-   $settingsThunderbird := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
+{{-   $processThunderbird := printf "%s/%s" $settingsThunderbird.installFolder $settingsThunderbird.processFile }}
 {{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) $numberOfRunningProcess }}
 .config/thunderbird
 .thunderbird
