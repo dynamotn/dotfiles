@@ -1,0 +1,35 @@
+description: com.apple.HIToolbox
+data:
+  com.apple.HIToolbox:
+    AppleCurrentKeyboardLayoutInputSourceID: com.apple.keylayout.ABC
+    AppleEnabledInputSources:
+      {{- if has "vi" .languages }}
+      - InputSourceKind: Keyboard Input Method
+        Bundle ID: com.apple.inputmethod.VietnameseIM
+      - InputSourceKind: Input Mode
+        Bundle ID: com.apple.inputmethod.VietnameseIM
+        Input Mode: com.apple.inputmethod.VietnameseSimpleTelex
+      {{- end }}
+      {{- if has "ja" .languages }}
+      - InputSourceKind: Keyboard Input Method
+        Bundle ID: com.apple.inputmethod.Kotoeri.RomajiTyping
+      - InputSourceKind: Input Mode
+        Input Mode: com.apple.inputmethod.Japanese
+        Bundle ID: com.apple.inputmethod.Kotoeri.RomajiTyping
+      {{- end }}
+      {{- if has "zh" .languages }}
+      - InputSourceKind: Keyboard Input Method
+        Bundle ID: com.apple.inputmethod.SCIM
+      - InputSourceKind: Input Mode
+        Bundle ID: com.apple.inputmethod.SCIM
+        Input Mode: com.apple.inputmethod.SCIM.ITABC
+      {{- end }}
+      - InputSourceKind: Keyboard Layout
+        KeyboardLayout Name: US Extended
+        KeyboardLayout ID: -2
+      - InputSourceKind: Non Keyboard Input Method
+        Bundle ID: com.apple.CharacterPaletteIM
+    AppleSelectedInputSources:
+      - InputSourceKind: Keyboard Layout
+        KeyboardLayout Name: US Extended
+        KeyboardLayout ID: -2
