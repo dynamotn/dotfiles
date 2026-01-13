@@ -14,7 +14,7 @@ layout {
       command "fish"
       args "-c" "k9s --context uat"
     }
-    {{- if ne .code "CVP00156075I" }}
+    {{- if ne .code "vdi" }}
     floating_panes {
       pane {
         command "chisel"
@@ -23,7 +23,7 @@ layout {
     }
     {{- end }}
   }
-  {{- if eq .code "CVP00156075I" }}
+  {{- if eq .code "vdi" }}
   tab name="prd-devops" cwd="~/Working/enterprise/F1/OP" {
     pane {
       command "fish"

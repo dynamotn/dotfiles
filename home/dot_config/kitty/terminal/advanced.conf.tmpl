@@ -6,7 +6,11 @@
 #: --login and --interactive to ensure that the shell starts in
 #: interactive mode and reads its startup rc files. Environment
 #: variables are expanded in this setting.
+{{- if eq .code "vdi" }}
+shell fish
+{{- else }}
 shell .
+{{- end }}
 
 #: The terminal based text editor (such as vim or nano) to use when
 #: editing the kitty config file or similar tasks.
