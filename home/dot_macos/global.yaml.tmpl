@@ -1,15 +1,16 @@
+{{- $region := "VN" }}
 description: NSGlobalDomain
 data:
   NSGlobalDomain:
     AKLastIDMSEnvironment: 0
-    AKLastLocale: en_VN
+    AKLastLocale: en_{{ $region }}
     AppleAccentColor: 3
     AppleActionOnDoubleClick: Maximize
     AppleAntiAliasingThreshold: 4
     AppleAquaColorVariant: 1
     AppleHighlightColor: 0.752941 0.964706 0.678431 Green
     AppleICUDateFormatStrings:
-      "1": dd/MM/y
+      "1": y-MM-dd
     AppleICUForce12HourTime: true
     AppleICUNumberSymbols:
       "10": ","
@@ -19,11 +20,19 @@ data:
     AppleInterfaceStyle: Dark
     AppleKeyboardUIMode: 2
     AppleLanguages:
-      - en-VN
-      - vi-VN
+      - en-{{ $region }}
+      {{- if has "vi" .languages }}
+      - vi-{{ $region }}
+      {{- end }}
+      {{- if has "ja" .languages }}
+      - ja-{{ $region }}
+      {{- end }}
+      {{- if has "zh" .languages }}
+      - zh-Hans-{{ $region }}
+      {{- end }}
     AppleLanguagesSchemaVersion: 5400
     AppleLiveTextEnabled: true
-    AppleLocale: en_VN
+    AppleLocale: en_{{ $region }}
     AppleMiniaturizeOnDoubleClick: false
     AppleReduceDesktopTinting: false
     AppleScrollerPagingBehavior: false
@@ -41,11 +50,22 @@ data:
     NSLinguisticDataAssetsRequestLastInterval: 86400.0
     NSLinguisticDataAssetsRequestTime: "2025-05-31T15:32:56.288089036Z"
     NSLinguisticDataAssetsRequested:
-      - vi
-      - vi_VN
       - en
-      - en_VN
+      - en_{{ $region }}
       - en_US
+      {{- if has "vi" .languages }}
+      - vi
+      - vi_{{ $region }}
+      {{- end }}
+      {{- if has "ja" .languages }}
+      - ja
+      - ja_{{ $region }}
+      {{- end }}
+      {{- if has "zh" .languages }}
+      - zh
+      - zh_Hans
+      - zh_{{ $region }}
+      {{- end }}
     NSLinguisticDataAssetsRequestedByChecker: []
     NSPreferredWebServices:
       NSWebServicesProviderWebSearch:
