@@ -10,6 +10,11 @@ folders:
     is_workspace: true
     regex: ""
     priority: 0
+  - path: {{ .chezmoi.homeDir }}/.config/chezmoi
+    prefix: ""
+    is_workspace: false
+    regex: ""
+    priority: 0
   - path: {{ .chezmoi.homeDir }}/Temp
     prefix: "tmp"
     is_workspace: true
@@ -62,6 +67,8 @@ folders:
           path: projekt
         - name: datme
           path: datme
+        - name: sh-docs
+          path: sh-docs
   - path: {{ .chezmoi.homeDir }}/Working/personal/infra
     prefix: "infra"
     is_workspace: true
@@ -75,6 +82,29 @@ folders:
           path: homeops
         - name: terragrunt
           path: terragrunt
+  - path: {{ .chezmoi.homeDir }}/Working/personal/misc
+    prefix: "misc"
+    is_workspace: true
+    regex: ""
+    priority: 0
+    git:
+      host: gh
+      group: dynamotn
+      repos:
+        - name: stars-collection
+          path: stars-collection
+        - name: action-awesome-list
+          path: stars-action
+        - name: Iosevka-Dynamo
+          path: font
+        - name: bash-coding-style
+          path: bash-coding-style
+        - name: dye
+          path: dye
+        - name: cv
+          path: cv
+        - name: tree-sitter-dbml
+          path: tree-sitter-dbml
   {{- if eq .kind "pc" "laptop" }}
   - path: {{ .chezmoi.homeDir }}/Working/personal/finance
     prefix: "finance"
@@ -94,7 +124,7 @@ folders:
     priority: 0
   - path: {{ .chezmoi.homeDir }}/Documents/Notes/_assets/books
     prefix: "book"
-    is_workspace: false
+    is_workspace: true
     regex: ""
     priority: 0
   {{- end }}
@@ -112,8 +142,8 @@ gitServers:
   {{-   range $gitSecret.servers }}
   - name: {{ .name | quote }}
     type: {{ .type | quote }}
-    https: {{ .https | quote }}
-    ssh: {{ .ssh | quote }}
+    https: {{ .https | trimSuffix "/" | quote }}
+    ssh: {{ .ssh | trimSuffix "/" | trimSuffix ":" | quote }}
     preferGitSSH: {{ .preferGitSSH }}
   {{-   end }}
   {{- end }}
@@ -122,8 +152,8 @@ gitServers:
   {{-   range $gitSecret.servers }}
   - name: {{ .name | quote }}
     type: {{ .type | quote }}
-    https: {{ .https | quote }}
-    ssh: {{ .ssh | quote }}
+    https: {{ .https | trimSuffix "/" | quote }}
+    ssh: {{ .ssh | trimSuffix "/" | trimSuffix ":" | quote }}
     preferGitSSH: {{ .preferGitSSH }}
   {{-   end }}
   {{- end }}
