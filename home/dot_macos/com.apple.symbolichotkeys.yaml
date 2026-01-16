@@ -247,7 +247,7 @@ data:
           parameters:
             - 32
             - 49
-            - 1441792
+            - 1179648
       "31":
         enabled: true
         value:
@@ -262,7 +262,7 @@ data:
           parameters:
             - 32
             - 49
-            - 393216
+            - 1048576
         enabled: true
       "17":
         enabled: false
