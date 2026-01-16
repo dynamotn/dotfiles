@@ -21,6 +21,8 @@ after-startup-command = [
   'exec-and-forget open -na {{ $mailClient }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} ',
   ## Obsidian
   'exec-and-forget open -a Obsidian',
+  ## Hammerspoon
+  'exec-and-forget open -a Hammerspoon',
 ]
 exec-on-workspace-change = [
   ## SketchyBar
