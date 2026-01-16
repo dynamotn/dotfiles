@@ -41,7 +41,7 @@ function _install_age {
   dybatpho::require "tar"
   dybatpho::create_temp "temp" "tar.gz"
   # shellcheck disable=SC2154
-  dybatpho::curl_download "https://dl.filippo.io/age/latest?for=linux/amd64" "$temp"
+  dybatpho::curl_download "https://dl.filippo.io/age/latest?for=$(dybatpho::goos)/$(dybatpho::goarch)" "$temp"
   tar -C "$BIN_DIR" -xzf "$temp" --strip=1 age/age
 }
 
@@ -131,11 +131,13 @@ _update_git_modules
 dybatpho::register_common_handlers
 dybatpho::require "git"
 dybatpho::require "curl"
-if ! $(dybatpho::require "chezmoi"); then
+# shellcheck disable=2091
+while ! $(dybatpho::require "chezmoi"); do
   _install_chezmoi
-fi
-if ! $(dybatpho::require "age"); then
+done
+# shellcheck disable=2091
+while ! $(dybatpho::require "age"); do
   _install_age
-fi
+done
 
 dybatpho::generate_from_spec _spec_main "$@"

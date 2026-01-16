@@ -3,5 +3,5 @@
 fzf = "latest"
 python = "system"
 
-[alias]
+[tool_alias]
 usage = "aqua:jdx/usage"
