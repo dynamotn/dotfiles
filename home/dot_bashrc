@@ -1,3 +1,0 @@
-if tty -s; then
-  fish
-fi
