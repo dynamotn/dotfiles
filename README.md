@@ -103,7 +103,13 @@ My dotfiles will be located in `$HOME/Dotfiles`.
 
 ## :scroll:&nbsp; Cheatsheet
 
-TODO: Link to another configs' cheatsheet
+### Key bindings
+
+See [key bindings](./docs/key_bindings/)
+
+### Commands
+
+See [commands](./docs/commands/)
 
 ## :wrench:&nbsp; Tools & Packages
 
