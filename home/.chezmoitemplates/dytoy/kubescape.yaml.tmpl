@@ -2,14 +2,8 @@ name: kubescape
 method: binary
 github:
   repo: kubescape/kubescape
-  {{- $os := "" }}
-  {{- if eq .chezmoi.os "linux" }}
-  {{-   $os = "ubuntu" }}
-  {{- else if eq .chezmoi.os "darwin" }}
-  {{-   $os = "macos" }}
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
   {{- end }}
-  {{- $arch := "" }}
-  {{- if eq .chezmoi.arch "arm64" }}
-  {{-   $arch = "arm64-" }}
-  {{- end }}
-  release_asset: kubescape-{{ $arch }}{{ $os }}-latest
+  release_asset: kubescape_%1v_{{ $os }}_{{ .chezmoi.arch }}

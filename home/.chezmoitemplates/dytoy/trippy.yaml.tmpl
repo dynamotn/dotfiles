@@ -18,3 +18,8 @@ github:
 archive:
   - path: trippy-%v-{{ $arch }}-{{ $os }}/trip
     strip: 1
+{{- if eq .chezmoi.os "linux" }}
+hook:
+  after: |-
+    sudo setcap CAP_NET_RAW+p ~/.local/bin/trippy
+{{- end }}
