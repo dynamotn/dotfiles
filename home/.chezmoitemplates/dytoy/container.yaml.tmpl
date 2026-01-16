@@ -45,7 +45,7 @@ macos:
   {{- end }}
   hook:
     after: |-
-      limactl disk create --size 50GB docker
+      limactl disk create --size 100GB docker
       limactl list dyker || limactl start -y template://dyker || :
       limactl start-at-login dyker
       docker context create lima-dyker --docker "host=unix://${HOME}/.lima/dyker/sock/docker.sock" \
