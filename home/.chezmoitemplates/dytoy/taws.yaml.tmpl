@@ -6,7 +6,7 @@ github:
   {{- if eq .chezmoi.os "darwin" }}
   {{-   $os = "apple-darwin" }}
   {{- else if eq .chezmoi.os "linux" }}
-  {{-   $os = "unknown-linux-gnu" }}
+  {{-   $os = "unknown-linux-musl" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}

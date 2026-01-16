@@ -1,0 +1,30 @@
+name: chezmoi
+is_essential: true
+{{- if eq .chezmoi.os "android" "darwin" }}
+# Use package manager for Android, macOS, and container environments
+# cuz it's essential tool
+method: os
+# https://repology.org/project/chezmoi/versions
+arch:
+  packages:
+    - name: chezmoi
+ubuntu:
+  packages:
+    - name: chezmoi
+alpine:
+  packages:
+    - name: chezmoi
+termux:
+  packages:
+    - name: chezmoi
+macos:
+  packages:
+    - name: chezmoi
+{{- else }}
+method: binary
+github:
+  repo: twpayne/chezmoi
+  release_asset: chezmoi_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
+archive:
+  - path: chezmoi
+{{- end }}

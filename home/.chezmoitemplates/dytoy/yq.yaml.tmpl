@@ -1,9 +1,10 @@
-name: kubescape
+name: yq
+is_essential: true
 method: binary
 github:
-  repo: kubescape/kubescape
+  repo: mikefarah/yq
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
   {{-   $os = "linux" }}
   {{- end }}
-  release_asset: kubescape_%1v_{{ $os }}_{{ .chezmoi.arch }}
+  release_asset: yq_{{ $os }}_{{ .chezmoi.arch }}
