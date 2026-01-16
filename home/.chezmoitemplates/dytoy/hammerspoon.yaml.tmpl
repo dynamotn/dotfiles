@@ -1,0 +1,9 @@
+{{- if eq .chezmoi.os "darwin" }}
+name: hammerspoon
+is_essential: true
+method: os
+macos:
+  packages:
+    - name: hammerspoon
+      type: cask
+{{- end }}
