@@ -56,7 +56,7 @@ function _generate_chezmoi_config {
   # Put current chezmoi source directory
   echo "sourceDir: \"$(readlink -f "$SCRIPT_DIR/..")\"" > "$dest_config"
   # Put rest of config from origin template
-  cat "$origin_config" >> "$dest_config"
+  command cat "$origin_config" >> "$dest_config"
 
   # Generate decrypt config
   # shellcheck disable=SC2153
@@ -87,7 +87,7 @@ function _main {
   _generate_chezmoi_config
 
   # Initialize chezmoi config from user input
-  dybatpho::header "Please answer the following questions"
+  dybatpho::info "Please answer the following questions"
   local prompt="--prompt"
   # shellcheck disable=SC2086
   if [ "$USE_DEFAULT" = "true" ]; then
@@ -102,7 +102,11 @@ function _main {
     params=("--debug")
   fi
   dybatpho::header "Setup Git modules"
-  chezmoi apply "$HOME"/Dotfiles/.gitmodules "${params[@]}"
+  chezmoi apply \
+    "$SCRIPT_DIR/../.gitmodules" \
+    --destination "$SCRIPT_DIR/.." \
+    --source "$SCRIPT_DIR/../cascadeur" \
+    --mode file "${params[@]}"
   dybatpho::header "Setup SSH"
   chezmoi apply "$HOME"/.ssh "${params[@]}"
   dybatpho::header "Setup RBW"

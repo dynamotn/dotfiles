@@ -19,112 +19,120 @@ data:
   {{- if hasKey .chezmoi.osRelease "id" }}
   {{-   $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id }}
   {{- end }}
-  osid: {{ $osid }}
+  osid: {{ $osid | quote }}
   {{- if eq $osid "android" }}
   initSystem: "termux"
   {{- else if eq $osid "darwin" }}
   initSystem: "launchd"
   {{- else if eq $osid "linux-gentoo" }}
-  {{-   $initSystem := promptChoiceOnce . "initSystem" "What init system does this machine use?" (list "openrc" "systemd") "openrc" }}
-  initSystem: {{ $initSystem | quote }}
+  {{-   $initCommand := output "/usr/bin/ps" "-p" "1" "-o" "comm=" | trim }}
+  {{-   if eq $initCommand "init" }}
+  initSystem: "openrc"
+  {{-   else }}
+  initSystem: "systemd"
+  {{-   end }}
   {{- else if eq $osid "linux-alpine" }}
   initSystem: "openrc"
   {{- else }}
   initSystem: "systemd"
   {{- end }}
   {{- if eq .chezmoi.os "android" }}
-  bash: {{ lookPath "bash" }}
+  bash: {{ lookPath "bash" | quote }}
   {{- else }}
-  bash: /usr/bin/env bash
+  bash: "/usr/bin/env bash"
   {{- end }}
-  {{ $place := promptChoiceOnce . "place" "Where does this machine place?" (list "home" "office" "cloud") "cloud" }}
+
+  {{- $places := list "cloud" "home" "office" "mobility" }}
+  {{- $place := promptChoiceOnce . "place" "Where does this machine place" $places (first $places) }}
   place: {{ $place | quote }}
-  {{ $kind := promptChoiceOnce . "kind" "What kind of this machine is it?"  (list "pc" "laptop" "workstation" "tablet" "mobile" "vm" "sbc" "container") "container" }}
+  {{- $kinds := list "container" "pc" "laptop" "workstation" "tablet" "mobile" "vm" "sbc" }}
+  {{- $kind := promptChoiceOnce . "kind" "What kind of this machine is it" $kinds (first $kinds) }}
   kind: {{ $kind | quote }}
-  code: {{ promptStringOnce . "code" "What is this machine's name?" "t00lb0x" | quote }}
+
+  {{- $companies := list "F1" "T1" "ZOO" }}
+  code: {{ promptStringOnce . "code" "What is this machine's name" "t00lb0x" | quote }}
   {{- if eq $place "office" }}
-  company: {{ promptStringOnce . "company" "What code of owner company is?" | quote }}
+  company: {{ promptChoiceOnce . "company" "What code of owner company is" $companies (first $companies) | quote }}
   {{- else }}
   company:
   {{- end }}
-  {{ $decryptPersonal := promptBoolOnce . "decryptPersonal" "Do you want to decrypt personal's secrets? (y/n)" false }}
+
+  {{- $decryptPersonal := promptBoolOnce . "decryptPersonal" "Do you want to decrypt personal's secrets (y/n)" false }}
   decryptPersonal: {{ $decryptPersonal }}
-  {{ $decryptEnterprise := promptBool "Do you want to decrypt enterprise's secrets? (y/n)" false }}
-  {{- $listDecryptEnterprise := list }}
+  {{- $decryptEnterprise := promptMultichoiceOnce . "decryptEnterprise" "Which company's secrets do you want to decrypt" $companies list }}
   {{- if $decryptEnterprise }}
   decryptEnterprise:
-    {{- range until 10 }}
-    {{-   $company := promptString "Fill your company code to decrypt (empty to end this list)" }}
-    {{-   if $company }}
-    {{-     $listDecryptEnterprise = append $listDecryptEnterprise $company }}
-    {{-   else }}
-    {{-     break }}
-    {{-   end }}
-    {{-   end }}
-    {{-   range $listDecryptEnterprise }}
-    - {{ . }}
-    {{-   end }}
+    {{ toYaml $decryptEnterprise | indent 4 | trim }}
   {{- else }}
   decryptEnterprise: []
   {{- end }}
-  {{ $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is? (W for Wayland, X for XOrg, M for Mac, 0 for CLI-only)" (list "W" "X" "M" "0") "0" }}
+
+  {{- $guiServers := list "0" "W" "X" "M" }}
+  {{- $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is (W for Wayland, X for XOrg, M for Mac, 0 for CLI-only)" $guiServers (first $guiServers) }}
   guiServer: {{ $guiServer | quote }}
+  {{- $guiDrivers := list "N" "I" "A" "M" "V" }}
+  {{- $guiDriver := "" }}
+  {{- $guiWinManagers := list "H" "A" "G" }}
+  {{- $guiWinManager := "" }}
   {{- if ne $guiServer "0" }}
-  guiDriver: {{ promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is? (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" (list "N" "I" "A" "M" "V") | quote }}
-  guiWinManager: {{ promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is? (A for aerospace, H for hyprland, G for gnome)" (list "H" "A" "G") "H" | quote }}
+  {{-   $guiDriver = promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" $guiDrivers }}
+  {{-   $guiWinManager = promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is (A for aerospace, H for hyprland, G for gnome)" $guiWinManagers (first $guiWinManagers) }}
+  {{- end }}
+  guiDriver: {{ $guiDriver | quote }}
+  guiWinManager: {{ $guiWinManager | quote }}
+
   {{- $languages := list }}
+  {{- if ne $guiServer "0" }}
+  {{-   $supportedLanguages := list "vi" "ja" "zh" }}
+  {{-   $languages = promptMultichoiceOnce . "languages" "Which company's secrets do you want to decrypt" $supportedLanguages list }}
+  {{- end }}
+  {{- if $languages }}
   languages:
-    {{- range until 10 }}
-    {{-   $language := promptString "Fill input language (empty to end this list)" }}
-    {{-   if $language }}
-    {{-     $languages = append $languages $language }}
-    {{-   else }}
-    {{-     break }}
-    {{-   end }}
-    {{-   range $languages }}
-    - {{ . }}
-    {{-   end }}
-    {{- end }}
-  browser: {{ promptChoiceOnce . "browser" "What web browser do you use? (F for Firefox, Z for Zen Browser, or empty)" (list "F" "Z" "") "Z" | quote }}
+    {{ toYaml $languages | indent 4 | trim }}
+  {{- else }}
+  languages: []
+  {{- end }}
+
+  {{- if ne $guiServer "0" }}
+  {{-   $browsers := list "Z" "F" "" }}
+  browser: {{ promptChoiceOnce . "browser" "What web browser do you use (F for Firefox, Z for Zen Browser, or empty)" $browsers (first $browsers) | quote }}
+  {{-   $browserEnterpriseProfiles := promptMultichoiceOnce . "browserEnterpriseProfiles" "Which company's browser profiles do you want to decrypt" $decryptEnterprise list }}
+  {{-   if $browserEnterpriseProfiles }}
   browserEnterpriseProfiles:
-    {{- range $listDecryptEnterprise }}
-    {{-   $hasProfile := promptBool (printf "Does %s company has a browser profile? (y/n)" .) false }}
-    {{-   if $hasProfile }}
-    - {{ . }}
-    {{-   end }}
-    {{- end }}
-  mailClient: {{ promptChoiceOnce . "mailClient" "What email client do you use? (T for Thunderbird, B for Betterbird, or empty)" (list "T" "B" "") "B" | quote }}
-  mailEnterpriseProfiles:
-    {{- range $listDecryptEnterprise }}
-    {{-   $hasProfile := promptBool (printf "Does %s company has a email profile? (y/n)" .) false }}
-    {{-   if $hasProfile }}
-    - {{ . }}
-    {{-   end }}
-    {{- end }}
-  {{- else }}
-  guiDriver:
-  guiWinManager:
-  browser:
+    {{ toYaml $browserEnterpriseProfiles | indent 4 | trim }}
+  {{-   else }}
   browserEnterpriseProfiles: []
-  mailClient:
+  {{-   end }}
+  {{- end }}
+
+  {{- if ne $guiServer "0" }}
+  {{-   $mailClients := list "B" "T" "" }}
+  mailClient: {{ promptChoiceOnce . "mailClient" "What email client do you use (T for Thunderbird, B for Betterbird, or empty)" $mailClients (first $mailClients) | quote }}
+  {{-  $mailEnterpriseProfiles := promptMultichoiceOnce . "mailEnterpriseProfiles" "Which company's mail profiles do you want to decrypt" $decryptEnterprise list }}
+  {{-   if $mailEnterpriseProfiles }}
+  mailEnterpriseProfiles:
+    {{ toYaml $mailEnterpriseProfiles | indent 4 | trim }}
+  {{-   else }}
   mailEnterpriseProfiles: []
+  {{-   end }}
   {{- end }}
-  terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use? (T for tmux, Z for Zellij)" (list "T" "Z") "Z" | quote }}
-  {{- if ne $kind "container" }}
-  hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card? (y/n)" false }}
-  hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device? (y/n)" false }}
-  hasWifi: {{ promptBoolOnce . "hasWifi" "Does this machine has a wifi device? (y/n)" false }}
-  {{- else }}
-  hasSound: false
-  hasBluetooth: false
-  hasWifi: false
-  {{- end }}
-  {{ $hasProxy := promptBool "Does this machine need HTTP(S) or SOCKS proxy? (y/n)" false }}
-  {{- if $hasProxy }}
-  httpProxy: {{ promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using:" | quote }}
-  socksProxy: {{ promptStringOnce . "socksProxy" "Fill SOCKS proxy address, empty for not using:" | quote }}
+
+  {{- $terminalMultiplexers := list "Z" "T" }}
+  terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use (T for tmux, Z for Zellij)" $terminalMultiplexers (first $terminalMultiplexers) | quote }}
+
+  {{- /**/}}
+  hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card (y/n)" false }}
+  hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device (y/n)" false }}
+  hasWifi: {{ promptBoolOnce . "hasWifi" "Does this machine has a wifi device (y/n)" false }}
+
+  {{- $httpProxy := promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using" }}
+  {{- $socksProxy := promptStringOnce . "socksProxy" "Fill SOCKS proxy address, empty for not using" }}
+  httpProxy: {{ $httpProxy | quote }}
+  socksProxy: {{ $socksProxy | quote }}
+  {{- if or $httpProxy $socksProxy }}
   noProxyAddresses:
-    {{- range until 100 }}
+    {{- $isEnd := false }}
+    {{- range until 1000 }}
     {{-   $address := promptString "Fill address that not use proxy (empty to end this list)" }}
     {{-  if $address }}
     - {{ $address }}
@@ -133,36 +141,32 @@ data:
     {{-  end }}
     {{- end }}
   {{- else }}
-  httpProxy:
-  socksProxy:
   noProxyAddresses: []
   {{- end }}
-  preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git? (y/n)" false }}
-  blockedGitlab: {{ promptBoolOnce . "blockedGitlab" "Is this machines blocked to access Gitlab? (y/n)" false }}
-  darkMode: {{ promptBoolOnce . "darkMode" "Do you want to use dark mode? (y/n)" true }}
+  preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git (y/n)" false }}
+  blockedGitlab: {{ promptBoolOnce . "blockedGitlab" "Is this machines blocked to access Gitlab (y/n)" false }}
+
+  {{- /**/}}
+  darkMode: {{ promptBoolOnce . "darkMode" "Do you want to use dark mode (y/n)" true }}
 
 age:
   identities:
-    {{ if $decryptPersonal }}
+    {{- if $decryptPersonal }}
     - {{ .chezmoi.homeDir }}/.config/chezmoi/personal.key
     {{- end }}
-    {{ if $decryptEnterprise }}
-    {{-  range $listDecryptEnterprise }}
+    {{-  range $decryptEnterprise }}
     - {{ $.chezmoi.homeDir }}/.config/chezmoi/enterprise-{{ . }}.key
     {{-  end }}
-    {{- end }}
   recipients:
-    {{ if $decryptPersonal }}
+    {{- if $decryptPersonal }}
     - age1fzajmt2yy4naas2wtcn3v2vjea3f5rgvmz2elp02zvvmdtcgwcdsqxnd5a
     {{- end }}
-    {{- if $decryptEnterprise }}
-    {{-   range $listDecryptEnterprise }}
-    {{      if eq . "F1" -}}
+    {{- range $decryptEnterprise }}
+    {{-   if eq . "F1" }}
     - age1t7nuzf3ys4890tn8frjk2mtalkhy3kyr0dqeajk7pn6fjnag6fys85fm39
-    {{      else if eq . "ZOO" -}}
+    {{-   else if eq . "ZOO" }}
     - age1xudykg8zjf4llnzlhre8jducx3sz02fu6p46v8gp05psvkrhvamqq658aa
-    {{      else if eq . "T1" -}}
+    {{-   else if eq . "T1" }}
     - age1ghq8xs3k044utwa4kwspupmfx0u4n67qfjnpvnerf2hfd0gyt4eqxhq6xz
-    {{-     end }}
     {{-   end }}
     {{- end }}

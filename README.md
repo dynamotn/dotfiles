@@ -87,14 +87,15 @@ TODO: List all screenshots
 
 ## :inbox_tray:&nbsp; Installation
 
-Run only one command:
+Run these commands:
 
 ```sh
 curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | bash -
+git clone https://github.com/dynamotn/dotfiles ~/Dotfiles
+bash ~/Dotfiles/scripts/setup.sh
 ```
 
 Answer questions, and wait to finish all setup scripts.
-My dotfiles will be located in `$HOME/Dotfiles`.
 > [!NOTE]
 >
 > - If you aren't me, need to answer no (`n`) for "Do you want to decrypt... secrets?" questions.

@@ -127,10 +127,6 @@ function _main {
     echo "Your OS/distro is not supported"
     exit 1
   fi
-  if ! [ -d ~/Dotfiles ]; then
-    git clone https://github.com/dynamotn/dotfiles ~/Dotfiles
-  fi
-  bash ~/Dotfiles/scripts/setup.sh
 }
 
 _main
