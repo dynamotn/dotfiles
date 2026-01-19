@@ -71,7 +71,7 @@ function _setup_termux {
   # Cloning code
   pkg install -y git curl openssh
   # Chezmoi tools
-  pkg install -y chezmoi age
+  pkg install -y chezmoi age yq
   # F-Droid tools
   pkg install -y fdroidcl
   # Turn on Android Settings, setting Wireless debugging manually
@@ -105,28 +105,37 @@ function _setup_macos {
 }
 
 function _main {
-  # Gentoo
-  if command -v emerge &> /dev/null; then
-    _setup_gentoo
-  # ArchLinux
-  elif command -v pacman &> /dev/null; then
-    _setup_arch
-  # Termux
-  elif command -v termux-setup-storage &> /dev/null; then
-    _setup_termux
-  # Ubuntu/Debian
-  elif command -v apt &> /dev/null; then
-    _setup_ubuntu_debian
-  # Alpine Linux
-  elif command -v apk &> /dev/null; then
-    _setup_alpine
-  # MacOS
-  elif command -v sw_vers &> /dev/null; then
-    _setup_macos
-  else
-    echo "Your OS/distro is not supported"
-    exit 1
-  fi
+  case "$(uname -o)" in
+    Android)
+      # Termux
+      _setup_termux
+      ;;
+    Linux)
+      # Gentoo
+      if command -v emerge &> /dev/null; then
+        _setup_gentoo
+      # ArchLinux
+      elif command -v pacman &> /dev/null; then
+        _setup_arch
+      # Ubuntu/Debian
+      elif command -v apt &> /dev/null; then
+        _setup_ubuntu_debian
+      # Alpine Linux
+      elif command -v apk &> /dev/null; then
+        _setup_alpine
+      else
+        echo "Your distro is not supported"
+        exit 1
+      fi
+      ;;
+    Darwin)
+      _setup_macos
+      ;;
+    *)
+      echo "Your OS is not supported"
+      exit 1
+      ;;
+  esac
 }
 
 _main

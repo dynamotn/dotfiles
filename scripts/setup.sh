@@ -46,6 +46,16 @@ function _install_age {
 }
 
 #######################################
+# @description Install binary version of yq
+# @env BIN_DIR Directory to install binary
+#######################################
+function _install_yq {
+  # shellcheck disable=SC2154
+  dybatpho::curl_download "https://github.com/mikefarah/yq/releases/latest/download/yq_$(dybatpho::goos)_$(dybatpho::goarch)" "$BIN_DIR/yq"
+  chmod +x "$BIN_DIR/yq"
+}
+
+#######################################
 # @description Generate chezmoi config file from template
 # @env IDENTITIES Comma separated list of identities to decrypt
 #######################################
@@ -98,7 +108,7 @@ function _main {
   # Apply configuration by order
   local params=()
   # shellcheck disable=SC2086
-  if dybatpho::compare_log_level debug; then
+  if dybatpho::compare_log_level trace; then
     params=("--debug")
   fi
   dybatpho::header "Setup Git modules"
@@ -108,20 +118,33 @@ function _main {
     --source "$SCRIPT_DIR/../cascadeur" \
     --mode file "${params[@]}"
   dybatpho::header "Setup SSH"
-  chezmoi apply "$HOME"/.ssh "${params[@]}"
+  chezmoi apply "${HOME}/.ssh" "${params[@]}"
   dybatpho::header "Setup RBW"
-  chezmoi apply "$HOME"/.config/rbw "${params[@]}"
+  if [ "$(chezmoi data | yq .decryptPersonal)" == "true" ]; then
+    chezmoi apply "${HOME}/.config/rbw" "${params[@]}"
+  fi
+  readarray identities < <(chezmoi data | yq e -o=j -I=0 -r '.decryptEnterprise[]')
+  for identity in "${identities[@]}"; do
+    if dybatpho::is dir "$SCRIPT_DIR/../home/dot_config/rbw-enterprise-$(dybatpho::lower "$identity")"; then
+      chezmoi apply "${HOME}/.config/rbw-enterprise-$(dybatpho::lower "$identity")" "${params[@]}"
+    fi
+  done
   dybatpho::header "Setup other dotfiles"
   chezmoi apply "${params[@]}"
 
   # Apply OS specific configuration if not Termux or MacOS
-  if
-    ! dybatpho::is command termux-setup-storage \
-      && dybatpho::is command sw_vers
-  then
-    dybatpho::header "Setup operating system"
-    ~/.local/bin/scz apply
-  fi
+  case "$(dybatpho::goos)" in
+    darwin)
+      sed -i "/umask:/s/^# //" "$HOME/.config/chezmoi/chezmoi.yaml"
+      dybatpho::header "Setup operating system"
+      ~/.local/bin/scz apply
+      sed -i "/umask:/s/^/# /" "$HOME/.config/chezmoi/chezmoi.yaml"
+      ;;
+    linux)
+      dybatpho::header "Setup operating system"
+      ~/.local/bin/scz apply
+      ;;
+  esac
 
   dybatpho::success "Setup complete"
 }
@@ -142,6 +165,10 @@ done
 # shellcheck disable=2091
 while ! $(dybatpho::require "age"); do
   _install_age
+done
+# shellcheck disable=2091
+while ! $(dybatpho::require "yq"); do
+  _install_yq
 done
 
 dybatpho::generate_from_spec _spec_main "$@"
