@@ -56,16 +56,6 @@
   executable: true
   refreshPeriod: 168h
 {{- end }}
-.local/bin/yq:
-  type: file
-  {{- if eq .chezmoi.os "android" }}
-  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_linux_arm64'
-  {{- else if eq .chezmoi.os "linux" }}
-  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_linux_{{ .chezmoi.arch }}'
-    {{- else if eq .chezmoi.os "darwin" }}
-  url: 'https://github.com/mikefarah/yq/releases/latest/download/yq_darwin_{{ .chezmoi.arch }}'
-  {{- end }}
-  executable: true
 {{- if eq .guiServer "W" }}
 .local/bin/hdrop:
   type: file
