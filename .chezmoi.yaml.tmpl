@@ -93,28 +93,38 @@ data:
   languages: []
   {{- end }}
 
+  {{- $browsers := list "Z" "F" " " }}
+  {{- $browser := "" }}
+  {{- $browserEnterpriseProfiles := list }}
   {{- if ne $guiServer "0" }}
-  {{-   $browsers := list "Z" "F" "" }}
-  browser: {{ promptChoiceOnce . "browser" "What web browser do you use (F for Firefox, Z for Zen Browser, or empty)" $browsers (first $browsers) | quote }}
-  {{-   $browserEnterpriseProfiles := promptMultichoiceOnce . "browserEnterpriseProfiles" "Which company's browser profiles do you want to decrypt" $decryptEnterprise list }}
-  {{-   if $browserEnterpriseProfiles }}
-  browserEnterpriseProfiles:
-    {{ toYaml $browserEnterpriseProfiles | indent 4 | trim }}
-  {{-   else }}
-  browserEnterpriseProfiles: []
+  {{-   $browser = promptChoiceOnce . "browser" "What web browser do you use (F for Firefox, Z for Zen Browser, or empty)" $browsers (first $browsers) | trim }}
+  {{-   if $browser }}
+  {{-     $browserEnterpriseProfiles = promptMultichoiceOnce . "browserEnterpriseProfiles" "Which company's browser profiles do you want to decrypt" $decryptEnterprise list }}
   {{-   end }}
   {{- end }}
+  browser: {{ $browser | quote }}
+  {{- if $browserEnterpriseProfiles }}
+  browserEnterpriseProfiles:
+    {{ toYaml $browserEnterpriseProfiles | indent 4 | trim }}
+  {{- else }}
+  browserEnterpriseProfiles: []
+  {{- end }}
 
+  {{- $mailClients := list "B" "T" " " }}
+  {{- $mailClient := "" }}
+  {{- $mailEnterpriseProfiles := list }}
   {{- if ne $guiServer "0" }}
-  {{-   $mailClients := list "B" "T" "" }}
-  mailClient: {{ promptChoiceOnce . "mailClient" "What email client do you use (T for Thunderbird, B for Betterbird, or empty)" $mailClients (first $mailClients) | quote }}
-  {{-  $mailEnterpriseProfiles := promptMultichoiceOnce . "mailEnterpriseProfiles" "Which company's mail profiles do you want to decrypt" $decryptEnterprise list }}
-  {{-   if $mailEnterpriseProfiles }}
+  {{-   $mailClient = promptChoiceOnce . "mailClient" "What email client do you use (T for Thunderbird, B for Betterbird, or empty)" $mailClients (first $mailClients) | trim }}
+  {{-   if $mailClient }}
+  {{-     $mailEnterpriseProfiles = promptMultichoiceOnce . "mailEnterpriseProfiles" "Which company's mail profiles do you want to decrypt" $decryptEnterprise list }}
+  {{-   end }}
+  {{- end }}
+  mailClient: {{ $mailClient | quote }}
+  {{- if $mailEnterpriseProfiles }}
   mailEnterpriseProfiles:
     {{ toYaml $mailEnterpriseProfiles | indent 4 | trim }}
-  {{-   else }}
+  {{- else }}
   mailEnterpriseProfiles: []
-  {{-   end }}
   {{- end }}
 
   {{- $terminalMultiplexers := list "Z" "T" }}
