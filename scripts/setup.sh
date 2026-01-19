@@ -119,6 +119,16 @@ function _main {
     --mode file "${params[@]}"
   dybatpho::header "Setup SSH"
   chezmoi apply "${HOME}/.ssh" "${params[@]}"
+  # shellcheck disable=SC2155
+  local proxy="$(chezmoi data | yq .httpProxy)"
+  if ! dybatpho::is empty "$proxy"; then
+    export https_proxy="$proxy"
+    export http_proxy="$proxy"
+    # shellcheck disable=SC2034
+    readarray addresses < <(chezmoi data | yq e -o=j -I=0 -r '.noProxyAddresses[]')
+    # shellcheck disable=SC2155
+    export no_proxy="$(dybatpho::array_join "addresses" ",")"
+  fi
   dybatpho::header "Setup RBW"
   if [ "$(chezmoi data | yq .decryptPersonal)" == "true" ]; then
     chezmoi apply "${HOME}/.config/rbw" "${params[@]}"

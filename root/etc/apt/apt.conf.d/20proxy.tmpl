@@ -5,9 +5,3 @@ Acquire::https::Proxy "{{ .httpProxy }}";
 Acquire::http::proxy::{{ . }} "DIRECT";
 {{-   end }}
 {{- end }}
-{{- if .socksProxy }}
-Acquire::socks::Proxy "{{ .socksProxy }}";
-{{-   range .noProxyAddresses }}
-Acquire::socks::proxy::{{ . }} "DIRECT";
-{{-   end }}
-{{- end }}

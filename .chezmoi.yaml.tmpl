@@ -136,10 +136,8 @@ data:
   hasWifi: {{ promptBoolOnce . "hasWifi" "Does this machine has a wifi device (y/n)" false }}
 
   {{- $httpProxy := promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using" }}
-  {{- $socksProxy := promptStringOnce . "socksProxy" "Fill SOCKS proxy address, empty for not using" }}
   httpProxy: {{ $httpProxy | quote }}
-  socksProxy: {{ $socksProxy | quote }}
-  {{- if or $httpProxy $socksProxy }}
+  {{- if $httpProxy }}
   noProxyAddresses:
     {{- $isEnd := false }}
     {{- range until 1000 }}
