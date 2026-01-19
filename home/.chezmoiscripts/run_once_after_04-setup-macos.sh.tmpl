@@ -12,7 +12,7 @@ macos-defaults apply ~/.macos
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
 # Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -r -domain local -domain system -domain user
 
 dybatpho::progress "Mapping keys for Apply Internal Keyboard"
 # Code table
