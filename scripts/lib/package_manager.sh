@@ -167,12 +167,14 @@ function pkg::init_macos {
 function pkg::add_overlay {
   local name url
   dybatpho::expect_args name url -- "$@"
-  if [ ! -d "/etc/portage/repos.conf/$name.conf" ]; then
+  if ! dybatpho::is file "/etc/portage/repos.conf/${name}.conf"; then
     dybatpho::dry_run sudo mkdir -p /etc/portage/repos.conf
-    dybatpho::dry_run eval "echo \"[$name]\" | sudo tee /etc/portage/repos.conf/$name.conf"
-    dybatpho::dry_run eval "echo \"location = /var/db/repos/$name\" | sudo tee -a /etc/portage/repos.conf/$name.conf"
-    dybatpho::dry_run eval "echo \"sync-type = git\" | sudo tee -a /etc/portage/repos.conf/$name.conf"
-    dybatpho::dry_run eval "echo \"sync-uri = $url\" | sudo tee -a /etc/portage/repos.conf/$name.conf"
+    dybatpho::dry_run eval "sudo tee /etc/portage/repos.conf/${name}.conf << EOF
+[${name}]
+location = /var/db/repos/${name}
+sync-type = git
+sync-uri = ${url}
+EOF"
     dybatpho::dry_run sudo emaint sync --yes --repo "$name" || dybatpho::die "Failed to sync repository $name"
   fi
 }
