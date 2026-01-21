@@ -1,0 +1,4 @@
+app-i18n/fcitx-configtool
+dev-qt/qtbase gtk opengl
+dev-qt/qttools -widgets -assistant
+app-text/xmlto text

@@ -90,7 +90,10 @@ Library/thunderbird
 
 {/* Window manager and WM-related files */}
 {{- if empty .languages }}
-.config/ibus
+.config/fcitx5
+{{- end }}
+{{- if ne .guiServer "X" }}
+.xprofile
 {{- end }}
 {{- if ne .guiWinManager "H" }}
 .config/hypr

@@ -1,0 +1,92 @@
+{{- $index := 0 }}
+{{- $group := "English" }}
+{{- $order := printf "%d=%s" $index $group -}}
+[Groups/{{ $index }}]
+# Group Name
+Name={{ $group }}
+# Layout
+Default Layout=us-colemak
+# Default Input Method
+DefaultIM=keyboard-us
+
+[Groups/{{ $index }}/Items/0]
+# Name
+Name=keyboard-us-colemak
+# Layout
+Layout=
+
+[Groups/{{ $index }}/Items/1]
+# Name
+Name=keyboard-us
+# Layout
+Layout=
+
+{{- if has "vi" .languages }}
+{{-   $index = add1 $index }}
+{{-   $group := "Vietnamese" }}
+{{-   $order = printf "%s\n%d=%s" $order $index $group }}
+
+[Groups/{{ $index }}]
+# Group Name
+Name={{ $group }}
+# Layout
+Default Layout=us-colemak
+# Default Input Method
+DefaultIM=bamboo
+
+[Groups/{{ $index }}/Items/0]
+# Name
+Name=bamboo
+# Layout
+Layout=
+{{- end }}
+
+{{- if has "ja" .languages }}
+{{-   $index = add1 $index }}
+{{-   $group := "Japanese" }}
+{{-   $order = printf "%s\n%d=%s" $order $index $group }}
+{{- $order }}
+
+[Groups/{{ $index }}]
+# Group Name
+Name={{ $group }}
+# Layout
+Default Layout=us-colemak
+# Default Input Method
+DefaultIM=mozc
+
+[Groups/{{ $index }}/Items/0]
+# Name
+Name=mozc
+# Layout
+Layout=
+{{- end }}
+
+{{- if has "zh" .languages }}
+{{-   $index = add1 $index }}
+{{-   $group := "Chinese" }}
+{{-   $order = printf "%s\n%d=%s" $order $index $group }}
+
+[Groups/{{ $index }}]
+# Group Name
+Name={{ $group }}
+# Layout
+Default Layout=us-colemak
+# Default Input Method
+DefaultIM=m17n_zh_pinyin
+
+[Groups/{{ $index }}/Items/0]
+# Name
+Name=pinyin
+# Layout
+Layout=
+
+[Groups/{{ $index }}/Items/1]
+# Name
+Name=m17n_zh_pinyin
+# Layout
+Layout=
+{{- end }}
+
+[GroupOrder]
+{{ $order }}

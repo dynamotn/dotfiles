@@ -47,11 +47,7 @@ exec-once = wl-paste --type text --watch cliphist store
 exec-once = wl-paste --type image --watch cliphist store
 
 # IM
-{{- if eq .osid "linux-gentoo" }}
-exec-once = /usr/libexec/ibus-ui-gtk3 --enable-wayland-im --exec-daemon --daemon-args "--panel disable"
-{{- else }}
-exec-once = ibus start --type wayland
-{{- end }}
+exec-once = fcitx5 -d --replace
 
 # Terminal
 exec-once = kitty zellij

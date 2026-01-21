@@ -77,12 +77,13 @@ etc/ca-certificates/trust-source
 {{- end }}
 
 {/* Input method */}
-{{- if not (has "vi" .languages) }}
-etc/portage/**ibus-lotus
+{{- if empty .languages }}
+etc/portage/**fcitx-configtool
+etc/portage/**fcitx-m17n
 {{- end }}
 {{- if not (has "ja" .languages) }}
 etc/portage/**mozc
 {{- end }}
 {{- if not (has "zh" .languages) }}
-etc/portage/**ibus-rime
+etc/portage/**fcitx-m17n
 {{- end }}

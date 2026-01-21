@@ -1,16 +1,17 @@
-{{- if empty .languages }}
-name: ibus
+{{- if not (empty .languages) }}
+name: fcitx5
 method: os
-# https://repology.org/project/ibus-bamboo/versions
-# https://repology.org/project/ibus-lotus/versions
-# https://repology.org/project/ibus-rime/versions
-# https://repology.org/project/ibus-m17n/versions
+# https://repology.org/project/fcitx5-configtool/versions
+# https://repology.org/project/fcitx5-bamboo/versions
+# https://repology.org/project/fcitx5-chinese-addons/versions
+# https://repology.org/project/fcitx5-m17n/versions
 # https://repology.org/project/mozc/versions
 is_essential: true
 gentoo:
   packages:
+    - name: app-i18n/fcitx-configtool
     {{- if has "vi" .languages }}
-    - name: app-i18n/ibus-lotus
+    - name: app-i18n/fcitx-bamboo
       repo: dynamo
       url: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
     {{- end }}
@@ -18,37 +19,57 @@ gentoo:
     - name: app-i18n/mozc
     {{- end }}
     {{- if has "zh" .languages }}
-    - name: app-i18n/ibus-rime
-    - name: app-i18n/ibus-m17n
+    - name: app-i18n/fcitx-chinese-addon
+    - name: app-i18n/fcitx-m17n
     {{- end }}
 arch:
   packages:
+    - name: fcitx5-configtool
     {{- if has "vi" .languages }}
-    - name: ibus-lotus
+    - name: fcitx5-bamboo
     {{- end }}
     {{- if has "ja" .languages }}
-    - name: ibus-mozc
+    - name: fcitx5-mozc
     {{- end }}
     {{- if has "zh" .languages }}
-    - name: ibus-rime
-    - name: ibus-m17n
+    - name: fcitx5-chinese-addons
+    - name: fcitx5-m17n
     {{- end }}
 ubuntu:
   packages:
+    - name: fcitx5-configtool
     {{- if has "vi" .languages }}
-    - name: ibus-bamboo
-      repo: http://ppa.launchpad.net/bamboo-engine/ibus-bamboo/ubuntu
-      components: main
-      key: 5AD2E0B68A0409AD907D462D36ED424E9659D014
+    - name: fcitx5-bamboo
     {{- end }}
     {{- if has "ja" .languages }}
-    - name: ibus-mozc
+    - name: fcitx5-mozc
     {{- end }}
     {{- if has "zh" .languages }}
-    - name: ibus-rime
-    - name: ibus-m17n
+    - name: fcitx5-chinese-addons
+    - name: fcitx5-m17n
     {{- end }}
-alpine: # not has packages
-termux: # not need to install
+alpine:
+  packages:
+    - name: fcitx5-configtool
+    {{- if has "vi" .languages }}
+    - name: fcitx5-bamboo
+    {{- end }}
+    {{- if has "ja" .languages }}
+    - name: fcitx5-mozc
+    {{- end }}
+    {{- if has "zh" .languages }}
+    - name: fcitx5-chinese-addons
+    - name: fcitx5-m17n
+    {{- end }}
+termux: # Use Fdroid
 macos: # use buitin input
+fdroid:
+  packages:
+    - name: org.fcitx.fcitx5.android
+    {{- if has "vi" .languages }}
+    - name: org.fcitx.fcitx5.android.plugin.unikey
+    {{- end }}
+    {{- if has "ja" .languages }}
+    - name: org.fcitx.fcitx5.android.plugin.anthy
+    {{- end }}
 {{- end }}
