@@ -24,37 +24,37 @@ user_pref("font.size.monospace.x-western", 14);
 user_pref("font.size.monospace.x-unicode", 14);
 user_pref("font.minimum-size.x-western", 14);
 user_pref("font.minimum-size.x-unicode", 14);
-{{- if eq .chezmoi.os "darwin" }}
 user_pref("font.name.serif.x-western", "Noto Serif");
 user_pref("font.name.sans-serif.x-western", "Roboto");
-user_pref("font.name.monospace.x-western", "Iosevka Dynamo Nerd");
 user_pref("font.name.cursive.x-western", "Playwrite VN");
 user_pref("font.name.fantasy.x-western", "Caveat");
 user_pref("font.name.serif.x-unicode", "Noto Serif");
 user_pref("font.name.sans-serif.x-unicode", "Roboto");
-user_pref("font.name.monospace.x-unicode", "Iosevka Dynamo Nerd");
 user_pref("font.name.cursive.x-unicode", "Pacifico");
 user_pref("font.name.fantasy.x-unicode", "Caveat");
 user_pref("font.name.serif.zh-CN", "Noto Serif CJK SC");
 user_pref("font.name.sans-serif.zh-CN", "Noto Sans CJK SC");
-user_pref("font.name.monospace.zh-CN", "Iosevka Dynamo Nerd");
 user_pref("font.name.cursive.zh-CN", "Pacifico");
-user_pref("font.name.serif.zh-HK", "Noto Serif CJK HK");
+user_pref("font.name.serif.zh-HK", "Noto Serif CJK TC");
 user_pref("font.name.sans-serif.zh-HK", "Noto Sans CJK HK");
-user_pref("font.name.monospace.zh-HK", "Iosevka Dynamo Nerd");
 user_pref("font.name.cursive.zh-HK", "Pacifico");
 user_pref("font.name.serif.zh-TW", "Noto Serif CJK TC");
 user_pref("font.name.sans-serif.zh-TW", "Noto Sans CJK TC");
-user_pref("font.name.monospace.zh-TW", "Iosevka Dynamo Nerd");
 user_pref("font.name.cursive.zh-TW", "Pacifico");
 user_pref("font.name.serif.ja", "Noto Serif CJK JP");
 user_pref("font.name.sans-serif.ja", "Noto Sans CJK JP");
-user_pref("font.name.monospace.ja", "Iosevka Dynamo Nerd");
 user_pref("font.name.cursive.ja", "Pacifico");
 user_pref("font.name.serif.ko", "Noto Serif CJK KR");
 user_pref("font.name.sans-serif.ko", "Noto Sans CJK KR");
-user_pref("font.name.monospace.ko", "Iosevka Dynamo Nerd");
 user_pref("font.name.cursive.ko", "Pacifico");
+{{- if eq .chezmoi.os "darwin" }}
+user_pref("font.name.monospace.x-unicode", "Iosevka Dynamo Nerd");
+user_pref("font.name.monospace.x-western", "Iosevka Dynamo Nerd");
+user_pref("font.name.monospace.zh-CN", "Iosevka Dynamo Nerd");
+user_pref("font.name.monospace.zh-HK", "Iosevka Dynamo Nerd");
+user_pref("font.name.monospace.zh-TW", "Iosevka Dynamo Nerd");
+user_pref("font.name.monospace.ja", "Iosevka Dynamo Nerd");
+user_pref("font.name.monospace.ko", "Iosevka Dynamo Nerd");
 {{- end }}
 /* Disable web page's font
  * [SETTING] General->Language and Appearance->Fonts and Colors */
