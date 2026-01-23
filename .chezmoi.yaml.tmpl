@@ -46,13 +46,13 @@ data:
   {{- $place := promptChoiceOnce . "place" "Where does this machine place" $places (first $places) }}
   place: {{ $place | quote }}
   {{- $kinds := list "container" "pc" "laptop" "workstation" "tablet" "mobile" "vm" "sbc" }}
-  {{- $kind := promptChoiceOnce . "kind" "What kind of this machine is it" $kinds (first $kinds) }}
+  {{- $kind := promptChoiceOnce . "kind" "Which kind of this machine is" $kinds (first $kinds) }}
   kind: {{ $kind | quote }}
 
   {{- $companies := list "F1" "T1" "ZOO" }}
   code: {{ promptStringOnce . "code" "What is this machine's name" "t00lb0x" | quote }}
   {{- if eq $place "office" }}
-  company: {{ promptChoiceOnce . "company" "What code of owner company is" $companies (first $companies) | quote }}
+  company: {{ promptChoiceOnce . "company" "Which code of owner company is" $companies (first $companies) | quote }}
   {{- else }}
   company:
   {{- end }}
@@ -84,7 +84,7 @@ data:
   {{- $languages := list }}
   {{- if ne $guiServer "0" }}
   {{-   $supportedLanguages := list "vi" "ja" "zh" }}
-  {{-   $languages = promptMultichoiceOnce . "languages" "Which company's secrets do you want to decrypt" $supportedLanguages list }}
+  {{-   $languages = promptMultichoiceOnce . "languages" "Which languages do you want to use in input method framework" $supportedLanguages list }}
   {{- end }}
   {{- if $languages }}
   languages:
@@ -97,7 +97,7 @@ data:
   {{- $browser := "" }}
   {{- $browserEnterpriseProfiles := list }}
   {{- if ne $guiServer "0" }}
-  {{-   $browser = promptChoiceOnce . "browser" "What web browser do you use (F for Firefox, Z for Zen Browser, or empty)" $browsers (first $browsers) | trim }}
+  {{-   $browser = promptChoiceOnce . "browser" "Which web browser do you use (F for Firefox, Z for Zen Browser, or empty)" $browsers (first $browsers) | trim }}
   {{-   if $browser }}
   {{-     $browserEnterpriseProfiles = promptMultichoiceOnce . "browserEnterpriseProfiles" "Which company's browser profiles do you want to decrypt" $decryptEnterprise list }}
   {{-   end }}
@@ -114,7 +114,7 @@ data:
   {{- $mailClient := "" }}
   {{- $mailEnterpriseProfiles := list }}
   {{- if ne $guiServer "0" }}
-  {{-   $mailClient = promptChoiceOnce . "mailClient" "What email client do you use (T for Thunderbird, B for Betterbird, or empty)" $mailClients (first $mailClients) | trim }}
+  {{-   $mailClient = promptChoiceOnce . "mailClient" "Which email client do you use (T for Thunderbird, B for Betterbird, or empty)" $mailClients (first $mailClients) | trim }}
   {{-   if $mailClient }}
   {{-     $mailEnterpriseProfiles = promptMultichoiceOnce . "mailEnterpriseProfiles" "Which company's mail profiles do you want to decrypt" $decryptEnterprise list }}
   {{-   end }}
@@ -128,12 +128,12 @@ data:
   {{- end }}
 
   {{- $terminalMultiplexers := list "Z" "T" }}
-  terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "What terminal multiplexer do you use (T for tmux, Z for Zellij)" $terminalMultiplexers (first $terminalMultiplexers) | quote }}
+  terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "Which terminal multiplexer do you use (T for tmux, Z for Zellij)" $terminalMultiplexers (first $terminalMultiplexers) | quote }}
 
   {{- /**/}}
   hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card (y/n)" false }}
-  hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth device (y/n)" false }}
-  hasWifi: {{ promptBoolOnce . "hasWifi" "Does this machine has a wifi device (y/n)" false }}
+  hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth card (y/n)" false }}
+  hasWifi: {{ promptBoolOnce . "hasWifi" "Does this machine has a wifi card (y/n)" false }}
 
   {{- $httpProxy := promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using" }}
   httpProxy: {{ $httpProxy | quote }}
