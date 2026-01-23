@@ -3,6 +3,9 @@ source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 dotfiles=$(realpath $(chezmoi execute-template '{{ .chezmoi.sourceDir }}')/..)
+{{- if eq .chezmoi.os "darwin" }}
+sed -i "/umask:/s/^# //" "$HOME/.config/chezmoi/chezmoi.yaml"
+{{- end }}
 sudo env "PATH=$PATH" \
   chezmoi --destination / \
   --source "$dotfiles/root" \
@@ -10,3 +13,6 @@ sudo env "PATH=$PATH" \
   --working-tree "$dotfiles" \
   --config ~/.config/chezmoi/chezmoi.yaml \
   "$@"
+{{- if eq .chezmoi.os "darwin" }}
+sed -i "/umask:/s/^/# /" "$HOME/.config/chezmoi/chezmoi.yaml"
+{{- end }}

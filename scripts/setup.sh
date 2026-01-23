@@ -144,13 +144,7 @@ function _main {
 
   # Apply OS specific configuration if not Termux or MacOS
   case "$(dybatpho::goos)" in
-    darwin)
-      sed -i "/umask:/s/^# //" "$HOME/.config/chezmoi/chezmoi.yaml"
-      dybatpho::header "Setup operating system"
-      ~/.local/bin/scz apply
-      sed -i "/umask:/s/^/# /" "$HOME/.config/chezmoi/chezmoi.yaml"
-      ;;
-    linux)
+    darwin | linux)
       dybatpho::header "Setup operating system"
       ~/.local/bin/scz apply
       ;;
