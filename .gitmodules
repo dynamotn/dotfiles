@@ -34,3 +34,6 @@
 [submodule "thunderbird-enterprise-F1"]
   path = home/dot_config/thunderbird/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/thunderbird/enterprise-F1.git
+[submodule "secrets/data"]
+  path = secrets/data
+  url = git@gitlab.com:dynamo-config/dotfiles-secrets.git
