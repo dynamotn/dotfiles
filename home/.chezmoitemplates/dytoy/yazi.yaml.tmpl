@@ -14,14 +14,14 @@ github:
   {{- end }}
   release_asset: yazi-{{ $arch }}-{{ $os }}.zip
 archive:
-  - path: yazi-x86_64-unknown-linux-gnu/yazi
+  - path: yazi-{{ $arch }}-{{ $os }}/yazi
     strip: 1
-  - path: yazi-x86_64-unknown-linux-gnu/ya
+  - path: yazi-{{ $arch }}-{{ $os }}/ya
     strip: 1
-  - path: yazi-x86_64-unknown-linux-gnu/completions/yazi.fish
+  - path: yazi-{{ $arch }}-{{ $os }}/completions/yazi.fish
     strip: 2
     location: ~/.config/fish/completions
-  - path: yazi-x86_64-unknown-linux-gnu/completions/ya.fish
+  - path: yazi-{{ $arch }}-{{ $os }}/completions/ya.fish
     strip: 2
     location: ~/.config/fish/completions
 hook:

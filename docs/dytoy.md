@@ -188,7 +188,6 @@
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|
 |[svu](https://github.com/caarlos0/svu)|Get Semantic version|
-|[hugo](https://github.com/gohugoio/hugo)|Build static website|
 |[trdsql](https://github.com/noborus/trdsql)|CLI execute SQL queries tool|
 |[step](https://github.com/smallstep/cli)|CLI tool for PKI systems and workflows|
 |[stripe](https://github.com/stripe/stripe-cli)|CLI to build, test Stripe integration|
