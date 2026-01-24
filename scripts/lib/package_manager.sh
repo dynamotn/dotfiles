@@ -155,7 +155,7 @@ function pkg::init_macos {
   pkg::sync_brew_repo
   if ! dybatpho::is command mas; then
     dybatpho::progress "Installing \`mas\` for managing Apple Store apps"
-    pkg::install_via_macos_brew mas
+    pkg::install_via_brew mas
   fi
 }
 
