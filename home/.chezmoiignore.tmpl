@@ -156,7 +156,7 @@ Multimedia
 {/* Secret files and Private submodules */}
 {{- if not .decryptPersonal }}
 .ssh/config.d/personal.config
-.ssh/key/personal*
+.ssh/keys/personal*
 .config/firefox/profiles/personal
 .config/firefox/startpage/profiles/personal
 .config/thunderbird/profiles/personal
@@ -175,12 +175,9 @@ Library/Application Support/rbw
 Library/Application Support/rbw-*
 .config/rbw-*
 {{- end }}
-{{- if and (not .decryptPersonal) (empty .decryptEnterprise) }}
-.ssh/key/public*
-{{- end }}
 {{- if not (has "F1" .decryptEnterprise) }}
 .ssh/config.d/enterprise-F1.config
-.ssh/key/enterprise-F1_*
+.ssh/keys/enterprise-F1_*
 Working/enterprise/F1
 .config/firefox/profiles/enterprise-F1
 .config/firefox/startpage/profiles/enterprise-F1
@@ -190,11 +187,11 @@ Library/Application Support/rbw-enterprise-f1
 {{- end }}
 {{- if not (has "ZOO" .decryptEnterprise) }}
 .ssh/config.d/enterprise-ZOO.config
-.ssh/key/enterprise-ZOO_*
+.ssh/keys/enterprise-ZOO_*
 Working/enterprise/ZOO
 {{- end }}
 {{- if not (has "T1" .decryptEnterprise) }}
 .ssh/config.d/enterprise-T1.config
-.ssh/key/enterprise-T1_*
+.ssh/keys/enterprise-T1_*
 Working/enterprise/T1
 {{- end }}
