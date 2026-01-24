@@ -1,7 +1,6 @@
 home/.chezmoi.*.tmpl
 .DS_Store
-secrets/**
-!secrets/**/
-!secrets/**/*.age
-!secrets/**/*.tmpl
+secrets/*
+!secrets/data
+!secrets/*.age
 .dockerignore

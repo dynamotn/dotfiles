@@ -92,3 +92,12 @@
   {{- end }}
 {{-   end }}
 {{- end }}
+{{- if or .decryptPersonal (not (empty .decryptEnterprise)) }}
+[submodule "secrets/data"]
+  path = secrets/data
+  {{- if $.blockedGitlab }}
+  url = {{ $github }}dynamotn/dotfiles-secrets.git
+  {{- else }}
+  url = {{ $gitlab }}dynamo-config/dotfiles-secrets.git
+  {{- end }}
+{{- end }}
