@@ -41,7 +41,7 @@ macos:
   packages:
     - name: Betterbird
       type: download
-      url: https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=future
+      url: https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=release
 {{-   else }}
 flatpak:
   packages:
