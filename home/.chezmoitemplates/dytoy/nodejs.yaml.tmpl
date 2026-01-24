@@ -7,4 +7,5 @@ is_essential: true
 hook:
   after: |
     # Enable corepack
-    yes | mise x node -- npx corepack enable pnpm
+    (yes || :) | ~/.local/bin/mise x node -- npm install --global corepack@latest
+    (yes || :) | ~/.local/bin/mise x node -- npx corepack enable pnpm

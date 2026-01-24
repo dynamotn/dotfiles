@@ -15,7 +15,7 @@ github:
   {{- if eq .chezmoi.arch "amd64" }}
   {{-   $arch = "x86_64" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{-   $arch = "aarch64" }}
+  {{-   $arch = "arm64" }}
   {{- end }}
   release_asset: fabric_{{ $os }}_{{ $arch }}.tar.gz
 archive:
