@@ -1,0 +1,7 @@
+{{- $rbwSecret := dict }}
+{{- if index . "personal" }}
+{{-   $rbwSecret = join .chezmoi.sourceDir "../secrets/data/personal/rbw.yaml.age" | include | decrypt | fromYaml }}
+{{- else if index . "enterprise" }}
+{{-   $rbwSecret = printf "../secrets/data/enterprise-%s/rbw.yaml.age" .enterprise | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{- end }}
+{{- $rbwSecret | toPrettyJson }}

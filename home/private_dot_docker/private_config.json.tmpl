@@ -1,0 +1,4 @@
+{{- if .decryptPersonal }}
+{{-   $top := merge . (dict "personal" true) }}
+{{- includeTemplate "docker/config.yaml.tmpl" $top | fromYaml | toPrettyJson "\t" }}
+{{- end -}}

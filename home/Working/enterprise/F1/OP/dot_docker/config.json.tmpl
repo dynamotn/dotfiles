@@ -1,0 +1,10 @@
+{{- if has "F1" .decryptEnterprise }}
+{{-   $top := merge . (dict
+        "enterprise" (dict
+          "name" "F1"
+          "scope" "OP"
+        )
+      )
+}}
+{{- includeTemplate "docker/config.yaml.tmpl" $top | fromYaml | toPrettyJson "\t" }}
+{{- end -}}

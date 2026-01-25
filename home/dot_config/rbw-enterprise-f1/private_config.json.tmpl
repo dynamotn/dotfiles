@@ -1,0 +1,4 @@
+{{- if has "F1" .decryptEnterprise }}
+{{-   $top := merge . (dict "enterprise" "F1")}}
+{{- includeTemplate "rbw/config.json.tmpl" $top }}
+{{- end -}}

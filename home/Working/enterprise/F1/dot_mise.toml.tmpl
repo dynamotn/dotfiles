@@ -1,6 +1,5 @@
 [env]
 {{ $top := merge . (dict "enterprise" "F1") }}
-{{- template "mise/env_jira.toml.tmpl" $top }}
 {{- if ne .kind "container" }}
 {{- template "mise/env_git.toml.tmpl" $top }}
 {{- end }}

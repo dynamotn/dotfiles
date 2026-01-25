@@ -1,8 +1,13 @@
-{{- $commonSecret := dict }}
+{{- $jiraSecret := dict }}
+{{- $scope := "global" }}
 {{- if index . "personal" }}
-{{-   $commonSecret = join .chezmoi.sourceDir "../secrets/data/personal/common.yaml.age" | include | decrypt | fromYaml }}
+{{-   $jiraSecret = join .chezmoi.sourceDir "../secrets/data/personal/jira.yaml.age" | include | decrypt | fromYaml }}
 {{- else if index . "enterprise" }}
-{{-   $commonSecret = printf "../secrets/data/enterprise-%s/common.yaml.age" .enterprise | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $jiraSecret = printf "../secrets/data/enterprise-%s/jira.yaml.age" .enterprise.name | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $scope = .enterprise.scope }}
 {{- end }}
-JIRA_CONFIG_FILE = "{{ "{{" }} config_root {{ "}}" }}/.jira/config.yaml"
-JIRA_API_TOKEN = {{ $commonSecret.jira.token | quote }}
+{{- range $jiraSecret.servers }}
+{{-   if eq .scope $scope }}
+JIRA_API_TOKEN = {{ .token | quote }}
+{{-   end }}
+{{- end }}

@@ -1,0 +1,10 @@
+{{- if has "F1" .decryptEnterprise }}
+{{-   $top := merge . (dict
+        "enterprise" (dict
+          "name" "F1"
+          "scope" "OP"
+        )
+      )
+}}
+{{- includeTemplate "k8s/config.yaml.tmpl" $top }}
+{{- end -}}
