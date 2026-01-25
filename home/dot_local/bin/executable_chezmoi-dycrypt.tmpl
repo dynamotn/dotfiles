@@ -34,6 +34,7 @@ function _spec_encrypt {
   dybatpho::opts::param \
     "Folder of input file, default is \`data\` for encryption to \`secrets/data\` in dotfiles folder" \
     FOLDER --folder -f init:="data"
+  dybatpho::opts::flag "Force encrypt" FORCE --force -F on:true off:false init:="false"
   dybatpho::opts::param "List of attributes for chezmoi source file, separate by \`,\`" ATTRIBUTES --attributes -a init:=""
   dybatpho::opts::param "Remove source file after encryption" REMOVE --remove -r init:="false"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_encrypt"
@@ -62,13 +63,15 @@ function _encrypt {
   dybatpho::dry_run mkdir -p "$(dirname "$output")"
   dybatpho::create_temp temp_file ".tmp"
   local up_to_date="false"
-  if dybatpho::is file "${output}"; then
+  if dybatpho::is true "${FORCE}"; then
+    up_to_date="false"
+  elif dybatpho::is file "${output}"; then
     age -d -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o "$temp_file" "$output"
     if diff "$input" "$temp_file" > /dev/null; then
       dybatpho::debug "Output file ${output} is up to date"
       up_to_date="true"
     else
-      dybatpho::debug "Output file ${output} updated"
+      dybatpho::debug "Output file ${output} is outdated"
     fi
   fi
   if dybatpho::is false "${up_to_date}"; then

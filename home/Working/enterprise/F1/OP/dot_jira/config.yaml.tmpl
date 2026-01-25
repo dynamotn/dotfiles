@@ -1,0 +1,10 @@
+{{- if has "F1" .decryptEnterprise }}
+{{-   $top := merge . (dict
+        "enterprise" (dict
+          "name" "F1"
+          "scope" "OP"
+        )
+      )
+}}
+{{- includeTemplate "jira/config.yaml.tmpl" $top }}
+{{- end -}}

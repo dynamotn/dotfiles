@@ -1,0 +1,4 @@
+{{- if .decryptPersonal }}
+{{-   $top := merge . (dict "personal" true) }}
+{{- includeTemplate "rbw/config.json.tmpl" $top }}
+{{- end -}}
