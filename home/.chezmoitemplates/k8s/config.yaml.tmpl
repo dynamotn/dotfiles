@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Config
+{{- $k8sSecret := dict }}
+{{- $scope := "global" }}
+{{- if index . "personal" }}
+{{-   $k8sSecret = join .chezmoi.sourceDir "../secrets/data/personal/k8s.yaml.age" | include | decrypt | fromYaml }}
+{{- else if index . "enterprise" }}
+{{-   $k8sSecret = printf "../secrets/data/enterprise-%s/k8s.yaml.age" .enterprise.name | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $scope = .enterprise.scope }}
+{{- end }}
+clusters:
+  {{- range $k8sSecret.clusters }}
+  {{-   if eq .scope $scope }}
+  - {{ unset . "scope" | toYaml | indent 4 | trim }}
+  {{-   end }}
+  {{- end }}
+contexts:
+  {{- range $k8sSecret.contexts }}
+  {{-   if eq .scope $scope }}
+  - {{ unset . "scope" | toYaml | indent 4 | trim }}
+  {{-   end }}
+  {{- end }}
+current-context: {{ get $k8sSecret "current-context" }}
+users:
+  {{- range $k8sSecret.users }}
+  {{-   if eq .scope $scope }}
+  - {{ unset . "scope" | toYaml | indent 4 | trim }}
+  {{-   end }}
+  {{- end }}

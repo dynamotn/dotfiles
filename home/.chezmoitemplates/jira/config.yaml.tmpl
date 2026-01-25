@@ -8,6 +8,6 @@
 {{- end }}
 {{- range $jiraSecret.servers }}
 {{-   if eq .scope $scope }}
-JIRA_API_TOKEN = {{ .token | quote }}
+{{-     .config | toYaml }}
 {{-   end }}
 {{- end }}

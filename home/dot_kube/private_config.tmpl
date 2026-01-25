@@ -1,0 +1,4 @@
+{{- if .decryptPersonal }}
+{{-   $top := merge . (dict "personal" true) }}
+{{- includeTemplate "k8s/config.yaml.tmpl" $top }}
+{{- end -}}
