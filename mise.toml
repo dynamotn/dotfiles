@@ -4,7 +4,7 @@ run = """
 ENTERPRISE="F1"
 DOCKER_IMAGE="git.example.com/dynamo/toolbox:${ENTERPRISE}"
 export TOOLBOX_TYPE="${ENTERPRISE}"
-export AGE_PASSPHRASES="${ENTERPRISE}=$(rbw get 'Age Dotfiles')"
+export AGE_PASSPHRASES="${ENTERPRISE}=$(rbw get 'Age Dotfiles' --field "${ENTERPRISE}")"
 export SSL_CERT="$(
   age -d -i ~/.config/chezmoi/enterprise-${ENTERPRISE}.key \
     secrets/data/enterprise-${ENTERPRISE}/ssl.crt.age
