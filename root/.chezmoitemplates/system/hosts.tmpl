@@ -1,0 +1,6 @@
+127.0.0.1   {{ .code }} localhost localhost4
+::1         {{ .code }} localhost localhost6
+{{- range .decryptEnterprise }}
+{{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{    get $commonSecret "hosts" }}
+{{- end }}
