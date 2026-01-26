@@ -1,4 +1,4 @@
-# vim:sw=4 sts=4 filetype=sshconfig
+{{- if .decryptPersonal }}
 Host github.com
     User git
     IdentityFile ~/.ssh/keys/personal_ed25519
@@ -10,3 +10,4 @@ Host gitlab.com
 Host aur.archlinux.org
     User aur
     IdentityFile ~/.ssh/keys/personal_ed25519
+{{- end }}
