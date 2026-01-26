@@ -1,22 +1,24 @@
 **/.DS_Store
 
-{/* OS related files */}
-{{- if ne .chezmoi.os "darwin" }}
-Applications
-{{- else if ne .chezmoi.os "linux" }}
+{{/* OS related files */}}
+{{- if ne .chezmoi.os "linux" }}
 etc
 usr
 opt
 var
 {{- end }}
+{{- if ne .chezmoi.os "darwin" }}
+Applications
+private
+{{- end }}
 
-{/* Window manager and WM-related files */}
+{{/* Window manager and WM-related files */}}
 {{- if ne .guiServer "W" }}
 usr/share/wayland-sessions/dyland.desktop
 etc/greetd
 {{- end }}
 
-{/* Browser files */}
+{{/* Browser files */}}
 {{- if ne .osid "linux-gentoo" }}
 usr/lib64/firefox
 opt/firefox
@@ -37,7 +39,7 @@ opt/zen-browser-bin
 Applications/Zen.app
 {{- end }}
 
-{/* Linux related files */}
+{{/* Linux related files */}}
 {{- if ne .initSystem "systemd" }}
 etc/systemd
 etc/vconsole.conf
@@ -57,7 +59,7 @@ var/lib/portage
 etc/apt
 {{- end }}
 
-{/* Machine type files */}
+{{/* Machine type files */}}
 {{- if not (eq .kind "pc" "laptop") }}
 etc/default/grub
 {{- end }}
@@ -67,7 +69,7 @@ etc/modprobe.d
 etc/pam.d
 {{- end }}
 
-{/* Secret files */}
+{{/* Secret files */}}
 {{- if or (ne .kind "office") (ne .company "F1") }}
 etc/ca-certificates
 {{- else }}
@@ -76,7 +78,7 @@ etc/ca-certificates/trust-source
 {{-   end }}
 {{- end }}
 
-{/* Input method */}
+{{/* Input method */}}
 {{- if empty .languages }}
 etc/portage/**fcitx-configtool
 etc/portage/**fcitx-m17n

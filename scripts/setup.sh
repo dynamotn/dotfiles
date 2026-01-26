@@ -76,15 +76,15 @@ function _generate_chezmoi_config {
   fi
   local identities=()
   IFS=',' read -r -a identities <<< "$IDENTITIES"
-  local enterpriseIdentities=()
+  local enterprise_identities=()
   for identity in "${identities[@]}"; do
     if [ -n "$identity" ] && [ "$identity" != "personal" ]; then
-      enterpriseIdentities+=("$identity")
+      enterprise_identities+=("$identity")
     fi
   done
   sed -i "s#\(\$decryptEnterprise := .*\) false }}#\1 true }}#g" "$dest_config"
   sed -i "s#\$company := \(.*\) }}#\$company := \"\" }}#g" "$dest_config"
-  for identity in "${enterpriseIdentities[@]}"; do
+  for identity in "${enterprise_identities[@]}"; do
     sed -i "s#\(\$listDecryptEnterprise := .*\) }}#\1 \"${identity}\" }}#g" "$dest_config"
   done
 }
@@ -142,9 +142,14 @@ function _main {
   dybatpho::header "Setup other dotfiles"
   chezmoi apply "${params[@]}"
 
-  # Apply OS specific configuration if not Termux or MacOS
+  # Apply OS specific configuration if not Termux
   case "$(dybatpho::goos)" in
-    darwin | linux)
+    darwin)
+      dybatpho::header "Setup operating system"
+      ~/.local/bin/scz apply /Applications
+      ~/.local/bin/scz apply /private
+      ;;
+    linux)
       dybatpho::header "Setup operating system"
       ~/.local/bin/scz apply
       ;;

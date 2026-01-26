@@ -1,4 +1,4 @@
-{/* Git objects and misc files */}
+{{/* Git objects and misc files */}}
 **/.git/**
 **/.gitignore
 **/.gitmodules
@@ -6,7 +6,7 @@
 **/.DS_Store
 **/.uuid
 
-{/* Linux UI-related files */}
+{{/* Linux UI-related files */}}
 {{- if eq .guiServer "0" "M" }}
 .local/share/themes
 .local/share/icons
@@ -19,8 +19,8 @@
 .xprofile
 {{- end }}
 
-{/* Browser and mail client files */}
-{/* Based on GUI window manager */}
+{{/* Browser and mail client files */}}
+{{/* Based on GUI window manager */}}
 {{- if eq .guiServer "M" }}
 .mozilla
 .zen
@@ -30,7 +30,7 @@ Library/Application Support/Firefox
 Library/Application Support/zen
 Library/thunderbird
 {{- end }}
-{/* Based on type of browser */}
+{{/* Based on type of browser */}}
 {{- if ne .browser "F" }}
 .mozilla
 Library/Application Support/Firefox
@@ -49,7 +49,7 @@ Library/Application Support/zen
 .config/firefox
 .local/bin/dyfox
 {{- else }}
-{/* Ignore when running */}
+{{/* Ignore when running */}}
 {{-   $settingsFirefox := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
 {{-   $processFirefox := printf "%s/%s" $settingsFirefox.installFolder $settingsFirefox.processFile }}
 {{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
@@ -60,13 +60,13 @@ Library/Application Support/Firefox
 Library/Application Support/zen
 {{-   end }}
 {{- end }}
-{/* Based on type of mail client */}
+{{/* Based on type of mail client */}}
 {{- if empty .mailClient }}
 .thunderbird
 .config/thunderbird
 .local/bin/dybird
 {{- else }}
-{/* Ignore when running */}
+{{/* Ignore when running */}}
 {{-   $settingsThunderbird := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
 {{-   $processThunderbird := printf "%s/%s" $settingsThunderbird.installFolder $settingsThunderbird.processFile }}
 {{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) $numberOfRunningProcess }}
@@ -76,7 +76,7 @@ Library/thunderbird
 {{-   end }}
 {{- end }}
 
-{/* Other GUI tools */}
+{{/* Other GUI tools */}}
 {{- if eq .guiServer "0" }}
 .local/bin/obsidian
 .config/kitty
@@ -88,7 +88,7 @@ Library/thunderbird
 .config/mpv
 {{- end }}
 
-{/* Window manager and WM-related files */}
+{{/* Window manager and WM-related files */}}
 {{- if empty .languages }}
 .config/fcitx5
 {{- end }}
@@ -111,7 +111,7 @@ Library/thunderbird
 .config/sketchybar
 {{- end }}
 
-{/* Terminal multiplexer files */}
+{{/* Terminal multiplexer files */}}
 {{- if ne .terminalMultiplexer "T" }}
 .tmux.conf
 .config/tmux
@@ -120,12 +120,12 @@ Library/thunderbird
 .config/zellij
 {{- end }}
 
-{/* Linux related files */}
+{{/* Linux related files */}}
 {{- if ne .initSystem "systemd" }}
 .config/systemd
 {{- end }}
 
-{/* MacOS related files */}
+{{/* MacOS related files */}}
 {{- if ne .guiServer "M" }}
 Library
 .hammerspoon
@@ -133,7 +133,7 @@ Library
 .macos
 {{- end }}
 
-{/* Machine type files */}
+{{/* Machine type files */}}
 {{- if ne .kind "laptop" }}
 .config/shikane
 {{- end }}
@@ -141,19 +141,19 @@ Library
 .netrc
 {{- end }}
 
-{/* Self-managed folders */}
+{{/* Self-managed folders */}}
 {{- if eq .guiServer "0" }}
 Documents
 Misc
 Multimedia
 {{- end }}
 
-{/* Enterprise files */}
+{{/* Enterprise files */}}
 {{- if ne .place "office" }}
 .npmrc
 {{- end }}
 
-{/* Secret files and Private submodules */}
+{{/* Secret files and Private submodules */}}
 {{- if not .decryptPersonal }}
 .ssh/config.d/personal.config
 .ssh/keys/personal*

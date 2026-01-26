@@ -4,7 +4,9 @@ dybatpho::register_common_handlers
 
 dotfiles=$(realpath $(chezmoi execute-template '{{ .chezmoi.sourceDir }}')/..)
 {{- if eq .chezmoi.os "darwin" }}
-sed -i "/umask:/s/^# //" "$HOME/.config/chezmoi/chezmoi.yaml"
+if [[ "$*" == *"/Applications"* ]]; then
+  sed -i "/umask:/s/^# //" "$HOME/.config/chezmoi/chezmoi.yaml"
+fi
 {{- end }}
 sudo env "PATH=$PATH" \
   chezmoi --destination / \
@@ -14,5 +16,7 @@ sudo env "PATH=$PATH" \
   --config ~/.config/chezmoi/chezmoi.yaml \
   "$@"
 {{- if eq .chezmoi.os "darwin" }}
-sed -i "/umask:/s/^/# /" "$HOME/.config/chezmoi/chezmoi.yaml"
+if [[ "$*" == *"/Applications"* ]]; then
+  sed -i "/umask:/s/^/# /" "$HOME/.config/chezmoi/chezmoi.yaml"
+fi
 {{- end }}
