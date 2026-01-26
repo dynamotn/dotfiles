@@ -129,16 +129,6 @@ function _main {
     # shellcheck disable=SC2155
     export no_proxy="$(dybatpho::array_join "addresses" ",")"
   fi
-  dybatpho::header "Setup RBW"
-  if [ "$(chezmoi data | yq .decryptPersonal)" == "true" ]; then
-    chezmoi apply "${HOME}/.config/rbw" "${params[@]}"
-  fi
-  readarray identities < <(chezmoi data | yq e -o=j -I=0 -r '.decryptEnterprise[]')
-  for identity in "${identities[@]}"; do
-    if dybatpho::is dir "$SCRIPT_DIR/../home/dot_config/rbw-enterprise-$(dybatpho::lower "$identity")"; then
-      chezmoi apply "${HOME}/.config/rbw-enterprise-$(dybatpho::lower "$identity")" "${params[@]}"
-    fi
-  done
   dybatpho::header "Setup other dotfiles"
   chezmoi apply "${params[@]}"
 

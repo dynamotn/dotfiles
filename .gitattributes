@@ -1,12 +1,4 @@
 home/**/*.age diff=age-personal
-root/**/*.age diff=age-personal
 
-home/dot_config/firefox/startpage/src/img/background/*F1.png.age diff=age-enterprise-F1
 home/dot_config/rbw-enterprise-f1/*.age diff=age-enterprise-F1
 home/private_dot_ssh/**/*F1*.age diff=age-enterprise-F1
-home/Working/enterprise/F1/**/*.age diff=age-enterprise-F1
-root/etc/ca-certificate/**/*.age diff=age-enterprise-F1
-
-home/Working/enterprise/ZOO/**/*.age diff=age-enterprise-ZOO
-
-home/Working/enterprise/T1/**/*.age diff=age-enterprise-T1
