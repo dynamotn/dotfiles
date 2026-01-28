@@ -1,0 +1,7 @@
+{{- if and (eq .chezmoi.os "android") (not (empty .decryptEnterprise)) }}
+name: shelter
+method: os
+fdroid:
+  packages:
+    - name: net.typeblog.shelter
+{{- end }}

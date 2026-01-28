@@ -279,6 +279,7 @@
 |[android-tools](developer.android.com/tools/releases/platform-tools)|Android development tools|
 |[fdroidcl](https://github.com/Hoverth/fdroidcl)|CLI for F-Droid|
 |[immich](https://github.com/immich-app/immich)|Client for self-hosted photo, video server|
+|[shelter](https://github.com/PeterCxy/Shelter)|Work profile for Android|
 
 ## Miscellaneous applications
 
