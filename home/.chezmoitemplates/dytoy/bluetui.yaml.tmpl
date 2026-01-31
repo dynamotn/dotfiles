@@ -6,8 +6,8 @@ is_essential: true
 github:
   repo: pythops/bluetui
   {{- if eq .chezmoi.arch "amd64" }}
-  release_asset: bluetui-x86_64-linux-gnu
+  release_asset: bluetui-x86_64-linux-musl
   {{- else if eq .chezmoi.arch "arm64" }}
-  release_asset: bluetui-aarch64-linux-gnu
+  release_asset: bluetui-aarch64-linux-musl
   {{- end }}
 {{- end }}
