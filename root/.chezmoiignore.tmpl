@@ -68,6 +68,9 @@ etc/hostname
 etc/modprobe.d
 etc/pam.d
 {{- end }}
+{{- if eq .kind "container" }}
+etc/hosts
+{{- end }}
 
 {{/* Secret files */}}
 {{- if or (ne .kind "office") (ne .company "F1") }}

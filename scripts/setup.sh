@@ -133,17 +133,19 @@ function _main {
   chezmoi apply "${params[@]}"
 
   # Apply OS specific configuration if not Termux
-  case "$(dybatpho::goos)" in
-    darwin)
-      dybatpho::header "Setup operating system"
-      ~/.local/bin/scz apply /Applications
-      ~/.local/bin/scz apply /private
-      ;;
-    linux)
-      dybatpho::header "Setup operating system"
-      ~/.local/bin/scz apply
-      ;;
-  esac
+  if sudo -n true 2> /dev/null || sudo true &> /dev/null; then
+    case "$(dybatpho::goos)" in
+      darwin)
+        dybatpho::header "Setup operating system"
+        ~/.local/bin/scz apply /Applications
+        ~/.local/bin/scz apply /private
+        ;;
+      linux)
+        dybatpho::header "Setup operating system"
+        ~/.local/bin/scz apply
+        ;;
+    esac
+  fi
 
   dybatpho::success "Setup complete"
 }

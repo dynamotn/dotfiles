@@ -135,7 +135,7 @@ data:
   hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth card (y/n)" false }}
   hasWifi: {{ promptBoolOnce . "hasWifi" "Does this machine has a wifi card (y/n)" false }}
 
-  {{- $httpProxy := promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using" }}
+  {{- $httpProxy := promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using" "" }}
   httpProxy: {{ $httpProxy | quote }}
   {{- if $httpProxy }}
   noProxyAddresses:
