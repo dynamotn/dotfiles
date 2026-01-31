@@ -13,3 +13,6 @@ auths:
     auth: "{{ printf "%s:%s" .username .password | b64enc }}"
   {{-   end }}
   {{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+currentContext: lima-dyker
+{{- end }}
