@@ -18,7 +18,7 @@ layout {
     floating_panes {
       pane {
         command "fish"
-        args "-c" "k --context uat port-forward default/toolbox 3000 3000"
+        args "-c" "k --context uat port-forward -n default toolbox 3000:3000"
       }
     }
     floating_panes {
