@@ -21,6 +21,13 @@
         binary = true
         textconv = "bash ~/.config/git/scripts/decrypt_chezmoi.sh _sqlite personal"
 {{- end }}
+{{- if .decryptEnterprise }}
+[diff "age-enterprise-shared"]
+        textconv = "bash ~/.config/git/scripts/decrypt_chezmoi.sh _normal enterprise-shared"
+[diff "sqlite3-enterprise-shared"]
+        binary = true
+        textconv = "bash ~/.config/git/scripts/decrypt_chezmoi.sh _sqlite enterprise-shared"
+{{- end }}
 {{- range .decryptEnterprise }}
 [diff "age-enterprise-{{ . }}"]
         textconv = "bash ~/.config/git/scripts/decrypt_chezmoi.sh _normal enterprise-{{ . }}"

@@ -3,8 +3,13 @@
         # Tôi ra đây có phải xưng danh không nhỉ?
         name = Trần Đức Nam
         email = me@dynamotn.dev
+        {{- if .decryptPersonal }}
         # Signing SSH key
         signingkey = ~/.ssh/keys/personal_ed25519.pub
+        {{- else if .decryptEnterprise }}
+        # Signing SSH key
+        signingkey = ~/.ssh/keys/enterprise-shared_ed25519.pub
+        {{- end }}
 [feature]
         # Optimize for repos with many files in the working directory
         manyFiles = true
