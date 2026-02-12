@@ -16,7 +16,6 @@
 .config/Trolltech.conf
 .config/user-dirs.dirs
 .local/bin/xdg-*
-.xprofile
 {{- end }}
 
 {{/* Browser and mail client files */}}
@@ -84,7 +83,8 @@ Library/thunderbird
 {{- if eq .guiServer "M" }}
 .local/bin/obsidian
 {{- end }}
-{{- if not (eq .kind "pc" "laptop") }}
+{{- if not .hasSound }}
+.config/cava
 .config/mpv
 {{- end }}
 
@@ -160,38 +160,27 @@ Multimedia
 .config/firefox/profiles/personal
 .config/firefox/startpage/profiles/personal
 .config/thunderbird/profiles/personal
-.config/fish-ai.ini
-.config/github-copilot/hosts.json
-.config/go-wol
-.config/himalaya
 .config/rbw
 Library/Application Support/rbw
 .config/tstruct/auth.json
 .kube/config
-.terraformrc
 .docker/config.json
 {{- end }}
 {{- if empty .decryptEnterprise }}
+.ssh/config.d/enterprise.config
+.ssh/keys/enterprise-shared_*
 Library/Application Support/rbw-*
 .config/rbw-*
 {{- end }}
-{{- if not (has "F1" .decryptEnterprise) }}
-.ssh/config.d/enterprise-F1.config
-.ssh/keys/enterprise-F1_*
-Working/enterprise/F1
-.config/firefox/profiles/enterprise-F1
-.config/firefox/startpage/profiles/enterprise-F1
-.config/thunderbird/profiles/enterprise-F1
-.config/rbw-enterprise-f1
-Library/Application Support/rbw-enterprise-f1
-{{- end }}
-{{- if not (has "ZOO" .decryptEnterprise) }}
-.ssh/config.d/enterprise-ZOO.config
-.ssh/keys/enterprise-ZOO_*
-Working/enterprise/ZOO
-{{- end }}
-{{- if not (has "T1" .decryptEnterprise) }}
-.ssh/config.d/enterprise-T1.config
-.ssh/keys/enterprise-T1_*
-Working/enterprise/T1
+{{- $companies := list "F1" "T1" "ZOO" }}
+{{- range $companies }}
+{{-   if not (has . $.decryptEnterprise) }}
+.ssh/keys/enterprise-{{ . }}_*
+Working/enterprise/{{ . }}
+.config/firefox/profiles/enterprise-{{ . }}
+.config/firefox/startpage/profiles/enterprise-{{ . }}
+.config/thunderbird/profiles/enterprise-{{ . }}
+.config/rbw-enterprise-{{ . | lower }}
+Library/Application Support/rbw-enterprise-{{ . | lower }}
+{{-   end }}
 {{- end }}
