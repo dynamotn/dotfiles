@@ -7,6 +7,10 @@ dybatpho::register_common_handlers
 {{-   $types = append $types "personal" }}
 # personal hash: {{ joinPath .chezmoi.sourceDir "../secrets/personal.age" | include | sha256sum }}
 {{- end }}
+{{- if .decryptEnterprise }}
+{{-   $types = append $types "enterprise-shared" }}
+# enterprise-shared hash: {{ joinPath .chezmoi.sourceDir "../secrets/enterprise-shared.age" | include | sha256sum }}
+{{- end }}
 {{- range .decryptEnterprise }}
 {{-   $types = printf "enterprise-%s" . | append $types }}
 # {{ . }} hash: {{ printf "../secrets/enterprise-%s.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
