@@ -1,0 +1,16 @@
+{{- range .hosts }}
+{{-   if eq $.code .host }}
+{{-     $algo := "ed25519" }}
+{{-     if hasKey . "algo" }}
+{{-       $algo = .algo }}
+{{-     end }}
+{{-     range .identities }}
+{{-       printf "ssh/pub/%s_%s.txt" . $algo | includeTemplate }}
+{{-     end -}}
+{{-     if hasKey . "authorized" }}
+{{-       range .authorized }}
+{{-         . }}
+{{-       end -}}
+{{-     end }}
+{{-   end }}
+{{- end -}}
