@@ -1,0 +1,14 @@
+{{- if .decryptPersonal }}
+{{-   $file := printf "../secrets/data/%s/ssh.yaml.age" "personal" | join .chezmoi.sourceDir }}
+{{-   if stat (printf "%s/%s" $.chezmoi.sourceDir $file) }}
+{{-     $ssh := include $file | decrypt | fromYaml }}
+{{-     merge $ssh . | includeTemplate "ssh/authorized.txt.tmpl" }}
+{{-   end }}
+{{- end -}}
+{{- range .decryptEnterprise }}
+{{-   $file := printf "../secrets/data/enterprise-%s/ssh.yaml.age" . | join $.chezmoi.sourceDir }}
+{{-   if stat (printf "%s/%s" $.chezmoi.sourceDir $file) }}
+{{-     $ssh := include $file | decrypt | fromYaml }}
+{{-     merge $ssh $ | includeTemplate "ssh/authorized.txt.tmpl" }}
+{{-   end }}
+{{- end -}}

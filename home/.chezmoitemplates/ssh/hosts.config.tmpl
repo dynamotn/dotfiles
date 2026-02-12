@@ -1,0 +1,23 @@
+# vim:sw=4 sts=4
+{{- range .hosts }}
+Host {{ .host }}
+    {{- if hasKey . "hostname" }}
+    Hostname {{ .hostname }}
+    {{- end }}
+    {{- if hasKey . "port" }}
+    Port {{ .port }}
+    {{- end }}
+    User {{ .user }}
+    {{- $algo := "ed25519" }}
+    {{- if hasKey . "algo" }}
+    {{-   $algo = .algo }}
+    {{- end }}
+    {{- range .identities }}
+    {{-   if and $.decryptPersonal (eq . "personal") }}
+    IdentityFile ~/.ssh/keys/personal_{{ $algo }}
+    {{-   else if and $.decryptEnterprise (eq . "enterprise-shared") }}
+    {{-   else }}
+    IdentityFile ~/.ssh/keys/{{ . }}_{{ $algo }}
+    {{-   end }}
+    {{- end }}
+{{- end }}
