@@ -1,0 +1,10 @@
+name: go
+{{- if eq .chezmoi.os "android" }}
+# Need to use system package for Android
+method: os
+termux:
+  packages:
+    - golang
+{{- else }}
+method: mise
+{{- end }}

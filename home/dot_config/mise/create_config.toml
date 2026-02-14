@@ -1,7 +1,6 @@
 [tools]
 "aqua:jdx/usage" = "latest"
 fzf = "latest"
-python = "system"
 
 [tool_alias]
 usage = "aqua:jdx/usage"

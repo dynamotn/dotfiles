@@ -1,14 +1,19 @@
+name: ov
+is_essential: true
+{{- if eq .chezmoi.os "android" }}
+# Need to use system package for Android with ABI compatible
+method: shell
+dependencies:
+  - golang
+content: |
+  go install github.com/noborus/ov@latest
+{{- else }}
 # Although this is essential tool but there isn't any packages on Arch, Alpine,
 # Ubuntu so I will use binary
-name: ov
 method: binary
-is_essential: true
 github:
   repo: noborus/ov
-  {{- $os := .chezmoi.os }}
-  {{- if eq .chezmoi.os "linux" "android" }}
-  {{-   $os = "linux" }}
-  {{- end }}
-  release_asset: ov_%1v_{{ $os }}_{{ .chezmoi.arch }}.zip
+  release_asset: ov_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.zip
 archive:
   - path: ov
+{{- end }}
