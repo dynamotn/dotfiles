@@ -1,0 +1,12 @@
+name: stern
+method: binary
+github:
+  repo: stern/stern
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  {{- $arch := .chezmoi.arch }}
+  release_asset: stern_%1v_{{ $os }}_{{ $arch }}.tar.gz
+archive:
+  - path: stern
