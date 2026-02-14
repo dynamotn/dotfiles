@@ -220,6 +220,7 @@
 |[skopeo](https://github.com/containers/skopeo)|CLI tool for various operations with remote image repositories|
 |[k9s](https://github.com/derailed/k9s)|Interactive TUI with Kubernetes cluster|
 |[krew](https://github.com/kubernetes-sigs/krew)|Plugin manager for kubectl|
+|[stern](https://github.com/stern/stern)|Multi pod and container log tailing for Kubernetes|
 |[k0sctl](https://github.com/k0sproject/k0sctl)|Bootstrap and manage k0s cluster|
 |[talosctl](https://github.com/siderolabs/talos)|Bootstrap and manage Talos Linux cluster|
 |[helm-docs](https://github.com/norwoodj/helm-docs)|Generate documents for Helm chart|
