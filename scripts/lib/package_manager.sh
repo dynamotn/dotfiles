@@ -134,7 +134,8 @@ function pkg::init_termux {
 #######################################
 function pkg::init_fdroid {
   pkg::sync_fdroid_repo
-  pkg::install_via_fdroidcl com.machiav3lli.fdroid
+  pkg::check_installed_fdroidcl com.looker.droidify \
+    || pkg::install_via_fdroidcl com.looker.droidify
 }
 
 #######################################
@@ -216,7 +217,7 @@ function pkg::add_apt_repo {
 }
 
 #######################################
-# @description Add repository to Gentoo portage
+# @description Add repository of Fdroid
 # @arg $1 string Name of repository
 # @arg $2 string URL of the repository
 #######################################
@@ -300,9 +301,12 @@ function pkg::check_installed_apk {
 
 #######################################
 # @description Check if a package is installed on Android via fdroidcl
+# @arg $1 string Application ID
 #######################################
 function pkg::check_installed_fdroidcl {
-  return 1
+  local app_id
+  dybatpho::expect_args app_id -- "$@"
+  cmd package list packages 2> /dev/null | grep -wq "$app_id"
 }
 
 #######################################
