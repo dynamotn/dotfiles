@@ -1,0 +1,11 @@
+name: python
+{{- if eq .chezmoi.os "android" }}
+# Need to use system package for Android
+method: os
+termux:
+  packages:
+    - python
+{{- else }}
+method: mise
+version: system
+{{- end }}

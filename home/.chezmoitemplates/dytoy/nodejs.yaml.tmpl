@@ -1,11 +1,19 @@
 name: node
+{{- if eq .chezmoi.os "android" }}
+# Need to use system package for Android
+method: os
+termux:
+  packages:
+    - nodejs
+{{- else }}
 method: mise
 backend: nodejs
-{{- if eq .kind "pc" "laptop" }}
+{{-   if eq .kind "pc" "laptop" }}
 is_essential: true
-{{- end }}
+{{-   end }}
 hook:
   after: |
     # Enable corepack
     (yes || :) | ~/.local/bin/mise x node -- npm install --global corepack@latest
     (yes || :) | ~/.local/bin/mise x node -- npx corepack enable pnpm
+{{- end }}

@@ -63,7 +63,7 @@ ubuntu:
     - name: make
 alpine:
   packages:
-    # System tools
+    # Build tools
     - name: build-base
 termux:
   packages:
@@ -73,6 +73,10 @@ termux:
     - name: proot
     - name: tsu
     - name: which
+    - name: file
+    # Build tools
+    - name: make
+    - name: clang
 macos:
   packages:
     # GNU compatible tools

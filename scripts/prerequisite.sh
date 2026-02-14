@@ -65,7 +65,7 @@ function _setup_termux {
   termux-change-repo && pkg update
   termux-setup-storage
   # Linux compatible tools
-  pkg install -y tsu which
+  pkg install -y tsu which file
   # Termux only tools
   pkg install -y termux-services termux-exec proot
   # Cloning code
