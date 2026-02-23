@@ -3,7 +3,7 @@
 dybatpho::register_common_handlers
 
 {{- if eq .guiWinManager "H" }}
-{{- $configHash := joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" | include | sha256sum }}
+{{- $configHash := joinPath .chezmoi.sourceDir "private_dot_config/hypr/hyprland/plugins.list" | include | sha256sum }}
 {{/* check list plugin is empty or not */}}
 {{- if ne $configHash "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }}
 # config hash: {{ $configHash }}
@@ -21,7 +21,7 @@ while IFS="" read -r plugin; do
   dybatpho::progress "Install plugin ${plugin}"
   hyprpm add -f https://github.com/${plugin} || true
   hyprpm enable ${plugin#*/}
-done < {{ joinPath .chezmoi.sourceDir "dot_config/hypr/hyprland/plugins.list" }}
+done < {{ joinPath .chezmoi.sourceDir "private_dot_config/hypr/hyprland/plugins.list" }}
 hyprpm reload -n
 dybatpho::success "Setup hyprland"
 {{- end }}

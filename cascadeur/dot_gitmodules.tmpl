@@ -11,7 +11,7 @@
 {{-   $gitlab = "https://gitlab.com/" }}
 {{- end }}
 [submodule "neovim"]
-  path = home/dot_config/nvim
+  path = home/private_dot_config/nvim
   {{- if .blockedGitlab }}
   url = {{ $github }}dynamotn/neovim-config.git
   {{- else }}
@@ -28,7 +28,7 @@
 {{- end }}
 {{- if eq .guiServer "X" }}
 [submodule "awesome"]
-  path = home/dot_config/awesome
+  path = home/private_dot_config/awesome
   {{- if .blockedGitlab }}
   url = {{ $github }}dynamotn/awesomewm-config.git
   {{- else }}
@@ -61,14 +61,14 @@
 {{- if eq .browser "F" "Z" }}
 {{-   if .decryptPersonal }}
 [submodule "firefox-personal"]
-  path = home/dot_config/firefox/profiles/personal
+  path = home/private_dot_config/firefox/profiles/personal
   {{- if .blockedGitlab }}
   url = {{ $github }}dynamotn/firefox-personal.git
   {{- else }}
   url = {{ $gitlab }}dynamo-config/firefox/personal.git
   {{- end }}
 [submodule "thunderbird-personal"]
-  path = home/dot_config/thunderbird/profiles/personal
+  path = home/private_dot_config/thunderbird/profiles/personal
   {{- if .blockedGitlab }}
   url = {{ $github }}dynamotn/thunderbird-personal.git
   {{- else }}
@@ -77,14 +77,14 @@
 {{-   end }}
 {{-   range .browserEnterpriseProfiles }}
 [submodule "firefox-enterprise-{{ . }}"]
-  path = home/dot_config/firefox/profiles/enterprise-{{ . }}
+  path = home/private_dot_config/firefox/profiles/enterprise-{{ . }}
   {{- if $.blockedGitlab }}
   url = {{ $github }}dynamotn/firefox-enterprise-{{ . }}.git
   {{- else }}
   url = {{ $gitlab }}dynamo-config/firefox/enterprise-{{ . }}.git
   {{- end }}
 [submodule "thunderbird-enterprise-{{ . }}"]
-  path = home/dot_config/thunderbird/profiles/enterprise-{{ . }}
+  path = home/private_dot_config/thunderbird/profiles/enterprise-{{ . }}
   {{- if $.blockedGitlab }}
   url = {{ $github }}dynamotn/thunderbird-enterprise-{{ . }}.git
   {{- else }}

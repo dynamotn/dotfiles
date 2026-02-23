@@ -20,18 +20,18 @@ git submodule update --init \
   {{- end }}
   {{- if eq .browser "F" "Z" }}
   {{-   if .decryptPersonal }}
-  home/dot_config/firefox/profiles/personal \
+  home/private_dot_config/firefox/profiles/personal \
   {{-   end }}
   {{-   range .browserEnterpriseProfiles }}
-  home/dot_config/firefox/profiles/enterprise-{{ . }} \
+  home/private_dot_config/firefox/profiles/enterprise-{{ . }} \
   {{-   end }}
   {{- end }}
   {{- if eq .mailClient "T" "B" }}
   {{-   if .decryptPersonal }}
-  home/dot_config/thunderbird/profiles/personal \
+  home/private_dot_config/thunderbird/profiles/personal \
   {{-   end }}
   {{-   range .mailEnterpriseProfiles }}
-  home/dot_config/thunderbird/profiles/enterprise-{{ . }} \
+  home/private_dot_config/thunderbird/profiles/enterprise-{{ . }} \
   {{-   end }}
   {{- end }}
   {{- if eq .terminalMultiplexer "T" }}
@@ -40,5 +40,5 @@ git submodule update --init \
   {{- if ne .guiServer "0" }}
   home/Multimedia/Pictures/Wallpaper \
   {{- end }}
-  home/dot_config/nvim
+  home/private_dot_config/nvim
 dybatpho::success "Updated submodules"

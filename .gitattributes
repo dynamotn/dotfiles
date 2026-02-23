@@ -1,5 +1,5 @@
 home/**/*.age diff=age-personal
 home/private_dot_ssh/**/enterprise-shared*.age diff=age-enterprise-shared
 
-home/dot_config/rbw-enterprise-f1/*.age diff=age-enterprise-F1
+home/private_dot_config/rbw-enterprise-f1/*.age diff=age-enterprise-F1
 home/private_dot_ssh/**/*F1*.age diff=age-enterprise-F1
