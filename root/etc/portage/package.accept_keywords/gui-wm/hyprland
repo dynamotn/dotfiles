@@ -1,0 +1,12 @@
+gui-wm/hyprland ~amd64
+gui-libs/aquamarine ~amd64
+gui-libs/hyprutils ~amd64
+dev-util/hyprwayland-scanner ~amd64
+dev-libs/hyprlang ~amd64
+dev-libs/hyprgraphics ~amd64
+gui-libs/hyprwire ~amd64
+gui-libs/hyprland-guiutils ~amd64
+dev-cpp/glaze ~amd64
+dev-libs/hyprland-protocols ~amd64
+gui-libs/hyprtoolkit ~amd64
+gui-libs/hyprcursor ~amd64
