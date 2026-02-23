@@ -129,7 +129,7 @@ function _gen_cz_attrs {
   for i in "${!components[@]}"; do
     local component="${components[$i]}"
     if [[ "$component" == .* ]]; then
-      component="dot_${component#.}"
+      component="private_dot_${component#.}"
     fi
 
     if [[ $i -eq $last_index && -n "$attributes" ]]; then

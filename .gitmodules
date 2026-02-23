@@ -5,7 +5,7 @@
   path = scripts/lib/expect-age
   url = https://github.com/dynamotn/expect-age.git
 [submodule "neovim"]
-  path = home/dot_config/nvim
+  path = home/private_dot_config/nvim
   url = git@gitlab.com:dynamo-config/neovim.git
 [submodule "tmux"]
   path = silos/tmux
@@ -23,16 +23,16 @@
   path = home/.chezmoitemplates/firefox/chrome/lepton
   url = git@github.com:black7375/Firefox-UI-Fix.git
 [submodule "firefox-personal"]
-  path = home/dot_config/firefox/profiles/personal
+  path = home/private_dot_config/firefox/profiles/personal
   url = git@gitlab.com:dynamo-config/firefox/personal.git
 [submodule "thunderbird-personal"]
-  path = home/dot_config/thunderbird/profiles/personal
+  path = home/private_dot_config/thunderbird/profiles/personal
   url = git@gitlab.com:dynamo-config/thunderbird/personal.git
 [submodule "firefox-enterprise-F1"]
-  path = home/dot_config/firefox/profiles/enterprise-F1
+  path = home/private_dot_config/firefox/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/firefox/enterprise-F1.git
 [submodule "thunderbird-enterprise-F1"]
-  path = home/dot_config/thunderbird/profiles/enterprise-F1
+  path = home/private_dot_config/thunderbird/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/thunderbird/enterprise-F1.git
 [submodule "secrets/data"]
   path = secrets/data

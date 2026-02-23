@@ -1,1 +1,9 @@
-{{ splitList (splitList "/" .chezmoi.configFile | last) .chezmoi.configFile | join "/" }}/../../.local/share/fonts
+{{
+  splitList
+    (splitList "/" .chezmoi.configFile | last)
+    .chezmoi.configFile
+  | join "/"
+  | printf "%s/../../.local/share/fonts"
+  | output "realpath"
+  | trim
+}}
