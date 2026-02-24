@@ -11,17 +11,15 @@ layout {
 
   tab name="uat" cwd="~/Working/enterprise/F1/OP" split_direction="vertical" {
     pane {
-      command "fish"
+      command "${SHELL}"
       args "-c" "k9s --context uat"
     }
     {{- if ne .code "vdi" }}
     floating_panes {
-      pane {
-        command "fish"
+      pane cwd="~/Working/enterprise/F1/OP" {
+        command "${SHELL}"
         args "-c" "k --context uat port-forward -n default toolbox 3000:3000"
       }
-    }
-    floating_panes {
       pane {
         command "chisel"
         args "client" "localhost:3000" "socks"
@@ -32,13 +30,13 @@ layout {
   {{- if eq .code "vdi" }}
   tab name="prd-devops" cwd="~/Working/enterprise/F1/OP" {
     pane {
-      command "fish"
+      command "${SHELL}"
       args "-c" "k9s --context prd-devops"
     }
   }
   tab name="prd-apps" cwd="~/Working/enterprise/F1/OP" {
     pane {
-      command "fish"
+      command "${SHELL}"
       args "-c" "k9s --context prd-apps"
     }
   }
