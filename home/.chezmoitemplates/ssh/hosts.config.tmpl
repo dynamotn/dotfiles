@@ -13,9 +13,13 @@ Host {{ .host }}
     {{-   $algo = .algo }}
     {{- end }}
     {{- range .identities }}
-    {{-   if and $.decryptPersonal (eq . "personal") }}
-    IdentityFile ~/.ssh/keys/personal_{{ $algo }}
-    {{-   else if and $.decryptEnterprise (eq . "enterprise-shared") }}
+    {{-   if eq . "personal" "enterprise-shared" }}
+    {{-     $condition := ternary $.decryptPersonal $.decryptEnterprise (eq . "personal") }}
+    {{-     if $condition }}
+    IdentityFile ~/.ssh/keys/{{ . }}_{{ $algo }}
+    {{-     else }}
+    {{-       continue }}
+    {{-     end }}
     {{-   else }}
     IdentityFile ~/.ssh/keys/{{ . }}_{{ $algo }}
     {{-   end }}
