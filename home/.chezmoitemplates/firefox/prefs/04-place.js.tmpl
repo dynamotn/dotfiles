@@ -7,10 +7,9 @@ user_pref("network.trr.mode", 0);
 
 {{- $ratio := -1.0 }}
 {{- if eq .code "l30n4rd0d4v1nc1" }}
-{{- $ratio = 1.2 }}
-{{- end }}
-{{- if eq .code "h1tl3r" }}
-{{- $ratio = 1.1 }}
+{{-   $ratio = 1.2 }}
+{{- else if eq .code "h1tl3r" }}
+{{-   $ratio = 2.0 }}
 {{- end }}
 /* Setting the font size of entire UI */
 user_pref("layout.css.devPixelsPerPx", {{ $ratio | quote }});
