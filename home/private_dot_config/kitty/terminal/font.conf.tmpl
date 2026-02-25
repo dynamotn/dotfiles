@@ -1,4 +1,3 @@
-# vim:fileencoding=utf-8 filetype=conf
 #: You can specify different fonts for the bold/italic/bold-italic
 #: variants. The easiest way to select fonts is to run the `kitten
 #: choose-fonts` command which will present a nice UI for you to
@@ -20,7 +19,11 @@ bold_italic_font Iosevka Dynamo Bold Italic
 {{- end }}
 
 #: Font size (in pts)
-font_size 14.0
+{{- $size := "14.0" }}
+{{- if eq .code "h1tl3r" }}
+{{-   $size = "11.0" }}
+{{- end }}
+font_size {{ $size }}
 
 #: kitty does not support BIDI (bidirectional text), however, for RTL
 #: scripts, words are automatically displayed in RTL. That is to say,
@@ -175,7 +178,6 @@ font_features none
 #: decreasing it lowers them. Decreasing the cell size might cause
 #: rendering artifacts, so use with care.
 # modify_font
-
 
 #: The sizes of the lines used for the box drawing Unicode characters.
 #: These values are in pts. They will be scaled by the monitor DPI to
