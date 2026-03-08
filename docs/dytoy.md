@@ -270,8 +270,10 @@
 |[claude](https://github.com/anthropics/claude-code)|CLI tool for Anthropic's Claude LLM|
 |[copilot](https://github.com/github/copilot-cli)|CLI tool for GitHub Copilot|
 |[gemini](https://github.com/google-gemini/gemini-cli)|CLI tool for Google Gemini LLM|
+|[llmfit](https://github.com/AlexsJones/llmfit)|TUI for models finding
 
 ## Android tools
+
 |Tool|Purpose|
 |----|-------|
 |[termux](https://github.com/termux/termux-app)|Terminal emulator for Android|
