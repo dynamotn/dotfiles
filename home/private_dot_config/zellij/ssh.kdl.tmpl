@@ -1,0 +1,3 @@
+{{- $defaultKeybind := "Ctrl a" }}
+{{- $top := merge . (dict "zellijKeybind" $defaultKeybind) }}
+{{- includeTemplate "zellij/config.kdl.tmpl" $top -}}
