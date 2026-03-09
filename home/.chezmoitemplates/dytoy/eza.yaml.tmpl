@@ -32,3 +32,6 @@ github:
 archive:
   - path: ./eza
 {{- end }}
+hook:
+  after: |-
+    dybatpho::curl_download https://raw.githubusercontent.com/eza-community/eza/refs/heads/main/completions/fish/eza.fish $HOME/.config/fish/completions/eza.fish

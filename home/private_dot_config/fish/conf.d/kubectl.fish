@@ -1,0 +1,28 @@
+alias k kubectl
+alias ka 'kubectl apply -f'
+alias kc 'kubectl create'
+alias kccc 'kubectl config current-context'
+alias kcdc 'kubectl config delete-context'
+alias kcsc 'kubectl config set-context'
+alias kcuc 'kubectl config use-context'
+alias kd 'kubectl describe'
+alias kdel 'kubectl delete'
+alias ke 'kubectl edit'
+alias kg 'kubectl get'
+alias kgj 'kubectl get -o json'
+alias kgy 'kubectl get -o yaml'
+alias kk 'kubectl apply -k'
+alias kl 'kubectl logs'
+alias klf 'kubectl logs -f --tail 50'
+alias ksc 'kubectl scale'
+alias kr 'kubectl rollout'
+alias kx 'kubectl exec -it'
+
+alias h helm
+alias hd helm-docs
+alias hdel 'helm delete'
+alias hdu 'helm dependency update'
+alias hg 'helm get values'
+alias hl 'helm ls'
+alias hs 'helm secrets'
+alias hu 'helm upgrade --install'

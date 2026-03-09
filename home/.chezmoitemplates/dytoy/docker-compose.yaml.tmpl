@@ -12,3 +12,6 @@ github:
   {{- end }}
   release_asset: docker-compose-{{ .chezmoi.os }}-{{ $arch }}
 {{- end }}
+hook:
+  after: |-
+    dybatpho::curl_download https://raw.githubusercontent.com/brgmnn/fish-docker-compose/refs/heads/master/completions/docker-compose.fish $HOME/.config/fish/completions/docker-compose.fish

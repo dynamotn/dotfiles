@@ -1,0 +1,16 @@
+alias cz chezmoi
+alias cza 'cz apply'
+alias czA 'cz add'
+alias czAe 'cz add --encrypt'
+alias cze 'cz edit'
+alias czd 'cz diff'
+alias czu 'cz update'
+alias czs 'cz status'
+
+alias scza 'scz apply'
+alias sczA 'scz add'
+alias sczAe 'scz add --encrypt'
+alias scze 'scz edit'
+alias sczd 'scz diff'
+alias sczu 'scz update'
+alias sczs 'scz status'
