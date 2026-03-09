@@ -1,6 +1,3 @@
-{{- $defaultKeybind := "Ctrl s" }}
-{{- if eq .kind "container" }}
-  {{- $defaultKeybind = "Ctrl a" }}
-{{- end -}}
+{{- $defaultKeybind := "Ctrl a" }}
 {{- $top := merge . (dict "zellijKeybind" $defaultKeybind) }}
 {{- includeTemplate "zellij/config.kdl.tmpl" $top -}}

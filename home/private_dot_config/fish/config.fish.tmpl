@@ -159,6 +159,7 @@ if status is-interactive
     if type -q zellij
         set -gx ZELLIJ_AUTO_ATTACH true
         zellij setup --generate-completion fish | source
+        set -q SSH_TTY; and set -gx ZELLIJ_CONFIG_FILE $HOME/.config/zellij/ssh.kdl
     end
     # OV with other commands
     if type -q ov
