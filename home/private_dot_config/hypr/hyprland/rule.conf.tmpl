@@ -1,5 +1,5 @@
 # TODO: Remove logic for version < 0.53 when 0.53 on Gentoo is stable
-{{- $version := output "hyprctl" "version" "-j" | fromJson | jq ".version" | first }}
+{{- $version := output "fish" "-c" "hyprctl version -j 2>/dev/null; or yq e -n '.version = \"0.51\"' -o json" | fromJson | jq ".version" | first }}
 {{- $matchClassKeyword := "class:" }}
 {{- $matchTagKeyword := "tag:" }}
 {{- $windowRuleSection := "windowrulev2" }}
