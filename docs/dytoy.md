@@ -146,7 +146,7 @@
 |[termshark](https://github.com/gcla/termshark)|TUI to network packet analysis|
 |[curlie](https://github.com/rs/curlie)|Alternative to `curl` with the ease of use from `httpie`|
 |[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|
-|[q](https://github.com/natesales/q)|Alternative to `dig`|
+|[doggo](https://github.com/mr-karan/doggo)|Alternative to `dig`|
 |[speedtest](https://github.com/showwin/speedtest-go)|CLI to test Internet speed|
 |[websocat](https://github.com/vi/websocat)|Netcat, curl and socat for websocket|
 |[flarectl](https://github.com/cloudflare/cloudflare-go)|Interactive CLI with Cloudflare|
