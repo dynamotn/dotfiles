@@ -33,19 +33,17 @@ function __add_folder_to_manpath --description "Add folder to MANPATH"
     end
 end
 
-fish_add_path -pPg /opt/homebrew/bin
-fish_add_path -pPg /opt/homebrew/sbin
-fish_add_path -pPg $HOME/.local/bin
-fish_add_path -pPg $CONFIG_PATH/../scripts/bin
-fish_add_path -pPg $HOME/.fzf/bin
-fish_add_path -pPg $HOME/.yarn/bin
-fish_add_path -pPg $HOME/.cargo/bin
-fish_add_path -pPg $HOME/.go/bin
-fish_add_path -pPg $HOME/.local/share/nvim/mason/bin
-fish_add_path -pPg $HOME/.krew/bin
+fish_add_path -mpPg /opt/homebrew/bin
+fish_add_path -mpPg /opt/homebrew/sbin
+fish_add_path -mpPg $HOME/.local/bin
+fish_add_path -mpPg $HOME/.fzf/bin
+fish_add_path -mpPg $HOME/.yarn/bin
+fish_add_path -mpPg $HOME/.cargo/bin
+fish_add_path -mpPg $HOME/.go/bin
+fish_add_path -mpPg $HOME/.local/share/nvim/mason/bin
+fish_add_path -mpPg $HOME/.krew/bin
 
 __add_folder_to_manpath $HOME/.local/man
-__add_folder_to_manpath $CONFIG_PATH/../scripts/man
 
 # Package manager
 type -q brew; and brew shellenv | source
