@@ -1,0 +1,11 @@
+name: usql
+method: binary
+github:
+  repo: xo/usql
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os := "linux" }}
+  {{- end }}
+  release_asset: usql-%1v-{{ $os }}-{{ .chezmoi.arch }}.tar.bz2
+archive:
+  - path: usql
