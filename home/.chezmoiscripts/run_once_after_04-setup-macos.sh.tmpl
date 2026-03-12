@@ -7,6 +7,7 @@ dybatpho::register_common_handlers
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
 dybatpho::header "Setup MacOS"
+sudo scutil --set HostName {{ .code }}
 macos-defaults apply ~/.macos
 
 # Disable the sound effects on boot
