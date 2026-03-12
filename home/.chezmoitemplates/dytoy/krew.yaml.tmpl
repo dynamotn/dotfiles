@@ -11,7 +11,7 @@ archive:
 hook:
   after: |-
     kubectl krew install access-matrix cert-manager deprecations \
-      pv-migrate tree ktop df-pv explore pv-mounter sniff stern \
+      pv-migrate tree ktop df-pv explore pv-mounter sniff stern debug-pvc \
       {{- if eq .chezmoi.os "linux" }}
       advise-policy
       {{- end }}
