@@ -1,4 +1,4 @@
-{{- $commonSecret := printf "../secrets/data/%s/common.yaml.age" .mailProfile | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{- $commonSecret := printf "../secrets/data/%s/common.yaml.age" .mailProfile | joinPath .chezmoi.sourceDir | include | decrypt | fromYaml }}
 user_pref("mail.account.account1.identities", "id1");
 user_pref("mail.account.account1.server", "server2");
 user_pref("mail.account.account2.server", "server3");

@@ -1,4 +1,4 @@
-{{- $firefoxSecret := join .chezmoi.sourceDir "../secrets/data/enterprise-F1/firefox.yaml.age" | include | decrypt | fromYaml }}
+{{- $firefoxSecret := joinPath .chezmoi.sourceDir "../secrets/data/enterprise-F1/firefox.yaml.age" | include | decrypt | fromYaml }}
 let saved_config = JSON.parse(localStorage.getItem("LOADED_CONFIG"));
 
 const default_config = {
