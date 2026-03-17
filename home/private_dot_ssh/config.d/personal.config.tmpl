@@ -1,6 +1,6 @@
 {{- if .decryptPersonal }}
-{{-   $file := printf "../secrets/data/%s/ssh.yaml.age" "personal" | join .chezmoi.sourceDir }}
-{{-   if stat (printf "%s/%s" .chezmoi.sourceDir $file) }}
+{{-   $file := printf "../secrets/data/%s/ssh.yaml.age" "personal" | joinPath .chezmoi.sourceDir }}
+{{-   if stat $file }}
 {{-     $ssh := include $file | decrypt | fromYaml }}
 {{-     merge $ssh . | includeTemplate "ssh/hosts.config.tmpl" -}}
 {{-   end }}

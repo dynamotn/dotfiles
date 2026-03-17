@@ -1,6 +1,6 @@
 {{- range .decryptEnterprise }}
-{{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
-{{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-   $top := $ }}
 {{-   range $gitSecret.servers }}
 {{-     $device := printf "%s-%s" $top.place $top.kind }}

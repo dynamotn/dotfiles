@@ -130,7 +130,7 @@ folders:
   {{- end }}
   {{- $top := . }}
   {{- range .decryptEnterprise }}
-  {{-   $projektSecret := printf "../secrets/data/enterprise-%s/projekt.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{-   $projektSecret := printf "../secrets/data/enterprise-%s/projekt.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
   {{-   range $projektSecret.folders }}
   {{-     $folder := . }}
   - {{-   $folder | toYaml | replaceAllRegex "\\$HOME" $top.chezmoi.homeDir | nindent 4 }}
@@ -138,7 +138,7 @@ folders:
   {{- end }}
 gitServers:
   {{- if .decryptPersonal }}
-  {{-   $gitSecret := print "../secrets/data/personal/git.yaml.age" | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{-   $gitSecret := print "../secrets/data/personal/git.yaml.age" | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
   {{-   range $gitSecret.servers }}
   - name: {{ .name | quote }}
     type: {{ .type | quote }}
@@ -148,7 +148,7 @@ gitServers:
   {{-   end }}
   {{- end }}
   {{- range .decryptEnterprise }}
-  {{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | join $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
   {{-   range $gitSecret.servers }}
   - name: {{ .name | quote }}
     type: {{ .type | quote }}
