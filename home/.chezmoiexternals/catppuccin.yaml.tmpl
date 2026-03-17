@@ -7,9 +7,9 @@
   type: file
   url: https://raw.githubusercontent.com/catppuccin/btop/main/themes/catppuccin_{{ $theme }}.theme
   refreshPeriod: 168h
-.config/fish/themes/catppuccin.theme:
+.config/fish/themes/catppuccin-{{ $theme }}.theme:
   type: file
-  url: https://raw.githubusercontent.com/catppuccin/fish/refs/heads/main/themes/Catppuccin%20{{ camelcase $theme }}.theme
+  url: https://raw.githubusercontent.com/catppuccin/fish/refs/heads/main/themes/static/catppuccin-{{ $theme }}.theme
   refreshPeriod: 168h
 .config/git/delta:
   type: file
