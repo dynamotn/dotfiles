@@ -90,8 +90,14 @@ end
 
 ## Other tools {
 if status is-interactive
+    {{- $themeName := "macchiato" }}
+    {{- $theme := .catppuccin.macchiato }}
+    {{- if not .darkMode }}
+    {{-   $themeName = "latte" }}
+    {{-   $theme = .catppuccin.latte }}
+    {{- end }}
     # Theme
-    fish_config theme choose catppuccin
+    fish_config theme choose catppuccin-{{ $themeName }}
     {{- if not .darkMode }}
     set -gx canaudua_host_context_fg brwhite
     set -gx canaudua_pwd_bg white
@@ -110,10 +116,6 @@ if status is-interactive
     # Hooks
     # Fzf config
     type -q __fzf_setup; and __fzf_setup
-    {{- $theme := .catppuccin.macchiato }}
-    {{- if not .darkMode }}
-    {{-   $theme = .catppuccin.latte }}
-    {{- end }}
     set -Ux FZF_COLOR_OPTS "\
         --color=bg+:{{ $theme.surface0 }},bg:{{ $theme.base }},spinner:{{ $theme.rosewater }},hl:{{ $theme.red}} \
         --color=fg:{{ $theme.text }},header:{{ $theme.red }},info:{{ $theme.mauve }},pointer:{{ $theme.rosewater }} \
