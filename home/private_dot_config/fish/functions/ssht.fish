@@ -18,7 +18,7 @@ function ssht --description "Run terminal workspace after ssh"
 
     if ! test -z "$(ssh $server command -v zellij)"
         ssh $server zellij a $session
-        or ssh $server zellij
+        or ssh $server zellij --config "\$HOME/.config/zellij/ssh.kdl"
     else if ! test -z "$(ssh $server command -v tmux)"
         if test -n "$session"
             set attach_argv "-t $session"
