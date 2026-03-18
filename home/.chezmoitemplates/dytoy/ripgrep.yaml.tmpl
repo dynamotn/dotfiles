@@ -30,8 +30,8 @@ github:
   {{-   $arch = "x86_64" }}
   {{-   $suffix = "musl" }}
   {{- else if eq .chezmoi.arch "arm64" }}
-  {{-   $arch = "arm" }}
-  {{-   $suffix = "gnueabihf" }}
+  {{-   $arch = "aarch64" }}
+  {{-   $suffix = "gnu" }}
   {{- end }}
   release_asset: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}.tar.gz
 archive:
