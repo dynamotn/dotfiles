@@ -141,7 +141,7 @@ function dytoy::is_defined {
   dybatpho::expect_args name method -- "$@"
   local yaml
   yaml=$(dytoy::get_yaml "$name" "all" "$method")
-  dybatpho::is empty "$yaml" \
+  [[ "$yaml" == "[]" ]] || dybatpho::is empty "$yaml" \
     && dybatpho::die "Not found $name tool in ~/.config/dytoy/tools.yaml"
 }
 
