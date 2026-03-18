@@ -36,20 +36,20 @@ function _install_tool {
   dybatpho::progress "Installing tool $name"
   # For some tools need specific backend
   local backend=$(dytoy::get_yaml "$name" "backend")
-  if [[ "$backend" = "null" ]]; then
-    backend=${name}
-  fi
+  [[ "${backend}" == "null" ]] && backend=""
+  backend=$(dybatpho::coalesce "${backend}" "${name}")
 
   local version=$(dytoy::get_yaml "$name" "version")
-  {{- $command := "mise" }}
+  local mise_bin mise_command
+  mise_bin="$(dybatpho::path_join "$HOME" ".local" "bin" "mise")"
+  mise_command="mise"
   {{- if eq .chezmoi.os "android" }}
-  {{- $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl $HOME/.local/bin/mise" }}
+  mise_command="proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl \"$mise_bin\""
   {{- end }}
 
-  if [[ "$version" = "null" ]]; then
-    version="latest"
-  fi
-  dybatpho::dry_run {{ $command }} use -g ${backend}@${version}
+  [[ "${version}" == "null" ]] && version=""
+  version=$(dybatpho::coalesce "${version}" "latest")
+  dybatpho::dry_run ${mise_command} use -g ${backend}@${version}
 
   dybatpho::create_temp after_path ".sh"
   dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook"

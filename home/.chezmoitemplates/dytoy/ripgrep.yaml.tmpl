@@ -39,5 +39,5 @@ archive:
     strip: 1
   - path: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}/doc/rg.1
     strip: 2
-    location: $HOME/.local/man/man1
+    location: {{ .chezmoi.homeDir }}/.local/man/man1
 {{- end }}

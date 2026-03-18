@@ -24,11 +24,31 @@ dybatpho::register_common_handlers
 #######################################
 # @description Refresh current live data of {{ $appName }} mail client from dotfiles
 #######################################
+function _profile_dir {
+  local profile
+  dybatpho::expect_args profile -- "$@"
+  dybatpho::path_join "$HOME" ".config" "thunderbird" "profiles" "$profile"
+}
+
+#######################################
+# @description Return prefs template directory for a profile
+#######################################
+function _prefs_template_dir {
+  local profile
+  dybatpho::expect_args profile -- "$@"
+  dybatpho::path_join "{{ .chezmoi.sourceDir }}" ".chezmoitemplates" "thunderbird" "prefs" "$profile"
+}
+
+#######################################
+# @description Refresh current live data of {{ $appName }} mail client from dotfiles
+#######################################
 function _refresh_live {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
+    local profile_dir
+    profile_dir="$(_profile_dir "$profile")"
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      dybatpho::dry_run rm -rf ~/.config/thunderbird/profiles/${profile}
-      dybatpho::dry_run chezmoi apply ~/.config/thunderbird/profiles/${profile} --force || true
+      dybatpho::dry_run rm -rf "$profile_dir"
+      dybatpho::dry_run chezmoi apply "$profile_dir" --force || true
     else
       dybatpho::debug "$PROFILE"
     fi
@@ -40,51 +60,55 @@ function _refresh_live {
 #######################################
 function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
+    local profile_dir prefs_file prefs_dir
+    profile_dir="$(_profile_dir "$profile")"
+    prefs_file="$(dybatpho::path_join "$profile_dir" "prefs.js")"
+    prefs_dir="$(_prefs_template_dir "$profile")"
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      if dybatpho::is file ~/.config/thunderbird/profiles/${profile}/prefs.js; then
+      if dybatpho::is file "$prefs_file"; then
         dybatpho::progress "Update addon setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"extensions.webextensions.uuids\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
-        dybatpho::dry_run eval "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
-        dybatpho::dry_run eval "grep \"privacy.userContext.extension\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/02-extensions.js" || true
+        dybatpho::dry_run eval "grep \"extensions.webextensions.uuids\" \"$prefs_file\" > \"$prefs_dir/02-extensions.js\"" || true
+        dybatpho::dry_run eval "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" \"$prefs_file\" >> \"$prefs_dir/02-extensions.js\"" || true
+        dybatpho::dry_run eval "grep \"privacy.userContext.extension\" \"$prefs_file\" >> \"$prefs_dir/02-extensions.js\"" || true
 
         dybatpho::progress "Update email setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"mail.account\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
-        dybatpho::dry_run eval "grep \"mail.server.server\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
-        dybatpho::dry_run eval "grep \"mail.identity.id\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
-        dybatpho::dry_run eval "grep \"mail.smtpserver.smtp\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
-        dybatpho::dry_run eval "grep \"mail.smtpservers\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
-        dybatpho::dry_run eval "grep \"mail.smtpservers\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/03-email.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"mail.account\" \"$prefs_file\" > \"$prefs_dir/03-email.js.tmpl\"" || true
+        dybatpho::dry_run eval "grep \"mail.server.server\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
+        dybatpho::dry_run eval "grep \"mail.identity.id\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
+        dybatpho::dry_run eval "grep \"mail.smtpserver.smtp\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
+        dybatpho::dry_run eval "grep \"mail.smtpservers\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
+        dybatpho::dry_run eval "grep \"mail.smtpservers\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
 
         dybatpho::progress "Update address book setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"ldap_2.servers\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/04-address-book.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"ldap_2.servers\" \"$prefs_file\" > \"$prefs_dir/04-address-book.js.tmpl\"" || true
 
         dybatpho::progress "Update calendar setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"calendar.list.sortOrder\" ~/.config/thunderbird/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/05-calendar.js.tmpl" || true
-        dybatpho::dry_run eval "grep \"calendar.registry\" ~/.config/thunderbird/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs/${profile}/05-calendar.js.tmpl" || true
+        dybatpho::dry_run eval "grep \"calendar.list.sortOrder\" \"$prefs_file\" > \"$prefs_dir/05-calendar.js.tmpl\"" || true
+        dybatpho::dry_run eval "grep \"calendar.registry\" \"$prefs_file\" >> \"$prefs_dir/05-calendar.js.tmpl\"" || true
       fi
 
       dybatpho::progress "Update extensions data for profile ${profile}"
       for filename in addons.json addonStartup.json.lz4 extensions.json extension-preferences.json; do
-        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename} --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
       done
       if [[ "${profile}" =~ enterprise-.* ]]; then
-        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/TbSync/account*.json --create || true
-        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/TbSync/folder*.json --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "TbSync" "account*.json")" --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "TbSync" "folder*.json")" --create || true
       fi
 
       dybatpho::progress "Update search engines for profile ${profile}"
-      dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/search.json.mozlz4 --create || true
+      dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "search.json.mozlz4")" --create || true
 
       export -f _encrypt_file
       dybatpho::progress "Update storage data for profile ${profile}"
       if [ "${profile}" = "public" ]; then
-        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/storage.sqlite --create || true
-        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* --create || true
-        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/global-messages-db.sqlite --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "storage.sqlite")" --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "storage" "default" "moz-extension+++*")" --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "global-messages-db.sqlite")" --create || true
       else
-        dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "storage.sqlite" || true
-        if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/storage/default; then
-          command find ~/.config/thunderbird/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} \
+        dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "storage.sqlite" || true
+        if dybatpho::is dir "$(dybatpho::path_join "$profile_dir" "storage" "default")"; then
+          command find "$(dybatpho::path_join "$profile_dir" "storage" "default" "moz-extension+++*")" -type f | xargs -P$(nproc) -I{} \
             bash -c "_encrypt_file '${profile}' '{}'" || true
         fi
       fi
@@ -93,11 +117,11 @@ function _update_dotfiles {
         dybatpho::progress "Update cookies, passwords for profile ${profile}"
         if [ "${profile}" = "public" ]; then
           for filename in cookies.sqlite logins.json key4.db folderTree.json folderCache.json; do
-            dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/${filename} --create || true
+            dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
           done
         else
           for filename in cookies.sqlite logins.json key4.db folderTree.json folderCache.json; do
-            dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "${filename}" || true
+            dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "${filename}" || true
           done
         fi
       fi
@@ -105,10 +129,10 @@ function _update_dotfiles {
       if dybatpho::is true "${MAIL}"; then
         dybatpho::progress "Update mail data for profile ${profile}"
         if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/ImapMail --create || true
+          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "ImapMail")" --create || true
         else
-          if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/ImapMail; then
-            command find ~/.config/thunderbird/profiles/${profile}/ImapMail -type f | xargs -P$(nproc) -I{} \
+          if dybatpho::is dir "$(dybatpho::path_join "$profile_dir" "ImapMail")"; then
+            command find "$(dybatpho::path_join "$profile_dir" "ImapMail")" -type f | xargs -P$(nproc) -I{} \
               bash -c "_encrypt_file '${profile}' '{}'" || true
           fi
         fi
@@ -116,17 +140,17 @@ function _update_dotfiles {
 
       if dybatpho::is true "${FEEDS}"; then
         dybatpho::progress "Update feeds data for profile ${profile}"
-        dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/Mail/Feeds --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "Mail" "Feeds")" --create || true
       fi
 
       if dybatpho::is true "${ADDRESSES}"; then
         dybatpho::progress "Update address book data for profile ${profile}"
         if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/history.sqlite --create || true
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/abook*.sqlite --create || true
+          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "history.sqlite")" --create || true
+          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "abook*.sqlite")" --create || true
         else
-          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/thunderbird/profiles/${profile} -a "create" "history.sqlite" || true
-          command find ~/.config/thunderbird/profiles/${profile}/abook*.sqlite -type f | xargs -P$(nproc) -I{} \
+          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "history.sqlite" || true
+          command find "$(dybatpho::path_join "$profile_dir" "abook*.sqlite")" -type f | xargs -P$(nproc) -I{} \
             bash -c "_encrypt_file '${profile}' '{}'" || true
         fi
       fi
@@ -134,10 +158,10 @@ function _update_dotfiles {
       if dybatpho::is true "${CALENDAR}"; then
         dybatpho::progress "Update calendar data for profile ${profile}"
         if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add ~/.config/thunderbird/profiles/${profile}/calendar-data --create || true
+          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "calendar-data")" --create || true
         else
-          if dybatpho::is dir ~/.config/thunderbird/profiles/${profile}/calendar-data; then
-            command find ~/.config/thunderbird/profiles/${profile}/calendar-data/*.sqlite -type f | xargs -P$(nproc) -I{} \
+          if dybatpho::is dir "$(dybatpho::path_join "$profile_dir" "calendar-data")"; then
+            command find "$(dybatpho::path_join "$profile_dir" "calendar-data" "*.sqlite")" -type f | xargs -P$(nproc) -I{} \
               bash -c "_encrypt_file '${profile}' '{}'" || true
           fi
         fi
@@ -155,8 +179,9 @@ function _update_dotfiles {
 #######################################
 function _encrypt_file {
   dybatpho::expect_args profile file -- "$@"
-  local folder="$(dirname "$file")"
-  local filename="$(basename "$file")"
+  local folder filename
+  folder="$(dybatpho::path_dirname "$file")"
+  filename="$(dybatpho::path_basename "$file")"
   dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "${filename}"
 }
 

@@ -33,8 +33,8 @@ archive:
   - path: zoxide
   - path: man/man1/*
     strip: 2
-    location: $HOME/.local/man/man1
+    location: {{ .chezmoi.homeDir }}/.local/man/man1
   - path: completions/zoxide.fish
     strip: 1
-    location: ~/.config/fish/completions
+    location: {{ .chezmoi.homeDir }}/.config/fish/completions
 {{- end }}

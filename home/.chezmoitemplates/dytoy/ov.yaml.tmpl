@@ -6,7 +6,10 @@ method: shell
 dependencies:
   - golang
 content: |
-  go install github.com/noborus/ov@latest
+  local bin_dir
+  bin_dir="$(dybatpho::path_join "$HOME" ".local" "bin")"
+  mkdir -p "$bin_dir"
+  GOBIN="$bin_dir" go install github.com/noborus/ov@latest
 {{- else }}
 # Although this is essential tool but there isn't any packages on Arch, Alpine,
 # Ubuntu so I will use binary

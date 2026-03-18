@@ -7,36 +7,25 @@ gentoo:
   packages:
     - name: sys-auth/pam_u2f
   hook:
-    after: |-
-      if [ ! -d ~/.config/Yubico ]; then
-        mkdir -p ~/.config/Yubico
-        pamu2fcfg > ~/.config/Yubico/u2f_keys
+    after: &pamu2fgen |-
+      yubico_dir="$(dybatpho::path_join "$HOME" ".config" "Yubico")"
+      if [ ! -d "$yubico_dir" ]; then
+        mkdir -p "$yubico_dir"
+        pamu2fcfg > "$(dybatpho::path_join "$yubico_dir" "u2f_keys")"
       fi
 arch:
   packages:
     - name: pam-u2f
   hook:
-    after: |-
-      if [ ! -d ~/.config/Yubico ]; then
-        mkdir -p ~/.config/Yubico
-        pamu2fcfg > ~/.config/Yubico/u2f_keys
-      fi
+    after: *pamu2fgen
 ubuntu:
   packages:
     - name: libpam-u2f
   hook:
-    after: |-
-      if [ ! -d ~/.config/Yubico ]; then
-        mkdir -p ~/.config/Yubico
-        pamu2fcfg > ~/.config/Yubico/u2f_keys
-      fi
+    after: *pamu2fgen
 alpine:
   packages:
     - name: pam-u2f
   hook:
-    after: |-
-      if [ ! -d ~/.config/Yubico ]; then
-        mkdir -p ~/.config/Yubico
-        pamu2fcfg > ~/.config/Yubico/u2f_keys
-      fi
+    after: *pamu2fgen
 {{- end }}

@@ -1,28 +1,30 @@
 #!{{ .bash }}
-source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 function _main {
-  local changes
-  changes=$(git status --porcelain 2> /dev/null | grep -c -E "^(M| M)")
-  if [ "$changes" != "0" ]; then
+  local has_changes=false
+  if ! dybatpho::git_is_clean .; then
+    has_changes=true
     git stash
   fi
 
-  local current_branch
-  current_branch=$(git branch --show-current)
-  local main_branch
-  main_branch=$(git main)
-  if [ "$current_branch" != "$main_branch" ]; then
-    git checkout "$main_branch"
-  fi
-  git fetch -p
-  git rebase "origin/$main_branch"
-  if [ "$current_branch" != "$main_branch" ]; then
-    git checkout "$branch"
+  local current_branch main_branch
+  current_branch="$(dybatpho::git_branch .)"
+  main_branch="$(dybatpho::git_default_branch .)"
+
+  if [[ "${current_branch}" != "${main_branch}" ]]; then
+    git checkout "${main_branch}"
   fi
 
-  if [ "$changes" != "0" ]; then
+  git fetch -p
+  git rebase "origin/${main_branch}"
+
+  if [[ "${current_branch}" != "${main_branch}" ]]; then
+    git checkout "${current_branch}"
+  fi
+
+  if [[ "${has_changes}" == true ]]; then
     git stash pop
   fi
 }

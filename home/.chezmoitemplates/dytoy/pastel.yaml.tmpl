@@ -26,6 +26,6 @@ archive:
   - path: pastel-%v-{{ $arch }}-{{ $os }}/pastel
     strip: 1
   - path: pastel-%v-{{ $arch }}-{{ $os }}/autocomplete/pastel.fish
-    location: $HOME/.config/fish/completions
+    location: {{ .chezmoi.homeDir }}/.config/fish/completions
     strip: 2
 {{- end }}

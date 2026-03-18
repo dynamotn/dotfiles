@@ -5,13 +5,16 @@ dependencies:
   - lz4
 content: |-
   dybatpho::create_temp temp_file ".c"
-  dybatpho::curl_download https://raw.githubusercontent.com/andikleen/lz4json/refs/heads/master/lz4jsoncat.c $temp_file
+  output_path="$(dybatpho::path_join "$HOME" ".local" "bin" "lz4jsoncat")"
+  mkdir -p "$(dybatpho::path_dirname "$output_path")"
+  dybatpho::curl_download https://raw.githubusercontent.com/andikleen/lz4json/refs/heads/master/lz4jsoncat.c "$temp_file"
   local gcc_params=""
   {{- if eq .chezmoi.os "darwin" }}
+  brew_prefix="$(brew --prefix lz4)"
   gcc_params="
-    -I$(readlink -f $(brew --prefix lz4))/include \
-    -L$(readlink -f $(brew --prefix lz4))/lib
+    -I$(dybatpho::path_join "$brew_prefix" include) \
+    -L$(dybatpho::path_join "$brew_prefix" lib)
   "
   {{- end }}
-  gcc -g -O2 -Wall $temp_file -llz4 -o ~/.local/bin/lz4jsoncat $gcc_params
+  gcc -g -O2 -Wall "$temp_file" -llz4 -o "$output_path" $gcc_params
 {{- end }}

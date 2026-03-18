@@ -20,10 +20,10 @@ archive:
     strip: 1
   - path: yazi-{{ $arch }}-{{ $os }}/completions/yazi.fish
     strip: 2
-    location: ~/.config/fish/completions
+    location: {{ .chezmoi.homeDir }}/.config/fish/completions
   - path: yazi-{{ $arch }}-{{ $os }}/completions/ya.fish
     strip: 2
-    location: ~/.config/fish/completions
+    location: {{ .chezmoi.homeDir }}/.config/fish/completions
 hook:
   after: |-
     ya pkg add yazi-rs/plugins:piper yazi-rs/plugins:git || :

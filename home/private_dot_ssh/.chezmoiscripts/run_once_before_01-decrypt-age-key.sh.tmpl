@@ -1,5 +1,5 @@
 #!{{ .bash }}
-source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 {{ $types := list }}
@@ -23,7 +23,7 @@ else
 fi
 for passphrase in $age_passphrases; do
   IFS='=' read -r key value <<< "$passphrase"
-  declare age_passphrase_$key="$value"
+  declare "age_passphrase_${key}=${value}"
 done
 {{- end }}
 for type in {{ range $types }}{{ . | quote }} {{ end }}; do
@@ -31,12 +31,10 @@ for type in {{ range $types }}{{ . | quote }} {{ end }}; do
   if ! dybatpho::is file "${HOME}/.config/chezmoi/${type}.key"; then
     {{- if eq .kind "container" }}
     passphrase_var="age_passphrase_${type##enterprise-}"
-    {{ .chezmoi.sourceDir }}/../scripts/lib/expect-age/expect-age "${!passphrase_var:-}" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age" "${HOME}/.config/chezmoi/${type}.key"
+    if {{ .chezmoi.sourceDir }}/../scripts/lib/expect-age/expect-age "${!passphrase_var:-}" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age" "${HOME}/.config/chezmoi/${type}.key"; then
     {{- else }}
-    age --decrypt --output "${HOME}/.config/chezmoi/${type}.key" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age"
+    if age --decrypt --output "${HOME}/.config/chezmoi/${type}.key" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age"; then
     {{- end }}
-
-    if [ $? -eq 0 ]; then
       chmod 400 "${HOME}/.config/chezmoi/${type}.key"
       dybatpho::success "Successfully decrypted ${type}.age file"
     else

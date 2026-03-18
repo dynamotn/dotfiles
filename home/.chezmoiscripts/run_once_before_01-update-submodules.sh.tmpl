@@ -4,11 +4,11 @@ dybatpho::register_common_handlers
 
 dybatpho::header "Update submodules"
 # modules hash: {{ joinPath .chezmoi.sourceDir "../.gitmodules" | include | sha256sum }}
-cd {{ .chezmoi.sourceDir }}/..
-git add .gitmodules
-git submodule sync --recursive
-git update-index --assume-unchanged .gitmodules
-git submodule update --init \
+repo_root="$(dybatpho::git_root "{{ .chezmoi.sourceDir }}/..")"
+git -C "${repo_root}" add .gitmodules
+git -C "${repo_root}" submodule sync --recursive
+git -C "${repo_root}" update-index --assume-unchanged .gitmodules
+git -C "${repo_root}" submodule update --init \
   {{-   if or .decryptPersonal (not (empty .decryptEnterprise)) }}
   secrets/data \
   {{-   end }}

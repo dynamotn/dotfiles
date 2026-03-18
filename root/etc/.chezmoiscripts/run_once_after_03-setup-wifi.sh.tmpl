@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 {{- if and (eq .chezmoi.os "linux") .hasWifi }}
 dybatpho::header "Setup Wi-Fi"
-if ! command -v nmcli &>/dev/null; then
+if ! dybatpho::is command nmcli; then
   dybatpho::warn "nmcli is not installed. Please install NetworkManager if need."
   exit
 fi

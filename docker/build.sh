@@ -8,18 +8,17 @@ SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")/../scripts"
 # @description Install custom SSL certificates if provided in Docker secrets.
 #######################################
 function _install_ssl_certs {
-  if [ -f /run/secrets/ssl_cert ]; then
-    folder=""
-    if command -v apk &> /dev/null; then
+  if [[ -f /run/secrets/ssl_cert ]]; then
+    local folder="" update_cmd=""
+    if command -v apk &>/dev/null; then
       folder="/usr/local/share/ca-certificates"
-      command="update-ca-certificates"
-    elif command -v pacman &> /dev/null; then
+      update_cmd="update-ca-certificates"
+    elif command -v pacman &>/dev/null; then
       folder="/etc/ca-certificates/trust-source/anchors"
-      command="update-ca-trust"
+      update_cmd="update-ca-trust"
     fi
-
     sudo cp /run/secrets/ssl_cert "$folder/ssl_decryption.crt"
-    sudo "$command"
+    sudo "$update_cmd"
   fi
 }
 
@@ -27,7 +26,7 @@ function _install_ssl_certs {
 # @description Install packages required for setting up dotfiles.
 #######################################
 function _install_packages {
-  if command -v pacman &> /dev/null; then
+  if command -v pacman &>/dev/null; then
     # Choose mirror for VN
     echo "Server = http://mirror.bizflycloud.vn/archlinux/\$repo/os/\$arch" | sudo tee /etc/pacman.d/mirrorlist
     # Container only tools
@@ -36,7 +35,7 @@ function _install_packages {
     sudo pacman -Sy --noconfirm git curl openssh
     # Install chezmoi tools
     sudo pacman -Sy --noconfirm chezmoi age expect
-  elif command -v apk &> /dev/null; then
+  elif command -v apk &>/dev/null; then
     sudo apk update
     # Container only tools
     sudo apk add --no-cache expect
@@ -79,9 +78,9 @@ function _main {
   # Delete unnecessary data
   rm -rf ~/.cache/chezmoi ~/Dotfiles/.git*
   # Uninstall packages
-  if command -v pacman &> /dev/null; then
+  if command -v pacman &>/dev/null; then
     sudo pacman -Rnsc --noconfirm chezmoi
-  elif command -v apk &> /dev/null; then
+  elif command -v apk &>/dev/null; then
     sudo apk del chezmoi
   fi
 }

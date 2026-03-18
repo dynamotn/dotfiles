@@ -8,7 +8,7 @@ dybatpho::register_common_handlers
 {{- if ne $configHash "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }}
 # config hash: {{ $configHash }}
 
-if ! [[ -v HYPRLAND_INSTANCE_SIGNATURE ]]; then
+if dybatpho::string_is_blank "${HYPRLAND_INSTANCE_SIGNATURE:-}"; then
   exit
 fi
 dybatpho::header "Setup hyprland"

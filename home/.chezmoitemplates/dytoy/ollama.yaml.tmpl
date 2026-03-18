@@ -32,6 +32,8 @@ macos:
 {{-   else }}
 method: shell
 content: |-
-  curl -fsSL https://ollama.com/install.sh | sh
+  dybatpho::create_temp install_script ".sh"
+  dybatpho::curl_download https://ollama.com/install.sh "$install_script"
+  sh "$install_script"
 {{-   end }}
 {{- end }}

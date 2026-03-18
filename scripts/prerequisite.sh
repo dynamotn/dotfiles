@@ -112,16 +112,16 @@ function _main {
       ;;
     Linux)
       # Gentoo
-      if command -v emerge &> /dev/null; then
+      if command -v emerge &>/dev/null; then
         _setup_gentoo
       # ArchLinux
-      elif command -v pacman &> /dev/null; then
+      elif command -v pacman &>/dev/null; then
         _setup_arch
       # Ubuntu/Debian
-      elif command -v apt &> /dev/null; then
+      elif command -v apt &>/dev/null; then
         _setup_ubuntu_debian
       # Alpine Linux
-      elif command -v apk &> /dev/null; then
+      elif command -v apk &>/dev/null; then
         _setup_alpine
       else
         echo "Your distro is not supported"
