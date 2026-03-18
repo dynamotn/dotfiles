@@ -1,4 +1,6 @@
-{{- $version := output "fish" "-c" "hyprctl version -j 2>/dev/null; or yq e -n '.version = \"0.51\"' -o json" | fromJson | jq ".version" | first }}
+{{- $versionJson := output "fish" "-c"
+"set -l hypr_version (hyprctl version -j 2>/dev/null); if string match -rq '^\\s*\\{' -- $hypr_version; echo $hypr_version; else; printf '{\"version\":\"0.51\"}\n'; end" }}
+{{- $version := $versionJson | fromJson | jq ".version" | first }}
 general {
   gaps_in = 4
   gaps_out = 8
