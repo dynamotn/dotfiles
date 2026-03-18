@@ -6,8 +6,8 @@
 function misc::install_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  hash "$name" > /dev/null 2>&1 \
-    || dybatpho::dry_run "$HOME/.local/bin/dytoy" -t "$name"
+  dybatpho::is command "$name" \
+    || dybatpho::dry_run "$(dybatpho::path_join "$HOME" ".local" "bin" "dytoy")" -t "$name"
 }
 
 #######################################

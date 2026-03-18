@@ -2,8 +2,9 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-export PATH=~/.local/bin:$PATH
+local_bin_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "bin")"
+export PATH="${local_bin_dir}:${PATH}"
 {{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
-{{ .chezmoi.homeDir  }}/.local/bin/dytoy_os -e -i -s
+"${local_bin_dir}/dytoy_os" -e -i -s

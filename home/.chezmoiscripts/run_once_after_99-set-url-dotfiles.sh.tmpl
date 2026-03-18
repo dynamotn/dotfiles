@@ -4,7 +4,11 @@ dybatpho::register_common_handlers
 
 {{- if ne .kind "container" }}
 dybatpho::header "Setup remote url of dotfiles"
-cd {{ .chezmoi.sourceDir }}/..
-git remote set-url origin git@gitlab.com:dynamo-config/dotfiles
-git remote add gh git@github.com:dynamotn/dotfiles.git || git remote set-url gh git@github.com:dynamotn/dotfiles.git
+repo_root="$(dybatpho::git_root "{{ .chezmoi.sourceDir }}/..")"
+git -C "${repo_root}" remote set-url origin git@gitlab.com:dynamo-config/dotfiles
+action="add"
+if dybatpho::git_has_remote gh "${repo_root}"; then
+  action="set-url"
+fi
+git -C "${repo_root}" remote "${action}" gh git@github.com:dynamotn/dotfiles.git
 {{- end }}

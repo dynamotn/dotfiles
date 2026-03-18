@@ -65,7 +65,7 @@ function _install_tool {
   {{- else if eq .chezmoi.os "linux" }}
   # Install flatpak packages if defined
   readarray packages < <(dytoy::get_yaml "$name" "flatpak.packages")
-  if [ ${#packages[@]} -gt 0 ]; then
+  if dybatpho::array_first packages > /dev/null 2>&1; then
     misc::install_tool flatpak
     pkg::init_flatpak
     for package in "${packages[@]}"; do
@@ -75,7 +75,7 @@ function _install_tool {
   {{- else if eq .chezmoi.os "android" }}
   # Install fdroid applications if defined
   readarray packages < <(dytoy::get_yaml "$name" "fdroid.packages")
-  if [ ${#packages[@]} -gt 0 ]; then
+  if dybatpho::array_first packages > /dev/null 2>&1; then
     misc::install_tool fdroidcl
     pkg::init_fdroid
     for package in "${packages[@]}"; do
@@ -100,7 +100,7 @@ function _install_tool {
 #######################################
 function _main {
   METHOD="os"
-  if [ "$TOOL" = "@empty" ]; then
+  if [[ "$TOOL" == "@empty" ]]; then
     dybatpho::info "Distro of this machine is {{ $name }}."
   fi
   if dybatpho::is true "$SYNC_REPO"; then

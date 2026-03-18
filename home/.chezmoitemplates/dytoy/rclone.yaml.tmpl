@@ -11,7 +11,7 @@ github:
 archive:
   - path: rclone-$version-{{ $os }}-{{ .chezmoi.arch }}/rclone
   - path: rclone-$version-{{ $os }}-{{ .chezmoi.arch }}/rclone.1
-    location: $HOME/.local/man/man1
+    location: {{ .chezmoi.homeDir }}/.local/man/man1
 {{- else if eq .chezmoi.os "android" }}
 method: os
 # https://repology.org/project/rclone/versions

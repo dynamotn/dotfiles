@@ -24,11 +24,31 @@ dybatpho::register_common_handlers
 #######################################
 # @description Refresh current live data of {{ $appName }} browser from dotfiles
 #######################################
+function _profile_dir {
+  local profile
+  dybatpho::expect_args profile -- "$@"
+  dybatpho::path_join "$HOME" ".config" "firefox" "profiles" "$profile"
+}
+
+#######################################
+# @description Return prefs template directory for a profile
+#######################################
+function _prefs_template_dir {
+  local profile
+  dybatpho::expect_args profile -- "$@"
+  dybatpho::path_join "{{ .chezmoi.sourceDir }}" ".chezmoitemplates" "firefox" "prefs" "$profile"
+}
+
+#######################################
+# @description Refresh current live data of {{ $appName }} browser from dotfiles
+#######################################
 function _refresh_live {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
+    local profile_dir
+    profile_dir="$(_profile_dir "$profile")"
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      dybatpho::dry_run rm -rf ~/.config/firefox/profiles/${profile}
-      dybatpho::dry_run chezmoi apply ~/.config/firefox/profiles/${profile} --force || true
+      dybatpho::dry_run rm -rf "$profile_dir"
+      dybatpho::dry_run chezmoi apply "$profile_dir" --force || true
     else
       dybatpho::debug "$PROFILE"
     fi
@@ -40,47 +60,51 @@ function _refresh_live {
 #######################################
 function _update_dotfiles {
   for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
+    local profile_dir prefs_file prefs_dir
+    profile_dir="$(_profile_dir "$profile")"
+    prefs_file="$(dybatpho::path_join "$profile_dir" "prefs.js")"
+    prefs_dir="$(_prefs_template_dir "$profile")"
     if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      if dybatpho::is file ~/.config/firefox/profiles/${profile}/prefs.js; then
+      if dybatpho::is file "$prefs_file"; then
         dybatpho::progress "Update toolbar setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"browser.uiCustomization.state\" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/01-toolbar.js" || true
+        dybatpho::dry_run eval "grep \"browser.uiCustomization.state\" \"$prefs_file\" > \"$prefs_dir/01-toolbar.js\"" || true
 
         dybatpho::progress "Update addon setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"extensions.webextensions.uuids\" ~/.config/firefox/profiles/${profile}/prefs.js > {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
-        dybatpho::dry_run eval "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
-        dybatpho::dry_run eval "grep \"privacy.userContext.extension\" ~/.config/firefox/profiles/${profile}/prefs.js >> {{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs/${profile}/02-extensions.js" || true
+        dybatpho::dry_run eval "grep \"extensions.webextensions.uuids\" \"$prefs_file\" > \"$prefs_dir/02-extensions.js\"" || true
+        dybatpho::dry_run eval "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" \"$prefs_file\" >> \"$prefs_dir/02-extensions.js\"" || true
+        dybatpho::dry_run eval "grep \"privacy.userContext.extension\" \"$prefs_file\" >> \"$prefs_dir/02-extensions.js\"" || true
       fi
 
       dybatpho::progress "Update containers for profile ${profile}"
-      dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/containers.json --create || true
+      dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "containers.json")" --create || true
 
       dybatpho::progress "Update extensions data for profile ${profile}"
       for filename in addons.json addonStartup.json.lz4 extensions.json extension-preferences.json; do
-        dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/${filename} --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
       done
 
       dybatpho::progress "Update search engines for profile ${profile}"
-      dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/search.json.mozlz4 --create || true
+      dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "search.json.mozlz4")" --create || true
 
       dybatpho::progress "Update bookmarks, history and workspaces for profile ${profile}"
       if [ "${profile}" = "public" ]; then
         for filename in favicons places; do
-          dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/${filename}.sqlite --create || true
+          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}.sqlite")" --create || true
         done
       else
         declare -a filenames=("favicons" "places")
-        printf "%s\n" "${filenames[@]}" | xargs -P$(nproc) -I{} bash -c "dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a 'create' '{}.sqlite'" || true
+        printf "%s\n" "${filenames[@]}" | xargs -P$(nproc) -I{} bash -c "dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ${profile_dir@Q} -a 'create' '{}.sqlite'" || true
       fi
 
       dybatpho::progress "Update storage data for profile ${profile}"
       if [ "${profile}" = "public" ]; then
-        dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/storage.sqlite --create || true
-        dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/storage/default/moz-extension+++* --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "storage.sqlite")" --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "storage" "default" "moz-extension+++*")" --create || true
       else
-        dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "storage.sqlite" || true
-        if dybatpho::is dir ~/.config/firefox/profiles/${profile}/storage/default; then
+        dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "storage.sqlite" || true
+        if dybatpho::is dir "$(dybatpho::path_join "$profile_dir" "storage" "default")"; then
           export -f _encrypt_file
-          command find ~/.config/firefox/profiles/${profile}/storage/default/moz-extension+++* -type f | xargs -P$(nproc) -I{} \
+          command find "$(dybatpho::path_join "$profile_dir" "storage" "default" "moz-extension+++*")" -type f | xargs -P$(nproc) -I{} \
             bash -c "_encrypt_file '${profile}' '{}'" || true
         fi
       fi
@@ -88,16 +112,16 @@ function _update_dotfiles {
       if dybatpho::is true "${COOKIES}"; then
         dybatpho::progress "Update cookies for profile ${profile}"
         if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/cookies.sqlite --create || true
+          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "cookies.sqlite")" --create || true
         else
-          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ~/.config/firefox/profiles/${profile} -a "create" "cookies.sqlite" || true
+          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "cookies.sqlite" || true
         fi
       fi
 
       {{ if eq .browser "Z" -}}
       dybatpho::progress "Update Zen customization for profile ${profile}"
       for filename in zen-themes.json zen-keyboard-shortcuts.json; do
-        dybatpho::dry_run chezmoi add ~/.config/firefox/profiles/${profile}/${filename} --create || true
+        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
       done
       {{- end }}
     else
@@ -113,8 +137,9 @@ function _update_dotfiles {
 #######################################
 function _encrypt_file {
   dybatpho::expect_args profile file -- "$@"
-  local folder="$(dirname "$file")"
-  local filename="$(basename "$file")"
+  local folder filename
+  folder="$(dybatpho::path_dirname "$file")"
+  filename="$(dybatpho::path_basename "$file")"
   dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "${filename}"
 }
 

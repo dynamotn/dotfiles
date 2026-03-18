@@ -5,20 +5,23 @@ dybatpho::register_common_handlers
 dybatpho::header "Setup fish shell"
 # plugins hash: {{ joinPath .chezmoi.homeDir ".config/fish/plugins.list" | include | sha256sum }}
 {{- if ne .kind "container" }}
-if [[ $SHELL != "$(which fish)" ]]; then
+dybatpho::is command fish || dybatpho::die "fish isn't installed"
+fish_bin="$(command -v fish)"
+if [[ "${SHELL:-}" != "${fish_bin}" ]]; then
   dybatpho::info "Change default shell to fish"
   {{- if eq .chezmoi.os "linux" }}
   # We need chsh without sudo cause sometimes we don't have sudo permissions on collaborative environment
-  chsh -s "$(which fish)" || :
+  chsh -s "${fish_bin}" || :
   {{- else if eq .chezmoi.os "darwin" }}
-  echo "$(which fish)" | sudo tee -a /etc/shells
-  chsh -s "$(which fish)" || :
+  echo "${fish_bin}" | sudo tee -a /etc/shells
+  chsh -s "${fish_bin}" || :
   {{- else }}
   chsh -s fish || :
   {{- end }}
 fi
 {{- end }}
-rm -rf {{ .chezmoi.homeDir }}/.config/fish/{conf.d,functions,completions,fishd*}
-fish {{ .chezmoi.homeDir }}/.config/fish/setup.fish
+fish_config_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".config" "fish")"
+rm -rf "${fish_config_dir}"/{conf.d,functions,completions,fishd*}
+fish "$(dybatpho::path_join "${fish_config_dir}" "setup.fish")"
 
 dybatpho::success "Setup fish shell"

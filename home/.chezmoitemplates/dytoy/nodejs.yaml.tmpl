@@ -14,6 +14,7 @@ is_essential: true
 hook:
   after: |
     # Enable corepack
-    (yes || :) | ~/.local/bin/mise x node -- npm install --global corepack@latest
-    (yes || :) | ~/.local/bin/mise x node -- npx corepack enable pnpm
+    mise_bin="$(dybatpho::path_join "$HOME" ".local" "bin" "mise")"
+    (yes || :) | "$mise_bin" x node -- npm install --global corepack@latest
+    (yes || :) | "$mise_bin" x node -- npx corepack enable pnpm
 {{- end }}

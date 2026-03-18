@@ -1,27 +1,23 @@
 #!{{ .bash }}
-source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 function _normal {
-  identity="$1"
-  encrypted_file="$2"
-
-  age -d -i ~/.config/chezmoi/"$identity".key "$encrypted_file" 2> /dev/null
+  local identity="$1"
+  local encrypted_file="$2"
+  age -d -i ~/.config/chezmoi/"${identity}".key "${encrypted_file}" 2> /dev/null
 }
 
 function _sqlite {
-  identity="$1"
-  encrypted_file="$2"
-  decrypted_file="$(mktemp --suffix=.sqlite)"
+  local identity="$1"
+  local encrypted_file="$2"
+  local decrypted_file
+  dybatpho::create_temp decrypted_file ".sqlite"
 
-  age -d -i ~/.config/chezmoi/"$identity".key "$encrypted_file" > "$decrypted_file" 2> /dev/null
-  if [ $? -ne 0 ]; then
-    echo "Error: Could not decrypt SQLite file." >&2
-    rm -f "$decrypted_file"
-    exit 1
+  if ! age -d -i ~/.config/chezmoi/"${identity}".key "${encrypted_file}" > "${decrypted_file}" 2> /dev/null; then
+    dybatpho::die "Could not decrypt SQLite file."
   fi
-  sqlite3 "$decrypted_file" .dump
-  rm -f "$decrypted_file"
+  sqlite3 "${decrypted_file}" .dump
 }
 
 cmd="$1"

@@ -2,6 +2,51 @@
 # shellcheck disable=2154,2155
 
 #######################################
+# @description Infer a temp-file suffix from a download URL.
+# @arg $1 string Download URL
+# @stdout Matching archive/file suffix, or `.bin` as a fallback
+#######################################
+function __binary_download_temp_suffix {
+  local url
+  dybatpho::expect_args url -- "$@"
+  case "${url}" in
+    *.tar.gz | *.tar.gz\?* | *.tgz | *.tgz\?*)
+      printf '.tar.gz\n'
+      ;;
+    *.tar.xz | *.tar.xz\?*)
+      printf '.tar.xz\n'
+      ;;
+    *.tar.bz2 | *.tar.bz2\?* | *.tbz2 | *.tbz2\?* | *.tbz | *.tbz\?*)
+      printf '.tar.bz2\n'
+      ;;
+    *.tar.zst | *.tar.zst\?*)
+      printf '.tar.zst\n'
+      ;;
+    *.tar | *.tar\?*)
+      printf '.tar\n'
+      ;;
+    *.zip | *.zip\?*)
+      printf '.zip\n'
+      ;;
+    *.xz | *.xz\?*)
+      printf '.xz\n'
+      ;;
+    *.bz2 | *.bz2\?*)
+      printf '.bz2\n'
+      ;;
+    *.gz | *.gz\?*)
+      printf '.gz\n'
+      ;;
+    *.zst | *.zst\?*)
+      printf '.zst\n'
+      ;;
+    *)
+      printf '.bin\n'
+      ;;
+  esac
+}
+
+#######################################
 # @description Get latest version of tool from GitHub or GitLab
 # @arg $1 string Host of GitHub or GitLab
 # @arg $2 string Repository of tool in format "owner/repo"
@@ -41,7 +86,10 @@ function binary::get_latest_version {
 function binary::download_and_extract {
   local name location url version
   dybatpho::expect_args name location url version -- "$@"
-  dybatpho::create_temp temp_file ".z"
+  local output_path temp_suffix
+  output_path="$(dybatpho::path_join "$location" "$name")"
+  temp_suffix="$(__binary_download_temp_suffix "$url")"
+  dybatpho::create_temp temp_file "$temp_suffix"
   dybatpho::debug "Downloaded $url to $temp_file"
   dybatpho::dry_run dybatpho::curl_download "$url" "$temp_file"
 
@@ -58,10 +106,10 @@ function binary::download_and_extract {
   elif [[ "$url" =~ \.gz$ ]]; then
     compressed:extract_gzip "$name" "$temp_file" "$location"
   else
-    dybatpho::dry_run mv "$temp_file" "${location}/${name}"
+    dybatpho::dry_run mv "$temp_file" "$output_path"
   fi
   if ! dybatpho::is true "$LIST_CONTENTS"; then
-    dybatpho::dry_run chmod +x "${location}/${name}"
+    dybatpho::dry_run chmod +x "$output_path"
   fi
 
   dybatpho::create_temp after_path ".sh"

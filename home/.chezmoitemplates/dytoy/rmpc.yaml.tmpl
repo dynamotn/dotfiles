@@ -18,8 +18,8 @@ archive:
   - path: rmpc
   - path: man/rmpc.1
     strip: 1
-    location: ~/.local/man/man1
+    location: {{ .chezmoi.homeDir }}/.local/man/man1
   - path: completions/rmpc.fish
     strip: 1
-    location: ~/.config/fish/completions
+    location: {{ .chezmoi.homeDir }}/.config/fish/completions
 {{- end }}

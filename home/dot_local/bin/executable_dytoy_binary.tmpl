@@ -31,10 +31,10 @@ function _spec_main {
 function _parse_release {
   local name type
   dybatpho::expect_args name type -- "$@"
+  local location host repo version release_asset artifact_host
   location=$(dytoy::get_yaml "$name" "location")
-  if [ "$location" = "null" ]; then
-    location=$HOME/.local/bin
-  fi
+  [[ "${location}" == "null" ]] && location=""
+  location=$(dybatpho::coalesce "${location}" "$(dybatpho::path_join "$HOME" ".local" "bin")")
   dytoy::is_installed_command "$name" "$location" && return
   dytoy::install_dependencies "$name"
   dybatpho::debug "Download tool ${name} to ${location}"
@@ -42,17 +42,18 @@ function _parse_release {
   dybatpho::progress "Installing ${name}"
   dybatpho::dry_run mkdir -p "$location"
   host=$(dytoy::get_yaml "$name" "${type}.host")
-  if [ "$host" = "null" ]; then
-    host="${type}.com"
-  fi
+  [[ "${host}" == "null" ]] && host=""
+  host=$(dybatpho::coalesce "${host}" "${type}.com")
   dybatpho::debug "Host is ${host}"
   repo=$(dytoy::get_yaml "$name" "${type}.repo")
   version=$(dytoy::get_yaml "$name" "${type}.version")
   release_asset=$(dytoy::get_yaml "$name" "${type}.release_asset")
+  [[ "${version}" == "null" ]] && version=""
+  version=$(dybatpho::coalesce "${version}" "latest")
 
-  if [ "$version" = "latest" ] || [ "$version" = "null" ]; then
+  if [[ "$version" == "latest" ]]; then
     version=$(binary::get_latest_version "$host" "$repo")
-    if [ "$version" = "" ]; then
+    if dybatpho::string_is_blank "$version"; then
       dybatpho::die "You're limited request to ${type} API"
     fi
   else
@@ -61,12 +62,13 @@ function _parse_release {
   release_asset=$(echo "${release_asset}" | misc::replace_version "$version")
   dybatpho::debug "Release asset is ${release_asset}"
 
-  local url
   artifact_host=$(dytoy::get_yaml "$name" "${type}.artifact_host")
-  if [ "$artifact_host" = "null" ]; then
-    if [ "$type" = "github" ]; then
+  [[ "${artifact_host}" == "null" ]] && artifact_host=""
+  local url
+  if dybatpho::string_is_blank "${artifact_host}"; then
+    if [[ "$type" == "github" ]]; then
       url="https://${host}/${repo}/releases/download/${version}/${release_asset}"
-    elif [ "$type" = "gitlab" ]; then
+    elif [[ "$type" == "gitlab" ]]; then
       url="https://${host}/${repo}/-/releases/${version}/downloads/${release_asset}"
     fi
   else
@@ -91,6 +93,7 @@ function _install_tool {
   elif [ "$(dytoy::get_yaml "$name" "gitlab")" != "null" ]; then
     type="gitlab"
   fi
+  dybatpho::string_is_blank "${type}" && dybatpho::die "No supported release source configured for ${name}"
   _parse_release "$name" "$type"
 }
 

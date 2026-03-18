@@ -10,27 +10,28 @@
 function dytoy::get_yaml {
   local name field
   dybatpho::expect_args name field -- "$@"
-  local file="$HOME/.config/dytoy/tools.yaml"
+  local file
+  file="$(dybatpho::path_join "$HOME" ".config" "dytoy" "tools.yaml")"
   case $field in
     all)
       local method="${3:-}"
       yq e -o=j -I=0 \
-        "filter(.name == \"${name}\" and .method == \"${method}\") | .[]" \
+        "filter(.name == \"${name}\" and .method == \"${method}\") | explode ." \
         "$file"
       ;;
     archive | *.packages | *.services)
       yq e -o=j -I=0 \
-        "filter(.name == \"${name}\") | .[].${field}.[]" \
+        "filter(.name == \"${name}\") | explode . | .[].${field}.[]" \
         "$file"
       ;;
     dependencies)
       yq e -o=j -I=0 -r \
-        "filter(.name == \"${name}\") | .[].${field}.[]" \
+        "filter(.name == \"${name}\") | explode . | .[].${field}.[]" \
         "$file"
       ;;
     *)
       yq e -o=j -I=0 -r \
-        "filter(.name == \"${name}\") | .[].${field}" \
+        "filter(.name == \"${name}\") | explode . | .[].${field}" \
         "$file"
       ;;
   esac
@@ -47,8 +48,9 @@ function dytoy::install_dependencies {
   for dependency in "${dependencies[@]}"; do
     dybatpho::debug "Need dependency: $dependency"
     dependency=${dependency%$'\n'}
-    local method=$(dytoy::get_yaml "$dependency" "method")
-    dybatpho::dry_run "$HOME/.local/bin/dytoy_${method}" -i -t "$dependency"
+    local method
+    method=$(dytoy::get_yaml "$dependency" "method")
+    dybatpho::dry_run "$(dybatpho::path_join "$HOME" ".local" "bin" "dytoy_${method}")" -i -t "$dependency"
   done
 }
 
@@ -80,17 +82,18 @@ function dytoy::run_script {
 function dytoy::create_script {
   local name path content kind
   dybatpho::expect_args name path content kind -- "$@"
+  if [[ "$content" == "null" ]] || dybatpho::string_is_blank "$content"; then
+    return 0
+  fi
 
-  if [ "$content" != "null" ]; then
-    local lib_dir
-    lib_dir=$(dirname "${BASH_SOURCE[0]}")
-    cat << EOF > "${path}"
-. ${lib_dir}/dybatpho/init.sh
+  local lib_dir
+  lib_dir="$(dybatpho::path_dirname "${BASH_SOURCE[0]}")"
+  cat << EOF > "${path}"
+. $(dybatpho::path_join "$lib_dir" "dybatpho" "init.sh")
 dybatpho::register_common_handlers
 dybatpho::progress "Running ${kind} to install ${name}"
 EOF
-    echo -e "${content}" >> "${path}"
-  fi
+  echo -e "${content}" >> "${path}"
 }
 
 #######################################
@@ -103,7 +106,7 @@ function dytoy::iterate {
   local command
   dybatpho::expect_args command -- "$@"
   # shellcheck disable=SC2153
-  if [ "$TOOL" = "@empty" ]; then
+  if [[ "$TOOL" == "@empty" ]]; then
     dybatpho::info "Install ${METHOD} tools"
     readarray tools < <(
       yq e -r -o=j -I=0 "filter(.method == \"${METHOD}\") | .[].name" \
@@ -136,7 +139,8 @@ function dytoy::iterate {
 function dytoy::is_defined {
   local name method
   dybatpho::expect_args name method -- "$@"
-  local yaml=$(dytoy::get_yaml "$name" "all" "$method")
+  local yaml
+  yaml=$(dytoy::get_yaml "$name" "all" "$method")
   dybatpho::is empty "$yaml" \
     && dybatpho::die "Not found $name tool in ~/.config/dytoy/tools.yaml"
 }
@@ -149,7 +153,8 @@ function dytoy::is_defined {
 function dytoy::is_invalid_essential {
   local name
   dybatpho::expect_args name -- "$@"
-  local is_essential=$(dytoy::get_yaml "$name" "is_essential")
+  local is_essential
+  is_essential=$(dytoy::get_yaml "$name" "is_essential")
   dybatpho::is true "$ONLY_ESSENTIAL" && ! dybatpho::is true "$is_essential"
 }
 
@@ -162,9 +167,9 @@ function dytoy::is_invalid_essential {
 function dytoy::is_installed_command {
   local name
   dybatpho::expect_args name -- "$@"
-  local location="${2:-$HOME/.local/bin}"
+  local location="${2:-$(dybatpho::path_join "$HOME" ".local" "bin")}"
   if dybatpho::is true "$ONLY_NOT_INSTALLED"; then
-    if dybatpho::is command "$name" || dybatpho::is file "${location}/${name}"; then
+    if dybatpho::is command "$name" || dybatpho::is file "$(dybatpho::path_join "$location" "$name")"; then
       dybatpho::debug "$name tool is already installed, skipping"
       return 0
     fi
@@ -204,10 +209,11 @@ function dytoy::enable_service {
   dybatpho::expect_args yaml init_system -- "$@"
 
   service_name=$(echo "$yaml" | yq e '.service')
-  if [[ "$service_name" != "null" ]]; then
-    is_user_service=$(echo "$yaml" | yq e '.is_user_service')
-    "init::enable_${init_system}_service" "$service_name" "$is_user_service"
+  if [[ "$service_name" == "null" ]]; then
+    return 0
   fi
+  is_user_service=$(echo "$yaml" | yq e '.is_user_service')
+  "init::enable_${init_system}_service" "$service_name" "$is_user_service"
 }
 
 #######################################
@@ -218,10 +224,13 @@ function dytoy::enable_service {
 function dytoy::install_gentoo_package {
   local yaml init_system
   dybatpho::expect_args yaml init_system -- "$@"
-  local name=$(echo "$yaml" | yq e '.name')
-  local repo=$(echo "$yaml" | yq e '.repo')
-  local url=$(echo "$yaml" | yq e '.url')
-  [[ "$repo" != "null" ]] && pkg::add_overlay "$repo" "$url" > /dev/null
+  local name
+  name=$(echo "$yaml" | yq e '.name')
+  local repo
+  repo=$(echo "$yaml" | yq e '.repo')
+  local url
+  url=$(echo "$yaml" | yq e '.url')
+  [[ "$repo" == "null" ]] || pkg::add_overlay "$repo" "$url" > /dev/null
 
   if ! dytoy::is_installed_package "$name" "portage"; then
     # shellcheck disable=SC2015
@@ -239,7 +248,8 @@ function dytoy::install_gentoo_package {
 function dytoy::install_arch_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name=$(echo "$yaml" | yq e '.name')
+  local name
+  name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "pacman"; then
     # shellcheck disable=SC2015
     pkg::install_via_pacman "$name" \
@@ -257,14 +267,20 @@ function dytoy::install_arch_package {
 function dytoy::add_apt_repo {
   local yaml os
   dybatpho::expect_args yaml os -- "$@"
-  local name=$(echo "$yaml" | yq e '.name')
-  local repo=$(echo "$yaml" | yq e '.repo')
+  local name
+  name=$(echo "$yaml" | yq e '.name')
+  local repo
+  repo=$(echo "$yaml" | yq e '.repo')
   [[ "$repo" == "null" ]] && return
 
-  local repo_name=$(echo "$yaml" | yq e '.repo_name')
-  local components=$(echo "$yaml" | yq e '.components')
-  local suite=$(echo "$yaml" | yq e '.suite')
-  local key=$(echo "$yaml" | yq e '.key')
+  local repo_name
+  repo_name=$(echo "$yaml" | yq e '.repo_name')
+  local components
+  components=$(echo "$yaml" | yq e '.components')
+  local suite
+  suite=$(echo "$yaml" | yq e '.suite')
+  local key
+  key=$(echo "$yaml" | yq e '.key')
 
   [[ "$repo_name" == "null" ]] && repo_name=$name
   if [[ "$suite" == "null" ]]; then
@@ -294,7 +310,8 @@ function dytoy::install_ubuntu_package {
   dybatpho::expect_args yaml -- "$@"
   dytoy::add_apt_repo "$yaml" "ubuntu"
 
-  local name=$(echo "$yaml" | yq e '.name')
+  local name
+  name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "apt"; then
     # shellcheck disable=SC2015
     pkg::install_via_apt "$name" \
@@ -311,7 +328,8 @@ function dytoy::install_ubuntu_package {
 function dytoy::install_alpine_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name=$(echo "$yaml" | yq e '.name')
+  local name
+  name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "apk"; then
     # shellcheck disable=SC2015
     pkg::install_via_apk "$name" \
@@ -328,7 +346,8 @@ function dytoy::install_alpine_package {
 function dytoy::install_termux_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name=$(echo "$yaml" | yq e '.name')
+  local name
+  name=$(echo "$yaml" | yq e '.name')
   if ! dytoy::is_installed_package "$name" "apt"; then
     # shellcheck disable=SC2015
     pkg::install_via_termux "$name" \
@@ -345,10 +364,13 @@ function dytoy::install_termux_package {
 function dytoy::install_fdroid_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name=$(echo "$yaml" | yq e '.name')
-  local repo=$(echo "$yaml" | yq e '.repo')
-  local url=$(echo "$yaml" | yq e '.url')
-  [[ "$repo" != "null" ]] && pkg::add_fdroid_repo "$repo" "$url" > /dev/null
+  local name
+  name=$(echo "$yaml" | yq e '.name')
+  local repo
+  repo=$(echo "$yaml" | yq e '.repo')
+  local url
+  url=$(echo "$yaml" | yq e '.url')
+  [[ "$repo" == "null" ]] || pkg::add_fdroid_repo "$repo" "$url" > /dev/null
 
   if ! dytoy::is_installed_package "$name" "fdroidcl"; then
     # shellcheck disable=SC2015
@@ -365,10 +387,13 @@ function dytoy::install_fdroid_package {
 function dytoy::install_flatpak_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name=$(echo "$yaml" | yq e '.name')
-  local repo=$(echo "$yaml" | yq e '.repo')
-  local url=$(echo "$yaml" | yq e '.url')
-  [[ "$repo" != "null" ]] && pkg::add_flatpak_repo "$repo" "$url" > /dev/null
+  local name
+  name=$(echo "$yaml" | yq e '.name')
+  local repo
+  repo=$(echo "$yaml" | yq e '.repo')
+  local url
+  url=$(echo "$yaml" | yq e '.url')
+  [[ "$repo" == "null" ]] || pkg::add_flatpak_repo "$repo" "$url" > /dev/null
 
   if ! dytoy::is_installed_package "$name" "flatpak"; then
     # shellcheck disable=SC2015
@@ -385,8 +410,10 @@ function dytoy::install_flatpak_package {
 function dytoy::install_macos_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name=$(echo "$yaml" | yq e '.name')
-  local type=$(echo "$yaml" | yq e '.type')
+  local name
+  name=$(echo "$yaml" | yq e '.name')
+  local type
+  type=$(echo "$yaml" | yq e '.type')
   case "$type" in
     store)
       if ! dytoy::is_installed_package "$name" "mas"; then
@@ -415,8 +442,9 @@ function dytoy::install_macos_package {
       if [[ "$unstable" == "true" ]]; then
         brew_param="$brew_param --HEAD"
       fi
-      local repo=$(echo "$yaml" | yq e '.repo')
-      [[ "$repo" != "null" ]] && pkg::add_brew_tap "$repo" > /dev/null
+      local repo
+      repo=$(echo "$yaml" | yq e '.repo')
+      [[ "$repo" == "null" ]] || pkg::add_brew_tap "$repo" > /dev/null
       if ! dytoy::is_installed_package "$name" "brew"; then
         # shellcheck disable=SC2015
         pkg::install_via_brew "$name" \

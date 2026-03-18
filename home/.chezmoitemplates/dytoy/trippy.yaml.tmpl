@@ -21,5 +21,5 @@ archive:
 {{- if eq .chezmoi.os "linux" }}
 hook:
   after: |-
-    sudo setcap CAP_NET_RAW+p ~/.local/bin/trippy
+    sudo setcap CAP_NET_RAW+p "$(dybatpho::path_join "$HOME" ".local" "bin" "trippy")"
 {{- end }}

@@ -1,17 +1,20 @@
 #!{{ .bash }}
-source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
 {{- if eq .terminalMultiplexer "T" }}
 dybatpho::header "Setup tmux"
 # config hash: {{ joinPath .chezmoi.sourceDir "../silos/tmux/config" | include | sha256sum }}
-mkdir -p {{ .chezmoi.homeDir }}/.local/share/tmux/plugins
+tmux_plugin_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "share" "tmux" "plugins")"
+tpm_dir="$(dybatpho::path_join "${tmux_plugin_dir}" "tpm")"
+mkdir -p "${tmux_plugin_dir}"
 
 dybatpho::progress "Install tpm"
-test ! -d {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm && \
-  git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm
+if ! dybatpho::is dir "${tpm_dir}"; then
+  git clone https://github.com/tmux-plugins/tpm "${tpm_dir}"
+fi
 
 dybatpho::progress "Install other plugins"
-bash {{ .chezmoi.homeDir }}/.local/share/tmux/plugins/tpm/bin/install_plugins
+bash "$(dybatpho::path_join "${tpm_dir}" "bin" "install_plugins")"
 dybatpho::success "Setup tmux"
 {{- end }}

@@ -45,14 +45,14 @@ github:
 hook:
   after: |-
     {{- if eq .chezmoi.os "android" }}
-    cd $PREFIX/etc/tls
-    mkdir -p certs
-    ln -sf cert.pem certs.pem
-    ln -sf cert.pem certs/ca-certificates.crt
+    tls_dir="$(dybatpho::path_join "$PREFIX" "etc" "tls")"
+    mkdir -p "$(dybatpho::path_join "$tls_dir" "certs")"
+    ln -sf "$(dybatpho::path_join "$tls_dir" "cert.pem")" "$(dybatpho::path_join "$tls_dir" "certs.pem")"
+    ln -sf "$(dybatpho::path_join "$tls_dir" "cert.pem")" "$(dybatpho::path_join "$tls_dir" "certs" "ca-certificates.crt")"
     {{- end }}
-    {{- $command := "$HOME/.local/bin/mise" }}
+    {{- $command := "\"$(dybatpho::path_join \"$HOME\" \".local\" \"bin\" \"mise\")\"" }}
     {{- if eq .chezmoi.os "android" }}
-    {{-   $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl $HOME/.local/bin/mise" }}
+    {{-   $command = "proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl \"$(dybatpho::path_join \"$HOME\" \".local\" \"bin\" \"mise\")\"" }}
     {{- else if eq .kind "container" }}
     {{-   $command = "mise" }}
     {{- end }}

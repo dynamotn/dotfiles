@@ -47,7 +47,8 @@ function _spec_encrypt {
 function _encrypt {
   dybatpho::expect_args filename -- "$@"
   filename=$(dybatpho::trim "${filename}")
-  local input output
+  local input output identity_key
+  identity_key="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "${IDENTITY_TYPE}.key")"
   if [ "${FOLDER}" = "data" ]; then
     input="{{ .chezmoi.sourceDir }}/../secrets/data/${IDENTITY_TYPE}/${filename}"
     output="${input}.age"
@@ -60,13 +61,13 @@ function _encrypt {
     dybatpho::die "Input ${input} is not a file"
   fi
   dybatpho::debug "Encrypt ${input} to ${output}"
-  dybatpho::dry_run mkdir -p "$(dirname "$output")"
+  dybatpho::dry_run mkdir -p "$(dybatpho::path_dirname "$output")"
   dybatpho::create_temp temp_file ".tmp"
   local up_to_date="false"
   if dybatpho::is true "${FORCE}"; then
     up_to_date="false"
   elif dybatpho::is file "${output}"; then
-    age -d -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o "$temp_file" "$output"
+    age -d -i "$identity_key" -o "$temp_file" "$output"
     if diff "$input" "$temp_file" > /dev/null; then
       dybatpho::debug "Output file ${output} is up to date"
       up_to_date="true"
@@ -75,7 +76,7 @@ function _encrypt {
     fi
   fi
   if dybatpho::is false "${up_to_date}"; then
-    dybatpho::dry_run age -e -a -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o "$output" "$input"
+    dybatpho::dry_run age -e -a -i "$identity_key" -o "$output" "$input"
   fi
   if dybatpho::is true "${REMOVE}"; then
     dybatpho::info "Remove input file ${input}"
@@ -89,13 +90,15 @@ function _encrypt {
 #######################################
 function _decrypt {
   dybatpho::expect_args filename -- "$@"
+  local identity_key
+  identity_key="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "${IDENTITY_TYPE}.key")"
   local output="{{ .chezmoi.sourceDir }}/../secrets/data/${IDENTITY_TYPE}/${filename}"
   local input="${output}.age"
   if ! dybatpho::is file "${input}"; then
     dybatpho::die "Input ${input} is not a file"
   fi
   dybatpho::info "Decrypt ${input} to ${output}"
-  dybatpho::dry_run age -d -i ~/.config/chezmoi/"${IDENTITY_TYPE}".key -o "$output" "$input"
+  dybatpho::dry_run age -d -i "$identity_key" -o "$output" "$input"
 }
 
 #######################################

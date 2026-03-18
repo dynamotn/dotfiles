@@ -30,8 +30,10 @@ github:
   {{- end }}
   release_asset: eza_{{ $arch }}-unknown-linux-gnu.tar.gz
 archive:
-  - path: ./eza
+  - path: eza
 {{- end }}
 hook:
   after: |-
-    dybatpho::curl_download https://raw.githubusercontent.com/eza-community/eza/refs/heads/main/completions/fish/eza.fish $HOME/.config/fish/completions/eza.fish
+    completion_path="$(dybatpho::path_join "$HOME" ".config" "fish" "completions" "eza.fish")"
+    mkdir -p "$(dybatpho::path_dirname "$completion_path")"
+    dybatpho::curl_download https://raw.githubusercontent.com/eza-community/eza/refs/heads/main/completions/fish/eza.fish "$completion_path"

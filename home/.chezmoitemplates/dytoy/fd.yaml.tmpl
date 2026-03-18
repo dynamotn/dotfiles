@@ -36,5 +36,5 @@ archive:
     strip: 1
   - path: fd-%v-{{ $arch }}-unknown-linux-gnu/fd.1
     strip: 1
-    location: $HOME/.local/man/man1
+    location: {{ .chezmoi.homeDir }}/.local/man/man1
 {{- end }}

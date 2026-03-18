@@ -14,7 +14,7 @@ archive:
     strip: 2
   - path: tala-%v/man/tala.1
     strip: 2
-    location: $HOME/.local/man/man1
+    location: {{ .chezmoi.homeDir }}/.local/man/man1
   - path: tala-%v/man/d2plugin-tala.1
     strip: 2
-    location: $HOME/.local/man/man1
+    location: {{ .chezmoi.homeDir }}/.local/man/man1

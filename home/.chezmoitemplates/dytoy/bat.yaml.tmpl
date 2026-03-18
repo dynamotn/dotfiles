@@ -39,5 +39,5 @@ archive:
     strip: 1
   - path: bat-%v-{{ $arch }}-{{ $os }}/bat.1
     strip: 1
-    location: $HOME/.local/man/man1
+    location: {{ .chezmoi.homeDir }}/.local/man/man1
 {{- end }}

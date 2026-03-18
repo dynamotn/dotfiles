@@ -2,10 +2,11 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-dotfiles=$(realpath $(chezmoi execute-template '{{ .chezmoi.sourceDir }}')/..)
+dotfiles="$(dybatpho::path_normalize "$(dybatpho::path_join "$(chezmoi execute-template '{{ .chezmoi.sourceDir }}')" "..")")"
+chezmoi_config="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "chezmoi.yaml")"
 {{- if eq .chezmoi.os "darwin" }}
-if [[ "$*" == *"/Applications"* ]]; then
-  sed -i "/umask:/s/^# //" "$HOME/.config/chezmoi/chezmoi.yaml"
+if dybatpho::string_contains "$*" "/Applications"; then
+  sed -i "/umask:/s/^# //" "$chezmoi_config"
 fi
 {{- end }}
 sudo env "PATH=$PATH" \
@@ -13,10 +14,10 @@ sudo env "PATH=$PATH" \
   --source "$dotfiles/root" \
   --mode file \
   --working-tree "$dotfiles" \
-  --config ~/.config/chezmoi/chezmoi.yaml \
+  --config "$chezmoi_config" \
   "$@"
 {{- if eq .chezmoi.os "darwin" }}
-if [[ "$*" == *"/Applications"* ]]; then
-  sed -i "/umask:/s/^/# /" "$HOME/.config/chezmoi/chezmoi.yaml"
+if dybatpho::string_contains "$*" "/Applications"; then
+  sed -i "/umask:/s/^/# /" "$chezmoi_config"
 fi
 {{- end }}

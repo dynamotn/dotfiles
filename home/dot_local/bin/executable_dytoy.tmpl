@@ -25,6 +25,8 @@ function _spec_main {
 #######################################
 function _main {
   local param=()
+  local dytoy_bin_dir
+  dytoy_bin_dir=$(dybatpho::path_join "$HOME" ".local" "bin")
   if dybatpho::is true "$ONLY_ESSENTIAL"; then
     param+=("--essential")
   fi
@@ -37,16 +39,18 @@ function _main {
   if dybatpho::is true "$LIST_CONTENTS"; then
     param+=("--list")
   fi
-  if [ "$TOOL" = "@empty" ]; then
+  if [[ "$TOOL" == "@empty" ]]; then
     # Need to un dytoy_os first
-    dybatpho::dry_run "$HOME/.local/bin/dytoy_os" "${param[@]}"
-    dybatpho::dry_run "$HOME/.local/bin/dytoy_binary" "${param[@]}"
-    dybatpho::dry_run "$HOME/.local/bin/dytoy_mise" "${param[@]}"
-    dybatpho::dry_run "$HOME/.local/bin/dytoy_shell" "${param[@]}"
+    dybatpho::dry_run "$(dybatpho::path_join "${dytoy_bin_dir}" "dytoy_os")" "${param[@]}"
+    dybatpho::dry_run "$(dybatpho::path_join "${dytoy_bin_dir}" "dytoy_binary")" "${param[@]}"
+    dybatpho::dry_run "$(dybatpho::path_join "${dytoy_bin_dir}" "dytoy_mise")" "${param[@]}"
+    dybatpho::dry_run "$(dybatpho::path_join "${dytoy_bin_dir}" "dytoy_shell")" "${param[@]}"
   else
     local method
     method=$(dytoy::get_yaml "$TOOL" "method")
-    dybatpho::dry_run "$HOME/.local/bin/dytoy_$method" "${param[@]}" -t "$TOOL"
+    [[ "${method}" == "null" ]] && method=""
+    dybatpho::string_is_blank "${method}" && dybatpho::die "Not found installer method for tool: ${TOOL}"
+    dybatpho::dry_run "$(dybatpho::path_join "${dytoy_bin_dir}" "dytoy_${method}")" "${param[@]}" -t "$TOOL"
   fi
 }
 

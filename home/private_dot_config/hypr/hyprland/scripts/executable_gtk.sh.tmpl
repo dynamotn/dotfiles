@@ -1,15 +1,19 @@
 #!{{ .bash }}
-config=$HOME/.config/gtk-3.0/settings.ini
-if [ ! -f "$config" ]; then exit 1; fi
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+
+config="${HOME}/.config/gtk-3.0/settings.ini"
+dybatpho::is file "${config}" || exit 0
+dybatpho::require gsettings
 
 gnome_schema="org.gnome.desktop.interface"
-gtk_theme="$(grep 'gtk-theme-name' "$config" | sed 's/.*\s*=\s*//')"
-icon_theme="$(grep 'gtk-icon-theme-name' "$config" | sed 's/.*\s*=\s*//')"
-cursor_theme="$(grep 'gtk-cursor-theme-name' "$config" | sed 's/.*\s*=\s*//')"
-cursor_size="$(grep 'gtk-cursor-theme-size' "$config" | sed 's/.*\s*=\s*//')"
-font_name="$(grep 'gtk-font-name' "$config" | sed 's/.*\s*=\s*//')"
-gsettings set "$gnome_schema" gtk-theme "$gtk_theme"
-gsettings set "$gnome_schema" icon-theme "$icon_theme"
-gsettings set "$gnome_schema" cursor-theme "$cursor_theme"
-gsettings set "$gnome_schema" cursor-size "$cursor_size"
-gsettings set "$gnome_schema" font-name "$font_name"
+gtk_theme="$(grep 'gtk-theme-name' "${config}" | sed 's/.*\s*=\s*//')"
+icon_theme="$(grep 'gtk-icon-theme-name' "${config}" | sed 's/.*\s*=\s*//')"
+cursor_theme="$(grep 'gtk-cursor-theme-name' "${config}" | sed 's/.*\s*=\s*//')"
+cursor_size="$(grep 'gtk-cursor-theme-size' "${config}" | sed 's/.*\s*=\s*//')"
+font_name="$(grep 'gtk-font-name' "${config}" | sed 's/.*\s*=\s*//')"
+
+gnome_keys=(gtk-theme icon-theme cursor-theme cursor-size font-name)
+gnome_vals=("${gtk_theme}" "${icon_theme}" "${cursor_theme}" "${cursor_size}" "${font_name}")
+for i in "${!gnome_keys[@]}"; do
+  dybatpho::string_is_blank "${gnome_vals[$i]}" || gsettings set "${gnome_schema}" "${gnome_keys[$i]}" "${gnome_vals[$i]}"
+done

@@ -99,8 +99,7 @@ function pkg::init_arch {
     dybatpho::create_temp paru ""
     # shellcheck disable=SC2154
     dybatpho::dry_run git clone https://aur.archlinux.org/paru.git "$paru"
-    dybatpho::dry_run cd "$paru"
-    dybatpho::dry_run makepkg -si --noconfirm
+    dybatpho::dry_run bash -c "cd \"${paru}\" && makepkg -si --noconfirm"
     dybatpho::dry_run sudo pacman -Rscn --noconfirm rust
   fi
 }
@@ -191,11 +190,12 @@ EOF"
 function pkg::add_apt_repo {
   local name url suite components key
   dybatpho::expect_args name url suite components key -- "$@"
-  local path
+  local path gpg_path
+  gpg_path="$(dybatpho::path_join "/etc/apt/trusted.gpg.d" "${name}.gpg")"
   if dybatpho::is command termux-setup-storage; then
-    path="$PREFIX/etc/apt/sources.list.d/$name.list"
+    path="$(dybatpho::path_join "$PREFIX" "etc" "apt" "sources.list.d" "${name}.list")"
   else
-    path="/etc/apt/sources.list.d/$name.list"
+    path="$(dybatpho::path_join "/etc/apt/sources.list.d" "${name}.list")"
   fi
   if ! dybatpho::is file "$path"; then
     dybatpho::debug "Adding repository $name."
@@ -206,11 +206,11 @@ function pkg::add_apt_repo {
     # shellcheck disable=SC2154
     dybatpho::dry_run dybatpho::curl_download "$key" "$temp_key"
     if ! [[ "$key" =~ ^https://.* ]]; then
-      dybatpho::dry_run sudo cp "$temp_key" "/etc/apt/trusted.gpg.d/${name}.gpg"
+      dybatpho::dry_run sudo cp "$temp_key" "$gpg_path"
     else
-      dybatpho::dry_run sudo gpg --dearmor -o "/etc/apt/trusted.gpg.d/${name}.gpg" "$temp_key"
+      dybatpho::dry_run sudo gpg --dearmor -o "$gpg_path" "$temp_key"
     fi
-    dybatpho::dry_run eval "echo \"deb [signed-by=/etc/apt/trusted.gpg.d/${name}.gpg] ${url} ${suite} ${components}\" | sudo tee \"/etc/apt/sources.list.d/$name.list\""
+    dybatpho::dry_run eval "echo \"deb [signed-by=${gpg_path}] ${url} ${suite} ${components}\" | sudo tee \"${path}\""
   else
     dybatpho::debug "Repository $name already exists, skipping."
   fi
@@ -437,7 +437,7 @@ function pkg::install_via_brew {
   local package
   dybatpho::expect_args package -- "$@"
   dybatpho::progress "Installing package $package"
-  dybatpho::dry_run brew install "$@" "$package"
+  dybatpho::dry_run brew install "$package"
 }
 
 #######################################

@@ -62,21 +62,27 @@ archive:
 location: {{ $path }}
 hook:
   before: |-
-    sudo mkdir -p {{ $path }}
-    sudo chown -R $USER {{ $path }}
+    browser_dir="{{ $path }}"
+    sudo mkdir -p "$browser_dir"
+    sudo chown -R "$USER" "$browser_dir"
   after: |-
+    browser_dir="{{ $path }}"
+    browser_bin="$(dybatpho::path_join "$browser_dir" "zen-bin")"
+    browser_icon_dir="$(dybatpho::path_join "$browser_dir" "browser" "chrome" "icons" "default")"
+    local_bin_path="$(dybatpho::path_join "$HOME" ".local" "bin" "zen-browser")"
+    distribution_dir="$(dybatpho::path_join "$browser_dir" "distribution")"
     for i in 16x16 32x32 48x48 64x64 128x128; do
-      install -d /usr/share/icons/hicolor/$i/apps/
-      sudo ln -sf {{ $path }}/browser/chrome/icons/default/default${i/x*}.png \
+      sudo install -d "/usr/share/icons/hicolor/$i/apps/"
+      sudo ln -sf "$(dybatpho::path_join "$browser_icon_dir" "default${i/x*}.png")" \
         /usr/share/icons/hicolor/$i/apps/zen-browser.png
     done
-    sudo ln -sf /usr/lib/x86_64-linux-gnu/libnssckbi.so {{ $path }}/libnssckbi.so
+    sudo ln -sf /usr/lib/x86_64-linux-gnu/libnssckbi.so "$browser_dir"/libnssckbi.so
     dybatpho::create_temp "desktop_file" ".desktop"
     cat <<EOF > "$desktop_file"
     [Desktop Entry]
     Name=Zen Browser
     Comment=Experience tranquillity while browsing the web without people tracking you!
-    Exec={{ $path }}/zen-bin %u
+    Exec=$browser_bin %u
     Icon=zen-browser
     Type=Application
     MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;application/x-xpinstall;application/pdf;application/json;
@@ -90,15 +96,15 @@ hook:
 
     [Desktop Action new-window]
     Name=Open a New Window
-    Exec={{ $path }}/zen-bin %u
+    Exec=$browser_bin %u
 
     [Desktop Action new-private-window]
     Name=Open a New Private Window
-    Exec={{ $path }}/zen-bin --private-window %u
+    Exec=$browser_bin --private-window %u
 
     [Desktop Action profilemanager]
     Name=Open the Profile Manager
-    Exec={{ $path }}/zen-bin --ProfileManager %u
+    Exec=$browser_bin --ProfileManager %u
     EOF
     sudo install -m644 "$desktop_file" /usr/share/applications/zen.desktop
     dybatpho::create_temp "policy_file" ".json"
@@ -109,14 +115,15 @@ hook:
       }
     }
     EOF
-    sudo mkdir -p "{{ $path }}/distribution"
-    sudo install -m644 "$policy_file" "{{ $path }}/distribution/policies.json"
+    sudo mkdir -p "$distribution_dir"
+    sudo install -m644 "$policy_file" "$(dybatpho::path_join "$distribution_dir" "policies.json")"
     dybatpho::create_temp "exec_file" ".sh"
     cat <<EOF > "$exec_file"
     #!/bin/bash
-    exec {{ $path }}/zen-bin "$@"
+    exec "$browser_bin" "$@"
     EOF
     sudo install -m755 "$exec_file" /usr/bin/zen-browser
-    cp "$exec_file" ~/.local/bin/zen-browser
+    mkdir -p "$(dybatpho::path_dirname "$local_bin_path")"
+    cp "$exec_file" "$local_bin_path"
 {{-   end }}
 {{- end }}

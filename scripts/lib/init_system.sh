@@ -42,8 +42,12 @@ function init::enable_openrc_service {
   if dybatpho::is true "$is_user_service"; then
     rc-update --user add "$service"
   else
+    local cgroup_contents=""
+    if dybatpho::is file /proc/self/cgroup; then
+      cgroup_contents="$(< /proc/self/cgroup)"
+    fi
     sudo rc-update add "$service" default
-    if ! grep -q "docker" /proc/self/cgroup \
+    if ! dybatpho::string_contains "$cgroup_contents" "docker" \
       && ! dybatpho::is file /.dockerenv; then
       sudo rc-service "$service" start
     fi

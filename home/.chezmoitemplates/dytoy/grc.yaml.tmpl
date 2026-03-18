@@ -4,22 +4,25 @@ is_essential: true
 method: shell
 content: |
   dybatpho::create_temp temp_dir ""
-  git clone https://github.com/garabik/grc $temp_dir
-  cd $temp_dir
-  {{- if eq .osid "android" }}
-  # Fix shebangs
-  find . -type f -exec termux-fix-shebang {} \;
-  {{- else if eq .osid "linux-alpine" }}
-  PREFIX="$HOME/.local"
-  {{- end }}
-  # Install into $PREFIX
-  ./install.sh $PREFIX $PREFIX
-  {{- if eq .osid "android" }}
-  # Copy config files
-  mkdir ~/.grc
-  cp -r colourfiles ~/.grc
-  cp grc.conf ~/.grc
-  {{- end }}
+  git clone https://github.com/garabik/grc "$temp_dir"
+  (
+    cd "$temp_dir"
+    {{- if eq .osid "android" }}
+    # Fix shebangs
+    find . -type f -exec termux-fix-shebang {} \;
+    {{- else if eq .osid "linux-alpine" }}
+    PREFIX="$(dybatpho::path_join "$HOME" ".local")"
+    {{- end }}
+    # Install into $PREFIX
+    ./install.sh "$PREFIX" "$PREFIX"
+    {{- if eq .osid "android" }}
+    # Copy config files
+    grc_config_dir="$(dybatpho::path_join "$HOME" ".grc")"
+    mkdir -p "$grc_config_dir"
+    cp -r colourfiles "$grc_config_dir"
+    cp grc.conf "$grc_config_dir"
+    {{- end }}
+  )
 {{- else if eq .chezmoi.os "linux" "darwin" }}
 method: os
 # https://repology.org/project/grc/versions

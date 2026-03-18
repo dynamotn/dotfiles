@@ -42,9 +42,10 @@ gentoo:
   hook:
     after: |-
       # Initial setup sccache
-      sudo mkdir -p /var/cache/sccache
-      sudo chown root:portage /var/cache/sccache
-      sudo chmod 2775 /var/cache/sccache
+      sccache_dir="/var/cache/sccache"
+      sudo mkdir -p "$sccache_dir"
+      sudo chown root:portage "$sccache_dir"
+      sudo chmod 2775 "$sccache_dir"
 arch:
   packages:
     # System tools

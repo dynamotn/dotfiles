@@ -8,7 +8,8 @@ dybatpho::register_common_handlers
 {{- end }}
 dybatpho::header "Setup MacOS"
 sudo scutil --set HostName {{ .code }}
-macos-defaults apply ~/.macos
+macos_defaults_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".macos")"
+macos-defaults apply "${macos_defaults_dir}"
 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
