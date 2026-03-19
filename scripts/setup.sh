@@ -39,7 +39,7 @@ function _install_chezmoi {
 #######################################
 function _install_age {
   dybatpho::require "tar"
-  dybatpho::create_temp "temp" "tar.gz"
+  dybatpho::create_temp "temp" ".tar.gz"
   # shellcheck disable=SC2154
   dybatpho::curl_download "https://dl.filippo.io/age/latest?for=$(dybatpho::goos)/$(dybatpho::goarch)" "$temp"
   dybatpho::archive_extract "$temp" "$BIN_DIR" 1
