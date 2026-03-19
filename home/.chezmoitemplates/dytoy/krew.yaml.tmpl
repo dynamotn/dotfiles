@@ -7,7 +7,6 @@ github:
   release_asset: krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
 archive:
   - path: krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}
-    strip: 1
 hook:
   after: |-
     kubectl krew install access-matrix cert-manager deprecations \
