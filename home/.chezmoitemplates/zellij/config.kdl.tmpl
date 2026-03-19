@@ -317,8 +317,8 @@ plugins {
         notification_format_no_notifications ""
         notification_show_interval "10"
 
-        command_uptime_command    "bash -c \"uptime | rev | cut -d':' -f1 | rev | sed s/,//g\""
-        command_uptime_format     "Uptime:{stdout}"
+        command_uptime_command    "bash -c 'raw=$(uptime); raw=\"${raw##*:}\"; echo \"${raw//,/}\"'"
+        command_uptime_format     "{stdout}"
         command_uptime_interval   "1"
         command_uptime_rendermode "static"
 
