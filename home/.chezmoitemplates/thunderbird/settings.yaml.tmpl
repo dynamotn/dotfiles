@@ -1,8 +1,8 @@
+{{- $app := "Thunderbird" }}
+{{- if eq .mailClient "B" }}
+{{-   $app = "Betterbird" }}
+{{- end }}
 {{- if eq .chezmoi.os "darwin" }}
-{{-   $app := "Thunderbird" }}
-{{-   if eq .mailClient "B" }}
-{{-     $app = "Betterbird" }}
-{{-   end }}
 {{-   $installFolder := printf "" $app }}
 installFolder: /Applications/{{ $app }}.app/Contents/MacOS
 executableFile: {{ lower $app }}
@@ -18,6 +18,7 @@ installFolder: /usr/lib/thunderbird
 executableFile: thunderbird
 processFile: thunderbird
 {{-     else }}
+{{-       printf "This distro doesn't have setting for %s" $app | warnf }}
 installFolder:
 executableFile:
 processFile:
@@ -32,6 +33,7 @@ installFolder: /opt/betterbird
 executableFile: betterbird
 processFile: betterbird-bin
 {{-     else }}
+{{-       printf "This distro doesn't have setting for %s" $app | warnf }}
 installFolder:
 executableFile:
 processFile:

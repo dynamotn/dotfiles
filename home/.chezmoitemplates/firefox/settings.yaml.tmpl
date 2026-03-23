@@ -1,8 +1,8 @@
+{{- $app := "Firefox" }}
+{{- if eq .browser "Z" }}
+{{-   $app = "Zen" }}
+{{- end }}
 {{- if eq .chezmoi.os "darwin" }}
-{{-   $app := "Firefox" }}
-{{-   if eq .browser "Z" }}
-{{-     $app = "Zen" }}
-{{-   end }}
 {{-   $installFolder := printf "" $app }}
 installFolder: /Applications/{{ $app }}.app/Contents/MacOS
 executableFile: {{ lower $app }}
@@ -19,6 +19,7 @@ installFolder: /usr/lib/firefox
 executableFile: firefox
 processFile: firefox
 {{-     else }}
+{{-       printf "This distro doesn't have setting for %s" $app | warnf }}
 installFolder:
 executableFile:
 processFile:
@@ -33,6 +34,7 @@ installFolder: /opt/zen-browser-bin
 executableFile: zen-browser
 processFile: zen
 {{-     else }}
+{{-       printf "This distro doesn't have setting for %s" $app | warnf }}
 installFolder:
 executableFile:
 processFile:
