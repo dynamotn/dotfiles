@@ -4,6 +4,9 @@ method: os
 {{- if eq .kind "pc" "laptop" }}
 is_essential: true
 {{- end }}
+{{- if eq .code "ch4mp10n" }}
+enabled: false
+{{- end }}
 gentoo:
   packages:
     - name: net-vpn/tailscale

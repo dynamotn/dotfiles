@@ -109,7 +109,7 @@ function dytoy::iterate {
   if [[ "$TOOL" == "@empty" ]]; then
     dybatpho::info "Install ${METHOD} tools"
     readarray tools < <(
-      yq e -r -o=j -I=0 "filter(.method == \"${METHOD}\") | .[].name" \
+      yq e -r -o=j -I=0 "filter(.method == \"${METHOD}\" and .enabled != \"false\") | .[].name" \
         ~/.config/dytoy/tools.yaml
     )
     if dybatpho::is function "$command"; then
@@ -143,6 +143,9 @@ function dytoy::is_defined {
   yaml=$(dytoy::get_yaml "$name" "all" "$method")
   [[ "$yaml" == "[]" ]] || dybatpho::is empty "$yaml" \
     && dybatpho::die "Not found $name tool in ~/.config/dytoy/tools.yaml"
+  is_enabled=$(dytoy::get_yaml "$name" "enabled")
+  dybatpho::is false "$is_enabled" \
+    && dybatpho::die "Tool $name is disabled"
 }
 
 #######################################

@@ -1,6 +1,14 @@
-{{- if and (ne .chezmoi.username "root") (eq .kind "pc" "laptop") }}
+{{- $gitlab := "git@gitlab.com:" }}
+{{- if not .preferGitSSH }}
+{{-   $gitlab = "https://gitlab.com/" }}
+{{- end }}
+{{- if and
+  (ne .chezmoi.username "root")
+  (eq .kind "pc" "laptop")
+  (ne .code "ch4mp10n")
+}}
 Documents/Notes:
   type: git-repo
-  url: git@gitlab.com:dynamo-brain/digital-garden.git
+  url: {{ $gitlab }}dynamo-brain/digital-garden.git
   refreshPeriod: 2h
 {{- end }}

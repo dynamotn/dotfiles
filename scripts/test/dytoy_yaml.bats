@@ -113,6 +113,18 @@ EOF
   assert_stderr --partial "Not found missing_tool tool"
 }
 
+@test "dytoy::is_defined fails for disabled tool" {
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: os
+  enabled: false
+EOF
+
+  run --separate-stderr dytoy::is_defined sample os
+  assert_failure
+  assert_stderr --partial "Tool sample is disabled"
+}
+
 @test "dytoy::is_invalid_essential respects ONLY_ESSENTIAL" {
   export ONLY_ESSENTIAL='true'
   write_tools_yaml << 'EOF'
@@ -292,7 +304,8 @@ EOF
   function pkg::sync_apt_repo { true; }
   # Stub /etc/os-release
   function grep {
-    if [[ "$*" == *UBUNTU_CODENAME* ]]; then printf 'UBUNTU_CODENAME=jammy\n'
+    if [[ "$*" == *UBUNTU_CODENAME* ]]; then
+      printf 'UBUNTU_CODENAME=jammy\n'
     else command grep "$@"; fi
   }
   run dytoy::add_apt_repo "$yaml" "ubuntu"
