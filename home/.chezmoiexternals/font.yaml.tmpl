@@ -25,6 +25,7 @@
   type: file
   url: 'https://github.com/google/fonts/raw/main/ofl/caveat/Caveat%5Bwght%5D.ttf'
   refreshPeriod: 168h
+{{-   if ne .code "ch4mp10n" }}
 {{ $fontFolder }}/Finesse:
   type: archive
   url: 'https://republi.sh/finesse-v2-0/'
@@ -33,6 +34,7 @@
   stripComponents: 2
   include:
     - Finesse-v2.0/Fonts/*.otf
+{{-   end }}
 {{- end }}
 {{- if eq .chezmoi.os "android" }}
 .termux/font.ttf:

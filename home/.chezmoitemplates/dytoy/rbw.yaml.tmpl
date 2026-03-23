@@ -1,5 +1,8 @@
 name: rbw
 is_essential: true
+{{- if eq .code "ch4mp10n" }}
+enabled: false
+{{- end }}
 {{- if or (eq .chezmoi.os "android" "darwin") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}
 # Use package manager for Android, macOS and container environments
 # cuz it's essential tool
