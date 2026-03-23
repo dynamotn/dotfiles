@@ -16,9 +16,8 @@
 {{/* Ignore when running */}}
 {{-   $settingsFirefox := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
 {{-   $processFirefox = printf "%s/%s" $settingsFirefox.installFolder $settingsFirefox.processFile }}
-{{- end }}
-{{- if $processFirefox }}
-{{-   if le (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
+{{-   if $settingsFirefox.processFile }}
+{{-     if le (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
 {{ $dotfilesFolder }}/.chezmoitemplates/firefox/prefs/00-arkenfox.js:
   type: file
   url: 'https://raw.githubusercontent.com/arkenfox/user.js/master/user.js'
@@ -27,7 +26,7 @@
   type: file
   url: 'https://github.com/aminomancer/uc.css.js/raw/refs/heads/master/JS/extensionOptionsPanel.uc.js'
   refreshPeriod: 168h
-{{-     range $profiles }}
+{{-       range $profiles }}
 .config/firefox/profiles/{{ . }}/extensions/tridactyl.vim.betas.nonewtab@cmcaine.co.uk.xpi:
   type: file
   url: 'https://tridactyl.cmcaine.co.uk/betas/nonewtab/tridactyl_no_new_tab_beta-latest.xpi'
@@ -81,8 +80,8 @@
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4442132/"
   refreshPeriod: 168h
-{{-       end }}
-{{-       if ne . "public" }}
+{{-         end }}
+{{-         if ne . "public" }}
 .config/firefox/profiles/{{ . }}/extensions/wappalyzer@crunchlabz.com.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4498612/"
@@ -111,8 +110,8 @@
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4196975/"
   refreshPeriod: 168h
-{{-       end }}
-{{-       if eq . "personal" }}
+{{-         end }}
+{{-         if eq . "personal" }}
 .config/firefox/profiles/{{ . }}/extensions/leechblockng@proginosko.com.xpi:
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4507296/"
@@ -135,6 +134,7 @@
   type: file
   url: "https://addons.mozilla.org/firefox/downloads/file/4197124/"
   refreshPeriod: 168h
+{{-         end }}
 {{-       end }}
 {{-     end }}
 {{-   end }}
@@ -143,14 +143,13 @@
 {{/* Ignore when running */}}
 {{-   $settingsThunderbird := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
 {{-   $processThunderbird := printf "%s/%s" $settingsThunderbird.installFolder $settingsThunderbird.processFile }}
-{{- end }}
-{{- if $processThunderbird }}
-{{-   if le (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) $numberOfRunningProcess }}
+{{-   if $settingsThunderbird.processFile }}
+{{-     if le (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) $numberOfRunningProcess }}
 {{ $dotfilesFolder }}/.chezmoitemplates/thunderbird/prefs/00-arkenfox.js:
   type: file
   url: https://raw.githubusercontent.com/HorlogeSkynet/thunderbird-user.js/master/user.js
   refreshPeriod: 168h
-{{-     range $profiles }}
+{{-       range $profiles }}
 .config/thunderbird/profiles/{{ . }}/extensions/uBlock0@raymondhill.net.xpi:
   type: file
   url: 'https://addons.thunderbird.net/thunderbird/downloads/latest/ublock-origin/addon-988489-latest.xpi'
@@ -171,7 +170,7 @@
   type: file
   url: "https://addons.thunderbird.net/thunderbird/downloads/latest/signature-switch/addon-611-latest.xpi"
   refreshPeriod: 168h
-{{-       if eq . "enterprise-F1" }}
+{{-         if eq . "enterprise-F1" }}
 # https://github.com/jobisoft/TbSync/issues/748
 .config/thunderbird/profiles/{{ . }}/extensions/tbsync@jobisoft.de.xpi:
   type: file
@@ -181,6 +180,7 @@
   type: file
   url: "https://github.com/user-attachments/files/21034206/EAS-4-TbSync_140.zip"
   refreshPeriod: 168h
+{{-         end }}
 {{-       end }}
 {{-     end }}
 {{-   end }}

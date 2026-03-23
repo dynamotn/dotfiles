@@ -51,12 +51,14 @@ Library/Application Support/zen
 {{/* Ignore when running */}}
 {{-   $settingsFirefox := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
 {{-   $processFirefox := printf "%s/%s" $settingsFirefox.installFolder $settingsFirefox.processFile }}
-{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
+{{-   if $settingsFirefox.processFile }}
+{{-     if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
 .config/firefox
 .mozilla
 .zen
 Library/Application Support/Firefox
 Library/Application Support/zen
+{{-     end }}
 {{-   end }}
 {{- end }}
 {{/* Based on type of mail client */}}
@@ -68,10 +70,12 @@ Library/Application Support/zen
 {{/* Ignore when running */}}
 {{-   $settingsThunderbird := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
 {{-   $processThunderbird := printf "%s/%s" $settingsThunderbird.installFolder $settingsThunderbird.processFile }}
-{{-   if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) $numberOfRunningProcess }}
+{{-   if $settingsThunderbird.processFile }}
+{{-     if gt (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processThunderbird) | trim | int) $numberOfRunningProcess }}
 .config/thunderbird
 .thunderbird
 Library/thunderbird
+{{-     end }}
 {{-   end }}
 {{- end }}
 
