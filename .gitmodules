@@ -25,15 +25,19 @@
 [submodule "firefox-personal"]
   path = home/private_dot_config/firefox/profiles/personal
   url = git@gitlab.com:dynamo-config/firefox/personal.git
+  shallow = true
 [submodule "thunderbird-personal"]
   path = home/private_dot_config/thunderbird/profiles/personal
   url = git@gitlab.com:dynamo-config/thunderbird/personal.git
+  shallow = true
 [submodule "firefox-enterprise-F1"]
   path = home/private_dot_config/firefox/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/firefox/enterprise-F1.git
+  shallow = true
 [submodule "thunderbird-enterprise-F1"]
   path = home/private_dot_config/thunderbird/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/thunderbird/enterprise-F1.git
+  shallow = true
 [submodule "secrets/data"]
   path = secrets/data
   url = git@gitlab.com:dynamo-config/dotfiles-secrets.git

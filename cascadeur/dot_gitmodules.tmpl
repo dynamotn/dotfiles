@@ -67,6 +67,7 @@
   {{- else }}
   url = {{ $gitlab }}dynamo-config/firefox/personal.git
   {{- end }}
+  shallow = true
 [submodule "thunderbird-personal"]
   path = home/private_dot_config/thunderbird/profiles/personal
   {{- if .blockedGitlab }}
@@ -74,6 +75,7 @@
   {{- else }}
   url = {{ $gitlab }}dynamo-config/thunderbird/personal.git
   {{- end }}
+  shallow = true
 {{-   end }}
 {{-   range .browserEnterpriseProfiles }}
 [submodule "firefox-enterprise-{{ . }}"]
@@ -83,6 +85,7 @@
   {{- else }}
   url = {{ $gitlab }}dynamo-config/firefox/enterprise-{{ . }}.git
   {{- end }}
+  shallow = true
 [submodule "thunderbird-enterprise-{{ . }}"]
   path = home/private_dot_config/thunderbird/profiles/enterprise-{{ . }}
   {{- if $.blockedGitlab }}
@@ -90,6 +93,7 @@
   {{- else }}
   url = {{ $gitlab }}dynamo-config/thunderbird/enterprise-{{ . }}.git
   {{- end }}
+  shallow = true
 {{-   end }}
 {{- end }}
 {{- if or .decryptPersonal (not (empty .decryptEnterprise)) }}
