@@ -24,7 +24,7 @@ fdroid:
       repo: ironfox
       url: https://fdroid.ironfoxoss.org/fdroid/repo
 {{- else if eq .browser "Z" }}
-name: zen-browser
+name: zen
 is_essential: true
 {{-   if not (eq .osid "linux-ubuntu" "linux-alpine") }}
 method: os
@@ -56,7 +56,7 @@ github:
   release_asset: zen.linux-{{ $arch }}.tar.xz
 {{      $path := "/opt/zen-browser-bin" }}
 archive:
-  - path: zen
+  - path: zen/*
     location: {{ $path }}
     strip: 1
 location: {{ $path }}
