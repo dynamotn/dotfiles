@@ -20,9 +20,6 @@ bold_italic_font Iosevka Dynamo Bold Italic
 
 #: Font size (in pts)
 {{- $size := "14.0" }}
-{{- if eq .code "h1tl3r" }}
-{{-   $size = "11.0" }}
-{{- end }}
 font_size {{ $size }}
 
 #: kitty does not support BIDI (bidirectional text), however, for RTL
