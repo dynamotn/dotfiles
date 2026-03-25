@@ -1,0 +1,32 @@
+{{- if ne .guiServer "0" }}
+# These configs for modern GPUs
+# If you have an older GPU, you may need to install legacy drivers and use them
+# instead of the modern ones. In this case, you need to set manual by code of
+# machine
+name: gpu
+method: os
+is_essential: true
+gentoo:
+  packages:
+    {{- if eq .guiDriver "I" }}
+    - name: media-libs/mesa
+    - name: media-libs/libva-intel-media-driver
+    {{- else if eq .guiDriver "A" }}
+    - name: media-libs/mesa
+    {{- else if eq .guiDriver "N" }}
+    - name: x11-drivers/nvidia-drivers
+    {{- end }}
+arch:
+  packages:
+    {{- if eq .guiDriver "I" }}
+    - name: mesa
+    - name: intel-media-driver
+    - name: vulkan-intel
+    {{- else if eq .guiDriver "A" }}
+    - name: mesa
+    - name: vulkan-radeon
+    {{- else if eq .guiDriver "N" }}
+    - name: nvidia-open
+    - name: nvidia-utils
+    {{- end }}
+{{- end }}
