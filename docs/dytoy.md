@@ -89,6 +89,7 @@
 
 |Tool|Purpose|
 |----|-------|
+|NVIDIA/Intel/AMD drivers & libraries|GUI drivers & video acceleration|
 |[kitty](https://github.com/kovidgoyal/kitty)|Terminal emulator, support ligature fonts and GPU|
 |[firefox](https://www.mozilla.org/en-US/firefox/)|Web browser|
 |[zen-browser](https://zen-browser.app/)|Web browser with modern features|
