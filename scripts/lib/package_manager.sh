@@ -63,12 +63,20 @@ function pkg::sync_fdroid_repo {
 }
 
 #######################################
-# @description Sync repositories of MacOS
+# @description Sync repositories of MacOS via Homebrew (for casks and taps)
 # @noargs
 #######################################
 function pkg::sync_brew_repo {
-  dybatpho::progress "Syncing package repositories"
+  dybatpho::progress "Syncing Homebrew repositories"
   dybatpho::dry_run brew update
+}
+
+#######################################
+# @description Sync formula metadata for zerobrew (no-op: zerobrew fetches on demand)
+# @noargs
+#######################################
+function pkg::sync_zerobrew_repo {
+  dybatpho::progress "Syncing zerobrew repositories"
 }
 
 #######################################
@@ -153,9 +161,10 @@ function pkg::init_flatpak {
 #######################################
 function pkg::init_macos {
   pkg::sync_brew_repo
+  pkg::sync_zerobrew_repo
   if ! dybatpho::is command mas; then
     dybatpho::progress "Installing \`mas\` for managing Apple Store apps"
-    pkg::install_via_brew mas
+    pkg::install_via_zerobrew mas
   fi
 }
 
@@ -330,6 +339,22 @@ function pkg::check_installed_brew {
 }
 
 #######################################
+# @description Check if a package is installed on MacOS via zerobrew
+# Handles core formulas, tap formulas (owner/tap/formula), and casks (homebrew/cask/token)
+# @arg $1 string Package name (e.g. "jq", "hashicorp/tap/terraform", "homebrew/cask/docker")
+#######################################
+function pkg::check_installed_zerobrew {
+  local package
+  dybatpho::expect_args package -- "$@"
+  if [[ "$package" == homebrew/cask/* ]]; then
+    local token="${package#homebrew/cask/}"
+    zb bundle dump 2> /dev/null | grep -q "^cask \"${token}\""
+  else
+    zb bundle dump 2> /dev/null | grep -q "^brew \"${package}\""
+  fi
+}
+
+#######################################
 # @description Check if a package is installed on MacOS via Apple Store.
 # Needs `mas` to be installed first.
 # @arg $1 string Apple Store app ID
@@ -427,6 +452,17 @@ function pkg::install_via_flatpak {
   dybatpho::expect_args app_id repo -- "$@"
   dybatpho::progress "Installing Flatpak app $app_id from $repo repo"
   dybatpho::dry_run flatpak install -y --user "$repo" "$app_id"
+}
+
+#######################################
+# @description Install a package in MacOS via zerobrew
+# @arg $1 string Package name
+#######################################
+function pkg::install_via_zerobrew {
+  local package
+  dybatpho::expect_args package -- "$@"
+  dybatpho::progress "Installing package $package via zerobrew"
+  dybatpho::dry_run zb install "$package"
 }
 
 #######################################

@@ -1,16 +1,18 @@
 {{- if eq .chezmoi.os "darwin" }}
-fish_add_path -mpPg /opt/homebrew/opt/coreutils/libexec/gnubin
-fish_add_path -mpPg /opt/homebrew/opt/findutils/libexec/gnubin
-fish_add_path -mpPg /opt/homebrew/opt/gnu-tar/libexec/gnubin
-fish_add_path -mpPg /opt/homebrew/opt/gnu-sed/libexec/gnubin
-fish_add_path -mpPg /opt/homebrew/opt/gawk/libexec/gnubin
-fish_add_path -mpPg /opt/homebrew/opt/gnu-indent/libexec/gnubin
-fish_add_path -mpPg /opt/homebrew/opt/gnu-getopt/bin
-fish_add_path -mpPg /opt/homebrew/opt/grep/libexec/gnubin
+fish_add_path -mpPg /opt/zerobrew/opt/coreutils/libexec/gnubin
+fish_add_path -mpPg /opt/zerobrew/opt/findutils/libexec/gnubin
+fish_add_path -mpPg /opt/zerobrew/opt/gnu-tar/libexec/gnubin
+fish_add_path -mpPg /opt/zerobrew/opt/gnu-sed/libexec/gnubin
+fish_add_path -mpPg /opt/zerobrew/opt/gawk/libexec/gnubin
+fish_add_path -mpPg /opt/zerobrew/opt/gnu-indent/libexec/gnubin
+fish_add_path -mpPg /opt/zerobrew/opt/gnu-getopt/bin
+fish_add_path -mpPg /opt/zerobrew/opt/grep/libexec/gnubin
 
 set -gx HOMEBREW_PREFIX "/opt/homebrew"
 set -gx HOMEBREW_CELLAR "/opt/homebrew/Cellar"
 set -gx HOMEBREW_REPOSITORY "/opt/homebrew"
+set -gx ZEROBREW_ROOT "/opt/zerobrew"
+set -gx ZEROBREW_PREFIX "/opt/zerobrew"
 {{- end }}
 
 {{- if eq .chezmoi.os "linux" }}

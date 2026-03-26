@@ -82,11 +82,29 @@ function init::enable_launchd_service {
   dybatpho::expect_args service is_user_service -- "$@"
   if ! dybatpho::is command launchctl; then
     dybatpho::warn "launchctl command not found, cannot enable service $service"
+    return
   fi
   dybatpho::progress "Enabling service $service"
   if dybatpho::is true "$is_user_service"; then
     /usr/bin/osascript -e "tell application \"System Events\" to make new login item at end with properties {name:\"${service}.app\", path:\"/Applications/${service}.app\", kind:\"Application\", hidden:true}"
   else
-    brew services start "$service"
+    local zerobrew_prefix="${ZEROBREW_ROOT:-/opt/zerobrew}"
+    local plist_path
+    plist_path=$(find "${zerobrew_prefix}/opt/${service}" -name "*.plist" -maxdepth 2 2> /dev/null | head -1)
+    if [[ -z "$plist_path" ]]; then
+      dybatpho::warn "No service plist found for ${service} in ${zerobrew_prefix}/opt/${service}"
+      return
+    fi
+    local label
+    label=$(/usr/libexec/PlistBuddy -c 'Print Label' "$plist_path" 2> /dev/null)
+    if [[ -z "$label" ]]; then
+      dybatpho::warn "Could not read Label from plist for ${service}"
+      return
+    fi
+    local plist_dest="/Library/LaunchDaemons/${label}.plist"
+    if ! launchctl list "$label" &> /dev/null; then
+      dybatpho::dry_run sudo cp "$plist_path" "$plist_dest"
+      dybatpho::dry_run sudo launchctl bootstrap system "$plist_dest"
+    fi
   fi
 }

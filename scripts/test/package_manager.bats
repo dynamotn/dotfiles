@@ -123,6 +123,11 @@ EOF
   assert_output --partial 'brew update'
 }
 
+@test "pkg::sync_zerobrew_repo succeeds without error" {
+  run pkg::sync_zerobrew_repo
+  assert_success
+}
+
 # ---------------------------------------------------------------------------
 # pkg::init_* — delegate to sync + optional install
 # ---------------------------------------------------------------------------
@@ -169,9 +174,10 @@ EOF
   export DRY_RUN='true'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function pkg::sync_brew_repo { printf 'synced\n' >> "${actions_file}"; }
+  function pkg::sync_zerobrew_repo { printf 'zerobrew-synced\n' >> "${actions_file}"; }
   run pkg::init_macos
   assert_success
-  assert_output --partial 'brew install mas'
+  assert_output --partial 'zb install mas'
 }
 
 @test "pkg::init_arch installs paru when missing in dry-run mode" {
@@ -321,6 +327,34 @@ EOF
   run pkg::install_via_brew fzf
   assert_success
   assert_output --partial 'brew install fzf'
+}
+
+@test "pkg::install_via_zerobrew prints zb install command in dry-run mode" {
+  export DRY_RUN='true'
+  run pkg::install_via_zerobrew fzf
+  assert_success
+  assert_output --partial 'zb install fzf'
+}
+
+@test "pkg::check_installed_zerobrew detects installed package" {
+  stub zb 'bundle dump : printf "brew \"wget\"\nbrew \"git\"\nbrew \"mytool\"\n"'
+  run pkg::check_installed_zerobrew mytool
+  assert_success
+  unstub zb
+}
+
+@test "pkg::check_installed_zerobrew detects installed cask" {
+  stub zb 'bundle dump : printf "brew \"wget\"\ncask \"docker-desktop\"\n"'
+  run pkg::check_installed_zerobrew homebrew/cask/docker-desktop
+  assert_success
+  unstub zb
+}
+
+@test "pkg::check_installed_zerobrew detects installed tap formula" {
+  stub zb 'bundle dump : printf "brew \"hashicorp/tap/terraform\"\nbrew \"wget\"\n"'
+  run pkg::check_installed_zerobrew hashicorp/tap/terraform
+  assert_success
+  unstub zb
 }
 
 @test "pkg::install_via_mas prints mas install command in dry-run mode" {

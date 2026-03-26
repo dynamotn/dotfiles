@@ -437,23 +437,33 @@ function dytoy::install_macos_package {
       ;;
     *)
       unstable=$(echo "$yaml" | yq e '.unstable')
-      if [[ "$type" == "cask" ]]; then
-        brew_param="--cask"
-      else
-        brew_param="--formula"
-      fi
-      if [[ "$unstable" == "true" ]]; then
-        brew_param="$brew_param --HEAD"
-      fi
       local repo
       repo=$(echo "$yaml" | yq e '.repo')
-      [[ "$repo" == "null" ]] || pkg::add_brew_tap "$repo" > /dev/null
-      if ! dytoy::is_installed_package "$name" "brew"; then
-        # shellcheck disable=SC2015
-        pkg::install_via_brew "$name" \
-          && dybatpho::debug "Installed package: $name" \
-          && dytoy::enable_service "$yaml" "launchd" \
-          || dybatpho::die "Can't install package: $name"
+      if [[ "$unstable" == "true" ]]; then
+        # HEAD installs still require brew; add tap first if needed
+        [[ "$repo" == "null" ]] || pkg::add_brew_tap "$repo" > /dev/null
+        if ! dytoy::is_installed_package "$name" "brew"; then
+          # shellcheck disable=SC2015
+          brew install --HEAD "$name" \
+            && dybatpho::debug "Installed package: $name" \
+            && dytoy::enable_service "$yaml" "launchd" \
+            || dybatpho::die "Can't install package: $name"
+        fi
+      else
+        # Build zerobrew install name: embed tap/cask info so zb resolves natively
+        local install_name="$name"
+        if [[ "$type" == "cask" ]]; then
+          install_name="homebrew/cask/$name"
+        elif [[ "$repo" != "null" ]]; then
+          install_name="$repo/$name"
+        fi
+        if ! dytoy::is_installed_package "$install_name" "zerobrew"; then
+          # shellcheck disable=SC2015
+          pkg::install_via_zerobrew "$install_name" \
+            && dybatpho::debug "Installed package: $name" \
+            && dytoy::enable_service "$yaml" "launchd" \
+            || dybatpho::die "Can't install package: $name"
+        fi
       fi
       ;;
   esac

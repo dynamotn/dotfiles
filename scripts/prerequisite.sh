@@ -84,7 +84,7 @@ function _setup_termux {
 #######################################
 function _setup_macos {
   _keep_sudo_alive
-  # Homebrew
+  # Homebrew (still needed for: brew shellenv env setup, brew tap for --HEAD installs)
   if ! command -v brew &> /dev/null; then
     echo "Homebrew not found. Installing Homebrew..."
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -95,13 +95,23 @@ function _setup_macos {
     ) >> ~/.zprofile
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
-  # GNU compatible tools
-  brew install bash coreutils findutils gnu-tar gnu-sed gawk gnutls gnu-indent grep
-  # Cloning code
-  brew install git curl
-  # Chezmoi tools
-  brew install chezmoi age
-  echo "export PATH=\"/opt/homebrew/bin:/opt/homebrew/opt/coreutils/libexec/gnubin:/opt/homebrew/opt/findutils/libexec/gnubin:/opt/homebrew/opt/gnu-tar/libexec/gnubin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:/opt/homebrew/opt/gawk/libexec/gnubin:/opt/homebrew/opt/gnu-indent/libexec/gnubin:/opt/homebrew/opt/gnu-getopt/bin:/opt/homebrew/opt/grep/libexec/gnubin:$PATH\"" >> ~/.zprofile
+  # Zerobrew (performance-optimized client for Homebrew formulas)
+  if ! command -v zb &> /dev/null; then
+    echo "zerobrew not found. Installing zerobrew..."
+    curl -fsSL https://zerobrew.rs/install | bash
+    (
+      echo
+      echo 'export PATH="$HOME/.local/bin:$PATH"'
+    ) >> ~/.zprofile
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
+  # GNU compatible tools (via zerobrew for performance)
+  zb install bash coreutils findutils gnu-tar gnu-sed gawk gnutls gnu-indent grep
+  # Cloning code (via zerobrew)
+  zb install git curl
+  # Chezmoi tools (via zerobrew)
+  zb install chezmoi age
+  echo "export PATH=\"/opt/zerobrew/bin:/opt/zerobrew/opt/coreutils/libexec/gnubin:/opt/zerobrew/opt/findutils/libexec/gnubin:/opt/zerobrew/opt/gnu-tar/libexec/gnubin:/opt/zerobrew/opt/gnu-sed/libexec/gnubin:/opt/zerobrew/opt/gawk/libexec/gnubin:/opt/zerobrew/opt/gnu-indent/libexec/gnubin:/opt/zerobrew/opt/gnu-getopt/bin:/opt/zerobrew/opt/grep/libexec/gnubin:$PATH\"" >> ~/.zprofile
 }
 
 function _main {

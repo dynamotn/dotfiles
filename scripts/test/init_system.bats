@@ -60,22 +60,28 @@ EOF
   assert_output $'enable:sample\nsv:up sample'
 }
 
-@test "init::enable_launchd_service uses brew services for system services" {
-  local args_file="${BATS_TEST_TMPDIR}/brew-args"
-  cat > "${HOME}/.local/bin/launchctl" <<'EOF'
-#!/usr/bin/env bash
-exit 0
+@test "init::enable_launchd_service bootstraps system daemon via launchctl" {
+  local plist_dir="${BATS_TEST_TMPDIR}/zerobrew/opt/SampleApp"
+  mkdir -p "$plist_dir"
+  cat > "${plist_dir}/homebrew.mxcl.SampleApp.plist" <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict><key>Label</key><string>homebrew.mxcl.SampleApp</string></dict></plist>
 EOF
-  cat > "${HOME}/.local/bin/brew" <<EOF
-#!/usr/bin/env bash
-printf '%s\n' "\$*" > "${args_file}"
-EOF
-  chmod +x "${HOME}/.local/bin/launchctl" "${HOME}/.local/bin/brew"
+  ZEROBREW_ROOT="${BATS_TEST_TMPDIR}/zerobrew"
 
+  local actions_file="${BATS_TEST_TMPDIR}/launchctl-args"
+  cat > "${HOME}/.local/bin/launchctl" <<EOF
+#!/usr/bin/env bash
+if [[ "\$1" == "list" ]]; then exit 1; fi
+printf '%s\n' "\$*" >> "${actions_file}"
+EOF
+  chmod +x "${HOME}/.local/bin/launchctl"
+
+  export DRY_RUN='true'
   PATH="${HOME}/.local/bin:/usr/bin:/bin"
   run init::enable_launchd_service SampleApp false
   assert_success
-  run cat "${args_file}"
-  assert_success
-  assert_output 'services start SampleApp'
+  assert_output --partial 'launchctl bootstrap system'
+  assert_output --partial 'homebrew.mxcl.SampleApp.plist'
 }
