@@ -1,0 +1,322 @@
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema
+title: Dytoy Tool Definition
+description: >
+  Schema for dytoy tool YAML files consumed by dytoy_binary, dytoy_mise,
+  dytoy_shell and dytoy_os scripts.
+type: object
+required: [name, method]
+additionalProperties: false
+
+properties:
+  name:
+    type: string
+    description: Unique identifier / command name of the tool
+
+  method:
+    type: string
+    enum: [binary, mise, os, shell]
+    description: >
+      Installation method:
+        binary – download from GitHub/GitLab release,
+        mise   – install via mise version manager,
+        os     – install via OS package manager,
+        shell  – run a custom shell script
+
+  is_essential:
+    type: boolean
+    description: When true the tool is included when --essential flag is used
+
+  enabled:
+    type: boolean
+    description: Set to false to skip this tool entirely (default true)
+
+  location:
+    type: string
+    description: Destination directory. Defaults to ~/.local/bin. Used by binary method.
+
+  version:
+    type: string
+    description: Specific version to install. Defaults to 'latest'. Use 'system' for mise.
+
+  backend:
+    type: string
+    description: Override the mise backend/plugin name when it differs from the tool name
+
+  dependencies:
+    type: array
+    description: Tool names that must be installed before this one
+    items:
+      type: string
+    uniqueItems: true
+
+  content:
+    type: string
+    description: Shell script content to execute. Required for shell method.
+
+  hook:
+    $ref: "#/$defs/hook"
+
+  github:
+    $ref: "#/$defs/release_source"
+    description: GitHub release source. Required when method is binary.
+
+  gitlab:
+    $ref: "#/$defs/release_source"
+    description: GitLab release source. Required when method is binary.
+
+  archive:
+    type: array
+    description: Files to extract from the downloaded archive. Used by binary method.
+    items:
+      $ref: "#/$defs/archive_entry"
+
+  need_rosetta:
+    type: boolean
+    description: "macOS: install Rosetta 2 before this tool when not already present"
+
+  # ── OS package manager sections ────────────────────────────────────────
+  # Any section may be null (written as `termux:` or `macos: # comment`)
+  # to signal that no packages exist for that platform.
+
+  arch:
+    oneOf:
+      - type: "null"
+      - $ref: "#/$defs/os_packages"
+
+  ubuntu:
+    oneOf:
+      - type: "null"
+      - $ref: "#/$defs/os_packages"
+
+  alpine:
+    oneOf:
+      - type: "null"
+      - $ref: "#/$defs/os_packages"
+
+  gentoo:
+    oneOf:
+      - type: "null"
+      - $ref: "#/$defs/os_packages"
+
+  termux:
+    oneOf:
+      - type: "null"
+      - $ref: "#/$defs/os_packages"
+
+  macos:
+    oneOf:
+      - type: "null"
+      - $ref: "#/$defs/macos_packages"
+
+  flatpak:
+    oneOf:
+      - type: "null"
+      - $ref: "#/$defs/flatpak_config"
+
+  fdroid:
+    oneOf:
+      - type: "null"
+      - $ref: "#/$defs/fdroid_config"
+
+# ── Shared definitions ──────────────────────────────────────────────────
+$defs:
+  hook:
+    type: object
+    description: Shell scripts to run before/after the installation step
+    additionalProperties: false
+    properties:
+      before:
+        type: string
+        description: Shell script executed before installation
+      after:
+        type: string
+        description: Shell script executed after installation
+
+  release_source:
+    type: object
+    description: GitHub or GitLab release download configuration
+    required: [repo, release_asset]
+    additionalProperties: false
+    properties:
+      host:
+        type: string
+        description: Custom host for self-hosted instances. Defaults to github.com / gitlab.com.
+      repo:
+        type: string
+        description: Repository path in 'owner/repo' format
+        pattern: "^[^/]+/[^/]+$"
+      version:
+        type: string
+        description: Specific release version tag. Defaults to 'latest'.
+      release_asset:
+        type: string
+        description: >
+          Release asset filename pattern.
+          Use %v for the full version tag, %1v for version without leading 'v'.
+      artifact_host:
+        type: string
+        description: >
+          Custom CDN / artifact host URL. When set the download URL is
+          constructed as artifact_host/release_asset.
+
+  archive_entry:
+    type: object
+    description: A file or glob pattern to extract from the downloaded archive
+    required: [path]
+    additionalProperties: false
+    properties:
+      path:
+        type: string
+        description: >
+          Path or glob inside the archive. Supports %v / %1v version
+          placeholders and glob wildcards.
+      strip:
+        type: integer
+        minimum: 0
+        description: Number of leading path components to strip
+      location:
+        type: string
+        description: Destination directory for this file. Overrides top-level location.
+
+  nullable_package_list:
+    description: List of packages, or null when no packages exist for this distro
+    oneOf:
+      - type: "null"
+      - type: array
+        items:
+          $ref: "#/$defs/package_entry"
+
+  os_packages:
+    type: object
+    description: OS package manager section (Arch / Ubuntu / Alpine / Gentoo / Termux)
+    additionalProperties: false
+    properties:
+      packages:
+        $ref: "#/$defs/nullable_package_list"
+      hook:
+        $ref: "#/$defs/hook"
+
+  package_entry:
+    type: object
+    description: A single OS package entry
+    required: [name]
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        description: Package name as known to the OS package manager
+      service:
+        type: string
+        description: System service name to enable after installation (systemd / openrc)
+      repo:
+        type: string
+        description: Repository identifier or overlay name (e.g. Gentoo overlay, Ubuntu PPA label)
+      url:
+        type: string
+        description: Repository URL to add (PPA URL, Gentoo overlay git URL, etc.)
+      components:
+        type: string
+        description: Repository components string (e.g. 'main', 'stable')
+      key:
+        type: string
+        description: GPG key URL or fingerprint for the repository
+
+  macos_packages:
+    type: object
+    description: macOS/Homebrew package section
+    additionalProperties: false
+    properties:
+      packages:
+        oneOf:
+          - type: "null"
+          - type: array
+            items:
+              $ref: "#/$defs/macos_package_entry"
+      hook:
+        $ref: "#/$defs/hook"
+      need_rosetta:
+        type: boolean
+        description: Install Rosetta 2 before these packages
+
+  macos_package_entry:
+    type: object
+    description: A single macOS/Homebrew package entry
+    required: [name]
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        description: Homebrew formula / cask name, or app name for download type
+      type:
+        type: string
+        enum: [cask, download]
+        description: "'cask' for Homebrew casks, 'download' for direct URL download"
+      repo:
+        type: string
+        description: Homebrew tap in 'user/tap' format to add before installing
+      url:
+        type: string
+        description: Direct download URL. Used when type is 'download'.
+      service:
+        type: string
+        description: macOS service name (launchd label) to start after installation
+      is_user_service:
+        type: boolean
+        description: When true the service is managed as a user launchd agent
+      unstable:
+        type: boolean
+        description: When true installs the HEAD/nightly build of the formula
+
+  flatpak_config:
+    type: object
+    description: Flatpak installation section (Linux only)
+    additionalProperties: false
+    properties:
+      packages:
+        type: array
+        items:
+          $ref: "#/$defs/flatpak_package_entry"
+      hook:
+        $ref: "#/$defs/hook"
+
+  flatpak_package_entry:
+    type: object
+    description: A Flatpak application
+    required: [name]
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        description: Flatpak application ID (reverse-DNS format)
+      repo:
+        type: string
+        description: Flatpak remote name (e.g. 'flathub')
+      url:
+        type: string
+        description: Flatpak remote URL to add when not already configured
+
+  fdroid_config:
+    type: object
+    description: F-Droid installation section (Android only)
+    additionalProperties: false
+    properties:
+      packages:
+        type: array
+        items:
+          $ref: "#/$defs/fdroid_package_entry"
+
+  fdroid_package_entry:
+    type: object
+    description: An F-Droid application
+    required: [name]
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        description: Android application ID (reverse-DNS format)
+      repo:
+        type: string
+        description: F-Droid repository name
+      url:
+        type: string
+        description: F-Droid repository URL to add when not already configured
