@@ -8,5 +8,6 @@ github:
   {{- end }}
   {{- $arch := .chezmoi.arch }}
   release_asset: stern_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  sha256: checksums.txt
 archive:
   - path: stern

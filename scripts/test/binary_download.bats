@@ -129,3 +129,85 @@ EOF
   assert_success
   assert_output "binary-data"
 }
+
+@test "binary::verify_sha256 passes when hash matches" {
+  local asset_file="${BATS_TEST_TMPDIR}/tool.tar.gz"
+  printf 'binary-data' > "${asset_file}"
+  local actual_hash
+  if command -v sha256sum > /dev/null 2>&1; then
+    actual_hash=$(sha256sum "${asset_file}" | awk '{print $1}')
+  else
+    actual_hash=$(shasum -a 256 "${asset_file}" | awk '{print $1}')
+  fi
+
+  function dybatpho::curl_download {
+    printf '%s  tool.tar.gz\n' "${actual_hash}" > "$2"
+  }
+
+  run binary::verify_sha256 \
+    sample \
+    "${asset_file}" \
+    "https://example.com/v1.0.0/tool.tar.gz" \
+    "checksums.txt"
+  assert_success
+}
+
+@test "binary::verify_sha256 fails when hash does not match" {
+  local asset_file="${BATS_TEST_TMPDIR}/tool.tar.gz"
+  printf 'binary-data' > "${asset_file}"
+
+  function dybatpho::curl_download {
+    printf '%s  tool.tar.gz\n' "0000000000000000000000000000000000000000000000000000000000000000" > "$2"
+  }
+
+  run binary::verify_sha256 \
+    sample \
+    "${asset_file}" \
+    "https://example.com/v1.0.0/tool.tar.gz" \
+    "checksums.txt"
+  assert_failure
+  assert_output --partial "SHA256 mismatch"
+}
+
+@test "binary::verify_sha256 fails when asset name not found in checksum file" {
+  local asset_file="${BATS_TEST_TMPDIR}/tool.tar.gz"
+  printf 'binary-data' > "${asset_file}"
+
+  function dybatpho::curl_download {
+    printf '%s  other-tool.tar.gz\n' "abc123" > "$2"
+  }
+
+  run binary::verify_sha256 \
+    sample \
+    "${asset_file}" \
+    "https://example.com/v1.0.0/tool.tar.gz" \
+    "checksums.txt"
+  assert_failure
+  assert_output --partial "SHA256 hash not found"
+}
+
+@test "binary::download_and_extract skips sha256 when sha256_asset is empty" {
+  function dytoy::create_script { :; }
+  function dytoy::run_script { :; }
+  function dytoy::get_yaml { printf 'null\n'; }
+  function dybatpho::curl_download { printf 'binary-data' > "$2"; }
+  function binary::verify_sha256 { return 99; }
+  mkdir -p "${BATS_TEST_TMPDIR}/out"
+
+  run binary::download_and_extract sample "${BATS_TEST_TMPDIR}/out" "https://example.com/tool" "v1.0.0" ""
+  assert_success
+}
+
+@test "binary::download_and_extract calls verify_sha256 when sha256_asset is set" {
+  local verify_called="${BATS_TEST_TMPDIR}/verify-called"
+  function dytoy::create_script { :; }
+  function dytoy::run_script { :; }
+  function dytoy::get_yaml { printf 'null\n'; }
+  function dybatpho::curl_download { printf 'binary-data' > "$2"; }
+  function binary::verify_sha256 { touch "${verify_called}"; }
+  mkdir -p "${BATS_TEST_TMPDIR}/out"
+
+  run binary::download_and_extract sample "${BATS_TEST_TMPDIR}/out" "https://example.com/tool" "v1.0.0" "checksums.txt"
+  assert_success
+  assert_file_exist "${verify_called}"
+}

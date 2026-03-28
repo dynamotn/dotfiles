@@ -3,10 +3,13 @@ method: binary
 github:
   repo: stripe/stripe-cli
   {{- $os := "" }}
+  {{- $os_checksum_type := "" }}
   {{- if eq .chezmoi.os "darwin" }}
   {{-   $os = "mac-os" }}
+  {{-   $os_checksum_type = "mac" }}
   {{- else if eq .chezmoi.os "linux" "android" }}
   {{-   $os = "linux" }}
+  {{-   $os_checksum_type = "linux" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
@@ -15,5 +18,6 @@ github:
   {{-   $arch = "arm64" }}
   {{- end }}
   release_asset: stripe_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  sha256: stripe-{{ $os_checksum_type }}-checksums.txt
 archive:
   - path: stripe

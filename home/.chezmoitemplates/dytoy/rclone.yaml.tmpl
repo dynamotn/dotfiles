@@ -8,9 +8,12 @@ github:
   {{-   $os = "osx" }}
   {{- end }}
   release_asset: rclone-%v-{{ $os }}-{{ .chezmoi.arch }}.zip
+  sha256: SHA256SUMS
 archive:
-  - path: rclone-$version-{{ $os }}-{{ .chezmoi.arch }}/rclone
-  - path: rclone-$version-{{ $os }}-{{ .chezmoi.arch }}/rclone.1
+  - path: rclone-%v{{ $os }}-{{ .chezmoi.arch }}/rclone
+    strip: 1
+  - path: rclone-%v-{{ $os }}-{{ .chezmoi.arch }}/rclone.1
+    strip: 1
     location: {{ .chezmoi.homeDir }}/.local/man/man1
 {{- else if eq .chezmoi.os "android" }}
 method: os

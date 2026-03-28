@@ -5,6 +5,7 @@ method: binary
 github:
   repo: wagoodman/dive
   release_asset:  dive_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
+  sha256: dive_%1v_checksums.txt
 archive:
   - path: dive
 {{- end }}

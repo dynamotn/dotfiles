@@ -16,6 +16,7 @@ github:
   {{-   $arch = "arm64" }}
   {{- end }}
   release_asset: doggo_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  sha256: doggo_%1v_checksums.txt
 archive:
   - path: doggo_%1v_{{ $os }}_{{ $arch }}/doggo
     strip: 1

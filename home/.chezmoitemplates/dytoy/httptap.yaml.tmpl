@@ -5,8 +5,10 @@ github:
   repo: monasticacademy/httptap
   {{- if eq .chezmoi.arch "amd64" }}
   release_asset: httptap_linux_x86_64.tar.gz
+  sha256: httptap_%1v_checksums.txt
   {{- else if eq .chezmoi.arch "arm64" }}
   release_asset: httptap_linux_arm64.tar.gz
+  sha256: httptap_%1v_checksums.txt
   {{- end }}
 archive:
   - path: httptap

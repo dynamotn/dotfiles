@@ -5,5 +5,6 @@ method: binary
 github:
   repo: docker/buildx
   release_asset: buildx-%v.{{ .chezmoi.os }}-{{ .chezmoi.arch }}
+  sha256: checksums.txt
 location: {{ .chezmoi.homeDir }}/.docker/cli-plugins
 {{- end }}

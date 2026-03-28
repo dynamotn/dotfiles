@@ -15,5 +15,6 @@ github:
   {{-   $arch = "arm64" }}
   {{- end }}
   release_asset: helm-docs_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  sha256: checksums.txt
 archive:
   - path: helm-docs

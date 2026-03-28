@@ -17,6 +17,7 @@ method: binary
 github:
   repo: noborus/ov
   release_asset: ov_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.zip
+  sha256: ov_%1v_checksums.txt
 archive:
   - path: ov
 {{- end }}

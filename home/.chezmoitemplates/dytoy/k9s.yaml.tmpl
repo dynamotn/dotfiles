@@ -9,5 +9,6 @@ github:
   {{-   $os = "Linux" }}
   {{- end }}
   release_asset: k9s_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+  sha256: checksums.sha256
 archive:
   - path: k9s

@@ -74,7 +74,16 @@ function _parse_release {
   else
     url="${artifact_host}/${release_asset}"
   fi
-  binary::download_and_extract "${name}" "${location}" "${url}" "${version}"
+
+  local sha256_asset
+  sha256_asset=$(dytoy::get_yaml "$name" "${type}.sha256")
+  [[ "${sha256_asset}" == "null" ]] && sha256_asset=""
+  if ! dybatpho::string_is_blank "${sha256_asset}"; then
+    sha256_asset=$(echo "${sha256_asset}" | misc::replace_version "$version")
+    dybatpho::debug "SHA256 asset is ${sha256_asset}"
+  fi
+
+  binary::download_and_extract "${name}" "${location}" "${url}" "${version}" "${sha256_asset}"
 }
 
 #######################################

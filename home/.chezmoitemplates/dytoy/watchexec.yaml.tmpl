@@ -28,6 +28,7 @@ github:
   {{-   $arch = "aarch64" }}
   {{- end }}
   release_asset: watchexec-%1v-{{ $arch }}-unknown-linux-gnu.tar.xz
+  sha256: SHA256SUMS
 archive:
   - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec
     strip: 1

@@ -15,5 +15,6 @@ github:
   {{-   $arch = "ARM64" }}
   {{- end }}
   release_asset: arduino-cli_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  sha256: "%1v-checksums.txt"
 archive:
   - path: arduino-cli
