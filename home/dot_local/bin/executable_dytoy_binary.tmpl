@@ -56,9 +56,8 @@ function _parse_release {
     if dybatpho::string_is_blank "$version"; then
       dybatpho::die "You're limited request to ${type} API"
     fi
-  else
-    dybatpho::info "Using version ${version} for https://${host}/${repo}"
   fi
+  dybatpho::info "Using version ${version} for https://${host}/${repo}"
   release_asset=$(echo "${release_asset}" | misc::replace_version "$version")
   dybatpho::debug "Release asset is ${release_asset}"
 

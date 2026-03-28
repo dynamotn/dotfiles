@@ -204,7 +204,7 @@ function pkg::add_apt_repo {
     fi
     dybatpho::create_temp temp_key ".gpg"
     # shellcheck disable=SC2154
-    dybatpho::dry_run dybatpho::curl_download "$key" "$temp_key"
+    dybatpho::curl_download "$key" "$temp_key"
     if ! [[ "$key" =~ ^https://.* ]]; then
       dybatpho::dry_run sudo cp "$temp_key" "$gpg_path"
     else

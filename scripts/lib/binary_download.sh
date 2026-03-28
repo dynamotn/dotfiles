@@ -108,7 +108,8 @@ function binary::verify_sha256 {
   dybatpho::debug "SHA256 verified for ${name}: ${actual_hash}"
 }
 
-
+#######################################
+# @description Get latest version of tool from GitHub or GitLab
 # @arg $1 string Host of GitHub or GitLab
 # @arg $2 string Repository of tool in format "owner/repo"
 # @env GITHUB_TOKEN string Token for GitHub API
@@ -117,23 +118,31 @@ function binary::verify_sha256 {
 function binary::get_latest_version {
   local host repo
   dybatpho::expect_args host repo -- "$@"
+
   dybatpho::create_temp temp_file ".txt"
   dybatpho::debug "Get version ${name} from https://${host}/${repo}"
   if [ "$type" = "github" ]; then
     local param=()
     if [ "${GITHUB_TOKEN:-x}" != "x" ]; then
-      param=("-H" "'Authorization: Bearer ${GITHUB_TOKEN}'")
+      param=("-H" "Authorization: Bearer ${GITHUB_TOKEN}")
     fi
-    dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$temp_file" "${param[@]}"
-    grep -Po "tag_name\": \"(\K.*)(?=\",)" "$temp_file"
+    if dybatpho::is true "${DRY_RUN}"; then
+      echo '{"tag_name": "v0.0.0"}' > "$temp_file"
+    else
+      dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$temp_file" "${param[@]}"
+    fi
   elif [ "$type" = "gitlab" ]; then
     local param=()
     if [ "${GITLAB_TOKEN:-x}" != "x" ]; then
-      param=("-H" "'Authorization: Bearer ${GITLAB_TOKEN}'")
+      param=("-H" "Authorization: Bearer ${GITLAB_TOKEN}")
     fi
-    dybatpho::curl_do "https://${host}/api/v4/projects/$(echo "$repo" | sed -e "s/\//%2f/g")/releases/permalink/latest" "$temp_file" "${param[@]}"
-    yq ".tag_name" "$temp_file"
+    if dybatpho::is true "${DRY_RUN}"; then
+      echo '{"tag_name": "v0.0.0"}' > "$temp_file"
+    else
+      dybatpho::curl_do "https://${host}/api/v4/projects/$(echo "$repo" | sed -e "s/\//%2f/g")/releases/permalink/latest" "$temp_file" "${param[@]}"
+    fi
   fi
+  dybatpho::json_query "$temp_file" ".tag_name" -o=props
 }
 
 #######################################
@@ -154,7 +163,7 @@ function binary::download_and_extract {
   temp_suffix="$(__binary_download_temp_suffix "$url")"
   dybatpho::create_temp temp_file "$temp_suffix"
   dybatpho::debug "Downloaded $url to $temp_file"
-  dybatpho::dry_run dybatpho::curl_download "$url" "$temp_file"
+  dybatpho::curl_download "$url" "$temp_file"
 
   if ! dybatpho::string_is_blank "${sha256_asset}"; then
     binary::verify_sha256 "${name}" "${temp_file}" "${url}" "${sha256_asset}"

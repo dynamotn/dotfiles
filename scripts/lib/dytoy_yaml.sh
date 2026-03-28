@@ -63,7 +63,7 @@ function dytoy::run_script {
   local script_file
   dybatpho::expect_args script_file -- "$@"
   if dybatpho::is true "$DRY_RUN"; then
-    echo "DRY_RUN: $script_file"
+    echo "RUN: $script_file"
     dybatpho::show_file "$script_file"
   else
     # shellcheck disable=1090
