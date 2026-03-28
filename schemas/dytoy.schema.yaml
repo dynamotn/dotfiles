@@ -153,6 +153,13 @@ $defs:
         description: >
           Release asset filename pattern.
           Use %v for the full version tag, %1v for version without leading 'v'.
+      sha256:
+        type: string
+        description: >
+          Checksum file filename pattern published alongside the release asset.
+          Use %v for the full version tag, %1v for version without leading 'v'.
+          The file must contain lines in 'sha256hash  filename' format (sha256sum/shasum output).
+          When set, the downloaded asset is verified against the hash before extraction.
       artifact_host:
         type: string
         description: >

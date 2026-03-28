@@ -7,5 +7,6 @@ github:
   {{-   $os = "linux" }}
   {{- end }}
   release_asset: wtf_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+  sha256: wtf_%1v_checksums.txt
 archive:
   - path: wtfutil

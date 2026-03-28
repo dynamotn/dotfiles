@@ -4,8 +4,10 @@ github:
   repo: caarlos0/svu
   {{- if eq .chezmoi.os "darwin" }}
   release_asset: svu_%1v_darwin_all.tar.gz
+  sha256: checksums.txt
   {{- else }}
   release_asset: svu_%1v_linux_{{ .chezmoi.arch }}.tar.gz
+  sha256: checksums.txt
   {{- end }}
 archive:
   - path: svu

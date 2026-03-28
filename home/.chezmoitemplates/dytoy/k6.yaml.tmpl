@@ -9,6 +9,7 @@ github:
   {{-   $extension = "zip" }}
   {{- end }}
   release_asset: k6-%v-{{ $os }}-{{ .chezmoi.arch }}.{{ $extension }}
+  sha256: k6-%v-checksums.txt
 archive:
   - path: k6-%v-{{ $os }}-{{ .chezmoi.arch }}/k6
     strip: 1

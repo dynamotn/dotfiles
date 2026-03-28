@@ -7,5 +7,6 @@ github:
   {{-   $os = "linux" }}
   {{- end }}
   release_asset: infracost-{{ $os }}-{{ .chezmoi.arch }}.tar.gz
+  sha256: infracost-{{ $os }}-{{ .chezmoi.arch }}.tar.gz.sha256
 archive:
   - path: infracost-{{ $os }}-{{ .chezmoi.arch }}

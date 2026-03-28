@@ -18,6 +18,7 @@ github:
   {{-   $arch = "aarch64" }}
   {{- end }}
   release_asset: prek-{{ $arch }}-{{ $os }}.tar.gz
+  sha256: prek-{{ $arch }}-{{ $os }}.tar.gz.sha256
 archive:
   - path: prek-{{ $arch }}-{{ $os }}/prek
     strip: 1

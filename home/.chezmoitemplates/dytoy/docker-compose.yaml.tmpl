@@ -11,6 +11,7 @@ github:
   {{-   $arch = "aarch64" }}
   {{- end }}
   release_asset: docker-compose-{{ .chezmoi.os }}-{{ $arch }}
+  sha256: checksums.txt
 {{- end }}
 hook:
   after: |-

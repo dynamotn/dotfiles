@@ -5,6 +5,7 @@ dependencies:
 github:
   repo: kubernetes-sigs/krew
   release_asset: krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
+  sha256: krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz.sha256
 archive:
   - path: krew-{{ .chezmoi.os }}_{{ .chezmoi.arch }}
 hook:

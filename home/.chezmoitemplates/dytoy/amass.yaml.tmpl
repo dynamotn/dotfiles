@@ -7,6 +7,7 @@ github:
   {{-   $os = "linux" }}
   {{- end }}
   release_asset: amass_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+  sha256: amass_checksums.txt
 archive:
   - path: amass_{{ $os }}_{{ .chezmoi.arch }}/amass
     strip: 1

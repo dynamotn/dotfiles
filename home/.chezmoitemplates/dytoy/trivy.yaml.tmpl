@@ -15,5 +15,6 @@ github:
   {{-   $arch = "ARM64" }}
   {{- end }}
   release_asset: trivy_%1v_{{ $os }}-{{ $arch }}.tar.gz
+  sha256: trivy_%1v_checksums.txt
 archive:
   - path: trivy

@@ -35,6 +35,7 @@ github:
   {{-   $arch = "arm64" }}
   {{- end }}
   release_asset: lazygit_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  sha256: checksums.txt
 archive:
   - path: lazygit
 {{- end }}

@@ -34,6 +34,7 @@ github:
   {{-   $suffix = "gnu" }}
   {{- end }}
   release_asset: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}.tar.gz
+  sha256: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}.tar.gz.sha256
 archive:
   - path: ripgrep-%v-{{ $arch }}-unknown-linux-{{ $suffix }}/rg
     strip: 1

@@ -11,6 +11,7 @@ method: binary
 github:
   repo: rs/curlie
   release_asset: curlie_%1v_{{ .chezmoi.os }}_{{ .chezmoi.arch }}.tar.gz
+  sha256: curlie_%1v_checksums.txt
 archive:
   - path: curlie
 {{- end }}

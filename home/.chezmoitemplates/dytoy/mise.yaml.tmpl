@@ -41,6 +41,7 @@ github:
   {{- $suffix = "-musl" }}
   {{- end }}
   release_asset: mise-%v-{{ $os }}-{{ $arch }}{{ $suffix }}
+  sha256: SHASUMS256.asc
 {{- end }}
 hook:
   after: |-

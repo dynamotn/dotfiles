@@ -8,6 +8,7 @@ github:
   {{-   $os = "linux" }}
   {{- end }}
   release_asset: projekt_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+  sha256: CHECKSUMS
 archive:
   - path: projekt
   - path: t

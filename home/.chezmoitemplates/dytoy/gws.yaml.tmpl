@@ -14,7 +14,8 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{-   $arch = "aarch64" }}
   {{- end }}
-  release_asset: gws-{{ $arch }}-{{ $os }}.tar.gz
+  release_asset: google-workspace-cli-{{ $arch }}-{{ $os }}.tar.gz
+  sha256: google-workspace-cli-{{ $arch }}-{{ $os }}.tar.gz.sha256
 archive:
-  - path: gws-{{ $arch }}-{{ $os }}/gws
+  - path: google-workspace-cli-{{ $arch }}-{{ $os }}/gws
     strip: 1
