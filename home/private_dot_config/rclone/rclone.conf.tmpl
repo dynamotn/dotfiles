@@ -1,8 +1,9 @@
 {{- range .decryptEnterprise }}
-{{-   if eq . "F1" }}
-{{-     $commonSecret := joinPath $.chezmoi.sourceDir "../secrets/data/enterprise-F1/common.yaml.age" | include | decrypt | fromYaml }}
-{{-     range $commonSecret.rclone}}
-{{-       .content }}
+{{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   if hasKey $commonSecret "rclone" -}}
+{{-     range $commonSecret.rclone }}
+[{{ .name }}]
+{{        .content }}
 {{-     end }}
 {{-   end }}
 {{- end }}

@@ -1,0 +1,47 @@
+#!/sbin/openrc-run
+# User service for Rclone mounting (OpenRC)
+#
+# Place in ~/.config/openrc/init.d/rclone
+# For each remote, create a symlink: rclone.REMOTE -> rclone
+# Then enable it:
+#   rc-update add rclone.REMOTE default --user
+#
+# The instance name (remote) is derived from the service name:
+#   rclone.dropbox -> remote = "dropbox"
+
+_remote="${RC_SVCNAME#rclone.}"
+_mount_dir="${HOME}/Sync/${_remote}"
+_config="${HOME}/.config/rclone/rclone.conf"
+_rclone="${HOME}/.local/bin/rclone"
+
+description="rclone: Remote FUSE filesystem for cloud storage config ${_remote}"
+command="${_rclone}"
+command_args="mount
+  --config=${_config}
+  --vfs-cache-mode writes
+  --vfs-cache-max-size 100M
+  --log-level INFO
+  --log-file /tmp/rclone-${_remote}.log
+  --umask 022
+  ${_remote}: ${_mount_dir}"
+command_background=true
+pidfile="/tmp/rclone-${_remote}.pid"
+
+depend() {
+    need net
+}
+
+start_pre() {
+    if [ "${RC_SVCNAME}" = "rclone" ]; then
+        eerror "Do not run rclone directly. Create a symlink named rclone.REMOTE"
+        eerror "Example: ln -s rclone ~/.config/openrc/init.d/rclone.dropbox"
+        return 1
+    fi
+    checkpath --directory --mode 0750 "${_mount_dir}"
+}
+
+stop_post() {
+    if mountpoint -q "${_mount_dir}" 2>/dev/null; then
+        fusermount -u "${_mount_dir}" 2>/dev/null || umount "${_mount_dir}" 2>/dev/null || true
+    fi
+}

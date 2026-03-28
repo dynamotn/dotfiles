@@ -1,0 +1,42 @@
+#!{{ .bash }}
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_common_handlers
+
+dybatpho::header "Start rclone"
+# config hash: {{ joinPath .chezmoi.homeDir ".config/rclone/rclone.conf" | include | sha256sum }}
+
+rclone_conf="{{ .chezmoi.homeDir }}/.config/rclone/rclone.conf"
+remotes=$(grep '^\[' "${rclone_conf}" | tr -d '[]')
+if [[ -z "${remotes}" ]]; then
+  dybatpho::warn "No rclone remotes configured, skipping"
+  exit 0
+fi
+
+{{- if eq .initSystem "systemd" }}
+systemctl --user daemon-reload
+for remote in ${remotes}; do
+  dybatpho::progress "Enable rclone for remote: ${remote}"
+  mkdir -p "{{ .chezmoi.homeDir }}/Sync/${remote}"
+  systemctl --user enable --now "rclone@${remote}.service" || true
+done
+{{- else if eq .initSystem "openrc" }}
+openrc_initd="{{ .chezmoi.homeDir }}/.config/openrc/init.d"
+openrc_default="{{ .chezmoi.homeDir }}/.config/openrc/runlevels/default"
+mkdir -p "${openrc_default}"
+for remote in ${remotes}; do
+  dybatpho::progress "Enable rclone for remote: ${remote}"
+  mkdir -p "{{ .chezmoi.homeDir }}/Sync/${remote}"
+  # Create per-remote symlink if not exists
+  if [[ ! -L "${openrc_initd}/rclone.${remote}" ]]; then
+    ln -sf "${openrc_initd}/rclone" "${openrc_initd}/rclone.${remote}"
+  fi
+  # Enable in default runlevel
+  if [[ ! -L "${openrc_default}/rclone.${remote}" ]]; then
+    ln -sf "${openrc_initd}/rclone.${remote}" "${openrc_default}/rclone.${remote}"
+  fi
+  rc-service --user "rclone.${remote}" start 2>/dev/null || \
+    rc-service "rclone.${remote}" start || true
+done
+{{- end }}
+
+dybatpho::success "Start rclone"
