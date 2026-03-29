@@ -17,7 +17,7 @@ github:
   {{- end }}
   {{- $os := "" }}
   {{- if eq .chezmoi.os "linux" }}
-  {{-   $os = "{{ $os }}" }}
+  {{-   $os = "unknown-linux-gnu" }}
   {{- else if eq .chezmoi.os "darwin" }}
   {{-   $os = "apple-darwin" }}
   {{- end }}
