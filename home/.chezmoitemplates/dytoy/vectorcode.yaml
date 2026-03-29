@@ -1,0 +1,5 @@
+name: vectorcode
+method: os
+dependencies:
+  - uv
+content: uv tool install vectorcode
