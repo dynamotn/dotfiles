@@ -78,7 +78,7 @@ close_on_child_death no
 #:     Remote control is completely disabled.
 #: yes
 #:     Remote control requests are always accepted.
-allow_remote_control no
+allow_remote_control socket-only
 
 #: Listen to the specified socket for remote control connections. Note
 #: that this will apply to all kitty instances. It can be overridden
@@ -94,7 +94,7 @@ allow_remote_control no
 #: unless allow_remote_control is set to either: yes, socket or
 #: socket-only. Changing this option by reloading the config is not
 #: supported.
-listen_on none
+listen_on unix:/tmp/kitty-{kitty_pid}
 
 #: Specify the environment variables to be set in all child processes.
 #: Using the name with an equal sign (e.g. env VAR=) will set it to
