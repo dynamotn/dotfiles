@@ -75,3 +75,7 @@ exec-once = obsidian
 
 # Scratchpad
 exec-once = [workspace special:hdrop silent] kitty --class btop -e btop
+
+# Headless monitor
+exec-once = hyprctl output create headless Wayvnc-1
+exec-once = wayvnc 0.0.0.0 1411 Wayvnc-1
