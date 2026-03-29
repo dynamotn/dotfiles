@@ -10,7 +10,7 @@ github:
   release_asset: rclone-%v-{{ $os }}-{{ .chezmoi.arch }}.zip
   sha256: SHA256SUMS
 archive:
-  - path: rclone-%v{{ $os }}-{{ .chezmoi.arch }}/rclone
+  - path: rclone-%v-{{ $os }}-{{ .chezmoi.arch }}/rclone
     strip: 1
   - path: rclone-%v-{{ $os }}-{{ .chezmoi.arch }}/rclone.1
     strip: 1
