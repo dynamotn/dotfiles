@@ -1,0 +1,17 @@
+{{- if eq .guiServer "W" }}
+name: wayvnc
+method: os
+# https://repology.org/project/wayvnc/versions
+gentoo:
+  packages:
+    - name: gui-apps/wayvnc
+arch:
+  packages:
+    - name: wayvnc
+ubuntu:
+  packages:
+    - name: wayvnc
+alpine:
+  packages:
+    - name: wayvnc
+{{- end }}

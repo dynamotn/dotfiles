@@ -124,6 +124,7 @@
 |[ibus-bamboo](https://github.com/BambooEngine/ibus-bamboo)|Vietnamese input method for Ibus|
 |[fcitx-bamboo](https://github.com/fcitx/fcitx5-bamboo)|Vietnamese input method for Fcitx|
 |[libnotify](https://gitlab.gnome.org/GNOME/libnotify)|Library for sending desktop notifications to a notification daemon|
+|[wayvnc](https://github.com/any1/wayvnc)|VNC server for wlroots-based compositors|
 
 ## MacOS GUI applications
 
