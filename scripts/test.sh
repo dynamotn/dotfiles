@@ -34,7 +34,7 @@ function _main {
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${SCRIPT_DIR}/test"
   fi
 
-  dybatpho::error "No test specified. Use --all, --schema or --secrets."
+  dybatpho::error "No test specified. Use --all, --dytoy or --secrets."
 }
 
 dybatpho::generate_from_spec _spec_main "$@"
