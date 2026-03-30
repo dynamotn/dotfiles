@@ -82,9 +82,17 @@ tags:
 monitors:
   - name: Unknown-1
     disabled: true
+  - name: Wayvnc-1
+    resolution: 1920x1080
+    scale: 1
 {{- if eq .code "c40c40" }}
+    position: 4800x0
+  - name: eDP-1
+    resolution: preferred
+    position: auto
+    scale: 1.5
   - name: HDMI-A-1
     resolution: preferred
-    position: "0x0"
+    position: "2880x0"
     scale: 1
 {{- end }}
