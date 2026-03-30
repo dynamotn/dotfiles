@@ -42,6 +42,25 @@ function _validate {
 }
 
 # ---------------------------------------------------------------------------
+# git.yaml
+# ---------------------------------------------------------------------------
+
+@test "secrets/enterprise-F1/git.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/git.schema.yaml" "${DATA_DIR}/enterprise-F1/git.yaml"
+}
+
+@test "secrets/enterprise-T1/git.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/git.schema.yaml" "${DATA_DIR}/enterprise-T1/git.yaml"
+}
+
+@test "secrets/enterprise-ZOO/git.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/git.schema.yaml" "${DATA_DIR}/enterprise-ZOO/git.yaml"
+}
+
+# ---------------------------------------------------------------------------
 # docker.yaml
 # ---------------------------------------------------------------------------
 
