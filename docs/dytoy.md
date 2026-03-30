@@ -207,6 +207,7 @@
 |[prek](https://github.com/j178/pre-commit)|Framework for manage pre-commit hooks, re-engineered in Rust|
 |[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|
 |[scc](github.com/boyter/scc)|Display statistics about code|
+|[yaml-schema](https://github.com/yaml-schema/yaml-schema)|YAML schema validator|
 
 ## DevOps tools
 
