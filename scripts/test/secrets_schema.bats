@@ -9,7 +9,7 @@ setup() {
 # ---------------------------------------------------------------------------
 
 function _require_ys {
-  command -v ys &>/dev/null || skip "ys not found – install with: cargo install yaml-schema"
+  command -v ys &> /dev/null || skip "ys not found – install with: cargo install yaml-schema"
 }
 
 # Validate a YAML file against a schema, or skip if the file does not exist.
@@ -41,6 +41,11 @@ function _validate {
   _validate "${SCHEMA_DIR}/common.schema.yaml" "${DATA_DIR}/enterprise-ZOO/common.yaml"
 }
 
+@test "secrets/enterprise-U3T/common.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/common.schema.yaml" "${DATA_DIR}/enterprise-U3T/common.yaml"
+}
+
 # ---------------------------------------------------------------------------
 # git.yaml
 # ---------------------------------------------------------------------------
@@ -58,6 +63,11 @@ function _validate {
 @test "secrets/enterprise-ZOO/git.yaml conforms to schema" {
   _require_ys
   _validate "${SCHEMA_DIR}/git.schema.yaml" "${DATA_DIR}/enterprise-ZOO/git.yaml"
+}
+
+@test "secrets/enterprise-U3T/git.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/git.schema.yaml" "${DATA_DIR}/enterprise-U3T/git.yaml"
 }
 
 # ---------------------------------------------------------------------------
