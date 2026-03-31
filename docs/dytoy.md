@@ -276,6 +276,7 @@
 |[gemini](https://github.com/google-gemini/gemini-cli)|CLI tool for Google Gemini LLM|
 |[llmfit](https://github.com/AlexsJones/llmfit)|TUI for models finding
 |[vectorcode](https://github.com/davidyz/vectorcode)|Code repository indexing tool with LLMs|
+|[opencode](https://github.com/anomalyco/opencode)|AI coding agent|
 
 ## Android tools
 
