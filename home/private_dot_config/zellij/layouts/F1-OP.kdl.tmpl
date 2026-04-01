@@ -18,7 +18,7 @@ layout {
     floating_panes {
       pane cwd="~/Working/enterprise/F1/OP" {
         command "${SHELL}"
-        args "-c" "k --context uat port-forward -n default toolbox 3000:3000"
+        args "-c" "k --context uat-old port-forward -n default toolbox 3000:3000"
       }
       pane {
         command "chisel"
@@ -42,15 +42,13 @@ layout {
   }
   {{- end }}
   tab name="docker" cwd="~/Working/enterprise/F1/OP/docker" {
-    pane cwd="~/Working/enterprise/F1/OP/docker/communities"
+    pane
   }
   tab name="iac" cwd="~/Working/enterprise/F1/OP/iac" {
-    pane cwd="~/Working/enterprise/F1/OP/iac/helm-registry"
-    pane cwd="~/Working/enterprise/F1/OP/iac/terragrunt"
+    pane
   }
   tab name="cicd" cwd="~/Working/enterprise/F1/OP/cicd" {
-    pane cwd="~/Working/enterprise/F1/OP/cicd/hub"
-    pane cwd="~/Working/enterprise/F1/OP/cicd/gitops"
+    pane
   }
   tab name="docs" cwd="~/Working/enterprise/F1/OP/docs" {
     pane
