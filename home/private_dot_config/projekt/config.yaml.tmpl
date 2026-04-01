@@ -1,9 +1,12 @@
 {{- $machine := printf "%s_%s" .place .kind -}}
 folders:
   - path: {{ .chezmoi.sourceDir }}/..
-    prefix: ""
+    name: "dot"
     is_workspace: false
-    regex: ""
+    priority: 0
+  - path: {{ .chezmoi.sourceDir }}/../secrets/data
+    name: "dotsec"
+    is_workspace: false
     priority: 0
   - path: {{ .chezmoi.sourceDir }}/../silos
     prefix: ""
@@ -11,9 +14,8 @@ folders:
     regex: ""
     priority: 0
   - path: {{ .chezmoi.homeDir }}/.config/chezmoi
-    prefix: ""
+    name: "chezmoi"
     is_workspace: false
-    regex: ""
     priority: 0
   - path: {{ .chezmoi.homeDir }}/Temp
     prefix: "tmp"
@@ -118,9 +120,8 @@ folders:
         - name: ledger
           path: ledger
   - path: {{ .chezmoi.homeDir }}/Documents/Notes
-    prefix: ""
+    name: "notes"
     is_workspace: false
-    regex: ""
     priority: 0
   - path: {{ .chezmoi.homeDir }}/Documents/Notes/_assets/books
     prefix: "book"

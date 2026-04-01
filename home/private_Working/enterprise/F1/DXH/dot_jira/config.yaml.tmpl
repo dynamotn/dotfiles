@@ -2,9 +2,9 @@
 {{-   $top := merge . (dict
         "enterprise" (dict
           "name" "F1"
-          "scope" "core"
+          "scope" "DXH"
         )
       )
 }}
-{{- includeTemplate "k8s/config.yaml.tmpl" $top }}
+{{- includeTemplate "jira/config.yaml.tmpl" $top }}
 {{- end -}}
