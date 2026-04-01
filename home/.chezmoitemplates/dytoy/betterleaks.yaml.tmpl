@@ -1,7 +1,7 @@
-name: gitleaks
+name: betterleaks
 method: binary
 github:
-  repo: gitleaks/gitleaks
+  repo: betterleaks/betterleaks
   {{- $os := .chezmoi.os }}
   {{- if eq .chezmoi.os "android" }}
   {{-   $os = "linux" }}
@@ -12,7 +12,7 @@ github:
   {{- else if eq .chezmoi.arch "amd64" }}
   {{-   $arch = "x64" }}
   {{- end }}
-  release_asset: gitleaks_%1v_{{ $os }}_{{ $arch }}.tar.gz
-  sha256: gitleaks_%1v_checksums.txt
+  release_asset: betterleaks_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  sha256: checksums.txt
 archive:
-  - path: gitleaks
+  - path: betterleaks
