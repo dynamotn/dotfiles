@@ -3,7 +3,7 @@ docker/Dockerfile.*
 secrets/personal.age
 secrets/data/personal/
 {{- end }}
-{{- range coll.Slice "F1" "T1" "ZOO" }}
+{{- range coll.Slice "F1" "T1" "ZOO" "U3T" }}
 {{-   if ne $.Env.TOOLBOX_TYPE . }}
 secrets/enterprise-{{ . }}.age
 secrets/data/enterprise-{{ . }}/
