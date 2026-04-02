@@ -176,8 +176,7 @@ Library/Application Support/rbw
 Library/Application Support/rbw-*
 .config/rbw-*
 {{- end }}
-{{- $companies := list "F1" "T1" "ZOO" }}
-{{- range $companies }}
+{{- range .companies }}
 {{-   if not (has . $.decryptEnterprise) }}
 .ssh/keys/enterprise-{{ . }}_*
 Working/enterprise/{{ . }}
