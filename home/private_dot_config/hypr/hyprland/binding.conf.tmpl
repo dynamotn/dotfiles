@@ -24,10 +24,8 @@ bind = $mainMod, 0, workspace, name:sec
 
 # Move workspace to another monitor and swap monitors
 bind = $mainMod, D, swapactiveworkspaces, 0 1
-bind = $mainMod CTRL, left, movecurrentworkspacetomonitor, l
-bind = $mainMod CTRL, right, movecurrentworkspacetomonitor, r
-bind = $mainMod CTRL, up, movecurrentworkspacetomonitor, u
-bind = $mainMod CTRL, down, movecurrentworkspacetomonitor, d
+bind = $mainMod CTRL, left, movecurrentworkspacetomonitor, -1
+bind = $mainMod CTRL, right, movecurrentworkspacetomonitor, +1
 
 # Scroll through existing workspaces with mainMod + scroll
 bind = $mainMod, mouse_down, workspace, e+1
