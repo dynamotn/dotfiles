@@ -1,1 +1,9 @@
-{{ .chezmoi.sourceDir }}/../silos/theme
+{{
+  splitList
+    (splitList "/" .chezmoi.configFile | last)
+    .chezmoi.configFile
+  | join "/"
+  | printf "%s/../../.local/share/themes/Dynamo"
+  | output "realpath"
+  | trim
+}}
