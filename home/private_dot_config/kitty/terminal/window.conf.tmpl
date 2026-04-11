@@ -116,11 +116,13 @@ inactive_text_alpha 1.0
 #: only, it is useful to also set window_margin_width and
 #: placement_strategy to prevent the rounded corners from clipping
 #: text. Or use titlebar-and-corners.
-{{- if eq .guiWinManager "H" "A" }}
-hide_window_decorations yes
-{{- else }}
-hide_window_decorations no
+{{- $hideWindowDecorations := "no" }}
+{{- if eq .guiWinManager "H" }}
+{{-   $hideWindowDecorations = "yes" }}
+{{- else if eq .guiWinManager "A" }}
+{{-   $hideWindowDecorations = "titlebar-only" }}
 {{- end }}
+hide_window_decorations {{ $hideWindowDecorations }}
 
 #: Path to a logo image. Must be in PNG/JPEG/WEBP/GIF/TIFF/BMP format.
 #: Relative paths are interpreted relative to the kitty config
