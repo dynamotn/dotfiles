@@ -9,48 +9,44 @@ layout {
     }
   }
 
-  tab name="uat" cwd="~/Working/enterprise/F1/OP" split_direction="vertical" {
+  tab name="uat" cwd="~/Working/enterprise/F1/DXH" split_direction="vertical" {
     pane {
       command "${SHELL}"
       args "-c" "k9s --context uat"
     }
     {{- if ne .code "vdi" }}
     floating_panes {
-      pane cwd="~/Working/enterprise/F1/OP" {
+      pane cwd="~/Working/enterprise/F1/DXH" {
         command "${SHELL}"
-        args "-c" "k --context uat-old port-forward -n default toolbox 3000:3000"
-      }
-      pane {
-        command "chisel"
-        args "client" "localhost:3000" "socks"
+        args "-c" "process-compose"
       }
     }
     {{- end }}
   }
   {{- if eq .code "vdi" }}
-  tab name="prd-devops" cwd="~/Working/enterprise/F1/OP" {
+  tab name="prd-devops" cwd="~/Working/enterprise/F1/DXH" {
     pane {
       command "${SHELL}"
       args "-c" "k9s --context prd-devops"
     }
   }
-  tab name="prd-apps" cwd="~/Working/enterprise/F1/OP" {
+  tab name="prd-apps" cwd="~/Working/enterprise/F1/DXH" {
     pane {
       command "${SHELL}"
       args "-c" "k9s --context prd-apps"
     }
   }
   {{- end }}
-  tab name="docker" cwd="~/Working/enterprise/F1/OP/docker" {
+  tab name="docker" cwd="~/Working/enterprise/F1/DXH/docker" {
     pane
   }
-  tab name="iac" cwd="~/Working/enterprise/F1/OP/iac" {
+  tab name="iac" cwd="~/Working/enterprise/F1/DXH/iac" {
     pane
   }
-  tab name="cicd" cwd="~/Working/enterprise/F1/OP/cicd" {
+  tab name="cicd" cwd="~/Working/enterprise/F1/DXH/cicd" {
     pane
   }
-  tab name="docs" cwd="~/Working/enterprise/F1/OP/docs" {
+  tab name="docs" cwd="~/Working/enterprise/F1/DXH/docs" {
     pane
   }
 }
