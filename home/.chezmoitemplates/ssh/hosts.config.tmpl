@@ -24,4 +24,9 @@ Host {{ .host }}
     IdentityFile ~/.ssh/keys/{{ . }}_{{ $algo }}
     {{-   end }}
     {{- end }}
+    {{- if hasKey . "jump" }}
+    {{-   if ne .jump $.code }}
+    ProxyJump {{ .jump }}
+    {{-   end }}
+    {{- end }}
 {{- end }}
