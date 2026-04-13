@@ -29,12 +29,13 @@ done
 for type in {{ range $types }}{{ . | quote }} {{ end }}; do
   dybatpho::header "Decrypting ${type}.age file to decrypt all encrypted files"
   if ! dybatpho::is file "${HOME}/.config/chezmoi/${type}.key"; then
+    age_params=("--decrypt" "--output" "${HOME}/.config/chezmoi/${type}.key" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age")
     {{- if eq .kind "container" }}
     passphrase_var="age_passphrase_${type##enterprise-}"
-    if {{ .chezmoi.sourceDir }}/../scripts/lib/expect-age/expect-age "${!passphrase_var:-}" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age" "${HOME}/.config/chezmoi/${type}.key"; then
-    {{- else }}
-    if age --decrypt --output "${HOME}/.config/chezmoi/${type}.key" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age"; then
+    export AGE_PASSPHRASE="${!passphrase_var:-}"
+    age_params+=("-j" "batchpass")
     {{- end }}
+    if age "${age_params[@]}"; then
       chmod 400 "${HOME}/.config/chezmoi/${type}.key"
       dybatpho::success "Successfully decrypted ${type}.age file"
     else
