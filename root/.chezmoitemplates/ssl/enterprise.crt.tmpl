@@ -1,1 +1,4 @@
-{{- printf "../secrets/data/enterprise-%s/ssl.crt.age" .enterprise | join .chezmoi.sourceDir | include | decrypt }}
+{{- $sslSecret := printf "../secrets/data/enterprise-%s/ssl.yaml.age" .enterprise | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{- range $sslSecret.certs }}
+{{-   printf "%s\n" .file }}
+{{- end -}}

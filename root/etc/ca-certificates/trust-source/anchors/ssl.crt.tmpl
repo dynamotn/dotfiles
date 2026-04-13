@@ -1,4 +1,7 @@
 {{- range .decryptEnterprise }}
-{{-   $top := merge $ (dict "enterprise" .) }}
+{{-   $top := mergeOverwrite $ (dict "enterprise" .) }}
+{{-   if not (stat (printf "../secrets/data/enterprise-%s/ssl.yaml.age" $top.enterprise | joinPath $top.chezmoi.sourceDir)) }}
+{{-    continue }}
+{{-   end }}
 {{-   template "ssl/enterprise.crt.tmpl" $top }}
 {{- end }}

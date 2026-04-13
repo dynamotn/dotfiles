@@ -44,6 +44,9 @@ Applications/Zen.app
 etc/systemd
 etc/vconsole.conf
 {{- end }}
+{{- if ne .initSystem "openrc" }}
+etc/syslog-ng
+{{- end }}
 {{- if ne .osid "linux-arch" }}
 etc/makepkg.conf
 etc/pacman.d
@@ -72,12 +75,15 @@ etc/pam.d
 etc/hosts
 {{- end }}
 
-{{/* Secret files */}}
-{{- if or (ne .kind "office") (ne .company "F1") }}
+{{/* Certificates files */}}
+{{- if ne .place "office" }}
 etc/ca-certificates
+usr/local/share/ca-certificates
 {{- else }}
-{{-   if ne .osid "linux-arch" }}
+{{-   if not (eq .osid "linux-arch" "linux-gentoo") }}
 etc/ca-certificates/trust-source
+{{-   else if not (eq .osid "linux-ubuntu" "linux-alpine") }}
+usr/local/share/ca-certificates
 {{-   end }}
 {{- end }}
 
