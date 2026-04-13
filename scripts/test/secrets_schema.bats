@@ -1,7 +1,7 @@
 setup() {
   load test_helper
   SCHEMA_DIR="${DOTFILES_DIR}/schemas/secrets"
-  DATA_DIR="${DOTFILES_REAL_HOME}/.config/chezmoi/secrets/data"
+  DATA_DIR="${DOTFILES_DIR}/secrets/data"
 }
 
 # ---------------------------------------------------------------------------
@@ -179,4 +179,13 @@ function _validate {
 @test "secrets/personal/wol.yaml conforms to schema" {
   _require_ys
   _validate "${SCHEMA_DIR}/wol.schema.yaml" "${DATA_DIR}/personal/wol.yaml"
+}
+
+# ---------------------------------------------------------------------------
+# ssl.yaml
+# ---------------------------------------------------------------------------
+
+@test "secrets/enterprise-F1/ssl.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/ssl.schema.yaml" "${DATA_DIR}/enterprise-F1/ssl.yaml"
 }
