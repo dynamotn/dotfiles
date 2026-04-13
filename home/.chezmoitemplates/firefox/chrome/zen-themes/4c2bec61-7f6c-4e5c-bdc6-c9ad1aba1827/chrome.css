@@ -1,0 +1,32 @@
+tab-group[split-view-group] .tab-group-container {
+    display: flex;
+    flex-direction: column;
+    padding: 2px 2px !important;
+    position: relative;
+
+    &::after {
+        content: "";
+        width: 3px;
+        height: calc(100% - 8px);
+        background-color: var(--tab-selected-bgcolor);
+        position: absolute;
+        left: 2px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-radius: 2px;
+    }
+
+    &:hover,
+    &:has(> tab:is([visuallyselected], [multiselected])) {
+        &::after {
+            width: 0;
+        }
+    }
+
+    & > .tabbrowser-tab {
+        &:not(:last-child)::after {
+            width: 0 !important;
+            height: 0 !important;
+        }
+    }
+}
