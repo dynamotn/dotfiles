@@ -14,8 +14,7 @@
 #       the blkid(8) command.
 
 # <fs>			<mountpoint>	<type>		<opts>		<dump> <pass>
-{{- $machine := printf "%s_%s" .place .kind }}
-{{- if eq $machine "home_pc" }}
+{{- if eq .code "l30n4rd0d4v1nc1" }}
 # /dev/nvme0n1p4 LABEL=System
 UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/         	btrfs     	rw,relatime,compress=zstd:3,ssd,discard=async,space_cache=v2,autodefrag,subvolid=259,subvol=/_active/root	0 0
 
@@ -39,4 +38,13 @@ UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/var      	btrfs     	rw,relatime,comp
 
 # /dev/nvme0n1p2
 UUID=38bb8bfd-5a4b-4c37-b614-29b6229dec92	none      	swap      	defaults  	0 0
+{{- else if eq .code "c40c40" }}
+# / was on /dev/nvme0n1p5 during installation
+UUID=c9fc4789-007d-4370-a8bb-3cd4d61c6b89 /               btrfs   defaults,subvol=root 0       1
+# /boot/efi was on /dev/nvme0n1p3 during installation
+UUID=2EA2-9B0E  /boot/efi       vfat    umask=0077      0       1
+# /home was on /dev/nvme0n1p7 during installation
+UUID=e05bdfa0-7897-47ec-9da5-c8c437722113 /home           btrfs   defaults,subvol=@home 0       2
+# swap was on /dev/nvme0n1p6 during installation
+UUID=98ae68c8-6b20-415f-9f52-c5ea0b95dc53 none            swap    sw              0       0
 {{- end }}
