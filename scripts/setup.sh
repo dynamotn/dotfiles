@@ -21,7 +21,7 @@ function _spec_main {
 function _update_git_modules {
   if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
     cd "$SCRIPT_DIR" || exit
-    git -C "$SCRIPT_DIR" submodule update --init --remote "$SCRIPT_DIR/lib/dybatpho" "$SCRIPT_DIR/lib/expect-age"
+    git -C "$SCRIPT_DIR" submodule update --init --remote "$SCRIPT_DIR/lib/dybatpho"
   fi
 }
 
