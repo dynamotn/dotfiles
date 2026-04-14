@@ -5,3 +5,5 @@ processes:
     command: kubectl --context uat-old port-forward -n default toolbox 3000:3000
   chisel:
     command: chisel client localhost:3000 socks
+  xray:
+    command: xray -c ../.xray/config.json
