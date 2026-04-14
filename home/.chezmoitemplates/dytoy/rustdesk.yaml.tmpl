@@ -16,6 +16,8 @@ macos:
   packages:
     - name: rustdesk
       type: cask
+  hook:
+    after: xattr -r -d com.apple.quarantine /Applications/RustDesk.app
 fdroid:
   packages:
     - name: com.carriez.flutter_hbb
