@@ -155,6 +155,7 @@
 |[oryx](https://github.com/pythops/oryx)|TUI for sniffing network traffic using eBPF|
 |[httptap](https://github.com/monasticacademy/httptap)|CLI to view HTTP requests per command|
 |[chisel](https://github.com/jpillora/chisel)|CLI to create TCP/UDP tunnel over HTTP|
+|[xray](https://github.com/XTLS/xray-core)|CLI to build network proxies to bypass network restrictions|
 |[vmware-horizon-client](https://www.omnissa.com/)|Virtual machine client to remote|
 |[rustdesk](https://github.com/rustdesk/rustdesk)|Self-hosted remote desktop|
 |[teleport](https://github.com/gravitational/teleport)|Identity-aware access proxy|
