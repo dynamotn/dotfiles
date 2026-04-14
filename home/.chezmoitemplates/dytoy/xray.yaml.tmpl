@@ -1,0 +1,19 @@
+name: xray
+method: binary
+github:
+  repo: XTLS/Xray-core
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "linux" "android" }}
+  {{-   $os = "linux" }}
+  {{- else if eq .chezmoi.os "darwin" }}
+  {{-   $os = "macos" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "arm64-v8a" }}
+  {{- end }}
+  release_asset: Xray-{{ $os }}-{{ $arch }}.zip
+archive:
+  - path: xray
