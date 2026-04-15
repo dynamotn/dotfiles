@@ -1,5 +1,5 @@
 [env]
-{{ $top := merge . (dict "enterprise" "U3T") }}
+{{ $top := merge . (dict "enterprise" (dict "name" "U3T" "scope" "core")) }}
 {{- if ne .kind "container" }}
 {{- template "mise/env_git.toml.tmpl" $top }}
 {{- end }}

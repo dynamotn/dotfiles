@@ -22,8 +22,8 @@
         insteadOf = {{ .ssh }}
 {{-   end }}
 {{- end }}
+{{- $device := printf "%s-%s" .place .kind }}
 {{- range $gitSecret.configs }}
-{{-   $device := printf "%s-%s" $.place $.kind }}
 {{-   if and (regexMatch .regexDevices $device) (regexMatch .negativeRegexDevices $device | not) }}
 {{      .config }}
 {{-   end }}

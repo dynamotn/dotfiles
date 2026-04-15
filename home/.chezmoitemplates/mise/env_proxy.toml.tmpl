@@ -1,0 +1,36 @@
+{{- $commonSecret := dict }}
+{{- $proxySecret := dict }}
+{{- $scope := "" }}
+{{- if index . "personal" }}
+{{-   $commonSecret = join .chezmoi.sourceDir "../secrets/data/personal/common.yaml.age" | include | decrypt | fromYaml }}
+{{-   $proxySecret = join .chezmoi.sourceDir "../secrets/data/personal/proxy.yaml.age" | include | decrypt | fromYaml }}
+{{-   $scope = .personal.scope }}
+{{- else if index . "enterprise" }}
+{{-   $commonSecret = printf "../secrets/data/enterprise-%s/common.yaml.age" .enterprise.name | joinPath .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $proxySecret = printf "../secrets/data/enterprise-%s/proxy.yaml.age" .enterprise.name | joinPath .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $scope = .enterprise.scope }}
+{{- end }}
+{{- $device := printf "%s-%s" .place .kind }}
+{{- range $proxySecret.servers }}
+{{-   if and (regexMatch .regexDevices $device) (regexMatch .negativeRegexDevices $device | not) (eq $scope .scope) }}
+{{-     if index . "http_proxy" }}
+http_proxy = {{
+  .http_proxy |
+  replaceAllRegex "\\$ACCOUNT_USERNAME" $commonSecret.account.username |
+  replaceAllRegex "\\$ACCOUNT_PASSWORD" $commonSecret.account.password |
+  quote
+}}
+{{-     end }}
+{{-     if index . "https_proxy" }}
+https_proxy = {{
+  .https_proxy |
+  replaceAllRegex "\\$ACCOUNT_USERNAME" $commonSecret.account.username |
+  replaceAllRegex "\\$ACCOUNT_PASSWORD" $commonSecret.account.password |
+  quote
+}}
+{{-     end }}
+{{-     if index . "no_proxy" }}
+no_proxy = {{ .no_proxy | join "," | quote }}
+{{-     end }}
+{{-   end }}
+{{- end }}

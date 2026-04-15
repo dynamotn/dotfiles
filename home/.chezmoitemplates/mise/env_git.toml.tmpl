@@ -1,16 +1,23 @@
 {{- $gitSecret := dict }}
+{{- $scope := "" }}
 {{- if index . "personal" }}
 {{-   $gitSecret = join .chezmoi.sourceDir "../secrets/data/personal/git.yaml.age" | include | decrypt | fromYaml }}
+{{-   $scope = .personal.scope }}
 {{- else if index . "enterprise" }}
-{{-   $gitSecret = printf "../secrets/data/enterprise-%s/git.yaml.age" .enterprise | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $gitSecret = printf "../secrets/data/enterprise-%s/git.yaml.age" .enterprise.name | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $scope = .enterprise.scope }}
 {{- end }}
+{{- $top := . }}
+{{- $device := printf "%s-%s" .place .kind }}
 {{- range $gitSecret.servers }}
-{{-   if eq .type "github" }}
+{{-   if and (regexMatch .regexDevices $device) (regexMatch .negativeRegexDevices $device | not) (eq $scope .scope) }}
+{{-     if eq .type "github" }}
 {{ .prefix | upper }}GITHUB_TOKEN = {{ .token | quote }}
 {{ .prefix | upper }}GITHUB_HOST = {{ .https | quote }}
-{{-   end }}
-{{-   if eq .type "gitlab" }}
+{{-     end }}
+{{-     if eq .type "gitlab" }}
 {{ .prefix | upper }}GITLAB_TOKEN = {{ .token | quote }}
 {{ .prefix | upper }}GITLAB_HOST = {{ .https | quote }}
+{{-     end }}
 {{-   end }}
 {{- end }}
