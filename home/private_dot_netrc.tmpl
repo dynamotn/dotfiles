@@ -2,8 +2,8 @@
 {{-   $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-   $gitSecret := printf "../secrets/data/enterprise-%s/git.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-   $top := $ }}
+{{-   $device := printf "%s-%s" $top.place $top.kind }}
 {{-   range $gitSecret.servers }}
-{{-     $device := printf "%s-%s" $top.place $top.kind }}
 {{-     if and (regexMatch .regexDevices $device) (regexMatch .negativeRegexDevices $device | not) }}
 {{-       $username := $commonSecret.account.username }}
 {{-       if index . "username" }}
