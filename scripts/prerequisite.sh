@@ -110,7 +110,7 @@ function _main {
       # Termux
       _setup_termux
       ;;
-    Linux)
+    *Linux)
       # Gentoo
       if command -v emerge &>/dev/null; then
         _setup_gentoo
