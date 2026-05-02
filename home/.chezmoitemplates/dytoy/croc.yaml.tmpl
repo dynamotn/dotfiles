@@ -1,0 +1,19 @@
+name: croc
+method: binary
+github:
+  repo: schollz/croc
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "macOS" }}
+  {{- else if eq .chezmoi.os "linux" "android" }}
+  {{-   $os = "Linux" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "ARM64" }}
+  {{- else if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "64bit" }}
+  {{- end }}
+  release_asset: croc_%v_{{ $os }}-{{ $arch }}.tar.gz
+archive:
+  - path: croc

@@ -298,6 +298,7 @@
 |[cht](https://cht.sh)|Access to community cheat sheet|
 |color16, color256, colorful, truecolor|Test CLI color|
 |[now](https://github.com/apankrat/now.sh)|Prints current date/time while waiting for an input and echoing it to the stdout|
+|[croc](https://github.com/schollz/croc)|Easily and securely send things from one computer to another|
 |[screensaver](https://github.com/pipeseroni/pipes.sh)|Show screensaver on CLI with pipes|
 |[qrify](https://github.com/alexanderepstein/Bash-Snippets)|Show QR of text|
 |[tmpmail](https://github.com/sdushantha/tmpmail)|Create temp mail address and receive emails|
