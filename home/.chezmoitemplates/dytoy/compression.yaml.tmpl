@@ -1,0 +1,57 @@
+name: compression
+method: os
+is_essential: true
+# https://repology.org/project/tar/versions
+# https://repology.org/project/gzip/versions
+# https://repology.org/project/bzip2/versions
+# https://repology.org/project/unzip/versions
+# https://repology.org/project/xz/versions
+# https://repology.org/project/zstd/versions
+gentoo:
+  packages:
+    - name: app-arch/tar
+    - name: app-arch/gzip
+    - name: app-arch/bzip2
+    - name: app-arch/unzip
+    - name: app-arch/xz-utils
+    - name: app-arch/zstd
+arch:
+  packages:
+    - name: tar
+    - name: gzip
+    - name: bzip2
+    - name: unzip
+    - name: xz
+    - name: zstd
+ubuntu:
+  packages:
+    - name: tar
+    - name: gzip
+    - name: bzip2
+    - name: unzip
+    - name: xz-utils
+    - name: libzstd
+alpine:
+  packages:
+    - name: tar
+    - name: gzip
+    - name: bzip2
+    - name: unzip
+    - name: xz
+    - name: zstd
+termux:
+  packages:
+    - name: tar
+    - name: gzip
+    - name: bzip2
+    - name: unzip
+    - name: liblzma
+    - name: zstd
+macos:
+  packages:
+    - name: gnu-tar
+    - name: gzip
+    - name: bzip2
+    - name: unzip
+    - name: xz
+    - name: zstd

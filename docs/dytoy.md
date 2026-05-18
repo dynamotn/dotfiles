@@ -26,7 +26,7 @@
 |[yq](https://github.com/mikefarah/yq)|YAML processor|
 |[chezmoi](https://github.com/twpayne/chezmoi)|Manage dotfiles across machines|
 |[age](https://github.com/FiloSottile/age)|Simple file encryption|
-|`tar`, `unzip`, `gzip`, `bzip2`|Uncompress file|
+|`tar`, `unzip`, `gzip`, `bzip2`, `xz`, `zstd`|Uncompress file|
 
 ## System core tools
 
