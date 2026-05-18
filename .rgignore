@@ -1,2 +1,3 @@
 home/private_dot_config/firefox/profiles
 home/private_dot_config/thunderbird/profiles
+!home/.chezmoi*

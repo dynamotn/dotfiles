@@ -1,1 +1,5 @@
-{{ .code }}
+{{- if .customHostname }}
+{{-   .customHostname }}
+{{- else }}
+{{-   .code }}
+{{- end }}
