@@ -1,6 +1,3 @@
-{{- $versionJson := output "fish" "-c"
-"set -l hypr_version (hyprctl version -j 2>/dev/null); if string match -rq '^\\s*\\{' -- $hypr_version; echo $hypr_version; else; printf '{\"version\":\"0.51\"}\n'; end" }}
-{{- $version := $versionJson | fromJson | jq ".version" | first }}
 general {
   gaps_in = 4
   gaps_out = 8
@@ -72,13 +69,7 @@ input {
   }
 }
 
-{{ if semverCompare ">=0.51" $version -}}
 gesture = 3, horizontal, workspace
-{{ else -}}
-gestures {
-  workspace_swipe = true
-}
-{{ end -}}
 
 group {
   col.border_inactive = $green $yellow 45deg
@@ -91,7 +82,6 @@ misc {
 }
 
 dwindle {
-  pseudotile = false
   preserve_split = true
 }
 

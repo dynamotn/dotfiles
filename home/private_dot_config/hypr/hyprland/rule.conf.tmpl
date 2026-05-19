@@ -1,55 +1,26 @@
-# TODO: Remove logic for version < 0.53 when 0.53 on Gentoo is stable
-{{- $versionJson := output "fish" "-c"
-"set -l hypr_version (hyprctl version -j 2>/dev/null); if string match -rq '^\\s*\\{' -- $hypr_version; echo $hypr_version; else; printf '{\"version\":\"0.51\"}\n'; end" }}
-{{- $version := $versionJson | fromJson | jq ".version" | first }}
-{{- $matchClassKeyword := "class:" }}
-{{- $matchTagKeyword := "tag:" }}
-{{- $windowRuleSection := "windowrulev2" }}
-{{- if semverCompare ">=0.53" $version }}
-{{-   $matchClassKeyword = "match:class " }}
-{{-   $matchTagKeyword = "match:tag " }}
-{{-   $windowRuleSection = "windowrule" }}
-{{- end }}
+{{- $matchClassKeyword := "match:class " }}
+{{- $matchTagKeyword := "match:tag " }}
+{{- $windowRuleSection := "windowrule" }}
 # Layer
 {{- $layers := list "wofi" "swaync-control-center" "gtk-layer-shell" }}
 {{- range $layers }}
-{{-   if semverCompare ">=0.53" $version }}
 layerrule = blur on, ignore_alpha 0, match:namespace {{ . }}
-{{-   else }}
-layerrule = blur, {{ . }}
-layerrule = ignorezero, {{ . }}
-{{-   end }}
 {{- end }}
 
 # Common #
 # Floating
-{{- if semverCompare ">=0.53" $version }}
 {{ $windowRuleSection }} = float on, match:float 1
-{{- else }}
-{{ $windowRuleSection }} = float, floating:1
-{{- end }}
 # Smart gaps
 {{- $workspaces := list "w[tv1]" "f[1]" }}
 {{- range $workspaces }}
 workspace = w[tv1], gapsout:0, gapsin:0
-{{-   if semverCompare ">=0.53" $version }}
 {{ $windowRuleSection }} = border_size 0, match:float 0, match:workspace {{ . }}
 {{ $windowRuleSection }} = rounding 0, match:float 0, match:workspace {{ . }}
 {{ $windowRuleSection }} = decorate off, match:float 0, match:workspace {{ . }}
 {{ $windowRuleSection }} = no_shadow on, match:float 0, match:workspace {{ . }}
-{{-   else }}
-{{ $windowRuleSection }} = bordersize 0, floating:0, onworkspace:{{ . }}
-{{ $windowRuleSection }} = rounding 0, floating:0, onworkspace:{{ . }}
-{{ $windowRuleSection }} = decorate off, floating:0, onworkspace:{{ . }}
-{{ $windowRuleSection }} = noshadow, floating:0, onworkspace:{{ . }}
-{{-   end }}
 {{- end }}
 # Fix dragging issues with XWayland
-{{- if semverCompare ">=0.53" $version }}
 {{ $windowRuleSection }} = no_focus on,match:class ^$,match:title ^$,match:xwayland 1,match:float 1,match:fullscreen 0,match:pin 0
-{{- else }}
-{{ $windowRuleSection }} = nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0
-{{- end }}
 
 # Per app #
 {{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
@@ -66,57 +37,34 @@ workspace = w[tv1], gapsout:0, gapsin:0
 {{-   end }}
 {{/*  Floating */}}
 {{-   if and (hasKey . "float") (get . "float") }}
-{{ $windowRuleSection }} = float{{ if semverCompare ">=0.53" $version }} on{{ end }}, {{ $matchTagKeyword }}{{ .name }}*
+{{ $windowRuleSection }} = float on, {{ $matchTagKeyword }}{{ .name }}*
 {{-   end }}
 {{/*  Center */}}
 {{-   if and (hasKey . "center") (get . "center") }}
-{{ $windowRuleSection }} = center{{ if semverCompare ">=0.53" $version }} on{{ end }}, {{ $matchTagKeyword }}{{ .name }}*
+{{ $windowRuleSection }} = center on, {{ $matchTagKeyword }}{{ .name }}*
 {{-   end }}
 {{/*  Fullscreen and blur */}}
 {{-   if and (hasKey . "fullscreen") (get . "fullscreen") }}
-{{ $windowRuleSection }} = {{ if semverCompare ">=0.53" $version }}no_blur on{{ else }}noblur{{ end }}, {{ $matchTagKeyword }}{{ .name }}*
-{{ $windowRuleSection }} = fullscreen{{ if semverCompare ">=0.53" $version }} on{{ end }}, {{ $matchTagKeyword }}{{ .name }}*
+{{ $windowRuleSection }} = no_blur on, {{ $matchTagKeyword }}{{ .name }}*
+{{ $windowRuleSection }} = fullscreen on, {{ $matchTagKeyword }}{{ .name }}*
 {{-   end }}
 {{/*  Size */}}
 {{-   if and (hasKey . "size") (get . "size") }}
-{{-     $size := "" }}
-{{-     if semverCompare ">=0.53" $version }}
-{{-       $size = printf "(monitor_w*%.2f) (monitor_h*%.2f)" .size.width .size.height }}
-{{-     else }}
-{{-       $size = printf "%d%% %d%%" (.size.width | mulf 100 | int)  (.size.height | mulf 100 | int) }}
-{{-     end }}
+{{-     $size := printf "(monitor_w*%.2f) (monitor_h*%.2f)" .size.width .size.height }}
 {{ $windowRuleSection }} = size {{ $size }}, {{ $matchTagKeyword }}{{ .name }}*
 {{-   end }}
 {{- end }}
 
 # Other tweaks
 ## Calendar Reminders
-{{- if semverCompare ">=0.53" $version }}
 {{ $windowRuleSection }} = float on, match:initial_title ^(Calendar Reminders)$
-{{- else }}
-{{ $windowRuleSection }} = float, initialTitle:^(Calendar Reminders)$
-{{- end }}
 ## Picture-in-Picture
-{{- if semverCompare ">=0.53" $version }}
 {{ $windowRuleSection }} = float on, match:title ^(Picture-in-Picture)$
 {{ $windowRuleSection }} = keep_aspect_ratio on, match:title ^(Picture-in-Picture)$
 {{ $windowRuleSection }} = pin on, match:title ^(Picture-in-Picture)$
 {{ $windowRuleSection }} = move (cursor_x-(window_w*0.5)) (cursor_y-(window_h*0.5)), match:title ^(Picture-in-Picture)$
-{{- else }}
-{{ $windowRuleSection }} = float, title:^(Picture-in-Picture)$
-{{ $windowRuleSection }} = keepaspectratio, title:^(Picture-in-Picture)$
-{{ $windowRuleSection }} = pin, title:^(Picture-in-Picture)$
-{{ $windowRuleSection }} = move cursor -50% -50%, title:^(Picture-in-Picture)$
-{{- end }}
 ## IME preedit box
-{{- if semverCompare ">=0.53" $version }}
 {{ $windowRuleSection }} = float on, match:class ^(ibus-ui-gtk3)$
 {{ $windowRuleSection }} = no_initial_focus on, match:class ^(ibus-ui-gtk3)$
 {{ $windowRuleSection }} = border_size 0, match:class ^(ibus-ui-gtk3)$
 {{ $windowRuleSection }} = pin on, match:class ^(ibus-ui-gtk3)$
-{{- else }}
-{{ $windowRuleSection }} = float, class:^(ibus-ui-gtk3)$
-{{ $windowRuleSection }} = noinitialfocus, class:^(ibus-ui-gtk3)$
-{{ $windowRuleSection }} = noborder, class:^(ibus-ui-gtk3)$
-{{ $windowRuleSection }} = pin, class:^(ibus-ui-gtk3)$
-{{- end }}
