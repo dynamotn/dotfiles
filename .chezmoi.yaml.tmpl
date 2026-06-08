@@ -51,7 +51,7 @@ data:
 
   {{- $companies := list "F1" "T1" "ZOO" "U3T" }}
   code: {{ promptStringOnce . "code" "What is this machine's name" "t00lb0x" | quote }}
-  {{- $hasCustomName := promptBook "Does this machine has custom hostname" }}
+  {{- $hasCustomName := promptBool "Does this machine has custom hostname" }}
   {{- if $hasCustomName }}
   customHostname: {{ promptStringOnce . "customHostname" "What is this machine's hostname" }}
   {{- else }}
