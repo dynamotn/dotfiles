@@ -1,0 +1,20 @@
+name: dnsglobe
+method: binary
+github:
+  repo: 514-labs/dnsglobe
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "linux" "android" }}
+  {{-   $os = "unknown-linux-gnu" }}
+  {{- else if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: dnsglobe-{{ $arch }}-{{ $os }}.tar.xz
+archive:
+  - path: dnsglobe-{{ $arch }}-{{ $os }}/dnsglobe
+    strip: 1
