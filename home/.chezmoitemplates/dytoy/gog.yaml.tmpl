@@ -1,0 +1,12 @@
+name: gog
+method: binary
+github:
+  repo: openclaw/gogcli
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset: gogcli_%1v_{{ $os }}_{{ .chezmoi.arch }}.tar.gz
+  sha256: checksums.txt
+archive:
+  - path: gog
