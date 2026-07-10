@@ -3,11 +3,9 @@ is_essential: true
 method: binary
 github:
   repo: mr-karan/doggo
-  {{- $os := "" }}
-  {{- if eq .chezmoi.os "android" "linux" }}
-  {{-   $os = "Linux" }}
-  {{- else if eq .chezmoi.os "darwin" }}
-  {{-   $os = "Darwin" }}
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}
@@ -15,8 +13,7 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{-   $arch = "arm64" }}
   {{- end }}
-  release_asset: doggo_%1v_{{ $os }}_{{ $arch }}.tar.gz
+  release_asset: doggo-{{ $os }}-{{ $arch }}.tar.gz
   sha256: doggo_%1v_checksums.txt
 archive:
-  - path: doggo_%1v_{{ $os }}_{{ $arch }}/doggo
-    strip: 1
+  - path: doggo
