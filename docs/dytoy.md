@@ -332,5 +332,6 @@
 |[in2csv](https://github.com/wireservice/csvkit)|Convert various data formats to CSV|
 |[lz4json](https://github.com/andikleen/lz4json)|C decompress tool for mozilla lz4json format|
 |[xleak](https://github.com/bgreenwell/xleak)|TUI for view Excel files|
+|[officecli](https://github.com/iOfficeAI/OfficeCLI)|CLI for Office suite's files|
 |[gws](https://github.com/googleworkspace/cli)|CLI for Google Workspace, use Google API Discovery Service|
 |[gog](https://github.com/googleworkspace/cli)|CLI for Google Workspace, useful for LLM|
