@@ -149,6 +149,7 @@
 |[curlie](https://github.com/rs/curlie)|Alternative to `curl` with the ease of use from `httpie`|
 |[bandwhich](https://github.com/imsnif/bandwhich)|CLI bandwidth utilization tool|
 |[doggo](https://github.com/mr-karan/doggo)|Alternative to `dig`|
+|[dnsglobe](https://github.com/514-labs/dnsglobe)|TUI to check global DNS propagation|
 |[speedtest](https://github.com/showwin/speedtest-go)|CLI to test Internet speed|
 |[websocat](https://github.com/vi/websocat)|Netcat, curl and socat for websocket|
 |[flarectl](https://github.com/cloudflare/cloudflare-go)|Interactive CLI with Cloudflare|
