@@ -39,7 +39,7 @@ for type in {{ range $types }}{{ . | quote }} {{ end }}; do
       chmod 400 "${HOME}/.config/chezmoi/${type}.key"
       dybatpho::success "Successfully decrypted ${type}.age file"
     else
-      dybatpho::error "Failed to decrypt ${type}.age file"
+      dybatpho::die "Failed to decrypt ${type}.age file"
     fi
   else
     dybatpho::info "Not need to decrypt ${type}.age file"
