@@ -1,7 +1,9 @@
 # vim:sw=4 sts=4
 {{- range .hosts }}
 Host {{ .host }}
-    {{- if hasKey . "hostname" }}
+    {{- if eq .host $.code }}
+    Hostname localhost
+    {{- else if hasKey . "hostname" }}
     Hostname {{ .hostname }}
     {{- end }}
     {{- if hasKey . "port" }}
