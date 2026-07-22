@@ -2,14 +2,18 @@
 source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-dotfiles="$(dybatpho::path_normalize "$(dybatpho::path_join "$(chezmoi execute-template '{{ .chezmoi.sourceDir }}')" "..")")"
+dotfiles="$(dybatpho::path_normalize "$(dybatpho::path_join "{{ .chezmoi.sourceDir }}" "..")")"
 chezmoi_config="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "chezmoi.yaml")"
 {{- if eq .chezmoi.os "darwin" }}
 if dybatpho::string_contains "$*" "/Applications"; then
   sed -i "/umask:/s/^# //" "$chezmoi_config"
 fi
 {{- end }}
-sudo env "PATH=$PATH" \
+env_args=(env
+  "PATH=${PATH}"
+  "HOME=${HOME}"
+)
+sudo "${env_args[@]}" \
   chezmoi --destination / \
   --source "$dotfiles/root" \
   --mode file \
