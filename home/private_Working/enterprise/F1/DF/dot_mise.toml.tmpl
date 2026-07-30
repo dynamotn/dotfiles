@@ -1,0 +1,12 @@
+[env]
+{{- if has "F1" .decryptEnterprise }}
+{{-   $top := merge . (dict
+        "enterprise" (dict
+          "name" "F1"
+          "scope" "DF"
+        )
+      )
+}}
+{{-   template "mise/env_jira.toml.tmpl" $top }}
+{{- end }}
+JIRA_CONFIG_FILE = "{{ "{{config_root}}" }}/.jira/config.yaml"
