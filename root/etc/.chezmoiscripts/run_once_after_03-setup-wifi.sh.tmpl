@@ -11,8 +11,8 @@ fi
 
 device=$(nmcli --get-values GENERAL.DEVICE,GENERAL.TYPE device show | sed '/^wifi$/!{h;d;};x')
 {{-   if .decryptPersonal }}
-# hash: {{ joinPath .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.age" | include | sha256sum }}
-{{-     $wifiSecret := join .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.tmpl" | include }}
+# hash: {{ joinPath .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.tmpl" | include | sha256sum }}
+{{-     $wifiSecret := includeTemplate (join .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.tmpl") . | fromYaml }}
 {{-     range $wifiSecret }}
 rm -rf "/etc/NetworkManager/system-connections/{{ .name }}-*.nmconnection"
 nmcli connection add type wifi \
