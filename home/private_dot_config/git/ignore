@@ -2,10 +2,11 @@
 # Tags generate by ctags
 tags
 
-# Editors
+# Local settings of tools & editors
 .vim
 .idea
 Session.vim
+**/.claude/settings.local.json
 
 # Compiled sources
 *.com
