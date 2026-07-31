@@ -1,9 +1,21 @@
 version: "0.5"
 
 processes:
+  serve:
+    command: kubectl --context uat-old exec -n default toolbox -- fish -c "killall chisel; chisel server --port 3000 --socks5"
+    shutdown:
+      command: kubectl --context uat-old exec -n default toolbox -- fish -c "killall chisel"
+      timeout_seconds: 10
+
   port-forward:
     command: kubectl --context uat-old port-forward -n default toolbox 3000:3000
-  chisel:
+    depends_on:
+      serve:
+        condition: process_started
+  socks:
     command: chisel client localhost:3000 socks
+    depends_on:
+      port-forward:
+        condition: process_started
   xray:
     command: xray -c ../.xray/config.json
