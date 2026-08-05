@@ -1,3 +1,5 @@
 name: az
 method: mise
 backend: azure
+dependencies:
+  - uv
