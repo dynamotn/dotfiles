@@ -11,6 +11,9 @@ var
 Applications
 private
 {{- end }}
+{{- if eq .osid "linux-arch" }}
+usr/lib64
+{{- end }}
 
 {{/* Window manager and WM-related files */}}
 {{- if ne .guiServer "W" }}
