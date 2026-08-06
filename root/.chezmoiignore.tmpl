@@ -101,3 +101,8 @@ etc/portage/**mozc
 {{- if not (has "zh" .languages) }}
 etc/portage/**fcitx-m17n
 {{- end }}
+
+{{/* Per machine */}}
+{{- if ne .code "b0n9u4" }}
+etc/pam.d/fprintd
+{{- end }}

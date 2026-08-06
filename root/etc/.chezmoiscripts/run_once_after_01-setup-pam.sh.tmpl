@@ -12,6 +12,12 @@ if dybatpho::is file /etc/pam.d/system-local-login; then
     dybatpho::header "Adding pam_u2f to system-local-login"
     sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
   fi
+  {{- if eq .code "b0n9u4" }}
+  if ! grep -q '^auth\s*include\s*fprintd' /etc/pam.d/system-local-login; then
+    dybatpho::header "Adding pam_fprintd to system-local-login"
+    sed -i '1 i\auth include fprintd' /etc/pam.d/system-local-login
+  fi
+  {{- end }}
 fi
 {{-   if eq .chezmoi.osRelease.id "arch" "ubuntu" }}
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su
