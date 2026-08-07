@@ -67,6 +67,7 @@
 |[vivid](https://github.com/sharkdp/vivid)|A themeable LS_COLORS generator with database|
 |[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|
 |[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|
+|[witr](https://github.com/pranshuparmar/witr)|Trace process, port, container and file locks on CLI|
 |[himalaya](https://github.com/soywod/himalaya)|Email CLI tool|
 |[smug](https://github.com/ivaaaan/smug)|Tmux session manager|
 |[projekt](https://github.com/dynamotn/projekt)|Smart CLI command to manage project folder|

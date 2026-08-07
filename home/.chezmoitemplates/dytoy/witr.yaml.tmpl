@@ -1,0 +1,9 @@
+name: witr
+method: binary
+github:
+  repo: pranshuparmar/witr
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset: witr-{{ $os }}-{{ .chezmoi.arch }}
