@@ -1,5 +1,5 @@
 name: copilot
 method: shell
 dependencies:
-  - node
-content: npm install -g @github/copilot
+  - bun
+content: bun install -g @github/copilot

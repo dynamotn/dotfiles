@@ -1,20 +1,12 @@
-name: node
+name: bun
+{{- if eq .kind "pc" "laptop" }}
+is_essential: true
+{{- end }}
 {{- if eq .chezmoi.os "android" }}
-# Need to use system package for Android
-method: os
-termux:
-  packages:
-    - nodejs
+method: shell
+content: |-
+  curl -fsSL "https://raw.githubusercontent.com/Happ1ness-dev/bun-termux/main/helper_scripts/bun-termux-manager" | bash -s install
 {{- else }}
 method: mise
-backend: nodejs
-{{-   if eq .kind "pc" "laptop" }}
-is_essential: true
-{{-   end }}
-hook:
-  after: |
-    # Enable corepack
-    mise_bin="$(dybatpho::path_join "$HOME" ".local" "bin" "mise")"
-    (yes || :) | "$mise_bin" x node -- npm install --global corepack@latest
-    (yes || :) | "$mise_bin" x node -- npx corepack enable pnpm
+backend: bun
 {{- end }}

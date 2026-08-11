@@ -204,7 +204,7 @@
 |[euporie](https://github.com/joouha/euporie)|Jupyter notebooks in CLI|
 |[rust](https://github.com/rust-lang/rust)|Compiler and library for Rust|
 |[go](https://github.com/golang/go)|Compiler and library for Go|
-|[nodejs](https://github.com/nodejs/node)|JavaScript runtime|
+|[bun](https://github.com/oven-sh/bun)|JavaScript runtime|
 |[deno](https://github.com/denoland/deno)|JavaScript runtime|
 |[uv](https://github.com/astral-sh/uv)|Modern Python package and project manager|
 |[prek](https://github.com/j178/pre-commit)|Framework for manage pre-commit hooks, re-engineered in Rust|
