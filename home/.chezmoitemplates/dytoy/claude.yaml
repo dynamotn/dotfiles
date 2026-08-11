@@ -1,5 +1,5 @@
 name: claude
 method: shell
 dependencies:
-  - node
-content: npm install -g @anthropic-ai/claude-code
+  - bun
+content: bun install -g @anthropic-ai/claude-code
