@@ -92,6 +92,9 @@ function dytoy::create_script {
 . $(dybatpho::path_join "$lib_dir" "dybatpho" "init.sh")
 dybatpho::register_common_handlers
 dybatpho::progress "Running ${kind} to install ${name}"
+
+export GOBIN="$(dybatpho::path_join "$HOME" ".local" "bin")"
+export CARGO_INSTALL_ROOT="$(dybatpho::path_join "$HOME" ".local")"
 EOF
   echo -e "${content}" >> "${path}"
 }

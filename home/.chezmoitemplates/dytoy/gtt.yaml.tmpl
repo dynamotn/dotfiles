@@ -3,9 +3,5 @@ name: gtt
 method: shell
 dependencies:
   - go
-content: |-
-  local bin_dir
-  bin_dir="$(dybatpho::path_join "$HOME" ".local" "bin")"
-  mkdir -p "$bin_dir"
-  GOBIN="$bin_dir" go install -ldflags="-s -w" github.com/eeeXun/gtt@latest
+content: go install -ldflags="-s -w" github.com/eeeXun/gtt@latest
 {{- end }}
