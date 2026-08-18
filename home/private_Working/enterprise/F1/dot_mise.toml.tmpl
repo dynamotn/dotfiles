@@ -1,8 +1,11 @@
 [env]
 {{ $top := merge . (dict "enterprise" (dict "name" "F1" "scope" "core")) }}
 {{- if ne .kind "container" }}
-{{- template "mise/env_git.toml.tmpl" $top }}
+{{-   template "mise/env_git.toml.tmpl" $top }}
 {{- end }}
 {{- if ne .kind "container" }}
-{{- template "mise/env_proxy.toml.tmpl" $top }}
+{{-   template "mise/env_proxy.toml.tmpl" $top }}
+{{- end }}
+{{- if eq .place "office" }}
+{{-   template "mise/ssl.toml" $top }}
 {{- end }}
