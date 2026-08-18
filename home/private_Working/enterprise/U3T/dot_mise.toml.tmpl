@@ -4,6 +4,9 @@
 {{-   template "mise/env_git.toml.tmpl" $top }}
 {{- end }}
 {{- template "mise/env_jira.toml.tmpl" $top }}
+{{- if eq .place "office" }}
+{{-   template "mise/ssl.toml" $top }}
+{{- end }}
 CLAUDE_CONFIG_DIR = "{{ "{{config_root}}" }}/.claude"
 AWS_CONFIG_FILE = "{{ "{{config_root}}" }}/.aws/config"
 AWS_SHARED_CREDENTIALS_FILE = "{{ "{{config_root}}" }}/.aws/credentials"
