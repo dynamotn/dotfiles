@@ -84,21 +84,24 @@ monitors:
     disabled: true
   - name: Wayvnc-1
     resolution: 1920x1080
+    position: "0x0"
     scale: 1
 {{- if eq .code "c40c40" }}
-    position: 3840x0
   - name: eDP-1
     resolution: 2800x1800
-    position: "122x0"
+    position: "1920x0"
     scale: 1.6
   - name: HDMI-A-1
     resolution: 1920x1080
-    position: "1920x0"
+    position: "4720x0"
     scale: 1
 {{- else if eq .code "b0n9u4" }}
-    position: 1920x0
   - name: eDP-1
     resolution: 1920x1200
-    position: "0x0"
+    position: "1920x0"
     scale: 1
+  - name: HDMI-A-1
+    resolution: 1920x1080
+    position: "3840x0"
+    scale: 0.8
 {{- end }}
