@@ -12,20 +12,7 @@ const default_config = {
       categories: [
         {
           name: "communicate",
-          links: [
-            {
-              name: "outlook",
-              url: "https://outlook.office.com",
-              icon: "󰴢",
-              icon_color: "red",
-            },
-            {
-              name: "teams",
-              url: "https://teams.microsoft.com",
-              icon: "󰊻",
-              icon_color: "purple",
-            },
-          ],
+          links: {{ toJson $firefoxSecret.startpage.config.communicate }},
         },
         {
           name: "development",
