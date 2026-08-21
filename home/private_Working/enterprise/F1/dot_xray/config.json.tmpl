@@ -1,1 +1,18 @@
-{{- printf "../secrets/data/enterprise-F1/xray.json.age" | join .chezmoi.sourceDir | include | decrypt }}
+{
+  "inbounds": [
+    {
+      "port": 8081,
+      "protocol": "http",
+      "settings": {
+        "auth": "noauth"
+      }
+    }
+  ],
+  {{- $xray := printf "../secrets/data/enterprise-F1/xray.yaml.age" | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
+  {{- $xrayLen := len $xray }}
+  {{- $index := 0 }}
+  {{- range $key, $value := $xray }}
+  {{-   $index = add $index 1 }}
+  "{{ $key }}": {{ $value | toPrettyJson | trim | indent 2 | trim }}{{ if ne $index $xrayLen }},{{ end }}
+  {{- end }}
+}
