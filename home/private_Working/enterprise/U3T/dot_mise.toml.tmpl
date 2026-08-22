@@ -5,7 +5,7 @@
 {{- end }}
 {{- template "mise/env_jira.toml.tmpl" $top }}
 {{- if eq .place "office" }}
-{{-   template "mise/ssl.toml" $top }}
+{{-   template "mise/env_ssl.toml" $top }}
 {{- end }}
 CLAUDE_CONFIG_DIR = "{{ "{{config_root}}" }}/.claude"
 AWS_CONFIG_FILE = "{{ "{{config_root}}" }}/.aws/config"
