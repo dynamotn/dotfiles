@@ -1,0 +1,9 @@
+name: tele
+method: binary
+github:
+  repo: sorokin-vladimir/tele
+  {{- $os := .chezmoi.os }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $os = "linux" }}
+  {{- end }}
+  release_asset: tele-{{ $os }}-{{ .chezmoi.arch }}
