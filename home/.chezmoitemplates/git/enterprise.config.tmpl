@@ -5,8 +5,6 @@
         # Signing SSH key
         signingkey = ~/.ssh/keys/enterprise-{{ .enterprise }}_ed25519.pub
 [core]
-        # Custom global ignore file
-        excludesfile = ~/Working/enterprise/{{ .enterprise }}/.gitignore
         {{- if index $gitSecret "useCustomSSHCommand" }}
         # Custom SSH command with separated ssh config
         sshCommand = ssh -F ~/Working/enterprise/{{ .enterprise }}/.ssh/config
