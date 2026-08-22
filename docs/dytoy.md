@@ -85,6 +85,7 @@
 |[jira](https://github.com/ankitpokhrel/jira-cli)|Interactive CLI tool with JIRA|
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|
+|[clin](https://github.com/reekta92/clin-rs)|TUI for Obsidian notes|
 
 ## Cross platform GUI applications
 
