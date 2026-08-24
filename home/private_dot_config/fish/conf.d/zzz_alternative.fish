@@ -1,6 +1,6 @@
 type -q grc; and __caran_setup_grc
 type -q bat; and alias cat bat
-type -q eza; and alias ls 'eza --icons'
+type -q eza; and alias ls 'eza --icons auto'
 type -q gping; and alias ping gping
 type -q btop; and alias top btop
 type -q procs; and alias ps procs
