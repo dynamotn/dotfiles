@@ -39,6 +39,9 @@ gentoo:
     {{- if and (eq .kind "pc") (eq .place "home") }}
     - name: media-gfx/fontforge
     {{- end }}
+    {{- if eq .kind "pc" "laptop" }}
+    - name: sys-apps/usbutils
+    {{- end }}
   hook:
     after: |-
       # Initial setup sccache
@@ -57,6 +60,17 @@ arch:
     - name: sof-firmware
     - name: alsa-firmware
     {{- end }}
+    {{- if eq .kind "pc" "laptop" }}
+    - name: usbutils
+    {{- end }}
+    {{- if eq .code "b0n9u4" }}
+    - name: fprintd
+    {{- end }}
+  hook:
+    after: |-
+      {{- if eq .code "b0n9u4" }}
+      sudo fprintd-enroll -f right-index-finger $USER
+      {{- end }}
 ubuntu:
   packages:
     # System tools
