@@ -278,6 +278,7 @@
 |[claude](https://github.com/anthropics/claude-code)|CLI tool for Anthropic's Claude LLM|
 |[copilot](https://github.com/github/copilot-cli)|CLI tool for GitHub Copilot|
 |[gemini](https://github.com/google-gemini/gemini-cli)|CLI tool for Google Gemini LLM|
+|[agy](https://github.com/google-antigravity/antigravity-cli)|CLI tool for Google Antigravity|
 |[llmfit](https://github.com/AlexsJones/llmfit)|TUI for models finding
 |[vectorcode](https://github.com/davidyz/vectorcode)|Code repository indexing tool with LLMs|
 |[opencode](https://github.com/anomalyco/opencode)|AI coding agent|
