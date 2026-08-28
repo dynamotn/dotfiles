@@ -82,6 +82,7 @@ function init::enable_launchd_service {
   dybatpho::expect_args service is_user_service -- "$@"
   if ! dybatpho::is command launchctl; then
     dybatpho::warn "launchctl command not found, cannot enable service $service"
+    return 1
   fi
   dybatpho::progress "Enabling service $service"
   if dybatpho::is true "$is_user_service"; then

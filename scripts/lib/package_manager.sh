@@ -79,11 +79,11 @@ function pkg::init_gentoo {
   pkg::sync_portage_repo
   if ! dybatpho::is command equery; then
     dybatpho::progress "Installing \`equery\` for day-to-day package management"
-    pkg::install_via_gentoo app-portage/gentoolkit
+    pkg::install_via_portage app-portage/gentoolkit
   fi
   if ! dybatpho::is command qlist; then
     dybatpho::progress "Installing \`qlist\` for querying installed packages"
-    pkg::install_via_gentoo app-portage/portage-utils
+    pkg::install_via_portage app-portage/portage-utils
   fi
 }
 
@@ -208,9 +208,9 @@ function pkg::add_apt_repo {
     if ! [[ "$key" =~ ^https://.* ]]; then
       dybatpho::dry_run sudo cp "$temp_key" "$gpg_path"
     else
-      dybatpho::dry_run sudo gpg --dearmor -o "$gpg_path" "$temp_key"
+      dybatpho::dry_run sudo gpg --dearmor --yes -o "$gpg_path" "$temp_key"
     fi
-    dybatpho::dry_run eval "echo \"deb [signed-by=${gpg_path}] ${url} ${suite} ${components}\" | sudo tee \"${path}\""
+    dybatpho::dry_run eval "printf '%s\n' \"deb [signed-by=${gpg_path}] ${url} ${suite} ${components}\" | sudo tee \"${path}\" > /dev/null"
   else
     dybatpho::debug "Repository $name already exists, skipping."
   fi
@@ -430,7 +430,7 @@ function pkg::install_via_flatpak {
 }
 
 #######################################
-# @description Check if a package is installed on MacOS via Apple Store
+# @description Install a package in MacOS via Homebrew
 # @arg $1 string Package name
 #######################################
 function pkg::install_via_brew {

@@ -61,7 +61,7 @@ function __compressed_copy_tar_selection {
 
   local match relative_path stripped_path destination_path
   for match in "${matches[@]}"; do
-    relative_path="${match#${extracted_root}/}"
+    relative_path="${match#"${extracted_root}"/}"
     stripped_path="$(__compressed_strip_path "${relative_path}" "${strip}")"
     [[ -n "${stripped_path}" ]] || continue
     destination_path="$(dybatpho::path_join "${destination}" "${stripped_path}")"
@@ -99,7 +99,7 @@ function __compressed_copy_zip_selection {
 
   local match relative_path stripped_path destination_path
   for match in "${matches[@]}"; do
-    relative_path="${match#${extracted_root}/}"
+    relative_path="${match#"${extracted_root}"/}"
     stripped_path="$(__compressed_strip_path "${relative_path}" "${strip}")"
     [[ -n "${stripped_path}" ]] || continue
     destination_path="$(dybatpho::path_join "${destination}" "$(dybatpho::path_basename "${stripped_path}")")"
@@ -143,6 +143,7 @@ function __compressed_extract_single_file {
 # @env LIST_CONTENTS boolean If true, list contents of archive instead of extracting
 #######################################
 function compressed:extract_tar {
+  # shellcheck disable=SC2034
   local name path location url version
   dybatpho::expect_args name path location url version -- "$@"
   if dybatpho::is true "$LIST_CONTENTS"; then

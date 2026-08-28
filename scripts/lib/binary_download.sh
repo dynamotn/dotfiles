@@ -93,9 +93,7 @@ function binary::verify_sha256 {
       # Single-hash per-asset file
       expected_hash="${candidate}"
     else
-      # Multi-entry file but asset not covered (e.g. macOS absent from Linux-only checksums.txt)
-      dybatpho::warn "SHA256 hash not found for ${asset_name} in ${sha256_url}, skipping verification"
-      return 0
+      dybatpho::die "SHA256 hash not found for ${asset_name} in ${sha256_url}"
     fi
   fi
 
@@ -120,7 +118,15 @@ function binary::get_latest_version {
   dybatpho::expect_args host repo -- "$@"
 
   dybatpho::create_temp temp_file ".txt"
-  dybatpho::debug "Get version ${name} from https://${host}/${repo}"
+  dybatpho::debug "Get version ${name:-tool} from https://${host}/${repo}"
+  local type="${type:-}"
+  if dybatpho::string_is_blank "$type"; then
+    if [[ "$host" =~ gitlab ]]; then
+      type="gitlab"
+    else
+      type="github"
+    fi
+  fi
   if [ "$type" = "github" ]; then
     local param=()
     if [ "${GITHUB_TOKEN:-x}" != "x" ]; then

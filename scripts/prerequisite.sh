@@ -7,12 +7,18 @@ set -Eeuo pipefail
 # @description Keep sudo alive
 #######################################
 function _keep_sudo_alive {
-  sudo -v
-  while true; do
-    sudo -n true
-    sleep 60
-    kill -0 "$$" || exit
-  done 2> /dev/null &
+  if command -v sudo &>/dev/null; then
+    sudo -v
+    (
+      while true; do
+        sudo -n true
+        sleep 60
+        kill -0 "$$" 2>/dev/null || exit
+      done
+    ) 2>/dev/null &
+    local sudo_pid=$!
+    trap 'kill -9 "$sudo_pid" 2>/dev/null || true' EXIT INT TERM
+  fi
 }
 
 #######################################
@@ -32,7 +38,7 @@ function _setup_gentoo {
 function _setup_arch {
   _keep_sudo_alive
   # Cloning code
-  sudo pacman -Sy --noconfirm git curl openssh
+  sudo pacman -Sy --needed --noconfirm ca-certificates git curl openssh
 }
 
 #######################################
@@ -42,7 +48,7 @@ function _setup_ubuntu_debian {
   _keep_sudo_alive
   sudo apt update
   # Cloning code
-  sudo apt install -y git curl openssh-client
+  sudo apt install -y ca-certificates git curl openssh-client
 }
 
 #######################################
@@ -52,7 +58,7 @@ function _setup_alpine {
   _keep_sudo_alive
   sudo apk update
   # GNU compatible tools
-  sudo apk add --no-cache coreutils grep
+  sudo apk add --no-cache ca-certificates coreutils grep bash
   # Cloning code
   sudo apk add --no-cache git curl openssh
 }
@@ -61,8 +67,8 @@ function _setup_alpine {
 # @description Setup Termux
 #######################################
 function _setup_termux {
-  pkg update && pkg upgrade -y
-  termux-change-repo && pkg update
+  pkg update -y && pkg upgrade -y
+  termux-change-repo && pkg update -y
   termux-setup-storage
   # Linux compatible tools
   pkg install -y tsu which file
@@ -84,58 +90,72 @@ function _setup_termux {
 #######################################
 function _setup_macos {
   _keep_sudo_alive
-  # Homebrew
-  if ! command -v brew &> /dev/null; then
+  local brew_prefix
+  if [[ -x /opt/homebrew/bin/brew ]]; then
+    brew_prefix="/opt/homebrew"
+  elif [[ -x /usr/local/bin/brew ]]; then
+    brew_prefix="/usr/local"
+  elif command -v brew &>/dev/null; then
+    brew_prefix="$(brew --prefix)"
+  else
     echo "Homebrew not found. Installing Homebrew..."
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    (
-      echo
-      # shellcheck disable=2016
-      echo 'eval "$(/opt/homebrew/bin/brew shellenv)"'
-    ) >> ~/.zprofile
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+      brew_prefix="/opt/homebrew"
+    else
+      brew_prefix="/usr/local"
+    fi
   fi
+
+  if [[ -x "${brew_prefix}/bin/brew" ]]; then
+    eval "$("${brew_prefix}/bin/brew" shellenv)"
+    if ! grep -qs 'brew shellenv' ~/.zprofile; then
+      echo "eval \"\$(${brew_prefix}/bin/brew shellenv)\"" >> ~/.zprofile
+    fi
+  fi
+
   # GNU compatible tools
   brew install bash coreutils findutils gnu-tar gnu-sed gawk gnutls gnu-indent grep
-  # Cloning code
-  brew install git curl
-  # Chezmoi tools
-  brew install chezmoi age
-  echo "export PATH=\"/opt/homebrew/bin:/opt/homebrew/opt/coreutils/libexec/gnubin:/opt/homebrew/opt/findutils/libexec/gnubin:/opt/homebrew/opt/gnu-tar/libexec/gnubin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:/opt/homebrew/opt/gawk/libexec/gnubin:/opt/homebrew/opt/gnu-indent/libexec/gnubin:/opt/homebrew/opt/gnu-getopt/bin:/opt/homebrew/opt/grep/libexec/gnubin:$PATH\"" >> ~/.zprofile
+  # Cloning code & chezmoi tools
+  brew install git curl openssh chezmoi age yq
+
+  local gnubin_path="${brew_prefix}/bin:${brew_prefix}/opt/coreutils/libexec/gnubin:${brew_prefix}/opt/findutils/libexec/gnubin:${brew_prefix}/opt/gnu-tar/libexec/gnubin:${brew_prefix}/opt/gnu-sed/libexec/gnubin:${brew_prefix}/opt/gawk/libexec/gnubin:${brew_prefix}/opt/gnu-indent/libexec/gnubin:${brew_prefix}/opt/gnu-getopt/bin:${brew_prefix}/opt/grep/libexec/gnubin"
+  if ! grep -qs 'libexec/gnubin' ~/.zprofile; then
+    echo "export PATH=\"${gnubin_path}:\$PATH\"" >> ~/.zprofile
+  fi
 }
 
 function _main {
-  case "$(uname -o)" in
-    Android)
-      # Termux
-      _setup_termux
-      ;;
-    *Linux)
-      # Gentoo
-      if command -v emerge &>/dev/null; then
-        _setup_gentoo
-      # ArchLinux
-      elif command -v pacman &>/dev/null; then
-        _setup_arch
-      # Ubuntu/Debian
-      elif command -v apt &>/dev/null; then
-        _setup_ubuntu_debian
-      # Alpine Linux
-      elif command -v apk &>/dev/null; then
-        _setup_alpine
-      else
-        echo "Your distro is not supported"
-        exit 1
-      fi
-      ;;
-    Darwin)
-      _setup_macos
-      ;;
-    *)
-      echo "Your OS is not supported"
+  local kernel
+  kernel="$(uname -s)"
+
+  if [[ -n "${TERMUX_VERSION:-}" ]] || [[ -d "/data/data/com.termux" ]]; then
+    # Termux on Android
+    _setup_termux
+  elif [[ "$kernel" == "Darwin" ]]; then
+    # macOS
+    _setup_macos
+  elif [[ "$kernel" == "Linux" ]]; then
+    # Gentoo
+    if command -v emerge &>/dev/null; then
+      _setup_gentoo
+    # ArchLinux
+    elif command -v pacman &>/dev/null; then
+      _setup_arch
+    # Ubuntu/Debian
+    elif command -v apt &>/dev/null; then
+      _setup_ubuntu_debian
+    # Alpine Linux
+    elif command -v apk &>/dev/null; then
+      _setup_alpine
+    else
+      echo "Your distro is not supported"
       exit 1
-      ;;
-  esac
+    fi
+  else
+    echo "Your OS ($kernel) is not supported"
+    exit 1
+  fi
 }
 
 _main
