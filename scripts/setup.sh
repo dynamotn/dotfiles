@@ -7,6 +7,7 @@ BIN_DIR="$HOME/.local/bin"
 #######################################
 # @description Spec of setup.sh
 #######################################
+# shellcheck disable=SC2154
 function _spec_main {
   dybatpho::opts::setup "Setup your machine from dotfiles" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
@@ -20,8 +21,18 @@ function _spec_main {
 #######################################
 function _update_git_modules {
   if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
-    cd "$SCRIPT_DIR" || exit
-    git -C "$SCRIPT_DIR" submodule update --init --remote "$SCRIPT_DIR/lib/dybatpho"
+    git -C "$SCRIPT_DIR/.." submodule update --init "$SCRIPT_DIR/lib/dybatpho"
+  fi
+}
+
+#######################################
+# @description In-place sed compatible with both GNU and BSD sed
+#######################################
+function _sed_i {
+  if sed --version 2>&1 | grep -q GNU; then
+    sed -i "$@"
+  else
+    sed -i '' "$@"
   fi
 }
 
@@ -30,7 +41,8 @@ function _update_git_modules {
 # @env BIN_DIR Directory to install binary
 #######################################
 function _install_chezmoi {
-  bash -c "$(curl -fsSL https://git.io/chezmoi)" -- -b "$BIN_DIR"
+  dybatpho::info "Installing chezmoi to $BIN_DIR"
+  sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$BIN_DIR"
 }
 
 #######################################
@@ -38,6 +50,7 @@ function _install_chezmoi {
 # @env BIN_DIR Directory to install binary
 #######################################
 function _install_age {
+  dybatpho::info "Installing age to $BIN_DIR"
   dybatpho::require "tar"
   dybatpho::create_temp "temp" ".tar.gz"
   # shellcheck disable=SC2154
@@ -50,6 +63,7 @@ function _install_age {
 # @env BIN_DIR Directory to install binary
 #######################################
 function _install_yq {
+  dybatpho::info "Installing yq to $BIN_DIR"
   local yq_path
   yq_path=$(dybatpho::path_join "$BIN_DIR" "yq")
   # shellcheck disable=SC2154
@@ -75,7 +89,8 @@ function _generate_chezmoi_config {
   # Generate decrypt config
   local enable_personal=false
   local identities=()
-  IFS=',' read -r -a identities <<< "$IDENTITIES"
+  local raw_identities="${IDENTITIES:-}"
+  IFS=',' read -r -a identities <<< "$raw_identities"
   local enterprise_identities=()
   for identity in "${identities[@]}"; do
     identity="$(dybatpho::trim "${identity}")"
@@ -89,14 +104,14 @@ function _generate_chezmoi_config {
     fi
   done
   if [[ "${enable_personal}" == true ]]; then
-    sed -i 's#decryptPersonal: .*#decryptPersonal: true#g' "$dest_config"
-    sed -i "s#\(\$decryptPersonal := .*\) false }}#\1 true }}#g" "$dest_config"
+    _sed_i 's#decryptPersonal: .*#decryptPersonal: true#g' "$dest_config"
+    _sed_i "s#\(\$decryptPersonal := .*\) false }}#\1 true }}#g" "$dest_config"
   fi
   if dybatpho::array_first enterprise_identities > /dev/null 2>&1; then
-    sed -i "s#\(\$decryptEnterprise := .*\) false }}#\1 true }}#g" "$dest_config"
-    sed -i "s#\$company := \(.*\) }}#\$company := \"\" }}#g" "$dest_config"
+    _sed_i "s#\(\$decryptEnterprise := .*\) false }}#\1 true }}#g" "$dest_config"
+    _sed_i "s#\$company := \(.*\) }}#\$company := \"\" }}#g" "$dest_config"
     for identity in "${enterprise_identities[@]}"; do
-      sed -i "s#\(\$listDecryptEnterprise := .*\) }}#\1 \"${identity}\" }}#g" "$dest_config"
+      _sed_i "s#\(\$listDecryptEnterprise := .*\) }}#\1 \"${identity}\" }}#g" "$dest_config"
     done
   fi
 }
@@ -132,14 +147,17 @@ function _main {
   dybatpho::header "Setup SSH"
   chezmoi apply "${HOME}/.ssh" "${params[@]}"
   local proxy
-  proxy="$(chezmoi data | yq .httpProxy)"
+  proxy="$(chezmoi data | yq .httpProxy 2>/dev/null || true)"
   [[ "${proxy}" == "null" ]] && proxy=""
   if ! dybatpho::string_is_blank "$proxy"; then
     export https_proxy="$proxy"
     export http_proxy="$proxy"
-    readarray addresses < <(chezmoi data | yq e -o=j -I=0 -r '.noProxyAddresses[]')
-    if dybatpho::array_first addresses > /dev/null 2>&1; then
-      export no_proxy="$(dybatpho::array_join "addresses" ",")"
+    local addresses=()
+    readarray -t addresses < <(chezmoi data 2>/dev/null | yq e -o=j -I=0 -r '.noProxyAddresses[] // empty' 2>/dev/null || true)
+    if ((${#addresses[@]} > 0)); then
+      local no_proxy_val
+      no_proxy_val="$(dybatpho::array_join "addresses" ",")"
+      export no_proxy="$no_proxy_val"
     fi
   fi
   dybatpho::header "Setup other dotfiles"
@@ -173,14 +191,18 @@ export PATH="$BIN_DIR":"$PATH"
 dybatpho::register_common_handlers
 dybatpho::require "git"
 dybatpho::require "curl"
-while ! dybatpho::is command "chezmoi"; do
+
+if ! dybatpho::is command "chezmoi"; then
   _install_chezmoi
-done
-while ! dybatpho::is command "age"; do
+  dybatpho::is command "chezmoi" || dybatpho::die "Failed to install chezmoi"
+fi
+if ! dybatpho::is command "age"; then
   _install_age
-done
-while ! dybatpho::is command "yq"; do
+  dybatpho::is command "age" || dybatpho::die "Failed to install age"
+fi
+if ! dybatpho::is command "yq"; then
   _install_yq
-done
+  dybatpho::is command "yq" || dybatpho::die "Failed to install yq"
+fi
 
 dybatpho::generate_from_spec _spec_main "$@"

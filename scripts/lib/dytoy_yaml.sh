@@ -10,8 +10,9 @@
 function dytoy::get_yaml {
   local name field
   dybatpho::expect_args name field -- "$@"
+  local config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
   local file
-  file="$(dybatpho::path_join "$HOME" ".config" "dytoy" "tools.yaml")"
+  file="$(dybatpho::path_join "$config_dir" "dytoy" "tools.yaml")"
   case $field in
     all)
       local method="${3:-}"
@@ -96,7 +97,7 @@ dybatpho::progress "Running ${kind} to install ${name}"
 export GOBIN="$(dybatpho::path_join "$HOME" ".local" "bin")"
 export CARGO_INSTALL_ROOT="$(dybatpho::path_join "$HOME" ".local")"
 EOF
-  echo -e "${content}" >> "${path}"
+  printf '%s\n' "${content}" >> "${path}"
 }
 
 #######################################
@@ -146,6 +147,7 @@ function dytoy::is_defined {
   yaml=$(dytoy::get_yaml "$name" "all" "$method")
   [[ "$yaml" == "[]" ]] || dybatpho::is empty "$yaml" \
     && dybatpho::die "Not found $name tool in ~/.config/dytoy/tools.yaml"
+  local is_enabled
   is_enabled=$(dytoy::get_yaml "$name" "enabled")
   dybatpho::is false "$is_enabled" \
     && dybatpho::die "Tool $name is disabled"
@@ -214,10 +216,12 @@ function dytoy::enable_service {
   local yaml init_system
   dybatpho::expect_args yaml init_system -- "$@"
 
+  local service_name
   service_name=$(echo "$yaml" | yq e '.service')
   if [[ "$service_name" == "null" ]]; then
     return 0
   fi
+  local is_user_service
   is_user_service=$(echo "$yaml" | yq e '.is_user_service')
   "init::enable_${init_system}_service" "$service_name" "$is_user_service"
 }
@@ -430,6 +434,7 @@ function dytoy::install_macos_package {
       fi
       ;;
     download)
+      local url
       url=$(echo "$yaml" | yq e '.url')
       if ! dytoy::is_installed_package "$name" "dmg"; then
         # shellcheck disable=SC2015
@@ -439,6 +444,7 @@ function dytoy::install_macos_package {
       fi
       ;;
     *)
+      local unstable brew_param
       unstable=$(echo "$yaml" | yq e '.unstable')
       if [[ "$type" == "cask" ]]; then
         brew_param="--cask"

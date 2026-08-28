@@ -18,5 +18,5 @@ function misc::install_tool {
 function misc::replace_version {
   local version
   dybatpho::expect_args version -- "$@"
-  cat - | sed "s/%v/${version}/g" | sed "s/%1v/${version:1}/g"
+  sed -e "s/%v/${version}/g" -e "s/%1v/${version:1}/g"
 }

@@ -2,6 +2,7 @@ setup() {
   load test_helper
   setup_dotfiles_test_env
   . "${DOTFILES_DIR}/scripts/lib/package_manager.sh"
+  eval "$(declare -f dybatpho::is | sed '1s/dybatpho::is/__orig_dybatpho_is/')"
 }
 
 @test "pkg::add_apt_repo converts fingerprints to keyserver URLs in dry-run mode" {
@@ -83,6 +84,12 @@ EOF
 
 @test "pkg::sync_pacman_repo falls back to pacman when paru is missing" {
   export DRY_RUN='true'
+  function dybatpho::is {
+    if [[ "$1" == "command" && "$2" == "paru" ]]; then
+      return 1
+    fi
+    __orig_dybatpho_is "$@"
+  }
   run pkg::sync_pacman_repo
   assert_success
   assert_output --partial 'pacman -Sy'
@@ -176,6 +183,12 @@ EOF
 
 @test "pkg::init_arch installs paru when missing in dry-run mode" {
   export DRY_RUN='true'
+  function dybatpho::is {
+    if [[ "$1" == "command" && "$2" == "paru" ]]; then
+      return 1
+    fi
+    __orig_dybatpho_is "$@"
+  }
   run pkg::init_arch
   assert_success
   assert_output --partial 'paru.git'
@@ -212,7 +225,7 @@ EOF
   local list_path="/etc/apt/sources.list.d/sample.list"
   function dybatpho::is {
     if [[ "$1" == "file" && "$2" == "${list_path}" ]]; then return 0; fi
-    command dybatpho::is "$@"
+    __orig_dybatpho_is "$@"
   }
   run pkg::add_apt_repo sample https://packages.example stable main ABCD1234
   assert_success
