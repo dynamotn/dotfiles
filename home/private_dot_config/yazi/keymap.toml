@@ -1,0 +1,8 @@
+#:schema https://raw.githubusercontent.com/yazi-rs/schemas/refs/heads/main/schemas/keymap.json
+[mgr]
+prepend_keymap = [
+  { on = [
+    "c",
+    "a",
+  ], run = "plugin ouch", desc = "Compress with ouch" },
+]
