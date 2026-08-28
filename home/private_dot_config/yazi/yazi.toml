@@ -1,4 +1,4 @@
-"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+#:schema https://raw.githubusercontent.com/yazi-rs/schemas/refs/heads/main/schemas/yazi.json
 
 [mgr]
 show_hidden = true
@@ -6,14 +6,14 @@ show_symlink = true
 linemode = "size"
 
 [plugin]
-prepend_previewers = [{ url = "*/", run = 'piper -- eza --icons -la@ "$1"' }]
-prepend_fetchers = [
-  { id = "git", name = "*", run = "git" },
-  { id = "git", name = "*/", run = "git" },
+prepend_previewers = [
+  { url = "*/", run = 'piper -- eza --icons -la@ "$1"' },
+  { mime = "application/{*zip,*tar,*bzip2,*7z*,*rar,*xz,*zstd,java-archive}", run = "ouch" },
 ]
 
 [opener]
 edit = [{ run = '$EDITOR "$@"', block = true, for = "unix" }]
 extract = [
   { run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
+  { run = 'ouch d -y "$@"', desc = "Extract here with ouch", for = "unix" },
 ]

@@ -86,6 +86,7 @@
 |[glab](https://gitlab.com/gitlab-org/cli)|Interactive CLI tool with Gitlab|
 |[gh](https://github.com/cli/cli)|Interactive CLI tool with Github|
 |[clin](https://github.com/reekta92/clin-rs)|TUI for Obsidian notes|
+|[ouch](https://github.com/ouch-org/ouch)|CLI tool to compress and decompress files with various formats|
 
 ## Cross platform GUI applications
 

@@ -1,0 +1,27 @@
+name: ouch
+method: binary
+is_essential: true
+github:
+  repo: ouch-org/ouch
+  {{- $os := "" }}
+  {{- if eq .chezmoi.os "linux" "android" }}
+  {{-   $os = "unknown-linux-gnu" }}
+  {{- else if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: ouch-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: ouch-{{ $arch }}-{{ $os }}/ouch
+    strip: 1
+  - path: ouch-{{ $arch }}-{{ $os }}/man/ouch*.1
+    strip: 2
+    location: {{ .chezmoi.homeDir }}/.local/man/man1
+  - path: ouch-{{ $arch }}-{{ $os }}/completions/ouch.fish
+    strip: 2
+    location: {{ .chezmoi.homeDir }}/.config/fish/completions
