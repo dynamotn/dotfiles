@@ -1,0 +1,120 @@
+#!{{ .bash }}
+# @file statusline.sh
+# @brief Claude Code statusline: model, effort, context usage bar, rate limits and cwd.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_common_handlers
+
+input=$(cat)
+
+# Single yq pass; `(. // "")` keeps one line per field so positions stay stable.
+mapfile -t fields < <(
+  printf '%s' "${input}" | dybatpho::json_query - '[
+    .model.display_name,
+    .context_window.used_percentage,
+    .context_window.total_input_tokens,
+    .context_window.context_window_size,
+    .effort.level,
+    .cwd,
+    .rate_limits.five_hour.used_percentage,
+    .rate_limits.five_hour.resets_at,
+    .rate_limits.seven_day.used_percentage
+  ] | .[] | (. // "")' -r
+)
+
+model="${fields[0]-}"
+used="${fields[1]-}"
+total_input="${fields[2]-}"
+ctx_size="${fields[3]-}"
+effort="${fields[4]-}"
+cwd="${fields[5]-}"
+five_hour_pct="${fields[6]-}"
+five_hour_reset="${fields[7]-}"
+seven_day_pct="${fields[8]-}"
+
+# Build circle bar (10 segments)
+FILLED="●"
+EMPTY="○"
+SEGMENTS=10
+
+if [[ -n "${used}" ]]; then
+  ctx_int=$(printf "%.0f" "${used}")
+  filled_count=$((ctx_int * SEGMENTS / 100))
+  if ((filled_count > SEGMENTS)); then
+    filled_count=${SEGMENTS}
+  fi
+
+  bar="$(dybatpho::string_repeat "${FILLED}" "${filled_count}")"
+  bar+="$(dybatpho::string_repeat "${EMPTY}" $((SEGMENTS - filled_count)))"
+
+  # Convert tokens to k
+  tokens_k=$((total_input / 1000))
+  max_k=$((ctx_size / 1000))
+
+  # Choose color: blue by default, red when > 60%
+  if ((ctx_int > 60)); then
+    color="\033[31m"
+  else
+    color="\033[34m"
+  fi
+
+  ctx_segment="${color}${bar} ${tokens_k}k/${max_k}k (${ctx_int}% used)\033[0m"
+else
+  empty_bar="$(dybatpho::string_repeat "${EMPTY}" "${SEGMENTS}")"
+  ctx_segment="\033[34m${empty_bar} 0%\033[0m"
+fi
+
+# Build model string with effort
+model_str="\033[33m${model}\033[0m"
+if [[ -n "${effort}" ]]; then
+  model_str="${model_str} \033[35m(${effort})\033[0m"
+fi
+
+# Build suffix with cwd and rate limits
+suffix=""
+
+# Format time remaining function
+__format_time_remaining() {
+  local reset_timestamp now seconds_left hours minutes
+  dybatpho::expect_args reset_timestamp -- "$@"
+  now=$(dybatpho::date_now)
+  seconds_left=$((reset_timestamp - now))
+
+  if ((seconds_left <= 0)); then
+    printf 'now\n'
+    return 0
+  fi
+  hours=$((seconds_left / 3600))
+  minutes=$(((seconds_left % 3600) / 60))
+  if ((hours > 0)); then
+    printf '%sh %sm\n' "${hours}" "${minutes}"
+  else
+    printf '%sm\n' "${minutes}"
+  fi
+}
+
+# Add rate limits to suffix with rounded percentages and time remaining
+if [[ -n "${five_hour_pct}" || -n "${seven_day_pct}" ]]; then
+  suffix="${suffix} • \033[36m["
+  if [[ -n "${five_hour_pct}" ]]; then
+    five_hour_pct_rounded=$(printf "%.0f" "${five_hour_pct}")
+    time_remaining=$(__format_time_remaining "${five_hour_reset:-0}")
+    suffix="${suffix}5h: ${five_hour_pct_rounded}% (${time_remaining})"
+  fi
+  if [[ -n "${seven_day_pct}" ]]; then
+    if [[ -n "${five_hour_pct}" ]]; then
+      suffix="${suffix} | "
+    fi
+    seven_day_pct_rounded=$(printf "%.0f" "${seven_day_pct}")
+    suffix="${suffix}7d: ${seven_day_pct_rounded}%"
+  fi
+  suffix="${suffix}]\033[0m"
+fi
+
+if [[ -n "${cwd}" ]]; then
+  # Shorten path: show last 2 components
+  parent="${cwd%/*}"
+  short_cwd="${parent##*/}/${cwd##*/}"
+  suffix="${suffix} • ${short_cwd}"
+fi
+
+printf "%b | %b%b\n" "${model_str}" "${ctx_segment}" "${suffix}"
