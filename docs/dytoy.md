@@ -283,6 +283,7 @@
 |[llmfit](https://github.com/AlexsJones/llmfit)|TUI for models finding
 |[vectorcode](https://github.com/davidyz/vectorcode)|Code repository indexing tool with LLMs|
 |[opencode](https://github.com/anomalyco/opencode)|AI coding agent|
+|[rtk](https://github.com/rtk-ai/rtk)|Proxy that reduces LLM token consumption|
 
 ## Android tools
 
