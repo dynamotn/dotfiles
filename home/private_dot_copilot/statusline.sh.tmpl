@@ -1,0 +1,91 @@
+#!{{ .bash }}
+# @file statusline.sh
+# @brief Copilot CLI statusline: model, context usage bar, git branch, usage and cwd.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_common_handlers
+
+input=$(cat)
+
+# Single yq pass; `(. // "")` keeps one line per field so positions stay stable.
+mapfile -t fields < <(
+  printf '%s' "${input}" | dybatpho::json_query - '[
+    .model.display_name,
+    .context_window.used_percentage,
+    .context_window.total_input_tokens,
+    .context_window.context_window_size,
+    .cwd,
+    .ai_used.formatted,
+    .cost.total_lines_added,
+    .cost.total_lines_removed
+  ] | .[] | (. // "")' -r
+)
+
+model="${fields[0]-}"
+used="${fields[1]-}"
+total_input="${fields[2]-}"
+ctx_size="${fields[3]-}"
+cwd="${fields[4]-}"
+ai_used="${fields[5]-}"
+lines_added="${fields[6]-}"
+lines_removed="${fields[7]-}"
+
+[[ -z "${model}" ]] && model="Copilot"
+
+# Build circle bar (10 segments)
+FILLED="●"
+EMPTY="○"
+SEGMENTS=10
+
+if [[ -n "${used}" ]]; then
+  ctx_int=$(printf "%.0f" "${used}")
+  filled_count=$((ctx_int * SEGMENTS / 100))
+  if ((filled_count > SEGMENTS)); then
+    filled_count=${SEGMENTS}
+  fi
+
+  bar="$(dybatpho::string_repeat "${FILLED}" "${filled_count}")"
+  bar+="$(dybatpho::string_repeat "${EMPTY}" $((SEGMENTS - filled_count)))"
+
+  # Convert tokens to k
+  tokens_k=$((total_input / 1000))
+  max_k=$((ctx_size / 1000))
+
+  # Choose color: blue by default, red when > 60%
+  if ((ctx_int > 60)); then
+    color="\033[31m"
+  else
+    color="\033[34m"
+  fi
+
+  ctx_segment="${color}${bar} ${tokens_k}k/${max_k}k (${ctx_int}% used)\033[0m"
+else
+  empty_bar="$(dybatpho::string_repeat "${EMPTY}" "${SEGMENTS}")"
+  ctx_segment="\033[34m${empty_bar} 0%\033[0m"
+fi
+
+model_str="\033[33m${model}\033[0m"
+
+# Build suffix with git branch, usage, code changes and cwd
+suffix=""
+
+if [[ -n "${cwd}" ]] && git -C "${cwd}" rev-parse --is-inside-work-tree &>/dev/null; then
+  branch=$(git -C "${cwd}" branch --show-current 2>/dev/null)
+  [[ -n "${branch}" ]] && suffix="${suffix} • \033[35m${branch}\033[0m"
+fi
+
+if [[ -n "${ai_used}" && "${ai_used}" != "0" ]]; then
+  suffix="${suffix} • \033[36musage: ${ai_used}\033[0m"
+fi
+
+if (("${lines_added:-0}" > 0 || "${lines_removed:-0}" > 0)); then
+  suffix="${suffix} • \033[32m+${lines_added:-0}\033[0m/\033[31m-${lines_removed:-0}\033[0m"
+fi
+
+if [[ -n "${cwd}" ]]; then
+  # Shorten path: show last 2 components
+  parent="${cwd%/*}"
+  short_cwd="${parent##*/}/${cwd##*/}"
+  suffix="${suffix} • ${short_cwd}"
+fi
+
+printf "%b | %b%b\n" "${model_str}" "${ctx_segment}" "${suffix}"
