@@ -1,0 +1,21 @@
+# CLI tool preferences
+
+This machine has modern replacements installed for several classic Unix
+tools. When running shell commands (directly, or via a bash/shell tool),
+prefer the tool on the right if it is available on `$PATH`; fall back to
+the classic tool only if the replacement is missing.
+
+| Instead of        | Prefer                                          | Notes |
+|-------------------|--------------------------------------------------|-------|
+| `tmux`            | `{{ if eq .terminalMultiplexer "Z" }}zellij{{ else }}tmux{{ end }}` | terminal multiplexer |
+| `grep`            | `rg` (ripgrep)                                    | text search |
+| `find`            | `fd`                                              | file search |
+
+Guidance:
+- Only substitute when the preferred tool is actually installed; check with
+  `command -v <tool>` if unsure.
+- Preserve the same flags/semantics as closely as possible; some of these
+  tools use different flag conventions (e.g. `fd` vs `find`, `rg` vs `grep`),
+  so adjust arguments accordingly rather than passing them through verbatim.
+- This file is about interactive/ad-hoc shell usage. Don't rewrite
+  project scripts, Makefiles, or CI configs to use these tools unless asked.
