@@ -54,6 +54,7 @@
 |[git-lfs](https://github.com/git-lfs/git-lfs)|Git extension for large files|
 |[jq](https://github.com/stedolan/jq)|JSON processor|
 |[delta](https://github.com/dandavison/delta)|Syntax highlighting pager for git, diff, and grep output|
+|[hunk](https://github.com/modem-dev/hunk)|Review-first diff viewer for git|
 |[bat](https://github.com/sharkdp/bat)|Alternative to `cat` with syntax highlighting and Git integration|
 |[ov](https://github.com/noborus/ov)|Alternative to `less`, `more`, `tail -f`|
 |[tspin](https://github.com/bensadeh/tailspin)|Alternative to `tail` with highlighter|
