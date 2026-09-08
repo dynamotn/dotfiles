@@ -74,7 +74,7 @@ exec-once = $mailClient -P Enterprise-{{ .company }}
 exec-once = obsidian
 
 # Scratchpad
-exec-once = [workspace special:hdrop silent] kitty --class btop -e btop
+exec-once = [workspace special:hdrop silent] kitty --class btop --sessions ~/.config/kitty/sessions/monitor.conf
 
 # Headless monitor
 exec-once = hyprctl output create headless Wayvnc-1
