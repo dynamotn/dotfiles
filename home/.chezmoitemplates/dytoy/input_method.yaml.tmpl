@@ -2,6 +2,7 @@
 name: fcitx5
 method: os
 # https://repology.org/project/fcitx5-configtool/versions
+# https://repology.org/project/fcitx5-lotus/versions
 # https://repology.org/project/fcitx5-bamboo/versions
 # https://repology.org/project/fcitx5-chinese-addons/versions
 # https://repology.org/project/fcitx5-m17n/versions
@@ -11,7 +12,7 @@ gentoo:
   packages:
     - name: app-i18n/fcitx-configtool
     {{- if has "vi" .languages }}
-    - name: app-i18n/fcitx-bamboo
+    - name: app-i18n/fcitx-lotus
       repo: dynamo
       url: https://gitlab.com/dynamo-config/distro/gentoo-overlay.git
     {{- end }}
@@ -22,11 +23,20 @@ gentoo:
     - name: app-i18n/fcitx-chinese-addon
     - name: app-i18n/fcitx-m17n
     {{- end }}
+  hook:
+    after: |-
+      {{- if eq .initSystem "openrc" }}
+      sudo ln -s /etc/init.d/fcitx5-lotus /etc/init.d/fcitx5-lotus.\$(whoami)
+      sudo rc-update add fcitx5-lotus.\$(whoami) default
+      sudo rc-service fcitx5-lotus.\$(whoami) restart
+      {{- else if eq .initSystem "systemd" }}
+      sudo systemctl enable --now fcitx5-lotus-server@\$(whoami).service
+      {{- end }}
 arch:
   packages:
     - name: fcitx5-configtool
     {{- if has "vi" .languages }}
-    - name: fcitx5-bamboo
+    - name: fcitx5-lotus
     {{- end }}
     {{- if has "ja" .languages }}
     - name: fcitx5-mozc
@@ -35,11 +45,17 @@ arch:
     - name: fcitx5-chinese-addons
     - name: fcitx5-m17n
     {{- end }}
+  hook:
+    after: |-
+      sudo systemctl enable --now fcitx5-lotus-server@\$(whoami).service
 ubuntu:
   packages:
     - name: fcitx5-configtool
     {{- if has "vi" .languages }}
-    - name: fcitx5-bamboo
+    - name: fcitx5-lotus
+      repo: https://fcitx5-lotus.pages.dev/apt/%v
+      components: main
+      key: https://fcitx5-lotus.pages.dev/pubkey.gpg
     {{- end }}
     {{- if has "ja" .languages }}
     - name: fcitx5-mozc
@@ -48,6 +64,9 @@ ubuntu:
     - name: fcitx5-chinese-addons
     - name: fcitx5-m17n
     {{- end }}
+  hook:
+    after: |-
+      sudo systemctl enable --now fcitx5-lotus-server@\$(whoami).service
 alpine:
   packages:
     - name: fcitx5-configtool
