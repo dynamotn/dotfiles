@@ -1,0 +1,27 @@
+#!{{ .bash }}
+# @file zellij-layout-picker
+# @brief Pick a zellij layout with fzf and launch/attach zellij using it.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_common_handlers
+
+layouts_dir="${ZELLIJ_LAYOUT_DIR:-$HOME/.config/zellij/layouts}"
+
+layout=""
+if [[ -d "$layouts_dir" ]]; then
+  layout=$(
+    find -L "$layouts_dir" -maxdepth 1 -type f -name '*.kdl' \
+      -exec basename {} \; \
+      | sed -E 's/\.kdl$//' \
+      | sort -u \
+      | awk '{ if ($0 == "default") print "0" $0; else print "1" $0 }' \
+      | sort \
+      | sed -E 's/^[01]//' \
+      | fzf --prompt="Zellij layout> " --height=40% --reverse --exit-0
+  )
+fi
+
+if [[ -n "$layout" ]]; then
+  exec zellij --layout "$layout"
+else
+  exec zellij
+fi
