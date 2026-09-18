@@ -55,7 +55,7 @@ alias gsts 'gst show --text'
 alias gsu 'git submodule update --init --recursive --remote'
 alias gt 'git tag'
 alias gv 'git mv'
-alias gw 'git whatchanged'
+alias gw 'git worktree'
 
 alias fgcs __caran_fzf_git_commit_search
 
