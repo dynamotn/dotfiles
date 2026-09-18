@@ -1,0 +1,16 @@
+{{- if eq .kind "laptop" }}
+# Use tlp only on my laptop (Gentoo and Arch)
+name: power_manager
+method: os
+# https://repology.org/project/tlp/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-power/tlp
+      service: tlp
+arch:
+  packages:
+    - name: tlp
+      service: tlp
+macos:  # Not needed
+{{- end }}

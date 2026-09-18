@@ -35,7 +35,7 @@
 |[kernel](https://github.com/torvalds/linux)|Linux kernel for OS|
 |[cronie](https://github.com/cronie-crond/cronie)|Run scheduled tasks|
 |`ntp`|NTP client to sync system clock|
-|[auto-cpufreq](https://github.com/AdnanHodzic/auto-cpufreq)|Automatic CPU speed & power optimizer|
+|[tlp](https://linrunner.de/tlp)|Automatic CPU speed & power optimizer for laptop|
 |[grub](https://www.gnu.org/software/grub/)|Bootloader for system|
 |[flatpak](https://github.com/flatpak/flatpak)|Linux application sandboxing and distribution framework|
 
