@@ -1,6 +1,6 @@
 status --is-interactive || exit
 function __auto_ls --on-variable PWD --description 'Automatically ls when the $PWD changes.'
-    eza --icons -la@ 2>/dev/null; or ls -laZ
+    eza --icons -la@ --color=always 2>/dev/null; or ls -laZ
 end
 
 function __auto_prek_install --on-variable PWD --description 'Install the prek pre-commit Git shim when entering a repository.'
