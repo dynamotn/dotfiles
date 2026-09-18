@@ -6,7 +6,10 @@ tags
 .vim
 .idea
 Session.vim
-**/.claude/settings.local.json
+.claude
+!.claude/settings.json
+.vscode
+!.vscode/settings.json
 
 # Compiled sources
 *.com
