@@ -9,11 +9,11 @@ set -gx XDG_CACHE_HOME $HOME/.cache
 set -gx XDG_CONFIG_HOME $HOME/.config
 set -gx XDG_DATA_HOME $HOME/.local/share
 set -gx XDG_STATE_HOME $HOME/.local/state
-{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{-   if eq .osid "linux-gentoo" }}
 set -gx XDG_RUNTIME_DIR /tmp/user-(id -u)
-{{- else }}
+{{-   else }}
 set -gx XDG_RUNTIME_DIR /run/user/(id -u)
-{{- end }}
+{{-   end }}
 {{- end }}
 
 # GPG interface to insert passphrase
