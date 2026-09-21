@@ -114,7 +114,7 @@
 |[eww](https://github.com/elkowar/eww)|Widgets and status bar|
 |[wofi](https://sr.ht/~scoopta/wofi/)|Application launcher, simple switcher|
 |[wtype](https://github.com/atx/wtype)|Simulate keyboard input for Wayland|
-|[swww](https://github.com/LGFae/swww)|Animated wallpaper daemon|
+|[awww](https://codeberg.com/LGFae/swww)|Animated wallpaper daemon|
 |[greetd](https://sr.ht/~kennylevinsen/greetd/)|GreetD, display manager for Wayland|
 |[regreet](https://github.com/rharish101/ReGreet)|ReGreet, greeter for GreetD|
 |[hyprlock](https://github.com/hyprwm/hyprlock)|Screen locker for Wayland|
