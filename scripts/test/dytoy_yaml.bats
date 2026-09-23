@@ -52,6 +52,27 @@ EOF
   assert_output ''
 }
 
+@test "dytoy::run_script shows the script content in dry-run mode" {
+  export DRY_RUN='true'
+  local script_path="${BATS_TEST_TMPDIR}/sample.sh"
+  printf 'echo hello from sample\n' > "${script_path}"
+
+  run dytoy::run_script "${script_path}"
+  assert_success
+  assert_output --partial "RUN: ${script_path}"
+  assert_output --partial 'echo hello from sample'
+}
+
+@test "dytoy::run_script reports nothing for a script without content" {
+  export DRY_RUN='true'
+  local script_path="${BATS_TEST_TMPDIR}/empty.sh"
+  : > "${script_path}"
+
+  run dytoy::run_script "${script_path}"
+  assert_success
+  refute_output --partial "RUN:"
+}
+
 @test "dytoy::is_installed_command respects a custom install location" {
   mkdir -p "${BATS_TEST_TMPDIR}/custom-bin"
   touch "${BATS_TEST_TMPDIR}/custom-bin/sample"
@@ -172,6 +193,20 @@ EOF
   run cat "${actions_file}"
   assert_success
   assert_output $'repo:ubuntu\ninstall:ripgrep\nservice:systemd'
+}
+
+@test "dytoy::install_macos_package passes the brew flags of the tool type" {
+  local actions_file="${BATS_TEST_TMPDIR}/actions"
+  function dytoy::is_installed_package { return 1; }
+  function dytoy::enable_service { true; }
+  function pkg::install_via_brew { printf 'brew:%s\n' "$*" >> "${actions_file}"; }
+
+  run dytoy::install_macos_package '{"name":"firefox","type":"cask","unstable":"true","repo":"null"}'
+  assert_success
+  run dytoy::install_macos_package '{"name":"fzf","type":"formula","unstable":"false","repo":"null"}'
+  assert_success
+  run cat "${actions_file}"
+  assert_output $'brew:firefox --cask --HEAD\nbrew:fzf --formula'
 }
 
 @test "dytoy::install_macos_rosetta installs rosetta when runtime is missing" {

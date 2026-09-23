@@ -4,10 +4,10 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-layouts_dir="${ZELLIJ_LAYOUT_DIR:-$HOME/.config/zellij/layouts}"
+layouts_dir="${ZELLIJ_LAYOUT_DIR:-$(dybatpho::path_join "$(dybatpho::xdg_config_dir zellij)" "layouts")}"
 
 layout=""
-if [[ -d "$layouts_dir" ]]; then
+if dybatpho::is dir "$layouts_dir"; then
   layout=$(
     find -L "$layouts_dir" -maxdepth 1 -type f -name '*.kdl' \
       -exec basename {} \; \

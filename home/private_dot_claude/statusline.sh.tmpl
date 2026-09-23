@@ -1,7 +1,7 @@
 #!{{ .bash }}
 # @file statusline.sh
 # @brief Claude Code statusline: model, effort, context usage bar, rate limits and cwd.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules json date
 dybatpho::register_common_handlers
 
 input=$(cat)

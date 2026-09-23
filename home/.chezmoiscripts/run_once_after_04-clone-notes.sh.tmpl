@@ -6,7 +6,7 @@ dybatpho::register_common_handlers
 notes_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" "storage" "shared" "Documents" "Notes")"
 if ! dybatpho::is dir "${notes_dir}"; then
   dybatpho::header "Clone notes"
-  mkdir -p "${notes_dir}"
+  dybatpho::ensure_dir "${notes_dir}" > /dev/null
   git -C "${notes_dir}" init
   git -C "${notes_dir}" remote add ssh git@gitlab.com:dynamo-brain/digital-garden.git
   dybatpho::progress "Pull from remote"

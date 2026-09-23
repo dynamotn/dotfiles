@@ -1,5 +1,5 @@
 #!{{ .bash }}
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules git
 dybatpho::register_common_handlers
 
 function _main {

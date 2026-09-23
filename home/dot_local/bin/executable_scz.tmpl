@@ -6,7 +6,7 @@ dotfiles="$(dybatpho::path_normalize "$(dybatpho::path_join "{{ .chezmoi.sourceD
 chezmoi_config="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "chezmoi.yaml")"
 {{- if eq .chezmoi.os "darwin" }}
 if dybatpho::string_contains "$*" "/Applications"; then
-  sed -i "/umask:/s/^# //" "$chezmoi_config"
+  dybatpho::file_replace "$chezmoi_config" '^# \(umask:\)' '\1'
 fi
 {{- end }}
 env_args=(env
@@ -22,6 +22,6 @@ sudo "${env_args[@]}" \
   "$@"
 {{- if eq .chezmoi.os "darwin" }}
 if dybatpho::string_contains "$*" "/Applications"; then
-  sed -i "/umask:/s/^/# /" "$chezmoi_config"
+  dybatpho::file_replace "$chezmoi_config" '^\(umask:\)' '# \1'
 fi
 {{- end }}

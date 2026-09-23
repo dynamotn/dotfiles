@@ -7,7 +7,7 @@ dybatpho::header "Setup tmux"
 # config hash: {{ joinPath .chezmoi.sourceDir "../silos/tmux/config" | include | sha256sum }}
 tmux_plugin_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "share" "tmux" "plugins")"
 tpm_dir="$(dybatpho::path_join "${tmux_plugin_dir}" "tpm")"
-mkdir -p "${tmux_plugin_dir}"
+dybatpho::ensure_dir "${tmux_plugin_dir}" > /dev/null
 
 dybatpho::progress "Install tpm"
 if ! dybatpho::is dir "${tpm_dir}"; then

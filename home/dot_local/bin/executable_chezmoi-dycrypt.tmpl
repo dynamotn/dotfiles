@@ -1,7 +1,7 @@
 #!{{ .bash }}
 # @file chezmoi-dycrypt
 # @brief Decrypt and encrypt secrets data in chezmoi dotfiles with single custom identity
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli
 dybatpho::register_common_handlers
 
 #######################################
@@ -20,7 +20,8 @@ function _spec_main {
 # @description Spec of decrypt command
 #######################################
 function _spec_decrypt {
-  dybatpho::opts::setup "Decrypt secrets data" DECRYPT_ARGS action:"_decrypt \$DECRYPT_ARGS"
+  dybatpho::opts::setup "Decrypt secrets data" DECRYPT_ARGS action:"_decrypt \"\${DECRYPT_ARGS[@]}\""
+  dybatpho::opts::arg "Name of the file to decrypt" FILENAME
   dybatpho::opts::param "Identity type" IDENTITY_TYPE --identity-type -i init:="personal"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_decrypt"
 }
@@ -29,7 +30,8 @@ function _spec_decrypt {
 # @description Spec of encrypt command
 #######################################
 function _spec_encrypt {
-  dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS action:"_encrypt \"\$ENCRYPT_ARGS\""
+  dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS action:"_encrypt \"\${ENCRYPT_ARGS[@]}\""
+  dybatpho::opts::arg "Name of the file to encrypt" FILENAME
   dybatpho::opts::param "Identity type" IDENTITY_TYPE --identity-type -i init:="personal"
   dybatpho::opts::param \
     "Folder of input file, default is \`data\` for encryption to \`secrets/data\` in dotfiles folder" \
@@ -61,7 +63,7 @@ function _encrypt {
     dybatpho::die "Input ${input} is not a file"
   fi
   dybatpho::debug "Encrypt ${input} to ${output}"
-  dybatpho::dry_run mkdir -p "$(dybatpho::path_dirname "$output")"
+  dybatpho::ensure_dir "$(dybatpho::path_dirname "$output")" > /dev/null
   dybatpho::create_temp temp_file ".tmp"
   local up_to_date="false"
   if dybatpho::is true "${FORCE}"; then

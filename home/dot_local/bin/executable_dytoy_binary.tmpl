@@ -1,7 +1,7 @@
 #!{{ .bash }}
 # @file dytoy_binary
 # @brief Install binary tools from GitHub or GitLab releases
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy_yaml.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/compressed.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/binary_download.sh
@@ -40,7 +40,7 @@ function _parse_release {
   dybatpho::debug "Download tool ${name} to ${location}"
 
   dybatpho::progress "Installing ${name}"
-  dybatpho::dry_run mkdir -p "$location"
+  dybatpho::ensure_dir "$location" > /dev/null
   host=$(dytoy::get_yaml "$name" "${type}.host")
   [[ "${host}" == "null" ]] && host=""
   host=$(dybatpho::coalesce "${host}" "${type}.com")

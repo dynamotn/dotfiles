@@ -1,7 +1,7 @@
 #!{{ .bash }}
 # @file dytoy_os
 # @brief Install package tools for the current OS
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array
 . {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy_yaml.sh
