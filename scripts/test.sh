@@ -3,7 +3,7 @@
 # @brief Run tests for the dotfiles setup
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 # shellcheck source=lib/dybatpho/init.sh
-. "$SCRIPT_DIR/lib/dybatpho/init.sh"
+. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli
 BATS_CMD="${DYBATPHO_DIR}/test/lib/core/bin/bats"
 dybatpho::register_common_handlers
 
@@ -23,8 +23,8 @@ function _spec_main {
 #######################################
 function _main {
   if [[ ! -x "${BATS_CMD}" ]]; then
-    if command -v bats &>/dev/null; then
-      BATS_CMD="$(command -v bats)"
+    if dybatpho::is command bats; then
+      BATS_CMD="$(dybatpho::command_path bats)"
     else
       git -C "${DYBATPHO_DIR}" submodule update --init --recursive 2>/dev/null || true
     fi

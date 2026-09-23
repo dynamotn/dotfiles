@@ -2,15 +2,101 @@
 # @file package_manager.sh
 # @brief Library `pkg` to manage package via package manager of distros
 # @description Library `pkg` to manage package via package manager of distros,
-# include repositories, packages
+# include repositories, packages.
+#
+# The `pkg` module of dybatpho already knows how to detect, query, update and
+# install with `apt`, `apk`, `brew`, `dnf`, `pacman` and `emerge`, so those
+# managers are driven through it instead of hand-written commands. Managers it
+# doesn't support (Termux's `pkg`, `fdroidcl`, `flatpak`, `mas`, `.dmg` files)
+# and Arch's AUR helper `paru` keep their own implementation here.
+dybatpho::load network pkg
+
+#######################################
+# @description Run a dybatpho `pkg` command against an explicit package manager
+# instead of the one detected on this machine. The override lives in a subshell,
+# so it never leaks into the caller.
+# @arg $1 string Package manager name, one of `dybatpho::pkg_supported`
+# @arg $@ string Command and its arguments
+# @exitcode The exit code of the command
+#######################################
+function __pkg_with_manager {
+  local manager
+  dybatpho::expect_args manager -- "$@"
+  shift
+  (
+    export DYBATPHO_PKG_MANAGER="${manager}"
+    "$@"
+  )
+}
+
+#######################################
+# @description Sync repositories of a package manager supported by dybatpho
+# @arg $1 string Package manager name, one of `dybatpho::pkg_supported`
+#######################################
+function pkg::sync_repo {
+  local manager
+  dybatpho::expect_args manager -- "$@"
+  dybatpho::progress "Syncing package repositories"
+  __pkg_with_manager "$manager" dybatpho::pkg_update --force
+}
+
+#######################################
+# @description Check if a package is installed, with a package manager
+# supported by dybatpho
+# @arg $1 string Package manager name, one of `dybatpho::pkg_supported`
+# @arg $2 string Package name
+#######################################
+function pkg::check_installed {
+  local manager package
+  dybatpho::expect_args manager package -- "$@"
+  __pkg_with_manager "$manager" dybatpho::pkg_installed "$package"
+}
+
+#######################################
+# @description Install packages with a package manager supported by dybatpho
+# @arg $1 string Package manager name, one of `dybatpho::pkg_supported`
+# @arg $@ string Package names, and `--arg`/`-a` options handed to the manager itself
+#######################################
+function pkg::install {
+  local manager
+  dybatpho::expect_args manager -- "$@"
+  shift
+  local -a options=() packages=()
+  while (($#)); do
+    case "$1" in
+      -a | --arg)
+        (($# > 1)) || dybatpho::die "pkg::install: expected a value after $1"
+        options+=("$1" "$2")
+        shift
+        ;;
+      *) packages+=("$1") ;;
+    esac
+    shift
+  done
+  ((${#packages[@]})) || dybatpho::die "pkg::install: expected at least one package"
+  dybatpho::progress "Installing package ${packages[*]}"
+  __pkg_with_manager "$manager" dybatpho::pkg_install --force "${options[@]}" -- "${packages[@]}"
+}
+
+#######################################
+# @description Make sure a command is available, installing the package that
+# provides it with a package manager supported by dybatpho
+# @arg $1 string Package manager name, one of `dybatpho::pkg_supported`
+# @arg $2 string Command that must be available
+# @arg $3 string Package providing the command
+#######################################
+function pkg::require {
+  local manager command package
+  dybatpho::expect_args manager command package -- "$@"
+  __pkg_with_manager "$manager" dybatpho::pkg_require --force "$command" "${manager}:${package}"
+}
 
 #######################################
 # @description Sync repositories of Gentoo
 # @noargs
 #######################################
 function pkg::sync_portage_repo {
-  dybatpho::progress "Syncing package repositories"
-  dybatpho::dry_run sudo emaint sync --allrepos
+  pkg::sync_repo emerge
 }
 
 #######################################
@@ -18,10 +104,11 @@ function pkg::sync_portage_repo {
 # @noargs
 #######################################
 function pkg::sync_pacman_repo {
-  dybatpho::progress "Syncing package repositories"
+  # `paru` also refreshes the AUR metadata, so it wins when it is installed.
   if ! dybatpho::is command paru; then
-    dybatpho::dry_run sudo pacman -Sy
+    pkg::sync_repo pacman
   else
+    dybatpho::progress "Syncing package repositories"
     dybatpho::dry_run paru -Sy
   fi
 }
@@ -31,8 +118,7 @@ function pkg::sync_pacman_repo {
 # @noargs
 #######################################
 function pkg::sync_apt_repo {
-  dybatpho::progress "Syncing package repositories"
-  dybatpho::dry_run sudo apt update
+  pkg::sync_repo apt
 }
 
 #######################################
@@ -40,8 +126,7 @@ function pkg::sync_apt_repo {
 # @noargs
 #######################################
 function pkg::sync_apk_repo {
-  dybatpho::progress "Syncing package repositories"
-  dybatpho::dry_run sudo apk update
+  pkg::sync_repo apk
 }
 
 #######################################
@@ -67,8 +152,7 @@ function pkg::sync_fdroid_repo {
 # @noargs
 #######################################
 function pkg::sync_brew_repo {
-  dybatpho::progress "Syncing package repositories"
-  dybatpho::dry_run brew update
+  pkg::sync_repo brew
 }
 
 #######################################
@@ -77,14 +161,9 @@ function pkg::sync_brew_repo {
 #######################################
 function pkg::init_gentoo {
   pkg::sync_portage_repo
-  if ! dybatpho::is command equery; then
-    dybatpho::progress "Installing \`equery\` for day-to-day package management"
-    pkg::install_via_portage app-portage/gentoolkit
-  fi
-  if ! dybatpho::is command qlist; then
-    dybatpho::progress "Installing \`qlist\` for querying installed packages"
-    pkg::install_via_portage app-portage/portage-utils
-  fi
+  # `qlist` and `equery` are also what `dybatpho::pkg_installed` queries on emerge.
+  pkg::require emerge qlist app-portage/portage-utils
+  pkg::require emerge equery app-portage/gentoolkit
 }
 
 #######################################
@@ -95,8 +174,8 @@ function pkg::init_arch {
   pkg::sync_pacman_repo
   if ! dybatpho::is command paru; then
     dybatpho::progress "Installing \`paru\` for managing AUR packages"
-    dybatpho::dry_run sudo pacman -S --needed --noconfirm git base-devel rust
-    dybatpho::create_temp paru ""
+    pkg::install pacman git base-devel rust
+    dybatpho::create_temp_dir paru
     # shellcheck disable=SC2154
     dybatpho::dry_run git clone https://aur.archlinux.org/paru.git "$paru"
     dybatpho::dry_run bash -c "cd \"${paru}\" && makepkg -si --noconfirm"
@@ -153,10 +232,7 @@ function pkg::init_flatpak {
 #######################################
 function pkg::init_macos {
   pkg::sync_brew_repo
-  if ! dybatpho::is command mas; then
-    dybatpho::progress "Installing \`mas\` for managing Apple Store apps"
-    pkg::install_via_brew mas
-  fi
+  pkg::require brew mas mas
 }
 
 #######################################
@@ -266,7 +342,7 @@ function pkg::add_brew_tap {
 function pkg::check_installed_portage {
   local package
   dybatpho::expect_args package -- "$@"
-  qlist -I "$package" > /dev/null
+  pkg::check_installed emerge "$package"
 }
 
 #######################################
@@ -276,7 +352,7 @@ function pkg::check_installed_portage {
 function pkg::check_installed_pacman {
   local package
   dybatpho::expect_args package -- "$@"
-  pacman -Qi "$package" > /dev/null
+  pkg::check_installed pacman "$package"
 }
 
 #######################################
@@ -286,7 +362,7 @@ function pkg::check_installed_pacman {
 function pkg::check_installed_apt {
   local package
   dybatpho::expect_args package -- "$@"
-  dpkg-query -s "$package" > /dev/null 2>&1
+  pkg::check_installed apt "$package"
 }
 
 #######################################
@@ -296,7 +372,7 @@ function pkg::check_installed_apt {
 function pkg::check_installed_apk {
   local package
   dybatpho::expect_args package -- "$@"
-  apk info -e "$package" > /dev/null 2>&1
+  pkg::check_installed apk "$package"
 }
 
 #######################################
@@ -326,7 +402,7 @@ function pkg::check_installed_flatpak {
 function pkg::check_installed_brew {
   local package
   dybatpho::expect_args package -- "$@"
-  grep -q "^$package$" <(brew ls -1)
+  pkg::check_installed brew "$package"
 }
 
 #######################################
@@ -358,8 +434,7 @@ function pkg::check_installed_dmg {
 function pkg::install_via_portage {
   local package
   dybatpho::expect_args package -- "$@"
-  dybatpho::progress "Installing package $package"
-  dybatpho::dry_run sudo emerge --ask n --noreplace "$package"
+  pkg::install emerge "$package"
 }
 
 #######################################
@@ -370,6 +445,8 @@ function pkg::install_via_pacman {
   local package
   dybatpho::expect_args package -- "$@"
   dybatpho::progress "Installing package $package"
+  # `dybatpho::pkg_install` drives `pacman`, which can't build AUR packages, so
+  # `paru` stays in charge here.
   dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$package"
 }
 
@@ -380,8 +457,7 @@ function pkg::install_via_pacman {
 function pkg::install_via_apt {
   local package
   dybatpho::expect_args package -- "$@"
-  dybatpho::progress "Installing package $package"
-  dybatpho::dry_run sudo apt install -y "$package"
+  pkg::install apt "$package"
 }
 
 #######################################
@@ -391,8 +467,8 @@ function pkg::install_via_apt {
 function pkg::install_via_apk {
   local package
   dybatpho::expect_args package -- "$@"
-  dybatpho::progress "Installing package $package"
-  dybatpho::dry_run sudo apk add --no-cache --no-interactive "$package"
+  # No index is kept on these machines, and nothing is watching the install.
+  pkg::install apk --arg --no-cache --arg --no-interactive "$package"
 }
 
 #######################################
@@ -432,12 +508,18 @@ function pkg::install_via_flatpak {
 #######################################
 # @description Install a package in MacOS via Homebrew
 # @arg $1 string Package name
+# @arg $@ string Flags of `brew install`, such as `--cask` or `--HEAD`
 #######################################
 function pkg::install_via_brew {
   local package
   dybatpho::expect_args package -- "$@"
-  dybatpho::progress "Installing package $package"
-  dybatpho::dry_run brew install "$package"
+  shift
+  local -a options=()
+  local flag
+  for flag in "$@"; do
+    options+=(--arg "$flag")
+  done
+  pkg::install brew "${options[@]}" "$package"
 }
 
 #######################################

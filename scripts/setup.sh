@@ -26,17 +26,6 @@ function _update_git_modules {
 }
 
 #######################################
-# @description In-place sed compatible with both GNU and BSD sed
-#######################################
-function _sed_i {
-  if sed --version 2>&1 | grep -q GNU; then
-    sed -i "$@"
-  else
-    sed -i '' "$@"
-  fi
-}
-
-#######################################
 # @description Install binary version of chezmoi
 # @env BIN_DIR Directory to install binary
 #######################################
@@ -104,14 +93,14 @@ function _generate_chezmoi_config {
     fi
   done
   if [[ "${enable_personal}" == true ]]; then
-    _sed_i 's#decryptPersonal: .*#decryptPersonal: true#g' "$dest_config"
-    _sed_i "s#\(\$decryptPersonal := .*\) false }}#\1 true }}#g" "$dest_config"
+    dybatpho::file_replace "$dest_config" 'decryptPersonal: .*' 'decryptPersonal: true'
+    dybatpho::file_replace "$dest_config" '\(\$decryptPersonal := .*\) false }}' '\1 true }}'
   fi
   if dybatpho::array_first enterprise_identities > /dev/null 2>&1; then
-    _sed_i "s#\(\$decryptEnterprise := .*\) false }}#\1 true }}#g" "$dest_config"
-    _sed_i "s#\$company := \(.*\) }}#\$company := \"\" }}#g" "$dest_config"
+    dybatpho::file_replace "$dest_config" '\(\$decryptEnterprise := .*\) false }}' '\1 true }}'
+    dybatpho::file_replace "$dest_config" '$company := \(.*\) }}' '$company := "" }}'
     for identity in "${enterprise_identities[@]}"; do
-      _sed_i "s#\(\$listDecryptEnterprise := .*\) }}#\1 \"${identity}\" }}#g" "$dest_config"
+      dybatpho::file_replace "$dest_config" '\(\$listDecryptEnterprise := .*\) }}' "\\1 \"${identity}\" }}"
     done
   fi
 }
@@ -184,9 +173,8 @@ function _main {
 _update_git_modules
 
 # shellcheck source=lib/dybatpho/init.sh
-. "$SCRIPT_DIR/lib/dybatpho/init.sh"
-BIN_DIR="$(dybatpho::path_join "$HOME" ".local" "bin")"
-mkdir -p "$BIN_DIR"
+. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli network archive array
+BIN_DIR="$(dybatpho::ensure_dir "$(dybatpho::path_join "$HOME" ".local" "bin")")"
 export PATH="$BIN_DIR":"$PATH"
 dybatpho::register_common_handlers
 dybatpho::require "git"

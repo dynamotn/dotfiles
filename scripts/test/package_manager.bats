@@ -28,7 +28,8 @@ setup() {
 @test "pkg::check_installed_apt delegates to dpkg-query" {
   cat > "${HOME}/.local/bin/dpkg-query" <<'EOF'
 #!/usr/bin/env bash
-if [[ "$1" == "-s" && "$2" == "sample" ]]; then
+if [[ "$1" == "-W" && "$4" == "sample" ]]; then
+  printf 'install ok installed'
   exit 0
 fi
 exit 1
@@ -63,11 +64,11 @@ EOF
 # pkg::sync_* — each prints a progress message and runs the sync command
 # ---------------------------------------------------------------------------
 
-@test "pkg::sync_portage_repo prints progress and calls emaint in dry-run mode" {
+@test "pkg::sync_portage_repo prints progress and syncs portage in dry-run mode" {
   export DRY_RUN='true'
   run pkg::sync_portage_repo
   assert_success
-  assert_output --partial 'emaint sync --allrepos'
+  assert_output --partial 'emerge --sync'
 }
 
 @test "pkg::sync_pacman_repo uses paru when available" {
@@ -99,7 +100,7 @@ EOF
   export DRY_RUN='true'
   run pkg::sync_apt_repo
   assert_success
-  assert_output --partial 'apt update'
+  assert_output --partial 'apt-get update'
 }
 
 @test "pkg::sync_apk_repo calls apk update in dry-run mode" {
@@ -236,10 +237,10 @@ EOF
 # pkg::check_installed_* — stub the underlying commands
 # ---------------------------------------------------------------------------
 
-@test "pkg::check_installed_pacman delegates to pacman -Qi" {
+@test "pkg::check_installed_pacman delegates to pacman -Q" {
   cat > "${HOME}/.local/bin/pacman" << 'EOF'
 #!/usr/bin/env bash
-[[ "$1" == "-Qi" && "$2" == "vim" ]] && exit 0; exit 1
+[[ "$1" == "-Q" && "$3" == "vim" ]] && exit 0; exit 1
 EOF
   chmod +x "${HOME}/.local/bin/pacman"
   run pkg::check_installed_pacman vim
@@ -249,7 +250,7 @@ EOF
 @test "pkg::check_installed_apk delegates to apk info -e" {
   cat > "${HOME}/.local/bin/apk" << 'EOF'
 #!/usr/bin/env bash
-[[ "$1" == "info" && "$2" == "-e" && "$3" == "curl" ]] && exit 0; exit 1
+[[ "$1" == "info" && "$2" == "-e" && "$4" == "curl" ]] && { printf 'curl\n'; exit 0; }; exit 1
 EOF
   chmod +x "${HOME}/.local/bin/apk"
   run pkg::check_installed_apk curl
@@ -263,9 +264,18 @@ EOF
   unstub flatpak
 }
 
-@test "pkg::check_installed_brew delegates to brew ls" {
-  stub brew 'ls -1 : printf "wget\ngit\nmytool\n"'
+@test "pkg::check_installed_brew delegates to brew list" {
+  stub brew 'list --formula --versions -- mytool : printf "mytool 1.0\n"'
   run pkg::check_installed_brew mytool
+  assert_success
+  unstub brew
+}
+
+@test "pkg::check_installed_brew finds a cask that is not a formula" {
+  stub brew \
+    'list --formula --versions -- firefox : exit 1' \
+    'list --cask --versions -- firefox : printf "firefox 1.0\n"'
+  run pkg::check_installed_brew firefox
   assert_success
   unstub brew
 }
@@ -291,7 +301,7 @@ EOF
   export DRY_RUN='true'
   run pkg::install_via_portage app-misc/jq
   assert_success
-  assert_output --partial 'emerge --ask n --noreplace app-misc/jq'
+  assert_output --partial 'emerge --noreplace --ask=n app-misc/jq'
 }
 
 @test "pkg::install_via_pacman prints paru command in dry-run mode" {
@@ -305,7 +315,7 @@ EOF
   export DRY_RUN='true'
   run pkg::install_via_apt ripgrep
   assert_success
-  assert_output --partial 'apt install -y ripgrep'
+  assert_output --partial 'apt-get install -y ripgrep'
 }
 
 @test "pkg::install_via_apk prints apk add command in dry-run mode" {
@@ -334,6 +344,13 @@ EOF
   run pkg::install_via_brew fzf
   assert_success
   assert_output --partial 'brew install fzf'
+}
+
+@test "pkg::install_via_brew passes brew flags through to the install command" {
+  export DRY_RUN='true'
+  run pkg::install_via_brew firefox --cask --HEAD
+  assert_success
+  assert_output --partial 'brew install --cask --HEAD firefox'
 }
 
 @test "pkg::install_via_mas prints mas install command in dry-run mode" {

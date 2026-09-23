@@ -16,16 +16,16 @@ fi
 systemctl --user daemon-reload
 for remote in ${remotes}; do
   dybatpho::progress "Enable rclone for remote: ${remote}"
-  mkdir -p "{{ .chezmoi.homeDir }}/Sync/${remote}"
+  dybatpho::ensure_dir "{{ .chezmoi.homeDir }}/Sync/${remote}" > /dev/null
   systemctl --user enable --now "rclone@${remote}.service" || true
 done
 {{- else if eq .initSystem "openrc" }}
 openrc_initd="{{ .chezmoi.homeDir }}/.config/openrc/init.d"
 openrc_default="{{ .chezmoi.homeDir }}/.config/openrc/runlevels/default"
-mkdir -p "${openrc_default}"
+dybatpho::ensure_dir "${openrc_default}" > /dev/null
 for remote in ${remotes}; do
   dybatpho::progress "Enable rclone for remote: ${remote}"
-  mkdir -p "{{ .chezmoi.homeDir }}/Sync/${remote}"
+  dybatpho::ensure_dir "{{ .chezmoi.homeDir }}/Sync/${remote}" > /dev/null
   # Create per-remote symlink if not exists
   if [[ ! -L "${openrc_initd}/rclone.${remote}" ]]; then
     ln -sf "${openrc_initd}/rclone" "${openrc_initd}/rclone.${remote}"

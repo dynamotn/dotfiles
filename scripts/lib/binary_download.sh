@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 # shellcheck disable=2154,2155
+# @file binary_download.sh
+# @brief Library `binary` to download a release asset and verify it
+# @description Library `binary` to download a release asset from a forge and
+# verify it. Requests go through the `network` module of dybatpho and the
+# release metadata is read with the `json` module, so a caller only has to load
+# `cli`.
+dybatpho::load network json
 
 #######################################
 # @description Infer a temp-file suffix from a download URL.
@@ -47,21 +54,6 @@ function __binary_download_temp_suffix {
 }
 
 #######################################
-# @description Compute SHA256 of a file, works on both Linux and macOS.
-# @arg $1 string Path to the file
-# @stdout hex digest string
-#######################################
-function __binary_sha256sum {
-  local file
-  dybatpho::expect_args file -- "$@"
-  if command -v sha256sum > /dev/null 2>&1; then
-    sha256sum "${file}" | awk '{print $1}'
-  else
-    shasum -a 256 "${file}" | awk '{print $1}'
-  fi
-}
-
-#######################################
 # @description Download a checksum file and verify the SHA256 of a downloaded asset.
 # The checksum file must contain lines in 'sha256hash  filename' format.
 # @arg $1 string Name of tool (for error messages)
@@ -98,7 +90,7 @@ function binary::verify_sha256 {
   fi
 
   local actual_hash
-  actual_hash=$(__binary_sha256sum "${temp_file}")
+  actual_hash=$(dybatpho::file_hash "${temp_file}" sha256)
 
   if [[ "${expected_hash}" != "${actual_hash}" ]]; then
     dybatpho::die "SHA256 mismatch for ${name}: expected ${expected_hash}, got ${actual_hash}"
@@ -148,7 +140,8 @@ function binary::get_latest_version {
       dybatpho::curl_do "https://${host}/api/v4/projects/$(echo "$repo" | sed -e "s/\//%2f/g")/releases/permalink/latest" "$temp_file" "${param[@]}"
     fi
   fi
-  dybatpho::json_query "$temp_file" ".tag_name" -o=props
+  # json_get works with either backend; `-o=props` was a yq-only flag.
+  dybatpho::json_get "$(< "$temp_file")" ".tag_name"
 }
 
 #######################################

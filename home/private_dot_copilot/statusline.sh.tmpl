@@ -1,7 +1,7 @@
 #!{{ .bash }}
 # @file statusline.sh
 # @brief Copilot CLI statusline: model, context usage bar, git branch, usage and cwd.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules json git
 dybatpho::register_common_handlers
 
 input=$(cat)
@@ -68,8 +68,9 @@ model_str="\033[33m${model}\033[0m"
 # Build suffix with git branch, usage, code changes and cwd
 suffix=""
 
-if [[ -n "${cwd}" ]] && git -C "${cwd}" rev-parse --is-inside-work-tree &>/dev/null; then
-  branch=$(git -C "${cwd}" branch --show-current 2>/dev/null)
+if [[ -n "${cwd}" ]]; then
+  # A subshell keeps `dybatpho::die` from killing the statusline outside a repo.
+  branch="$(dybatpho::git_branch "${cwd}" 2> /dev/null || true)"
   [[ -n "${branch}" ]] && suffix="${suffix} • \033[35m${branch}\033[0m"
 fi
 

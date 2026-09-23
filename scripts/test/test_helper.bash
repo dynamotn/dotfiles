@@ -1,19 +1,24 @@
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DYBATPHO_DIR="${DOTFILES_DIR}/scripts/lib/dybatpho"
 DOTFILES_REAL_HOME="${HOME}"
-DOTFILES_REAL_XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}/.config}"
 . "${DYBATPHO_DIR}/test/lib/support/load.bash"
 . "${DYBATPHO_DIR}/test/lib/assert/load.bash"
 . "${DYBATPHO_DIR}/test/lib/file/load.bash"
 . "${DYBATPHO_DIR}/test/lib/mock/stub.bash"
-. "${DYBATPHO_DIR}/init.sh"
+# Bats runs each test in its own process, where the module registry
+# `dybatpho::load` reads cannot follow (Bash cannot export an associative
+# array), so every module the libraries under test load is named here.
+. "${DYBATPHO_DIR}/init.sh" --modules cli network archive json array pkg
+DOTFILES_REAL_XDG_CONFIG_HOME="$(dybatpho::xdg_config_dir)"
 
 bats_require_minimum_version 1.5.0
 
 function setup_dotfiles_test_env {
   export HOME="${BATS_TEST_TMPDIR}/home"
   export XDG_CONFIG_HOME="${HOME}/.config"
-  mkdir -p "${HOME}/.config/dytoy" "${HOME}/.config/chezmoi" "${HOME}/.local/bin"
+  dybatpho::ensure_dir "$(dybatpho::xdg_config_dir dytoy)" > /dev/null
+  dybatpho::ensure_dir "$(dybatpho::xdg_config_dir chezmoi)" > /dev/null
+  dybatpho::ensure_dir "${HOME}/.local/bin" > /dev/null
   export PATH="${HOME}/.local/bin:${PATH}"
   export DRY_RUN="false"
   export LOG_LEVEL="debug"

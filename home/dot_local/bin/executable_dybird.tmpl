@@ -1,7 +1,7 @@
 #!{{ .bash }}
 # @file dybird
 # @brief Update/Refresh your live data of thundebird/betterbird mail client to/from your dotfiles
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli
 dybatpho::register_common_handlers
 
 {{- if .mailClient }}
