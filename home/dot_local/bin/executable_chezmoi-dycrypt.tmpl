@@ -1,16 +1,42 @@
 #!{{ .bash }}
 # @file chezmoi-dycrypt
 # @brief Decrypt and encrypt secrets data in chezmoi dotfiles with single custom identity
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli
+# @description The CLI only parses options and resolves paths; the age calls and
+# the chezmoi source path rules live in `scripts/lib/dycrypt.sh` and
+# `scripts/lib/chezmoi_attrs.sh`, where they can be tested without rendering
+# this template.
+DYCRYPT_DOTFILES_DIR="{{ .chezmoi.sourceDir }}/.."
+. "${DYCRYPT_DOTFILES_DIR}/scripts/lib/dybatpho/init.sh" --modules cli array
+. "${DYCRYPT_DOTFILES_DIR}/scripts/lib/chezmoi_attrs.sh"
+. "${DYCRYPT_DOTFILES_DIR}/scripts/lib/dycrypt.sh"
 dybatpho::register_common_handlers
+
+#######################################
+# @description Options both commands share, declared once as persistent so the
+# subcommands inherit them instead of restating them
+#######################################
+function _spec_common {
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" \
+    validate:"dybatpho::validate_log_level \$OPTARG" persistent:true
+  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false" persistent:true
+  dybatpho::opts::param "Identity type" IDENTITY_TYPE --identity-type -i init:="personal" \
+    validate:"dycrypt::validate_identity \$OPTARG" persistent:true
+  dybatpho::opts::param \
+    "Folder of the plain file, default is \`data\` for the \`secrets/data\` store in dotfiles folder" \
+    FOLDER --folder -f init:="data" persistent:true
+  dybatpho::opts::param "List of attributes for chezmoi source file, separate by \`,\`" \
+    ATTRIBUTES --attributes -a init:="" \
+    validate:"chezmoi_attrs::validate \$OPTARG" persistent:true
+  dybatpho::opts::flag "Run even when the output file is already up to date" FORCE --force -F \
+    on:true off:false init:="false" persistent:true
+}
 
 #######################################
 # @description Spec of chezmoi-dycrypt
 #######################################
 function _spec_main {
+  _spec_common
   dybatpho::opts::setup "Utilities to work with my secrets data" MAIN_ARGS
-  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
-  dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
   dybatpho::opts::cmd decrypt _spec_decrypt
   dybatpho::opts::cmd encrypt _spec_encrypt
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
@@ -22,7 +48,6 @@ function _spec_main {
 function _spec_decrypt {
   dybatpho::opts::setup "Decrypt secrets data" DECRYPT_ARGS action:"_decrypt \"\${DECRYPT_ARGS[@]}\""
   dybatpho::opts::arg "Name of the file to decrypt" FILENAME
-  dybatpho::opts::param "Identity type" IDENTITY_TYPE --identity-type -i init:="personal"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_decrypt"
 }
 
@@ -32,13 +57,8 @@ function _spec_decrypt {
 function _spec_encrypt {
   dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS action:"_encrypt \"\${ENCRYPT_ARGS[@]}\""
   dybatpho::opts::arg "Name of the file to encrypt" FILENAME
-  dybatpho::opts::param "Identity type" IDENTITY_TYPE --identity-type -i init:="personal"
-  dybatpho::opts::param \
-    "Folder of input file, default is \`data\` for encryption to \`secrets/data\` in dotfiles folder" \
-    FOLDER --folder -f init:="data"
-  dybatpho::opts::flag "Force encrypt" FORCE --force -F on:true off:false init:="false"
-  dybatpho::opts::param "List of attributes for chezmoi source file, separate by \`,\`" ATTRIBUTES --attributes -a init:=""
-  dybatpho::opts::param "Remove source file after encryption" REMOVE --remove -r init:="false"
+  dybatpho::opts::flag "Remove source file after encryption" REMOVE --remove -r \
+    on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_encrypt"
 }
 
@@ -47,43 +67,11 @@ function _spec_encrypt {
 # @arg $1 string Name of file to encrypt
 #######################################
 function _encrypt {
+  local filename
   dybatpho::expect_args filename -- "$@"
-  filename=$(dybatpho::trim "${filename}")
-  local input output identity_key
-  identity_key="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "${IDENTITY_TYPE}.key")"
-  if [ "${FOLDER}" = "data" ]; then
-    input="{{ .chezmoi.sourceDir }}/../secrets/data/${IDENTITY_TYPE}/${filename}"
-    output="${input}.age"
-  else
-    input="${FOLDER}/${filename}"
-    output="{{ .chezmoi.sourceDir }}/../$(_gen_cz_attrs "${input}" "$ATTRIBUTES,encrypted").age"
-  fi
-
-  if ! dybatpho::is file "${input}"; then
-    dybatpho::die "Input ${input} is not a file"
-  fi
-  dybatpho::debug "Encrypt ${input} to ${output}"
-  dybatpho::ensure_dir "$(dybatpho::path_dirname "$output")" > /dev/null
-  dybatpho::create_temp temp_file ".tmp"
-  local up_to_date="false"
-  if dybatpho::is true "${FORCE}"; then
-    up_to_date="false"
-  elif dybatpho::is file "${output}"; then
-    age -d -i "$identity_key" -o "$temp_file" "$output"
-    if diff "$input" "$temp_file" > /dev/null; then
-      dybatpho::debug "Output file ${output} is up to date"
-      up_to_date="true"
-    else
-      dybatpho::debug "Output file ${output} is outdated"
-    fi
-  fi
-  if dybatpho::is false "${up_to_date}"; then
-    dybatpho::dry_run age -e -a -i "$identity_key" -o "$output" "$input"
-  fi
-  if dybatpho::is true "${REMOVE}"; then
-    dybatpho::info "Remove input file ${input}"
-    dybatpho::dry_run rm -f "$input"
-  fi
+  local plain cipher
+  dycrypt::resolve_paths plain cipher "${IDENTITY_TYPE}" "${filename}" "${FOLDER}" "${ATTRIBUTES}"
+  dycrypt::encrypt "${IDENTITY_TYPE}" "${plain}" "${cipher}" "${FORCE}" "${REMOVE}"
 }
 
 #######################################
@@ -91,73 +79,11 @@ function _encrypt {
 # @arg $1 string Name of file to decrypt
 #######################################
 function _decrypt {
+  local filename
   dybatpho::expect_args filename -- "$@"
-  local identity_key
-  identity_key="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "${IDENTITY_TYPE}.key")"
-  local output="{{ .chezmoi.sourceDir }}/../secrets/data/${IDENTITY_TYPE}/${filename}"
-  local input="${output}.age"
-  if ! dybatpho::is file "${input}"; then
-    dybatpho::die "Input ${input} is not a file"
-  fi
-  dybatpho::info "Decrypt ${input} to ${output}"
-  dybatpho::dry_run age -d -i "$identity_key" -o "$output" "$input"
-}
-
-#######################################
-# @description Generate chezmoi attributes prefix for target path
-# @arg $1 string Target path, must be started with / or $HOME or ~
-# @arg $2 string List of attributes, separated by colon
-#######################################
-function _gen_cz_attrs {
-  dybatpho::expect_args target_path attributes -- "$@"
-
-  local relative_path
-  local base_prefix
-  if [[ "$target_path" == "$HOME"* ]]; then
-    base_prefix="home/"
-    relative_path="${target_path#"$HOME"/}"
-  elif [[ "$target_path" == "~"* ]]; then
-    base_prefix="home/"
-    relative_path="${target_path#~/}"
-  elif [[ "$target_path" == /* ]]; then
-    base_prefix="root/"
-    relative_path="${target_path#/}"
-  else
-    dybatpho::die "Target path $target_path must be started with / or \$HOME or ~."
-  fi
-
-  local processed_components=()
-  IFS='/' read -r -a components <<< "$relative_path"
-  local last_index=$((${#components[@]} - 1))
-
-  local priority=("create" "encrypted" "private" "readonly" "empty" "executable")
-  for i in "${!components[@]}"; do
-    local component="${components[$i]}"
-    if [[ "$component" == .* ]]; then
-      component="private_dot_${component#.}"
-    fi
-
-    if [[ $i -eq $last_index && -n "$attributes" ]]; then
-      IFS=',' read -r -a attrs_array <<< "$attributes"
-      component_prefix=""
-      for attr in "${priority[@]}"; do
-        for user_attr in "${attrs_array[@]}"; do
-          if [[ "$user_attr" == "$attr" ]]; then
-            component_prefix+="${attr}_"
-            break
-          fi
-        done
-      done
-      component="${component_prefix}${component}"
-    fi
-    processed_components+=("$component")
-  done
-
-  local final_path
-  local IFS="/"
-  final_path="${processed_components[*]}"
-
-  echo "${base_prefix}${final_path}"
+  local plain cipher
+  dycrypt::resolve_paths plain cipher "${IDENTITY_TYPE}" "${filename}" "${FOLDER}" "${ATTRIBUTES}"
+  dycrypt::decrypt "${IDENTITY_TYPE}" "${cipher}" "${plain}" "${FORCE}"
 }
 
 dybatpho::generate_from_spec _spec_main "$@"
