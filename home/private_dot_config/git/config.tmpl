@@ -206,7 +206,7 @@
         # Generate patch from git diff
         gen-patch = "!_() { git -c diff.noprefix=false diff --output $1; }; _"
         # Create worktree with new branch
-        wt = "!_() { branch=$1; branch_safe=${branch//\\//-}; repo=$(git rev-parse --show-toplevel); repo_name=$(basename "$repo"); dir="${repo}/../${repo_name}-${branch_safe}"; git worktree add -b "$branch" "$dir"; }; _"
+        wt = "!_() { branch=$1; branch_safe=${branch//\\//-}; repo=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)"); dir="${repo}/.worktrees/${branch_safe}"; mkdir -p "${repo}/.worktrees"; git worktree add -b "$branch" "$dir"; }; _"
 [gc]
         # Don't auto git gc, with large project can slow when working
         auto = 0
