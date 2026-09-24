@@ -1,7 +1,11 @@
 #!{{ .bash }}
 # @file dybird
 # @brief Update/Refresh your live data of thundebird/betterbird mail client to/from your dotfiles
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli
+# @description Only the list of files this mail client keeps lives here; walking
+# the profiles, reading `prefs.js` and handing files to chezmoi is shared with
+# `dyfox` in `scripts/lib/mozilla_profile.sh`.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array
+. {{ .chezmoi.sourceDir }}/../scripts/lib/mozilla_profile.sh
 dybatpho::register_common_handlers
 
 {{- if .mailClient }}
@@ -21,184 +25,108 @@ dybatpho::register_common_handlers
 {{-     $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{-   end }}
 
+# The library reads the profile layout from these, so shellcheck sees no use of
+# them in this file.
+# shellcheck disable=SC2034
+declare MOZILLA_APP_NAME="{{ $appName }}" \
+  MOZILLA_APP_KIND="email client" \
+  MOZILLA_PROCESS="{{ $process }}" \
+  MOZILLA_PROFILE_ROOT="${HOME}/.config/thunderbird/profiles" \
+  MOZILLA_TEMPLATE_ROOT="{{ .chezmoi.sourceDir }}/.chezmoitemplates/thunderbird/prefs"
+# shellcheck disable=SC2034
+declare -a MOZILLA_PROFILES=({{ range $profiles }}{{ . | quote }} {{ end }})
+
 #######################################
-# @description Refresh current live data of {{ $appName }} mail client from dotfiles
+# @description Update current live data of one profile to dotfiles
+# @arg $1 string Profile
 #######################################
-function _profile_dir {
+function _update_profile {
   local profile
   dybatpho::expect_args profile -- "$@"
-  dybatpho::path_join "$HOME" ".config" "thunderbird" "profiles" "$profile"
-}
+  local profile_dir prefs_file prefs_dir storage_dir
+  profile_dir="$(mozilla::profile_dir "${profile}")"
+  prefs_file="$(dybatpho::path_join "$profile_dir" "prefs.js")"
+  prefs_dir="$(mozilla::prefs_template_dir "${profile}")"
+  storage_dir="$(dybatpho::path_join "$profile_dir" "storage" "default")"
 
-#######################################
-# @description Return prefs template directory for a profile
-#######################################
-function _prefs_template_dir {
-  local profile
-  dybatpho::expect_args profile -- "$@"
-  dybatpho::path_join "{{ .chezmoi.sourceDir }}" ".chezmoitemplates" "thunderbird" "prefs" "$profile"
-}
+  if dybatpho::is file "$prefs_file"; then
+    dybatpho::progress "Update addon setting for profile ${profile}"
+    mozilla::extract_prefs "$prefs_dir/02-extensions.js" "$prefs_file" \
+      "extensions.webextensions.uuids" \
+      "extensions.webextensions.ExtensionStorageIDB.migrated" \
+      "privacy.userContext.extension"
 
-#######################################
-# @description Refresh current live data of {{ $appName }} mail client from dotfiles
-#######################################
-function _refresh_live {
-  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
-    local profile_dir
-    profile_dir="$(_profile_dir "$profile")"
-    if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      dybatpho::dry_run rm -rf "$profile_dir"
-      dybatpho::dry_run chezmoi apply "$profile_dir" --force || true
-    else
-      dybatpho::debug "$PROFILE"
-    fi
-  done
-}
+    dybatpho::progress "Update email setting for profile ${profile}"
+    mozilla::extract_prefs "$prefs_dir/03-email.js.tmpl" "$prefs_file" \
+      "mail.account" "mail.server.server" "mail.identity.id" \
+      "mail.smtpserver.smtp" "mail.smtpservers"
 
-#######################################
-# @description Update current live data of {{ $appName }} mail client to dotfiles
-#######################################
-function _update_dotfiles {
-  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
-    local profile_dir prefs_file prefs_dir
-    profile_dir="$(_profile_dir "$profile")"
-    prefs_file="$(dybatpho::path_join "$profile_dir" "prefs.js")"
-    prefs_dir="$(_prefs_template_dir "$profile")"
-    if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      if dybatpho::is file "$prefs_file"; then
-        dybatpho::progress "Update addon setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"extensions.webextensions.uuids\" \"$prefs_file\" > \"$prefs_dir/02-extensions.js\"" || true
-        dybatpho::dry_run eval "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" \"$prefs_file\" >> \"$prefs_dir/02-extensions.js\"" || true
-        dybatpho::dry_run eval "grep \"privacy.userContext.extension\" \"$prefs_file\" >> \"$prefs_dir/02-extensions.js\"" || true
+    dybatpho::progress "Update address book setting for profile ${profile}"
+    mozilla::extract_prefs "$prefs_dir/04-address-book.js.tmpl" "$prefs_file" \
+      "ldap_2.servers"
 
-        dybatpho::progress "Update email setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"mail.account\" \"$prefs_file\" > \"$prefs_dir/03-email.js.tmpl\"" || true
-        dybatpho::dry_run eval "grep \"mail.server.server\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
-        dybatpho::dry_run eval "grep \"mail.identity.id\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
-        dybatpho::dry_run eval "grep \"mail.smtpserver.smtp\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
-        dybatpho::dry_run eval "grep \"mail.smtpservers\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
-        dybatpho::dry_run eval "grep \"mail.smtpservers\" \"$prefs_file\" >> \"$prefs_dir/03-email.js.tmpl\"" || true
+    dybatpho::progress "Update calendar setting for profile ${profile}"
+    mozilla::extract_prefs "$prefs_dir/05-calendar.js.tmpl" "$prefs_file" \
+      "calendar.list.sortOrder" "calendar.registry"
+  fi
 
-        dybatpho::progress "Update address book setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"ldap_2.servers\" \"$prefs_file\" > \"$prefs_dir/04-address-book.js.tmpl\"" || true
+  dybatpho::progress "Update extensions data for profile ${profile}"
+  mozilla::add "$profile_dir" \
+    "addons.json" "addonStartup.json.lz4" "extensions.json" "extension-preferences.json"
+  if [[ "${profile}" =~ enterprise-.* ]]; then
+    mozilla::add "$(dybatpho::path_join "$profile_dir" "TbSync")" "account*.json" "folder*.json"
+  fi
 
-        dybatpho::progress "Update calendar setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"calendar.list.sortOrder\" \"$prefs_file\" > \"$prefs_dir/05-calendar.js.tmpl\"" || true
-        dybatpho::dry_run eval "grep \"calendar.registry\" \"$prefs_file\" >> \"$prefs_dir/05-calendar.js.tmpl\"" || true
-      fi
+  dybatpho::progress "Update search engines for profile ${profile}"
+  mozilla::add "$profile_dir" "search.json.mozlz4"
 
-      dybatpho::progress "Update extensions data for profile ${profile}"
-      for filename in addons.json addonStartup.json.lz4 extensions.json extension-preferences.json; do
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
-      done
-      if [[ "${profile}" =~ enterprise-.* ]]; then
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "TbSync" "account*.json")" --create || true
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "TbSync" "folder*.json")" --create || true
-      fi
-
-      dybatpho::progress "Update search engines for profile ${profile}"
-      dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "search.json.mozlz4")" --create || true
-
-      export -f _encrypt_file
-      dybatpho::progress "Update storage data for profile ${profile}"
-      if [ "${profile}" = "public" ]; then
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "storage.sqlite")" --create || true
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "storage" "default" "moz-extension+++*")" --create || true
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "global-messages-db.sqlite")" --create || true
-      else
-        dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "storage.sqlite" || true
-        if dybatpho::is dir "$(dybatpho::path_join "$profile_dir" "storage" "default")"; then
-          command find "$(dybatpho::path_join "$profile_dir" "storage" "default" "moz-extension+++*")" -type f | xargs -P$(nproc) -I{} \
-            bash -c "_encrypt_file '${profile}' '{}'" || true
-        fi
-      fi
-
-      if dybatpho::is true "${COOKIES}"; then
-        dybatpho::progress "Update cookies, passwords for profile ${profile}"
-        if [ "${profile}" = "public" ]; then
-          for filename in cookies.sqlite logins.json key4.db folderTree.json folderCache.json; do
-            dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
-          done
-        else
-          dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "$profile_dir" -a "create" \
-            cookies.sqlite logins.json key4.db folderTree.json folderCache.json || true
-        fi
-      fi
-
-      if dybatpho::is true "${MAIL}"; then
-        dybatpho::progress "Update mail data for profile ${profile}"
-        if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "ImapMail")" --create || true
-        else
-          if dybatpho::is dir "$(dybatpho::path_join "$profile_dir" "ImapMail")"; then
-            command find "$(dybatpho::path_join "$profile_dir" "ImapMail")" -type f | xargs -P$(nproc) -I{} \
-              bash -c "_encrypt_file '${profile}' '{}'" || true
-          fi
-        fi
-      fi
-
-      if dybatpho::is true "${FEEDS}"; then
-        dybatpho::progress "Update feeds data for profile ${profile}"
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "Mail" "Feeds")" --create || true
-      fi
-
-      if dybatpho::is true "${ADDRESSES}"; then
-        dybatpho::progress "Update address book data for profile ${profile}"
-        if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "history.sqlite")" --create || true
-          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "abook*.sqlite")" --create || true
-        else
-          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "history.sqlite" || true
-          command find "$(dybatpho::path_join "$profile_dir" "abook*.sqlite")" -type f | xargs -P$(nproc) -I{} \
-            bash -c "_encrypt_file '${profile}' '{}'" || true
-        fi
-      fi
-
-      if dybatpho::is true "${CALENDAR}"; then
-        dybatpho::progress "Update calendar data for profile ${profile}"
-        if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "calendar-data")" --create || true
-        else
-          if dybatpho::is dir "$(dybatpho::path_join "$profile_dir" "calendar-data")"; then
-            command find "$(dybatpho::path_join "$profile_dir" "calendar-data" "*.sqlite")" -type f | xargs -P$(nproc) -I{} \
-              bash -c "_encrypt_file '${profile}' '{}'" || true
-          fi
-        fi
-      fi
-    else
-      dybatpho::debug "$PROFILE"
-    fi
-  done
-}
-
-#######################################
-# @description Encrypt a file with chezmoi-dycrypt
-# @arg $1 string ID of profile
-# @arg $2 string Path of file
-#######################################
-function _encrypt_file {
-  dybatpho::expect_args profile file -- "$@"
-  local folder filename
-  folder="$(dybatpho::path_dirname "$file")"
-  filename="$(dybatpho::path_basename "$file")"
-  dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "${filename}"
-}
-
-#######################################
-# @description Main function
-#######################################
-function _main {
-  dybatpho::info "Your email client in chezmoi settings is {{ $appName }}"
-  if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 0 ]; then
-    dybatpho::fatal "{{ $appName }} is running"
-  elif dybatpho::is true "${REFRESH}"; then
-    dybatpho::header "Refresh from scratch {{ $appName }} settings"
-    _refresh_live
-    dybatpho::success "Refresh from scratch {{ $appName }} settings"
+  dybatpho::progress "Update storage data for profile ${profile}"
+  mozilla::store "${profile}" "$profile_dir" "storage.sqlite"
+  if [ "${profile}" = "public" ]; then
+    mozilla::add "$storage_dir" "moz-extension+++*"
+    mozilla::add "$profile_dir" "global-messages-db.sqlite"
   else
-    dybatpho::header "Update {{ $appName }} settings"
-    _update_dotfiles
-    dybatpho::success "Update {{ $appName }} settings"
+    mozilla::store_tree "${profile}" "$storage_dir" -path "*/moz-extension+++*"
+  fi
+
+  if dybatpho::is true "${COOKIES}"; then
+    dybatpho::progress "Update cookies, passwords for profile ${profile}"
+    mozilla::store "${profile}" "$profile_dir" \
+      "cookies.sqlite" "logins.json" "key4.db" "folderTree.json" "folderCache.json"
+  fi
+
+  if dybatpho::is true "${MAIL}"; then
+    dybatpho::progress "Update mail data for profile ${profile}"
+    if [ "${profile}" = "public" ]; then
+      mozilla::add "$profile_dir" "ImapMail"
+    else
+      mozilla::store_tree "${profile}" "$(dybatpho::path_join "$profile_dir" "ImapMail")"
+    fi
+  fi
+
+  if dybatpho::is true "${FEEDS}"; then
+    dybatpho::progress "Update feeds data for profile ${profile}"
+    mozilla::add "$(dybatpho::path_join "$profile_dir" "Mail")" "Feeds"
+  fi
+
+  if dybatpho::is true "${ADDRESSES}"; then
+    dybatpho::progress "Update address book data for profile ${profile}"
+    mozilla::store "${profile}" "$profile_dir" "history.sqlite"
+    if [ "${profile}" = "public" ]; then
+      mozilla::add "$profile_dir" "abook*.sqlite"
+    else
+      mozilla::store_tree "${profile}" "$profile_dir" -maxdepth 1 -name "abook*.sqlite"
+    fi
+  fi
+
+  if dybatpho::is true "${CALENDAR}"; then
+    dybatpho::progress "Update calendar data for profile ${profile}"
+    if [ "${profile}" = "public" ]; then
+      mozilla::add "$profile_dir" "calendar-data"
+    else
+      mozilla::store_tree "${profile}" "$(dybatpho::path_join "$profile_dir" "calendar-data")" \
+        -name "*.sqlite"
+    fi
   fi
 }
 
@@ -206,10 +134,10 @@ function _main {
 # @description Spec of dybird cli
 #######################################
 function _spec_main {
-  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} client to/from your dotfiles" MAIN_ARGS action:"_main"
+  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} client to/from your dotfiles" MAIN_ARGS action:"mozilla::run _update_profile"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
-  dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"_validate_profile"
+  dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"mozilla::validate_profile \$OPTARG"
   dybatpho::opts::flag "Refresh from scratch live data" REFRESH --refresh -r on:true off:false init:="false"
   dybatpho::opts::flag "Include cookies" COOKIES --cookies --no-cookies -c on:true off:false init:="true"
   dybatpho::opts::flag "Include mail data" MAIL --mail --no-mail -m on:true off:false init:="false"
@@ -217,19 +145,6 @@ function _spec_main {
   dybatpho::opts::flag "Include address book data" ADDRESSES --addresses --no-addresses -a on:true off:false init:="false"
   dybatpho::opts::flag "Include calendar data" CALENDAR --calendar --no-calendar -C on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
-}
-
-#######################################
-# @description Validate profile code
-#######################################
-function _validate_profile {
-  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
-    if [ "$OPTARG" = "" ] || [ "$OPTARG" = "$profile" ]; then
-      return 0
-    fi
-  done
-  dybatpho::error "Profile must be one of this list: {{ range $profiles }}'{{ . }}' {{ end }}"
-  return 1
 }
 
 dybatpho::generate_from_spec _spec_main "$@"
