@@ -7,4 +7,4 @@ export PATH="${local_bin_dir}:${PATH}"
 {{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
-"${local_bin_dir}/dytoy_mise" -e -i
+"${local_bin_dir}/dytoy" mise -e -i

@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://json-schema.org/draft-07/schema
 title: Dytoy Tool Definition
 description: >
-  Schema for dytoy tool YAML files consumed by dytoy_binary, dytoy_mise,
-  dytoy_shell and dytoy_os scripts.
+  Schema for dytoy tool YAML files consumed by the dytoy script and its
+  binary, mise, shell and os subcommands.
 type: object
 required: [name, method]
 additionalProperties: false

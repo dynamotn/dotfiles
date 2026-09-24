@@ -71,7 +71,7 @@ function dytoy::install_dependencies {
     dybatpho::debug "Need dependency: $dependency"
     local method
     method=$(dytoy::get_yaml "$dependency" "method")
-    dybatpho::dry_run "$(dybatpho::path_join "$HOME" ".local" "bin" "dytoy_${method}")" -i -t "$dependency"
+    dybatpho::dry_run "$(dybatpho::path_join "$HOME" ".local" "bin" "dytoy")" "${method}" -i -t "$dependency"
   done
 }
 
