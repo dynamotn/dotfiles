@@ -16,20 +16,21 @@ These rules apply whenever an AI agent creates commits in any repository.
 
 ## Changelog
 
-- Every change a user could notice MUST be recorded in `CHANGELOG.md`, in the
-  same commit as the change itself. Never defer it to release time.
+- **Only when the repository already has a `CHANGELOG.md`.** Never create one,
+  and never ask to; a repository without it keeps its history in commits.
+- When it does exist, every change a user could notice MUST be recorded there,
+  in the same commit as the change itself. Never defer it to release time.
 - Record the requested change — what the user asked for and what they can now
   do — not a restatement of the commit subject.
-- If the repository has no `CHANGELOG.md`, create one in
-  [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format and add the
-  entry under `## [Unreleased]`.
+- Add the entry under `## [Unreleased]`, following
+  [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Use Keep a Changelog sections only — `### Added`, `### Changed`,
   `### Deprecated`, `### Removed`, `### Fixed`, `### Security` — in that
   order, created on demand.
 - Purely internal changes (formatting, test-only edits, refactors with no
   observable effect) do not need an entry.
 
-Before reporting the work as done, confirm the entry exists:
+When the file exists, confirm the entry before reporting the work as done:
 
 ```bash
 git diff --stat HEAD~1 -- CHANGELOG.md
