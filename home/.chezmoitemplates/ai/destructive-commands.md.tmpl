@@ -1,0 +1,40 @@
+# Destructive commands
+
+These rules apply whenever an AI agent runs a command, in any repository or
+anywhere else on this machine. Undoing a missing change costs minutes; undoing
+a destructive one can cost the whole machine.
+
+## Ask before running
+
+- Recursive deletion: `rm -rf`, `shred`, `find -delete`, or any delete whose
+  target is `$HOME`, `/`, a mount point, or a path built from a variable that
+  could be empty.
+- Discarding work in git: `reset --hard`, `restore`/`checkout --` over
+  uncommitted changes, `clean -fdx`, `branch -D`, `tag -d`, `stash drop`,
+  `stash clear`, and any rebase or history rewrite of already-pushed commits.
+- Changing shared state: force pushes of any kind, pushing to `main` or
+  `master`, deleting a remote branch, merging, and creating remote tags or
+  releases.
+- Anything system-wide: `sudo`, installing or removing packages with
+  `pacman`, `paru`, `apt` or `brew`, `systemctl` enable/disable/start/stop,
+  writing under `/etc`, and changing ownership or permissions outside the
+  repository.
+- `chezmoi apply`, `chezmoi destroy`, and `chezmoi forget` — they write over
+  the real `$HOME`. Show `chezmoi diff` and wait for a yes.
+- Container commands that prune, remove volumes, or rebuild an image the user
+  depends on.
+
+## Safe without asking
+
+- Read-only inspection: `status`, `diff`, `log`, `show`, `ls`, `rg`, `fd`.
+- Creating a branch, committing to it, and pushing that new branch.
+- Creating or editing files inside the repository working tree.
+
+## Work additively
+
+- Prefer the additive move: a new commit over a rewritten one, a new branch
+  over a moved one, a rename over a delete, a backup copy over an overwrite.
+- Never reach for `--force`, `--no-verify`, `-y`, or `--yes` to get past a
+  prompt that exists to protect the user.
+- Quote every path, and never build a deletion target by concatenation
+  without first checking that the variable is non-empty.
