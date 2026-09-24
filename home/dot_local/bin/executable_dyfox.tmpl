@@ -92,8 +92,8 @@ function _update_dotfiles {
           dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}.sqlite")" --create || true
         done
       else
-        declare -a filenames=("favicons" "places")
-        printf "%s\n" "${filenames[@]}" | xargs -P$(nproc) -I{} bash -c "dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f ${profile_dir@Q} -a 'create' '{}.sqlite'" || true
+        dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "$profile_dir" -a "create" \
+          "favicons.sqlite" "places.sqlite" || true
       fi
 
       dybatpho::progress "Update storage data for profile ${profile}"

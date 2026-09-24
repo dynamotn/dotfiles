@@ -57,21 +57,33 @@ function _spec_decrypt {
 function _spec_encrypt {
   dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS action:"_encrypt \"\${ENCRYPT_ARGS[@]}\""
   dybatpho::opts::arg "Name of the file to encrypt" FILENAME
+  dybatpho::opts::arg "Name of the other files to encrypt from the same folder" MORE_FILENAMES \
+    required:false variadic:true
   dybatpho::opts::flag "Remove source file after encryption" REMOVE --remove -r \
     on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_encrypt"
 }
 
 #######################################
-# @description Encrypt file with single custom identity
-# @arg $1 string Name of file to encrypt
+# @description Encrypt every named file of one folder with single custom identity
+# @arg $@ string Names of the files to encrypt
+# @note Every file is encrypted in its own subshell, because `dybatpho::die`
+#   ends the shell it runs in: one unreadable file would otherwise abandon the
+#   rest of the batch. The failures are collected and reported together.
 #######################################
 function _encrypt {
-  local filename
-  dybatpho::expect_args filename -- "$@"
-  local plain cipher
-  dycrypt::resolve_paths plain cipher "${IDENTITY_TYPE}" "${filename}" "${FOLDER}" "${ATTRIBUTES}"
-  dycrypt::encrypt "${IDENTITY_TYPE}" "${plain}" "${cipher}" "${FORCE}" "${REMOVE}"
+  (($# > 0)) || dybatpho::die "Expected at least one file to encrypt"
+  local filename plain cipher
+  local -a failed=()
+  for filename in "$@"; do
+    if ! (
+      dycrypt::resolve_paths plain cipher "${IDENTITY_TYPE}" "${filename}" "${FOLDER}" "${ATTRIBUTES}"
+      dycrypt::encrypt "${IDENTITY_TYPE}" "${plain}" "${cipher}" "${FORCE}" "${REMOVE}"
+    ); then
+      failed+=("${filename}")
+    fi
+  done
+  ((${#failed[@]} == 0)) || dybatpho::die "Cannot encrypt ${#failed[@]} file(s): ${failed[*]}"
 }
 
 #######################################

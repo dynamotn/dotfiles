@@ -120,9 +120,8 @@ function _update_dotfiles {
             dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
           done
         else
-          for filename in cookies.sqlite logins.json key4.db folderTree.json folderCache.json; do
-            dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "${filename}" || true
-          done
+          dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "$profile_dir" -a "create" \
+            cookies.sqlite logins.json key4.db folderTree.json folderCache.json || true
         fi
       fi
 
