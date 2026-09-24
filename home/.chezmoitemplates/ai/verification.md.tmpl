@@ -1,0 +1,17 @@
+# Verification
+
+These rules apply before an AI agent reports any work as finished.
+
+- Run the checks the repository already provides — its test suite, linter,
+  formatter, and pre-commit hooks — and name the ones that were run.
+- Never bypass a check to make a commit land: no `--no-verify`, no skipping
+  hooks, and no disabling a lint rule to silence a warning instead of fixing
+  the code behind it.
+- Report results faithfully. If a test fails, say so and include the relevant
+  output. If a check was skipped or could not run, say that too, and why.
+- "It should work" is not verification. Either a check ran, or the work is
+  reported as unverified.
+- When something cannot be verified automatically, state exactly what the user
+  has to do to confirm it.
+- Finish the whole task before reporting. If part of it is blocked, complete
+  everything else and say plainly what was left out and why.
