@@ -1,0 +1,27 @@
+# Shell
+
+The interactive shell on this machine is fish; scripts are bash. They do not
+share syntax, so always be explicit about which one a command is written for.
+
+## Running commands
+
+- Write ad-hoc commands in POSIX or bash syntax. Do not rely on fish-only
+  constructs (`and`, `or`, `set -x`, `$status`, abbreviations) unless the
+  command is explicitly meant for fish.
+- The interactive fish config defines aliases, abbreviations, and wrapper
+  functions, so a bare command name may not be the binary it looks like. When
+  the exact program matters, call it as `command <tool>` or by absolute path.
+- A `cd` does not carry over between separate commands. Use absolute paths, or
+  chain the `cd` into the same command.
+
+## Writing scripts
+
+- Start every bash script with `#!/usr/bin/env bash`, and add
+  `set -euo pipefail` unless the surrounding code already installs its own
+  error handling.
+- Quote every variable expansion, prefer `[[ ]]` over `[ ]`, and `$(...)`
+  over backticks.
+- Keep scripts shellcheck-clean and shfmt-formatted, and add a
+  `# shellcheck source=` directive when sourcing a library by a computed path.
+- Fish scripts live in `*.fish` files and use fish syntax throughout. Never
+  mix bash syntax into them, or fish syntax into a bash script.

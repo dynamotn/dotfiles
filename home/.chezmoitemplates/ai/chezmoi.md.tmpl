@@ -1,0 +1,21 @@
+# Chezmoi-managed home
+
+The dotfiles on this machine are managed by chezmoi, with its source in
+`~/Dotfiles`. Many paths under `$HOME` are therefore not ordinary files, and
+this holds no matter which repository the current task is about.
+
+- Never edit a chezmoi-managed file through its `$HOME` path. Edit the source
+  under `~/Dotfiles/home/` instead. An edit made in `$HOME` either writes
+  straight into the source behind your back or is silently discarded on the
+  next apply.
+- Check before touching a path under `$HOME`: `chezmoi managed` lists what is
+  managed, and `chezmoi source-path <path>` gives the source file to edit.
+- Source file names encode attributes: `dot_` becomes a leading dot,
+  `private_` restricts permissions, `executable_` sets the executable bit,
+  `symlink_` creates a link, `encrypted_` stores the file age-encrypted, and a
+  `.tmpl` suffix marks a Go template rendered at apply time.
+- Render a template with `chezmoi execute-template --file <path>` to check it,
+  and preview the result of a change with `chezmoi diff`. Do not run
+  `chezmoi apply` on the user's behalf without showing that diff first.
+- Add a new dotfile with `chezmoi add`, rather than writing into `$HOME` and
+  expecting chezmoi to notice.
