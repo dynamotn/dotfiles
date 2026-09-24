@@ -34,6 +34,32 @@ function assert_entrypoint_help {
   done
 }
 
+@test "chezmoi-dycrypt encrypts every file it is given and reports the ones it could not" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_chezmoi-dycrypt"
+  render_template "home/dot_local/bin/executable_chezmoi-dycrypt.tmpl" "${rendered}"
+  # The rendered script points at the real repository; a test must never write
+  # there, so the sandbox takes its place.
+  local sandbox="${BATS_TEST_TMPDIR}/dotfiles"
+  dybatpho::ensure_dir "${sandbox}" > /dev/null
+  # The libraries the script sources live under that same root.
+  ln -s "${DOTFILES_DIR}/scripts" "${sandbox}/scripts"
+  sed -i "s|^DYCRYPT_DOTFILES_DIR=.*|DYCRYPT_DOTFILES_DIR='${sandbox}'|" "${rendered}"
+
+  age-keygen -o "$(dybatpho::xdg_config_dir chezmoi)/test.key" 2> /dev/null
+  chmod 600 "$(dybatpho::xdg_config_dir chezmoi)/test.key"
+  local live="${HOME}/.live"
+  dybatpho::ensure_dir "${live}" > /dev/null
+  printf 'first\n' > "${live}/first.txt"
+  printf 'second\n' > "${live}/second.txt"
+
+  run bash "${rendered}" encrypt -i test -f "${live}" -a create first.txt absent.txt second.txt
+  assert_failure
+  assert_output --partial "Cannot encrypt 1 file(s): absent.txt"
+  # The file after the unusable one still has to be encrypted.
+  assert [ -f "${sandbox}/home/private_dot_live/create_encrypted_first.txt.age" ]
+  assert [ -f "${sandbox}/home/private_dot_live/create_encrypted_second.txt.age" ]
+}
+
 @test "dybird shows profile and refresh help" {
   assert_entrypoint_help     "home/dot_local/bin/executable_dybird.tmpl"     "--profile"     "--refresh"
 }
