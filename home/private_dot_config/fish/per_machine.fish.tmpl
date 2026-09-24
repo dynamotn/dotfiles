@@ -36,6 +36,12 @@ set -gx REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt
 set -gx DENO_TLS_CA_STORE system
 {{- end }}
 
+{{- if eq .kind "container" }}
+set -gx MISE_OFFLINE 1
+{{- else if eq .kind "vdi" }}
+set -gx MISE_PREFER_OFFLINE 1
+{{- end }}
+
 {{- if .httpProxy }}
 set -gx http_proxy {{ .httpProxy | quote }}
 set -gx https_proxy {{ .httpProxy | quote }}
