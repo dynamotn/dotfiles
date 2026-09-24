@@ -8,6 +8,7 @@ tags
 Session.vim
 .claude
 !.claude/settings.json
+.worktrees/
 .vscode
 !.vscode/settings.json
 
