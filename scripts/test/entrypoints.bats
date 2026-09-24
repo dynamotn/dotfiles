@@ -18,6 +18,22 @@ function assert_entrypoint_help {
   assert_entrypoint_help     "home/dot_local/bin/executable_chezmoi-dycrypt.tmpl"     "decrypt"     "encrypt"
 }
 
+@test "every chezmoi-dycrypt subcommand inherits the persistent options" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_chezmoi-dycrypt"
+  render_template "home/dot_local/bin/executable_chezmoi-dycrypt.tmpl" "${rendered}"
+
+  local command
+  for command in encrypt decrypt; do
+    run bash "${rendered}" "${command}" --help
+    assert_success
+    assert_output --partial "--identity-type"
+    assert_output --partial "--folder"
+    assert_output --partial "--attributes"
+    assert_output --partial "--force"
+    assert_output --partial "--dry-run"
+  done
+}
+
 @test "dybird shows profile and refresh help" {
   assert_entrypoint_help     "home/dot_local/bin/executable_dybird.tmpl"     "--profile"     "--refresh"
 }
