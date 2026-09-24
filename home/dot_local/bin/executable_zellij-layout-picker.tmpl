@@ -20,6 +20,13 @@ if dybatpho::is dir "$layouts_dir"; then
   )
 fi
 
+# dybatpho exports its functions to subshells; stop them outliving this script
+# through exec. /bin/sh on macOS is bash 3.2, which can't import them and
+# prints an error from every shell zellij starts (e.g. git's pager).
+for fn in $(declare -F | awk '$2 == "-fx" && $3 ~ /^dybatpho::/ { print $3 }'); do
+  export -nf "${fn?}"
+done
+
 if [[ -n "$layout" ]]; then
   exec zellij --layout "$layout"
 else
