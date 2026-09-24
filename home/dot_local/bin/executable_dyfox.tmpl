@@ -1,7 +1,11 @@
 #!{{ .bash }}
 # @file dyfox
 # @brief Update/Refresh your live data of firefox/zen browser to/from your dotfiles
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli
+# @description Only the list of files this browser keeps lives here; walking the
+# profiles, reading `prefs.js` and handing files to chezmoi is shared with
+# `dybird` in `scripts/lib/mozilla_profile.sh`.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array
+. {{ .chezmoi.sourceDir }}/../scripts/lib/mozilla_profile.sh
 dybatpho::register_common_handlers
 
 {{- if .browser }}
@@ -21,171 +25,85 @@ dybatpho::register_common_handlers
 {{-     $profiles = append $profiles (printf "enterprise-%s" .) }}
 {{-   end }}
 
+# The library reads the profile layout from these, so shellcheck sees no use of
+# them in this file.
+# shellcheck disable=SC2034
+declare MOZILLA_APP_NAME="{{ $appName }}" \
+  MOZILLA_APP_KIND="web browser" \
+  MOZILLA_PROCESS="{{ $process }}" \
+  MOZILLA_PROFILE_ROOT="${HOME}/.config/firefox/profiles" \
+  MOZILLA_TEMPLATE_ROOT="{{ .chezmoi.sourceDir }}/.chezmoitemplates/firefox/prefs"
+# shellcheck disable=SC2034
+declare -a MOZILLA_PROFILES=({{ range $profiles }}{{ . | quote }} {{ end }})
+
 #######################################
-# @description Refresh current live data of {{ $appName }} browser from dotfiles
+# @description Update current live data of one profile to dotfiles
+# @arg $1 string Profile
 #######################################
-function _profile_dir {
+function _update_profile {
   local profile
   dybatpho::expect_args profile -- "$@"
-  dybatpho::path_join "$HOME" ".config" "firefox" "profiles" "$profile"
-}
+  local profile_dir prefs_file prefs_dir storage_dir
+  profile_dir="$(mozilla::profile_dir "${profile}")"
+  prefs_file="$(dybatpho::path_join "$profile_dir" "prefs.js")"
+  prefs_dir="$(mozilla::prefs_template_dir "${profile}")"
+  storage_dir="$(dybatpho::path_join "$profile_dir" "storage" "default")"
 
-#######################################
-# @description Return prefs template directory for a profile
-#######################################
-function _prefs_template_dir {
-  local profile
-  dybatpho::expect_args profile -- "$@"
-  dybatpho::path_join "{{ .chezmoi.sourceDir }}" ".chezmoitemplates" "firefox" "prefs" "$profile"
-}
+  if dybatpho::is file "$prefs_file"; then
+    dybatpho::progress "Update toolbar setting for profile ${profile}"
+    mozilla::extract_prefs "$prefs_dir/01-toolbar.js" "$prefs_file" \
+      "browser.uiCustomization.state"
 
-#######################################
-# @description Refresh current live data of {{ $appName }} browser from dotfiles
-#######################################
-function _refresh_live {
-  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
-    local profile_dir
-    profile_dir="$(_profile_dir "$profile")"
-    if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      dybatpho::dry_run rm -rf "$profile_dir"
-      dybatpho::dry_run chezmoi apply "$profile_dir" --force || true
-    else
-      dybatpho::debug "$PROFILE"
-    fi
-  done
-}
-
-#######################################
-# @description Update current live data of {{ $appName }} browser to dotfiles
-#######################################
-function _update_dotfiles {
-  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
-    local profile_dir prefs_file prefs_dir
-    profile_dir="$(_profile_dir "$profile")"
-    prefs_file="$(dybatpho::path_join "$profile_dir" "prefs.js")"
-    prefs_dir="$(_prefs_template_dir "$profile")"
-    if [ "$PROFILE" = "" ] || [ "$PROFILE" = "$profile" ]; then
-      if dybatpho::is file "$prefs_file"; then
-        dybatpho::progress "Update toolbar setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"browser.uiCustomization.state\" \"$prefs_file\" > \"$prefs_dir/01-toolbar.js\"" || true
-
-        dybatpho::progress "Update addon setting for profile ${profile}"
-        dybatpho::dry_run eval "grep \"extensions.webextensions.uuids\" \"$prefs_file\" > \"$prefs_dir/02-extensions.js\"" || true
-        dybatpho::dry_run eval "grep \"extensions.webextensions.ExtensionStorageIDB.migrated\" \"$prefs_file\" >> \"$prefs_dir/02-extensions.js\"" || true
-        dybatpho::dry_run eval "grep \"privacy.userContext.extension\" \"$prefs_file\" >> \"$prefs_dir/02-extensions.js\"" || true
-      fi
-
-      dybatpho::progress "Update containers for profile ${profile}"
-      dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "containers.json")" --create || true
-
-      dybatpho::progress "Update extensions data for profile ${profile}"
-      for filename in addons.json addonStartup.json.lz4 extensions.json extension-preferences.json; do
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
-      done
-
-      dybatpho::progress "Update search engines for profile ${profile}"
-      dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "search.json.mozlz4")" --create || true
-
-      dybatpho::progress "Update bookmarks, history and workspaces for profile ${profile}"
-      if [ "${profile}" = "public" ]; then
-        for filename in favicons places; do
-          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}.sqlite")" --create || true
-        done
-      else
-        dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "$profile_dir" -a "create" \
-          "favicons.sqlite" "places.sqlite" || true
-      fi
-
-      dybatpho::progress "Update storage data for profile ${profile}"
-      if [ "${profile}" = "public" ]; then
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "storage.sqlite")" --create || true
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "storage" "default" "moz-extension+++*")" --create || true
-      else
-        dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "storage.sqlite" || true
-        if dybatpho::is dir "$(dybatpho::path_join "$profile_dir" "storage" "default")"; then
-          export -f _encrypt_file
-          command find "$(dybatpho::path_join "$profile_dir" "storage" "default" "moz-extension+++*")" -type f | xargs -P$(nproc) -I{} \
-            bash -c "_encrypt_file '${profile}' '{}'" || true
-        fi
-      fi
-
-      if dybatpho::is true "${COOKIES}"; then
-        dybatpho::progress "Update cookies for profile ${profile}"
-        if [ "${profile}" = "public" ]; then
-          dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "cookies.sqlite")" --create || true
-        else
-          dybatpho::dry_run chezmoi-dycrypt encrypt -i ${profile} -f "$profile_dir" -a "create" "cookies.sqlite" || true
-        fi
-      fi
-
-      {{ if eq .browser "Z" -}}
-      dybatpho::progress "Update Zen customization for profile ${profile}"
-      for filename in zen-themes.json zen-keyboard-shortcuts.json; do
-        dybatpho::dry_run chezmoi add "$(dybatpho::path_join "$profile_dir" "${filename}")" --create || true
-      done
-      {{- end }}
-    else
-      dybatpho::debug "$PROFILE"
-    fi
-  done
-}
-
-#######################################
-# @description Encrypt a file with chezmoi-dycrypt
-# @arg $1 string ID of profile
-# @arg $2 string Path of file
-#######################################
-function _encrypt_file {
-  dybatpho::expect_args profile file -- "$@"
-  local folder filename
-  folder="$(dybatpho::path_dirname "$file")"
-  filename="$(dybatpho::path_basename "$file")"
-  dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "${filename}"
-}
-
-#######################################
-# @description Main function
-#######################################
-function _main {
-  dybatpho::info "Your web browser in chezmoi settings is {{ $appName }}"
-
-  if [ "$(pgrep -f {{ $process }} | wc -l)" -gt 0 ]; then
-    dybatpho::fatal "{{ $appName }} is running"
-  elif dybatpho::is true "${REFRESH}"; then
-    dybatpho::header "Refresh from scratch {{ $appName }} settings"
-    _refresh_live
-    dybatpho::success "Refresh from scratch {{ $appName }} settings"
-  else
-    dybatpho::header "Update {{ $appName }} settings"
-    _update_dotfiles
-    dybatpho::success "Update {{ $appName }} settings"
+    dybatpho::progress "Update addon setting for profile ${profile}"
+    mozilla::extract_prefs "$prefs_dir/02-extensions.js" "$prefs_file" \
+      "extensions.webextensions.uuids" \
+      "extensions.webextensions.ExtensionStorageIDB.migrated" \
+      "privacy.userContext.extension"
   fi
+
+  dybatpho::progress "Update containers for profile ${profile}"
+  mozilla::add "$profile_dir" "containers.json"
+
+  dybatpho::progress "Update extensions data for profile ${profile}"
+  mozilla::add "$profile_dir" \
+    "addons.json" "addonStartup.json.lz4" "extensions.json" "extension-preferences.json"
+
+  dybatpho::progress "Update search engines for profile ${profile}"
+  mozilla::add "$profile_dir" "search.json.mozlz4"
+
+  dybatpho::progress "Update bookmarks, history and workspaces for profile ${profile}"
+  mozilla::store "${profile}" "$profile_dir" "favicons.sqlite" "places.sqlite"
+
+  dybatpho::progress "Update storage data for profile ${profile}"
+  mozilla::store "${profile}" "$profile_dir" "storage.sqlite"
+  if [ "${profile}" = "public" ]; then
+    mozilla::add "$storage_dir" "moz-extension+++*"
+  else
+    mozilla::store_tree "${profile}" "$storage_dir" -path "*/moz-extension+++*"
+  fi
+
+  if dybatpho::is true "${COOKIES}"; then
+    dybatpho::progress "Update cookies for profile ${profile}"
+    mozilla::store "${profile}" "$profile_dir" "cookies.sqlite"
+  fi
+
+  {{ if eq .browser "Z" -}}
+  dybatpho::progress "Update Zen customization for profile ${profile}"
+  mozilla::add "$profile_dir" "zen-themes.json" "zen-keyboard-shortcuts.json"
+  {{- end }}
 }
 
 #######################################
 # @description Spec of dyfox cli
 #######################################
 function _spec_main {
-  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} browser to/from your dotfiles" MAIN_ARGS action:"_main"
+  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} browser to/from your dotfiles" MAIN_ARGS action:"mozilla::run _update_profile"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
-  dybatpho::opts::param "Profile code" PROFILE --profile -p validate:"_validate_profile"
+  dybatpho::opts::param "Profile code" PROFILE --profile -p validate:"mozilla::validate_profile \$OPTARG"
   dybatpho::opts::flag "Refresh from scratch live data" REFRESH --refresh -r on:true off:false init:="false"
   dybatpho::opts::flag "Include cookies" COOKIES --cookies --no-cookies -c on:true off:false init:="true"
   dybatpho::opts::disp "Show help" --help action:"dybatpho::generate_help _spec_main"
-}
-
-#######################################
-# @description Validate profile code
-#######################################
-function _validate_profile {
-  for profile in {{ range $profiles }}{{ . | quote }} {{ end }}; do
-    if [ "$OPTARG" = "" ] || [ "$OPTARG" = "$profile" ]; then
-      return 0
-    fi
-  done
-  dybatpho::error "Profile must be one of this list: {{ range $profiles }}'{{ . }}' {{ end }}"
-  return 1
 }
 
 dybatpho::generate_from_spec _spec_main "$@"
