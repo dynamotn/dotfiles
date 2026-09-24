@@ -30,20 +30,56 @@ function assert_entrypoint_help {
   assert_entrypoint_help     "home/dot_local/bin/executable_dytoy.tmpl"     "--tool"     "--sync"
 }
 
-@test "dytoy_binary shows binary installer flags" {
-  assert_entrypoint_help     "home/dot_local/bin/executable_dytoy_binary.tmpl"     "--tool"     "--list"
+@test "dytoy lists one subcommand per installer method" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+
+  run bash "${rendered}" --help
+  assert_success
+  local method
+  for method in os binary mise shell; do
+    assert_output --partial "${method}"
+  done
 }
 
-@test "dytoy_mise shows mise installer flags" {
-  assert_entrypoint_help     "home/dot_local/bin/executable_dytoy_mise.tmpl"     "--tool"     "--essential"
+@test "every dytoy subcommand inherits the persistent options" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+
+  local method
+  for method in os binary mise shell; do
+    run bash "${rendered}" "${method}" --help
+    assert_success
+    assert_output --partial "--tool"
+    assert_output --partial "--essential"
+    assert_output --partial "--dry-run"
+  done
 }
 
-@test "dytoy_os shows os installer flags" {
-  assert_entrypoint_help     "home/dot_local/bin/executable_dytoy_os.tmpl"     "--tool"     "--sync"
+@test "dytoy generates its own shell completion" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+
+  local shell
+  for shell in bash zsh fish; do
+    run bash "${rendered}" completion --shell "${shell}"
+    assert_success
+    # Every subcommand has to reach the completion, or the shipped fish file
+    # would offer less than the CLI accepts.
+    local method
+    for method in os binary mise shell; do
+      assert_output --partial "${method}"
+    done
+    assert_output --partial "tool"
+  done
 }
 
-@test "dytoy_shell shows shell installer flags" {
-  assert_entrypoint_help     "home/dot_local/bin/executable_dytoy_shell.tmpl"     "--tool"     "--essential"
+@test "dytoy rejects a completion shell it cannot generate" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+
+  run bash "${rendered}" completion --shell tcsh
+  assert_failure
 }
 
 @test "scz renders as a valid shell script" {
@@ -53,56 +89,26 @@ function assert_entrypoint_help {
   assert_success
 }
 
-@test "dytoy dry-run dispatches to all installer entrypoints" {
+@test "dytoy dry-run runs every installer method, os first" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
 
   run bash "${rendered}" --dry-run
   assert_success
-  assert_output --partial "${HOME}/.local/bin/dytoy_os"
-  assert_output --partial "${HOME}/.local/bin/dytoy_binary"
-  assert_output --partial "${HOME}/.local/bin/dytoy_mise"
-  assert_output --partial "${HOME}/.local/bin/dytoy_shell"
+  local method
+  for method in os binary mise shell; do
+    assert_output --partial "Installed all ${method} tools"
+  done
+  # `os` installs the package managers the other methods need, so it leads.
+  local os_line binary_line
+  os_line="$(printf '%s\n' "${output}" | grep -n 'Installed all os tools' | head -1 | cut -d: -f1)"
+  binary_line="$(printf '%s\n' "${output}" | grep -n 'Installed all binary tools' | head -1 | cut -d: -f1)"
+  ((os_line < binary_line))
 }
 
 @test "dytoy routes a selected tool to its configured method" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
-  write_tools_yaml <<'EOF'
-- name: sample
-  method: binary
-EOF
-
-  run bash "${rendered}" --dry-run --tool sample
-  assert_success
-  assert_output --partial "${HOME}/.local/bin/dytoy_binary"
-  assert_output --partial "-t sample"
-  refute_output --partial "${HOME}/.local/bin/dytoy_shell"
-}
-
-@test "dytoy_binary dry-run builds a release download URL" {
-  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy_binary"
-  render_template "home/dot_local/bin/executable_dytoy_binary.tmpl" "${rendered}"
-  cat > "${HOME}/.config/dytoy/tools.yaml" <<EOF
-- name: sample
-  method: binary
-  location: ${HOME}/.local/bin
-  github:
-    host: github.com
-    repo: owner/repo
-    version: v1.2.3
-    release_asset: sample-linux-amd64
-EOF
-
-  run bash "${rendered}" --dry-run --tool sample --no-check-installed
-  assert_success
-  assert_output --partial "https://github.com/owner/repo/releases/download/v1.2.3/sample-linux-amd64"
-  assert_output --partial "Installed binary tool: sample"
-}
-
-@test "dytoy_mise dry-run uses configured backend and version" {
-  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy_mise"
-  render_template "home/dot_local/bin/executable_dytoy_mise.tmpl" "${rendered}"
   write_tools_yaml <<'EOF'
 - name: sample
   method: mise
@@ -114,11 +120,61 @@ EOF
   assert_success
   assert_output --partial "mise use -g node@22.0.0"
   assert_output --partial "Installed mise tool: sample"
+  refute_output --partial "Installed shell tool"
 }
 
-@test "dytoy_shell dry-run renders shell content through a temp script" {
-  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy_shell"
-  render_template "home/dot_local/bin/executable_dytoy_shell.tmpl" "${rendered}"
+@test "dytoy fails on a tool whose method is not in the YAML" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  write_tools_yaml <<'EOF'
+- name: sample
+  other: value
+EOF
+
+  run bash "${rendered}" --dry-run --tool sample
+  assert_failure
+  assert_output --partial "Not found installer method for tool: sample"
+}
+
+@test "dytoy binary dry-run builds a release download URL" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  cat > "${HOME}/.config/dytoy/tools.yaml" <<EOF
+- name: sample
+  method: binary
+  location: ${HOME}/.local/bin
+  github:
+    host: github.com
+    repo: owner/repo
+    version: v1.2.3
+    release_asset: sample-linux-amd64
+EOF
+
+  run bash "${rendered}" binary --dry-run --tool sample --no-check-installed
+  assert_success
+  assert_output --partial "https://github.com/owner/repo/releases/download/v1.2.3/sample-linux-amd64"
+  assert_output --partial "Installed binary tool: sample"
+}
+
+@test "dytoy mise dry-run uses configured backend and version" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  write_tools_yaml <<'EOF'
+- name: sample
+  method: mise
+  backend: node
+  version: 22.0.0
+EOF
+
+  run bash "${rendered}" mise --dry-run --tool sample --no-check-installed
+  assert_success
+  assert_output --partial "mise use -g node@22.0.0"
+  assert_output --partial "Installed mise tool: sample"
+}
+
+@test "dytoy shell dry-run renders shell content through a temp script" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
   write_tools_yaml <<'EOF'
 - name: sample
   method: shell
@@ -126,7 +182,7 @@ EOF
     echo hello from sample shell tool
 EOF
 
-  run bash "${rendered}" --dry-run --tool sample --no-check-installed
+  run bash "${rendered}" shell --dry-run --tool sample --no-check-installed
   assert_success
   assert_output --partial "Running commands to install sample"
   assert_output --partial "hello from sample shell tool"

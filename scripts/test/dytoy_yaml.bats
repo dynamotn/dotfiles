@@ -107,7 +107,7 @@ EOF
 second'
 }
 
-@test "dytoy::install_dependencies dispatches through the tool-specific dytoy entrypoint" {
+@test "dytoy::install_dependencies dispatches through the dytoy subcommand of its method" {
   export DRY_RUN='true'
   write_tools_yaml << 'EOF'
 - name: sample
@@ -120,7 +120,7 @@ EOF
 
   run dytoy::install_dependencies sample
   assert_success
-  assert_output --partial "${HOME}/.local/bin/dytoy_shell -i -t helper"
+  assert_output --partial "${HOME}/.local/bin/dytoy shell -i -t helper"
 }
 
 @test "dytoy::is_defined fails for a missing tool" {

@@ -1,0 +1,10 @@
+# Merged into a single `dytoy` entry point with one subcommand per method.
+# Paths are relative to the destination directory.
+.local/bin/dytoy_os
+.local/bin/dytoy_binary
+.local/bin/dytoy_mise
+.local/bin/dytoy_shell
+.config/fish/completions/dytoy_os.fish
+.config/fish/completions/dytoy_binary.fish
+.config/fish/completions/dytoy_mise.fish
+.config/fish/completions/dytoy_shell.fish
