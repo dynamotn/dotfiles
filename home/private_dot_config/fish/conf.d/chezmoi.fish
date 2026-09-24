@@ -7,6 +7,9 @@ alias czd 'cz diff --recursive'
 alias czu 'cz update'
 alias czs 'cz status'
 
+alias czDd 'cz dycrypt decrypt'
+alias czDe 'cz dycrypt encrypt'
+
 alias scza 'scz apply'
 alias sczA 'scz add'
 alias sczAe 'scz add --encrypt'
