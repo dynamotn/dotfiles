@@ -1,0 +1,36 @@
+# Git conventions
+
+These rules apply whenever an AI agent creates commits in any repository.
+
+## Commit messages
+
+- Keep the subject short and to the point: one line, imperative mood,
+  ideally under 50 characters and never over 72.
+- Use Conventional Commits (`type(scope): subject`) when the repository
+  already follows that style; otherwise match the existing history.
+- Write a body only when the *why* is not obvious from the subject, and keep
+  it to a few short lines. Do not restate the diff.
+- Never add trailers that credit the agent: no `Co-Authored-By:`,
+  no `Co-Authored-By: Claude`, no "Generated with ..." footer, no emoji
+  attribution. The human author is the only author.
+
+## Changelog
+
+- Every change a user could notice MUST be recorded in `CHANGELOG.md`, in the
+  same commit as the change itself. Never defer it to release time.
+- Record the requested change — what the user asked for and what they can now
+  do — not a restatement of the commit subject.
+- If the repository has no `CHANGELOG.md`, create one in
+  [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format and add the
+  entry under `## [Unreleased]`.
+- Use Keep a Changelog sections only — `### Added`, `### Changed`,
+  `### Deprecated`, `### Removed`, `### Fixed`, `### Security` — in that
+  order, created on demand.
+- Purely internal changes (formatting, test-only edits, refactors with no
+  observable effect) do not need an entry.
+
+Before reporting the work as done, confirm the entry exists:
+
+```bash
+git diff --stat HEAD~1 -- CHANGELOG.md
+```
