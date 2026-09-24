@@ -1,6 +1,16 @@
 # Git conventions
 
-These rules apply whenever an AI agent creates commits in any repository.
+These rules apply whenever an AI agent works with git in any repository.
+
+## Worktrees
+
+- Create worktrees inside `.worktrees/` at the root of the repository, never
+  as a sibling directory next to it and never nested inside another worktree.
+- Prefer the `git wt <branch>` alias, which picks the right location on its
+  own. Otherwise use `git worktree add .worktrees/<name>` from the main
+  checkout.
+- `.worktrees/` is already in the global git ignore, so it never needs a
+  per-repository `.gitignore` entry.
 
 ## Commit messages
 
