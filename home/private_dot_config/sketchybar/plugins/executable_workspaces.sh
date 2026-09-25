@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-source "${CONFIG_DIR}/themes/catppuccin.sh"
+# @file workspaces.sh
+# @brief Highlight the sketchybar item of the focused aerospace workspace
+# @description Highlight the sketchybar item of the focused aerospace
+# workspace and dim every other one. Invoked by sketchybar with the workspace
+# id as its only argument.
+# shellcheck source=../themes/catppuccin.sh
+. "${CONFIG_DIR}/themes/catppuccin.sh"
 
 workspace_id=$1
 focus_workspace_ids="${FOCUSED_WORKSPACE}"
@@ -7,7 +13,7 @@ if [[ -z "${focus_workspace_ids}" ]]; then
   focus_workspace_ids=$(aerospace list-workspaces --focused)
 fi
 
-if [ "${workspace_id}" = "${focus_workspace_ids}" ]; then
+if [[ "${workspace_id}" == "${focus_workspace_ids}" ]]; then
   sketchybar --set "$NAME" \
     label.color="${SKETCHY_MAUVE}" \
     background.color="${SKETCHY_SURFACE_2}"

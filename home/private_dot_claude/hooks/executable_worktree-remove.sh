@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# @file worktree-remove.sh
+# @brief WorktreeRemove hook, counterpart to worktree-create.sh
+# @description Remove the worktree created by `worktree-create.sh`. Configuring a
+# WorktreeCreate hook replaces the built-in git cleanup too, so the removal has
+# to happen here.
 # WorktreeRemove hook: counterpart to worktree-create.sh. Configuring a
 # WorktreeCreate hook replaces the built-in git cleanup too, so remove the
 # worktree here.

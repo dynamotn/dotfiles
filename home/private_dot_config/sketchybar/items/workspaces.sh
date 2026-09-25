@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
+# @file workspaces.sh
+# @brief Declare one sketchybar item per aerospace workspace
+# @description Declare one sketchybar item per aerospace workspace, each with
+# its own icon and a click action that switches to that workspace.
 sketchybar --add event aerospace_workspace_change
 
-get_icon() {
+#######################################
+# @description Map a workspace id to its icon
+# @arg $1 string Workspace id
+# @stdout Icon of the workspace, empty for an unknown id
+#######################################
+function get_icon {
   case "$1" in
     1) printf "" ;; # Term
     2) printf "" ;; # Web
@@ -17,7 +26,9 @@ get_icon() {
   esac
 }
 
-for workspace_id in $(aerospace list-workspaces --all); do
+workspace_ids=()
+readarray -t workspace_ids < <(aerospace list-workspaces --all)
+for workspace_id in "${workspace_ids[@]}"; do
   workspace_icon=$(get_icon "${workspace_id}")
 
   sketchybar --add item "workspace.${workspace_id}" left

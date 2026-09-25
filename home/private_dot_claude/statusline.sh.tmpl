@@ -72,8 +72,12 @@ fi
 # Build suffix with cwd and rate limits
 suffix=""
 
-# Format time remaining function
-__format_time_remaining() {
+#######################################
+# @description Format the time left until a rate limit resets
+# @arg $1 string Reset timestamp, in seconds since the epoch
+# @stdout Remaining time as `<h>h <m>m` or `<m>m`, or `now` once it has passed
+#######################################
+function __format_time_remaining {
   local reset_timestamp now seconds_left hours minutes
   dybatpho::expect_args reset_timestamp -- "$@"
   now=$(dybatpho::date_now)
