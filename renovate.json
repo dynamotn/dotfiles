@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard"],
+  "enabledManagers": ["pre-commit", "github-actions", "git-submodules"],
+  "pre-commit": {
+    "enabled": true
+  },
+  "git-submodules": {
+    "enabled": true,
+    "ignorePaths": ["secrets/data"]
+  },
+  "packageRules": [
+    {
+      "description": "The dotfiles submodules follow their own branches; group their bumps into one pull request instead of one each.",
+      "matchManagers": ["git-submodules"],
+      "groupName": "submodules",
+      "schedule": ["before 9am on monday"]
+    }
+  ]
+}
