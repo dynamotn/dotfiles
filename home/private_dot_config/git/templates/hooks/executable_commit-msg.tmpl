@@ -1,0 +1,51 @@
+#!{{ .bash }}
+# @file commit-msg
+# @brief Reject a commit message that breaks the commit conventions
+# @description Reject an empty message, a subject over 72 characters and any trailer that
+# credits an AI agent, and warn when the subject goes over the 50 character mark.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
+dybatpho::register_common_handlers
+
+readonly SUBJECT_WARN_LENGTH=50
+readonly SUBJECT_MAX_LENGTH=72
+
+message_file="${1-}"
+dybatpho::is file "${message_file}" \
+  || dybatpho::die "commit-msg hook expects the path of the message file"
+
+# Drop everything the editor added: the scissors line and its diff, then the
+# comments and the blank lines git would strip on its own anyway.
+message="$(sed '/^# ------------------------ >8 ------------------------$/,$d' "${message_file}" \
+  | git stripspace --strip-comments)"
+
+if dybatpho::string_is_blank "${message}"; then
+  dybatpho::die "Empty commit message, nothing to commit"
+fi
+
+subject="${message%%$'\n'*}"
+
+# A merge, a revert and a fixup all get their subject from git or from the
+# commit they point at, so holding them to the length rule helps nobody.
+if [[ ${subject} =~ ^(Merge|Revert|fixup!|squash!|amend!) ]]; then
+  exit 0
+fi
+
+# Attribution belongs to the human author, so no agent trailer gets committed.
+attribution_pattern='(Co-[Aa]uthored-[Bb]y:.*(Claude|Copilot|Cursor|Codex|Gemini|ChatGPT|GPT-|Aider))|([Gg]enerated with)|(🤖)'
+offenders=()
+mapfile -t offenders < <(grep -E "${attribution_pattern}" <<< "${message}" || true)
+if ((${#offenders[@]} > 0)); then
+  dybatpho::error "Agent attribution is not allowed in a commit message:"
+  dybatpho::array_print offenders >&2
+  dybatpho::die "Remove the trailer, the human author is the only author"
+fi
+
+if ((${#subject} > SUBJECT_MAX_LENGTH)); then
+  dybatpho::error "Subject is ${#subject} characters, the limit is ${SUBJECT_MAX_LENGTH}:"
+  dybatpho::error "${subject}"
+  dybatpho::die "Shorten the subject and move the detail into the body"
+fi
+
+if ((${#subject} > SUBJECT_WARN_LENGTH)); then
+  dybatpho::warn "Subject is ${#subject} characters, ${SUBJECT_WARN_LENGTH} reads better: ${subject}"
+fi

@@ -1,0 +1,37 @@
+#######################################
+# @description Report the dependency files that changed in a commit range, so a
+# checkout or a merge does not leave the tool versions and the lockfiles behind.
+# @arg $1 string Commit range, such as `ORIG_HEAD..HEAD`
+# @stderr One warning header and one changed file per line
+#######################################
+function git_hook::report_dependency_changes {
+  local range
+  dybatpho::expect_args range -- "$@"
+
+  local -a watched=(
+    .gitmodules
+    '*Cargo.lock'
+    '*Gemfile.lock'
+    '*bun.lock'
+    '*bun.lockb'
+    '*composer.lock'
+    '*flake.lock'
+    '*go.sum'
+    '*mise.toml'
+    '*package-lock.json'
+    '*pnpm-lock.yaml'
+    '*poetry.lock'
+    '*requirements*.txt'
+    '*uv.lock'
+    '*yarn.lock'
+    '.tool-versions'
+  )
+
+  local -a changed=()
+  mapfile -t changed < <(git diff --name-only "${range}" -- "${watched[@]}")
+
+  if ((${#changed[@]} > 0)); then
+    dybatpho::warn "Dependencies changed, re-run the install step for:"
+    dybatpho::array_print changed >&2
+  fi
+}

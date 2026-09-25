@@ -1,0 +1,15 @@
+#!{{ .bash }}
+# @file post-merge
+# @brief Warn when a merge brought in dependency changes
+# @description Warn when a merge or a `git pull` changed the submodules, the lockfiles or
+# the pinned tool versions, so the install step is not forgotten.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
+dybatpho::register_common_handlers
+
+{{ template "git/hooks/dependency-changes.sh.tmpl" . }}
+
+# ORIG_HEAD is where the branch stood before the merge; without it there is
+# nothing to compare against, which is the case for the very first commit.
+if git rev-parse --verify --quiet ORIG_HEAD > /dev/null; then
+  git_hook::report_dependency_changes "ORIG_HEAD..HEAD"
+fi

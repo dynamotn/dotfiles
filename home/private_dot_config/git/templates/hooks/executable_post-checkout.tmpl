@@ -1,0 +1,22 @@
+#!{{ .bash }}
+# @file post-checkout
+# @brief Warn when switching branches brought in dependency changes
+# @description Warn when a branch checkout changed the submodules, the lockfiles or the
+# pinned tool versions, so the install step is not forgotten.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
+dybatpho::register_common_handlers
+
+{{ template "git/hooks/dependency-changes.sh.tmpl" . }}
+
+previous_head="${1-}"
+new_head="${2-}"
+is_branch_checkout="${3-0}"
+null_ref="0000000000000000000000000000000000000000"
+
+# Git calls this hook for file checkouts and for the checkout a clone ends with
+# too. Neither is a branch switch, so there is no range worth comparing.
+if [[ ${is_branch_checkout} == "1" ]] \
+  && [[ ${previous_head} != "${null_ref}" ]] \
+  && [[ ${previous_head} != "${new_head}" ]]; then
+  git_hook::report_dependency_changes "${previous_head}..${new_head}"
+fi
