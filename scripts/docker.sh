@@ -114,6 +114,13 @@ function _main {
     || dybatpho::die "Specify an image: public, personal, personal-arch, or enterprise-<CODE>"
   target="${MAIN_ARGS[0]}"
 
+  # Reject a name we do not know before asking for any tool, so a typo does
+  # not first complain about a missing docker.
+  case "$target" in
+    public | personal | personal-arch | enterprise-?*) ;;
+    *) dybatpho::die "Unknown image $target" ;;
+  esac
+
   dybatpho::require "docker"
   dybatpho::require "gomplate"
   SECRETS=(--secret "id=github_token,env=GITHUB_TOKEN")
@@ -123,7 +130,6 @@ function _main {
     personal) _configure_personal ;;
     personal-arch) _configure_personal_arch ;;
     enterprise-*) _configure_enterprise "${target#enterprise-}" ;;
-    *) dybatpho::die "Unknown image $target" ;;
   esac
 
   # A quoted "~" never expands, which is why the tasks this replaces silently
