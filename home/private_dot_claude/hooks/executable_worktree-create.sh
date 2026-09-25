@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# @file worktree-create.sh
+# @brief WorktreeCreate hook placing worktrees in <repo>/.worktrees/
+# @description Place worktrees in `<repo>/.worktrees/<name>` instead of the built-in
+# `<repo>/.claude/worktrees/<name>`. Claude Code reads the last line of stdout
+# as the worktree path, so every other message goes to stderr.
 # WorktreeCreate hook: place worktrees in <repo>/.worktrees/<name> instead of
 # the built-in <repo>/.claude/worktrees/<name>.
 #
