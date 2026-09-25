@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  SHFMT_VERSION: v3.12.0
+
+jobs:
+  lint:
+    name: Lint shell
+    runs-on: ubuntu-latest
+    steps:
+      # secrets/data is a private submodule; never ask CI for it.
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Install shfmt
+        run: |
+          curl -fsSL -o /tmp/shfmt \
+            "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64"
+          chmod +x /tmp/shfmt
+          sudo mv /tmp/shfmt /usr/local/bin/shfmt
+
+      # The pathspec matches recursively and skips submodule contents.
+      - name: shellcheck
+        run: git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning
+
+      - name: shfmt
+        run: |
+          git ls-files 'scripts/*.sh' 'scripts/*.bats' 'scripts/*.bash' \
+            | xargs shfmt -i 2 -ci -bn -sr -d
+
+  test:
+    name: Bats suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      # Only the test library, so the private secrets submodule stays out.
+      - name: Fetch dybatpho
+        run: git submodule update --init --recursive scripts/lib/dybatpho
+
+      - name: Install chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+
+      - name: Cache cargo binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin
+          key: cargo-bin-yaml-schema-${{ runner.os }}
+
+      - name: Install yaml-schema
+        run: command -v ys > /dev/null || cargo install yaml-schema --locked
+
+      # The secrets schema tests skip themselves when secrets/data is absent,
+      # so the whole suite is safe to run without the private submodule.
+      - name: Run tests
+        run: ./scripts/test.sh --all
