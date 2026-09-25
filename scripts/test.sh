@@ -43,15 +43,15 @@ function _main {
     dybatpho::die "Bats test runner not found. Please install bats or run: git -C ${DYBATPHO_DIR} submodule update --init --recursive"
   fi
 
-  if [ "$DYTOY" = "true" ]; then
+  if [[ "$DYTOY" == "true" ]]; then
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run \
       "${SCRIPT_DIR}/test/dytoy_schema.bats"
   fi
-  if [ "$SECRETS" = "true" ]; then
+  if [[ "$SECRETS" == "true" ]]; then
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run \
       "${SCRIPT_DIR}/test/secrets_schema.bats"
   fi
-  if [ "$ALL" = "true" ]; then
+  if [[ "$ALL" == "true" ]]; then
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${SCRIPT_DIR}/test"
   fi
   if ((${#MAIN_ARGS[@]} > 0)); then

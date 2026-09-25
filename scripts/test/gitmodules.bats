@@ -82,7 +82,7 @@ function _committed_entries {
 # ---------------------------------------------------------------------------
 
 @test ".gitmodules template exists" {
-  [ -f "${TEMPLATE}" ]
+  [[ -f "${TEMPLATE}" ]]
 }
 
 # .gitmodules is generated per machine, so it holds a subset of the entries
@@ -94,10 +94,10 @@ function _committed_entries {
 
   local failures=()
   while IFS=$'\t' read -r name path; do
-    [ -n "${name}" ] || continue
+    [[ -n "${name}" ]] || continue
     local expected
     expected="$(awk -F'\t' -v n="${name}" '$1 == n { print $2 }' "${rendered}")"
-    if [ -z "${expected}" ]; then
+    if [[ -z "${expected}" ]]; then
       failures+=("${name}: in .gitmodules but the template never emits it")
     elif ! grep -qxF "${path}" <<< "${expected}"; then
       failures+=("${name}: .gitmodules says ${path}, template says ${expected}")
@@ -112,7 +112,7 @@ function _committed_entries {
 @test "every tracked submodule has a .gitmodules entry" {
   local failures=()
   while read -r path; do
-    [ -n "${path}" ] || continue
+    [[ -n "${path}" ]] || continue
     grep -qE "^[[:space:]]*path = ${path}$" "${GITMODULES}" \
       || failures+=("${path}: tracked as a submodule but absent from .gitmodules")
   done < <(cd "${DOTFILES_DIR}" && git ls-files --stage | awk '$1 == "160000" { print $4 }')
