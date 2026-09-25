@@ -26,7 +26,7 @@ setup() {
 }
 
 @test "pkg::check_installed_apt delegates to dpkg-query" {
-  cat > "${HOME}/.local/bin/dpkg-query" <<'EOF'
+  cat > "${HOME}/.local/bin/dpkg-query" << 'EOF'
 #!/usr/bin/env bash
 if [[ "$1" == "-W" && "$4" == "sample" ]]; then
   printf 'install ok installed'

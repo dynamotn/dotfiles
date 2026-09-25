@@ -20,7 +20,7 @@ setup() {
 function fake_command {
   local name exit_code
   dybatpho::expect_args name exit_code -- "$@"
-  cat > "${HOME}/.local/bin/${name}" <<EOF
+  cat > "${HOME}/.local/bin/${name}" << EOF
 #!/usr/bin/env bash
 printf '${name} %s\n' "\$*"
 exit ${exit_code}
@@ -88,7 +88,7 @@ function write_prefs {
 }
 
 @test "mozilla::extract_prefs writes the matching preferences in pattern order" {
-  write_prefs <<'EOF'
+  write_prefs << 'EOF'
 user_pref("mail.account.lastKey", 3);
 user_pref("privacy.userContext.extension", "x");
 user_pref("mail.smtpservers", "smtp1");
@@ -104,7 +104,7 @@ EOF
 }
 
 @test "mozilla::extract_prefs keeps the template when no preference matches" {
-  write_prefs <<'EOF'
+  write_prefs << 'EOF'
 user_pref("mail.account.lastKey", 3);
 EOF
   local template_file="${MOZILLA_TEMPLATE_ROOT}/03-email.js"

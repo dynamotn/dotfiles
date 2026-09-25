@@ -26,7 +26,7 @@ function _main {
     if dybatpho::is command bats; then
       BATS_CMD="$(dybatpho::command_path bats)"
     else
-      git -C "${DYBATPHO_DIR}" submodule update --init --recursive 2>/dev/null || true
+      git -C "${DYBATPHO_DIR}" submodule update --init --recursive 2> /dev/null || true
     fi
   fi
   if [[ ! -x "${BATS_CMD}" ]]; then
