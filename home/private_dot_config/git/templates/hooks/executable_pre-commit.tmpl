@@ -1,0 +1,16 @@
+#!{{ .bash }}
+# @file pre-commit
+# @brief Reject a commit that still has conflict markers
+# @description Reject a commit whose staged changes still contain merge conflict markers,
+# and list the files they are in.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
+dybatpho::register_common_handlers
+
+conflicts=()
+mapfile -t conflicts < <(git diff --cached --name-only -G"<<<<<|=====|>>>>>")
+
+if ((${#conflicts[@]} > 0)); then
+  dybatpho::error "Unresolved merge conflicts in these files:"
+  dybatpho::array_print conflicts >&2
+  dybatpho::die "Resolve the conflict markers before committing"
+fi
