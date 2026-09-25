@@ -15,7 +15,7 @@ function assert_entrypoint_help {
 }
 
 @test "chezmoi-dycrypt shows subcommand help" {
-  assert_entrypoint_help     "home/dot_local/bin/executable_chezmoi-dycrypt.tmpl"     "decrypt"     "encrypt"
+  assert_entrypoint_help "home/dot_local/bin/executable_chezmoi-dycrypt.tmpl" "decrypt" "encrypt"
 }
 
 @test "every chezmoi-dycrypt subcommand inherits the persistent options" {
@@ -61,15 +61,15 @@ function assert_entrypoint_help {
 }
 
 @test "dybird shows profile and refresh help" {
-  assert_entrypoint_help     "home/dot_local/bin/executable_dybird.tmpl"     "--profile"     "--refresh"
+  assert_entrypoint_help "home/dot_local/bin/executable_dybird.tmpl" "--profile" "--refresh"
 }
 
 @test "dyfox shows profile and refresh help" {
-  assert_entrypoint_help     "home/dot_local/bin/executable_dyfox.tmpl"     "--profile"     "--refresh"
+  assert_entrypoint_help "home/dot_local/bin/executable_dyfox.tmpl" "--profile" "--refresh"
 }
 
 @test "dytoy shows shared installer flags" {
-  assert_entrypoint_help     "home/dot_local/bin/executable_dytoy.tmpl"     "--tool"     "--sync"
+  assert_entrypoint_help "home/dot_local/bin/executable_dytoy.tmpl" "--tool" "--sync"
 }
 
 @test "dytoy lists one subcommand per installer method" {
@@ -151,7 +151,7 @@ function assert_entrypoint_help {
 @test "dytoy routes a selected tool to its configured method" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
-  write_tools_yaml <<'EOF'
+  write_tools_yaml << 'EOF'
 - name: sample
   method: mise
   backend: node
@@ -168,7 +168,7 @@ EOF
 @test "dytoy fails on a tool whose method is not in the YAML" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
-  write_tools_yaml <<'EOF'
+  write_tools_yaml << 'EOF'
 - name: sample
   other: value
 EOF
@@ -181,7 +181,7 @@ EOF
 @test "dytoy binary dry-run builds a release download URL" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
-  cat > "${HOME}/.config/dytoy/tools.yaml" <<EOF
+  cat > "${HOME}/.config/dytoy/tools.yaml" << EOF
 - name: sample
   method: binary
   location: ${HOME}/.local/bin
@@ -201,7 +201,7 @@ EOF
 @test "dytoy mise dry-run uses configured backend and version" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
-  write_tools_yaml <<'EOF'
+  write_tools_yaml << 'EOF'
 - name: sample
   method: mise
   backend: node
@@ -217,7 +217,7 @@ EOF
 @test "dytoy shell dry-run renders shell content through a temp script" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
-  write_tools_yaml <<'EOF'
+  write_tools_yaml << 'EOF'
 - name: sample
   method: shell
   content: |

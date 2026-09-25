@@ -49,7 +49,7 @@ setup() {
   mkdir -p "${src_dir}/bundle/bin"
   printf 'hello zip
 ' > "${src_dir}/bundle/bin/tool"
-  python3 - <<PY
+  python3 - << PY
 from pathlib import Path
 import zipfile
 src = Path("${src_dir}")

@@ -27,7 +27,7 @@ setup() {
   local args_file="${BATS_TEST_TMPDIR}/curl-args"
   function dybatpho::curl_do {
     printf '%s\n' "$*" > "${args_file}"
-    cat <<'EOF' > "$2"
+    cat << 'EOF' > "$2"
 {"tag_name": "v1.2.3"}
 EOF
   }
@@ -51,7 +51,7 @@ EOF
   local args_file="${BATS_TEST_TMPDIR}/curl-args"
   function dybatpho::curl_do {
     printf '%s\n' "$*" > "${args_file}"
-    cat <<'EOF' > "$2"
+    cat << 'EOF' > "$2"
 tag_name: v9.8.7
 EOF
   }

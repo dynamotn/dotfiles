@@ -136,13 +136,13 @@ function _main {
   dybatpho::header "Setup SSH"
   chezmoi apply "${HOME}/.ssh" "${params[@]}"
   local proxy
-  proxy="$(chezmoi data | yq .httpProxy 2>/dev/null || true)"
+  proxy="$(chezmoi data | yq .httpProxy 2> /dev/null || true)"
   [[ "${proxy}" == "null" ]] && proxy=""
   if ! dybatpho::string_is_blank "$proxy"; then
     export https_proxy="$proxy"
     export http_proxy="$proxy"
     local addresses=()
-    readarray -t addresses < <(chezmoi data 2>/dev/null | yq e -o=j -I=0 -r '.noProxyAddresses[] // empty' 2>/dev/null || true)
+    readarray -t addresses < <(chezmoi data 2> /dev/null | yq e -o=j -I=0 -r '.noProxyAddresses[] // empty' 2> /dev/null || true)
     if ((${#addresses[@]} > 0)); then
       local no_proxy_val
       no_proxy_val="$(dybatpho::array_join "addresses" ",")"

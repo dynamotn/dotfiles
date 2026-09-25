@@ -7,15 +7,15 @@ set -Eeuo pipefail
 # @description Keep sudo alive
 #######################################
 function _keep_sudo_alive {
-  if command -v sudo &>/dev/null; then
+  if command -v sudo &> /dev/null; then
     sudo -v
     (
       while true; do
         sudo -n true
         sleep 60
-        kill -0 "$$" 2>/dev/null || exit
+        kill -0 "$$" 2> /dev/null || exit
       done
-    ) 2>/dev/null &
+    ) 2> /dev/null &
     local sudo_pid=$!
     trap 'kill -9 "$sudo_pid" 2>/dev/null || true' EXIT INT TERM
   fi
@@ -95,7 +95,7 @@ function _setup_macos {
     brew_prefix="/opt/homebrew"
   elif [[ -x /usr/local/bin/brew ]]; then
     brew_prefix="/usr/local"
-  elif command -v brew &>/dev/null; then
+  elif command -v brew &> /dev/null; then
     brew_prefix="$(brew --prefix)"
   else
     echo "Homebrew not found. Installing Homebrew..."
@@ -137,16 +137,16 @@ function _main {
     _setup_macos
   elif [[ "$kernel" == "Linux" ]]; then
     # Gentoo
-    if command -v emerge &>/dev/null; then
+    if command -v emerge &> /dev/null; then
       _setup_gentoo
     # ArchLinux
-    elif command -v pacman &>/dev/null; then
+    elif command -v pacman &> /dev/null; then
       _setup_arch
     # Ubuntu/Debian
-    elif command -v apt &>/dev/null; then
+    elif command -v apt &> /dev/null; then
       _setup_ubuntu_debian
     # Alpine Linux
-    elif command -v apk &>/dev/null; then
+    elif command -v apk &> /dev/null; then
       _setup_alpine
     else
       echo "Your distro is not supported"

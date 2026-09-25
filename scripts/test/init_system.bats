@@ -6,7 +6,7 @@ setup() {
 
 @test "init::enable_systemd_service enables user services when systemd is running" {
   local args_file="${BATS_TEST_TMPDIR}/systemctl-args"
-  cat > "${HOME}/.local/bin/systemctl" <<EOF
+  cat > "${HOME}/.local/bin/systemctl" << EOF
 #!/usr/bin/env bash
 if [[ "\$1" == "is-system-running" ]]; then
   exit 0
@@ -24,11 +24,11 @@ EOF
 
 @test "init::enable_openrc_service enables user services without sudo" {
   local args_file="${BATS_TEST_TMPDIR}/rc-update-args"
-  cat > "${HOME}/.local/bin/rc-service" <<'EOF'
+  cat > "${HOME}/.local/bin/rc-service" << 'EOF'
 #!/usr/bin/env bash
 exit 0
 EOF
-  cat > "${HOME}/.local/bin/rc-update" <<EOF
+  cat > "${HOME}/.local/bin/rc-update" << EOF
 #!/usr/bin/env bash
 echo "\$*" > "${args_file}"
 EOF
@@ -43,11 +43,11 @@ EOF
 
 @test "init::enable_termux_service enables and starts the service" {
   local actions_file="${BATS_TEST_TMPDIR}/termux-actions"
-  cat > "${HOME}/.local/bin/sv-enable" <<EOF
+  cat > "${HOME}/.local/bin/sv-enable" << EOF
 #!/usr/bin/env bash
 printf 'enable:%s\n' "\$*" >> "${actions_file}"
 EOF
-  cat > "${HOME}/.local/bin/sv" <<EOF
+  cat > "${HOME}/.local/bin/sv" << EOF
 #!/usr/bin/env bash
 printf 'sv:%s\n' "\$*" >> "${actions_file}"
 EOF
@@ -62,11 +62,11 @@ EOF
 
 @test "init::enable_launchd_service uses brew services for system services" {
   local args_file="${BATS_TEST_TMPDIR}/brew-args"
-  cat > "${HOME}/.local/bin/launchctl" <<'EOF'
+  cat > "${HOME}/.local/bin/launchctl" << 'EOF'
 #!/usr/bin/env bash
 exit 0
 EOF
-  cat > "${HOME}/.local/bin/brew" <<EOF
+  cat > "${HOME}/.local/bin/brew" << EOF
 #!/usr/bin/env bash
 printf '%s\n' "\$*" > "${args_file}"
 EOF
