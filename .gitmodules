@@ -8,7 +8,7 @@
   path = silos/tmux
   url = git@gitlab.com:dynamo-config/tmux.git
 [submodule "awesome"]
-  path = home/dot_config/awesome
+  path = home/private_dot_config/awesome
   url = git@gitlab.com:dynamo-config/awesome.git
 [submodule "wallpaper"]
   path = home/Multimedia/Pictures/Wallpaper
