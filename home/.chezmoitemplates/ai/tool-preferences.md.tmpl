@@ -10,6 +10,7 @@ the classic tool only if the replacement is missing.
 | `tmux`            | `{{ if eq .terminalMultiplexer "Z" }}zellij{{ else }}tmux{{ end }}` | terminal multiplexer |
 | `grep`            | `rg` (ripgrep)                                    | text search |
 | `find`            | `fd`                                              | file search |
+| `pre-commit`      | `prek`                                            | pre-commit hooks |
 
 Guidance:
 - Only substitute when the preferred tool is actually installed; check with
