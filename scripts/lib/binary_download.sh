@@ -173,13 +173,13 @@ function binary::download_and_extract {
   dytoy::run_script "$before_path"
 
   if [[ "$url" =~ \.(tar\.gz|tgz|tar\.xz|tar\.bz2|tbz2|xz|tar|tar\.zst|tbz)$ ]]; then
-    compressed:extract_tar "$name" "$temp_file" "$location" "$url" "$version"
+    compressed::extract_tar "$name" "$temp_file" "$location" "$url" "$version"
   elif [[ "$url" =~ \.zip$ ]]; then
-    compressed:extract_zip "$name" "$temp_file" "$location" "$version"
+    compressed::extract_zip "$name" "$temp_file" "$location" "$version"
   elif [[ "$url" =~ \.bz2$ ]]; then
-    compressed:extract_bzip2 "$name" "$temp_file" "$location"
+    compressed::extract_bzip2 "$name" "$temp_file" "$location"
   elif [[ "$url" =~ \.gz$ ]]; then
-    compressed:extract_gzip "$name" "$temp_file" "$location"
+    compressed::extract_gzip "$name" "$temp_file" "$location"
   else
     dybatpho::dry_run mv "$temp_file" "$output_path"
   fi

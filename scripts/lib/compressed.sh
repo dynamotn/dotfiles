@@ -166,7 +166,7 @@ function __compressed_extract_archive {
 # @arg $5 string Version of tool
 # @env LIST_CONTENTS boolean If true, list contents of archive instead of extracting
 #######################################
-function compressed:extract_tar {
+function compressed::extract_tar {
   # shellcheck disable=SC2034
   local name path location url version
   dybatpho::expect_args name path location url version -- "$@"
@@ -181,7 +181,7 @@ function compressed:extract_tar {
 # @arg $4 string Version of tool
 # @env LIST_CONTENTS boolean If true, list contents of archive instead of extracting
 #######################################
-function compressed:extract_zip {
+function compressed::extract_zip {
   local name path location version
   dybatpho::expect_args name path location version -- "$@"
   __compressed_extract_archive "$name" "$path" "$location" "$version" "flat" false
@@ -193,7 +193,7 @@ function compressed:extract_zip {
 # @arg $2 string Compressed file location to extract
 # @arg $3 string Location to extract
 #######################################
-function compressed:extract_bzip2 {
+function compressed::extract_bzip2 {
   local name path location
   dybatpho::expect_args name path location -- "$@"
   __compressed_extract_single_file "$name" "$path" "$location" ".bz2"
@@ -205,7 +205,7 @@ function compressed:extract_bzip2 {
 # @arg $2 string Compressed file location to extract
 # @arg $3 string Location to extract
 #######################################
-function compressed:extract_gzip {
+function compressed::extract_gzip {
   local name path location
   dybatpho::expect_args name path location -- "$@"
   __compressed_extract_single_file "$name" "$path" "$location" ".gz"
