@@ -1,68 +1,43 @@
-[tasks.docker-enterprise-F1]
+[tasks.test]
+description = "Run the bats suite"
+run = "./scripts/test.sh --all"
+
+[tasks.lint]
+description = "Lint and format-check the shell sources"
 run = """
 #!/usr/bin/env bash
-ENTERPRISE="F1"
-DOCKER_IMAGE="git.example.com/dynamo/toolbox:${ENTERPRISE}"
-export TOOLBOX_TYPE="${ENTERPRISE}"
-export AGE_PASSPHRASES="${ENTERPRISE}=$(rbw get 'Age Dotfiles' --field "${ENTERPRISE}")"
-export SSL_CERT="$(
-  age -d -i ~/.config/chezmoi/enterprise-${ENTERPRISE}.key \
-    secrets/data/enterprise-${ENTERPRISE}/ssl.crt.age
-)"
-export PATH="~/.local/bin:$PATH"
-gomplate -f {{ config_root }}/.dockerignore.tmpl -o {{ config_root }}/.dockerignore
-docker build --network=host \
-  --secret id=github_token,env=GITHUB_TOKEN \
-  --secret id=age_passphrases,env=AGE_PASSPHRASES \
-  --secret id=ssl_cert,env=SSL_CERT \
-  --no-cache \
-  -f "{{ config_root }}/docker/Dockerfile.alpine" \
-  -t $DOCKER_IMAGE "{{ config_root }}"
+set -Eeuo pipefail
+git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning
+git ls-files 'scripts/*.sh' 'scripts/*.bats' 'scripts/*.bash' \
+  | xargs shfmt -i 2 -ci -bn -sr -d
 """
+
+[tasks.format]
+description = "Rewrite the shell sources in the repository style"
+run = """
+#!/usr/bin/env bash
+set -Eeuo pipefail
+git ls-files 'scripts/*.sh' 'scripts/*.bats' 'scripts/*.bash' \
+  | xargs shfmt -i 2 -ci -bn -sr -w
+"""
+
+[tasks.check]
+description = "Everything CI runs"
+depends = ["lint", "test"]
+
+# The four images share a single build script; see scripts/docker.sh.
+[tasks.docker-enterprise-F1]
+description = "Build the F1 enterprise toolbox image"
+run = "./scripts/docker.sh enterprise-F1"
 
 [tasks.docker-personal]
-run = """
-#!/usr/bin/env bash
-DOCKER_IMAGE="git.dynamotn.dev/config/dotfiles"
-export TOOLBOX_TYPE="personal"
-export AGE_PASSPHRASES="personal=$(rbw get 'Age Dotfiles')"
-export PATH="~/.local/bin:$PATH"
-gomplate -f {{ config_root }}/.dockerignore.tmpl -o {{ config_root }}/.dockerignore
-docker build --network=host \
-  --build-arg IDENTITIES="personal" \
-  --secret id=github_token,env=GITHUB_TOKEN \
-  --secret id=age_passphrases,env=AGE_PASSPHRASES \
-  --no-cache \
-  -f "{{ config_root }}/docker/Dockerfile.alpine" \
-  -t $DOCKER_IMAGE "{{ config_root }}"
-"""
+description = "Build the personal toolbox image"
+run = "./scripts/docker.sh personal"
 
 [tasks.docker-personal-arch]
-run = """
-#!/usr/bin/env bash
-DOCKER_IMAGE="git.dynamotn.dev/config/dotfiles:arch"
-export TOOLBOX_TYPE="personal"
-export PATH="~/.local/bin:$PATH"
-export AGE_PASSPHRASES="personal=$(rbw get 'Age Dotfiles')"
-gomplate -f {{ config_root }}/.dockerignore.tmpl -o {{ config_root }}/.dockerignore
-docker build --network=host \
-  --secret id=github_token,env=GITHUB_TOKEN \
-  --secret id=age_passphrases,env=AGE_PASSPHRASES \
-  --no-cache \
-  -f "{{ config_root }}/docker/Dockerfile.arch" \
-  -t $DOCKER_IMAGE "{{ config_root }}"
-"""
+description = "Build the Arch-based personal toolbox image"
+run = "./scripts/docker.sh personal-arch"
 
 [tasks.docker-public]
-run = """
-#!/usr/bin/env bash
-DOCKER_IMAGE="dynamotn/toolbox"
-export TOOLBOX_TYPE=""
-export PATH="~/.local/bin:$PATH"
-gomplate -f {{ config_root }}/.dockerignore.tmpl -o {{ config_root }}/.dockerignore
-docker build --network=host \
-  --secret id=github_token,env=GITHUB_TOKEN \
-  --no-cache \
-  -f "{{ config_root }}/docker/Dockerfile.alpine" \
-  -t $DOCKER_IMAGE "{{ config_root }}"
-"""
+description = "Build the public toolbox image"
+run = "./scripts/docker.sh public"
