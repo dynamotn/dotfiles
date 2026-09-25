@@ -2,6 +2,16 @@
 # @file test.sh
 # @brief Run tests for the dotfiles setup
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+# The library lives in a submodule, which a fresh clone or a new worktree
+# does not populate. Fetch it before sourcing, or nothing below is defined.
+if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
+  git -C "$SCRIPT_DIR/.." submodule update --init "$SCRIPT_DIR/lib/dybatpho"
+fi
+if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
+  echo "dybatpho is missing and could not be fetched." >&2
+  echo "Run: git submodule update --init scripts/lib/dybatpho" >&2
+  exit 1
+fi
 # shellcheck source=lib/dybatpho/init.sh
 . "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli
 BATS_CMD="${DYBATPHO_DIR}/test/lib/core/bin/bats"
