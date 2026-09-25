@@ -1,0 +1,39 @@
+# secrets/data is a private submodule; CI never fetches it. The secrets
+# schema tests skip themselves when it is absent, so the suite still runs.
+variables:
+  GIT_SUBMODULE_STRATEGY: none
+  SHFMT_VERSION: v3.12.0
+
+stages:
+  - lint
+  - test
+
+.debian:
+  image: debian:stable-slim
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq --no-install-recommends ca-certificates curl git
+
+lint:shell:
+  extends: .debian
+  stage: lint
+  script:
+    - apt-get install -y -qq --no-install-recommends shellcheck
+    - curl -fsSL -o /usr/local/bin/shfmt
+      "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64"
+    - chmod +x /usr/local/bin/shfmt
+    # The pathspec matches recursively and skips submodule contents.
+    - git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning
+    - git ls-files 'scripts/*.sh' 'scripts/*.bats' 'scripts/*.bash' | xargs shfmt -i 2 -ci -bn -sr -d
+
+test:bats:
+  extends: .debian
+  stage: test
+  script:
+    # Only the test library, so the private secrets submodule stays out.
+    - git submodule update --init --recursive scripts/lib/dybatpho
+    - sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+    - apt-get install -y -qq --no-install-recommends cargo
+    - export PATH="$HOME/.cargo/bin:$PATH"
+    - command -v ys > /dev/null || cargo install yaml-schema --locked
+    - ./scripts/test.sh --all
