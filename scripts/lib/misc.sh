@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# @file misc.sh
+# @brief Library `misc` for helpers that fit no other library
+# @description Library `misc` for helpers that fit no other library, such as installing a
+# tool through dytoy and substituting a version into a release asset name.
 #######################################
 # @description Install tool using dytoy
 # @arg $1 string Name of tool

@@ -1,4 +1,9 @@
 #!{{ .bash }}
+# @file 03-setup-gnome.sh
+# @brief Stop the GNOME overlay key from grabbing the super key
+# @description Stop the GNOME overlay key from grabbing the super key, so that it stays
+# available for other bindings. Only applies when GNOME is the chosen window
+# manager.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file gtk.sh
+# @brief Mirror the GTK 3 settings into the GNOME schema
+# @description Read the theme, icon, cursor and font settings out of the GTK 3 settings
+# file and write them into the GNOME interface schema, so both toolkits agree.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 
 config="${HOME}/.config/gtk-3.0/settings.ini"

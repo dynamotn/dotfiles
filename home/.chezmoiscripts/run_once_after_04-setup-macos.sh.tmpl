@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file 04-setup-macos.sh
+# @brief Apply the macOS defaults and the keyboard mapping
+# @description Apply every defaults file under `dot_macos` and set the modifier key
+# mapping. Only runs on macOS.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

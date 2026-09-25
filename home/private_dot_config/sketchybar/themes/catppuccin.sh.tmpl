@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# @file catppuccin.sh
+# @brief Export the Catppuccin palette for sketchybar
+# @description Export the Catppuccin palette as the `SKETCHY_*` colour variables the
+# sketchybar items and plugins read, picking the flavour that matches the
+# current dark mode setting.
 {{- $theme := .catppuccin.macchiato }}
 {{- if not .darkMode }}
 {{-   $theme = .catppuccin.latte }}

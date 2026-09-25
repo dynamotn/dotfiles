@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# @file init_system.sh
+# @brief Library `init` to manage services of init systems
+# @description Library `init` to manage services of init systems, covering systemd,
+# OpenRC and the service managers of the other supported distributions.
 # shellcheck disable=2154
 
 #######################################

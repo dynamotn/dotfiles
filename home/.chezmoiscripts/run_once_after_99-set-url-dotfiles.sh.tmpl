@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file 99-set-url-dotfiles.sh
+# @brief Point the dotfiles remotes at GitLab and GitHub
+# @description Set the origin remote of the dotfiles repository to GitLab and add GitHub
+# as a second remote. Skipped on container machines.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules git
 dybatpho::register_common_handlers
 

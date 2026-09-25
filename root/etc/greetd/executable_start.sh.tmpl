@@ -1,4 +1,9 @@
 #!/bin/sh
+# @file start.sh
+# @brief Session command greetd runs after a successful login
+# @description Set up the runtime directory and the environment, then start the chosen
+# session. Written for POSIX sh, because it is the session command greetd
+# itself executes.
 {{- if eq .osid "linux-gentoo" }}
 export XDG_RUNTIME_DIR=/tmp/user-$(id -u)
 {{- else }}
