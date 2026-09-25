@@ -15,6 +15,24 @@ repos:
         description: Forces to replace line ending by the UNIX 'lf' character.
       - id: trailing-whitespace
         exclude: .*arkenfox.js$
+      - id: check-json
+        exclude: ^home/.*profiles/
+  - repo: local
+    hooks:
+      - id: shellcheck-system
+        name: Lint shell scripts
+        description: Static analysis of the bash libraries and entrypoints.
+        entry: shellcheck -x -S warning
+        language: system
+        files: ^scripts/.*\.(sh|bash)$
+        exclude: ^scripts/lib/dybatpho/
+      - id: shfmt-system
+        name: Format shell scripts
+        description: Enforce the repository shell formatting style.
+        entry: shfmt -i 2 -ci -bn -sr -w
+        language: system
+        files: ^scripts/.*\.(sh|bash|bats)$
+        exclude: ^scripts/lib/dybatpho/
   - repo: https://github.com/betterleaks/betterleaks
     rev: v1.1.1
     hooks:

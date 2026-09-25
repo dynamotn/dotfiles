@@ -1,0 +1,36 @@
+name: shellcheck
+{{- if or (eq .chezmoi.os "android") (eq .kind "container") }}
+# Use package manager for Android and container environments, where the
+# release tarball is not published for every architecture
+method: os
+# https://repology.org/project/shellcheck/versions
+arch:
+  packages:
+    - name: shellcheck
+ubuntu:
+  packages:
+    - name: shellcheck
+alpine:
+  packages:
+    - name: shellcheck
+termux:
+  packages:
+    - name: shellcheck
+macos:
+  packages:
+    - name: shellcheck
+{{- else }}
+method: binary
+github:
+  repo: koalaman/shellcheck
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: shellcheck-%v.{{ .chezmoi.os }}.{{ $arch }}.tar.xz
+archive:
+  - path: shellcheck-%v/shellcheck
+    strip: 1
+{{- end }}
