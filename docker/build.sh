@@ -58,7 +58,7 @@ function _main {
   # Disable SSH host key checking
   export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
   # Get identities from secrets
-  if [ -f /run/secrets/age_passphrases ]; then
+  if [[ -f /run/secrets/age_passphrases ]]; then
     local age_passphrases
     age_passphrases=$(sudo cat /run/secrets/age_passphrases)
     local identities=""

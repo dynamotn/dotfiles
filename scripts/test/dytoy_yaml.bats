@@ -161,7 +161,7 @@ EOF
 @test "dytoy::is_installed_package delegates to the package-specific checker" {
   export ONLY_NOT_INSTALLED='true'
   function pkg::check_installed_apt {
-    [ "$1" = "sample" ]
+    [[ "$1" == "sample" ]]
   }
 
   run dytoy::is_installed_package sample apt

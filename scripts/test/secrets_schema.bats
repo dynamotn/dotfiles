@@ -16,7 +16,7 @@ function _require_ys {
 # Usage: _validate <schema_file> <yaml_file>
 function _validate {
   local schema="${1}" yaml="${2}"
-  if [ ! -f "${yaml}" ]; then
+  if [[ ! -f "${yaml}" ]]; then
     skip "secrets file not found (not decrypted): ${yaml}"
   fi
   ys -f "${schema}" "${yaml}"

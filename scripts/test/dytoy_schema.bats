@@ -106,7 +106,7 @@ function _validate_profile {
 # ---------------------------------------------------------------------------
 
 @test "dytoy schema yaml file exists" {
-  [ -f "${SCHEMA_FILE}" ]
+  [[ -f "${SCHEMA_FILE}" ]]
 }
 
 @test "plain dytoy yaml files conform to schema" {

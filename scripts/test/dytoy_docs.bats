@@ -33,7 +33,7 @@ function _documented_repos {
 # ---------------------------------------------------------------------------
 
 @test "dytoy documentation exists" {
-  [ -f "${DOC_FILE}" ]
+  [[ -f "${DOC_FILE}" ]]
 }
 
 # A tool whose definition points at one project while the docs link another
@@ -45,7 +45,7 @@ function _documented_repos {
 
   local failures=()
   while read -r repo; do
-    [ -n "${repo}" ] || continue
+    [[ -n "${repo}" ]] || continue
     grep -qxF "${repo}" <<< "${documented}" \
       || failures+=("${repo}: installed by dytoy but not linked in docs/dytoy.md")
   done < <(_defined_repos)
