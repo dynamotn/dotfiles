@@ -245,12 +245,15 @@ function pkg::add_overlay {
   dybatpho::expect_args name url -- "$@"
   if ! dybatpho::is file "/etc/portage/repos.conf/${name}.conf"; then
     dybatpho::dry_run sudo mkdir -p /etc/portage/repos.conf
-    dybatpho::dry_run eval "sudo tee /etc/portage/repos.conf/${name}.conf << EOF
+    dybatpho::create_temp repo_conf ".conf"
+    # shellcheck disable=SC2154
+    cat > "${repo_conf}" << EOF
 [${name}]
 location = /var/db/repos/${name}
 sync-type = git
 sync-uri = ${url}
-EOF"
+EOF
+    dybatpho::dry_run sudo cp "${repo_conf}" "/etc/portage/repos.conf/${name}.conf"
     dybatpho::dry_run sudo emaint sync --yes --repo "$name" || dybatpho::die "Failed to sync repository $name"
   fi
 }
@@ -286,7 +289,10 @@ function pkg::add_apt_repo {
     else
       dybatpho::dry_run sudo gpg --dearmor --yes -o "$gpg_path" "$temp_key"
     fi
-    dybatpho::dry_run eval "printf '%s\n' \"deb [signed-by=${gpg_path}] ${url} ${suite} ${components}\" | sudo tee \"${path}\" > /dev/null"
+    dybatpho::create_temp repo_list ".list"
+    # shellcheck disable=SC2154
+    printf '%s\n' "deb [signed-by=${gpg_path}] ${url} ${suite} ${components}" > "${repo_list}"
+    dybatpho::dry_run sudo cp "${repo_list}" "${path}"
   else
     dybatpho::debug "Repository $name already exists, skipping."
   fi
