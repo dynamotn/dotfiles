@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file 02-install-01-package-tools.sh
+# @brief Install the package manager tools declared for dytoy
+# @description Install the package manager tools declared for dytoy. Re-runs whenever a
+# dytoy template changes.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

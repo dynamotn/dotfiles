@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# @file 02-setup-ssl.sh
+# @brief Install the extra SSL certificates
+# @description Install the extra SSL certificates into the system trust store and refresh
+# it.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

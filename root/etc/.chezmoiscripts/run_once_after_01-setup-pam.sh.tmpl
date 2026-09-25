@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# @file 01-setup-pam.sh
+# @brief Set up PAM for hardware key and fingerprint login
+# @description Add the `pam_u2f` and `pam_fprintd` modules to the local login stack, when
+# the machine is configured to use them.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

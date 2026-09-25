@@ -1,3 +1,6 @@
 #!{{ .bash }}
+# @file bar.sh
+# @brief Start the eww daemon and open the bar
+# @description Start the eww daemon and open the bar on the first screen.
 eww -c ~/.config/eww daemon \
   && eww -c ~/.config/eww open bar --screen 0 --id bar0

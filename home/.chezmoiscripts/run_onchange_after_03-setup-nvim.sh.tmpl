@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file 03-setup-nvim.sh
+# @brief Sync the neovim plugins
+# @description Sync the neovim plugins with Lazy, headless, after the configuration
+# changes.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

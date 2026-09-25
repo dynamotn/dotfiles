@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file 03-setup-tridactyl.sh
+# @brief Install the tridactyl native messenger
+# @description Install the tridactyl native messenger by running the upstream installer,
+# only when the chosen browser is Firefox or Zen.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules network
 dybatpho::register_common_handlers
 
