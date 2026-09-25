@@ -10,7 +10,7 @@ input=$(cat)
 name=$(jq -r '.name' <<<"$input")
 cwd=$(jq -r '.cwd' <<<"$input")
 
-if [ -z "$name" ] || [ "$name" = "null" ]; then
+if [[ -z "$name" || "$name" == "null" ]]; then
   echo "worktree-create: no name in hook input" >&2
   exit 1
 fi
@@ -24,7 +24,7 @@ dir="$root/.worktrees/$name"
 branch="worktree-$name"
 
 # Reusing a name reopens the existing worktree, matching the built-in behavior.
-if [ -d "$dir" ]; then
+if [[ -d "$dir" ]]; then
   echo "worktree-create: reusing $dir" >&2
   echo "$dir"
   exit 0
@@ -38,7 +38,7 @@ else
   # Match the default "fresh" base: the remote's default branch, falling back
   # to local HEAD when there is no remote or it has not been fetched.
   base=$(git -C "$root" rev-parse --verify --quiet origin/HEAD || true)
-  [ -n "$base" ] || base=HEAD
+  [[ -n "$base" ]] || base=HEAD
   git -C "$root" worktree add -b "$branch" "$dir" "$base" >&2
 fi
 
