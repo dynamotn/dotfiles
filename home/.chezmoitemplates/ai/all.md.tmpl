@@ -1,0 +1,18 @@
+{{- /* The complete machine-wide agent instructions, in reading order.
+       Every agent tool includes this one file, so a new section is added
+       here once rather than in each of their wrappers. */ -}}
+{{- template "ai/credentials.md.tmpl" . }}
+
+{{ template "ai/destructive-commands.md.tmpl" . }}
+
+{{ template "ai/shell.md.tmpl" . }}
+
+{{ template "ai/tool-preferences.md.tmpl" . }}
+
+{{ template "ai/chezmoi.md.tmpl" . }}
+
+{{ template "ai/git-conventions.md.tmpl" . }}
+
+{{ template "ai/verification.md.tmpl" . }}
+
+{{ template "ai/language.md.tmpl" . -}}
