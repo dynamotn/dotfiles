@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file update_main.sh
+# @brief Update the main branch of the current repository
+# @description Update the main branch of the current repository, stashing local changes
+# while it runs when the working tree is not clean.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules git
 dybatpho::register_common_handlers
 

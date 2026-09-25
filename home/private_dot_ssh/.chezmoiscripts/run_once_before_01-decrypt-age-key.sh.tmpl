@@ -1,4 +1,9 @@
 #!{{ .bash }}
+# @file run_once_before_01-decrypt-age-key.sh
+# @brief Decrypt the age identity keys used by chezmoi
+# @description Decrypt the age identity key of each selected identity, so that the
+# encrypted files of this repository can be applied. Runs before anything
+# else in the ssh source tree.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

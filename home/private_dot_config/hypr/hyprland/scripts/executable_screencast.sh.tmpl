@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file screencast.sh
+# @brief Restart the desktop portals used for screencasting
+# @description Restart the xdg desktop portals, so that screencasting picks the Hyprland
+# portal instead of a stale one.
 killall xdg-desktop-portal-wlr
 killall xdg-desktop-portal-gnome
 killall xdg-desktop-portal-hyprland

@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file run_once_after_04-clone-notes.sh
+# @brief Clone the notes repository on Android
+# @description Clone the notes repository into the shared Documents folder, only on
+# Android, and only when it is not there yet.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

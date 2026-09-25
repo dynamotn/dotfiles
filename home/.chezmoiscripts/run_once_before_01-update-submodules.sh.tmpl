@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file run_once_before_01-update-submodules.sh
+# @brief Update the submodules before applying the dotfiles
+# @description Update the submodules of the dotfiles repository, so that the libraries the
+# later scripts source are present. Re-runs whenever `.gitmodules` changes.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules git
 dybatpho::register_common_handlers
 

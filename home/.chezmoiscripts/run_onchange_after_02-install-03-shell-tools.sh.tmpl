@@ -1,4 +1,8 @@
 #!{{ .bash }}
+# @file run_onchange_after_02-install-03-shell-tools.sh
+# @brief Install the shell tools declared for dytoy
+# @description Install the shell tools declared for dytoy. Re-runs whenever a dytoy
+# template changes.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

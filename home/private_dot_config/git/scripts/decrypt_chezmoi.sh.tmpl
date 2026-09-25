@@ -1,4 +1,9 @@
 #!{{ .bash }}
+# @file decrypt_chezmoi.sh
+# @brief Decrypt a chezmoi managed file for git to read
+# @description Decrypt an age encrypted file with the identity key of a chezmoi identity,
+# so that git can diff it. Takes the name of the decoder to use, `_normal` for
+# a plain file or `_sqlite` for a dump of an encrypted SQLite database.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

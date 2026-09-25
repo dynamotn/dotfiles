@@ -1,4 +1,7 @@
 #!{{ .bash }}
+# @file run_onchange_after_03-setup-tmux.sh
+# @brief Set up tmux
+# @description Set up tmux, only when it is the chosen terminal multiplexer.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 

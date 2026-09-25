@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# @file battery.sh
+# @brief Report the battery state for the hyprlock screen
+# @description Report the battery state for the hyprlock screen, as an icon and the charge
+# percentage, and print nothing on a machine with no battery.
 
 ############ Variables ############
 enable_battery=false
