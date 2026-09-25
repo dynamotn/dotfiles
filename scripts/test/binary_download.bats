@@ -68,21 +68,21 @@ EOF
   assert_output --partial "Authorization: Bearer secret-token"
 }
 
-@test "binary::download_and_extract routes tarballs through compressed:extract_tar" {
+@test "binary::download_and_extract routes tarballs through compressed::extract_tar" {
   function dytoy::create_script { :; }
   function dytoy::run_script { :; }
   function dytoy::get_yaml { printf 'null
 '; }
   function dybatpho::curl_download { :; }
-  function compressed:extract_tar {
+  function compressed::extract_tar {
     printf '%s
 ' "$2" > "${BATS_TEST_TMPDIR}/archive-path"
     mkdir -p "$3"
     : > "$3/$1"
   }
-  function compressed:extract_zip { return 99; }
-  function compressed:extract_bzip2 { return 99; }
-  function compressed:extract_gzip { return 99; }
+  function compressed::extract_zip { return 99; }
+  function compressed::extract_bzip2 { return 99; }
+  function compressed::extract_gzip { return 99; }
 
   run binary::download_and_extract sample "${BATS_TEST_TMPDIR}/out" "https://example.com/tool.tar.gz" "v1.0.0"
   assert_success
@@ -91,16 +91,16 @@ EOF
   assert_output --regexp '.*\.tar\.gz$'
 }
 
-@test "binary::download_and_extract routes gzip files through compressed:extract_gzip" {
+@test "binary::download_and_extract routes gzip files through compressed::extract_gzip" {
   function dytoy::create_script { :; }
   function dytoy::run_script { :; }
   function dytoy::get_yaml { printf 'null
 '; }
   function dybatpho::curl_download { :; }
-  function compressed:extract_tar { return 99; }
-  function compressed:extract_zip { return 99; }
-  function compressed:extract_bzip2 { return 99; }
-  function compressed:extract_gzip {
+  function compressed::extract_tar { return 99; }
+  function compressed::extract_zip { return 99; }
+  function compressed::extract_bzip2 { return 99; }
+  function compressed::extract_gzip {
     printf '%s
 ' "$2" > "${BATS_TEST_TMPDIR}/archive-path"
     mkdir -p "$3"

@@ -15,7 +15,7 @@ setup() {
   assert_output "bundle/bin/tool"
 }
 
-@test "compressed:extract_tar selects and renames the first matching entry" {
+@test "compressed::extract_tar selects and renames the first matching entry" {
   local src_dir="${BATS_TEST_TMPDIR}/src"
   local archive_path="${BATS_TEST_TMPDIR}/bundle.tar.gz"
   local destination="${BATS_TEST_TMPDIR}/custom-bin"
@@ -34,7 +34,7 @@ setup() {
     fi
   }
 
-  run compressed:extract_tar mytool "${archive_path}" "${BATS_TEST_TMPDIR}/ignored" "https://example.com/tool.tar.gz" "v1.0.0"
+  run compressed::extract_tar mytool "${archive_path}" "${BATS_TEST_TMPDIR}/ignored" "https://example.com/tool.tar.gz" "v1.0.0"
   assert_success
   assert_file_exist "${destination}/mytool"
   run cat "${destination}/mytool"
@@ -42,7 +42,7 @@ setup() {
   assert_output "hello tar"
 }
 
-@test "compressed:extract_zip flattens selected entries into the destination" {
+@test "compressed::extract_zip flattens selected entries into the destination" {
   local src_dir="${BATS_TEST_TMPDIR}/src"
   local archive_path="${BATS_TEST_TMPDIR}/bundle.zip"
   local destination="${BATS_TEST_TMPDIR}/custom-bin"
@@ -68,7 +68,7 @@ PY
     fi
   }
 
-  run compressed:extract_zip mytool "${archive_path}" "${BATS_TEST_TMPDIR}/ignored" "v1.0.0"
+  run compressed::extract_zip mytool "${archive_path}" "${BATS_TEST_TMPDIR}/ignored" "v1.0.0"
   assert_success
   assert_file_exist "${destination}/tool"
   run cat "${destination}/tool"
@@ -91,22 +91,22 @@ PY
   assert_output "hello single"
 }
 
-@test "compressed:extract_bzip2 delegates to __compressed_extract_single_file with .bz2 suffix" {
+@test "compressed::extract_bzip2 delegates to __compressed_extract_single_file with .bz2 suffix" {
   function __compressed_extract_single_file {
     printf 'name:%s suffix:%s\n' "$1" "$4"
   }
 
-  run compressed:extract_bzip2 mytool "${BATS_TEST_TMPDIR}/file.bz2" "${BATS_TEST_TMPDIR}/out"
+  run compressed::extract_bzip2 mytool "${BATS_TEST_TMPDIR}/file.bz2" "${BATS_TEST_TMPDIR}/out"
   assert_success
   assert_output "name:mytool suffix:.bz2"
 }
 
-@test "compressed:extract_gzip delegates to __compressed_extract_single_file with .gz suffix" {
+@test "compressed::extract_gzip delegates to __compressed_extract_single_file with .gz suffix" {
   function __compressed_extract_single_file {
     printf 'name:%s suffix:%s\n' "$1" "$4"
   }
 
-  run compressed:extract_gzip mytool "${BATS_TEST_TMPDIR}/file.gz" "${BATS_TEST_TMPDIR}/out"
+  run compressed::extract_gzip mytool "${BATS_TEST_TMPDIR}/file.gz" "${BATS_TEST_TMPDIR}/out"
   assert_success
   assert_output "name:mytool suffix:.gz"
 }
