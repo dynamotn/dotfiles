@@ -81,11 +81,11 @@ Library/thunderbird
 
 {{/* Other GUI tools */}}
 {{- if eq .guiServer "0" }}
-.local/bin/obsidian
+.local/bin/obsidian-app
 .config/kitty
 {{- end }}
 {{- if eq .guiServer "M" }}
-.local/bin/obsidian
+.local/bin/obsidian-app
 {{- end }}
 {{- if not .hasSound }}
 .config/cava
