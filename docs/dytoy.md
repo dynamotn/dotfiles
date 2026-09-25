@@ -212,6 +212,7 @@
 |[uv](https://github.com/astral-sh/uv)|Modern Python package and project manager|
 |[prek](https://github.com/j178/prek)|Framework for manage pre-commit hooks, re-engineered in Rust|
 |[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|
+|[shfmt](https://github.com/mvdan/sh)|Formatter for shell scripts|
 |[scc](github.com/boyter/scc)|Display statistics about code|
 |[yaml-schema](https://github.com/yaml-schema/yaml-schema)|YAML schema validator|
 
