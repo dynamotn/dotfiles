@@ -44,7 +44,7 @@
 |Tool|Purpose|
 |----|-------|
 |[neovim](https://github.com/neovim/neovim)|My love editor, and IDE in my eyes|
-|[rbw](https://github.com/dynamotn/rbw)|Bitwarden CLI tool|
+|[rbw](https://github.com/doy/rbw)|Bitwarden CLI tool|
 |[fish](https://github.com/fish-shell/fish-shell)|Smart command line shell|
 |[tmux](https://github.com/tmux/tmux)|Terminal multiplexer|
 |[zellij](https://github.com/zellij-org/zellij)|Terminal multiplexer|
@@ -52,7 +52,7 @@
 |[tree-sitter](https://github.com/tree-sitter/tree-sitter)|Parser generator tool for syntax|
 |[w3m](https://github.com/acg/w3m)|Text-based web browser|
 |[git-lfs](https://github.com/git-lfs/git-lfs)|Git extension for large files|
-|[jq](https://github.com/stedolan/jq)|JSON processor|
+|[jq](https://github.com/jqlang/jq)|JSON processor|
 |[delta](https://github.com/dandavison/delta)|Syntax highlighting pager for git, diff, and grep output|
 |[hunk](https://github.com/modem-dev/hunk)|Review-first diff viewer for git|
 |[bat](https://github.com/sharkdp/bat)|Alternative to `cat` with syntax highlighting and Git integration|
@@ -96,7 +96,7 @@
 |NVIDIA/Intel/AMD drivers & libraries|GUI drivers & video acceleration|
 |[kitty](https://github.com/kovidgoyal/kitty)|Terminal emulator, support ligature fonts and GPU|
 |[firefox](https://www.mozilla.org/en-US/firefox/)|Web browser|
-|[zen-browser](https://zen-browser.app/)|Web browser with modern features|
+|[zen-browser](https://github.com/zen-browser/desktop)|Web browser with modern features|
 |[thunderbird](https://www.thunderbird.net/)|Email client|
 |[nvtop](https://github.com/Syllo/nvtop)|Monitor resources of GPU|
 |[nvitop](https://github.com/XuehaiPan/nvitop)|Monitor resources of GPU (NVIDIA only)|
@@ -210,7 +210,7 @@
 |[bun](https://github.com/oven-sh/bun)|JavaScript runtime|
 |[deno](https://github.com/denoland/deno)|JavaScript runtime|
 |[uv](https://github.com/astral-sh/uv)|Modern Python package and project manager|
-|[prek](https://github.com/j178/pre-commit)|Framework for manage pre-commit hooks, re-engineered in Rust|
+|[prek](https://github.com/j178/prek)|Framework for manage pre-commit hooks, re-engineered in Rust|
 |[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|
 |[scc](github.com/boyter/scc)|Display statistics about code|
 |[yaml-schema](https://github.com/yaml-schema/yaml-schema)|YAML schema validator|
@@ -342,4 +342,4 @@
 |[xleak](https://github.com/bgreenwell/xleak)|TUI for view Excel files|
 |[officecli](https://github.com/iOfficeAI/OfficeCLI)|CLI for Office suite's files|
 |[gws](https://github.com/googleworkspace/cli)|CLI for Google Workspace, use Google API Discovery Service|
-|[gog](https://github.com/googleworkspace/cli)|CLI for Google Workspace, useful for LLM|
+|[gog](https://github.com/openclaw/gogcli)|CLI for Google Workspace, useful for LLM|
