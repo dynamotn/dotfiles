@@ -201,6 +201,8 @@
         submodule-clean = "!_() { git submodule update --init --recursive && git submodule foreach --recursive 'git reset --hard' && git submodule foreach --recursive 'git clean -fd' }; _"
         # Update main branch
         update-main = !bash ~/.config/git/scripts/update_main.sh
+        # Push-mirror the GitLab project to GitHub via GitLab mirroring (default: origin -> gh)
+        mirror = !bash ~/.config/git/scripts/gitlab_mirror.sh
         # Unshallow
         unshallow = "!_() { git fetch --unshallow; git config remote.$1.fetch "+refs/heads/*:refs/remotes/$1/*"; git fetch $1; }; _"
         # Generate patch from git diff
