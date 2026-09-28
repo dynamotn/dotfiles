@@ -63,7 +63,6 @@
 |[ripgrep](https://github.com/BurntSushi/ripgrep)|Alternative to `grep`, with Git integration and faster|
 |[gping](https://github.com/orf/gping)|Alternative to `ping` with graph|
 |[wtf](https://github.com/wtfutil/wtf)|Personal information dashboard on CLI|
-|[zoxide](https://github.com/ajeetdsouza/zoxide)|Alternative to `cd` with smarter|
 |[mise](https://github.com/jdx/mise)|All-in-one version manager|
 |[vivid](https://github.com/sharkdp/vivid)|A themeable LS_COLORS generator with database|
 |[navi](https://github.com/denisidoro/navi)|Cheatsheet CLI tool|
