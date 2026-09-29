@@ -5,7 +5,10 @@
 # the source remote pushes every branch and tag to the GitHub repository behind the
 # target remote. The mirror authenticates over SSH with a key GitLab generates; that
 # key is added to GitHub as a deploy key with write access, so no token is stored.
-# Running it again reuses the existing mirror and only triggers a sync.
+# The SSH host keys of the GitHub host are stored on the mirror, otherwise GitLab
+# fails with `Host key verification failed`.
+# Running it again reuses the existing mirror, refreshes its host keys and triggers
+# a sync.
 # Requires `glab` and `gh` to be logged in, and `jq`.
 # @arg $1 string Optional GitLab remote, default is `origin`
 # @arg $2 string Optional GitHub remote, default is `gh`
@@ -55,13 +58,25 @@ function _main {
     dybatpho::info "Push mirror to ${github_repo} already exists (id ${mirror_id})"
   else
     dybatpho::info "Creating push mirror ${gitlab_host} -> ${github_repo}"
-    mirror_id="$(_gitlab remote_mirrors --method POST \
-      --raw-field url="${mirror_url}" \
-      --raw-field auth_method=ssh_public_key \
-      --field enabled=true \
-      --field keep_divergent_refs=false \
-      --field only_protected_branches=false | jq -r '.id')"
+    mirror_id="$(jq -n --arg url "${mirror_url}" \
+      '{
+        url: $url,
+        auth_method: "ssh_public_key",
+        enabled: true,
+        keep_divergent_refs: false,
+        only_protected_branches: false
+      }' | _gitlab remote_mirrors --method POST --input - | jq -r '.id')"
   fi
+
+  # Without the host keys of the GitHub host, the mirror cannot verify it and fails
+  local host_keys
+  host_keys="$(gh api --hostname "${github_repo%%/*}" meta --jq '.ssh_keys[]' |
+    jq -Rn '[inputs]')"
+  [[ "$(jq -r 'length' <<< "${host_keys}")" -gt 0 ]] ||
+    dybatpho::die "No SSH host key advertised by ${github_repo%%/*}"
+  dybatpho::info "Storing the SSH host keys of ${github_repo%%/*} on the mirror"
+  jq -n --argjson host_keys "${host_keys}" '{host_keys: $host_keys}' |
+    _gitlab "remote_mirrors/${mirror_id}" --method PUT --input - > /dev/null
 
   # GitHub stores a deploy key without its comment, so match on type and body only
   local public_key
