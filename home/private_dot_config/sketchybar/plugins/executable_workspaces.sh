@@ -4,7 +4,10 @@
 # @description Highlight the sketchybar item of the focused aerospace
 # workspace and dim every other one. Invoked by sketchybar with the workspace
 # id as its only argument.
-# shellcheck source=../themes/catppuccin.sh
+set -euo pipefail
+
+# The theme is a chezmoi template, so there is no file to follow here.
+# shellcheck source=/dev/null
 . "${CONFIG_DIR}/themes/catppuccin.sh"
 
 workspace_id=$1

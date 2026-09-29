@@ -61,7 +61,7 @@ function __compressed_copy_selection {
     return 0
   fi
 
-  local matches=()
+  local -a matches=()
   __compressed_glob_matches "${extracted_root}" "${archive_pattern}" matches
   dybatpho::array_first matches > /dev/null 2>&1 \
     || dybatpho::die "No archive entries matched pattern: ${archive_pattern}"
@@ -80,11 +80,13 @@ function __compressed_copy_selection {
   done
 
   [[ -n "${rename_target}" ]] || return 0
-  local expected_name
+  local expected_name expected_path
   expected_name="$(dybatpho::path_basename "${archive_pattern}")"
-  if [[ "${expected_name}" != "${rename_target}" ]] && dybatpho::is exist "$(dybatpho::path_join "${destination}" "${expected_name}")"; then
+  expected_path="$(dybatpho::path_join "${destination}" "${expected_name}")"
+  if [[ "${expected_name}" != "${rename_target}" ]] \
+    && dybatpho::is exist "${expected_path}"; then
     dybatpho::dry_run mv \
-      "$(dybatpho::path_join "${destination}" "${expected_name}")" \
+      "${expected_path}" \
       "$(dybatpho::path_join "${destination}" "${rename_target}")"
   fi
 }

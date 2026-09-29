@@ -1,33 +1,40 @@
 #!/usr/bin/env bash
 # @file setup.sh
 # @brief Setup your machine from dotfiles
+# @description Bring a fresh machine up to this repository: fetch the dybatpho
+# submodule, install the tools chezmoi itself needs, generate the chezmoi
+# configuration from its template and apply the dotfiles in order.
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-BIN_DIR="$HOME/.local/bin"
+# The library lives in a submodule, which a fresh clone or a new worktree
+# does not populate. Fetch it before sourcing, or nothing below is defined.
+if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
+  git -C "$SCRIPT_DIR/.." submodule update --init "$SCRIPT_DIR/lib/dybatpho"
+fi
+# shellcheck source-path=SCRIPTDIR
+# shellcheck source=lib/dybatpho/init.sh
+. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli network archive array
+dybatpho::register_common_handlers
+BIN_DIR="$(dybatpho::ensure_dir "$(dybatpho::path_join "$HOME" ".local" "bin")")"
+export PATH="$BIN_DIR":"$PATH"
 
 #######################################
 # @description Spec of setup.sh
+# @noargs
 #######################################
 # shellcheck disable=SC2154
 function _spec_main {
   dybatpho::opts::setup "Setup your machine from dotfiles" MAIN_ARGS action:"_main"
-  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" \
+    validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::flag "Use default values of chezmoi" USE_DEFAULT --use-default -d on:true off:false init:="false"
   dybatpho::opts::param "List of identities to decrypt, separated by \`,\`" IDENTITIES --identities -i optional:true on:
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
 #######################################
-# @description Update git submodules for running this script only
-#######################################
-function _update_git_modules {
-  if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
-    git -C "$SCRIPT_DIR/.." submodule update --init "$SCRIPT_DIR/lib/dybatpho"
-  fi
-}
-
-#######################################
 # @description Install binary version of chezmoi
 # @env BIN_DIR Directory to install binary
+# @noargs
 #######################################
 function _install_chezmoi {
   dybatpho::info "Installing chezmoi to $BIN_DIR"
@@ -37,6 +44,7 @@ function _install_chezmoi {
 #######################################
 # @description Install binary version of age
 # @env BIN_DIR Directory to install binary
+# @noargs
 #######################################
 function _install_age {
   dybatpho::info "Installing age to $BIN_DIR"
@@ -50,20 +58,27 @@ function _install_age {
 #######################################
 # @description Install binary version of yq
 # @env BIN_DIR Directory to install binary
+# @noargs
 #######################################
 function _install_yq {
   dybatpho::info "Installing yq to $BIN_DIR"
   local yq_path
   yq_path=$(dybatpho::path_join "$BIN_DIR" "yq")
   # shellcheck disable=SC2154
-  dybatpho::curl_download "https://github.com/mikefarah/yq/releases/latest/download/yq_$(dybatpho::goos)_$(dybatpho::goarch)" "$yq_path"
+  local yq_url="https://github.com/mikefarah/yq/releases/latest/download"
+  yq_url+="/yq_$(dybatpho::goos)_$(dybatpho::goarch)"
+  dybatpho::curl_download "$yq_url" "$yq_path"
   chmod +x "$yq_path"
 }
 
 #######################################
 # @description Generate chezmoi config file from template
 # @env IDENTITIES Comma separated list of identities to decrypt
+# @noargs
 #######################################
+# The replacement patterns are Go template text of the chezmoi config, so the
+# `$name` in them is not a shell expansion and must stay single quoted.
+# shellcheck disable=SC2016
 function _generate_chezmoi_config {
   local root_dir origin_config dest_config
   root_dir="$(dybatpho::path_normalize "$(dybatpho::path_join "$SCRIPT_DIR" "..")")"
@@ -76,11 +91,11 @@ function _generate_chezmoi_config {
   command cat "$origin_config" >> "$dest_config"
 
   # Generate decrypt config
-  local enable_personal=false
-  local identities=()
+  local enable_personal=false identity
+  local -a identities=()
   local raw_identities="${IDENTITIES:-}"
   IFS=',' read -r -a identities <<< "$raw_identities"
-  local enterprise_identities=()
+  local -a enterprise_identities=()
   for identity in "${identities[@]}"; do
     identity="$(dybatpho::trim "${identity}")"
     if dybatpho::string_is_blank "${identity}"; then
@@ -106,9 +121,34 @@ function _generate_chezmoi_config {
 }
 
 #######################################
+# @description Install every tool this script needs before it can run chezmoi
+# @env BIN_DIR Directory to install binary
+# @noargs
+#######################################
+function _install_prerequisites {
+  dybatpho::require "git"
+  dybatpho::require "curl"
+  if ! dybatpho::is command "chezmoi"; then
+    _install_chezmoi
+    dybatpho::is command "chezmoi" || dybatpho::die "Failed to install chezmoi"
+  fi
+  if ! dybatpho::is command "age"; then
+    _install_age
+    dybatpho::is command "age" || dybatpho::die "Failed to install age"
+  fi
+  if ! dybatpho::is command "yq"; then
+    _install_yq
+    dybatpho::is command "yq" || dybatpho::die "Failed to install yq"
+  fi
+}
+
+#######################################
 # @description Main function
+# @noargs
 #######################################
 function _main {
+  _install_prerequisites
+
   dybatpho::header "Initialize chezmoi"
   _generate_chezmoi_config
 
@@ -122,7 +162,7 @@ function _main {
   chezmoi init -S "$SCRIPT_DIR/.." "$prompt"
 
   # Apply configuration by order
-  local params=()
+  local -a params=()
   # shellcheck disable=SC2086
   if dybatpho::compare_log_level trace; then
     params=("--debug")
@@ -141,8 +181,12 @@ function _main {
   if ! dybatpho::string_is_blank "$proxy"; then
     export https_proxy="$proxy"
     export http_proxy="$proxy"
-    local addresses=()
-    readarray -t addresses < <(chezmoi data 2> /dev/null | yq e -o=j -I=0 -r '.noProxyAddresses[] // empty' 2> /dev/null || true)
+    local -a addresses=()
+    readarray -t addresses < <(
+      chezmoi data 2> /dev/null \
+        | yq e -o=j -I=0 -r '.noProxyAddresses[] // empty' 2> /dev/null \
+        || true
+    )
     if ((${#addresses[@]} > 0)); then
       local no_proxy_val
       no_proxy_val="$(dybatpho::array_join "addresses" ",")"
@@ -153,6 +197,7 @@ function _main {
   chezmoi apply "${params[@]}"
 
   # Apply OS specific configuration if not Termux
+  # dyshellint disable=BSG035 the OS layer is root-owned; skip it without root
   if sudo -n true 2> /dev/null || sudo true &> /dev/null; then
     case "$(dybatpho::goos)" in
       darwin)
@@ -169,28 +214,5 @@ function _main {
 
   dybatpho::success "Setup complete"
 }
-
-_update_git_modules
-
-# shellcheck source=lib/dybatpho/init.sh
-. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli network archive array
-BIN_DIR="$(dybatpho::ensure_dir "$(dybatpho::path_join "$HOME" ".local" "bin")")"
-export PATH="$BIN_DIR":"$PATH"
-dybatpho::register_common_handlers
-dybatpho::require "git"
-dybatpho::require "curl"
-
-if ! dybatpho::is command "chezmoi"; then
-  _install_chezmoi
-  dybatpho::is command "chezmoi" || dybatpho::die "Failed to install chezmoi"
-fi
-if ! dybatpho::is command "age"; then
-  _install_age
-  dybatpho::is command "age" || dybatpho::die "Failed to install age"
-fi
-if ! dybatpho::is command "yq"; then
-  _install_yq
-  dybatpho::is command "yq" || dybatpho::die "Failed to install yq"
-fi
 
 dybatpho::generate_from_spec _spec_main "$@"

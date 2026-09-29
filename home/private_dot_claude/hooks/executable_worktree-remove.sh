@@ -10,17 +10,18 @@
 #
 # Exiting non-zero while the directory still exists makes removal fail, so
 # fall back to a plain delete and always report success.
+# dyshellint disable=BSG031 a failed removal must not fail the hook, see above
 set -uo pipefail
 
 input=$(cat)
-path=$(jq -r '.worktree_path' <<<"$input")
+path=$(jq -r '.worktree_path' <<< "$input")
 
 if [[ -z "$path" || "$path" == "null" || ! -d "$path" ]]; then
   exit 0
 fi
 
 # Run git from the main checkout: removing a worktree from inside it fails.
-common_dir=$(git -C "$path" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)
+common_dir=$(git -C "$path" rev-parse --path-format=absolute --git-common-dir 2> /dev/null || true)
 
 if [[ -n "$common_dir" ]]; then
   root=$(dirname "$common_dir")

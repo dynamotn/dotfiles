@@ -38,7 +38,10 @@ function chezmoi_attrs::validate {
 # @stdout Attribute prefixes in chezmoi order, each followed by `_`
 #######################################
 function __chezmoi_attrs_prefix {
-  local -n __component_attrs="$1"
+  local component_attrs
+  dybatpho::expect_args component_attrs -- "$@"
+  dybatpho::expect_ref "${component_attrs}"
+  local -n __component_attrs="${component_attrs}"
   local attr prefix=""
   for attr in "${CHEZMOI_ATTRS_ORDER[@]}"; do
     if dybatpho::array_contains __component_attrs "${attr}"; then

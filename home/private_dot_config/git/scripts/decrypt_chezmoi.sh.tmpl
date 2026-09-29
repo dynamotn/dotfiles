@@ -7,15 +7,27 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
+#######################################
+# @description Decode a plain age encrypted file
+# @arg $1 string Name of the chezmoi identity holding the key
+# @arg $2 string Path of the encrypted file
+# @stdout Decrypted content
+#######################################
 function _normal {
-  local identity="$1"
-  local encrypted_file="$2"
+  local identity encrypted_file
+  dybatpho::expect_args identity encrypted_file -- "$@"
   age -d -i ~/.config/chezmoi/"${identity}".key "${encrypted_file}" 2> /dev/null
 }
 
+#######################################
+# @description Decode an age encrypted SQLite database as its SQL dump
+# @arg $1 string Name of the chezmoi identity holding the key
+# @arg $2 string Path of the encrypted file
+# @stdout SQL dump of the decrypted database
+#######################################
 function _sqlite {
-  local identity="$1"
-  local encrypted_file="$2"
+  local identity encrypted_file
+  dybatpho::expect_args identity encrypted_file -- "$@"
   local decrypted_file
   dybatpho::create_temp decrypted_file ".sqlite"
 
@@ -25,6 +37,19 @@ function _sqlite {
   sqlite3 "${decrypted_file}" .dump
 }
 
-cmd="$1"
-shift
-${cmd} "$@"
+#######################################
+# @description Run the decoder named by the first argument
+# @arg $1 string Decoder to use, `_normal` or `_sqlite`
+# @arg $@ string Arguments of that decoder
+#######################################
+function _main {
+  local decoder
+  dybatpho::expect_args decoder -- "$@"
+  shift
+  case "${decoder}" in
+    _normal | _sqlite) "${decoder}" "$@" ;;
+    *) dybatpho::die "Unknown decoder '${decoder}'" ;;
+  esac
+}
+
+_main "$@"

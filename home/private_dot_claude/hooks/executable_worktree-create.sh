@@ -12,8 +12,8 @@
 set -euo pipefail
 
 input=$(cat)
-name=$(jq -r '.name' <<<"$input")
-cwd=$(jq -r '.cwd' <<<"$input")
+name=$(jq -r '.name' <<< "$input")
+cwd=$(jq -r '.cwd' <<< "$input")
 
 if [[ -z "$name" || "$name" == "null" ]]; then
   echo "worktree-create: no name in hook input" >&2

@@ -18,7 +18,7 @@
 # @env MOZILLA_PROFILES array Profiles this installation knows about
 # @env PROFILE string Profile the user selected, empty for all of them
 
-# @env MOZILLA_FAILED_STORES number Folders `mozilla::store` could not encrypt
+# @env MOZILLA_FAILED_STORES number Folders `mozilla_profile::store` could not encrypt
 MOZILLA_FAILED_STORES=0
 
 #######################################
@@ -26,7 +26,7 @@ MOZILLA_FAILED_STORES=0
 # @arg $1 string Profile
 # @stdout Path of the profile folder
 #######################################
-function mozilla::profile_dir {
+function mozilla_profile::profile_dir {
   local profile
   dybatpho::expect_args profile -- "$@"
   dybatpho::path_join "${MOZILLA_PROFILE_ROOT}" "${profile}"
@@ -37,7 +37,7 @@ function mozilla::profile_dir {
 # @arg $1 string Profile
 # @stdout Path of the template folder
 #######################################
-function mozilla::prefs_template_dir {
+function mozilla_profile::prefs_template_dir {
   local profile
   dybatpho::expect_args profile -- "$@"
   dybatpho::path_join "${MOZILLA_TEMPLATE_ROOT}" "${profile}"
@@ -48,7 +48,7 @@ function mozilla::prefs_template_dir {
 # @arg $1 string Profile
 # @exitcode 1 The user selected another profile
 #######################################
-function mozilla::selected {
+function mozilla_profile::selected {
   local profile
   dybatpho::expect_args profile -- "$@"
   [[ -z "${PROFILE}" || "${PROFILE}" == "${profile}" ]]
@@ -59,7 +59,7 @@ function mozilla::selected {
 # @arg $1 string Value to validate, empty means every profile
 # @exitcode 1 No profile goes by that name
 #######################################
-function mozilla::validate_profile {
+function mozilla_profile::validate_profile {
   local value
   dybatpho::expect_args value -- "$@"
   [[ -z "${value}" ]] && return 0
@@ -77,12 +77,12 @@ function mozilla::validate_profile {
 # @description Run a callback once per profile the user selected
 # @arg $1 string Name of a function taking the profile as its only argument
 #######################################
-function mozilla::for_each_profile {
+function mozilla_profile::for_each_profile {
   local callback
   dybatpho::expect_args callback -- "$@"
   local profile
   for profile in "${MOZILLA_PROFILES[@]}"; do
-    if mozilla::selected "${profile}"; then
+    if mozilla_profile::selected "${profile}"; then
       "${callback}" "${profile}"
     else
       dybatpho::debug "${PROFILE}"
@@ -94,11 +94,11 @@ function mozilla::for_each_profile {
 # @description Replace the live data of a profile with the dotfiles copy
 # @arg $1 string Profile
 #######################################
-function mozilla::refresh_profile {
+function mozilla_profile::refresh_profile {
   local profile
   dybatpho::expect_args profile -- "$@"
   local profile_dir
-  profile_dir="$(mozilla::profile_dir "${profile}")"
+  profile_dir="$(mozilla_profile::profile_dir "${profile}")"
   dybatpho::dry_run rm -rf "${profile_dir}"
   # The live data is already gone at this point, so a failure here is fatal
   # rather than something to walk past.
@@ -112,7 +112,7 @@ function mozilla::refresh_profile {
 # @arg $2 string `prefs.js` of the profile
 # @arg $@ string Patterns to look for, in the order they are written
 #######################################
-function mozilla::extract_prefs {
+function mozilla_profile::extract_prefs {
   local output prefs_file
   dybatpho::expect_args output prefs_file -- "$@"
   shift 2
@@ -127,7 +127,7 @@ function mozilla::extract_prefs {
   done
 
   if [[ ! -s "${temp_file}" ]]; then
-    dybatpho::warn "No preference of ${prefs_file} matches ${*}, keeping ${output} as it is"
+    dybatpho::warn "No preference of ${prefs_file} matches $*, keeping ${output} as it is"
     return 0
   fi
   dybatpho::dry_run cp "${temp_file}" "${output}"
@@ -138,7 +138,7 @@ function mozilla::extract_prefs {
 # @arg $1 string Folder holding the files
 # @arg $@ string Names of the files, relative to that folder
 #######################################
-function mozilla::add {
+function mozilla_profile::add {
   local folder
   dybatpho::expect_args folder -- "$@"
   shift
@@ -164,19 +164,19 @@ function mozilla::add {
 # @arg $2 string Folder holding the files
 # @arg $@ string Names of the files, relative to that folder
 #######################################
-function mozilla::store {
+function mozilla_profile::store {
   local profile folder
   dybatpho::expect_args profile folder -- "$@"
   shift 2
   (($#)) || return 0
 
   if [[ "${profile}" == "public" ]]; then
-    mozilla::add "${folder}" "$@"
+    mozilla_profile::add "${folder}" "$@"
   elif ! dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "$@"; then
     # One call now carries a whole folder, so swallowing its failure would lose
     # every file of that folder without a word. The run carries on and says so
     # at the end instead.
-    dybatpho::warn "Cannot encrypt ${#} file(s) of ${folder}"
+    dybatpho::warn "Cannot encrypt $# file(s) of ${folder}"
     MOZILLA_FAILED_STORES=$((MOZILLA_FAILED_STORES + 1))
   fi
 }
@@ -191,7 +191,7 @@ function mozilla::store {
 #   it. One process per folder also replaces the one process per file the
 #   `xargs` this used to run would have paid for.
 #######################################
-function mozilla::store_tree {
+function mozilla_profile::store_tree {
   local profile root
   dybatpho::expect_args profile root -- "$@"
   shift 2
@@ -212,13 +212,13 @@ function mozilla::store_tree {
   for file in "${files[@]}"; do
     folder="$(dybatpho::path_dirname "${file}")"
     if [[ "${folder}" != "${current}" ]]; then
-      mozilla::store "${profile}" "${current}" "${batch[@]}"
+      mozilla_profile::store "${profile}" "${current}" "${batch[@]}"
       current="${folder}"
       batch=()
     fi
     batch+=("$(dybatpho::path_basename "${file}")")
   done
-  mozilla::store "${profile}" "${current}" "${batch[@]}"
+  mozilla_profile::store "${profile}" "${current}" "${batch[@]}"
 }
 
 #######################################
@@ -226,7 +226,7 @@ function mozilla::store_tree {
 # @arg $1 string Name of the function updating the dotfiles of one profile
 # @env REFRESH string Refresh the live data instead of updating the dotfiles
 #######################################
-function mozilla::run {
+function mozilla_profile::run {
   local update_profile
   dybatpho::expect_args update_profile -- "$@"
   dybatpho::info "Your ${MOZILLA_APP_KIND} in chezmoi settings is ${MOZILLA_APP_NAME}"
@@ -237,11 +237,11 @@ function mozilla::run {
     dybatpho::die "${MOZILLA_APP_NAME} is running"
   elif dybatpho::is true "${REFRESH}"; then
     dybatpho::header "Refresh from scratch ${MOZILLA_APP_NAME} settings"
-    mozilla::for_each_profile mozilla::refresh_profile
+    mozilla_profile::for_each_profile mozilla_profile::refresh_profile
     dybatpho::success "Refresh from scratch ${MOZILLA_APP_NAME} settings"
   else
     dybatpho::header "Update ${MOZILLA_APP_NAME} settings"
-    mozilla::for_each_profile "${update_profile}"
+    mozilla_profile::for_each_profile "${update_profile}"
     ((MOZILLA_FAILED_STORES == 0)) \
       || dybatpho::die "${MOZILLA_FAILED_STORES} folder(s) could not be encrypted, the dotfiles are not up to date"
     dybatpho::success "Update ${MOZILLA_APP_NAME} settings"

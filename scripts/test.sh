@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # @file test.sh
 # @brief Run tests for the dotfiles setup
+# @description Run the bats suite of this repository, or one of the schema
+# validations on their own. The runner is the bats bundled with the dybatpho
+# submodule, falling back to a bats already on `PATH`.
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 # The library lives in a submodule, which a fresh clone or a new worktree
 # does not populate. Fetch it before sourcing, or nothing below is defined.
@@ -12,6 +15,7 @@ if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
   echo "Run: git submodule update --init scripts/lib/dybatpho" >&2
   exit 1
 fi
+# shellcheck source-path=SCRIPTDIR
 # shellcheck source=lib/dybatpho/init.sh
 . "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli
 BATS_CMD="${DYBATPHO_DIR}/test/lib/core/bin/bats"
@@ -19,17 +23,21 @@ dybatpho::register_common_handlers
 
 #######################################
 # @description Spec of test.sh
+# @noargs
 #######################################
 function _spec_main {
   dybatpho::opts::setup "Test the dotfiles setup" MAIN_ARGS action:"_main"
   dybatpho::opts::flag "Run all tests" ALL --all -a on:true off:false init:="false"
-  dybatpho::opts::flag "Run only the dytoy YAML schema validation tests" DYTOY --dytoy -d on:true off:false init:="false"
-  dybatpho::opts::flag "Run only the secrets YAML schema validation tests" SECRETS --secrets -s on:true off:false init:="false"
+  dybatpho::opts::flag "Run only the dytoy YAML schema validation tests" \
+    DYTOY --dytoy -d on:true off:false init:="false"
+  dybatpho::opts::flag "Run only the secrets YAML schema validation tests" \
+    SECRETS --secrets -s on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
 #######################################
 # @description Main function
+# @noargs
 #######################################
 function _main {
   if [[ ! -x "${BATS_CMD}" ]]; then
@@ -40,7 +48,8 @@ function _main {
     fi
   fi
   if [[ ! -x "${BATS_CMD}" ]]; then
-    dybatpho::die "Bats test runner not found. Please install bats or run: git -C ${DYBATPHO_DIR} submodule update --init --recursive"
+    local hint="git -C ${DYBATPHO_DIR} submodule update --init --recursive"
+    dybatpho::die "Bats test runner not found. Install bats, or run: ${hint}"
   fi
 
   if [[ "$DYTOY" == "true" ]]; then

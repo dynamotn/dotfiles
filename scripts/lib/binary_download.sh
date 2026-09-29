@@ -61,7 +61,7 @@ function __binary_download_temp_suffix {
 # @arg $3 string Full download URL of the release asset
 # @arg $4 string Checksum filename (already version-substituted) in the same release
 #######################################
-function binary::verify_sha256 {
+function binary_download::verify_sha256 {
   local name temp_file url sha256_asset
   dybatpho::expect_args name temp_file url sha256_asset -- "$@"
 
@@ -105,7 +105,7 @@ function binary::verify_sha256 {
 # @env GITHUB_TOKEN string Token for GitHub API
 # @env GITLAB_TOKEN string Token for GitLab API
 #######################################
-function binary::get_latest_version {
+function binary_download::get_latest_version {
   local host repo
   dybatpho::expect_args host repo -- "$@"
 
@@ -120,7 +120,7 @@ function binary::get_latest_version {
     fi
   fi
   if [[ "$type" == "github" ]]; then
-    local param=()
+    local -a param=()
     if [[ "${GITHUB_TOKEN:-x}" != "x" ]]; then
       param=("-H" "Authorization: Bearer ${GITHUB_TOKEN}")
     fi
@@ -130,14 +130,18 @@ function binary::get_latest_version {
       dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$temp_file" "${param[@]}"
     fi
   elif [[ "$type" == "gitlab" ]]; then
-    local param=()
+    local -a param=()
     if [[ "${GITLAB_TOKEN:-x}" != "x" ]]; then
       param=("-H" "Authorization: Bearer ${GITLAB_TOKEN}")
     fi
     if dybatpho::is true "${DRY_RUN}"; then
       echo '{"tag_name": "v0.0.0"}' > "$temp_file"
     else
-      dybatpho::curl_do "https://${host}/api/v4/projects/$(echo "$repo" | sed -e "s/\//%2f/g")/releases/permalink/latest" "$temp_file" "${param[@]}"
+      local project
+      project="$(dybatpho::url_encode "$repo")"
+      dybatpho::curl_do \
+        "https://${host}/api/v4/projects/${project}/releases/permalink/latest" \
+        "$temp_file" "${param[@]}"
     fi
   fi
   # json_get works with either backend; `-o=props` was a yq-only flag.
@@ -153,7 +157,7 @@ function binary::get_latest_version {
 # @arg $5 string (optional) SHA256 checksum filename pattern (already version-substituted)
 # @env LIST_CONTENTS boolean If false, grant execute permission extracted file
 #######################################
-function binary::download_and_extract {
+function binary_download::download_and_extract {
   local name location url version
   dybatpho::expect_args name location url version -- "$@"
   local sha256_asset="${5:-}"
@@ -165,7 +169,7 @@ function binary::download_and_extract {
   dybatpho::curl_download "$url" "$temp_file"
 
   if ! dybatpho::string_is_blank "${sha256_asset}"; then
-    binary::verify_sha256 "${name}" "${temp_file}" "${url}" "${sha256_asset}"
+    binary_download::verify_sha256 "${name}" "${temp_file}" "${url}" "${sha256_asset}"
   fi
 
   dybatpho::create_temp before_path ".sh"

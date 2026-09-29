@@ -44,87 +44,87 @@ function _update_profile {
   local profile
   dybatpho::expect_args profile -- "$@"
   local profile_dir prefs_file prefs_dir storage_dir
-  profile_dir="$(mozilla::profile_dir "${profile}")"
+  profile_dir="$(mozilla_profile::profile_dir "${profile}")"
   prefs_file="$(dybatpho::path_join "$profile_dir" "prefs.js")"
-  prefs_dir="$(mozilla::prefs_template_dir "${profile}")"
+  prefs_dir="$(mozilla_profile::prefs_template_dir "${profile}")"
   storage_dir="$(dybatpho::path_join "$profile_dir" "storage" "default")"
 
   if dybatpho::is file "$prefs_file"; then
     dybatpho::progress "Update addon setting for profile ${profile}"
-    mozilla::extract_prefs "$prefs_dir/02-extensions.js" "$prefs_file" \
+    mozilla_profile::extract_prefs "$prefs_dir/02-extensions.js" "$prefs_file" \
       "extensions.webextensions.uuids" \
       "extensions.webextensions.ExtensionStorageIDB.migrated" \
       "privacy.userContext.extension"
 
     dybatpho::progress "Update email setting for profile ${profile}"
-    mozilla::extract_prefs "$prefs_dir/03-email.js.tmpl" "$prefs_file" \
+    mozilla_profile::extract_prefs "$prefs_dir/03-email.js.tmpl" "$prefs_file" \
       "mail.account" "mail.server.server" "mail.identity.id" \
       "mail.smtpserver.smtp" "mail.smtpservers"
 
     dybatpho::progress "Update address book setting for profile ${profile}"
-    mozilla::extract_prefs "$prefs_dir/04-address-book.js.tmpl" "$prefs_file" \
+    mozilla_profile::extract_prefs "$prefs_dir/04-address-book.js.tmpl" "$prefs_file" \
       "ldap_2.servers"
 
     dybatpho::progress "Update calendar setting for profile ${profile}"
-    mozilla::extract_prefs "$prefs_dir/05-calendar.js.tmpl" "$prefs_file" \
+    mozilla_profile::extract_prefs "$prefs_dir/05-calendar.js.tmpl" "$prefs_file" \
       "calendar.list.sortOrder" "calendar.registry"
   fi
 
   dybatpho::progress "Update extensions data for profile ${profile}"
-  mozilla::add "$profile_dir" \
+  mozilla_profile::add "$profile_dir" \
     "addons.json" "addonStartup.json.lz4" "extensions.json" "extension-preferences.json"
   if [[ "${profile}" =~ enterprise-.* ]]; then
-    mozilla::add "$(dybatpho::path_join "$profile_dir" "TbSync")" "account*.json" "folder*.json"
+    mozilla_profile::add "$(dybatpho::path_join "$profile_dir" "TbSync")" "account*.json" "folder*.json"
   fi
 
   dybatpho::progress "Update search engines for profile ${profile}"
-  mozilla::add "$profile_dir" "search.json.mozlz4"
+  mozilla_profile::add "$profile_dir" "search.json.mozlz4"
 
   dybatpho::progress "Update storage data for profile ${profile}"
-  mozilla::store "${profile}" "$profile_dir" "storage.sqlite"
+  mozilla_profile::store "${profile}" "$profile_dir" "storage.sqlite"
   if [ "${profile}" = "public" ]; then
-    mozilla::add "$storage_dir" "moz-extension+++*"
-    mozilla::add "$profile_dir" "global-messages-db.sqlite"
+    mozilla_profile::add "$storage_dir" "moz-extension+++*"
+    mozilla_profile::add "$profile_dir" "global-messages-db.sqlite"
   else
-    mozilla::store_tree "${profile}" "$storage_dir" -path "*/moz-extension+++*"
+    mozilla_profile::store_tree "${profile}" "$storage_dir" -path "*/moz-extension+++*"
   fi
 
   if dybatpho::is true "${COOKIES}"; then
     dybatpho::progress "Update cookies, passwords for profile ${profile}"
-    mozilla::store "${profile}" "$profile_dir" \
+    mozilla_profile::store "${profile}" "$profile_dir" \
       "cookies.sqlite" "logins.json" "key4.db" "folderTree.json" "folderCache.json"
   fi
 
   if dybatpho::is true "${MAIL}"; then
     dybatpho::progress "Update mail data for profile ${profile}"
     if [ "${profile}" = "public" ]; then
-      mozilla::add "$profile_dir" "ImapMail"
+      mozilla_profile::add "$profile_dir" "ImapMail"
     else
-      mozilla::store_tree "${profile}" "$(dybatpho::path_join "$profile_dir" "ImapMail")"
+      mozilla_profile::store_tree "${profile}" "$(dybatpho::path_join "$profile_dir" "ImapMail")"
     fi
   fi
 
   if dybatpho::is true "${FEEDS}"; then
     dybatpho::progress "Update feeds data for profile ${profile}"
-    mozilla::add "$(dybatpho::path_join "$profile_dir" "Mail")" "Feeds"
+    mozilla_profile::add "$(dybatpho::path_join "$profile_dir" "Mail")" "Feeds"
   fi
 
   if dybatpho::is true "${ADDRESSES}"; then
     dybatpho::progress "Update address book data for profile ${profile}"
-    mozilla::store "${profile}" "$profile_dir" "history.sqlite"
+    mozilla_profile::store "${profile}" "$profile_dir" "history.sqlite"
     if [ "${profile}" = "public" ]; then
-      mozilla::add "$profile_dir" "abook*.sqlite"
+      mozilla_profile::add "$profile_dir" "abook*.sqlite"
     else
-      mozilla::store_tree "${profile}" "$profile_dir" -maxdepth 1 -name "abook*.sqlite"
+      mozilla_profile::store_tree "${profile}" "$profile_dir" -maxdepth 1 -name "abook*.sqlite"
     fi
   fi
 
   if dybatpho::is true "${CALENDAR}"; then
     dybatpho::progress "Update calendar data for profile ${profile}"
     if [ "${profile}" = "public" ]; then
-      mozilla::add "$profile_dir" "calendar-data"
+      mozilla_profile::add "$profile_dir" "calendar-data"
     else
-      mozilla::store_tree "${profile}" "$(dybatpho::path_join "$profile_dir" "calendar-data")" \
+      mozilla_profile::store_tree "${profile}" "$(dybatpho::path_join "$profile_dir" "calendar-data")" \
         -name "*.sqlite"
     fi
   fi
@@ -134,10 +134,10 @@ function _update_profile {
 # @description Spec of dybird cli
 #######################################
 function _spec_main {
-  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} client to/from your dotfiles" MAIN_ARGS action:"mozilla::run _update_profile"
+  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} client to/from your dotfiles" MAIN_ARGS action:"mozilla_profile::run _update_profile"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
-  dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"mozilla::validate_profile \$OPTARG"
+  dybatpho::opts::param "Profile name" PROFILE --profile -p validate:"mozilla_profile::validate_profile \$OPTARG"
   dybatpho::opts::flag "Refresh from scratch live data" REFRESH --refresh -r on:true off:false init:="false"
   dybatpho::opts::flag "Include cookies" COOKIES --cookies --no-cookies -c on:true off:false init:="true"
   dybatpho::opts::flag "Include mail data" MAIL --mail --no-mail -m on:true off:false init:="false"

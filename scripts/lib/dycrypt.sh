@@ -20,6 +20,7 @@ DYCRYPT_AGE_EXT=".age"
 
 #######################################
 # @description Fail unless `age` and the repository root are usable
+# @noargs
 #######################################
 function dycrypt::check_prerequisites {
   dybatpho::is command age > /dev/null \

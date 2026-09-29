@@ -5,6 +5,15 @@
 #   distribution and which secrets they carry; everything else is shared.
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
+# The library lives in a submodule, which a fresh clone or a new worktree
+# does not populate. Fetch it before sourcing, or nothing below is defined.
+if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
+  git -C "$REPO_DIR" submodule update --init "$SCRIPT_DIR/lib/dybatpho"
+fi
+# shellcheck source-path=SCRIPTDIR
+# shellcheck source=lib/dybatpho/init.sh
+. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli
+dybatpho::register_common_handlers
 IMAGE=""
 DOCKERFILE=""
 BUILD_ARGS=()
@@ -12,21 +21,14 @@ SECRETS=()
 
 #######################################
 # @description Spec of docker.sh
+# @noargs
 #######################################
 # shellcheck disable=SC2154
 function _spec_main {
   dybatpho::opts::setup "Build a toolbox container image" MAIN_ARGS action:"_main"
-  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" \
+    validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
-}
-
-#######################################
-# @description Update git submodules for running this script only
-#######################################
-function _update_git_modules {
-  if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
-    git -C "$REPO_DIR" submodule update --init "$SCRIPT_DIR/lib/dybatpho"
-  fi
 }
 
 #######################################
@@ -51,6 +53,7 @@ function _export_age_passphrase {
 
 #######################################
 # @description Configure the public image, which carries no secret at all
+# @noargs
 #######################################
 function _configure_public {
   IMAGE="dynamotn/toolbox"
@@ -60,6 +63,7 @@ function _configure_public {
 
 #######################################
 # @description Configure the Alpine personal image
+# @noargs
 #######################################
 function _configure_personal {
   IMAGE="git.dynamotn.dev/config/dotfiles"
@@ -71,6 +75,7 @@ function _configure_personal {
 
 #######################################
 # @description Configure the Arch personal image
+# @noargs
 #######################################
 function _configure_personal_arch {
   IMAGE="git.dynamotn.dev/config/dotfiles:arch"
@@ -107,6 +112,7 @@ function _configure_enterprise {
 #######################################
 # @description Main function
 # @env MAIN_ARGS Positional arguments; the first names the image to build
+# @noargs
 #######################################
 function _main {
   local target bin_dir
@@ -151,9 +157,4 @@ function _main {
   dybatpho::success "Built $IMAGE"
 }
 
-_update_git_modules
-
-# shellcheck source=lib/dybatpho/init.sh
-. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli
-dybatpho::register_common_handlers
 dybatpho::generate_from_spec _spec_main "$@"

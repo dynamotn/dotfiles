@@ -1,7 +1,7 @@
 setup() {
   load test_helper
   setup_dotfiles_test_env
-  . "${DOTFILES_DIR}/scripts/lib/dytoy_yaml.sh"
+  . "${DOTFILES_DIR}/scripts/lib/dytoy.sh"
 }
 
 function _pipe_replace_version {
@@ -160,7 +160,7 @@ EOF
 
 @test "dytoy::is_installed_package delegates to the package-specific checker" {
   export ONLY_NOT_INSTALLED='true'
-  function pkg::check_installed_apt {
+  function package_manager::check_installed_apt {
     [[ "$1" == "sample" ]]
   }
 
@@ -170,7 +170,7 @@ EOF
 
 @test "dytoy::enable_service dispatches to the requested init backend" {
   local args_file="${BATS_TEST_TMPDIR}/service-args"
-  function init::enable_systemd_service {
+  function init_system::enable_systemd_service {
     printf '%s|%s\n' "$1" "$2" > "${args_file}"
   }
 
@@ -185,7 +185,7 @@ EOF
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::add_apt_repo { printf 'repo:%s\n' "$2" >> "${actions_file}"; }
   function dytoy::is_installed_package { return 1; }
-  function pkg::install_via_apt { printf 'install:%s\n' "$1" >> "${actions_file}"; }
+  function package_manager::install_via_apt { printf 'install:%s\n' "$1" >> "${actions_file}"; }
   function dytoy::enable_service { printf 'service:%s\n' "$2" >> "${actions_file}"; }
 
   run dytoy::install_ubuntu_package $'name: ripgrep\nservice: sshd'
@@ -199,7 +199,7 @@ EOF
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::is_installed_package { return 1; }
   function dytoy::enable_service { true; }
-  function pkg::install_via_brew { printf 'brew:%s\n' "$*" >> "${actions_file}"; }
+  function package_manager::install_via_brew { printf 'brew:%s\n' "$*" >> "${actions_file}"; }
 
   run dytoy::install_macos_package '{"name":"firefox","type":"cask","unstable":"true","repo":"null"}'
   assert_success
@@ -237,7 +237,7 @@ EOF
   local yaml='{"name":"app-misc/htop","repo":"null","url":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::is_installed_package { return 1; }
-  function pkg::install_via_portage { printf 'portage:%s\n' "$1" >> "${actions_file}"; }
+  function package_manager::install_via_portage { printf 'portage:%s\n' "$1" >> "${actions_file}"; }
   function dytoy::enable_service { true; }
   run dytoy::install_gentoo_package "$yaml" "openrc"
   assert_success
@@ -248,7 +248,7 @@ EOF
 @test "dytoy::install_gentoo_package skips already-installed packages" {
   local yaml='{"name":"app-misc/htop","repo":"null","url":"null"}'
   function dytoy::is_installed_package { return 0; }
-  function pkg::install_via_portage { return 1; }
+  function package_manager::install_via_portage { return 1; }
   run dytoy::install_gentoo_package "$yaml" "openrc"
   assert_success
 }
@@ -257,7 +257,7 @@ EOF
   local yaml='{"name":"htop","repo":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::is_installed_package { return 1; }
-  function pkg::install_via_pacman { printf 'pacman:%s\n' "$1" >> "${actions_file}"; }
+  function package_manager::install_via_pacman { printf 'pacman:%s\n' "$1" >> "${actions_file}"; }
   function dytoy::enable_service { true; }
   run dytoy::install_arch_package "$yaml"
   assert_success
@@ -268,7 +268,7 @@ EOF
 @test "dytoy::install_arch_package skips already-installed packages" {
   local yaml='{"name":"htop","repo":"null"}'
   function dytoy::is_installed_package { return 0; }
-  function pkg::install_via_pacman { return 1; }
+  function package_manager::install_via_pacman { return 1; }
   run dytoy::install_arch_package "$yaml"
   assert_success
 }
@@ -277,7 +277,7 @@ EOF
   local yaml='{"name":"curl","repo":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::is_installed_package { return 1; }
-  function pkg::install_via_apk { printf 'apk:%s\n' "$1" >> "${actions_file}"; }
+  function package_manager::install_via_apk { printf 'apk:%s\n' "$1" >> "${actions_file}"; }
   function dytoy::enable_service { true; }
   run dytoy::install_alpine_package "$yaml"
   assert_success
@@ -289,7 +289,7 @@ EOF
   local yaml='{"name":"git","repo":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::is_installed_package { return 1; }
-  function pkg::install_via_termux { printf 'termux:%s\n' "$1" >> "${actions_file}"; }
+  function package_manager::install_via_termux { printf 'termux:%s\n' "$1" >> "${actions_file}"; }
   function dytoy::enable_service { true; }
   run dytoy::install_termux_package "$yaml"
   assert_success
@@ -301,7 +301,7 @@ EOF
   local yaml='{"name":"com.termux","repo":"null","url":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::is_installed_package { return 1; }
-  function pkg::install_via_fdroidcl { printf 'fdroid:%s\n' "$1" >> "${actions_file}"; }
+  function package_manager::install_via_fdroidcl { printf 'fdroid:%s\n' "$1" >> "${actions_file}"; }
   run dytoy::install_fdroid_package "$yaml"
   assert_success
   run cat "${actions_file}"
@@ -311,9 +311,9 @@ EOF
 @test "dytoy::install_fdroid_package adds fdroid repo when repo is specified" {
   local yaml='{"name":"com.example.App","repo":"myrepo","url":"https://example.com/fdroid/repo"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
-  function pkg::add_fdroid_repo { printf 'add_repo:%s\n' "$1" >> "${actions_file}"; }
+  function package_manager::add_fdroid_repo { printf 'add_repo:%s\n' "$1" >> "${actions_file}"; }
   function dytoy::is_installed_package { return 1; }
-  function pkg::install_via_fdroidcl { printf 'fdroid:%s\n' "$1" >> "${actions_file}"; }
+  function package_manager::install_via_fdroidcl { printf 'fdroid:%s\n' "$1" >> "${actions_file}"; }
   run dytoy::install_fdroid_package "$yaml"
   assert_success
   run cat "${actions_file}"
@@ -325,18 +325,18 @@ EOF
   local yaml='{"name":"org.gnome.Calendar","repo":"flathub","url":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::is_installed_package { return 1; }
-  function pkg::install_via_flatpak { printf 'flatpak:%s|%s\n' "$1" "$2" >> "${actions_file}"; }
+  function package_manager::install_via_flatpak { printf 'flatpak:%s|%s\n' "$1" "$2" >> "${actions_file}"; }
   run dytoy::install_flatpak_package "$yaml"
   assert_success
   run cat "${actions_file}"
   assert_output "flatpak:org.gnome.Calendar|flathub"
 }
 
-@test "dytoy::add_apt_repo calls pkg::add_apt_repo with expanded suite for ubuntu" {
+@test "dytoy::add_apt_repo calls package_manager::add_apt_repo with expanded suite for ubuntu" {
   local yaml='{"name":"sample","repo":"https://packages.example/dists/%v","suite":"null","components":"main","key":"ABCD1234","repo_name":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
-  function pkg::add_apt_repo { printf 'add_apt_repo:%s|%s\n' "$1" "$3" >> "${actions_file}"; }
-  function pkg::sync_apt_repo { true; }
+  function package_manager::add_apt_repo { printf 'add_apt_repo:%s|%s\n' "$1" "$3" >> "${actions_file}"; }
+  function package_manager::sync_apt_repo { true; }
   # Stub /etc/os-release
   function grep {
     if [[ "$*" == *UBUNTU_CODENAME* ]]; then
@@ -352,7 +352,7 @@ EOF
 @test "dytoy::add_apt_repo returns early when repo is null" {
   local yaml='{"name":"sample","repo":"null","suite":"null","components":"main","key":"ABCD1234","repo_name":"null"}'
   local called_file="${BATS_TEST_TMPDIR}/called"
-  function pkg::add_apt_repo { printf 'called\n' > "${called_file}"; }
+  function package_manager::add_apt_repo { printf 'called\n' > "${called_file}"; }
   run dytoy::add_apt_repo "$yaml" "ubuntu"
   assert_success
   refute [ -f "${called_file}" ]

@@ -7,7 +7,7 @@ dybatpho::register_common_handlers
 
 {{- if eq .guiWinManager "H" }}
 {{- $configHash := joinPath .chezmoi.sourceDir "private_dot_config/hypr/hyprland/plugins.list" | include | sha256sum }}
-{{/* check list plugin is empty or not */}}
+{{- /* check list plugin is empty or not */}}
 {{- if ne $configHash "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }}
 # config hash: {{ $configHash }}
 

@@ -6,6 +6,10 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules git
 dybatpho::register_common_handlers
 
+#######################################
+# @description Rebase the main branch of the current repository on its remote
+# @noargs
+#######################################
 function _main {
   local has_changes=false
   if ! dybatpho::git_is_clean .; then
