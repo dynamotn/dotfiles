@@ -4,93 +4,162 @@
 # @description Configure GitLab's repository mirroring so the GitLab project behind
 # the source remote pushes every branch and tag to the GitHub repository behind the
 # target remote. The mirror authenticates over SSH with a key GitLab generates; that
-# key is added to GitHub as a deploy key with write access, so no token is stored.
-# The SSH host keys of the GitHub host are stored on the mirror, otherwise GitLab
-# fails with `Host key verification failed`.
+# key is added to GitHub as a deploy key with write access, so no token is stored on
+# the mirror itself. The SSH host keys of the GitHub host are stored on the mirror as
+# well, otherwise GitLab stops at `Host key verification failed`.
 # Running it again reuses the existing mirror, refreshes its host keys and triggers
 # a sync.
-# Requires `glab` and `gh` to be logged in, and `jq`.
+# Both APIs are called through `forge.sh`, which reads its tokens from
+# `GITLAB_TOKEN` and `GITHUB_TOKEN`.
 # @arg $1 string Optional GitLab remote, default is `origin`
 # @arg $2 string Optional GitHub remote, default is `gh`
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules git forge
 dybatpho::register_common_handlers
 
+# Remotes the two API helpers below talk to, set by `_main`
+gitlab_remote=""
+github_remote=""
+
 #######################################
 # @description Call the GitLab API of the source project.
-# @arg $1 string Path below the project, e.g. `remote_mirrors`
-# @arg $@ string Extra arguments for `glab api`
-# @stdout JSON response
+# @arg $@ string Arguments for `dybatpho::forge_request`
 #######################################
 function _gitlab {
-  local path="$1"
-  shift
-  glab api --hostname "${gitlab_host}" "${gitlab_project}/${path}" "$@"
+  # shellcheck disable=SC2034 # read by dybatpho::forge_request through dynamic scoping
+  local DYBATPHO_FORGE_REMOTE="${gitlab_remote}"
+  dybatpho::forge_request "$@"
+}
+
+#######################################
+# @description Call the GitHub API of the target repository.
+# @arg $@ string Arguments for `dybatpho::forge_request`
+#######################################
+function _github {
+  # shellcheck disable=SC2034 # read by dybatpho::forge_request through dynamic scoping
+  local DYBATPHO_FORGE_REMOTE="${github_remote}"
+  dybatpho::forge_request "$@"
+}
+
+#######################################
+# @description Find the push mirror pointing at a repository.
+#   GitLab masks the credentials of a mirror URL, so the scheme and the user
+#   part are dropped before the URLs are compared.
+# @arg $1 string Mirror list as returned by the API
+# @arg $2 string Target as `host/owner/repo.git`
+# @stdout Mirror id, or nothing when no mirror points there
+#######################################
+function _mirror_id {
+  local mirrors target
+  dybatpho::expect_args mirrors target -- "$@"
+
+  local count index url
+  count="$(dybatpho::json_get "${mirrors}" 'length')"
+  for ((index = 0; index < count; index++)); do
+    url="$(dybatpho::json_get "${mirrors}" ".[${index}].url")"
+    url="${url#*://}"
+    [[ "${url#*@}" == "${target}" ]] || continue
+    dybatpho::json_get "${mirrors}" ".[${index}].id"
+    return 0
+  done
+}
+
+#######################################
+# @description Return success when a deploy key is already on the GitHub repository.
+#   GitHub stores a deploy key without its comment, so only the type and the
+#   body of the key are compared.
+# @arg $1 string Key list as returned by the API
+# @arg $2 string Public key to look for
+# @exitcode 0 The repository already has the key
+# @exitcode 1 The key is missing
+#######################################
+function _has_deploy_key {
+  local keys public_key
+  dybatpho::expect_args keys public_key -- "$@"
+
+  local type body count index
+  read -r type body _ <<< "${public_key}"
+  count="$(dybatpho::json_get "${keys}" 'length')"
+  for ((index = 0; index < count; index++)); do
+    [[ "$(dybatpho::json_get "${keys}" ".[${index}].key")" == "${type} ${body}"* ]] &&
+      return 0
+  done
+  return 1
 }
 
 function _main {
-  local source="${1:-origin}"
-  local target="${2:-gh}"
+  gitlab_remote="${1:-origin}"
+  github_remote="${2:-gh}"
 
-  [[ "${source}" != "${target}" ]] ||
+  [[ "${gitlab_remote}" != "${github_remote}" ]] ||
     dybatpho::die "GitLab and GitHub remote must differ"
   local remote
-  for remote in "${source}" "${target}"; do
+  for remote in "${gitlab_remote}" "${github_remote}"; do
     dybatpho::git_has_remote "${remote}" ||
       dybatpho::die "Remote '${remote}' does not exist"
   done
-  [[ "$(dybatpho::forge_kind "${source}")" == gitlab ]] ||
-    dybatpho::die "Remote '${source}' is not a GitLab repository"
-  [[ "$(dybatpho::forge_kind "${target}")" == github ]] ||
-    dybatpho::die "Remote '${target}' is not a GitHub repository"
+  [[ "$(dybatpho::forge_kind "${gitlab_remote}")" == gitlab ]] ||
+    dybatpho::die "Remote '${gitlab_remote}' is not a GitLab repository"
+  [[ "$(dybatpho::forge_kind "${github_remote}")" == github ]] ||
+    dybatpho::die "Remote '${github_remote}' is not a GitHub repository"
 
-  gitlab_host="$(dybatpho::forge_host "${source}")"
-  gitlab_project="projects/$(dybatpho::url_encode "$(dybatpho::forge_repo "${source}")")"
-  local github_repo
-  github_repo="$(dybatpho::forge_host "${target}")/$(dybatpho::forge_repo "${target}")"
-  local mirror_url="ssh://git@${github_repo}.git"
+  local gitlab_host github_host github_repo mirror_target response
+  gitlab_host="$(dybatpho::forge_host "${gitlab_remote}")"
+  github_host="$(dybatpho::forge_host "${github_remote}")"
+  github_repo="$(dybatpho::forge_repo "${github_remote}")"
+  mirror_target="${github_host}/${github_repo}.git"
+  dybatpho::create_temp response ".json"
 
-  # GitLab masks the user part of a mirror URL, so compare without it
   local mirror_id
-  mirror_id="$(_gitlab remote_mirrors |
-    jq -r --arg repo "${github_repo}.git" \
-      '[.[] | select((.url | sub("^[a-z]+://([^@/]*@)?"; "")) == $repo)][0].id // empty')"
+  _gitlab GET "remote_mirrors" "" "${response}" ||
+    dybatpho::die "Could not list the push mirrors: $(dybatpho::forge_error "${response}")"
+  mirror_id="$(_mirror_id "$(< "${response}")" "${mirror_target}")"
   if [[ -n "${mirror_id}" ]]; then
-    dybatpho::info "Push mirror to ${github_repo} already exists (id ${mirror_id})"
+    dybatpho::info "Push mirror to ${mirror_target%.git} already exists (id ${mirror_id})"
   else
-    dybatpho::info "Creating push mirror ${gitlab_host} -> ${github_repo}"
-    mirror_id="$(jq -n --arg url "${mirror_url}" \
-      '{
-        url: $url,
-        auth_method: "ssh_public_key",
-        enabled: true,
-        keep_divergent_refs: false,
-        only_protected_branches: false
-      }' | _gitlab remote_mirrors --method POST --input - | jq -r '.id')"
+    dybatpho::info "Creating push mirror ${gitlab_host} -> ${github_host}/${github_repo}"
+    local payload
+    payload="$(dybatpho::json_object \
+      url "ssh://git@${mirror_target}" \
+      auth_method "ssh_public_key" \
+      enabled:json true \
+      keep_divergent_refs:json false \
+      only_protected_branches:json false)"
+    _gitlab POST "remote_mirrors" "${payload}" "${response}" ||
+      dybatpho::die "Could not create the push mirror: $(dybatpho::forge_error "${response}")"
+    mirror_id="$(dybatpho::json_get "$(< "${response}")" '.id')"
   fi
 
-  # Without the host keys of the GitHub host, the mirror cannot verify it and fails
+  # Without the host keys of the GitHub host, the mirror cannot verify it
   local host_keys
-  host_keys="$(gh api --hostname "${github_repo%%/*}" meta --jq '.ssh_keys[]' |
-    jq -Rn '[inputs]')"
-  [[ "$(jq -r 'length' <<< "${host_keys}")" -gt 0 ]] ||
-    dybatpho::die "No SSH host key advertised by ${github_repo%%/*}"
-  dybatpho::info "Storing the SSH host keys of ${github_repo%%/*} on the mirror"
-  jq -n --argjson host_keys "${host_keys}" '{host_keys: $host_keys}' |
-    _gitlab "remote_mirrors/${mirror_id}" --method PUT --input - > /dev/null
+  _github GET "$(dybatpho::forge_api "${github_remote}")/meta" "" "${response}" ||
+    dybatpho::die "Could not read the host keys of ${github_host}: $(dybatpho::forge_error "${response}")"
+  host_keys="$(dybatpho::json_eval "$(< "${response}")" '.ssh_keys')"
+  [[ "$(dybatpho::json_get "${host_keys}" 'length')" -gt 0 ]] ||
+    dybatpho::die "No SSH host key advertised by ${github_host}"
+  dybatpho::info "Storing the SSH host keys of ${github_host} on the mirror"
+  _gitlab PUT "remote_mirrors/${mirror_id}" \
+    "$(dybatpho::json_object host_keys:json "${host_keys}")" "${response}" ||
+    dybatpho::die "Could not store the host keys: $(dybatpho::forge_error "${response}")"
 
-  # GitHub stores a deploy key without its comment, so match on type and body only
   local public_key
-  public_key="$(_gitlab "remote_mirrors/${mirror_id}/public_key" | jq -r '.public_key')"
-  if gh api --hostname "${github_repo%%/*}" "repos/${github_repo#*/}/keys" --jq '.[].key' |
-    grep -qxF -- "$(cut -d ' ' -f 1-2 <<< "${public_key}")"; then
-    dybatpho::info "Deploy key of the mirror is already on ${github_repo}"
+  _gitlab GET "remote_mirrors/${mirror_id}/public_key" "" "${response}" ||
+    dybatpho::die "Could not read the public key of the mirror: $(dybatpho::forge_error "${response}")"
+  public_key="$(dybatpho::json_get "$(< "${response}")" '.public_key')"
+  _github GET "keys" "" "${response}" ||
+    dybatpho::die "Could not list the deploy keys: $(dybatpho::forge_error "${response}")"
+  if _has_deploy_key "$(< "${response}")" "${public_key}"; then
+    dybatpho::info "Deploy key of the mirror is already on ${github_host}/${github_repo}"
   else
-    dybatpho::info "Adding the mirror's SSH key to ${github_repo} as a deploy key"
-    gh repo deploy-key add - --allow-write --repo "${github_repo}" \
-      --title "GitLab mirror from ${gitlab_host}/$(dybatpho::forge_repo "${source}")" <<< "${public_key}"
+    dybatpho::info "Adding the mirror's SSH key to ${github_host}/${github_repo} as a deploy key"
+    _github POST "keys" "$(dybatpho::json_object \
+      title "GitLab mirror from ${gitlab_host}/$(dybatpho::forge_repo "${gitlab_remote}")" \
+      key "${public_key}" \
+      read_only:json false)" "${response}" ||
+      dybatpho::die "Could not add the deploy key: $(dybatpho::forge_error "${response}")"
   fi
 
-  _gitlab "remote_mirrors/${mirror_id}/sync" --method POST > /dev/null
+  _gitlab POST "remote_mirrors/${mirror_id}/sync" "" "${response}" ||
+    dybatpho::die "Could not start the sync: $(dybatpho::forge_error "${response}")"
   dybatpho::success "Mirror sync started; check Settings > Repository > Mirroring repositories"
 }
 
