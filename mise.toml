@@ -41,3 +41,7 @@ run = "./scripts/docker.sh personal-arch"
 [tasks.docker-public]
 description = "Build the public toolbox image"
 run = "./scripts/docker.sh public"
+
+[tasks.clean-secret]
+description = "Remove the secret files from the repository"
+run = "rm -f {{ config_root }}/secrets/data/**/*.yaml"
