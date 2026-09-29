@@ -31,10 +31,14 @@ for passphrase in $age_passphrases; do
   declare "age_passphrase_${key}=${value}"
 done
 {{- end }}
-for type in {{ range $types }}{{ . | quote }} {{ end }}; do
+for type in {{ range $index, $type := $types }}{{ if $index }} {{ end }}{{ $type | quote }}{{ end }}; do
   dybatpho::header "Decrypting ${type}.age file to decrypt all encrypted files"
   if ! dybatpho::is file "${HOME}/.config/chezmoi/${type}.key"; then
-    age_params=("--decrypt" "--output" "${HOME}/.config/chezmoi/${type}.key" "{{ .chezmoi.sourceDir }}/../secrets/${type}.age")
+    age_params=(
+      "--decrypt"
+      "--output" "${HOME}/.config/chezmoi/${type}.key"
+      "{{ .chezmoi.sourceDir }}/../secrets/${type}.age"
+    )
     {{- if eq .kind "container" }}
     passphrase_var="age_passphrase_${type##enterprise-}"
     export AGE_PASSPHRASE="${!passphrase_var:-}"

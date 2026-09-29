@@ -1,16 +1,20 @@
 #!/bin/sh
+# dyshellint disable=BSG030 greetd runs this as its session command, under sh
+# dyshellint disable=BSG031 sh has no pipefail, and a failed step must still log in
 # @file start.sh
 # @brief Session command greetd runs after a successful login
 # @description Set up the runtime directory and the environment, then start the chosen
 # session. Written for POSIX sh, because it is the session command greetd
 # itself executes.
 {{- if eq .osid "linux-gentoo" }}
-export XDG_RUNTIME_DIR=/tmp/user-$(id -u)
+XDG_RUNTIME_DIR="/tmp/user-$(id -u)"
 {{- else }}
-export XDG_RUNTIME_DIR=/run/user/$(id -u)
+XDG_RUNTIME_DIR="/run/user/$(id -u)"
 {{- end }}
-export HOME=$XDG_RUNTIME_DIR
-mkdir -p $XDG_RUNTIME_DIR && chmod 700 $XDG_RUNTIME_DIR
+export XDG_RUNTIME_DIR
+HOME="$XDG_RUNTIME_DIR"
+export HOME
+mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"
 {{- $command := "Hyprland" }}
 {{- if lookPath "start-hyprland" }}
 {{-   $command = "start-hyprland --" }}

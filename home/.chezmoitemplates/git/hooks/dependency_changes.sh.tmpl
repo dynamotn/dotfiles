@@ -1,10 +1,16 @@
+# @file dependency_changes.sh
+# @brief Report the dependency files a commit range touched
+# @description Included by the `post-checkout` and `post-merge` hooks, which
+# source dybatpho themselves and then call the function below.
+# shellcheck shell=bash
+
 #######################################
 # @description Report the dependency files that changed in a commit range, so a
 # checkout or a merge does not leave the tool versions and the lockfiles behind.
 # @arg $1 string Commit range, such as `ORIG_HEAD..HEAD`
 # @stderr One warning header and one changed file per line
 #######################################
-function git_hook::report_dependency_changes {
+function dependency_changes::report {
   local range
   dybatpho::expect_args range -- "$@"
 

@@ -11,7 +11,7 @@
 # @arg $2 boolean Flag indicating if the service is system-wide (false) or
 # user-specific (true)
 #######################################
-function init::enable_systemd_service {
+function init_system::enable_systemd_service {
   local service is_user_service
   dybatpho::expect_args service is_user_service -- "$@"
   if ! dybatpho::is command systemctl; then
@@ -24,6 +24,7 @@ function init::enable_systemd_service {
     if dybatpho::is true "$is_user_service"; then
       systemctl enable --now --user "$service"
     else
+      # dyshellint disable=BSG035 enabling a system unit is a root-only action
       sudo systemctl enable --now "$service"
     fi
   fi
@@ -35,7 +36,7 @@ function init::enable_systemd_service {
 # @arg $2 boolean Flag indicating if the service is system-wide (false) or
 # user-specific (true)
 #######################################
-function init::enable_openrc_service {
+function init_system::enable_openrc_service {
   local service is_user_service
   dybatpho::expect_args service is_user_service -- "$@"
   if ! dybatpho::is command rc-service; then
@@ -50,9 +51,11 @@ function init::enable_openrc_service {
     if dybatpho::is file /proc/self/cgroup; then
       cgroup_contents="$(< /proc/self/cgroup)"
     fi
+    # dyshellint disable=BSG035 adding a system runlevel entry needs root
     sudo rc-update add "$service" default
     if ! dybatpho::string_contains "$cgroup_contents" "docker" \
       && ! dybatpho::is file /.dockerenv; then
+      # dyshellint disable=BSG035 starting a system service needs root
       sudo rc-service "$service" start
     fi
   fi
@@ -62,7 +65,7 @@ function init::enable_openrc_service {
 # @description Enable termux service
 # @arg $1 string Name of service
 #######################################
-function init::enable_termux_service {
+function init_system::enable_termux_service {
   local service
   dybatpho::expect_args service -- "$@"
   if ! dybatpho::is command sv; then
@@ -81,7 +84,7 @@ function init::enable_termux_service {
 # user-specific (true)
 # @arg $3 string Name of application (optional, used for user-specific services)
 #######################################
-function init::enable_launchd_service {
+function init_system::enable_launchd_service {
   local service is_user_service
   dybatpho::expect_args service is_user_service -- "$@"
   if ! dybatpho::is command launchctl; then
@@ -90,7 +93,11 @@ function init::enable_launchd_service {
   fi
   dybatpho::progress "Enabling service $service"
   if dybatpho::is true "$is_user_service"; then
-    /usr/bin/osascript -e "tell application \"System Events\" to make new login item at end with properties {name:\"${service}.app\", path:\"/Applications/${service}.app\", kind:\"Application\", hidden:true}"
+    local login_item action
+    login_item="{name:\"${service}.app\", path:\"/Applications/${service}.app\","
+    login_item+=" kind:\"Application\", hidden:true}"
+    action="make new login item at end with properties ${login_item}"
+    /usr/bin/osascript -e "tell application \"System Events\" to ${action}"
   else
     brew services start "$service"
   fi

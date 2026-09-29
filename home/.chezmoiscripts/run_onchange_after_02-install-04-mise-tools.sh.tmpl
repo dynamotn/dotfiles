@@ -8,7 +8,7 @@ dybatpho::register_common_handlers
 
 local_bin_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "bin")"
 export PATH="${local_bin_dir}:${PATH}"
-{{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/*" | glob) }}
-# {{ . }} hash: {{ . | include | sha256sum }}
+{{- range (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/*.yaml*" | glob) }}
+# {{ base . }} hash: {{ . | include | sha256sum }}
 {{- end }}
 "${local_bin_dir}/dytoy" mise -e -i

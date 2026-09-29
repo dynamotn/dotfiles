@@ -4,6 +4,7 @@
 # @description Read the theme, icon, cursor and font settings out of the GTK 3 settings
 # file and write them into the GNOME interface schema, so both toolkits agree.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_common_handlers
 
 config="${HOME}/.config/gtk-3.0/settings.ini"
 dybatpho::is file "${config}" || exit 0
@@ -16,8 +17,14 @@ cursor_theme="$(grep 'gtk-cursor-theme-name' "${config}" | sed 's/.*\s*=\s*//')"
 cursor_size="$(grep 'gtk-cursor-theme-size' "${config}" | sed 's/.*\s*=\s*//')"
 font_name="$(grep 'gtk-font-name' "${config}" | sed 's/.*\s*=\s*//')"
 
-gnome_keys=(gtk-theme icon-theme cursor-theme cursor-size font-name)
-gnome_vals=("${gtk_theme}" "${icon_theme}" "${cursor_theme}" "${cursor_size}" "${font_name}")
-for i in "${!gnome_keys[@]}"; do
-  dybatpho::string_is_blank "${gnome_vals[$i]}" || gsettings set "${gnome_schema}" "${gnome_keys[$i]}" "${gnome_vals[$i]}"
+declare -A gnome_settings=(
+  ["gtk-theme"]="${gtk_theme}"
+  ["icon-theme"]="${icon_theme}"
+  ["cursor-theme"]="${cursor_theme}"
+  ["cursor-size"]="${cursor_size}"
+  ["font-name"]="${font_name}"
+)
+for gnome_key in "${!gnome_settings[@]}"; do
+  dybatpho::string_is_blank "${gnome_settings[$gnome_key]}" \
+    || gsettings set "${gnome_schema}" "${gnome_key}" "${gnome_settings[$gnome_key]}"
 done

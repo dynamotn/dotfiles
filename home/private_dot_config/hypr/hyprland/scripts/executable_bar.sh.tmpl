@@ -2,5 +2,6 @@
 # @file bar.sh
 # @brief Start the eww daemon and open the bar
 # @description Start the eww daemon and open the bar on the first screen.
+set -euo pipefail
 eww -c ~/.config/eww daemon \
   && eww -c ~/.config/eww open bar --screen 0 --id bar0

@@ -1,55 +1,72 @@
 #!/usr/bin/env bash
 # @file build.sh
 # @brief Build container and setup dotfiles
-set -Eeou pipefail
+# @description Run inside the container image build: install the certificates
+# and packages the image needs, apply the dotfiles for the identities carried
+# as build secrets, then drop both the secrets and the build-only packages.
+set -euo pipefail
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")/../scripts"
 
 #######################################
 # @description Install custom SSL certificates if provided in Docker secrets.
+# @noargs
 #######################################
 function _install_ssl_certs {
   if [[ -f /run/secrets/ssl_cert ]]; then
     local folder="" update_cmd=""
-    if command -v apk &>/dev/null; then
+    if command -v apk &> /dev/null; then
       folder="/usr/local/share/ca-certificates"
       update_cmd="update-ca-certificates"
-    elif command -v pacman &>/dev/null; then
+    elif command -v pacman &> /dev/null; then
       folder="/etc/ca-certificates/trust-source/anchors"
       update_cmd="update-ca-trust"
     fi
+    # dyshellint disable=BSG035 the system trust store is root-owned
     sudo cp /run/secrets/ssl_cert "$folder/ssl_decryption.crt"
+    # dyshellint disable=BSG035 refreshing the system trust store needs root
     sudo "$update_cmd"
   fi
 }
 
 #######################################
 # @description Install packages required for setting up dotfiles.
+# @noargs
 #######################################
 function _install_packages {
-  if command -v pacman &>/dev/null; then
+  if command -v pacman &> /dev/null; then
     # Choose mirror for VN
+    # dyshellint disable=BSG035 the pacman mirrorlist is root-owned
     echo "Server = http://mirror.bizflycloud.vn/archlinux/\$repo/os/\$arch" | sudo tee /etc/pacman.d/mirrorlist
     # Container only tools
+    # dyshellint disable=BSG035 pacman writes to the system package database
     sudo pacman -Sy --noconfirm expect
     # Install for cloning code
+    # dyshellint disable=BSG035 pacman writes to the system package database
     sudo pacman -Sy --noconfirm git curl openssh
     # Install chezmoi tools
+    # dyshellint disable=BSG035 pacman writes to the system package database
     sudo pacman -Sy --noconfirm chezmoi age expect
-  elif command -v apk &>/dev/null; then
+  elif command -v apk &> /dev/null; then
+    # dyshellint disable=BSG035 apk writes to the system package database
     sudo apk update
     # Container only tools
+    # dyshellint disable=BSG035 apk writes to the system package database
     sudo apk add --no-cache expect
     # GNU compatible tools
+    # dyshellint disable=BSG035 apk writes to the system package database
     sudo apk add --no-cache coreutils grep file
     # Install for cloning code
+    # dyshellint disable=BSG035 apk writes to the system package database
     sudo apk add --no-cache git curl openssh
     # Install chezmoi tools
+    # dyshellint disable=BSG035 apk writes to the system package database
     sudo apk add --no-cache chezmoi age
   fi
 }
 
 #######################################
 # @description Main function to setup dotfiles.
+# @noargs
 #######################################
 function _main {
   _install_ssl_certs
@@ -60,6 +77,7 @@ function _main {
   # Get identities from secrets
   if [[ -f /run/secrets/age_passphrases ]]; then
     local age_passphrases
+    # dyshellint disable=BSG035 the build secret is mounted root-only
     age_passphrases=$(sudo cat /run/secrets/age_passphrases)
     local identities=""
     for passphrase in $age_passphrases; do
@@ -78,9 +96,11 @@ function _main {
   # Delete unnecessary data
   rm -rf ~/.cache/chezmoi ~/Dotfiles/.git*
   # Uninstall packages
-  if command -v pacman &>/dev/null; then
+  if command -v pacman &> /dev/null; then
+    # dyshellint disable=BSG035 pacman writes to the system package database
     sudo pacman -Rnsc --noconfirm chezmoi
-  elif command -v apk &>/dev/null; then
+  elif command -v apk &> /dev/null; then
+    # dyshellint disable=BSG035 apk writes to the system package database
     sudo apk del chezmoi
   fi
 }

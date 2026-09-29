@@ -3,10 +3,13 @@
 # @brief Restart the desktop portals used for screencasting
 # @description Restart the xdg desktop portals, so that screencasting picks the Hyprland
 # portal instead of a stale one.
-killall xdg-desktop-portal-wlr
-killall xdg-desktop-portal-gnome
-killall xdg-desktop-portal-hyprland
-killall xdg-desktop-portal
+set -euo pipefail
+
+# A portal that is not running is the state we want, so a failed kill is fine.
+killall xdg-desktop-portal-wlr || true
+killall xdg-desktop-portal-gnome || true
+killall xdg-desktop-portal-hyprland || true
+killall xdg-desktop-portal || true
 {{ if eq .chezmoi.osRelease.id "gentoo" }}
 /usr/libexec/xdg-desktop-portal-wlr &
 sleep 2
@@ -15,4 +18,4 @@ sleep 2
 /usr/lib64/xdg-desktop-portal-hyprland &
 sleep 2
 /usr/lib64/xdg-desktop-portal
-{{ end }}
+{{- end }}

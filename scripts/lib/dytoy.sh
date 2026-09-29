@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=2154,2155
-# @file dytoy_yaml.sh
+# @file dytoy.sh
 # @brief Library `dytoy` to read the tools YAML file and install what it describes
 # @description Library `dytoy` to read the tools YAML file and install what it
 # describes. Queries go through the `json` module of dybatpho instead of calling
@@ -203,7 +203,8 @@ function dytoy::is_invalid_essential {
 function dytoy::is_installed_command {
   local name
   dybatpho::expect_args name -- "$@"
-  local location="${2:-$(dybatpho::path_join "$HOME" ".local" "bin")}"
+  local location
+  location="${2:-$(dybatpho::path_join "$HOME" ".local" "bin")}"
   if dybatpho::is true "$ONLY_NOT_INSTALLED"; then
     if dybatpho::is command "$name" || dybatpho::is file "$(dybatpho::path_join "$location" "$name")"; then
       dybatpho::debug "$name tool is already installed, skipping"
@@ -217,14 +218,15 @@ function dytoy::is_installed_command {
 #######################################
 # @description Check if package tool is not installed or installed but in force mode
 # @arg $1 string Package name
-# @arg $2 string Tool to use for package management (e.g., "portage", "pacman", "apt", "apk", "brew", "mas", "dmg", "fdroidcl")
+# @arg $2 string Tool to use for package management, one of "portage",
+#   "pacman", "apt", "apk", "brew", "mas", "dmg" or "fdroidcl"
 # @env ONLY_NOT_INSTALLED boolean Flag to install only not installed tool
 #######################################
 function dytoy::is_installed_package {
   local name pkg_tool
   dybatpho::expect_args name pkg_tool -- "$@"
   if dybatpho::is true "$ONLY_NOT_INSTALLED"; then
-    if "pkg::check_installed_${pkg_tool}" "$name"; then
+    if "package_manager::check_installed_${pkg_tool}" "$name"; then
       dybatpho::debug "$name package is already installed, skipping."
       return 0
     else
@@ -250,7 +252,7 @@ function dytoy::enable_service {
   fi
   local is_user_service
   is_user_service=$(dytoy::get_field "$yaml" "is_user_service")
-  "init::enable_${init_system}_service" "$service_name" "$is_user_service"
+  "init_system::enable_${init_system}_service" "$service_name" "$is_user_service"
 }
 
 #######################################
@@ -285,10 +287,10 @@ function dytoy::install_gentoo_package {
   name=$(dytoy::get_field "$yaml" "name")
   repo=$(dytoy::get_field "$yaml" "repo")
   url=$(dytoy::get_field "$yaml" "url")
-  [[ "$repo" == "null" ]] || pkg::add_overlay "$repo" "$url" > /dev/null
+  [[ "$repo" == "null" ]] || package_manager::add_overlay "$repo" "$url" > /dev/null
 
   dytoy::install_package "$name" "portage" "$init_system" "$yaml" \
-    pkg::install_via_portage "$name"
+    package_manager::install_via_portage "$name"
 }
 
 #######################################
@@ -301,7 +303,7 @@ function dytoy::install_arch_package {
   local name
   name=$(dytoy::get_field "$yaml" "name")
   dytoy::install_package "$name" "pacman" "systemd" "$yaml" \
-    pkg::install_via_pacman "$name"
+    package_manager::install_via_pacman "$name"
 }
 
 #######################################
@@ -338,8 +340,8 @@ function dytoy::add_apt_repo {
     esac
   fi
   local url="${repo//%v/${suite}}"
-  pkg::add_apt_repo "$repo_name" "$url" "$suite" "$components" "$key"
-  pkg::sync_apt_repo
+  package_manager::add_apt_repo "$repo_name" "$url" "$suite" "$components" "$key"
+  package_manager::sync_apt_repo
 }
 
 #######################################
@@ -354,7 +356,7 @@ function dytoy::install_ubuntu_package {
   local name
   name=$(dytoy::get_field "$yaml" "name")
   dytoy::install_package "$name" "apt" "systemd" "$yaml" \
-    pkg::install_via_apt "$name"
+    package_manager::install_via_apt "$name"
 }
 
 #######################################
@@ -367,7 +369,7 @@ function dytoy::install_alpine_package {
   local name
   name=$(dytoy::get_field "$yaml" "name")
   dytoy::install_package "$name" "apk" "openrc" "$yaml" \
-    pkg::install_via_apk "$name"
+    package_manager::install_via_apk "$name"
 }
 
 #######################################
@@ -380,7 +382,7 @@ function dytoy::install_termux_package {
   local name
   name=$(dytoy::get_field "$yaml" "name")
   dytoy::install_package "$name" "apt" "termux" "$yaml" \
-    pkg::install_via_termux "$name"
+    package_manager::install_via_termux "$name"
 }
 
 #######################################
@@ -394,10 +396,10 @@ function dytoy::install_fdroid_package {
   name=$(dytoy::get_field "$yaml" "name")
   repo=$(dytoy::get_field "$yaml" "repo")
   url=$(dytoy::get_field "$yaml" "url")
-  [[ "$repo" == "null" ]] || pkg::add_fdroid_repo "$repo" "$url" > /dev/null
+  [[ "$repo" == "null" ]] || package_manager::add_fdroid_repo "$repo" "$url" > /dev/null
 
   dytoy::install_package "$name" "fdroidcl" "" "$yaml" \
-    pkg::install_via_fdroidcl "$name"
+    package_manager::install_via_fdroidcl "$name"
 }
 
 #######################################
@@ -411,10 +413,10 @@ function dytoy::install_flatpak_package {
   name=$(dytoy::get_field "$yaml" "name")
   repo=$(dytoy::get_field "$yaml" "repo")
   url=$(dytoy::get_field "$yaml" "url")
-  [[ "$repo" == "null" ]] || pkg::add_flatpak_repo "$repo" "$url" > /dev/null
+  [[ "$repo" == "null" ]] || package_manager::add_flatpak_repo "$repo" "$url" > /dev/null
 
   dytoy::install_package "$name" "flatpak" "" "$yaml" \
-    pkg::install_via_flatpak "$name" "$repo"
+    package_manager::install_via_flatpak "$name" "$repo"
 }
 
 #######################################
@@ -430,13 +432,13 @@ function dytoy::install_macos_package {
   case "$type" in
     store)
       dytoy::install_package "$name" "mas" "" "$yaml" \
-        pkg::install_via_mas "$name"
+        package_manager::install_via_mas "$name"
       ;;
     download)
       local url
       url=$(dytoy::get_field "$yaml" "url")
       dytoy::install_package "$name" "dmg" "" "$yaml" \
-        pkg::install_via_dmg "$name" "$url"
+        package_manager::install_via_dmg "$name" "$url"
       ;;
     *)
       local unstable
@@ -452,9 +454,9 @@ function dytoy::install_macos_package {
       fi
       local repo
       repo=$(dytoy::get_field "$yaml" "repo")
-      [[ "$repo" == "null" ]] || pkg::add_brew_tap "$repo" > /dev/null
+      [[ "$repo" == "null" ]] || package_manager::add_brew_tap "$repo" > /dev/null
       dytoy::install_package "$name" "brew" "launchd" "$yaml" \
-        pkg::install_via_brew "$name" "${brew_params[@]}"
+        package_manager::install_via_brew "$name" "${brew_params[@]}"
       ;;
   esac
 }

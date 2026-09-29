@@ -6,7 +6,7 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
 dybatpho::register_common_handlers
 
-{{ template "git/hooks/dependency-changes.sh.tmpl" . }}
+{{ template "git/hooks/dependency_changes.sh.tmpl" . }}
 
 previous_head="${1-}"
 new_head="${2-}"
@@ -18,5 +18,5 @@ null_ref="0000000000000000000000000000000000000000"
 if [[ ${is_branch_checkout} == "1" ]] \
   && [[ ${previous_head} != "${null_ref}" ]] \
   && [[ ${previous_head} != "${new_head}" ]]; then
-  git_hook::report_dependency_changes "${previous_head}..${new_head}"
+  dependency_changes::report "${previous_head}..${new_head}"
 fi
