@@ -62,6 +62,7 @@ Expanded when the command runs, not while typing.
 | `gai` | `git add -i` |
 | `gap` | `git add -p` |
 | `gb` | `git branch` |
+| `gbd` | `git branch -D` |
 | `gbl` | `git blame` |
 | `gc` | `git commit -v` |
 | `gca` | `git commit --amend` |
@@ -72,7 +73,6 @@ Expanded when the command runs, not while typing.
 | `gcpa` | `git cherry-pick --abort` |
 | `gcpc` | `git cherry-pick --continue` |
 | `gd` | `git diff` |
-| `gdb` | `git branch -D` |
 | `gdc` | `git diff --cached` |
 | `gf` | `git fetch` |
 | `gfa` | `git fetch --all -p` |
@@ -84,6 +84,7 @@ Expanded when the command runs, not while typing.
 | `gm` | `git merge --ff` |
 | `gmc` | `git merge --continue` |
 | `gmt` | `git mergetool` |
+| `gmv` | `git mv` |
 | `gn` | `git clone --recursive --depth 1` |
 | `gnb` | `git checkout -b` |
 | `gp` | `git push` |
@@ -114,8 +115,7 @@ Expanded when the command runs, not while typing.
 | `gsts` | `git stash show --text` |
 | `gsu` | `git submodule update --init --recursive --remote` |
 | `gt` | `git tag` |
-| `gv` | `git mv` |
-| `gw` | `git worktree` |
+| `gwt` | `git worktree` |
 | `fgcs` | Pick a commit with fzf |
 
 Completion for `git` extends the one fish ships with, in
