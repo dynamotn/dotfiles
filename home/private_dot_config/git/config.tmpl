@@ -191,6 +191,10 @@
         stop-keep-forever = "!_() { git update-index --no-skip-worktree $1; }; _"
         # Show root level directory
         root = "!_() { git rev-parse --show-toplevel; }; _"
+        # Leave a linked worktree for its main checkout, then a submodule for its superproject
+        # NOTE: git exports GIT_DIR to aliases, and a submodule checkout is only reachable
+        # through core.worktree in its git dir, not by trimming .git/modules/<name>
+        up = "!_() { unset GIT_DIR GIT_WORK_TREE; _m() { c=$(git -C \"$1\" rev-parse --path-format=absolute --git-common-dir); w=$(git -C \"$c\" rev-parse --path-format=absolute --show-toplevel 2>/dev/null); [ -n \"$w\" ] || w=$(dirname \"$c\"); echo \"$w\"; }; dir=$(_m .); super=$(git -C \"$dir\" rev-parse --show-superproject-working-tree); [ -n \"$super\" ] && dir=$(_m \"$super\"); echo \"$dir\"; }; _"
         # Show file with conflicts
         conflicts = "!_() { git ls-files -u | awk '{print $4}' | sort -u; }; _"
         # Delete dangling commits
@@ -207,8 +211,8 @@
         unshallow = "!_() { git fetch --unshallow; git config remote.$1.fetch "+refs/heads/*:refs/remotes/$1/*"; git fetch $1; }; _"
         # Generate patch from git diff
         gen-patch = "!_() { git -c diff.noprefix=false diff --output $1; }; _"
-        # Create worktree with new branch
-        wt = "!_() { branch=$1; branch_safe=${branch//\\//-}; repo=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)"); dir="${repo}/.worktrees/${branch_safe}"; mkdir -p "${repo}/.worktrees"; git worktree add -b "$branch" "$dir"; }; _"
+        # Create worktree with new branch, in the repository itself even inside a submodule
+        wt = "!_() { branch=$1; branch_safe=${branch//\\//-}; unset GIT_DIR GIT_WORK_TREE; c=$(git rev-parse --path-format=absolute --git-common-dir); repo=$(git -C \"$c\" rev-parse --path-format=absolute --show-toplevel 2>/dev/null); [ -n \"$repo\" ] || repo=$(dirname \"$c\"); mkdir -p \"${repo}/.worktrees\"; git -C \"$repo\" worktree add -b \"$branch\" \"${repo}/.worktrees/${branch_safe}\"; }; _"
 [gc]
         # Don't auto git gc, with large project can slow when working
         auto = 0
