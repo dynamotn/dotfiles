@@ -1,7 +1,11 @@
 # Kitty
 ## Modifier keys
 
-- `Ctrl+Shift`: Main modifier
+- `Ctrl+Shift`: Main modifier (`kitty_mod`)
+
+`clear_all_shortcuts` is off, so kitty's built-in shortcuts stay active. Only
+the rows marked *(custom)* are overridden in
+`home/private_dot_config/kitty/terminal/shortcut.conf`.
 
 ## Clipboard operations
 
@@ -19,9 +23,9 @@
 | Keybind | Action |
 |---------|--------|
 | `Ctrl+Shift+Up` / `Ctrl+Shift+K` | Scroll line up |
-| `Super+Up` | Scroll line up (macOS) |
+| `Super+Up` / `Opt+Super+Page Up` | Scroll line up (macOS) |
 | `Ctrl+Shift+Down` / `Ctrl+Shift+J` | Scroll line down |
-| `Super+Down` | Scroll line down (macOS) |
+| `Super+Down` / `Opt+Super+Page Down` | Scroll line down (macOS) |
 | `Ctrl+Shift+Page Up` | Scroll page up |
 | `Super+Page Up` | Scroll page up (macOS) |
 | `Ctrl+Shift+Page Down` | Scroll page down |
@@ -54,7 +58,7 @@
 |---------|--------|
 |`Ctrl+Shift+Right`|Next tab|
 |`Ctrl+Shift+Left`|Previous tab|
-|`Ctrl+Shift+T`|New tab|
+|`Ctrl+Shift+T`|New tab from a zellij layout picked interactively *(custom)*|
 |`Ctrl+Shift+Q`|Close tab|
 |`Ctrl+Shift+.`|Move tab forward|
 |`Ctrl+Shift+,`|Move tab backward|
