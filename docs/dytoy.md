@@ -77,7 +77,6 @@
 |[viddy](https://github.com/sachaos/viddy)|Alternative to `watch` with colours, diff, time machine...|
 |[dust](https://github.com/bootandy/dust)|Alternative to `du` with more intuitive|
 |[duf](https://github.com/muesli/duf)|Alternative to `df` with colours...|
-|[pulsemixer](https://github.com/GeorgeFilipkin/pulsemixer)|Alternative CLI tool for pavucontrol|
 |[wol](https://github.com/sabhiram/go-wol)|Wake-on-LAN utility|
 |[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|
 |[lazygit](https://github.com/jesseduffield/lazygit)|TUI for git|
@@ -109,11 +108,10 @@
 |[xdg-user-dirs](https://www.freedesktop.org/wiki/Software/xdg-user-dirs/)|Manage well-known user directories|
 |[hyprland](https://github.com/hyprwm/Hyprland)|Window manager for Wayland|
 |[hyprshade](https://github.com/loqusion/hyprshade)|Adjusts the color temperature of screen|
-|[hdrop](https://github.com/hyprwm/contrib#hdrop)|Dropdown utilities|
 |[eww](https://github.com/elkowar/eww)|Widgets and status bar|
 |[wofi](https://sr.ht/~scoopta/wofi/)|Application launcher, simple switcher|
 |[wtype](https://github.com/atx/wtype)|Simulate keyboard input for Wayland|
-|[awww](https://codeberg.com/LGFae/swww)|Animated wallpaper daemon|
+|[awww](https://codeberg.org/LGFae/swww)|Animated wallpaper daemon|
 |[greetd](https://sr.ht/~kennylevinsen/greetd/)|GreetD, display manager for Wayland|
 |[regreet](https://github.com/rharish101/ReGreet)|ReGreet, greeter for GreetD|
 |[hyprlock](https://github.com/hyprwm/hyprlock)|Screen locker for Wayland|
@@ -124,8 +122,10 @@
 |[cliphist](https://github.com/sentriz/cliphist)|Clipboard manager for Wayland|
 |[shikane](https://github.com/hw0lff/shikane)|Automatically detects and configures connected monitors|
 |[wdisplays](https://github.com/cyclopsian/wdisplays)|Configure display monitors manually with GUI|
-|[ibus-bamboo](https://github.com/BambooEngine/ibus-bamboo)|Vietnamese input method for Ibus|
-|[fcitx-bamboo](https://github.com/fcitx/fcitx5-bamboo)|Vietnamese input method for Fcitx|
+|[fcitx5](https://github.com/fcitx/fcitx5)|Input method framework|
+|[fcitx5-lotus](https://fcitx5-lotus.pages.dev/)|Vietnamese input method for Fcitx5|
+|[mozc](https://github.com/google/mozc)|Japanese input method for Fcitx5|
+|[fcitx5-chinese-addons](https://github.com/fcitx/fcitx5-chinese-addons)|Chinese input method for Fcitx5|
 |[libnotify](https://gitlab.gnome.org/GNOME/libnotify)|Library for sending desktop notifications to a notification daemon|
 |[wayvnc](https://github.com/any1/wayvnc)|VNC server for wlroots-based compositors|
 
@@ -137,6 +137,7 @@
 |[aerospace](https://github.com/nikitabobko/AeroSpace)|Window manager for MacOS|
 |[raycast](https://www.raycast.com/)|Launcher for everything|
 |[alt-tab](https://github.com/lwouis/alt-tab-macos)|Windows alt-tab on macOS|
+|[hammerspoon](https://github.com/Hammerspoon/hammerspoon)|Desktop automation, also simulates keyboard input|
 
 ## Network tools
 
@@ -145,7 +146,7 @@
 |`ssh`|SSH client|
 |`netcat`|TCP/IP swiss army knife|
 |[NetworkManager](https://networkmanager.dev/)|Linux network configuration tool suite|
-|[tshark](https://www.wireshark.org/docs/man-pages/tshark.html)|CLI of Wireshark, network packet analysis|
+|[wireshark](https://www.wireshark.org/)|Network packet analysis, `tshark` CLI on headless machines|
 |[bcc](https://github.com/iovisor/bcc)|Toolkit for IO analysis, networking, monitoring...|
 |[trippy](https://github.com/fujiapple852/trippy)|CLI tool for network diagnostic|
 |[termshark](https://github.com/gcla/termshark)|TUI to network packet analysis|
@@ -182,7 +183,6 @@
 |[osintui](https://github.com/wssheldon/osintui)|Open source intelligence tool|
 |[tsui](https://github.com/neuralinkcorp/tsui)|TUI for Tailscale|
 |[haiti](https://github.com/noraj/haiti)|Hash type identifier|
-|[anti-ddos](https://github.com/anti-ddos/Anti-DDOS)|Anti DDOS|
 |[betterleaks](https://github.com/betterleaks/betterleaks)|Detect secrets in git repos|
 |[binsider](https://github.com/orhun/binsider)|Reverse engineering tool to analyze ELF binaries|
 
@@ -190,7 +190,6 @@
 
 |Tool|Purpose|
 |----|-------|
-|[shdoc](https://github.com/reconquest/shdoc)|Generate documents for Bash shell scripts|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|
 |[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|
@@ -205,6 +204,8 @@
 |[posting](https://github.com/darrenburns/posting)|Powerful HTTP client with TUI same as Postman|
 |[euporie](https://github.com/joouha/euporie)|Jupyter notebooks in CLI|
 |[rust](https://github.com/rust-lang/rust)|Compiler and library for Rust|
+|[python](https://github.com/python/cpython)|Interpreter and library for Python|
+|[ruby](https://github.com/ruby/ruby)|Interpreter and library for Ruby|
 |[go](https://github.com/golang/go)|Compiler and library for Go|
 |[bun](https://github.com/oven-sh/bun)|JavaScript runtime|
 |[deno](https://github.com/denoland/deno)|JavaScript runtime|
@@ -212,8 +213,8 @@
 |[prek](https://github.com/j178/prek)|Framework for manage pre-commit hooks, re-engineered in Rust|
 |[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|
 |[shfmt](https://github.com/mvdan/sh)|Formatter for shell scripts|
-|[scc](github.com/boyter/scc)|Display statistics about code|
-|[yaml-schema](https://github.com/yaml-schema/yaml-schema)|YAML schema validator|
+|[scc](https://github.com/boyter/scc)|Display statistics about code|
+|[ys](https://github.com/yaml-schema/yaml-schema)|YAML schema validator (`yaml-schema` crate)|
 
 ## DevOps tools
 
@@ -256,7 +257,7 @@
 |[restic](https://github.com/restic/restic)|Backup program|
 |[goaccess](https://github.com/allinurl/goaccess)|Real-time web log analyzer|
 |[hl](https://github.com/pamburus/hl)|Log viewer and processor that translates JSON or logfmt logs into a pretty human-readable format|
-|[otel-cli](https://github.com/equinix-labs/otel-cli)|CLI tool to send OpenTelemetry traces|
+|[otel-cli](https://github.com/equinix-labs/otel-cli)|CLI tool to send OpenTelemetry traces (`otel`)|
 |[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|
 |[k6](https://github.com/grafana/k6)|Load testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|
@@ -266,7 +267,7 @@
 |[helm](https://github.com/helm/helm)|Kubernetes package manager|
 |[gcloud](https://cloud.google.com/sdk)|Libraries and tools for interacting with Google Cloud products and services|
 |[aws](https://github.com/aws/aws-cli)|Libraries and tools for interacting with Amazon Web Services products and services|
-|[taws](github.com/huseyinbabal/taws)|Interactive TUI AWS services|
+|[taws](https://github.com/huseyinbabal/taws)|Interactive TUI AWS services|
 |[az](https://github.com/Azure/azure-cli)|Libraries and tools for interacting with Microsoft Azure products and services|
 |[pint](https://github.com/cloudflare/pint)|Linter for Prometheus rules|
 
@@ -281,7 +282,7 @@
 |[copilot](https://github.com/github/copilot-cli)|CLI tool for GitHub Copilot|
 |[gemini](https://github.com/google-gemini/gemini-cli)|CLI tool for Google Gemini LLM|
 |[agy](https://github.com/google-antigravity/antigravity-cli)|CLI tool for Google Antigravity|
-|[llmfit](https://github.com/AlexsJones/llmfit)|TUI for models finding
+|[llmfit](https://github.com/AlexsJones/llmfit)|TUI for models finding|
 |[vectorcode](https://github.com/davidyz/vectorcode)|Code repository indexing tool with LLMs|
 |[opencode](https://github.com/anomalyco/opencode)|AI coding agent|
 |[rtk](https://github.com/rtk-ai/rtk)|Proxy that reduces LLM token consumption|
@@ -293,7 +294,7 @@
 |[termux](https://github.com/termux/termux-app)|Terminal emulator for Android|
 |[waydroid](https://github.com/waydroid/waydroid)|Android environment on Linux with container-based approach|
 |[bluestacks](https://www.bluestacks.com/)|Android environment on MacOS|
-|[android-tools](developer.android.com/tools/releases/platform-tools)|Android development tools|
+|[android-tools](https://developer.android.com/tools/releases/platform-tools)|Android development tools|
 |[fdroidcl](https://github.com/Hoverth/fdroidcl)|CLI for F-Droid|
 |[immich](https://github.com/immich-app/immich)|Client for self-hosted photo, video server|
 |[shelter](https://github.com/PeterCxy/Shelter)|Work profile for Android|
@@ -302,20 +303,12 @@
 
 |Tool|Purpose|
 |----|-------|
-|[cht](https://cht.sh)|Access to community cheat sheet|
 |color16, color256, colorful, truecolor|Test CLI color|
 |[now](https://github.com/apankrat/now.sh)|Prints current date/time while waiting for an input and echoing it to the stdout|
 |[croc](https://github.com/schollz/croc)|Easily and securely send things from one computer to another|
-|[screensaver](https://github.com/pipeseroni/pipes.sh)|Show screensaver on CLI with pipes|
-|[qrify](https://github.com/alexanderepstein/Bash-Snippets)|Show QR of text|
-|[tmpmail](https://github.com/sdushantha/tmpmail)|Create temp mail address and receive emails|
-|[trans](https://github.com/soimort/translate-shell)|Translate|
-|[xpanes](https://github.com/greymd/tmux-xpanes)|Terminal divider with tmux|
 |[cava](https://github.com/karlstav/cava)|Audio visualizer|
-|[git-quick-stats](https://github.com/arzzen/git-quick-stats)|Show statistics of Git repository|
 |[playerctl](https://github.com/altdesktop/playerctl)|Control media players that implement the MPRIS|
 |[pipewire](https://github.com/PipeWire/pipewire)|Audio and video devices framework|
-|[pulsemixer](https://github.com/GeorgeFilipkin/pulsemixer)|Alternative CLI tool for pavucontrol|
 |[bluez](https://github.com/bluez/bluez)|Bluetooth controller|
 |[mpv](https://github.com/mpv-player/mpv)|Media player|
 |[pandoc](https://github.com/jgm/pandoc)|Universal markup converter|
@@ -337,8 +330,8 @@
 |[bluetui](https://github.com/pythops/bluetui)|TUI for managing bluetooth|
 |[gtt](https://github.com/eeeXun/gtt)|TUI for Google Translate and other services|
 |[pptx2md](https://github.com/ssine/pptx2md)|Convert PowerPoint presentations to Markdown|
-|[in2csv](https://github.com/wireservice/csvkit)|Convert various data formats to CSV|
-|[lz4json](https://github.com/andikleen/lz4json)|C decompress tool for mozilla lz4json format|
+|[csvkit](https://github.com/wireservice/csvkit)|Convert various data formats to CSV (`in2csv`, `csvlook`...)|
+|[lz4jsoncat](https://github.com/andikleen/lz4json)|C decompress tool for mozilla lz4json format|
 |[xleak](https://github.com/bgreenwell/xleak)|TUI for view Excel files|
 |[officecli](https://github.com/iOfficeAI/OfficeCLI)|CLI for Office suite's files|
 |[gws](https://github.com/googleworkspace/cli)|CLI for Google Workspace, use Google API Discovery Service|

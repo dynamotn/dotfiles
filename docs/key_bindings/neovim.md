@@ -12,9 +12,9 @@
 
 | Keybind | Action |
 |---------|--------|
-| `<C-c>` | Change word (ciw) |
-| `d`, `dd`, `x`, `c`, `s` | Smart delete|
-| `v+p` | Paste without copying|
+| `<C-c>` | Change word (`ciw`) |
+| `d`, `dd`, `x`, `c`, `s`, `C`, `S`, `X` | Smart delete: sends blank lines to the black-hole register instead of the yank register |
+| `p` (visual mode) | Paste over the selection without yanking it |
 
 ## Command Abbreviations
 
@@ -44,6 +44,12 @@
 |---------|--------|
 | `<leader>cp` | Markdown preview |
 | `<leader>T` | Open Todo List (Obsidian) |
+
+### D2
+
+| Keybind | Action |
+|---------|--------|
+| `<leader>cp` | D2 diagram preview |
 
 ### Typst
 
