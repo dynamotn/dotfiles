@@ -43,8 +43,6 @@ alias grmd 'grm remove'
 alias grmu 'grm set-url'
 alias grs 'git reset --soft'
 alias grv 'git revert'
-alias gR 'cd (git rev-parse --show-toplevel)'
-alias gRu 'cd (git up)'
 alias gs 'git status'
 alias gsh 'git show'
 alias gsm 'git submodule'
@@ -59,5 +57,20 @@ alias gv 'git mv'
 alias gw 'git worktree'
 
 alias fgcs __caran_fzf_git_commit_search
+
+# The two `cd` shortcuts are functions rather than aliases: an alias wraps `cd`,
+# so fish would offer directory completion for commands that take no argument.
+function gR --description 'Go to the root of the repository'
+    cd (git rev-parse --show-toplevel)
+end
+
+function gRu --description 'Go to the main checkout, or the superproject root'
+    cd (git up)
+end
+
+# Neither those nor the fzf commit picker take an argument
+complete -c gR -f
+complete -c gRu -f
+complete -c fgcs -f
 
 set -q FZF_GIT_COMMIT_SEARCH_COMMAND; or set -U FZF_GIT_COMMIT_SEARCH_COMMAND "git log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"

@@ -118,6 +118,14 @@ Expanded when the command runs, not while typing.
 | `gw` | `git worktree` |
 | `fgcs` | Pick a commit with fzf |
 
+Completion for `git` extends the one fish ships with, in
+`completions/git.fish`: commands that only accept tracked files (`rm`, `blame`,
+`ls-files`, `log`, …) no longer offer untracked ones, `clean` offers exactly
+what it would delete, `mergetool` the conflicted files, and every alias of
+`~/.config/git/config` gets the argument it really takes — a stash for
+`stash-rename`, a remote for `unshallow` and `mirror`, nothing at all for
+`root`, `up` or `snapshot`.
+
 ### Kubectl
 
 | Alias | Expansion |
