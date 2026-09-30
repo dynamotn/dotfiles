@@ -22,16 +22,31 @@
 
 | Keybind | Action |
 |---------|--------|
-| `Super+1..9,0` | Switch to workspace 1-9,0 |
-| `Super+D` | Swap workspaces with first monitor |
-| `Super+Ctrl+Arrow` | Move workspace to monitor (left/right/up/down) |
+| `Super+1..9,0` | Switch to the named workspace bound to that key |
+| `Super+D` | Swap the active workspaces of monitor 0 and monitor 1 |
+| `Super+Ctrl+Left` / `Super+Ctrl+Right` | Move current workspace to the previous/next monitor |
 | `Super+MouseScroll` | Cycle through workspaces |
+
+Workspaces are named, not numbered:
+
+| Key | Workspace |
+|-----|-----------|
+| `1` | `term` |
+| `2` | `web` |
+| `3` | `mail` |
+| `4` | `doc` |
+| `5` | `chat` |
+| `6` | `media` |
+| `7` | `game` |
+| `8` | `sys` |
+| `9` | `misc` |
+| `0` | `sec` |
 
 ## Window management
 
 | Keybind | Action |
 |---------|--------|
-| `Super+Shift+1..9,0` | Move window to workspace 1-9,0 |
+| `Super+Shift+1..9,0` | Move window to that named workspace, silently |
 | `Super+Arrow` | Focus window direction |
 | `Alt+Tab` | Cycle next window |
 | `Super+LMB/RMB` | Move/resize window |
@@ -48,17 +63,17 @@
 | Keybind | Action |
 |---------|--------|
 | `Super+Return` | Terminal (kitty + zellij) |
-| `Super+E` | Browser (primary) |
-| `Super+Q` | Browser (alternate) |
-| `Super+M` | Mail client (primary) |
-| `Super+K` | Mail client (alternate) |
+| `Super+E` | Browser, personal profile at home / enterprise profile at the office |
+| `Super+Q` | Browser, the other profile |
+| `Super+M` | Mail client, personal profile at home / enterprise profile at the office |
+| `Super+K` | Mail client, the other profile |
 | `Super+N` | Notification center |
 | `Super+J` | Clipboard history |
-| `Super+P` | Password manager (Get password)|
+| `Super+P` | Password manager (get password) |
 | `Super+T` | Password manager (Get TOTP) |
 | `Super+L` | Lock session |
-| `Super+S` | Screenshot|
-| `Super+Z` | System monitoring|
+| `Super+S` | Screenshot a selected region (`grim` + `slurp`), then edit in `swappy` |
+| `Super+Z` | Drop-down `btop` in kitty (needs `hdrop`) |
 
 ## Media control
 

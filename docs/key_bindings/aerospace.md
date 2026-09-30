@@ -36,15 +36,15 @@
 
 | Keybind | Action |
 |---------|--------|
-| `Super+Shift+-` | Resize window smaller (smart) |
-| `Super+Shift+=` | Resize window larger (smart) |
+| `Super+Shift+-` | Resize window smaller (`resize smart -50`) |
+| `Super+Shift+=` | Resize window larger (`resize smart +50`) |
 
 ## Workspace management
 
 | Keybind | Action |
 |---------|--------|
-| `Super+1..9,0` | Switch to workspace 1-10 |
-| `Super+Shift+1..9,0` | Move window to workspace 1-10 (with focus) |
+| `Super+1..9,0` | Switch to workspace `1`-`9` or `0` |
+| `Super+Shift+1..9,0` | Move window to workspace `1`-`9` or `0` (focus follows) |
 | `Super+Tab` | Switch to previous workspace (back-and-forth) |
 | `Super+Shift+Tab` | Move workspace to next monitor (wrap around) |
 
@@ -53,10 +53,10 @@
 | Keybind | Action |
 |---------|--------|
 | `Super+Return` | Open terminal (kitty + zellij) |
-| `Super+E` | Open browser (primary) |
-| `Super+Q` | Open browser (alternate) |
-| `Super+M` | Open mail (primary) |
-| `Super+K` | Open mail (alternate) |
+| `Super+E` | Browser, personal profile at home / enterprise profile at the office |
+| `Super+Q` | Browser, the other profile |
+| `Super+M` | Mail client, personal profile at home / enterprise profile at the office |
+| `Super+K` | Mail client, the other profile |
 
 ## Binding modes
 
