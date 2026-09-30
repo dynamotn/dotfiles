@@ -1,0 +1,14 @@
+{{- $github := "git@github.com:" }}
+{{- $gitlab := "git@gitlab.com:" }}
+{{- if not .preferGitSSH }}
+{{-   $github = "https://github.com/" }}
+{{-   $gitlab = "https://gitlab.com/" }}
+{{- end }}
+.local/share/projekt:
+  type: git-repo
+  {{- if .blockedGitlab }}
+  url: {{ $gitlab }}dynamo-config/projekt-templates.git
+  {{- else }}
+  url: {{ $github }}dynamotn/projekt-templates.git
+  {{- end }}
+  refreshPeriod: 2h
