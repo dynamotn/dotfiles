@@ -34,6 +34,7 @@ set -gx NODE_TLS_REJECT_UNAUTHORIZED 0
 set -gx GRPC_DEFAULT_SSL_ROOTS_FILE_PATH /etc/ssl/certs/ca-certificates.crt
 set -gx REQUESTS_CA_BUNDLE /etc/ssl/certs/ca-certificates.crt
 set -gx DENO_TLS_CA_STORE system
+set -gx UV_SYSTEM_CERTS true
 {{- end }}
 
 {{- if eq .kind "container" }}
