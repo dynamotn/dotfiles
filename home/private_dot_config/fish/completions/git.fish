@@ -49,6 +49,27 @@ function __caran_git_skip_worktree_files --description 'Files hidden with --skip
     __fish_git ls-files -v 2>/dev/null | string replace --regex --filter '^S ' ''
 end
 
+# Only a submodule that points at another commit has something for git to act
+# on: new files or edits inside it change nothing in the superproject. With
+# --cached, list the submodules whose new commit is already staged instead.
+function __caran_git_modified_submodules --description 'Submodules checked out at another commit'
+    argparse cached -- $argv; or return
+    set -l diff_opts --raw --ignore-submodules=dirty
+    set -q _flag_cached; and set -a diff_opts --cached
+    # The paths come from the top of the repository; write them relative to the
+    # current directory, the way the shipped file completions do.
+    set -l prefix (__fish_git rev-parse --show-prefix 2>/dev/null)
+    set -l cdup (__fish_git rev-parse --show-cdup 2>/dev/null)
+    for submodule in (__fish_git diff $diff_opts 2>/dev/null \
+            | string replace --regex --filter '^:\d+ 160000 \S+ \S+ \S+\t' '')
+        if test -n "$prefix"; and string match -q -- "$prefix*" $submodule
+            string replace -- $prefix '' $submodule
+        else
+            echo $cdup$submodule
+        end
+    end
+end
+
 ##
 ## Cases the shipped completion leaves to plain file completion
 ##
@@ -70,6 +91,23 @@ end
 complete -f -c git -n '__fish_git_using_command clean' -a '(__fish_git_files untracked)'
 complete -f -c git -n '__fish_git_using_command clean' -n '__fish_git_contains_opt -s x -s X' \
     -a '(__fish_git_files ignored)'
+
+# The shipped file lists run `git status --ignore-submodules=all`, so no command
+# ever offers a submodule whose pointer moved. Add it back where it counts:
+# `add`, `diff` and `commit` for a new commit not staged yet, and `diff
+# --cached`, `commit`, `reset` and `restore --staged` for one already staged.
+# `checkout`, `restore` and `stash` are left out: without --recurse-submodules
+# they can't move a submodule back, so offering one would only mislead.
+complete -f -c git -n '__fish_git_using_command add commit' \
+    -a '(__caran_git_modified_submodules)' -d 'Modified submodule'
+complete -f -c git -n '__fish_git_using_command diff' -n 'not __fish_git_contains_opt cached staged' \
+    -a '(__caran_git_modified_submodules)' -d 'Modified submodule'
+complete -f -c git -n '__fish_git_using_command diff' -n '__fish_git_contains_opt cached staged' \
+    -a '(__caran_git_modified_submodules --cached)' -d 'Staged submodule'
+complete -f -c git -n '__fish_git_using_command commit reset' \
+    -a '(__caran_git_modified_submodules --cached)' -d 'Staged submodule'
+complete -f -c git -n '__fish_git_using_command restore' -n '__fish_git_contains_opt -s S staged' \
+    -a '(__caran_git_modified_submodules --cached)' -d 'Staged submodule'
 
 # `git mergetool` only makes sense on the files that are still conflicted
 complete -f -c git -n '__fish_git_using_command mergetool' \
