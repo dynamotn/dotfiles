@@ -16,6 +16,11 @@ alias fGpc __caran_fzf_gcloud_project_change
 alias fGcis __caran_fzf_gcloud_instance_ssh
 alias fGciS __caran_fzf_gcloud_instance_search
 
+# The fzf pickers take no argument
+complete -c fGpc -f
+complete -c fGcis -f
+complete -c fGciS -f
+
 set -q FZF_GCLOUD_PROJECT_SWITCH_COMMAND; or set -U FZF_GCLOUD_PROJECT_SWITCH_COMMAND "gcloud config set project \$project_id"
 set -q FZF_GCLOUD_PROJECT_SEARCH_COMMAND; or set -U FZF_GCLOUD_PROJECT_SEARCH_COMMAND "gcloud projects list --format='table[no-heading](projectId,name)'"
 set -q FZF_GCLOUD_INSTANCE_SEARCH_COMMAND; or set -U FZF_GCLOUD_INSTANCE_SEARCH_COMMAND "gcloud compute instances list | tail -n +2"

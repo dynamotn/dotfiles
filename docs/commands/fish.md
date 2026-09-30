@@ -150,6 +150,16 @@ what it would delete, `mergetool` the conflicted files, and every alias of
 | `ksc` | `kubectl scale` |
 | `kx` | `kubectl exec -it` |
 
+Completion for `kubectl` comes from `kubectl completion fish`;
+`completions/kubectl.fish` keeps that and adds what it misses, so
+`kubectl config current-context` and friends no longer fall back to file names,
+`set-cluster`/`set-credentials` name what is in the kubeconfig and `-k` offers
+the directory of a kustomization. `kk` carries its own copy of that last rule:
+`--wraps` cannot express "the next word is the argument of `-k`". The
+wrappers `grc` installs used to pass their arguments through `eval`, which lost
+empty and quoted ones and broke completion for every command they colour
+(`kubectl`, `docker`, `systemctl`, …).
+
 ### Helm
 
 | Alias | Expansion |
@@ -158,10 +168,15 @@ what it would delete, `mergetool` the conflicted files, and every alias of
 | `hd` | `helm-docs` |
 | `hdel` | `helm delete` |
 | `hdu` | `helm dependency update` |
-| `hg` | `helm get values` |
+| `hgv` | `helm get values` |
 | `hl` | `helm ls` |
 | `hs` | `helm secrets` |
 | `hu` | `helm upgrade --install` |
+
+Completion for `helm` comes from `helm completion fish`;
+`completions/helm.fish` keeps that and stops the file names it falls back to
+when the cluster is out of reach and a release name cannot be listed, and makes
+`helm dependency` offer chart directories.
 
 ### Google Cloud
 
