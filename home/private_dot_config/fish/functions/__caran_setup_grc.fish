@@ -19,7 +19,10 @@ function __caran_setup_grc
                     set -l options $$optionsvariable
                     grc -es --colour=auto $executable $options $argv
                 else
-                    eval command $executable $argv
+                    # No `eval` here: it re-parses the arguments, and an empty
+                    # one then disappears. Completion scripts pass exactly that
+                    # to ask for "complete the next, still empty word".
+                    command $executable $argv
                 end
             end
         end
