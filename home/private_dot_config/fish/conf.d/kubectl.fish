@@ -18,11 +18,15 @@ alias ksc 'kubectl scale'
 alias kr 'kubectl rollout'
 alias kx 'kubectl exec -it'
 
+# `--wraps` cannot carry "the next word is the argument of -k", so say here
+# that the alias takes the directory of a kustomization
+complete -f -c kk -a '(__fish_complete_directories)'
+
 alias h helm
 alias hd helm-docs
 alias hdel 'helm delete'
 alias hdu 'helm dependency update'
-alias hg 'helm get values'
+alias hgv 'helm get values'
 alias hl 'helm ls'
 alias hs 'helm secrets'
 alias hu 'helm upgrade --install'
