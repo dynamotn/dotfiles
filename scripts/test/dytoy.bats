@@ -209,6 +209,19 @@ EOF
   assert_output $'brew:firefox --cask --HEAD\nbrew:fzf --formula'
 }
 
+@test "dytoy::install_macos_package appends the brew_args of the tool" {
+  local actions_file="${BATS_TEST_TMPDIR}/actions"
+  function dytoy::is_installed_package { return 1; }
+  function dytoy::enable_service { true; }
+  function package_manager::install_via_brew { printf 'brew:%s\n' "$*" >> "${actions_file}"; }
+
+  run dytoy::install_macos_package \
+    '{"name":"font-roboto","type":"cask","unstable":"false","repo":"null","brew_args":["--force","--no-quarantine"]}'
+  assert_success
+  run cat "${actions_file}"
+  assert_output 'brew:font-roboto --cask --force --no-quarantine'
+}
+
 @test "dytoy::install_macos_rosetta installs rosetta when runtime is missing" {
   function dybatpho::is {
     if [[ "$1" == "file" && "$2" == "/usr/libexec/rosetta/runtime" ]]; then

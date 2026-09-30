@@ -130,11 +130,13 @@ Library/thunderbird
 {{- end }}
 
 {{/* MacOS related files */}}
-{{- if ne .guiServer "M" }}
+{{- if ne .chezmoi.os "darwin" }}
 Library
 .hammerspoon
 .lima
 .macos
+.config/homebrew
+.homebrew
 {{- end }}
 
 {{/* Machine type files */}}

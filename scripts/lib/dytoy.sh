@@ -452,6 +452,9 @@ function dytoy::install_macos_package {
       if [[ "$unstable" == "true" ]]; then
         brew_params+=("--HEAD")
       fi
+      local -a brew_args=()
+      readarray -t brew_args < <(dytoy::get_field "$yaml" "brew_args // [] | .[]")
+      brew_params+=("${brew_args[@]}")
       local repo
       repo=$(dytoy::get_field "$yaml" "repo")
       [[ "$repo" == "null" ]] || package_manager::add_brew_tap "$repo" > /dev/null

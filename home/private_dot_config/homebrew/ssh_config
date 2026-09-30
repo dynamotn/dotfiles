@@ -1,0 +1,8 @@
+# SSH config Homebrew uses when fetching git over SSH, see `brew.env`. Its
+# sandbox can't create the ControlMaster socket, so turn connection sharing off
+# before the user config sets it; the first value SSH reads for a key wins.
+Host *
+  ControlMaster no
+  ControlPath none
+
+Include ~/.ssh/config

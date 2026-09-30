@@ -273,6 +273,11 @@ $defs:
       unstable:
         type: boolean
         description: When true installs the HEAD/nightly build of the formula
+      brew_args:
+        type: array
+        items:
+          type: string
+        description: Extra arguments passed to 'brew install', such as '--force'
 
   flatpak_config:
     type: object

@@ -3,6 +3,7 @@
 # @brief Reject a commit that still has conflict markers
 # @description Reject a commit whose staged changes still contain merge conflict markers,
 # and list the files they are in.
+{{ template "git/hooks/modern_bash.sh.tmpl" . }}
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
 dybatpho::register_common_handlers
 
