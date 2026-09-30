@@ -71,6 +71,7 @@
 | `gpo` | `git push -u origin` |
 | `gpt` | `git push --tags` |
 | `gR` | `cd` to git root folder |
+| `gRu` | `cd` to superproject root if in a submodule, else to the main checkout of the repository |
 | `grb` | `git rebase` |
 | `grbi` | `git rebase -i` |
 | `grh` | `git reset --hard` |
