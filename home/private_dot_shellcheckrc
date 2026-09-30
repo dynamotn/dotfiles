@@ -1,0 +1,33 @@
+# ShellCheck configuration for the Bash coding style guide.
+#
+# `dyshellint` runs ShellCheck with this file, and maps its levels onto the tiers
+# of the guide: error and warning are the ✔️ SHOULD / ❌ AVOID rules, info and
+# style are the ⚠️ CONSIDER ones. No `severity=` is set here on purpose, so that
+# nothing is filtered out before dyshellint has seen it.
+
+shell=bash
+
+# `# shellcheck source=...` directives point at real files in this repository,
+# so let ShellCheck follow them.
+external-sources=true
+
+# Resolve a `source=` directive relative to the script that carries it, which is
+# how every entrypoint here reaches `scripts/lib/`.
+source-path=SCRIPTDIR
+
+# Optional checks that the guide asks for by name.
+enable=require-variable-braces    # Formatting > Variable Expansion
+enable=require-double-brackets    # Features and Bugs > Test Expression
+enable=quote-safe-variables       # Features and Bugs > Quoting
+enable=deprecate-which            # Calling Commands > Builtin Commands vs External Commands
+enable=useless-use-of-cat         # Calling Commands > Builtin Commands vs External Commands
+enable=avoid-nullary-conditions   # Features and Bugs > Testing Strings
+enable=add-default-case           # Formatting > Case statement
+enable=check-extra-masked-returns # Calling Commands > Checking Return Values
+enable=check-set-e-suppressed     # Calling Commands > Checking Return Values
+enable=check-unassigned-uppercase # Naming Conventions > Variable Names
+
+# BSG010 covers the same ground with the distinction the guide makes: a
+# `local x="$(cmd)"` inside a function hides an exit status, while the
+# `readonly CONST="$(cmd)"` at the top of a file is the recommended form.
+disable=SC2155
