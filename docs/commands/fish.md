@@ -121,7 +121,10 @@ Expanded when the command runs, not while typing.
 Completion for `git` extends the one fish ships with, in
 `completions/git.fish`: commands that only accept tracked files (`rm`, `blame`,
 `ls-files`, `log`, …) no longer offer untracked ones, `clean` offers exactly
-what it would delete, `mergetool` the conflicted files, and every alias of
+what it would delete, `mergetool` the conflicted files, `add`, `diff`,
+`commit`, `reset` and `restore --staged` (and so `ga`, `gd`, `gdc`, `gc`, `grH`)
+also the submodules moved to another commit, staged or not as each command
+expects, and every alias of
 `~/.config/git/config` gets the argument it really takes — a stash for
 `stash-rename`, a remote for `unshallow` and `mirror`, nothing at all for
 `root`, `up` or `snapshot`.
