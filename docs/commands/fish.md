@@ -223,6 +223,28 @@ when the cluster is out of reach and a release name cannot be listed, and makes
 | `sczs` | `scz status` |
 | `sczu` | `scz update` |
 
+`chezmoi` dispatches an unknown subcommand to `chezmoi-<name>`, so its own
+completion knows nothing about `dycrypt`. `completions/chezmoi.fish` adds it,
+from the option spec of `chezmoi-dycrypt`: the identity types come from the
+`decryptPersonal`/`decryptEnterprise` data of `~/.config/chezmoi/chezmoi.yaml`,
+the attributes of `-a` chain on a comma, and `-f` offers `data` beside the
+directories. The file name comes from the store the command would read - the
+`.age` files of `secrets/data/<identity>` for `decrypt`, the plain ones for
+`encrypt`, the contents of `--folder` when it is not the data store - and
+follows whatever `-i` and `-f` are already on the line. Only names are listed,
+never what is inside them. `chezmoi-dycrypt` called directly, and `scz` through
+its wrap, get the same rules.
+
+A completion file here only wins while nothing erases the command's
+completions afterwards. `config.fish` used to run
+`chezmoi completion fish | source` at every interactive start, and that script
+opens with `complete -c chezmoi -e`; the erase loads
+`completions/chezmoi.fish` first and then wipes what it just registered, so
+`dycrypt` never survived. The line is gone - fish autoloads the same script
+from `completions/chezmoi.fish` on the first Tab anyway. Any tool that gets a
+file in `completions/` has to be taken out of that eager block for the same
+reason.
+
 ### Clipboard
 
 Resolved once at startup, per platform.
