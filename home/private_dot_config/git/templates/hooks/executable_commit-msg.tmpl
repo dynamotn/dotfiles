@@ -3,6 +3,7 @@
 # @brief Reject a commit message that breaks the commit conventions
 # @description Reject an empty message, a subject over 72 characters and any trailer that
 # credits an AI agent, and warn when the subject goes over the 50 character mark.
+{{ template "git/hooks/modern_bash.sh.tmpl" . }}
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
 dybatpho::register_common_handlers
 

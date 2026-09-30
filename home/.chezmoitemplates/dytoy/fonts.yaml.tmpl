@@ -21,14 +21,20 @@ ubuntu:
     - name: fonts-noto-cjk
     - name: fonts-noto-color-emoji
 macos:
+  # Force the casks over font files that a lost Caskroom record left behind in
+  # ~/Library/Fonts, which brew otherwise refuses to overwrite.
   packages:
     - name: font-roboto
       type: cask
+      brew_args: [--force]
     - name: font-noto-serif
       type: cask
+      brew_args: [--force]
     - name: font-noto-serif-cjk
       type: cask
+      brew_args: [--force]
     - name: font-noto-sans-cjk
       type: cask
+      brew_args: [--force]
     # Not need Noto Color Emoji, use builtin Apple Color Emoji
 {{- end }}

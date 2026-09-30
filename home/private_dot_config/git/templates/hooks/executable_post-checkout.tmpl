@@ -3,6 +3,7 @@
 # @brief Warn when switching branches brought in dependency changes
 # @description Warn when a branch checkout changed the submodules, the lockfiles or the
 # pinned tool versions, so the install step is not forgotten.
+{{ template "git/hooks/modern_bash.sh.tmpl" . }}
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
 dybatpho::register_common_handlers
 
