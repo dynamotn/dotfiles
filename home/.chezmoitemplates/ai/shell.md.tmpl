@@ -21,7 +21,22 @@ share syntax, so always be explicit about which one a command is written for.
   error handling.
 - Quote every variable expansion, prefer `[[ ]]` over `[ ]`, and `$(...)`
   over backticks.
-- Keep scripts shellcheck-clean and shfmt-formatted, and add a
-  `# shellcheck source=` directive when sourcing a library by a computed path.
+- Build any bash script beyond a few lines on
+  [dybatpho](https://github.com/dynamotn/dybatpho). Use the repository's own
+  copy when it vendors one (often a submodule under `scripts/lib/dybatpho`),
+  otherwise the shared checkout in `~/Working/personal/tools/dybatpho`.
+  Source its `init.sh` (with `--modules <name>...` for anything beyond the
+  core) and use its helpers — `dybatpho::die`, `dybatpho::is`,
+  `dybatpho::opts::*`, the logging and trap handlers — instead of
+  hand-rolling argument parsing, error handling, logging, or cleanup. Read
+  its `AGENT.md` before reaching for a function you have not used yet. A
+  one-off snippet that needs none of that may stay plain bash.
+- Lint every shell script you write or change with `dyshellint <path>...`
+  and fix what it reports before calling the work done. It runs ShellCheck
+  and shfmt on top of its own rules, so do not settle for running those two
+  alone. Silence a finding only when it is a deliberate choice, with an inline
+  `# dyshellint disable=<CODE> <reason>` on the line above it.
+- Add a `# shellcheck source=` directive when sourcing a library by a
+  computed path.
 - Fish scripts live in `*.fish` files and use fish syntax throughout. Never
   mix bash syntax into them, or fish syntax into a bash script.
