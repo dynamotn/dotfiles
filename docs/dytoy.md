@@ -31,6 +31,7 @@ cursor. Nothing is picked until you pick it.
 |`←` `→` `h` `l` `Tab`|Switch method tab|
 |`Space`|Pick or unpick the tool|
 |`a`|Pick the whole tab, or clear it|
+|`f` `/`|Find a tool by name across every tab: type to filter, `Space` picks, `Enter` goes to it, `Esc` cancels|
 |`Enter`|Install the picked tools|
 |`q` `Esc`|Quit, or stop installing after a confirmation|
 |`f`|Follow the log of the running tool again|

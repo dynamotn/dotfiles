@@ -35,6 +35,8 @@ declare -ga DYTOY_TUI_ELAPSED=()
 declare -gA DYTOY_TUI_DETAIL=()
 # The cursor of each pick tab, by method.
 declare -gA DYTOY_TUI_CURSOR=()
+# The first row each list shows, by list.
+declare -gA DYTOY_TUI_OFFSET=()
 
 # Indexes of the picked tools, in the order they install.
 declare -ga DYTOY_TUI_QUEUE=()
@@ -47,8 +49,12 @@ DYTOY_TUI_FOLLOW=true
 
 # `pick`, `install`, or `done`.
 DYTOY_TUI_PHASE="pick"
-# `normal` or `confirm`, the latter while the stop dialog is up.
+# `normal`, `search` while a name is being typed in the pick phase, or
+# `confirm` while the stop dialog is up.
 DYTOY_TUI_MODE="normal"
+# What is typed in search mode, and the cursor among the tools it matches.
+DYTOY_TUI_QUERY=""
+DYTOY_TUI_MATCH=0
 DYTOY_TUI_TAB=0
 DYTOY_TUI_RUNNING=true
 DYTOY_TUI_STATUS=""
@@ -58,6 +64,11 @@ DYTOY_TUI_WRAP_DIR=""
 DYTOY_TUI_KEEPALIVE_PID=""
 
 declare -ga DYTOY_TUI_SPINNER=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
+# The styles only this interface draws, set by dytoy_tui::theme; every other
+# style is a `DYBATPHO_SCREEN_STYLE_*` of the screen module's theme.
+DYTOY_TUI_STYLE_BRAND="" DYTOY_TUI_STYLE_ROW_BG="" DYTOY_TUI_STYLE_TEXT=""
+DYTOY_TUI_STYLE_STRONG="" DYTOY_TUI_STYLE_RUN="" DYTOY_TUI_STYLE_KEY=""
+DYTOY_TUI_STYLE_VALUE="" DYTOY_TUI_STYLE_GAUGE_EMPTY="" DYTOY_TUI_STYLE_BADGE=""
 # `true` once a picked tool failed or was stopped, read by the caller.
 # shellcheck disable=SC2034
 DYTOY_TUI_FAILED=false
@@ -94,8 +105,9 @@ function dytoy_tui::load_tools {
 
   # One query for the whole file rather than one per tool: the list is read
   # before the first frame, and a `yq` call per tool is seconds of blank screen.
-  local rows
-  rows=$(dybatpho::yaml_query "$(dytoy::yaml_file)" \
+  local rows yaml_file
+  yaml_file="$(dytoy::yaml_file)"
+  rows=$(dybatpho::yaml_query "${yaml_file}" \
     'explode(.) | .[] | select(.enabled != false and .enabled != "false")
       | [.name, .method, (.is_essential // false)] | @tsv' -r)
 
@@ -131,10 +143,11 @@ function dytoy_tui::load_tools {
 function dytoy_tui::detect_installed {
   local name method
   dybatpho::expect_args name method -- "$@"
+  local local_bin_file
+  local_bin_file="$(dybatpho::path_join "${HOME}" ".local" "bin" "${name}")"
   if [[ "${method}" == "os" ]]; then
     echo "unknown"
-  elif dybatpho::is command "${name}" \
-    || dybatpho::is file "$(dybatpho::path_join "${HOME}" ".local" "bin" "${name}")"; then
+  elif dybatpho::is command "${name}" || dybatpho::is file "${local_bin_file}"; then
     echo "yes"
   else
     echo "no"
@@ -147,8 +160,9 @@ function dytoy_tui::detect_installed {
 # @arg $2 string Method
 #######################################
 function dytoy_tui::tab_items {
-  local -n __dytoy_tui_items="$1"
-  local method="$2" index
+  local __dytoy_tui_items_ref method index
+  dybatpho::expect_args __dytoy_tui_items_ref method -- "$@"
+  local -n __dytoy_tui_items="${__dytoy_tui_items_ref}"
   __dytoy_tui_items=()
   for index in "${!DYTOY_TUI_NAME[@]}"; do
     [[ "${DYTOY_TUI_METHOD[index]}" == "${method}" ]] && __dytoy_tui_items+=("${index}")
@@ -157,17 +171,56 @@ function dytoy_tui::tab_items {
 }
 
 #######################################
-# @description Print how many tools are picked, overall or for one method.
-# @arg $1 string Optional method
-# @stdout The count
+# @description Fill an array with the indexes of the tools whose name holds
+# the search query, across every method, in install order. The match is a
+# case-insensitive substring rather than a pattern: a search is typed in a
+# hurry and should not need escaping.
+# @arg $1 string Name of the array variable receiving the indexes
+# @env DYTOY_TUI_QUERY string What was typed
 #######################################
-function dytoy_tui::picked_count {
-  local method="${1-}" index count=0
+function dytoy_tui::search_matches {
+  local __dytoy_tui_matches_ref
+  dybatpho::expect_args __dytoy_tui_matches_ref -- "$@"
+  local -n __dytoy_tui_matches="${__dytoy_tui_matches_ref}"
+  local query="${DYTOY_TUI_QUERY,,}" index
+  __dytoy_tui_matches=()
+  for index in "${!DYTOY_TUI_NAME[@]}"; do
+    [[ "${DYTOY_TUI_NAME[index],,}" == *"${query}"* ]] && __dytoy_tui_matches+=("${index}")
+  done
+  return 0
+}
+
+#######################################
+# @description Pick a tool, or unpick it when it is already picked.
+# @arg $1 number Index of the tool
+#######################################
+function dytoy_tui::toggle_pick {
+  local index
+  dybatpho::expect_args index -- "$@"
+  if dybatpho::is true "${DYTOY_TUI_PICKED[index]}"; then
+    DYTOY_TUI_PICKED[index]=false
+  else
+    DYTOY_TUI_PICKED[index]=true
+  fi
+}
+
+#######################################
+# @description Count the picked tools, overall or for one method. It is asked
+# once per tab on every frame, so it writes to a variable rather than paying
+# for a subshell each time: a frame that forks falls behind a held key.
+# @arg $1 string Name of the variable receiving the count
+# @arg $2 string Method, or empty for every method
+#######################################
+function dytoy_tui::picked_count_into {
+  local __dytoy_tui_picked_ref method index
+  dybatpho::expect_args __dytoy_tui_picked_ref method -- "$@"
+  local -n __dytoy_tui_picked="${__dytoy_tui_picked_ref}"
+  __dytoy_tui_picked=0
   for index in "${!DYTOY_TUI_NAME[@]}"; do
     [[ -z "${method}" || "${DYTOY_TUI_METHOD[index]}" == "${method}" ]] || continue
-    dybatpho::is true "${DYTOY_TUI_PICKED[index]}" && count=$((count + 1))
+    dybatpho::is true "${DYTOY_TUI_PICKED[index]}" && __dytoy_tui_picked=$((__dytoy_tui_picked + 1))
   done
-  echo "${count}"
+  return 0
 }
 
 #######################################
@@ -179,8 +232,9 @@ function dytoy_tui::picked_count {
 # @env LOG_LEVEL, DRY_RUN, ONLY_ESSENTIAL, ONLY_NOT_INSTALLED, LIST_CONTENTS
 #######################################
 function dytoy_tui::child_args {
-  local -n __dytoy_tui_args="$1"
-  local index="$2" sync="$3"
+  local __dytoy_tui_args_ref index sync
+  dybatpho::expect_args __dytoy_tui_args_ref index sync -- "$@"
+  local -n __dytoy_tui_args="${__dytoy_tui_args_ref}"
   __dytoy_tui_args=(
     "${DYTOY_TUI_METHOD[index]}" --tool "${DYTOY_TUI_NAME[index]}" --log-level "${LOG_LEVEL}"
   )
@@ -198,25 +252,29 @@ function dytoy_tui::child_args {
 
 #######################################
 # @description Fill an array with the last lines of a log, cleaned up for the
-# screen: colours and other escape sequences dropped, a line redrawn with `\r`
-# reduced to what it ended as, and tabs expanded.
+# screen: colours kept, every other escape sequence dropped, a line redrawn
+# with `\r` reduced to what it ended as, and tabs expanded.
 # @arg $1 string Name of the array variable receiving the lines
 # @arg $2 string Log file
 # @arg $3 number Number of lines
 #######################################
 function dytoy_tui::log_tail {
-  local -n __dytoy_tui_lines="$1"
-  local file="$2" count="$3"
+  local __dytoy_tui_lines_ref file count
+  dybatpho::expect_args __dytoy_tui_lines_ref file count -- "$@"
+  local -n __dytoy_tui_lines="${__dytoy_tui_lines_ref}"
   __dytoy_tui_lines=()
   [[ -f "${file}" ]] && ((count > 0)) || return 0
-  readarray -t __dytoy_tui_lines < <(
-    tail -n "${count}" "${file}" | LC_ALL=C sed -E \
-      -e 's/\x1B\[[0-9;?]*[A-Za-z]//g' \
-      -e 's/\x1B\][^\x07]*\x07//g' \
-      -e 's/\r$//' -e 's/.*\r//' \
-      -e 's/\t/  /g' \
-      -e 's/[\x01-\x08\x0B-\x1F\x7F]//g'
-  )
+  local tailed cleaned
+  tailed="$(tail -n "${count}" "${file}")"
+  [[ -n "${tailed}" ]] || return 0
+  cleaned="$(LC_ALL=C sed -E \
+    -e 's/\x1B\[[0-9;?]*[A-Za-ln-z]//g' \
+    -e 's/\x1B\][^\x07]*\x07//g' \
+    -e 's/\r$//' -e 's/.*\r//' \
+    -e 's/\t/  /g' \
+    -e 's/[\x01-\x08\x0B-\x1A\x1C-\x1F\x7F]//g' <<< "${tailed}")"
+  [[ -n "${cleaned}" ]] || return 0
+  readarray -t __dytoy_tui_lines <<< "${cleaned}"
 }
 
 #######################################
@@ -239,16 +297,21 @@ function dytoy_tui::build_queue {
 }
 
 #######################################
-# @description Print how many queued tools ended in a state.
-# @arg $1 string State
-# @stdout The count
+# @description Count the queued tools that ended in a state, into a variable
+# rather than through a subshell, since every frame of the install phase asks.
+# @arg $1 string Name of the variable receiving the count
+# @arg $2 string State
 #######################################
-function dytoy_tui::count_state {
-  local state="$1" index count=0
+function dytoy_tui::count_state_into {
+  local __dytoy_tui_state_count_ref state index
+  dybatpho::expect_args __dytoy_tui_state_count_ref state -- "$@"
+  local -n __dytoy_tui_state_count="${__dytoy_tui_state_count_ref}"
+  __dytoy_tui_state_count=0
   for index in "${DYTOY_TUI_QUEUE[@]}"; do
-    [[ "${DYTOY_TUI_STATE[index]}" == "${state}" ]] && count=$((count + 1))
+    [[ "${DYTOY_TUI_STATE[index]}" == "${state}" ]] \
+      && __dytoy_tui_state_count=$((__dytoy_tui_state_count + 1))
   done
-  echo "${count}"
+  return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -256,18 +319,166 @@ function dytoy_tui::count_state {
 # ---------------------------------------------------------------------------
 
 #######################################
-# @description Draw one row of text across a rectangle, padded to its width so
-# a style covers the whole row.
-# @arg $1 string Rectangle to draw in, only its first row is used
-# @arg $2 string Text
-# @arg $3 string SGR parameters
+# @description Set the colours of the interface: the `dusk` theme of the
+# screen module for every widget, plus the few styles only this interface
+# draws. `NO_COLOR` gives the `mono` theme and leaves bold, dim and reverse to
+# mark what matters.
+# @noargs
+# @env NO_COLOR string Draw without colours when set to a non-empty value
 #######################################
-function dytoy_tui::draw_bar {
-  local x y width text="$2" style="$3" used
-  read -r x y width _ <<< "$1"
-  dybatpho::screen_width used "${text}"
-  ((used < width)) && printf -v text '%s%*s' "${text}" "$((width - used))" ""
-  dybatpho::screen_put "${y}" "${x}" "${text}" "${style}"
+function dytoy_tui::theme {
+  dybatpho::screen_theme dusk
+  if [[ -n "${NO_COLOR:-}" ]]; then
+    DYTOY_TUI_STYLE_BRAND="1;7"
+    DYTOY_TUI_STYLE_ROW_BG=""
+    DYTOY_TUI_STYLE_TEXT="0"
+    DYTOY_TUI_STYLE_STRONG="1"
+    DYTOY_TUI_STYLE_RUN="1"
+    DYTOY_TUI_STYLE_KEY="1"
+    DYTOY_TUI_STYLE_VALUE="0"
+    DYTOY_TUI_STYLE_GAUGE_EMPTY="2"
+    DYTOY_TUI_STYLE_BADGE="1;7"
+    return 0
+  fi
+  DYTOY_TUI_STYLE_BRAND="1;38;5;231;48;5;98"
+  DYTOY_TUI_STYLE_ROW_BG="48;5;237"
+  DYTOY_TUI_STYLE_TEXT="38;5;252"
+  DYTOY_TUI_STYLE_STRONG="1;38;5;231"
+  DYTOY_TUI_STYLE_RUN="1;38;5;117"
+  DYTOY_TUI_STYLE_KEY="38;5;117"
+  DYTOY_TUI_STYLE_VALUE="38;5;223"
+  DYTOY_TUI_STYLE_GAUGE_EMPTY="38;5;238"
+  DYTOY_TUI_STYLE_BADGE="1;38;5;235;48;5;221"
+}
+
+#######################################
+# @description Draw one line of YAML with its keys, values and comments
+# coloured apart.
+# @arg $1 number Row
+# @arg $2 number Column
+# @arg $3 number Width
+# @arg $4 string The line
+#######################################
+function dytoy_tui::put_yaml {
+  local row column width line
+  dybatpho::expect_args row column width line -- "$@"
+  local value_style="${DYTOY_TUI_STYLE_VALUE}"
+  if [[ "${line}" =~ ^([[:space:]]*)#(.*)$ ]]; then
+    dybatpho::screen_spans "${row}" "${column}" "${width}" "" "${line}" "${DYBATPHO_SCREEN_STYLE_DIM}"
+  elif [[ "${line}" =~ ^([[:space:]]*)(-[[:space:]]+)?([^:#[:space:]][^:]*):([[:space:]].*)?$ ]]; then
+    # The groups are copied first: the test on the value below replaces them.
+    local indent="${BASH_REMATCH[1]}" dash="${BASH_REMATCH[2]-}" key="${BASH_REMATCH[3]}"
+    local value="${BASH_REMATCH[4]-}"
+    [[ "${value}" =~ ^[[:space:]]*(true|false|null|-?[0-9.]+)$ ]] && value_style="${DYBATPHO_SCREEN_STYLE_WARN}"
+    dybatpho::screen_spans "${row}" "${column}" "${width}" "" \
+      "${indent}" "0" \
+      "${dash}" "${DYBATPHO_SCREEN_STYLE_DIM}" \
+      "${key}" "${DYTOY_TUI_STYLE_KEY}" \
+      ":" "${DYBATPHO_SCREEN_STYLE_DIM}" \
+      "${value}" "${value_style}"
+  elif [[ "${line}" =~ ^([[:space:]]*)(-[[:space:]]+)(.*)$ ]]; then
+    dybatpho::screen_spans "${row}" "${column}" "${width}" "" \
+      "${BASH_REMATCH[1]}" "0" \
+      "${BASH_REMATCH[2]}" "${DYBATPHO_SCREEN_STYLE_DIM}" \
+      "${BASH_REMATCH[3]}" "${value_style}"
+  else
+    dybatpho::screen_spans "${row}" "${column}" "${width}" "" "${line}" "${value_style}"
+  fi
+}
+
+#######################################
+# @description Work out the first row a list shows, scrolling only as far as
+# keeps the selection in view, so moving the cursor does not jerk the list.
+# @arg $1 string Key the offset is remembered under
+# @arg $2 number Selected item
+# @arg $3 number Number of items
+# @arg $4 number Rows available
+# @set DYTOY_TUI_OFFSET The offset, under the key
+#######################################
+function dytoy_tui::scroll {
+  local key selected count height
+  dybatpho::expect_args key selected count height -- "$@"
+  local offset="${DYTOY_TUI_OFFSET[${key}]:-0}"
+  ((selected < offset)) && offset="${selected}"
+  ((selected >= offset + height)) && offset=$((selected - height + 1))
+  ((offset > count - height)) && offset=$((count - height))
+  ((offset >= 0)) || offset=0
+  DYTOY_TUI_OFFSET["${key}"]="${offset}"
+}
+
+#######################################
+# @description Draw a bordered panel, highlighted when it has the focus.
+# @arg $1 string Rectangle
+# @arg $2 string Title
+# @arg $3 boolean Whether the panel has the focus
+# @set DYBATPHO_SCREEN_INNER The rectangle inside the border
+#######################################
+function dytoy_tui::panel {
+  local rect title focus
+  dybatpho::expect_args rect title focus -- "$@"
+  dybatpho::screen_block "${rect}" title:"${title}" border:rounded focus:"${focus}"
+}
+
+#######################################
+# @description Draw the top row: the name of the tool, then either the method
+# tabs or what is being done, and a badge for a dry run.
+# @arg $1 string Rectangle
+# @arg $@ string Pairs of text and SGR parameters drawn after the name
+#######################################
+function dytoy_tui::draw_header {
+  local rect x y width
+  dybatpho::expect_args rect -- "$@"
+  shift
+  read -r x y width _ <<< "${rect}"
+  local -a segments=(" ◆ dytoy " "${DYTOY_TUI_STYLE_BRAND}" "  " "0" "$@")
+  local badge=""
+  dybatpho::is true "${DRY_RUN}" && badge=" DRY RUN "
+  dybatpho::screen_spans "${y}" "${x}" "$((width - ${#badge}))" "" "${segments[@]}"
+  [[ -n "${badge}" ]] && dybatpho::screen_put "${y}" "$((x + width - ${#badge}))" "${badge}" "${DYTOY_TUI_STYLE_BADGE}"
+  return 0
+}
+
+#######################################
+# @description Draw the bottom row: key hints, or a message when there is one.
+# @arg $1 string Rectangle
+# @arg $@ string Pairs of a key and what it does
+#######################################
+function dytoy_tui::draw_footer {
+  local rect
+  dybatpho::expect_args rect -- "$@"
+  shift
+  if [[ -z "${DYTOY_TUI_STATUS}" ]]; then
+    dybatpho::screen_keybar "${rect}" "$@"
+    return 0
+  fi
+  local x y width
+  read -r x y width _ <<< "${rect}"
+  dybatpho::screen_spans "${y}" "${x}" "${width}" "${DYBATPHO_SCREEN_STYLE_KEYBAR}" \
+    " ! ${DYTOY_TUI_STATUS}" "1;${DYBATPHO_SCREEN_STYLE_WARN}"
+}
+
+#######################################
+# @description Draw a thin progress bar with its label after it.
+# @arg $1 string Rectangle, only its first row is used
+# @arg $2 number Value reached
+# @arg $3 number Value that counts as full
+# @arg $4 string SGR parameters of the filled part
+# @arg $5 string Label
+#######################################
+function dytoy_tui::draw_progress {
+  local rect value total style label x y width label_width
+  dybatpho::expect_args rect value total style label -- "$@"
+  read -r x y width _ <<< "${rect}"
+  ((total > 0)) || total=1
+  dybatpho::screen_width label_width "${label}"
+  local bar_width=$((width - label_width - 2))
+  ((bar_width > 4)) || bar_width=4
+  local filled=$((value * bar_width / total)) full="" empty=""
+  printf -v full '%*s' "${filled}" ""
+  printf -v empty '%*s' "$((bar_width - filled))" ""
+  dybatpho::screen_spans "${y}" "${x}" "${width}" "" \
+    "${full// /━}" "${style}" "${empty// /─}" "${DYTOY_TUI_STYLE_GAUGE_EMPTY}" \
+    "  ${label}" "${DYTOY_TUI_STYLE_STRONG}"
 }
 
 #######################################
@@ -276,9 +487,12 @@ function dytoy_tui::draw_bar {
 # @set DYTOY_TUI_DETAIL The YAML of the tool
 #######################################
 function dytoy_tui::load_detail {
-  local index="$1"
+  local index
+  dybatpho::expect_args index -- "$@"
   [[ -n "${DYTOY_TUI_DETAIL[${index}]+set}" ]] && return 0
-  DYTOY_TUI_DETAIL["${index}"]="$(dybatpho::yaml_query "$(dytoy::yaml_file)" \
+  local yaml_file
+  yaml_file="$(dytoy::yaml_file)"
+  DYTOY_TUI_DETAIL["${index}"]="$(dybatpho::yaml_query "${yaml_file}" \
     "explode(.) | .[] | select(.name == \"${DYTOY_TUI_NAME[index]}\" and .method == \"${DYTOY_TUI_METHOD[index]}\")" \
     2> /dev/null)" || DYTOY_TUI_DETAIL["${index}"]=""
 }
@@ -288,81 +502,133 @@ function dytoy_tui::load_detail {
 # @noargs
 #######################################
 function dytoy_tui::draw_pick {
-  local -a frame=() body=() tabs=() items=() lines=()
+  local -a frame=() body=() items=() tabs=()
   dybatpho::screen_layout frame vertical "${DYBATPHO_SCREEN_RECT}" length:1 fill:1 length:1
 
-  local method
-  for method in "${DYTOY_METHODS[@]}"; do
+  local method position style picked
+  for position in "${!DYTOY_METHODS[@]}"; do
+    method="${DYTOY_METHODS[position]}"
     dytoy_tui::tab_items items "${method}"
-    tabs+=("${method} $(dytoy_tui::picked_count "${method}")/${#items[@]}")
+    dytoy_tui::picked_count_into picked "${method}"
+    style="${DYTOY_TUI_STYLE_TEXT}"
+    ((position == DYTOY_TUI_TAB)) && style="${DYBATPHO_SCREEN_STYLE_TAB_ACTIVE}"
+    tabs+=(" ${method} ${picked}/${#items[@]} " "${style}" " " "0")
   done
-  dybatpho::screen_tabs "${frame[0]}" tabs active:"${DYTOY_TUI_TAB}"
+  dytoy_tui::draw_header "${frame[0]}" "${tabs[@]}"
 
+  # Search mode lists what matches across every method, each with its method
+  # in front; otherwise the list is the tools of the current tab.
   method="${DYTOY_METHODS[DYTOY_TUI_TAB]}"
-  dytoy_tui::tab_items items "${method}"
-  local cursor="${DYTOY_TUI_CURSOR[${method}]:-0}"
+  local cursor list_key title="Tools" empty="No ${method} tool to install" searching=false
+  if [[ "${DYTOY_TUI_MODE}" == "search" ]]; then
+    searching=true
+    dytoy_tui::search_matches items
+    cursor="${DYTOY_TUI_MATCH}" list_key="search" title="Search"
+    empty="No tool matches '${DYTOY_TUI_QUERY}'"
+  else
+    dytoy_tui::tab_items items "${method}"
+    cursor="${DYTOY_TUI_CURSOR[${method}]:-0}" list_key="pick:${method}"
+  fi
+  local count="${#items[@]}"
 
   dybatpho::screen_layout body horizontal "${frame[1]}" percent:40 fill:1
-  dybatpho::screen_block "${body[0]}" title:"Tools" border:rounded
-  local list_rect="${DYBATPHO_SCREEN_INNER}"
-  if ((${#items[@]} == 0)); then
-    dybatpho::screen_text "${list_rect}" "No ${method} tool to install" align:center style:"2"
+  dytoy_tui::panel "${body[0]}" "${title}" true
+  local x y width height
+  read -r x y width height <<< "${DYBATPHO_SCREEN_INNER}"
+  if ((count == 0)); then
+    dybatpho::screen_text "${DYBATPHO_SCREEN_INNER}" "${empty}" \
+      align:center style:"${DYBATPHO_SCREEN_STYLE_DIM}"
   else
-    local index box mark
-    for index in "${items[@]}"; do
-      box="[ ]"
-      dybatpho::is true "${DYTOY_TUI_PICKED[index]}" && box="[x]"
+    # A scrollbar takes the last column only when the list overflows.
+    local list_width="${width}"
+    ((count > height)) && list_width=$((width - 1))
+    dytoy_tui::scroll "${list_key}" "${cursor}" "${count}" "${height}"
+    local offset="${DYTOY_TUI_OFFSET[${list_key}]}" row index
+    local background pointer box box_style mark mark_style name_style star prefix
+    for ((row = 0; row < height && offset + row < count; row++)); do
+      index="${items[offset + row]}"
+      background="" pointer="  " name_style="${DYTOY_TUI_STYLE_TEXT}"
+      if ((offset + row == cursor)); then
+        background="${DYTOY_TUI_STYLE_ROW_BG}" pointer="▌ " name_style="${DYTOY_TUI_STYLE_STRONG}"
+      fi
+      box="[ ]" box_style="${DYBATPHO_SCREEN_STYLE_DIM}"
+      dybatpho::is true "${DYTOY_TUI_PICKED[index]}" && box="[✔]" box_style="${DYBATPHO_SCREEN_STYLE_OK}"
       case "${DYTOY_TUI_INSTALLED[index]}" in
-        yes) mark="✓" ;;
-        no) mark="·" ;;
-        *) mark="?" ;;
+        yes) mark="●" mark_style="${DYBATPHO_SCREEN_STYLE_OK}" ;;
+        no) mark="○" mark_style="${DYBATPHO_SCREEN_STYLE_WARN}" ;;
+        *) mark="◌" mark_style="${DYBATPHO_SCREEN_STYLE_DIM}" ;;
       esac
-      local line="${box} ${mark} ${DYTOY_TUI_NAME[index]}"
-      dybatpho::is true "${DYTOY_TUI_ESSENTIAL[index]}" && line+=" ★"
-      lines+=("${line}")
+      star="" prefix=""
+      dybatpho::is true "${DYTOY_TUI_ESSENTIAL[index]}" && star=" ★"
+      dybatpho::is true "${searching}" && prefix="${DYTOY_TUI_METHOD[index]}/"
+      dybatpho::screen_spans "$((y + row))" "${x}" "${list_width}" "${background}" \
+        "${pointer}" "${DYBATPHO_SCREEN_STYLE_ACCENT}" \
+        "${box}" "${box_style}" " " "0" \
+        "${mark}" "${mark_style}" " " "0" \
+        "${prefix}" "${DYBATPHO_SCREEN_STYLE_DIM}" \
+        "${DYTOY_TUI_NAME[index]}" "${name_style}" \
+        "${star}" "${DYBATPHO_SCREEN_STYLE_WARN}"
     done
-    dybatpho::screen_list "${list_rect}" lines selected:"${cursor}"
+    if ((count > height)); then
+      local bar_rect
+      dybatpho::screen_rect bar_rect "$((x + width - 1))" "${y}" 1 "${height}"
+      dybatpho::screen_scrollbar "${bar_rect}" "${offset}" "${count}" \
+        style:"${DYBATPHO_SCREEN_STYLE_FOCUS}" track_style:"${DYBATPHO_SCREEN_STYLE_BORDER}"
+    fi
   fi
 
-  local title="Details"
-  if ((${#items[@]} > 0)); then
+  if ((count > 0)); then
     local selected="${items[cursor]}"
-    title="${DYTOY_TUI_NAME[selected]}"
-    dybatpho::screen_block "${body[1]}" title:"${title}" border:rounded
-    local detail_rect="${DYBATPHO_SCREEN_INNER}"
+    dytoy_tui::panel "${body[1]}" "${DYTOY_TUI_NAME[selected]}" false
+    read -r x y width height <<< "${DYBATPHO_SCREEN_INNER}"
     dytoy_tui::load_detail "${selected}"
-    dybatpho::screen_text "${detail_rect}" "${DYTOY_TUI_DETAIL[${selected}]}" wrap:false
+    local -a detail=()
+    readarray -t detail <<< "${DYTOY_TUI_DETAIL[${selected}]}"
+    for ((row = 0; row < height && row < ${#detail[@]}; row++)); do
+      dytoy_tui::put_yaml "$((y + row))" "$((x + 1))" "$((width - 1))" "${detail[row]}"
+    done
   else
-    dybatpho::screen_block "${body[1]}" title:"${title}" border:rounded
+    dytoy_tui::panel "${body[1]}" "Details" false
   fi
 
-  local status=" ${DYTOY_TUI_STATUS}"
-  if [[ -z "${DYTOY_TUI_STATUS}" ]]; then
-    status=" $(dytoy_tui::picked_count) picked   space pick  a all  ←→ tab  enter install  q quit"
-    status+="   ✓ installed  · missing  ★ essential"
+  if dybatpho::is true "${searching}"; then
+    read -r x y width _ <<< "${frame[2]}"
+    dybatpho::screen_spans "${y}" "${x}" "${width}" "${DYBATPHO_SCREEN_STYLE_KEYBAR}" \
+      " / " "${DYBATPHO_SCREEN_STYLE_KEY}" "${DYTOY_TUI_QUERY}" "${DYTOY_TUI_STYLE_STRONG}" \
+      "▏" "${DYBATPHO_SCREEN_STYLE_ACCENT}" "   ${count} found " "" \
+      " ↑↓" "${DYBATPHO_SCREEN_STYLE_KEY}" " move " "" " space" "${DYBATPHO_SCREEN_STYLE_KEY}" " pick " "" \
+      " enter" "${DYBATPHO_SCREEN_STYLE_KEY}" " go to " "" " esc" "${DYBATPHO_SCREEN_STYLE_KEY}" " cancel " ""
+    return 0
   fi
-  dytoy_tui::draw_bar "${frame[2]}" "${status}" "7"
+  local total_picked
+  dytoy_tui::picked_count_into total_picked ""
+  dytoy_tui::draw_footer "${frame[2]}" \
+    "space" "pick" "f" "find" "a" "all" "←→" "tab" "enter" "install ${total_picked}" "q" "quit" \
+    "●" "installed" "○" "missing" "★" "essential"
 }
 
 #######################################
-# @description Set a variable to the marker of a queued tool's state. It is
-# drawn once per tool per frame, so it writes to a variable rather than paying
-# for a subshell each time.
+# @description Set a variable to the marker of a queued tool's state, and
+# another to its style. It is drawn once per tool per frame, so it writes to
+# variables rather than paying for a subshell each time.
 # @arg $1 string Name of the variable receiving the marker
-# @arg $2 number Index of the tool
+# @arg $2 string Name of the variable receiving the style
+# @arg $3 number Index of the tool
 #######################################
 function dytoy_tui::state_mark_into {
-  local -n __dytoy_tui_mark="$1"
-  local index="$2"
+  local __dytoy_tui_mark_ref __dytoy_tui_mark_style_ref index
+  dybatpho::expect_args __dytoy_tui_mark_ref __dytoy_tui_mark_style_ref index -- "$@"
+  local -n __dytoy_tui_mark="${__dytoy_tui_mark_ref}" __dytoy_tui_mark_style="${__dytoy_tui_mark_style_ref}"
   case "${DYTOY_TUI_STATE[index]}" in
-    ok) __dytoy_tui_mark="✓" ;;
-    failed) __dytoy_tui_mark="✗" ;;
-    skipped) __dytoy_tui_mark="-" ;;
+    ok) __dytoy_tui_mark="✔" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_OK}" ;;
+    failed) __dytoy_tui_mark="✘" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_ERROR}" ;;
+    skipped) __dytoy_tui_mark="⊘" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_DIM}" ;;
     running)
       local tick="${EPOCHREALTIME/[.,]/}"
       __dytoy_tui_mark="${DYTOY_TUI_SPINNER[(tick / 100000) % ${#DYTOY_TUI_SPINNER[@]}]}"
+      __dytoy_tui_mark_style="${DYTOY_TUI_STYLE_RUN}"
       ;;
-    *) __dytoy_tui_mark="·" ;;
+    *) __dytoy_tui_mark="·" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_DIM}" ;;
   esac
 }
 
@@ -371,74 +637,92 @@ function dytoy_tui::state_mark_into {
 # @noargs
 #######################################
 function dytoy_tui::draw_install {
-  local -a frame=() body=() lines=() tail_lines=()
-  dybatpho::screen_layout frame vertical "${DYBATPHO_SCREEN_RECT}" length:3 fill:1 length:1
+  local -a frame=() body=() tail_lines=()
+  dybatpho::screen_layout frame vertical "${DYBATPHO_SCREEN_RECT}" length:1 length:3 fill:1 length:1
 
   local total="${#DYTOY_TUI_QUEUE[@]}" ok failed skipped finished
-  ok="$(dytoy_tui::count_state ok)"
-  failed="$(dytoy_tui::count_state failed)"
-  skipped="$(dytoy_tui::count_state skipped)"
+  dytoy_tui::count_state_into ok ok
+  dytoy_tui::count_state_into failed failed
+  dytoy_tui::count_state_into skipped skipped
   finished=$((ok + failed + skipped))
 
-  local title="Installing" label style="1;32"
+  local title="Installing" title_style="${DYTOY_TUI_STYLE_RUN}" label gauge_style="${DYBATPHO_SCREEN_STYLE_FOCUS}"
   if [[ "${DYTOY_TUI_PHASE}" == "done" ]]; then
-    title="Finished"
+    title="Finished" title_style="${DYBATPHO_SCREEN_STYLE_OK}" gauge_style="${DYBATPHO_SCREEN_STYLE_OK}"
     label="${ok} installed, ${failed} failed, ${skipped} skipped"
   else
     label="${finished}/${total}"
     ((DYTOY_TUI_CURRENT >= 0)) && label+="  ${DYTOY_TUI_NAME[DYTOY_TUI_CURRENT]}"
   fi
-  ((failed > 0)) && style="1;31"
-  dybatpho::is true "${DRY_RUN}" && title+=" (dry run)"
-  dybatpho::screen_block "${frame[0]}" title:"${title}" border:rounded
-  dybatpho::screen_gauge "${DYBATPHO_SCREEN_INNER}" "${finished}" "$((total > 0 ? total : 1))" \
-    label:"${label}" style:"${style}"
+  ((failed > 0)) && title_style="${DYBATPHO_SCREEN_STYLE_ERROR}" gauge_style="${DYBATPHO_SCREEN_STYLE_ERROR}"
+  dytoy_tui::draw_header "${frame[0]}" " ${title} " "${title_style}"
 
-  dybatpho::screen_layout body horizontal "${frame[1]}" percent:30 fill:1
-  dybatpho::screen_block "${body[0]}" title:"Tools" border:rounded
-  local list_rect="${DYBATPHO_SCREEN_INNER}" index elapsed line mark
-  for index in "${DYTOY_TUI_QUEUE[@]}"; do
-    dytoy_tui::state_mark_into mark "${index}"
-    line="${mark} ${DYTOY_TUI_METHOD[index]}/${DYTOY_TUI_NAME[index]}"
-    elapsed="${DYTOY_TUI_ELAPSED[index]}"
-    [[ "${DYTOY_TUI_STATE[index]}" == "running" ]] \
-      && elapsed=$((EPOCHSECONDS - DYTOY_TUI_STARTED[index]))
-    [[ "${DYTOY_TUI_STATE[index]}" == "pending" || "${DYTOY_TUI_STATE[index]}" == "skipped" ]] \
-      || line+=" (${elapsed}s)"
-    lines+=("${line}")
+  dytoy_tui::panel "${frame[1]}" "Progress" false
+  dytoy_tui::draw_progress "${DYBATPHO_SCREEN_INNER}" "${finished}" "${total}" "${gauge_style}" "${label}"
+
+  dybatpho::screen_layout body horizontal "${frame[2]}" percent:32 fill:1
+  dytoy_tui::panel "${body[0]}" "Tools" true
+  local x y width height
+  read -r x y width height <<< "${DYBATPHO_SCREEN_INNER}"
+  dytoy_tui::scroll "install" "${DYTOY_TUI_VIEW}" "${total}" "${height}"
+  local offset="${DYTOY_TUI_OFFSET[install]}" row index elapsed mark mark_style background pointer name_style
+  for ((row = 0; row < height && offset + row < total; row++)); do
+    index="${DYTOY_TUI_QUEUE[offset + row]}"
+    dytoy_tui::state_mark_into mark mark_style "${index}"
+    background="" pointer="  " name_style="${DYTOY_TUI_STYLE_TEXT}"
+    [[ "${DYTOY_TUI_STATE[index]}" == "running" ]] && name_style="${DYTOY_TUI_STYLE_RUN}"
+    [[ "${DYTOY_TUI_STATE[index]}" == "skipped" ]] && name_style="${DYBATPHO_SCREEN_STYLE_DIM}"
+    if ((offset + row == DYTOY_TUI_VIEW)); then
+      background="${DYTOY_TUI_STYLE_ROW_BG}" pointer="▌ "
+    fi
+    elapsed=""
+    case "${DYTOY_TUI_STATE[index]}" in
+      running) elapsed=" $((EPOCHSECONDS - DYTOY_TUI_STARTED[index]))s" ;;
+      ok | failed) elapsed=" ${DYTOY_TUI_ELAPSED[index]}s" ;;
+      *) ;;
+    esac
+    dybatpho::screen_spans "$((y + row))" "${x}" "${width}" "${background}" \
+      "${pointer}" "${DYBATPHO_SCREEN_STYLE_ACCENT}" \
+      "${mark}" "${mark_style}" " " "0" \
+      "${DYTOY_TUI_METHOD[index]}/" "${DYBATPHO_SCREEN_STYLE_DIM}" \
+      "${DYTOY_TUI_NAME[index]}" "${name_style}" \
+      "${elapsed}" "${DYBATPHO_SCREEN_STYLE_DIM}"
   done
-  dybatpho::screen_list "${list_rect}" lines selected:"${DYTOY_TUI_VIEW}" pointer:false
 
   local viewed="${DYTOY_TUI_QUEUE[DYTOY_TUI_VIEW]:--1}" log_title="Log"
-  ((viewed >= 0)) && log_title="Log: ${DYTOY_TUI_NAME[viewed]}"
-  dybatpho::is true "${DYTOY_TUI_FOLLOW}" && log_title+=" (following)"
-  dybatpho::screen_block "${body[1]}" title:"${log_title}" border:rounded
-  local log_rect="${DYBATPHO_SCREEN_INNER}" height
-  read -r _ _ _ height <<< "${log_rect}"
+  ((viewed >= 0)) && log_title="Log · ${DYTOY_TUI_NAME[viewed]}"
+  dybatpho::is true "${DYTOY_TUI_FOLLOW}" && log_title+=" · following"
+  dytoy_tui::panel "${body[1]}" "${log_title}" false
+  read -r x y width height <<< "${DYBATPHO_SCREEN_INNER}"
   if ((viewed >= 0)) && [[ -n "${DYTOY_TUI_LOG[viewed]}" ]]; then
     dytoy_tui::log_tail tail_lines "${DYTOY_TUI_LOG[viewed]}" "${height}"
-    local text=""
-    ((${#tail_lines[@]} > 0)) && printf -v text '%s\n' "${tail_lines[@]}"
-    dybatpho::screen_text "${log_rect}" "${text%$'\n'}" wrap:false
+    for row in "${!tail_lines[@]}"; do
+      dybatpho::screen_ansi "$((y + row))" "$((x + 1))" "$((width - 1))" "${tail_lines[row]}"
+    done
   else
-    dybatpho::screen_text "${log_rect}" "Waiting to start" align:center style:"2"
+    dybatpho::screen_text "${DYBATPHO_SCREEN_INNER}" "Waiting to start" \
+      align:center style:"${DYBATPHO_SCREEN_STYLE_DIM}"
   fi
 
-  local status
   if [[ "${DYTOY_TUI_PHASE}" == "done" ]]; then
-    status=" ↑↓ view log   q quit   logs in ${DYTOY_TUI_LOG_DIR}"
+    dytoy_tui::draw_footer "${frame[3]}" "↑↓" "view log" "q" "quit" "logs" "${DYTOY_TUI_LOG_DIR}"
   else
-    status=" ↑↓ view log   f follow   q stop"
+    dytoy_tui::draw_footer "${frame[3]}" "↑↓" "view log" "f" "follow" "q" "stop"
   fi
-  dytoy_tui::draw_bar "${frame[2]}" "${status}" "7"
 
   if [[ "${DYTOY_TUI_MODE}" == "confirm" ]]; then
     local box
-    dybatpho::screen_rect_center box "${DYBATPHO_SCREEN_RECT}" 44 7
-    dybatpho::screen_popup "${box}" title:"Stop installing" border:double
+    dybatpho::screen_rect_center box "${DYBATPHO_SCREEN_RECT}" 46 7
+    dybatpho::screen_popup "${box}" title:" Stop installing " border:double \
+      style:"${DYBATPHO_SCREEN_STYLE_ERROR}" title_style:"${DYBATPHO_SCREEN_STYLE_ERROR}"
+    read -r x y width height <<< "${DYBATPHO_SCREEN_INNER}"
     dybatpho::screen_text "${DYBATPHO_SCREEN_INNER}" \
-      $'Stop the running tool and skip the rest?\n\ny = stop    n = keep going' align:center
+      "Stop the running tool and skip the rest?" align:center style:"${DYTOY_TUI_STYLE_STRONG}"
+    ((height >= 3)) && dybatpho::screen_spans "$((y + 2))" "$((x + (width - 26) / 2))" 26 "" \
+      " y " "${DYTOY_TUI_STYLE_BADGE}" " stop    " "${DYTOY_TUI_STYLE_TEXT}" \
+      " n " "${DYTOY_TUI_STYLE_BADGE}" " keep going" "${DYTOY_TUI_STYLE_TEXT}"
   fi
+  return 0
 }
 
 #######################################
@@ -463,13 +747,19 @@ function dytoy_tui::draw {
 # @arg $1 string Event name
 #######################################
 function dytoy_tui::handle_pick_key {
+  local key
+  dybatpho::expect_args key -- "$@"
+  if [[ "${DYTOY_TUI_MODE}" == "search" ]]; then
+    dytoy_tui::handle_search_key "${key}"
+    return 0
+  fi
   local -a items=()
   local method="${DYTOY_METHODS[DYTOY_TUI_TAB]}" tab_count="${#DYTOY_METHODS[@]}"
   dytoy_tui::tab_items items "${method}"
   local count="${#items[@]}" cursor="${DYTOY_TUI_CURSOR[${method}]:-0}"
   DYTOY_TUI_STATUS=""
 
-  case "$1" in
+  case "${key}" in
     char:q | escape | eof) DYTOY_TUI_RUNNING=false ;;
     up | char:k) ((count > 0)) && cursor=$(((cursor - 1 + count) % count)) ;;
     down | char:j) ((count > 0)) && cursor=$(((cursor + 1) % count)) ;;
@@ -479,25 +769,28 @@ function dytoy_tui::handle_pick_key {
     right | char:l | tab) DYTOY_TUI_TAB=$(((DYTOY_TUI_TAB + 1) % tab_count)) ;;
     space)
       if ((count > 0)); then
-        local index="${items[cursor]}"
-        if dybatpho::is true "${DYTOY_TUI_PICKED[index]}"; then
-          DYTOY_TUI_PICKED[index]=false
-        else
-          DYTOY_TUI_PICKED[index]=true
-        fi
+        dytoy_tui::toggle_pick "${items[cursor]}"
         cursor=$(((cursor + 1) % count))
       fi
       ;;
+    char:f | char:/)
+      DYTOY_TUI_MODE="search"
+      DYTOY_TUI_QUERY=""
+      DYTOY_TUI_MATCH=0
+      ;;
     char:a)
       # Pick the whole tab, or clear it when it is already fully picked.
-      local index value=false
-      (($(dytoy_tui::picked_count "${method}") < count)) && value=true
+      local index value=false tab_picked
+      dytoy_tui::picked_count_into tab_picked "${method}"
+      ((tab_picked < count)) && value=true
       for index in "${items[@]}"; do
         DYTOY_TUI_PICKED[index]="${value}"
       done
       ;;
     enter)
-      if (($(dytoy_tui::picked_count) == 0)); then
+      local total_picked
+      dytoy_tui::picked_count_into total_picked ""
+      if ((total_picked == 0)); then
         DYTOY_TUI_STATUS="Nothing picked: press space to pick a tool"
       else
         DYTOY_TUI_PHASE="install"
@@ -511,15 +804,100 @@ function dytoy_tui::handle_pick_key {
 }
 
 #######################################
+# @description Act on one key while a name is being searched for. Every
+# printable key goes into the query, so the list keys of the normal mode are
+# not available here; the arrows still move.
+# @arg $1 string Event name
+#######################################
+function dytoy_tui::handle_search_key {
+  local key
+  dybatpho::expect_args key -- "$@"
+  local -a matches=()
+  dytoy_tui::search_matches matches
+  local count="${#matches[@]}"
+  case "${key}" in
+    escape) DYTOY_TUI_MODE="normal" ;;
+    enter)
+      # Go to the match in its own tab, so picking carries on from there.
+      if ((count > 0)); then
+        local index="${matches[DYTOY_TUI_MATCH]}" position items_position
+        local -a items=()
+        for position in "${!DYTOY_METHODS[@]}"; do
+          [[ "${DYTOY_METHODS[position]}" == "${DYTOY_TUI_METHOD[index]}" ]] && DYTOY_TUI_TAB="${position}"
+        done
+        dytoy_tui::tab_items items "${DYTOY_TUI_METHOD[index]}"
+        for items_position in "${!items[@]}"; do
+          ((items[items_position] == index)) && DYTOY_TUI_CURSOR["${DYTOY_TUI_METHOD[index]}"]="${items_position}"
+        done
+      fi
+      DYTOY_TUI_MODE="normal"
+      ;;
+    up) ((count > 0)) && DYTOY_TUI_MATCH=$(((DYTOY_TUI_MATCH - 1 + count) % count)) ;;
+    down) ((count > 0)) && DYTOY_TUI_MATCH=$(((DYTOY_TUI_MATCH + 1) % count)) ;;
+    space) ((count > 0)) && dytoy_tui::toggle_pick "${matches[DYTOY_TUI_MATCH]}" ;;
+    backspace)
+      DYTOY_TUI_QUERY="${DYTOY_TUI_QUERY%?}"
+      DYTOY_TUI_MATCH=0
+      ;;
+    char:*)
+      DYTOY_TUI_QUERY+="${key#char:}"
+      DYTOY_TUI_MATCH=0
+      ;;
+    resize) dybatpho::screen_size || true ;;
+    eof) DYTOY_TUI_RUNNING=false ;;
+    *) ;;
+  esac
+  return 0
+}
+
+#######################################
+# @description Act on one key, in whichever phase the interface is in, and
+# start installing when the key ended the pick phase.
+# @arg $1 string Event name
+#######################################
+function dytoy_tui::handle_key {
+  local key
+  dybatpho::expect_args key -- "$@"
+  if [[ "${DYTOY_TUI_PHASE}" != "pick" ]]; then
+    dytoy_tui::handle_install_key "${key}"
+    return 0
+  fi
+  dytoy_tui::handle_pick_key "${key}"
+  [[ "${DYTOY_TUI_PHASE}" == "install" ]] && dytoy_tui::start_install
+  return 0
+}
+
+#######################################
+# @description Get the install phase ready: the log directory, the queue of
+# picked tools, and `sudo`. A failed authentication goes back to picking with
+# nothing installed.
+# @noargs
+#######################################
+function dytoy_tui::start_install {
+  # The logs are the interface's own, so they are written in a dry run too,
+  # where `dybatpho::ensure_dir` would only say it creates them.
+  mkdir -p -- "${DYTOY_TUI_LOG_DIR}"
+  dytoy_tui::build_queue
+  if ! dytoy_tui::prepare_sudo; then
+    DYTOY_TUI_PHASE="pick"
+    DYTOY_TUI_QUEUE=()
+    DYTOY_TUI_STATUS="sudo authentication failed, nothing was installed"
+  fi
+  return 0
+}
+
+#######################################
 # @description Act on one key in the install phase.
 # @arg $1 string Event name
 #######################################
 function dytoy_tui::handle_install_key {
+  local key
+  dybatpho::expect_args key -- "$@"
   local count="${#DYTOY_TUI_QUEUE[@]}"
   if [[ "${DYTOY_TUI_MODE}" == "confirm" ]]; then
     # Only an explicit `y` stops anything: a dialog a stray key confirms reads
     # as a safeguard without being one.
-    case "$1" in
+    case "${key}" in
       char:y | char:Y)
         dytoy_tui::stop
         DYTOY_TUI_MODE="normal"
@@ -530,11 +908,11 @@ function dytoy_tui::handle_install_key {
     return 0
   fi
 
-  case "$1" in
+  case "${key}" in
     char:q | escape | eof)
       if [[ "${DYTOY_TUI_PHASE}" == "done" ]]; then
         DYTOY_TUI_RUNNING=false
-      elif [[ "$1" == "eof" ]]; then
+      elif [[ "${key}" == "eof" ]]; then
         dytoy_tui::stop
         DYTOY_TUI_RUNNING=false
       else
@@ -614,8 +992,12 @@ function dytoy_tui::start_next {
   # prompt nobody can see.
   local path="${PATH}"
   [[ -n "${DYTOY_TUI_WRAP_DIR}" ]] && path="${DYTOY_TUI_WRAP_DIR}:${PATH}"
+  # The log is not a terminal, but its colours are drawn in the log pane, so
+  # the tools that look for a terminal are told to colour anyway.
+  local -a colour=()
+  [[ -n "${NO_COLOR:-}" ]] || colour=(FORCE_COLOR=1 CLICOLOR_FORCE=1)
   set -m
-  PATH="${path}" NO_COLOR=1 "${DYTOY_TUI_SELF}" "${args[@]}" >> "${log}" 2>&1 < /dev/null &
+  env PATH="${path}" "${colour[@]}" "${DYTOY_TUI_SELF}" "${args[@]}" >> "${log}" 2>&1 < /dev/null &
   DYTOY_TUI_PID=$!
   set +m
   dytoy_tui::follow
@@ -727,11 +1109,13 @@ function dytoy_tui::prepare_sudo {
     dytoy_tui::screen_end
     printf 'dytoy needs sudo to install packages.\n' >&2
     local status=0
+    # dyshellint disable=BSG035 package managers need root, and the children cannot prompt
     sudo -v || status=$?
     dybatpho::screen_begin || return 1
     ((status == 0)) || return 1
     (
       while kill -0 "$$" 2> /dev/null; do
+        # dyshellint disable=BSG035 refreshing the timestamp only, it never prompts
         sudo -n -v 2> /dev/null || true
         sleep 60
       done
@@ -795,10 +1179,15 @@ function dytoy_tui::run {
   local self
   dybatpho::expect_args self -- "$@"
   DYTOY_TUI_SELF="${self}"
-  DYTOY_TUI_LOG_DIR="$(dybatpho::path_join "$(dybatpho::xdg_state_dir dytoy)" "logs" "$(date +%Y%m%d-%H%M%S)")"
+  local state_dir run_id yaml_file
+  state_dir="$(dybatpho::xdg_state_dir dytoy)"
+  run_id="$(date +%Y%m%d-%H%M%S)"
+  yaml_file="$(dytoy::yaml_file)"
+  DYTOY_TUI_LOG_DIR="$(dybatpho::path_join "${state_dir}" "logs" "${run_id}")"
 
-  dybatpho::progress "Reading $(dytoy::yaml_file)"
+  dybatpho::progress "Reading ${yaml_file}"
   dytoy_tui::load_tools
+  dytoy_tui::theme
 
   # Mouse reporting would take text selection away from the log pane.
   # shellcheck disable=SC2034 # read by dybatpho::screen_begin
@@ -812,25 +1201,20 @@ function dytoy_tui::run {
     dybatpho::screen_flush
     if [[ "${DYTOY_TUI_PHASE}" == "pick" ]]; then
       dybatpho::screen_event key || continue
-      dytoy_tui::handle_pick_key "${key}"
-      if [[ "${DYTOY_TUI_PHASE}" == "install" ]]; then
-        # The logs are the interface's own, so they are written in a dry run
-        # too, where `dybatpho::ensure_dir` would only say it creates them.
-        mkdir -p -- "${DYTOY_TUI_LOG_DIR}"
-        dytoy_tui::build_queue
-        if ! dytoy_tui::prepare_sudo; then
-          DYTOY_TUI_PHASE="pick"
-          DYTOY_TUI_QUEUE=()
-          DYTOY_TUI_STATUS="sudo authentication failed, nothing was installed"
-        fi
-      fi
+    elif ! dybatpho::screen_event key 0.1; then
+      # The deadline keeps the spinner and the log moving while no key comes.
+      dytoy_tui::poll
       continue
     fi
-    # The deadline keeps the spinner and the log moving while no key comes.
-    if dybatpho::screen_event key 0.1; then
-      dytoy_tui::handle_install_key "${key}"
-    fi
-    dytoy_tui::poll
+    dytoy_tui::handle_key "${key}"
+    # Keys that arrived while the frame was drawing are all handled before the
+    # next one is drawn, so a held arrow moves as fast as the key repeats and
+    # stops as soon as it is released.
+    while dybatpho::is true "${DYTOY_TUI_RUNNING}" && dybatpho::screen_pending; do
+      dybatpho::screen_event key || break
+      dytoy_tui::handle_key "${key}"
+    done
+    [[ "${DYTOY_TUI_PHASE}" == "pick" ]] || dytoy_tui::poll
   done
 
   dytoy_tui::screen_end
