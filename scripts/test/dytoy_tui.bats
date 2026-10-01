@@ -13,6 +13,7 @@ setup() {
   DYBATPHO_SCREEN_HEIGHT=0
   dybatpho::screen_size || true
   dybatpho::screen_clear
+  dytoy_tui::theme
 
   write_tools_yaml << 'EOF'
 - name: shelltool
@@ -47,6 +48,13 @@ function screen_dump {
     screen_row "${row}"
     printf '\n'
   done
+}
+
+# Print one row of the buffer with its escape sequences intact.
+function screen_raw {
+  local rendered
+  __dybatpho_screen_render_into rendered "$1"
+  printf '%s' "${rendered}"
 }
 
 # Write a stand-in for the dytoy executable: it logs its arguments and fails
@@ -123,13 +131,13 @@ function run_until_done {
   assert_equal "${args[*]}" "binary --tool missing --log-level warn --essential --check-installed --list"
 }
 
-@test "dytoy_tui::log_tail strips escapes and keeps what a redrawn line ended as" {
+@test "dytoy_tui::log_tail keeps colours, drops other escapes and keeps what a redrawn line ended as" {
   local log="${BATS_TEST_TMPDIR}/sample.log"
-  printf 'first\n\033[1;31mred\033[0m\n10%%\r50%%\r100%%\nwin\r\nlast\tline\n' > "${log}"
+  printf 'first\n\033[1;31mred\033[0m\033[K\n10%%\r50%%\r100%%\nwin\r\nlast\tline\n' > "${log}"
   local -a lines=()
   dytoy_tui::log_tail lines "${log}" 4
   assert_equal "${#lines[@]}" 4
-  assert_equal "${lines[0]}" "red"
+  assert_equal "${lines[0]}" $'\033[1;31mred\033[0m'
   assert_equal "${lines[1]}" "100%"
   assert_equal "${lines[2]}" "win"
   assert_equal "${lines[3]}" "last  line"
@@ -246,10 +254,10 @@ function run_until_done {
   run screen_dump
   assert_output --partial "os 0/1"
   assert_output --partial "binary 0/2"
-  assert_output --partial "[ ] ✓ present"
-  assert_output --partial "[ ] · missing ★"
+  assert_output --partial "[ ] ● present"
+  assert_output --partial "[ ] ○ missing ★"
   assert_output --partial "method: binary"
-  assert_output --partial "0 picked"
+  assert_output --partial "install 0"
 }
 
 @test "dytoy_tui::draw_install shows progress, states and the followed log" {
@@ -263,8 +271,163 @@ function run_until_done {
   run screen_dump
   assert_output --partial "Finished"
   assert_output --partial "2 installed, 1 failed, 0 skipped"
-  assert_output --partial "✓ os/pkg"
-  assert_output --partial "✗ binary/missing"
-  assert_output --partial "Log: shelltool"
+  assert_output --partial "✔ os/pkg"
+  assert_output --partial "✘ binary/missing"
+  assert_output --partial "Log · shelltool"
   assert_output --partial "coloured"
+}
+
+@test "dytoy_tui::draw_install shows a child's log with its colours" {
+  export NO_COLOR=""
+  dytoy_tui::theme
+  dytoy_tui::load_tools
+  write_fake_self
+  pick_tools 3
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+  run_until_done
+  dytoy_tui::draw
+  run screen_dump
+  assert_output --partial "coloured"
+  local row found=false
+  for ((row = 0; row < DYBATPHO_SCREEN_HEIGHT; row++)); do
+    [[ "$(screen_raw "${row}")" == *$'\033[1;32mcoloured'* ]] && found=true
+  done
+  assert_equal "${found}" "true"
+}
+
+@test "dytoy_tui::put_yaml colours keys apart from their values" {
+  export NO_COLOR=""
+  dytoy_tui::theme
+  dytoy_tui::put_yaml 0 0 40 "  repo: owner/tool"
+  dytoy_tui::put_yaml 1 0 40 "  - name: tool"
+  assert_equal "$(screen_row 0 | sed -E 's/ +$//')" "  repo: owner/tool"
+  assert_equal "$(screen_row 1 | sed -E 's/ +$//')" "  - name: tool"
+  run screen_raw 0
+  assert_output --partial $'\033['"${DYTOY_TUI_STYLE_KEY}mrepo"
+  assert_output --partial $'\033['"${DYTOY_TUI_STYLE_VALUE}m owner/tool"
+}
+
+@test "dytoy_tui::theme draws without colours under NO_COLOR" {
+  export NO_COLOR=1
+  dytoy_tui::theme
+  local name
+  for name in "${!DYTOY_TUI_STYLE_@}" "${!DYBATPHO_SCREEN_STYLE_@}"; do
+    [[ "${!name}" != *"38;5"* && "${!name}" != *"48;5"* ]] || fail "${name} has a colour: ${!name}"
+  done
+}
+
+@test "dytoy_tui::start_next lets the child colour its log unless NO_COLOR is set" {
+  dytoy_tui::load_tools
+  write_fake_self
+  printf '#!/usr/bin/env bash\nprintf "%%s|%%s\\n" "${FORCE_COLOR-}" "${CLICOLOR_FORCE-}"\n' > "${DYTOY_TUI_SELF}"
+  pick_tools 3
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+
+  export NO_COLOR=""
+  run_until_done
+  run cat "${DYTOY_TUI_LOG[3]}"
+  assert_output --partial "1|1"
+
+  export NO_COLOR=1
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+  run_until_done
+  run cat "${DYTOY_TUI_LOG[3]}"
+  assert_output --partial "|"
+  refute_output --partial "1|1"
+}
+
+@test "dytoy_tui::handle_pick_key opens a search that filters every tab by name" {
+  dytoy_tui::load_tools
+  dytoy_tui::handle_pick_key char:f
+  assert_equal "${DYTOY_TUI_MODE}" "search"
+
+  local -a matches=()
+  dytoy_tui::handle_pick_key char:s
+  dytoy_tui::search_matches matches
+  assert_equal "${matches[*]}" "1 2 3"
+  # Case does not matter, and every key typed goes into the query.
+  dytoy_tui::handle_pick_key char:H
+  dytoy_tui::search_matches matches
+  assert_equal "${DYTOY_TUI_QUERY}" "sH"
+  assert_equal "${matches[*]}" "3"
+  dytoy_tui::handle_pick_key backspace
+  assert_equal "${DYTOY_TUI_QUERY}" "s"
+
+  # Escape leaves the search without picking or moving anything.
+  dytoy_tui::handle_pick_key escape
+  assert_equal "${DYTOY_TUI_MODE}" "normal"
+  assert_equal "${DYTOY_TUI_PICKED[*]}" "false false false false"
+  assert_equal "${DYTOY_TUI_TAB}" "0"
+}
+
+@test "dytoy_tui::handle_search_key picks a match and goes to it in its tab" {
+  dytoy_tui::load_tools
+  dytoy_tui::handle_pick_key char:f
+  dytoy_tui::handle_pick_key char:m
+  dytoy_tui::handle_pick_key char:i
+  dytoy_tui::handle_pick_key space
+  assert_equal "${DYTOY_TUI_PICKED[2]}" "true"
+
+  dytoy_tui::handle_pick_key enter
+  assert_equal "${DYTOY_TUI_MODE}" "normal"
+  assert_equal "${DYTOY_TUI_TAB}" "1"
+  assert_equal "${DYTOY_TUI_CURSOR[binary]}" "1"
+}
+
+@test "dytoy_tui::draw_pick shows the matches and the query while searching" {
+  dytoy_tui::load_tools
+  dytoy_tui::handle_pick_key char:f
+  dytoy_tui::handle_pick_key char:s
+  dytoy_tui::draw
+  run screen_dump
+  assert_output --partial "Search"
+  assert_output --partial "binary/present"
+  assert_output --partial "shell/shelltool"
+  refute_output --partial "os/pkg"
+  assert_output --partial " / s▏   3 found"
+
+  dytoy_tui::handle_pick_key char:z
+  dytoy_tui::draw
+  run screen_dump
+  assert_output --partial "No tool matches 'sz'"
+}
+
+@test "dytoy_tui::picked_count_into and count_state_into count without a subshell" {
+  dytoy_tui::load_tools
+  pick_tools 1 2 3
+  local count
+  dytoy_tui::picked_count_into count ""
+  assert_equal "${count}" "3"
+  dytoy_tui::picked_count_into count binary
+  assert_equal "${count}" "2"
+
+  dytoy_tui::build_queue
+  DYTOY_TUI_STATE[1]=ok DYTOY_TUI_STATE[2]=failed DYTOY_TUI_STATE[3]=ok
+  dytoy_tui::count_state_into count ok
+  assert_equal "${count}" "2"
+  dytoy_tui::count_state_into count skipped
+  assert_equal "${count}" "0"
+}
+
+@test "dytoy_tui::handle_key routes by phase and gets the install ready on enter" {
+  dytoy_tui::load_tools
+  write_fake_self
+  DYTOY_TUI_LOG_DIR="${BATS_TEST_TMPDIR}/run-logs"
+  dytoy_tui::handle_key char:l
+  dytoy_tui::handle_key char:l
+  dytoy_tui::handle_key char:l
+  dytoy_tui::handle_key space
+  assert_equal "${DYTOY_TUI_PICKED[3]}" "true"
+
+  dytoy_tui::handle_key enter
+  assert_equal "${DYTOY_TUI_PHASE}" "install"
+  assert_equal "${DYTOY_TUI_QUEUE[*]}" "3"
+  assert [ -d "${DYTOY_TUI_LOG_DIR}" ]
+
+  # From here keys go to the install phase: `q` asks before stopping.
+  dytoy_tui::handle_key char:q
+  assert_equal "${DYTOY_TUI_MODE}" "confirm"
 }
