@@ -79,6 +79,9 @@ function assert_entrypoint_help {
   run bash "${rendered}" --help
   assert_success
   assert_output --partial "--no-tui"
+  assert_output --partial "--jobs"
+  run bash "${rendered}" --jobs many --help
+  assert_failure
   run bash "${rendered}" binary --help
   assert_success
   refute_output --partial "--no-tui"

@@ -37,7 +37,17 @@ cursor. Nothing is picked until you pick it.
 |`f`|Follow the log of the running tool again|
 
 Each picked tool runs as its own `dytoy <method> --tool <name>` and its output
-goes to `~/.local/state/dytoy/logs/<run>/`, shown in the log pane. When a
+goes to `~/.local/state/dytoy/logs/<run>/`, shown in the log pane. The methods
+still install in order, `os` first, but within `binary` and `shell` up to
+`--jobs` tools (default 4) install at once. `os` and `mise` always install one
+tool at a time: a package manager locks its database, and `mise use -g` rewrites
+one global configuration file.
+
+Each child installs the `dependencies` of its tool, so two tools installing at
+once could both install the same one. A dependency needed by two picked tools
+or more, directly or through another dependency, and a picked tool that another
+picked tool depends on, install first instead, one at a time and dependencies
+of dependencies first. They show as `· shared` in the install list. When a
 package manager tool is picked, `sudo` asks for the password once, before the
 interface starts installing.
 

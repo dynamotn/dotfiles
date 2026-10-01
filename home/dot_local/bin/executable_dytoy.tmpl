@@ -70,6 +70,8 @@ function _spec_main {
   dybatpho::opts::setup "Utilities to install tools" MAIN_ARGS action:"_main"
   dybatpho::opts::flag "Pick tools in a full-screen interface when run in a terminal" TUI \
     --tui --no-tui on:true off:false init:="true"
+  dybatpho::opts::param "Tools the interface installs at once, where their method allows" JOBS \
+    --jobs -j init:="4" type:int
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
   dybatpho::opts::cmd os _spec_os
   dybatpho::opts::cmd binary _spec_binary
