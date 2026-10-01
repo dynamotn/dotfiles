@@ -19,6 +19,18 @@ DYTOY_TUI_PALETTE=(
   [{{ $name }}]="{{ $hex }}"
 {{- end }}
 )
+# The source file each tool is defined in, which the interface opens in the
+# editor: `tools.yaml` is generated from these, so editing it would be undone
+# by the next apply. The name is read from the rendered text rather than with
+# `fromYaml`, which refuses a definition that repeats a key where `yq` does not.
+DYTOY_TUI_SOURCE=(
+{{- range glob (joinPath .chezmoi.sourceDir ".chezmoitemplates/dytoy/*.yaml*") }}
+{{-   $line := includeTemplate . $ | regexFind "(?m)^name:[ \t]*[^ \t\r\n#]+" }}
+{{-   if $line }}
+  [{{ regexReplaceAll "^name:[ \t]*" $line "" | quote }}]={{ . | quote }}
+{{-   end }}
+{{- end }}
+)
 . {{ .chezmoi.sourceDir }}/../scripts/lib/compressed.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/binary_download.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh

@@ -684,3 +684,69 @@ EOF
   assert_success
   assert_equal "${#lines[@]}" "3"
 }
+
+# Stand in for the terminal and chezmoi around an edit: the suite has no
+# terminal to give back, and the render should only echo the edited file.
+function setup_edit {
+  dytoy_tui::load_tools
+  function dytoy_tui::screen_end { :; }
+  function dybatpho::screen_begin { :; }
+  DYTOY_TUI_TTY=/dev/null
+  printf '#!/usr/bin/env bash\ncat "$3"\n' > "${HOME}/.local/bin/chezmoi"
+  chmod +x "${HOME}/.local/bin/chezmoi"
+  SOURCE_FILE="${BATS_TEST_TMPDIR}/missing.yaml.tmpl"
+  printf 'name: missing\nmethod: binary\n' > "${SOURCE_FILE}"
+  DYTOY_TUI_SOURCE=([missing]="${SOURCE_FILE}")
+  EDITOR_SCRIPT="${BATS_TEST_TMPDIR}/fake-editor"
+  printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" > "%s/editor-args"\nprintf "version: 2.0\\n" >> "${@: -1}"\n' \
+    "${BATS_TEST_TMPDIR}" > "${EDITOR_SCRIPT}"
+  chmod +x "${EDITOR_SCRIPT}"
+}
+
+@test "dytoy_tui::handle_pick_key opens the tool's source file in the editor on e" {
+  setup_edit
+  export EDITOR="${EDITOR_SCRIPT}"
+  unset VISUAL
+  DYTOY_TUI_TAB=1
+  DYTOY_TUI_CURSOR[binary]=1
+  dytoy_tui::handle_pick_key char:e
+  run cat "${BATS_TEST_TMPDIR}/editor-args"
+  assert_output "${SOURCE_FILE}"
+  # The detail shows the file as it renders now, and the status says apply.
+  assert_equal "${DYTOY_TUI_DETAIL[2]}" $'name: missing\nmethod: binary\nversion: 2.0'
+  assert_equal "${DYTOY_TUI_STATUS}" \
+    "Edited missing.yaml.tmpl; run chezmoi apply for dytoy to install from it"
+}
+
+@test "dytoy_tui::edit_source prefers VISUAL and passes the editor's own arguments" {
+  setup_edit
+  export VISUAL="${EDITOR_SCRIPT} --wait" EDITOR="false"
+  dytoy_tui::edit_source 2
+  run cat "${BATS_TEST_TMPDIR}/editor-args"
+  assert_output "--wait ${SOURCE_FILE}"
+}
+
+@test "dytoy_tui::edit_source says so when a tool has no known source file" {
+  setup_edit
+  export EDITOR="${EDITOR_SCRIPT}"
+  dytoy_tui::edit_source 1
+  assert_equal "${DYTOY_TUI_STATUS}" "No source file is known for present"
+  assert [ ! -e "${BATS_TEST_TMPDIR}/editor-args" ]
+}
+
+@test "dytoy_tui::edit_source reports an editor that fails" {
+  setup_edit
+  export EDITOR="false"
+  unset VISUAL
+  dytoy_tui::edit_source 2
+  assert_equal "${DYTOY_TUI_STATUS}" "false exited with 1, missing.yaml.tmpl may be unchanged"
+  assert_equal "${DYTOY_TUI_DETAIL[2]-unset}" "unset"
+}
+
+@test "dytoy renders where each tool is defined, by the name it installs" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  # A file can be named apart from the tool it defines.
+  run grep -F "[\"aws\"]=\"${DOTFILES_DIR}/home/.chezmoitemplates/dytoy/awscli.yaml\"" "${rendered}"
+  assert_success
+}
