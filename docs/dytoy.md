@@ -23,7 +23,9 @@
 
 Run `dytoy` in a terminal to open a full-screen interface: one tab per
 installer method, a checkbox per tool, and the YAML of the tool under the
-cursor. Nothing is picked until you pick it.
+cursor. Nothing is picked until you pick it. The interface is drawn in the Catppuccin
+flavour the terminal uses (Macchiato, or Latte without `darkMode`), and in
+bold, dim and reverse only under `NO_COLOR`.
 
 |Key|Action|
 |---|------|
