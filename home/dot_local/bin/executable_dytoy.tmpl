@@ -4,9 +4,11 @@
 # @description One entry point for every installer method. `dytoy` with no
 # subcommand runs them all in dependency order; `dytoy <method>` runs one; and
 # `dytoy -t <tool>` routes a single tool to whichever method its YAML entry
-# declares.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array
+# declares. Run with no subcommand in a terminal, it opens a full-screen
+# interface to pick the tools and follow their installation instead.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array screen
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy_tui.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/compressed.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/binary_download.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
@@ -66,6 +68,8 @@ function _spec_common {
 function _spec_main {
   _spec_common
   dybatpho::opts::setup "Utilities to install tools" MAIN_ARGS action:"_main"
+  dybatpho::opts::flag "Pick tools in a full-screen interface when run in a terminal" TUI \
+    --tui --no-tui on:true off:false init:="true"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
   dybatpho::opts::cmd os _spec_os
   dybatpho::opts::cmd binary _spec_binary
@@ -371,6 +375,12 @@ function _run_one_method {
 #######################################
 function _main {
   if [[ "$TOOL" == "@empty" ]]; then
+    # A chezmoi hook or a pipe has no terminal and keeps the plain run.
+    if dybatpho::is true "$TUI" && dytoy_tui::has_terminal; then
+      dytoy_tui::run "$0"
+      dybatpho::is true "${DYTOY_TUI_FAILED}" && exit 1
+      return 0
+    fi
     local method
     for method in "${DYTOY_METHODS[@]}"; do
       _run_method "${method}"
