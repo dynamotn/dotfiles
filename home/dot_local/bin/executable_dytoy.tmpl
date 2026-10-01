@@ -9,6 +9,16 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array screen
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy_tui.sh
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end }}
+# The interface takes the Catppuccin flavour the terminal uses.
+DYTOY_TUI_PALETTE=(
+{{- range $name, $hex := $theme }}
+  [{{ $name }}]="{{ $hex }}"
+{{- end }}
+)
 . {{ .chezmoi.sourceDir }}/../scripts/lib/compressed.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/binary_download.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh

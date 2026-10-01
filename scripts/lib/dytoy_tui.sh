@@ -76,6 +76,18 @@ DYTOY_TUI_WRAP_DIR=""
 DYTOY_TUI_KEEPALIVE_PID=""
 
 declare -ga DYTOY_TUI_SPINNER=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
+# The Catppuccin palette the theme is built from, by colour name. Macchiato is
+# the default; the installed `dytoy` replaces it with the flavour chezmoi
+# renders, so the interface matches the terminal.
+declare -gA DYTOY_TUI_PALETTE=(
+  [rosewater]="#f4dbd6" [flamingo]="#f0c6c6" [pink]="#f5bde6" [mauve]="#c6a0f6"
+  [red]="#ed8796" [maroon]="#ee99a0" [peach]="#f5a97f" [yellow]="#eed49f"
+  [green]="#a6da95" [teal]="#8bd5ca" [sky]="#91d7e3" [sapphire]="#7dc4e4"
+  [blue]="#8aadf4" [lavender]="#b7bdf8" [text]="#cad3f5" [subtext1]="#b8c0e0"
+  [subtext0]="#a5adcb" [overlay2]="#939ab7" [overlay1]="#8087a2" [overlay0]="#6e738d"
+  [surface2]="#5b6078" [surface1]="#494d64" [surface0]="#363a4f" [base]="#24273a"
+  [mantle]="#1e2030" [crust]="#181926"
+)
 # The styles only this interface draws, set by dytoy_tui::theme; every other
 # style is a `DYBATPHO_SCREEN_STYLE_*` of the screen module's theme.
 DYTOY_TUI_STYLE_BRAND="" DYTOY_TUI_STYLE_ROW_BG="" DYTOY_TUI_STYLE_TEXT=""
@@ -432,16 +444,38 @@ function dytoy_tui::count_state_into {
 # ---------------------------------------------------------------------------
 
 #######################################
-# @description Set the colours of the interface: the `dusk` theme of the
-# screen module for every widget, plus the few styles only this interface
-# draws. `NO_COLOR` gives the `mono` theme and leaves bold, dim and reverse to
-# mark what matters.
+# @description Set a variable to the SGR parameters of a palette colour, in
+# 24-bit colour, as a foreground or a background.
+# @arg $1 string Name of the variable receiving the parameters
+# @arg $2 string `fg` or `bg`
+# @arg $3 string Colour name in `DYTOY_TUI_PALETTE`
+#######################################
+function dytoy_tui::colour_into {
+  local __dytoy_tui_colour_ref layer name
+  dybatpho::expect_args __dytoy_tui_colour_ref layer name -- "$@"
+  local -n __dytoy_tui_colour="${__dytoy_tui_colour_ref}"
+  local hex="${DYTOY_TUI_PALETTE[${name}]-}"
+  hex="${hex#\#}"
+  [[ "${hex}" =~ ^[0-9a-fA-F]{6}$ ]] \
+    || dybatpho::die "${FUNCNAME[0]}: '${name}' is not a #rrggbb colour of the palette"
+  local code=38
+  [[ "${layer}" == bg ]] && code=48
+  __dytoy_tui_colour="${code};2;$((16#${hex:0:2}));$((16#${hex:2:2}));$((16#${hex:4:2}))"
+}
+
+#######################################
+# @description Set the colours of the interface from the Catppuccin palette
+# in `DYTOY_TUI_PALETTE`, for the screen module's widgets and for the few
+# styles only this interface draws. The palette is Macchiato unless the
+# installed `dytoy` was rendered with another flavour. `NO_COLOR` gives the
+# `mono` theme and leaves bold, dim and reverse to mark what matters.
 # @noargs
 # @env NO_COLOR string Draw without colours when set to a non-empty value
+# @env DYTOY_TUI_PALETTE array Catppuccin colours by name, `#rrggbb`
 #######################################
 function dytoy_tui::theme {
-  dybatpho::screen_theme dusk
   if [[ -n "${NO_COLOR:-}" ]]; then
+    dybatpho::screen_theme mono
     DYTOY_TUI_STYLE_BRAND="1;7"
     DYTOY_TUI_STYLE_ROW_BG=""
     DYTOY_TUI_STYLE_TEXT="0"
@@ -453,15 +487,56 @@ function dytoy_tui::theme {
     DYTOY_TUI_STYLE_BADGE="1;7"
     return 0
   fi
-  DYTOY_TUI_STYLE_BRAND="1;38;5;231;48;5;98"
-  DYTOY_TUI_STYLE_ROW_BG="48;5;237"
-  DYTOY_TUI_STYLE_TEXT="38;5;252"
-  DYTOY_TUI_STYLE_STRONG="1;38;5;231"
-  DYTOY_TUI_STYLE_RUN="1;38;5;117"
-  DYTOY_TUI_STYLE_KEY="38;5;117"
-  DYTOY_TUI_STYLE_VALUE="38;5;223"
-  DYTOY_TUI_STYLE_GAUGE_EMPTY="38;5;238"
-  DYTOY_TUI_STYLE_BADGE="1;38;5;235;48;5;221"
+  local text subtext1 overlay1 surface0 surface1 surface2 mantle crust
+  local mauve pink lavender blue sky green yellow peach red
+  local mauve_bg lavender_bg yellow_bg surface1_fg
+  dytoy_tui::colour_into text fg text
+  dytoy_tui::colour_into subtext1 fg subtext1
+  dytoy_tui::colour_into overlay1 fg overlay1
+  dytoy_tui::colour_into surface0 bg surface0
+  dytoy_tui::colour_into surface1 bg surface1
+  dytoy_tui::colour_into surface1_fg fg surface1
+  dytoy_tui::colour_into surface2 fg surface2
+  dytoy_tui::colour_into mantle bg mantle
+  dytoy_tui::colour_into crust fg crust
+  dytoy_tui::colour_into mauve fg mauve
+  dytoy_tui::colour_into pink fg pink
+  dytoy_tui::colour_into lavender fg lavender
+  dytoy_tui::colour_into blue fg blue
+  dytoy_tui::colour_into sky fg sky
+  dytoy_tui::colour_into green fg green
+  dytoy_tui::colour_into yellow fg yellow
+  dytoy_tui::colour_into peach fg peach
+  dytoy_tui::colour_into red fg red
+  dytoy_tui::colour_into mauve_bg bg mauve
+  dytoy_tui::colour_into lavender_bg bg lavender
+  dytoy_tui::colour_into yellow_bg bg yellow
+
+  # The screen module's widgets: frames, selection, tabs, the key bar. They are
+  # exported, as the screen module declares them, since its widgets read them.
+  export DYBATPHO_SCREEN_STYLE_SELECTED="1;${text};${surface1}"
+  export DYBATPHO_SCREEN_STYLE_BORDER="${surface2}"
+  export DYBATPHO_SCREEN_STYLE_FOCUS="${mauve}"
+  export DYBATPHO_SCREEN_STYLE_TITLE="1;${lavender}"
+  export DYBATPHO_SCREEN_STYLE_TAB_ACTIVE="1;${crust};${lavender_bg}"
+  export DYBATPHO_SCREEN_STYLE_KEYBAR="${subtext1};${mantle}"
+  export DYBATPHO_SCREEN_STYLE_KEY="1;${mauve}"
+  export DYBATPHO_SCREEN_STYLE_ACCENT="1;${pink}"
+  export DYBATPHO_SCREEN_STYLE_DIM="${overlay1}"
+  export DYBATPHO_SCREEN_STYLE_OK="1;${green}"
+  export DYBATPHO_SCREEN_STYLE_WARN="${yellow}"
+  export DYBATPHO_SCREEN_STYLE_ERROR="1;${red}"
+
+  # What only this interface draws.
+  DYTOY_TUI_STYLE_BRAND="1;${crust};${mauve_bg}"
+  DYTOY_TUI_STYLE_ROW_BG="${surface0}"
+  DYTOY_TUI_STYLE_TEXT="${text}"
+  DYTOY_TUI_STYLE_STRONG="1;${text}"
+  DYTOY_TUI_STYLE_RUN="1;${sky}"
+  DYTOY_TUI_STYLE_KEY="${blue}"
+  DYTOY_TUI_STYLE_VALUE="${peach}"
+  DYTOY_TUI_STYLE_GAUGE_EMPTY="${surface1_fg}"
+  DYTOY_TUI_STYLE_BADGE="1;${crust};${yellow_bg}"
 }
 
 #######################################

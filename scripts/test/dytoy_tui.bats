@@ -319,7 +319,7 @@ function run_until_done {
   dytoy_tui::theme
   local name
   for name in "${!DYTOY_TUI_STYLE_@}" "${!DYBATPHO_SCREEN_STYLE_@}"; do
-    [[ "${!name}" != *"38;5"* && "${!name}" != *"48;5"* ]] || fail "${name} has a colour: ${!name}"
+    [[ "${!name}" != *[34]8\;[25]\;* ]] || fail "${name} has a colour: ${!name}"
   done
 }
 
@@ -646,4 +646,41 @@ EOF
   run screen_dump
   assert_output --partial "mise/runtime · shared"
   refute_output --partial "shell/alpha · shared"
+}
+
+@test "dytoy_tui::colour_into turns a palette colour into 24-bit SGR parameters" {
+  local sgr
+  dytoy_tui::colour_into sgr fg mauve
+  assert_equal "${sgr}" "38;2;198;160;246"
+  dytoy_tui::colour_into sgr bg base
+  assert_equal "${sgr}" "48;2;36;39;58"
+  run dytoy_tui::colour_into sgr fg nonexistent
+  assert_failure
+  assert_output --partial "'nonexistent' is not a #rrggbb colour of the palette"
+}
+
+@test "dytoy_tui::theme draws in Catppuccin Macchiato by default" {
+  export NO_COLOR=""
+  dytoy_tui::theme
+  assert_equal "${DYBATPHO_SCREEN_STYLE_FOCUS}" "38;2;198;160;246"
+  assert_equal "${DYBATPHO_SCREEN_STYLE_OK}" "1;38;2;166;218;149"
+  assert_equal "${DYBATPHO_SCREEN_STYLE_KEYBAR}" "38;2;184;192;224;48;2;30;32;48"
+  assert_equal "${DYTOY_TUI_STYLE_ROW_BG}" "48;2;54;58;79"
+  assert_equal "${DYTOY_TUI_STYLE_BRAND}" "1;38;2;24;25;38;48;2;198;160;246"
+}
+
+@test "dytoy_tui::theme follows the palette the installed dytoy was rendered with" {
+  export NO_COLOR=""
+  # Latte's mauve, as a light terminal would render it.
+  DYTOY_TUI_PALETTE[mauve]="#8839ef"
+  dytoy_tui::theme
+  assert_equal "${DYBATPHO_SCREEN_STYLE_FOCUS}" "38;2;136;57;239"
+}
+
+@test "dytoy renders the Catppuccin flavour of the terminal into its palette" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  run grep -E '^  \[(mauve|base|crust)\]="#[0-9a-f]{6}"$' "${rendered}"
+  assert_success
+  assert_equal "${#lines[@]}" "3"
 }
