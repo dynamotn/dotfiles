@@ -26,6 +26,16 @@ declare -ga DYTOY_TUI_ESSENTIAL=()
 # `yes`, `no`, or `unknown` (a package manager tool, too slow to ask about).
 declare -ga DYTOY_TUI_INSTALLED=()
 declare -ga DYTOY_TUI_PICKED=()
+# `true` for a tool left out of the list by `--essential`; it is still loaded
+# so a listed tool can depend on it.
+declare -ga DYTOY_TUI_HIDDEN=()
+# The dependencies each tool declares, comma-separated names.
+declare -ga DYTOY_TUI_DEPS=()
+# The index of each tool, by name.
+declare -gA DYTOY_TUI_INDEX=()
+# The stage a queued tool installs in: `dependencies` for one installed ahead
+# of the others, otherwise its method.
+declare -ga DYTOY_TUI_STAGE=()
 # `pending`, `running`, `ok`, `failed`, or `skipped`.
 declare -ga DYTOY_TUI_STATE=()
 declare -ga DYTOY_TUI_LOG=()
@@ -41,8 +51,10 @@ declare -gA DYTOY_TUI_OFFSET=()
 # Indexes of the picked tools, in the order they install.
 declare -ga DYTOY_TUI_QUEUE=()
 DYTOY_TUI_QUEUE_POS=0
-DYTOY_TUI_PID=""
-DYTOY_TUI_CURRENT=-1
+# The process of each running tool, by index.
+declare -gA DYTOY_TUI_PIDS=()
+# How many tools run at once where their method allows it.
+DYTOY_TUI_JOBS=4
 # The tool whose log is shown, as a position in the queue.
 DYTOY_TUI_VIEW=0
 DYTOY_TUI_FOLLOW=true
@@ -90,8 +102,13 @@ function dytoy_tui::has_terminal {
 # @env DYTOY_METHODS array Installer methods, in the order they run
 # @env ONLY_ESSENTIAL boolean Only list essential tools
 # @set DYTOY_TUI_NAME, DYTOY_TUI_METHOD, DYTOY_TUI_ESSENTIAL, DYTOY_TUI_INSTALLED, DYTOY_TUI_PICKED
+# @set DYTOY_TUI_HIDDEN, DYTOY_TUI_DEPS, DYTOY_TUI_INDEX
 #######################################
 function dytoy_tui::load_tools {
+  DYTOY_TUI_HIDDEN=()
+  DYTOY_TUI_DEPS=()
+  DYTOY_TUI_INDEX=()
+  DYTOY_TUI_STAGE=()
   DYTOY_TUI_NAME=()
   DYTOY_TUI_METHOD=()
   DYTOY_TUI_ESSENTIAL=()
@@ -109,16 +126,20 @@ function dytoy_tui::load_tools {
   yaml_file="$(dytoy::yaml_file)"
   rows=$(dybatpho::yaml_query "${yaml_file}" \
     'explode(.) | .[] | select(.enabled != false and .enabled != "false")
-      | [.name, .method, (.is_essential // false)] | @tsv' -r)
+      | [.name, .method, (.is_essential // false), ((.dependencies // []) | join(","))] | @tsv' -r)
 
-  local method name tool_method essential installed
+  local method name tool_method essential dependencies installed hidden
   for method in "${DYTOY_METHODS[@]}"; do
-    while IFS=$'\t' read -r name tool_method essential; do
+    while IFS=$'\t' read -r name tool_method essential dependencies; do
       [[ -n "${name}" && "${tool_method}" == "${method}" ]] || continue
+      hidden=false
       if dybatpho::is true "${ONLY_ESSENTIAL}" && ! dybatpho::is true "${essential}"; then
-        continue
+        hidden=true
       fi
       installed="$(dytoy_tui::detect_installed "${name}" "${method}")"
+      [[ -n "${DYTOY_TUI_INDEX[${name}]+set}" ]] || DYTOY_TUI_INDEX["${name}"]="${#DYTOY_TUI_NAME[@]}"
+      DYTOY_TUI_HIDDEN+=("${hidden}")
+      DYTOY_TUI_DEPS+=("${dependencies}")
       DYTOY_TUI_NAME+=("${name}")
       DYTOY_TUI_METHOD+=("${method}")
       DYTOY_TUI_ESSENTIAL+=("${essential}")
@@ -165,6 +186,7 @@ function dytoy_tui::tab_items {
   local -n __dytoy_tui_items="${__dytoy_tui_items_ref}"
   __dytoy_tui_items=()
   for index in "${!DYTOY_TUI_NAME[@]}"; do
+    dybatpho::is true "${DYTOY_TUI_HIDDEN[index]}" && continue
     [[ "${DYTOY_TUI_METHOD[index]}" == "${method}" ]] && __dytoy_tui_items+=("${index}")
   done
   return 0
@@ -185,6 +207,7 @@ function dytoy_tui::search_matches {
   local query="${DYTOY_TUI_QUERY,,}" index
   __dytoy_tui_matches=()
   for index in "${!DYTOY_TUI_NAME[@]}"; do
+    dybatpho::is true "${DYTOY_TUI_HIDDEN[index]}" && continue
     [[ "${DYTOY_TUI_NAME[index],,}" == *"${query}"* ]] && __dytoy_tui_matches+=("${index}")
   done
   return 0
@@ -278,22 +301,112 @@ function dytoy_tui::log_tail {
 }
 
 #######################################
-# @description Fill the queue with the picked tools, in install order, and
-# reset their state.
+# @description Fill an array with every tool a tool depends on, directly or
+# through another dependency, by index. A dependency that is not an enabled
+# tool of the YAML file is left to the child, which reports it.
+# @arg $1 string Name of the array variable receiving the indexes
+# @arg $2 number Index of the tool
+#######################################
+function dytoy_tui::dependency_closure_into {
+  local __dytoy_tui_closure_ref start
+  dybatpho::expect_args __dytoy_tui_closure_ref start -- "$@"
+  local -n __dytoy_tui_closure="${__dytoy_tui_closure_ref}"
+  __dytoy_tui_closure=()
+  local -A seen=(["${start}"]=1)
+  local -a pending=("${start}")
+  local index name dependency
+  local -a names=()
+  while ((${#pending[@]} > 0)); do
+    index="${pending[0]}"
+    pending=("${pending[@]:1}")
+    IFS=, read -r -a names <<< "${DYTOY_TUI_DEPS[index]}"
+    for name in "${names[@]}"; do
+      dependency="${DYTOY_TUI_INDEX[${name}]-}"
+      [[ -n "${dependency}" && -z "${seen[${dependency}]-}" ]] || continue
+      seen["${dependency}"]=1
+      __dytoy_tui_closure+=("${dependency}")
+      pending+=("${dependency}")
+    done
+  done
+  return 0
+}
+
+#######################################
+# @description Append a tool to the order the shared dependencies install in,
+# after whatever it depends on, so a dependency of a dependency goes first.
+# @arg $1 number Index of the tool
+# @env __DYTOY_TUI_EARLY Tools installed ahead of the others, by index
+# @set __DYTOY_TUI_ORDER The order, built up across calls
+#######################################
+function dytoy_tui::order_dependency {
+  local index
+  dybatpho::expect_args index -- "$@"
+  [[ -z "${__DYTOY_TUI_VISITED[${index}]-}" ]] || return 0
+  __DYTOY_TUI_VISITED["${index}"]=1
+  local name dependency
+  local -a names=()
+  IFS=, read -r -a names <<< "${DYTOY_TUI_DEPS[index]}"
+  for name in "${names[@]}"; do
+    dependency="${DYTOY_TUI_INDEX[${name}]-}"
+    [[ -n "${dependency}" ]] && dytoy_tui::order_dependency "${dependency}"
+  done
+  [[ -n "${__DYTOY_TUI_EARLY[${index}]-}" ]] && __DYTOY_TUI_ORDER+=("${index}")
+  return 0
+}
+
+#######################################
+# @description Fill the queue with what is to be installed, in order, and
+# reset its state.
+#
+# Tools of a method run side by side, and each child installs its own
+# dependencies, so two tools needing the same one would both install it at
+# once -- as would a tool and a picked tool it depends on. Those dependencies
+# go first instead, in a stage of their own that runs one tool at a time: a
+# dependency needed by two picked tools or more, directly or not, and a picked
+# tool another picked tool depends on. The children then find them installed.
 # @noargs
+# @set DYTOY_TUI_QUEUE, DYTOY_TUI_STAGE
 #######################################
 function dytoy_tui::build_queue {
   DYTOY_TUI_QUEUE=()
-  local index
+  DYTOY_TUI_STAGE=()
+  local index dependency
+  local -a closure=()
+  local -A needed_by=()
+  declare -gA __DYTOY_TUI_EARLY=() __DYTOY_TUI_VISITED=()
+  declare -ga __DYTOY_TUI_ORDER=()
   for index in "${!DYTOY_TUI_NAME[@]}"; do
     dybatpho::is true "${DYTOY_TUI_PICKED[index]}" || continue
+    dytoy_tui::dependency_closure_into closure "${index}"
+    for dependency in "${closure[@]}"; do
+      needed_by["${dependency}"]=$((${needed_by[${dependency}]:-0} + 1))
+      dybatpho::is true "${DYTOY_TUI_PICKED[dependency]}" && __DYTOY_TUI_EARLY["${dependency}"]=1
+    done
+  done
+  for dependency in "${!needed_by[@]}"; do
+    ((needed_by[${dependency}] >= 2)) && __DYTOY_TUI_EARLY["${dependency}"]=1
+  done
+  for index in "${!DYTOY_TUI_NAME[@]}"; do
+    [[ -n "${__DYTOY_TUI_EARLY[${index}]-}" ]] && dytoy_tui::order_dependency "${index}"
+  done
+
+  for index in "${__DYTOY_TUI_ORDER[@]}"; do
     DYTOY_TUI_QUEUE+=("${index}")
+    DYTOY_TUI_STAGE[index]="dependencies"
     DYTOY_TUI_STATE[index]="pending"
   done
+  for index in "${!DYTOY_TUI_NAME[@]}"; do
+    dybatpho::is true "${DYTOY_TUI_PICKED[index]}" || continue
+    [[ -z "${__DYTOY_TUI_EARLY[${index}]-}" ]] || continue
+    DYTOY_TUI_QUEUE+=("${index}")
+    DYTOY_TUI_STAGE[index]="${DYTOY_TUI_METHOD[index]}"
+    DYTOY_TUI_STATE[index]="pending"
+  done
+  unset __DYTOY_TUI_EARLY __DYTOY_TUI_VISITED __DYTOY_TUI_ORDER
   DYTOY_TUI_QUEUE_POS=0
   DYTOY_TUI_VIEW=0
   DYTOY_TUI_FOLLOW=true
-  DYTOY_TUI_CURRENT=-1
+  DYTOY_TUI_PIDS=()
 }
 
 #######################################
@@ -651,8 +764,7 @@ function dytoy_tui::draw_install {
     title="Finished" title_style="${DYBATPHO_SCREEN_STYLE_OK}" gauge_style="${DYBATPHO_SCREEN_STYLE_OK}"
     label="${ok} installed, ${failed} failed, ${skipped} skipped"
   else
-    label="${finished}/${total}"
-    ((DYTOY_TUI_CURRENT >= 0)) && label+="  ${DYTOY_TUI_NAME[DYTOY_TUI_CURRENT]}"
+    label="${finished}/${total}  ${#DYTOY_TUI_PIDS[@]} running"
   fi
   ((failed > 0)) && title_style="${DYBATPHO_SCREEN_STYLE_ERROR}" gauge_style="${DYBATPHO_SCREEN_STYLE_ERROR}"
   dytoy_tui::draw_header "${frame[0]}" " ${title} " "${title_style}"
@@ -665,7 +777,7 @@ function dytoy_tui::draw_install {
   local x y width height
   read -r x y width height <<< "${DYBATPHO_SCREEN_INNER}"
   dytoy_tui::scroll "install" "${DYTOY_TUI_VIEW}" "${total}" "${height}"
-  local offset="${DYTOY_TUI_OFFSET[install]}" row index elapsed mark mark_style background pointer name_style
+  local offset="${DYTOY_TUI_OFFSET[install]}" row index elapsed mark mark_style background pointer name_style role
   for ((row = 0; row < height && offset + row < total; row++)); do
     index="${DYTOY_TUI_QUEUE[offset + row]}"
     dytoy_tui::state_mark_into mark mark_style "${index}"
@@ -675,6 +787,8 @@ function dytoy_tui::draw_install {
     if ((offset + row == DYTOY_TUI_VIEW)); then
       background="${DYTOY_TUI_STYLE_ROW_BG}" pointer="▌ "
     fi
+    role=""
+    [[ "${DYTOY_TUI_STAGE[index]-}" == "dependencies" ]] && role=" · shared"
     elapsed=""
     case "${DYTOY_TUI_STATE[index]}" in
       running) elapsed=" $((EPOCHSECONDS - DYTOY_TUI_STARTED[index]))s" ;;
@@ -686,7 +800,8 @@ function dytoy_tui::draw_install {
       "${mark}" "${mark_style}" " " "0" \
       "${DYTOY_TUI_METHOD[index]}/" "${DYBATPHO_SCREEN_STYLE_DIM}" \
       "${DYTOY_TUI_NAME[index]}" "${name_style}" \
-      "${elapsed}" "${DYBATPHO_SCREEN_STYLE_DIM}"
+      "${elapsed}" "${DYBATPHO_SCREEN_STYLE_DIM}" \
+      "${role}" "${DYBATPHO_SCREEN_STYLE_DIM}"
   done
 
   local viewed="${DYTOY_TUI_QUEUE[DYTOY_TUI_VIEW]:--1}" log_title="Log"
@@ -717,7 +832,7 @@ function dytoy_tui::draw_install {
       style:"${DYBATPHO_SCREEN_STYLE_ERROR}" title_style:"${DYBATPHO_SCREEN_STYLE_ERROR}"
     read -r x y width height <<< "${DYBATPHO_SCREEN_INNER}"
     dybatpho::screen_text "${DYBATPHO_SCREEN_INNER}" \
-      "Stop the running tool and skip the rest?" align:center style:"${DYTOY_TUI_STYLE_STRONG}"
+      "Stop the running tools and skip the rest?" align:center style:"${DYTOY_TUI_STYLE_STRONG}"
     ((height >= 3)) && dybatpho::screen_spans "$((y + 2))" "$((x + (width - 26) / 2))" 26 "" \
       " y " "${DYTOY_TUI_STYLE_BADGE}" " stop    " "${DYTOY_TUI_STYLE_TEXT}" \
       " n " "${DYTOY_TUI_STYLE_BADGE}" " keep going" "${DYTOY_TUI_STYLE_TEXT}"
@@ -943,31 +1058,70 @@ function dytoy_tui::handle_install_key {
 # ---------------------------------------------------------------------------
 
 #######################################
-# @description Point the log view at the running tool, or at the last one to
-# finish, while following.
+# @description Point the log view, while following, at the first tool still
+# running in install order, or at the last one started when none is.
 # @noargs
 #######################################
 function dytoy_tui::follow {
   dybatpho::is true "${DYTOY_TUI_FOLLOW}" || return 0
-  local position=$((DYTOY_TUI_QUEUE_POS - 1))
+  local position
+  for ((position = 0; position < DYTOY_TUI_QUEUE_POS; position++)); do
+    if [[ -n "${DYTOY_TUI_PIDS[${DYTOY_TUI_QUEUE[position]}]-}" ]]; then
+      DYTOY_TUI_VIEW="${position}"
+      return 0
+    fi
+  done
+  position=$((DYTOY_TUI_QUEUE_POS - 1))
   ((position >= 0)) || position=0
   DYTOY_TUI_VIEW="${position}"
 }
 
 #######################################
-# @description Start the next queued tool, or end the install phase when none
-# is left.
+# @description Set a variable to how many tools of a stage may run at once.
+# A package manager holds a lock on its database, and `mise use -g` rewrites
+# one global configuration file, so those two run one tool at a time, as do
+# the shared dependencies, which may be of any method; the others take
+# `DYTOY_TUI_JOBS`.
+# @arg $1 string Name of the variable receiving the limit
+# @arg $2 string Stage: a method, or `dependencies`
+#######################################
+function dytoy_tui::method_jobs_into {
+  local __dytoy_tui_jobs_ref method
+  dybatpho::expect_args __dytoy_tui_jobs_ref method -- "$@"
+  local -n __dytoy_tui_jobs="${__dytoy_tui_jobs_ref}"
+  case "${method}" in
+    os | mise | dependencies) __dytoy_tui_jobs=1 ;;
+    *) __dytoy_tui_jobs="${DYTOY_TUI_JOBS}" ;;
+  esac
+}
+
+#######################################
+# @description Return success when the next queued tool may start now. The
+# stages still run in order -- the shared dependencies, then `os`, which
+# installs what the others need, then the rest -- so a tool waits while one of
+# an earlier stage is running, and otherwise while its stage has no free slot.
+# @noargs
+# @exitcode 0 The next tool may start
+# @exitcode 1 It has to wait, or nothing is left to start
+#######################################
+function dytoy_tui::can_start {
+  ((DYTOY_TUI_QUEUE_POS < ${#DYTOY_TUI_QUEUE[@]})) || return 1
+  local next="${DYTOY_TUI_QUEUE[DYTOY_TUI_QUEUE_POS]}" index limit
+  for index in "${!DYTOY_TUI_PIDS[@]}"; do
+    [[ "${DYTOY_TUI_STAGE[index]}" == "${DYTOY_TUI_STAGE[next]}" ]] || return 1
+  done
+  dytoy_tui::method_jobs_into limit "${DYTOY_TUI_STAGE[next]}"
+  ((${#DYTOY_TUI_PIDS[@]} < limit))
+}
+
+#######################################
+# @description Start the next queued tool in a child of its own.
 # @noargs
 #######################################
 function dytoy_tui::start_next {
-  if ((DYTOY_TUI_QUEUE_POS >= ${#DYTOY_TUI_QUEUE[@]})); then
-    DYTOY_TUI_PHASE="done"
-    DYTOY_TUI_CURRENT=-1
-    return 0
-  fi
+  ((DYTOY_TUI_QUEUE_POS < ${#DYTOY_TUI_QUEUE[@]})) || return 0
   local index="${DYTOY_TUI_QUEUE[DYTOY_TUI_QUEUE_POS]}"
   DYTOY_TUI_QUEUE_POS=$((DYTOY_TUI_QUEUE_POS + 1))
-  DYTOY_TUI_CURRENT="${index}"
 
   # The repositories are synced once, by the first package manager tool,
   # rather than once per tool.
@@ -998,70 +1152,74 @@ function dytoy_tui::start_next {
   [[ -n "${NO_COLOR:-}" ]] || colour=(FORCE_COLOR=1 CLICOLOR_FORCE=1)
   set -m
   env PATH="${path}" "${colour[@]}" "${DYTOY_TUI_SELF}" "${args[@]}" >> "${log}" 2>&1 < /dev/null &
-  DYTOY_TUI_PID=$!
+  DYTOY_TUI_PIDS["${index}"]=$!
   set +m
-  dytoy_tui::follow
 }
 
 #######################################
-# @description Collect the running tool once it has ended, and start the next.
+# @description Collect every running tool that has ended, start as many queued
+# tools as the slots allow, and end the install phase once nothing is left.
 # @noargs
 #######################################
 function dytoy_tui::poll {
   [[ "${DYTOY_TUI_PHASE}" == "install" ]] || return 0
-  if [[ -z "${DYTOY_TUI_PID}" ]]; then
+  local index pid status
+  for index in "${!DYTOY_TUI_PIDS[@]}"; do
+    pid="${DYTOY_TUI_PIDS[${index}]}"
+    kill -0 "${pid}" 2> /dev/null && continue
+    status=0
+    wait "${pid}" 2> /dev/null || status=$?
+    unset 'DYTOY_TUI_PIDS[${index}]'
+    DYTOY_TUI_ELAPSED[index]=$((EPOCHSECONDS - DYTOY_TUI_STARTED[index]))
+    if ((status == 0)); then
+      DYTOY_TUI_STATE[index]="ok"
+    else
+      DYTOY_TUI_STATE[index]="failed"
+      printf '\n[exit status %s]\n' "${status}" >> "${DYTOY_TUI_LOG[index]}"
+    fi
+  done
+  while dytoy_tui::can_start; do
     dytoy_tui::start_next
-    return 0
+  done
+  if ((DYTOY_TUI_QUEUE_POS >= ${#DYTOY_TUI_QUEUE[@]} && ${#DYTOY_TUI_PIDS[@]} == 0)); then
+    DYTOY_TUI_PHASE="done"
   fi
-  kill -0 "${DYTOY_TUI_PID}" 2> /dev/null && return 0
-
-  local status=0 index="${DYTOY_TUI_CURRENT}"
-  wait "${DYTOY_TUI_PID}" 2> /dev/null || status=$?
-  DYTOY_TUI_PID=""
-  DYTOY_TUI_ELAPSED[index]=$((EPOCHSECONDS - DYTOY_TUI_STARTED[index]))
-  if ((status == 0)); then
-    DYTOY_TUI_STATE[index]="ok"
-  else
-    DYTOY_TUI_STATE[index]="failed"
-    printf '\n[exit status %s]\n' "${status}" >> "${DYTOY_TUI_LOG[index]}"
-  fi
-  dytoy_tui::start_next
+  dytoy_tui::follow
 }
 
 #######################################
-# @description Terminate the running child and everything it started. A child
+# @description Terminate a running child and everything it started. A child
 # stopped on a read from the terminal only acts on the signal once continued.
-# @noargs
+# @arg $1 number Process of the child
 #######################################
 function dytoy_tui::kill_child {
-  [[ -n "${DYTOY_TUI_PID}" ]] || return 0
-  kill -TERM -- "-${DYTOY_TUI_PID}" 2> /dev/null || kill -TERM "${DYTOY_TUI_PID}" 2> /dev/null || true
-  kill -CONT -- "-${DYTOY_TUI_PID}" 2> /dev/null || true
+  local pid
+  dybatpho::expect_args pid -- "$@"
+  kill -TERM -- "-${pid}" 2> /dev/null || kill -TERM "${pid}" 2> /dev/null || true
+  kill -CONT -- "-${pid}" 2> /dev/null || true
 }
 
 #######################################
-# @description Stop the running tool and skip every tool not started yet.
+# @description Stop every running tool and skip every tool not started yet.
 # @noargs
 #######################################
 function dytoy_tui::stop {
-  if [[ -n "${DYTOY_TUI_PID}" ]]; then
-    dytoy_tui::kill_child
-    wait "${DYTOY_TUI_PID}" 2> /dev/null || true
-    DYTOY_TUI_PID=""
-    local index="${DYTOY_TUI_CURRENT}"
-    if ((index >= 0)); then
-      DYTOY_TUI_STATE[index]="failed"
-      DYTOY_TUI_ELAPSED[index]=$((EPOCHSECONDS - DYTOY_TUI_STARTED[index]))
-      printf '\n[stopped]\n' >> "${DYTOY_TUI_LOG[index]}"
-    fi
-  fi
+  local index pid
+  for index in "${!DYTOY_TUI_PIDS[@]}"; do
+    pid="${DYTOY_TUI_PIDS[${index}]}"
+    dytoy_tui::kill_child "${pid}"
+    wait "${pid}" 2> /dev/null || true
+    DYTOY_TUI_STATE[index]="failed"
+    DYTOY_TUI_ELAPSED[index]=$((EPOCHSECONDS - DYTOY_TUI_STARTED[index]))
+    printf '\n[stopped]\n' >> "${DYTOY_TUI_LOG[index]}"
+  done
+  DYTOY_TUI_PIDS=()
   local position
   for ((position = DYTOY_TUI_QUEUE_POS; position < ${#DYTOY_TUI_QUEUE[@]}; position++)); do
     DYTOY_TUI_STATE[DYTOY_TUI_QUEUE[position]]="skipped"
   done
   DYTOY_TUI_QUEUE_POS="${#DYTOY_TUI_QUEUE[@]}"
   DYTOY_TUI_PHASE="done"
-  DYTOY_TUI_CURRENT=-1
 }
 
 #######################################
@@ -1137,10 +1295,11 @@ function dytoy_tui::prepare_sudo {
 # @noargs
 #######################################
 function dytoy_tui::cleanup {
-  if [[ -n "${DYTOY_TUI_PID}" ]]; then
-    dytoy_tui::kill_child
-    DYTOY_TUI_PID=""
-  fi
+  local pid
+  for pid in "${DYTOY_TUI_PIDS[@]}"; do
+    dytoy_tui::kill_child "${pid}"
+  done
+  DYTOY_TUI_PIDS=()
   if [[ -n "${DYTOY_TUI_KEEPALIVE_PID}" ]]; then
     kill "${DYTOY_TUI_KEEPALIVE_PID}" 2> /dev/null || true
     DYTOY_TUI_KEEPALIVE_PID=""
@@ -1172,6 +1331,7 @@ function dytoy_tui::summary {
 #######################################
 # @description Run the interface: pick tools, install them, and report.
 # @arg $1 string Path of the `dytoy` executable the children run
+# @env JOBS number Tools installed at once where their method allows, default `4`
 # @set DYTOY_TUI_FAILED `true` when a tool failed or was stopped
 # @exitcode 1 There is no terminal to take over
 #######################################
@@ -1179,6 +1339,10 @@ function dytoy_tui::run {
   local self
   dybatpho::expect_args self -- "$@"
   DYTOY_TUI_SELF="${self}"
+  DYTOY_TUI_JOBS="${JOBS:-4}"
+  if [[ ! "${DYTOY_TUI_JOBS}" =~ ^[1-9][0-9]*$ ]]; then
+    dybatpho::die "--jobs takes at least 1, got '${DYTOY_TUI_JOBS}'"
+  fi
   local state_dir run_id yaml_file
   state_dir="$(dybatpho::xdg_state_dir dytoy)"
   run_id="$(date +%Y%m%d-%H%M%S)"

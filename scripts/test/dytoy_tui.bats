@@ -113,10 +113,16 @@ function run_until_done {
   assert_equal "${DYTOY_TUI_PICKED[*]}" "false false false false"
 }
 
-@test "dytoy_tui::load_tools keeps only essential tools when asked" {
+@test "dytoy_tui::load_tools lists only essential tools when asked, keeping the rest for dependencies" {
   export ONLY_ESSENTIAL="true"
   dytoy_tui::load_tools
-  assert_equal "${DYTOY_TUI_NAME[*]}" "pkg missing"
+  assert_equal "${DYTOY_TUI_HIDDEN[*]}" "false true false true"
+  local -a items=()
+  dytoy_tui::tab_items items binary
+  assert_equal "${items[*]}" "2"
+  DYTOY_TUI_QUERY="s"
+  dytoy_tui::search_matches items
+  assert_equal "${items[*]}" "2"
 }
 
 @test "dytoy_tui::child_args passes the run options down to the child" {
@@ -221,7 +227,7 @@ function run_until_done {
 
   dytoy_tui::stop
   assert_equal "${DYTOY_TUI_PHASE}" "done"
-  assert_equal "${DYTOY_TUI_PID}" ""
+  assert_equal "${#DYTOY_TUI_PIDS[@]}" "0"
   assert_equal "${DYTOY_TUI_STATE[0]} ${DYTOY_TUI_STATE[2]} ${DYTOY_TUI_STATE[3]}" "failed skipped skipped"
 }
 
@@ -430,4 +436,214 @@ function run_until_done {
   # From here keys go to the install phase: `q` asks before stopping.
   dytoy_tui::handle_key char:q
   assert_equal "${DYTOY_TUI_MODE}" "confirm"
+}
+
+# Write a stand-in for the dytoy executable that takes a while, so tools that
+# run at the same time can be seen running together.
+function write_slow_self {
+  write_fake_self
+  printf '#!/usr/bin/env bash\nsleep 1\n' > "${DYTOY_TUI_SELF}"
+}
+
+@test "dytoy_tui::poll runs the tools of a parallel method at the same time" {
+  dytoy_tui::load_tools
+  write_slow_self
+  pick_tools 1 2
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+  dytoy_tui::poll
+  assert_equal "${#DYTOY_TUI_PIDS[@]}" "2"
+  assert_equal "${DYTOY_TUI_STATE[1]} ${DYTOY_TUI_STATE[2]}" "running running"
+  run_until_done
+  assert_equal "${DYTOY_TUI_STATE[1]} ${DYTOY_TUI_STATE[2]}" "ok ok"
+}
+
+@test "dytoy_tui::poll keeps the methods in order and the package manager to one tool" {
+  dytoy_tui::load_tools
+  write_slow_self
+  pick_tools 0 1 2 3
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+  dytoy_tui::poll
+  # `os` runs alone: nothing of a later method starts beside it.
+  assert_equal "${!DYTOY_TUI_PIDS[*]}" "0"
+  assert_equal "${DYTOY_TUI_STATE[1]}" "pending"
+  run_until_done
+  assert_equal "${DYTOY_TUI_STATE[*]}" "ok ok ok ok"
+}
+
+@test "dytoy_tui::method_jobs_into limits os and mise to one tool and the rest to --jobs" {
+  local limit
+  DYTOY_TUI_JOBS=6
+  dytoy_tui::method_jobs_into limit os
+  assert_equal "${limit}" "1"
+  dytoy_tui::method_jobs_into limit mise
+  assert_equal "${limit}" "1"
+  dytoy_tui::method_jobs_into limit binary
+  assert_equal "${limit}" "6"
+  dytoy_tui::method_jobs_into limit shell
+  assert_equal "${limit}" "6"
+}
+
+@test "dytoy_tui::poll runs one tool at a time with --jobs 1" {
+  dytoy_tui::load_tools
+  write_slow_self
+  DYTOY_TUI_JOBS=1
+  pick_tools 1 2
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+  dytoy_tui::poll
+  assert_equal "${!DYTOY_TUI_PIDS[*]}" "1"
+  assert_equal "${DYTOY_TUI_STATE[2]}" "pending"
+  dytoy_tui::stop
+}
+
+@test "dytoy_tui::stop ends every running tool" {
+  dytoy_tui::load_tools
+  write_fake_self
+  printf '#!/usr/bin/env bash\nsleep 30\n' > "${DYTOY_TUI_SELF}"
+  pick_tools 1 2 3
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+  dytoy_tui::poll
+  assert_equal "${#DYTOY_TUI_PIDS[@]}" "2"
+  local pids="${DYTOY_TUI_PIDS[*]}"
+
+  dytoy_tui::stop
+  assert_equal "${DYTOY_TUI_STATE[1]} ${DYTOY_TUI_STATE[2]} ${DYTOY_TUI_STATE[3]}" "failed failed skipped"
+  local pid
+  for pid in ${pids}; do
+    run kill -0 "${pid}"
+    assert_failure
+  done
+}
+
+@test "dytoy_tui::follow shows the first tool still running" {
+  dytoy_tui::load_tools
+  pick_tools 1 2 3
+  dytoy_tui::build_queue
+  DYTOY_TUI_QUEUE_POS=2
+  DYTOY_TUI_PIDS=([2]=111)
+  dytoy_tui::follow
+  assert_equal "${DYTOY_TUI_VIEW}" "1"
+  DYTOY_TUI_PIDS=()
+  dytoy_tui::follow
+  assert_equal "${DYTOY_TUI_VIEW}" "1"
+}
+
+# A YAML file where two tools share a dependency, which itself depends on
+# another tool, and one picked tool depends on another.
+function write_dependency_yaml {
+  write_tools_yaml << 'EOF'
+- name: base
+  method: os
+- name: runtime
+  method: mise
+  dependencies:
+    - base
+- name: alpha
+  method: shell
+  dependencies:
+    - runtime
+- name: beta
+  method: shell
+  dependencies:
+    - runtime
+- name: gamma
+  method: binary
+  dependencies:
+    - solo
+- name: solo
+  method: binary
+- name: delta
+  method: shell
+  dependencies:
+    - gamma
+    - ghost
+EOF
+}
+
+@test "dytoy_tui::dependency_closure_into follows dependencies of dependencies" {
+  write_dependency_yaml
+  dytoy_tui::load_tools
+  local -a closure=()
+  dytoy_tui::dependency_closure_into closure "${DYTOY_TUI_INDEX[alpha]}"
+  assert_equal "${closure[*]}" "${DYTOY_TUI_INDEX[runtime]} ${DYTOY_TUI_INDEX[base]}"
+  # A dependency that is not an enabled tool is left to the child.
+  dytoy_tui::dependency_closure_into closure "${DYTOY_TUI_INDEX[delta]}"
+  assert_equal "${closure[*]}" "${DYTOY_TUI_INDEX[gamma]} ${DYTOY_TUI_INDEX[solo]}"
+}
+
+@test "dytoy_tui::build_queue installs shared dependencies first, one at a time" {
+  write_dependency_yaml
+  dytoy_tui::load_tools
+  pick_tools "${DYTOY_TUI_INDEX[alpha]}" "${DYTOY_TUI_INDEX[beta]}"
+  dytoy_tui::build_queue
+  local -a names=() stages=() index
+  for index in "${DYTOY_TUI_QUEUE[@]}"; do
+    names+=("${DYTOY_TUI_NAME[index]}")
+    stages+=("${DYTOY_TUI_STAGE[index]}")
+  done
+  # `runtime` is needed by both, and `base` through it; `base` goes first.
+  assert_equal "${names[*]}" "base runtime alpha beta"
+  assert_equal "${stages[*]}" "dependencies dependencies shell shell"
+  local limit
+  dytoy_tui::method_jobs_into limit dependencies
+  assert_equal "${limit}" "1"
+}
+
+@test "dytoy_tui::build_queue installs a picked tool another picked tool needs first" {
+  write_dependency_yaml
+  dytoy_tui::load_tools
+  pick_tools "${DYTOY_TUI_INDEX[gamma]}" "${DYTOY_TUI_INDEX[delta]}"
+  dytoy_tui::build_queue
+  local -a names=() index
+  for index in "${DYTOY_TUI_QUEUE[@]}"; do
+    names+=("${DYTOY_TUI_NAME[index]}:${DYTOY_TUI_STAGE[index]}")
+  done
+  # `solo` is needed by both picked tools through `gamma`, and `gamma` itself
+  # is picked and needed by `delta`.
+  assert_equal "${names[*]}" "solo:dependencies gamma:dependencies delta:shell"
+}
+
+@test "dytoy_tui::build_queue leaves a dependency of one tool to that tool's child" {
+  write_dependency_yaml
+  dytoy_tui::load_tools
+  pick_tools "${DYTOY_TUI_INDEX[alpha]}"
+  dytoy_tui::build_queue
+  assert_equal "${DYTOY_TUI_QUEUE[*]}" "${DYTOY_TUI_INDEX[alpha]}"
+  assert_equal "${DYTOY_TUI_STAGE[${DYTOY_TUI_INDEX[alpha]}]}" "shell"
+}
+
+@test "dytoy_tui::poll finishes the shared dependencies before the tools that need them" {
+  write_dependency_yaml
+  dytoy_tui::load_tools
+  write_slow_self
+  pick_tools "${DYTOY_TUI_INDEX[alpha]}" "${DYTOY_TUI_INDEX[beta]}"
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+  dytoy_tui::poll
+  assert_equal "${!DYTOY_TUI_PIDS[*]}" "${DYTOY_TUI_INDEX[base]}"
+  run_until_done
+  local index
+  for index in "${DYTOY_TUI_QUEUE[@]}"; do
+    assert_equal "${DYTOY_TUI_STATE[index]}" "ok"
+  done
+  # Both dependents started only once `runtime` had finished.
+  local runtime_end=$((DYTOY_TUI_STARTED[DYTOY_TUI_INDEX[runtime]] + DYTOY_TUI_ELAPSED[DYTOY_TUI_INDEX[runtime]]))
+  ((DYTOY_TUI_STARTED[DYTOY_TUI_INDEX[alpha]] >= runtime_end))
+  ((DYTOY_TUI_STARTED[DYTOY_TUI_INDEX[beta]] >= runtime_end))
+}
+
+@test "dytoy_tui::draw_install marks a shared dependency" {
+  write_dependency_yaml
+  dytoy_tui::load_tools
+  pick_tools "${DYTOY_TUI_INDEX[alpha]}" "${DYTOY_TUI_INDEX[beta]}"
+  dytoy_tui::build_queue
+  DYTOY_TUI_PHASE="install"
+  DYTOY_TUI_LOG_DIR="${BATS_TEST_TMPDIR}"
+  dytoy_tui::draw
+  run screen_dump
+  assert_output --partial "mise/runtime · shared"
+  refute_output --partial "shell/alpha · shared"
 }
