@@ -33,6 +33,7 @@ bold, dim and reverse only under `NO_COLOR`.
 |`←` `→` `h` `l` `Tab`|Switch method tab|
 |`Space`|Pick or unpick the tool|
 |`a`|Pick the whole tab, or clear it|
+|`e`|Edit the tool's definition under `home/.chezmoitemplates/dytoy/` in `$VISUAL` or `$EDITOR`; run `chezmoi apply` afterwards for `dytoy` to install from it|
 |`f` `/`|Find a tool by name across every tab: type to filter, `Space` picks, `Enter` goes to it, `Esc` cancels|
 |`Enter`|Install the picked tools|
 |`q` `Esc`|Quit, or stop installing after a confirmation|

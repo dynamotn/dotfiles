@@ -88,6 +88,11 @@ declare -gA DYTOY_TUI_PALETTE=(
   [surface2]="#5b6078" [surface1]="#494d64" [surface0]="#363a4f" [base]="#24273a"
   [mantle]="#1e2030" [crust]="#181926"
 )
+# The source file each tool is defined in, by name; the installed `dytoy`
+# fills it, and a tool missing from it cannot be edited from the interface.
+declare -gA DYTOY_TUI_SOURCE=()
+# The terminal the editor runs on while the interface is suspended.
+DYTOY_TUI_TTY="/dev/tty"
 # The styles only this interface draws, set by dytoy_tui::theme; every other
 # style is a `DYBATPHO_SCREEN_STYLE_*` of the screen module's theme.
 DYTOY_TUI_STYLE_BRAND="" DYTOY_TUI_STYLE_ROW_BG="" DYTOY_TUI_STYLE_TEXT=""
@@ -791,7 +796,7 @@ function dytoy_tui::draw_pick {
   local total_picked
   dytoy_tui::picked_count_into total_picked ""
   dytoy_tui::draw_footer "${frame[2]}" \
-    "space" "pick" "f" "find" "a" "all" "←→" "tab" "enter" "install ${total_picked}" "q" "quit" \
+    "space" "pick" "f" "find" "e" "edit" "a" "all" "←→" "tab" "enter" "install ${total_picked}" "q" "quit" \
     "●" "installed" "○" "missing" "★" "essential"
 }
 
@@ -963,6 +968,7 @@ function dytoy_tui::handle_pick_key {
         cursor=$(((cursor + 1) % count))
       fi
       ;;
+    char:e) ((count > 0)) && dytoy_tui::edit_source "${items[cursor]}" ;;
     char:f | char:/)
       DYTOY_TUI_MODE="search"
       DYTOY_TUI_QUERY=""
@@ -991,6 +997,57 @@ function dytoy_tui::handle_pick_key {
   esac
   DYTOY_TUI_CURSOR["${method}"]="${cursor}"
   return 0
+}
+
+#######################################
+# @description Open the source file of a tool in the editor, with the
+# interface suspended, then show what the file now renders to.
+#
+# The file edited is the template under `.chezmoitemplates/dytoy/`, not the
+# generated `tools.yaml`, which the next apply would overwrite. The children
+# keep reading `tools.yaml`, so the change installs once it is applied; the
+# status line says so.
+# @arg $1 number Index of the tool
+# @env VISUAL string Editor to run, before `EDITOR`
+# @env EDITOR string Editor to run when `VISUAL` is unset, default `vi`
+# @set DYTOY_TUI_STATUS What happened
+#######################################
+function dytoy_tui::edit_source {
+  local index
+  dybatpho::expect_args index -- "$@"
+  local name="${DYTOY_TUI_NAME[index]}"
+  local source="${DYTOY_TUI_SOURCE[${name}]-}"
+  if [[ -z "${source}" ]] || ! dybatpho::is file "${source}"; then
+    DYTOY_TUI_STATUS="No source file is known for ${name}"
+    return 0
+  fi
+  # An editor is often given with arguments, such as `code --wait`.
+  local -a editor=()
+  read -r -a editor <<< "${VISUAL:-${EDITOR:-vi}}"
+
+  dytoy_tui::screen_end
+  # The editor gets the terminal itself, opened once for both directions,
+  # whatever this script's own streams were redirected to.
+  local status=0 tty
+  exec {tty}<> "${DYTOY_TUI_TTY}"
+  "${editor[@]}" "${source}" <&"${tty}" >&"${tty}" 2>&1 || status=$?
+  exec {tty}>&-
+  if ! dybatpho::screen_begin; then
+    DYTOY_TUI_RUNNING=false
+    return 0
+  fi
+  if ((status != 0)); then
+    DYTOY_TUI_STATUS="${editor[0]} exited with ${status}, ${source##*/} may be unchanged"
+    return 0
+  fi
+
+  # Show the edit straight away: render the template the way apply will.
+  local rendered
+  if dybatpho::is command chezmoi \
+    && rendered="$(chezmoi execute-template --file "${source}" 2> /dev/null)"; then
+    DYTOY_TUI_DETAIL["${index}"]="${rendered}"
+  fi
+  DYTOY_TUI_STATUS="Edited ${source##*/}; run chezmoi apply for dytoy to install from it"
 }
 
 #######################################
