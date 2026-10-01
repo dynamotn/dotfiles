@@ -152,6 +152,31 @@ EOF
   assert_success
 }
 
+@test "binary_download::verify_sha256 matches filenames prefixed with ./" {
+  local asset_file="${BATS_TEST_TMPDIR}/tool"
+  printf 'binary-data' > "${asset_file}"
+  local actual_hash
+  if command -v sha256sum > /dev/null 2>&1; then
+    actual_hash=$(sha256sum "${asset_file}" | awk '{print $1}')
+  else
+    actual_hash=$(shasum -a 256 "${asset_file}" | awk '{print $1}')
+  fi
+
+  function dybatpho::curl_download {
+    {
+      printf '%s  ./tool\n' "${actual_hash}"
+      printf '%s  ./tool-musl\n' "0000000000000000000000000000000000000000000000000000000000000000"
+    } > "$2"
+  }
+
+  run binary_download::verify_sha256 \
+    sample \
+    "${asset_file}" \
+    "https://example.com/v1.0.0/tool" \
+    "SHASUMS256.asc"
+  assert_success
+}
+
 @test "binary_download::verify_sha256 fails when hash does not match" {
   local asset_file="${BATS_TEST_TMPDIR}/tool.tar.gz"
   printf 'binary-data' > "${asset_file}"
