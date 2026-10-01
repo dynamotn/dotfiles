@@ -47,7 +47,12 @@ apply here.
   with functions namespaced `<area>::<verb>`.
 - They build on the `dybatpho` submodule (`scripts/lib/dybatpho`): use its
   helpers (`dybatpho::die`, `dybatpho::is`, `dybatpho::opts::*`) instead of
-  hand-rolling argument parsing or error handling.
+  hand-rolling argument parsing or error handling. This holds for every bash
+  script in the tree, including `scripts/*.sh` and `.chezmoiscripts/` hooks,
+  not only the libraries.
+- Lint every shell script you add or change with `dyshellint`, and fix what
+  it reports rather than disabling the rule; a deliberate exception carries
+  `# dyshellint disable=<CODE> <reason>` on the line above it.
 - Document with the existing comment style: `# @file`, `# @brief`,
   `# @description`, `# @arg`, `# @stdout`.
 - Every library has a matching `scripts/test/<area>.bats`. A new function that
@@ -59,6 +64,7 @@ apply here.
 ./scripts/test.sh --all        # whole bats suite
 ./scripts/test.sh --dytoy      # dytoy YAML against its schema
 ./scripts/test.sh --secrets    # secrets YAML against schemas/secrets/
+dyshellint <changed scripts>   # shellcheck + shfmt + its own rules
 pre-commit run --all-files     # incl. betterleaks and detect-private-key
 ```
 
