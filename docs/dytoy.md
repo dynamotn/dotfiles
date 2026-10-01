@@ -2,6 +2,7 @@
 
 <!-- toc -->
 
+- [Usage](#usage)
 - [Prerequisite](#prerequisite)
 - [System core tools](#system-core-tools)
 - [Everyday terminal applications](#everyday-terminal-applications)
@@ -17,6 +18,31 @@
 - [Miscellaneous applications](#miscellaneous-applications)
 
 <!-- tocstop -->
+
+## Usage
+
+Run `dytoy` in a terminal to open a full-screen interface: one tab per
+installer method, a checkbox per tool, and the YAML of the tool under the
+cursor. Nothing is picked until you pick it.
+
+|Key|Action|
+|---|------|
+|`↑` `↓` `j` `k`|Move the cursor|
+|`←` `→` `h` `l` `Tab`|Switch method tab|
+|`Space`|Pick or unpick the tool|
+|`a`|Pick the whole tab, or clear it|
+|`Enter`|Install the picked tools|
+|`q` `Esc`|Quit, or stop installing after a confirmation|
+|`f`|Follow the log of the running tool again|
+
+Each picked tool runs as its own `dytoy <method> --tool <name>` and its output
+goes to `~/.local/state/dytoy/logs/<run>/`, shown in the log pane. When a
+package manager tool is picked, `sudo` asks for the password once, before the
+interface starts installing.
+
+Without a terminal (a chezmoi hook, a pipe) or with `--no-tui`, `dytoy` keeps
+the plain run: every method in order, `os` first. `dytoy <method>` and
+`dytoy --tool <name>` never open the interface.
 
 ## Prerequisite
 

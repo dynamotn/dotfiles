@@ -72,6 +72,33 @@ function assert_entrypoint_help {
   assert_entrypoint_help "home/dot_local/bin/executable_dytoy.tmpl" "--tool" "--sync"
 }
 
+@test "dytoy offers its full-screen interface as a root option only" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+
+  run bash "${rendered}" --help
+  assert_success
+  assert_output --partial "--no-tui"
+  run bash "${rendered}" binary --help
+  assert_success
+  refute_output --partial "--no-tui"
+}
+
+@test "dytoy keeps the plain run when it has no terminal" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: shell
+  content: echo hi
+EOF
+
+  run bash "${rendered}" --dry-run < /dev/null
+  assert_success
+  assert_output --partial "Installed all shell tools"
+  refute_output --partial $'\033[?1049h'
+}
+
 @test "dytoy lists one subcommand per installer method" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
