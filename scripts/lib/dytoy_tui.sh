@@ -813,6 +813,15 @@ function dytoy_tui::run {
     if [[ "${DYTOY_TUI_PHASE}" == "pick" ]]; then
       dybatpho::screen_event key || continue
       dytoy_tui::handle_pick_key "${key}"
+      # A frame takes longer to draw than a held key takes to repeat, so every
+      # key already waiting is handled before the next one is drawn; otherwise
+      # the cursor keeps moving long after the key is released.
+      while [[ "${DYTOY_TUI_PHASE}" == "pick" ]] \
+        && dybatpho::is true "${DYTOY_TUI_RUNNING}" \
+        && dybatpho::screen_pending; do
+        dybatpho::screen_event key || break
+        dytoy_tui::handle_pick_key "${key}"
+      done
       if [[ "${DYTOY_TUI_PHASE}" == "install" ]]; then
         # The logs are the interface's own, so they are written in a dry run
         # too, where `dybatpho::ensure_dir` would only say it creates them.
@@ -829,6 +838,10 @@ function dytoy_tui::run {
     # The deadline keeps the spinner and the log moving while no key comes.
     if dybatpho::screen_event key 0.1; then
       dytoy_tui::handle_install_key "${key}"
+      while dybatpho::is true "${DYTOY_TUI_RUNNING}" && dybatpho::screen_pending; do
+        dybatpho::screen_event key || break
+        dytoy_tui::handle_install_key "${key}"
+      done
     fi
     dytoy_tui::poll
   done
