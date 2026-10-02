@@ -95,7 +95,7 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[jq](https://github.com/jqlang/jq)|JSON processor|
 |[delta](https://github.com/dandavison/delta)|Syntax highlighting pager for git, diff, and grep output|
 |[hunk](https://github.com/modem-dev/hunk)|Review-first diff viewer for git|
-|[bat](https://github.com/sharkdp/bat)|Alternative to `cat` with syntax highlighting and Git integration|
+|[nvimpager](https://github.com/lucc/nvimpager)|Alternative to `cat`, reading files through Neovim itself|
 |[ov](https://github.com/noborus/ov)|Alternative to `less`, `more`, `tail -f`|
 |[tspin](https://github.com/bensadeh/tailspin)|Alternative to `tail` with highlighter|
 |[fd](https://github.com/sharkdp/fd)|Alternative to `find`, simpler and faster|

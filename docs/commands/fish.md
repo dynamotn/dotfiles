@@ -263,7 +263,7 @@ Each is defined only when the replacement is installed.
 
 | Alias | Expansion |
 |-------|-----------|
-| `cat` | `bat` |
+| `cat` | `nvimpager` |
 | `ls` | `eza --icons auto --color=always` |
 | `ping` | `gping` |
 | `top` / `htop` | `btop` |

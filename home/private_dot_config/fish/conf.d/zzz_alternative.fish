@@ -1,5 +1,5 @@
 type -q grc; and __caran_setup_grc
-type -q bat; and alias cat bat
+type -q nvimpager; and alias cat nvimpager
 type -q eza; and alias ls 'eza --icons auto --color=always'
 type -q gping; and alias ping gping
 type -q btop; and alias top btop

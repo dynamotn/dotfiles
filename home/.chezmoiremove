@@ -8,3 +8,6 @@
 .config/fish/completions/dytoy_binary.fish
 .config/fish/completions/dytoy_mise.fish
 .config/fish/completions/dytoy_shell.fish
+
+# Replaced by nvimpager, which reads files through Neovim itself.
+.config/bat
