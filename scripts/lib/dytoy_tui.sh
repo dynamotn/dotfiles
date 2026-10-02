@@ -15,9 +15,10 @@
 # Each tool runs as a child rather than in this shell so that a failing tool,
 # which ends its process with `dybatpho::die`, does not end the interface, and
 # so that its output can be shown in a pane instead of scrolling over the
-# frame. A child cannot answer a prompt, so `sudo` is authenticated before the
-# install phase and every child sees a `sudo` that never asks.
-dybatpho::load screen
+# frame. A child cannot answer a prompt, so the `privilege` module of dybatpho
+# authenticates before the install phase and every child sees a `sudo` that
+# never asks.
+dybatpho::load screen privilege array
 
 # Every enabled tool, in install order, as parallel arrays indexed alike.
 declare -ga DYTOY_TUI_NAME=()
@@ -72,13 +73,13 @@ DYTOY_TUI_RUNNING=true
 DYTOY_TUI_STATUS=""
 DYTOY_TUI_SELF=""
 DYTOY_TUI_LOG_DIR=""
-DYTOY_TUI_WRAP_DIR=""
-DYTOY_TUI_KEEPALIVE_PID=""
 
 declare -ga DYTOY_TUI_SPINNER=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
-# The Catppuccin palette the theme is built from, by colour name. Macchiato is
-# the default; the installed `dytoy` replaces it with the flavour chezmoi
-# renders, so the interface matches the terminal.
+# The Catppuccin flavour of the screen module's theme, and its palette by
+# colour name, which the styles only this interface draws are built from.
+# Macchiato is the default; the installed `dytoy` replaces both with the
+# flavour chezmoi renders, so the interface matches the terminal.
+DYTOY_TUI_FLAVOUR="macchiato"
 declare -gA DYTOY_TUI_PALETTE=(
   [rosewater]="#f4dbd6" [flamingo]="#f0c6c6" [pink]="#f5bde6" [mauve]="#c6a0f6"
   [red]="#ed8796" [maroon]="#ee99a0" [peach]="#f5a97f" [yellow]="#eed49f"
@@ -318,56 +319,49 @@ function dytoy_tui::log_tail {
 }
 
 #######################################
-# @description Fill an array with every tool a tool depends on, directly or
-# through another dependency, by index. A dependency that is not an enabled
-# tool of the YAML file is left to the child, which reports it.
-# @arg $1 string Name of the array variable receiving the indexes
-# @arg $2 number Index of the tool
+# @description Fill an associative array with the dependency graph of the
+# enabled tools by index, in the shape `dybatpho::array_toposort` reads. A
+# dependency that is not an enabled tool of the YAML file is left out, for the
+# child to report.
+# @arg $1 string Name of the associative array receiving the edges
 #######################################
-function dytoy_tui::dependency_closure_into {
-  local __dytoy_tui_closure_ref start
-  dybatpho::expect_args __dytoy_tui_closure_ref start -- "$@"
-  local -n __dytoy_tui_closure="${__dytoy_tui_closure_ref}"
-  __dytoy_tui_closure=()
-  local -A seen=(["${start}"]=1)
-  local -a pending=("${start}")
-  local index name dependency
+function dytoy_tui::dependency_graph_into {
+  local __dytoy_tui_graph_ref
+  dybatpho::expect_args __dytoy_tui_graph_ref -- "$@"
+  local -n __dytoy_tui_graph="${__dytoy_tui_graph_ref}"
+  __dytoy_tui_graph=()
+  local index name dependency edges
   local -a names=()
-  while ((${#pending[@]} > 0)); do
-    index="${pending[0]}"
-    pending=("${pending[@]:1}")
+  for index in "${!DYTOY_TUI_NAME[@]}"; do
+    edges=""
     IFS=, read -r -a names <<< "${DYTOY_TUI_DEPS[index]}"
     for name in "${names[@]}"; do
       dependency="${DYTOY_TUI_INDEX[${name}]-}"
-      [[ -n "${dependency}" && -z "${seen[${dependency}]-}" ]] || continue
-      seen["${dependency}"]=1
-      __dytoy_tui_closure+=("${dependency}")
-      pending+=("${dependency}")
+      [[ -z "${dependency}" ]] || edges+="${edges:+ }${dependency}"
     done
+    __dytoy_tui_graph["${index}"]="${edges}"
   done
   return 0
 }
 
 #######################################
-# @description Append a tool to the order the shared dependencies install in,
-# after whatever it depends on, so a dependency of a dependency goes first.
-# @arg $1 number Index of the tool
-# @env __DYTOY_TUI_EARLY Tools installed ahead of the others, by index
-# @set __DYTOY_TUI_ORDER The order, built up across calls
+# @description Fill an array with every tool a tool depends on, directly or
+# through another dependency, by index.
+# @arg $1 string Name of the array variable receiving the indexes
+# @arg $2 string Name of the dependency graph, from dytoy_tui::dependency_graph_into
+# @arg $3 number Index of the tool
 #######################################
-function dytoy_tui::order_dependency {
+function dytoy_tui::dependency_closure_into {
+  local __dytoy_tui_closure_ref __dytoy_tui_closure_graph start
+  dybatpho::expect_args __dytoy_tui_closure_ref __dytoy_tui_closure_graph start -- "$@"
+  local -n __dytoy_tui_closure="${__dytoy_tui_closure_ref}"
+  local -a __dytoy_tui_reachable=()
+  dybatpho::array_closure "${__dytoy_tui_closure_graph}" __dytoy_tui_reachable "${start}"
+  __dytoy_tui_closure=()
   local index
-  dybatpho::expect_args index -- "$@"
-  [[ -z "${__DYTOY_TUI_VISITED[${index}]-}" ]] || return 0
-  __DYTOY_TUI_VISITED["${index}"]=1
-  local name dependency
-  local -a names=()
-  IFS=, read -r -a names <<< "${DYTOY_TUI_DEPS[index]}"
-  for name in "${names[@]}"; do
-    dependency="${DYTOY_TUI_INDEX[${name}]-}"
-    [[ -n "${dependency}" ]] && dytoy_tui::order_dependency "${dependency}"
+  for index in "${__dytoy_tui_reachable[@]}"; do
+    [[ "${index}" == "${start}" ]] || __dytoy_tui_closure+=("${index}")
   done
-  [[ -n "${__DYTOY_TUI_EARLY[${index}]-}" ]] && __DYTOY_TUI_ORDER+=("${index}")
   return 0
 }
 
@@ -388,38 +382,44 @@ function dytoy_tui::build_queue {
   DYTOY_TUI_QUEUE=()
   DYTOY_TUI_STAGE=()
   local index dependency
-  local -a closure=()
-  local -A needed_by=()
-  declare -gA __DYTOY_TUI_EARLY=() __DYTOY_TUI_VISITED=()
-  declare -ga __DYTOY_TUI_ORDER=()
+  local -a closure=() roots=() order=()
+  local -A needed_by=() early=()
+  # shellcheck disable=SC2034 # read by name through the dybatpho::array_* calls
+  local -A graph=()
+  dytoy_tui::dependency_graph_into graph
   for index in "${!DYTOY_TUI_NAME[@]}"; do
     dybatpho::is true "${DYTOY_TUI_PICKED[index]}" || continue
-    dytoy_tui::dependency_closure_into closure "${index}"
+    dytoy_tui::dependency_closure_into closure graph "${index}"
     for dependency in "${closure[@]}"; do
       needed_by["${dependency}"]=$((${needed_by[${dependency}]:-0} + 1))
-      dybatpho::is true "${DYTOY_TUI_PICKED[dependency]}" && __DYTOY_TUI_EARLY["${dependency}"]=1
+      dybatpho::is true "${DYTOY_TUI_PICKED[dependency]}" && early["${dependency}"]=1
     done
   done
   for dependency in "${!needed_by[@]}"; do
-    ((needed_by[${dependency}] >= 2)) && __DYTOY_TUI_EARLY["${dependency}"]=1
+    ((needed_by[${dependency}] >= 2)) && early["${dependency}"]=1
   done
   for index in "${!DYTOY_TUI_NAME[@]}"; do
-    [[ -n "${__DYTOY_TUI_EARLY[${index}]-}" ]] && dytoy_tui::order_dependency "${index}"
+    [[ -z "${early[${index}]-}" ]] || roots+=("${index}")
   done
+  # A dependency of a dependency goes first. A cycle is broken where it
+  # closes rather than refused: each child still installs its own side.
+  if ((${#roots[@]} > 0)); then
+    dybatpho::array_toposort graph order "${roots[@]}" || true
+  fi
 
-  for index in "${__DYTOY_TUI_ORDER[@]}"; do
+  for index in "${order[@]}"; do
+    [[ -n "${early[${index}]-}" ]] || continue
     DYTOY_TUI_QUEUE+=("${index}")
     DYTOY_TUI_STAGE[index]="dependencies"
     DYTOY_TUI_STATE[index]="pending"
   done
   for index in "${!DYTOY_TUI_NAME[@]}"; do
     dybatpho::is true "${DYTOY_TUI_PICKED[index]}" || continue
-    [[ -z "${__DYTOY_TUI_EARLY[${index}]-}" ]] || continue
+    [[ -z "${early[${index}]-}" ]] || continue
     DYTOY_TUI_QUEUE+=("${index}")
     DYTOY_TUI_STAGE[index]="${DYTOY_TUI_METHOD[index]}"
     DYTOY_TUI_STATE[index]="pending"
   done
-  unset __DYTOY_TUI_EARLY __DYTOY_TUI_VISITED __DYTOY_TUI_ORDER
   DYTOY_TUI_QUEUE_POS=0
   DYTOY_TUI_VIEW=0
   DYTOY_TUI_FOLLOW=true
@@ -469,18 +469,20 @@ function dytoy_tui::colour_into {
 }
 
 #######################################
-# @description Set the colours of the interface from the Catppuccin palette
-# in `DYTOY_TUI_PALETTE`, for the screen module's widgets and for the few
-# styles only this interface draws. The palette is Macchiato unless the
-# installed `dytoy` was rendered with another flavour. `NO_COLOR` gives the
-# `mono` theme and leaves bold, dim and reverse to mark what matters.
+# @description Set the colours of the interface: the screen module's
+# Catppuccin theme of `DYTOY_TUI_FLAVOUR` for its widgets, and the palette in
+# `DYTOY_TUI_PALETTE` for the few styles only this interface draws. Where
+# `dybatpho::color_supported` says colour is not wanted, the `mono` theme
+# leaves bold, dim and reverse to mark what matters.
 # @noargs
-# @env NO_COLOR string Draw without colours when set to a non-empty value
+# @env DYTOY_TUI_FLAVOUR string Catppuccin flavour: `latte`, `frappe`, `macchiato` or `mocha`
 # @env DYTOY_TUI_PALETTE array Catppuccin colours by name, `#rrggbb`
 #######################################
 function dytoy_tui::theme {
-  if [[ -n "${NO_COLOR:-}" ]]; then
-    dybatpho::screen_theme mono
+  # The screen module's widgets read its styles, which it declares exported.
+  dybatpho::screen_theme "catppuccin-${DYTOY_TUI_FLAVOUR}" \
+    || dybatpho::die "${FUNCNAME[0]}: Unknown Catppuccin flavour '${DYTOY_TUI_FLAVOUR}'"
+  if ! dybatpho::color_supported stdout; then
     DYTOY_TUI_STYLE_BRAND="1;7"
     DYTOY_TUI_STYLE_ROW_BG=""
     DYTOY_TUI_STYLE_TEXT="0"
@@ -492,47 +494,17 @@ function dytoy_tui::theme {
     DYTOY_TUI_STYLE_BADGE="1;7"
     return 0
   fi
-  local text subtext1 overlay1 surface0 surface1 surface2 mantle crust
-  local mauve pink lavender blue sky green yellow peach red
-  local mauve_bg lavender_bg yellow_bg surface1_fg
+  local text surface0 surface1 crust blue sky peach mauve_bg yellow_bg
   dytoy_tui::colour_into text fg text
-  dytoy_tui::colour_into subtext1 fg subtext1
-  dytoy_tui::colour_into overlay1 fg overlay1
   dytoy_tui::colour_into surface0 bg surface0
-  dytoy_tui::colour_into surface1 bg surface1
-  dytoy_tui::colour_into surface1_fg fg surface1
-  dytoy_tui::colour_into surface2 fg surface2
-  dytoy_tui::colour_into mantle bg mantle
+  dytoy_tui::colour_into surface1 fg surface1
   dytoy_tui::colour_into crust fg crust
-  dytoy_tui::colour_into mauve fg mauve
-  dytoy_tui::colour_into pink fg pink
-  dytoy_tui::colour_into lavender fg lavender
   dytoy_tui::colour_into blue fg blue
   dytoy_tui::colour_into sky fg sky
-  dytoy_tui::colour_into green fg green
-  dytoy_tui::colour_into yellow fg yellow
   dytoy_tui::colour_into peach fg peach
-  dytoy_tui::colour_into red fg red
   dytoy_tui::colour_into mauve_bg bg mauve
-  dytoy_tui::colour_into lavender_bg bg lavender
   dytoy_tui::colour_into yellow_bg bg yellow
 
-  # The screen module's widgets: frames, selection, tabs, the key bar. They are
-  # exported, as the screen module declares them, since its widgets read them.
-  export DYBATPHO_SCREEN_STYLE_SELECTED="1;${text};${surface1}"
-  export DYBATPHO_SCREEN_STYLE_BORDER="${surface2}"
-  export DYBATPHO_SCREEN_STYLE_FOCUS="${mauve}"
-  export DYBATPHO_SCREEN_STYLE_TITLE="1;${lavender}"
-  export DYBATPHO_SCREEN_STYLE_TAB_ACTIVE="1;${crust};${lavender_bg}"
-  export DYBATPHO_SCREEN_STYLE_KEYBAR="${subtext1};${mantle}"
-  export DYBATPHO_SCREEN_STYLE_KEY="1;${mauve}"
-  export DYBATPHO_SCREEN_STYLE_ACCENT="1;${pink}"
-  export DYBATPHO_SCREEN_STYLE_DIM="${overlay1}"
-  export DYBATPHO_SCREEN_STYLE_OK="1;${green}"
-  export DYBATPHO_SCREEN_STYLE_WARN="${yellow}"
-  export DYBATPHO_SCREEN_STYLE_ERROR="1;${red}"
-
-  # What only this interface draws.
   DYTOY_TUI_STYLE_BRAND="1;${crust};${mauve_bg}"
   DYTOY_TUI_STYLE_ROW_BG="${surface0}"
   DYTOY_TUI_STYLE_TEXT="${text}"
@@ -540,7 +512,7 @@ function dytoy_tui::theme {
   DYTOY_TUI_STYLE_RUN="1;${sky}"
   DYTOY_TUI_STYLE_KEY="${blue}"
   DYTOY_TUI_STYLE_VALUE="${peach}"
-  DYTOY_TUI_STYLE_GAUGE_EMPTY="${surface1_fg}"
+  DYTOY_TUI_STYLE_GAUGE_EMPTY="${surface1}"
   DYTOY_TUI_STYLE_BADGE="1;${crust};${yellow_bg}"
 }
 
@@ -1128,7 +1100,7 @@ function dytoy_tui::start_install {
   if ! dytoy_tui::prepare_sudo; then
     DYTOY_TUI_PHASE="pick"
     DYTOY_TUI_QUEUE=()
-    DYTOY_TUI_STATUS="sudo authentication failed, nothing was installed"
+    DYTOY_TUI_STATUS="Authentication failed, nothing was installed"
   fi
   return 0
 }
@@ -1275,15 +1247,14 @@ function dytoy_tui::start_next {
 
   # Job control gives the child a process group of its own, so stopping it
   # reaches whatever it started too. Its stdin is closed so nothing waits on a
-  # prompt nobody can see.
-  local path="${PATH}"
-  [[ -n "${DYTOY_TUI_WRAP_DIR}" ]] && path="${DYTOY_TUI_WRAP_DIR}:${PATH}"
+  # prompt nobody can see, and the `sudo` it finds first on `PATH` is the one
+  # `dybatpho::privilege_acquire --shield` put there, which never asks.
   # The log is not a terminal, but its colours are drawn in the log pane, so
-  # the tools that look for a terminal are told to colour anyway.
+  # the tools that look for a terminal are told to colour as the frame does.
   local -a colour=()
-  [[ -n "${NO_COLOR:-}" ]] || colour=(FORCE_COLOR=1 CLICOLOR_FORCE=1)
+  dybatpho::color_supported stdout && colour=(FORCE_COLOR=1 CLICOLOR_FORCE=1)
   set -m
-  env PATH="${path}" "${colour[@]}" "${DYTOY_TUI_SELF}" "${args[@]}" >> "${log}" 2>&1 < /dev/null &
+  env "${colour[@]}" "${DYTOY_TUI_SELF}" "${args[@]}" >> "${log}" 2>&1 < /dev/null &
   DYTOY_TUI_PIDS["${index}"]=$!
   set +m
 }
@@ -1374,8 +1345,7 @@ function dytoy_tui::screen_end {
 #######################################
 function dytoy_tui::needs_sudo {
   dybatpho::is true "${DRY_RUN}" && return 1
-  dybatpho::is_root && return 1
-  dybatpho::is command sudo || return 1
+  dybatpho::privilege_needed || return 1
   local index
   for index in "${DYTOY_TUI_QUEUE[@]}"; do
     [[ "${DYTOY_TUI_METHOD[index]}" == "os" ]] && return 0
@@ -1384,41 +1354,39 @@ function dytoy_tui::needs_sudo {
 }
 
 #######################################
+# @description Give the terminal back around the password prompt of
+# `dybatpho::privilege_acquire`, which is drawn on the normal screen.
+# @arg $1 string `suspend` or `resume`
+#######################################
+function dytoy_tui::privilege_hand_over {
+  local action
+  dybatpho::expect_args action -- "$@"
+  case "${action}" in
+    suspend)
+      local command_name
+      command_name="$(dybatpho::privilege_command)"
+      dytoy_tui::screen_end
+      printf 'dytoy needs %s to install packages.\n' "${command_name}" >&2
+      ;;
+    resume) dybatpho::screen_begin ;;
+    *) dybatpho::die "${FUNCNAME[0]}: Unknown action '${action}'" ;;
+  esac
+}
+
+#######################################
 # @description Make `sudo` usable from the children without a prompt. The
 # password is asked for once, outside the interface, and kept fresh in the
 # background; the children then find a `sudo` that refuses rather than asks,
 # because a prompt drawn over the frame can be neither seen nor answered.
+# The escalation is released when the interface ends.
 # @noargs
 # @exitcode 1 Authentication was needed and failed
 #######################################
 function dytoy_tui::prepare_sudo {
-  dybatpho::is command sudo || return 0
-  dybatpho::is_root && return 0
-
-  if dytoy_tui::needs_sudo; then
-    dytoy_tui::screen_end
-    printf 'dytoy needs sudo to install packages.\n' >&2
-    local status=0
-    # dyshellint disable=BSG035 package managers need root, and the children cannot prompt
-    sudo -v || status=$?
-    dybatpho::screen_begin || return 1
-    ((status == 0)) || return 1
-    (
-      while kill -0 "$$" 2> /dev/null; do
-        # dyshellint disable=BSG035 refreshing the timestamp only, it never prompts
-        sudo -n -v 2> /dev/null || true
-        sleep 60
-      done
-    ) > /dev/null 2>&1 < /dev/null &
-    DYTOY_TUI_KEEPALIVE_PID=$!
-  fi
-
-  local real_sudo
-  real_sudo="$(command -v sudo)"
-  DYTOY_TUI_WRAP_DIR="$(dybatpho::path_join "${DYTOY_TUI_LOG_DIR}" ".bin")"
-  mkdir -p -- "${DYTOY_TUI_WRAP_DIR}"
-  printf '#!/bin/sh\nexec %q -n "$@"\n' "${real_sudo}" > "${DYTOY_TUI_WRAP_DIR}/sudo"
-  chmod +x "${DYTOY_TUI_WRAP_DIR}/sudo"
+  dytoy_tui::needs_sudo || return 0
+  # shellcheck disable=SC2034 # read by dybatpho::privilege_acquire
+  DYBATPHO_PRIVILEGE_SUSPEND_HOOK="dytoy_tui::privilege_hand_over"
+  dybatpho::privilege_acquire --shield
 }
 
 #######################################
@@ -1432,10 +1400,6 @@ function dytoy_tui::cleanup {
     dytoy_tui::kill_child "${pid}"
   done
   DYTOY_TUI_PIDS=()
-  if [[ -n "${DYTOY_TUI_KEEPALIVE_PID}" ]]; then
-    kill "${DYTOY_TUI_KEEPALIVE_PID}" 2> /dev/null || true
-    DYTOY_TUI_KEEPALIVE_PID=""
-  fi
   return 0
 }
 

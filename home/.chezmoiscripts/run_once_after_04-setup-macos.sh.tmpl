@@ -3,7 +3,7 @@
 # @brief Apply the macOS defaults and the keyboard mapping
 # @description Apply every defaults file under `dot_macos` and set the modifier key
 # mapping. Only runs on macOS.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules privilege
 dybatpho::register_common_handlers
 
 {{- if eq .chezmoi.os "darwin" }}
@@ -11,12 +11,12 @@ dybatpho::register_common_handlers
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
 dybatpho::header "Setup MacOS"
-sudo scutil --set HostName {{ .code }}
+dybatpho::privilege_run -- scutil --set HostName {{ .code }}
 macos_defaults_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".macos")"
 macos-defaults apply "${macos_defaults_dir}"
 
 # Disable the sound effects on boot
-sudo nvram SystemAudioVolume=" "
+dybatpho::privilege_run -- nvram SystemAudioVolume=" "
 # Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -r -domain local -domain system -domain user
 

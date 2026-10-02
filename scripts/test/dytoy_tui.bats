@@ -284,7 +284,7 @@ function run_until_done {
 }
 
 @test "dytoy_tui::draw_install shows a child's log with its colours" {
-  export NO_COLOR=""
+  export NO_COLOR="" FORCE_COLOR=1
   dytoy_tui::theme
   dytoy_tui::load_tools
   write_fake_self
@@ -303,7 +303,7 @@ function run_until_done {
 }
 
 @test "dytoy_tui::put_yaml colours keys apart from their values" {
-  export NO_COLOR=""
+  export NO_COLOR="" FORCE_COLOR=1
   dytoy_tui::theme
   dytoy_tui::put_yaml 0 0 40 "  repo: owner/tool"
   dytoy_tui::put_yaml 1 0 40 "  - name: tool"
@@ -323,7 +323,7 @@ function run_until_done {
   done
 }
 
-@test "dytoy_tui::start_next lets the child colour its log unless NO_COLOR is set" {
+@test "dytoy_tui::start_next lets the child colour its log only where the frame has colour" {
   dytoy_tui::load_tools
   write_fake_self
   printf '#!/usr/bin/env bash\nprintf "%%s|%%s\\n" "${FORCE_COLOR-}" "${CLICOLOR_FORCE-}"\n' > "${DYTOY_TUI_SELF}"
@@ -331,12 +331,13 @@ function run_until_done {
   dytoy_tui::build_queue
   DYTOY_TUI_PHASE="install"
 
-  export NO_COLOR=""
+  export NO_COLOR="" FORCE_COLOR=1
   run_until_done
   run cat "${DYTOY_TUI_LOG[3]}"
   assert_output --partial "1|1"
 
   export NO_COLOR=1
+  unset FORCE_COLOR
   dytoy_tui::build_queue
   DYTOY_TUI_PHASE="install"
   run_until_done
@@ -563,15 +564,29 @@ function write_dependency_yaml {
 EOF
 }
 
+@test "dytoy_tui::dependency_graph_into maps each tool to the enabled tools it needs" {
+  write_dependency_yaml
+  dytoy_tui::load_tools
+  local -A graph=()
+  dytoy_tui::dependency_graph_into graph
+  assert_equal "${graph[${DYTOY_TUI_INDEX[alpha]}]}" "${DYTOY_TUI_INDEX[runtime]}"
+  assert_equal "${graph[${DYTOY_TUI_INDEX[solo]}]}" ""
+  # A dependency that is not an enabled tool is left to the child.
+  assert_equal "${graph[${DYTOY_TUI_INDEX[delta]}]}" "${DYTOY_TUI_INDEX[gamma]}"
+}
+
 @test "dytoy_tui::dependency_closure_into follows dependencies of dependencies" {
   write_dependency_yaml
   dytoy_tui::load_tools
-  local -a closure=()
-  dytoy_tui::dependency_closure_into closure "${DYTOY_TUI_INDEX[alpha]}"
-  assert_equal "${closure[*]}" "${DYTOY_TUI_INDEX[runtime]} ${DYTOY_TUI_INDEX[base]}"
-  # A dependency that is not an enabled tool is left to the child.
-  dytoy_tui::dependency_closure_into closure "${DYTOY_TUI_INDEX[delta]}"
-  assert_equal "${closure[*]}" "${DYTOY_TUI_INDEX[gamma]} ${DYTOY_TUI_INDEX[solo]}"
+  local -A graph=()
+  dytoy_tui::dependency_graph_into graph
+  local -a closure=() expected=()
+  dytoy_tui::dependency_closure_into closure graph "${DYTOY_TUI_INDEX[alpha]}"
+  mapfile -t expected < <(printf '%s\n' "${DYTOY_TUI_INDEX[runtime]}" "${DYTOY_TUI_INDEX[base]}" | LC_ALL=C sort)
+  assert_equal "${closure[*]}" "${expected[*]}"
+  dytoy_tui::dependency_closure_into closure graph "${DYTOY_TUI_INDEX[delta]}"
+  mapfile -t expected < <(printf '%s\n' "${DYTOY_TUI_INDEX[gamma]}" "${DYTOY_TUI_INDEX[solo]}" | LC_ALL=C sort)
+  assert_equal "${closure[*]}" "${expected[*]}"
 }
 
 @test "dytoy_tui::build_queue installs shared dependencies first, one at a time" {
@@ -660,21 +675,85 @@ EOF
 }
 
 @test "dytoy_tui::theme draws in Catppuccin Macchiato by default" {
-  export NO_COLOR=""
+  export NO_COLOR="" FORCE_COLOR=1
   dytoy_tui::theme
   assert_equal "${DYBATPHO_SCREEN_STYLE_FOCUS}" "38;2;198;160;246"
   assert_equal "${DYBATPHO_SCREEN_STYLE_OK}" "1;38;2;166;218;149"
-  assert_equal "${DYBATPHO_SCREEN_STYLE_KEYBAR}" "38;2;184;192;224;48;2;30;32;48"
+  assert_equal "${DYBATPHO_SCREEN_STYLE_KEYBAR}" "38;2;165;173;203;48;2;30;32;48"
   assert_equal "${DYTOY_TUI_STYLE_ROW_BG}" "48;2;54;58;79"
   assert_equal "${DYTOY_TUI_STYLE_BRAND}" "1;38;2;24;25;38;48;2;198;160;246"
 }
 
-@test "dytoy_tui::theme follows the palette the installed dytoy was rendered with" {
-  export NO_COLOR=""
-  # Latte's mauve, as a light terminal would render it.
+@test "dytoy_tui::theme follows the flavour the installed dytoy was rendered with" {
+  export NO_COLOR="" FORCE_COLOR=1
+  # Latte, as a light terminal would render it.
+  DYTOY_TUI_FLAVOUR="latte"
   DYTOY_TUI_PALETTE[mauve]="#8839ef"
   dytoy_tui::theme
   assert_equal "${DYBATPHO_SCREEN_STYLE_FOCUS}" "38;2;136;57;239"
+  assert_equal "${DYTOY_TUI_STYLE_BRAND}" "1;38;2;24;25;38;48;2;136;57;239"
+}
+
+@test "dytoy_tui::theme refuses a flavour Catppuccin does not have" {
+  DYTOY_TUI_FLAVOUR="espresso"
+  run dytoy_tui::theme
+  assert_failure
+  assert_output --partial "Unknown Catppuccin flavour 'espresso'"
+}
+
+@test "dytoy_tui::theme draws without colours where the output is not a terminal" {
+  export NO_COLOR=""
+  unset FORCE_COLOR
+  dytoy_tui::theme
+  assert_equal "${DYTOY_TUI_STYLE_ROW_BG}" ""
+  assert_equal "${DYBATPHO_SCREEN_STYLE_SELECTED}" "1;7"
+}
+
+@test "dytoy_tui::needs_sudo asks only for a package manager tool that needs elevation" {
+  dytoy_tui::load_tools
+  pick_tools "${DYTOY_TUI_INDEX[pkg]}"
+  dytoy_tui::build_queue
+  function dybatpho::privilege_needed { return 0; }
+  run dytoy_tui::needs_sudo
+  assert_success
+  DRY_RUN=true run dytoy_tui::needs_sudo
+  assert_failure
+  function dybatpho::privilege_needed { return 1; }
+  run dytoy_tui::needs_sudo
+  assert_failure
+  pick_tools "${DYTOY_TUI_INDEX[present]}"
+  DYTOY_TUI_PICKED[DYTOY_TUI_INDEX[pkg]]=false
+  dytoy_tui::build_queue
+  function dybatpho::privilege_needed { return 0; }
+  run dytoy_tui::needs_sudo
+  assert_failure
+}
+
+@test "dytoy_tui::privilege_hand_over gives the terminal back around the prompt" {
+  local calls="${BATS_TEST_TMPDIR}/screen"
+  function dytoy_tui::screen_end { echo end >> "${calls}"; }
+  function dybatpho::screen_begin { echo begin >> "${calls}"; }
+  function dybatpho::privilege_command { echo doas; }
+  run dytoy_tui::privilege_hand_over suspend
+  assert_success
+  assert_output "dytoy needs doas to install packages."
+  dytoy_tui::privilege_hand_over resume
+  run cat "${calls}"
+  assert_output $'end\nbegin'
+  run dytoy_tui::privilege_hand_over sideways
+  assert_failure
+}
+
+@test "dytoy_tui::prepare_sudo holds the escalation behind a shield only when needed" {
+  local calls="${BATS_TEST_TMPDIR}/acquire"
+  function dybatpho::privilege_acquire { printf '%s|%s\n' "$*" "${DYBATPHO_PRIVILEGE_SUSPEND_HOOK}" >> "${calls}"; }
+  function dytoy_tui::needs_sudo { return 1; }
+  dytoy_tui::prepare_sudo
+  assert_file_not_exists "${calls}"
+  function dytoy_tui::needs_sudo { return 0; }
+  dytoy_tui::prepare_sudo
+  run cat "${calls}"
+  assert_output "--shield|dytoy_tui::privilege_hand_over"
 }
 
 @test "dytoy renders the Catppuccin flavour of the terminal into its palette" {
@@ -682,7 +761,8 @@ EOF
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
   run grep -E '^  \[(mauve|base|crust)\]="#[0-9a-f]{6}"$' "${rendered}"
   assert_success
-  assert_equal "${#lines[@]}" "3"
+  assert_equal "${#lines[@]}" "3"  run grep -E '^DYTOY_TUI_FLAVOUR="(latte|macchiato)"$' "${rendered}"
+  assert_success
 }
 
 # Stand in for the terminal and chezmoi around an edit: the suite has no

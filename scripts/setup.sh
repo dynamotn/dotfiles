@@ -12,7 +12,7 @@ if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
 fi
 # shellcheck source-path=SCRIPTDIR
 # shellcheck source=lib/dybatpho/init.sh
-. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli network archive array
+. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli network archive array privilege
 dybatpho::register_common_handlers
 BIN_DIR="$(dybatpho::ensure_dir "$(dybatpho::path_join "$HOME" ".local" "bin")")"
 export PATH="$BIN_DIR":"$PATH"
@@ -196,9 +196,9 @@ function _main {
   dybatpho::header "Setup other dotfiles"
   chezmoi apply "${params[@]}"
 
-  # Apply OS specific configuration if not Termux
-  # dyshellint disable=BSG035 the OS layer is root-owned; skip it without root
-  if sudo -n true 2> /dev/null || sudo true &> /dev/null; then
+  # Apply OS specific configuration if not Termux. The OS layer is root-owned,
+  # so it is skipped without root, and the escalation is held for its run.
+  if dybatpho::is_root || { dybatpho::privilege_needed && dybatpho::privilege_acquire; }; then
     case "$(dybatpho::goos)" in
       darwin)
         dybatpho::header "Setup operating system"
