@@ -25,5 +25,5 @@ content: |-
   dybatpho::is command make || dybatpho::die "nvimpager is built from source here, and make is missing"
   dybatpho::create_temp_dir nvimpager_src "nvimpager"
   git clone --depth 1 https://github.com/lucc/nvimpager.git "${nvimpager_src}"
-  make -C "${nvimpager_src}" PREFIX="${HOME}/.local" install
+  make -C "${nvimpager_src}" PREFIX="$(dybatpho::path_join "$HOME" ".local")" install
 {{- end }}

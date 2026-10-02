@@ -100,30 +100,82 @@ if site then
   if treesitter then vim.opt.rtp:prepend(treesitter) end
 end
 
--- The target language of a chezmoi template, told by the file name. These
--- predicates are named by the `after/queries/gotmpl/injections.scm` that comes
--- in through the symlinked `after/`, and an unregistered predicate makes the
--- whole injection query raise E5108 -- so leaving them out costs not just
--- these patterns but every injection, and a `*.yaml.tmpl` reads as flat text.
-local template_languages = {
-  ['is-bash-file?'] = { '.*%.sh%.tmpl$', 'executable_.*%.tmpl$' },
-  ['is-fish-file?'] = { '.*%.fish%.tmpl$' },
-  ['is-yaml-file?'] = { '.*%.ya?ml%.tmpl$' },
-  ['is-toml-file?'] = { '.*%.toml%.tmpl$' },
-  ['is-ini-file?'] = { '.*%.ini%.tmpl$' },
-  ['is-js-file?'] = { '.*%.js%.tmpl$' },
-  ['is-python-file?'] = { '.*%.py%.tmpl$' },
-  ['is-lua-file?'] = { '.*%.lua%.tmpl$' },
-}
-for predicate, patterns in pairs(template_languages) do
-  vim.treesitter.query.add_predicate(predicate, function(_, _, buf)
-    local name =
-      vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tonumber(buf) or 0), ':t')
-    for _, pattern in ipairs(patterns) do
-      if name:match(pattern) == name then return true end
+-- Custom treesitter predicates.
+--
+-- The query files that come in through the symlinked `queries/` and
+-- `after/queries/` name predicates that Neovim does not ship -- `is-yaml-file?`
+-- for a chezmoi template, `is-gh-action?` for a workflow. An unregistered
+-- predicate does not merely skip its own pattern: it raises E5108 and the
+-- whole injection query is dropped, so a `*.yaml.tmpl` reads as flat text and
+-- a workflow loses its shell blocks.
+--
+-- The tables are read out of the language specs instead of being copied here,
+-- because a copy is exactly what goes stale: each language that adds a
+-- predicate would otherwise break this pager silently. `lua/config/globals`
+-- comes first because the specs read `_G` flags to decide what they return.
+pcall(require, 'config.globals')
+
+---@param buf integer
+---@param patterns string|string[]|false Lua patterns matched against the file name
+---@return boolean
+local function name_matches(buf, patterns)
+  if not patterns then return false end
+  local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ':t')
+  for _, pattern in ipairs(type(patterns) == 'table' and patterns or { patterns }) do
+    if name:match(pattern) == name then return true end
+  end
+  return false
+end
+
+---@param buf integer
+---@param filetypes string|string[] Filetypes the predicate holds for
+---@return boolean
+local function filetype_matches(buf, filetypes)
+  local wanted = type(filetypes) == 'table' and filetypes or { filetypes }
+  return vim.list_contains(wanted, vim.bo[buf].filetype)
+end
+
+do
+  -- `custom_predicates` asks what a buffer is called, `custom_filetype_predicates`
+  -- what it is. Both sit under an `opts` somewhere inside a lazy spec, so the
+  -- specs are searched rather than indexed by a path that would also go stale.
+  local matchers = {
+    custom_predicates = name_matches,
+    custom_filetype_predicates = filetype_matches,
+  }
+  local function register(spec, depth)
+    if type(spec) ~= 'table' or depth > 8 then return end
+    for key, value in pairs(spec) do
+      local matches = matchers[key]
+      if matches and type(value) == 'table' then
+        for predicate, argument in pairs(value) do
+          vim.treesitter.query.add_predicate(predicate, function(_, _, buf)
+            return matches(tonumber(buf) or 0, argument)
+          end, { force = true, all = false })
+        end
+      end
+      register(value, depth + 1)
     end
-    return false
-  end, { force = true, all = false })
+  end
+
+  local languages = nvim_config .. '/lua/plugins/lang'
+  if present(languages) then
+    for name, kind in vim.fs.dir(languages) do
+      -- chezmoi applies this tree in symlink mode, so an entry is a link
+      if kind ~= 'directory' and name:match('%.lua$') then
+        local path = languages .. '/' .. name
+        local file = io.open(path)
+        local source = file and file:read('*a') or ''
+        if file then file:close() end
+        -- Reading the file first keeps this to the two or three specs that
+        -- carry a predicate, instead of executing all sixty.
+        if source:find('custom_predicates', 1, true) or source:find('custom_filetype_predicates', 1, true) then
+          local ok, spec = pcall(dofile, path)
+          if ok then register(spec, 0) end
+        end
+      end
+    end
+  end
 end
 
 -- `chezmoi-template.nvim` is what injects a target language into the templates
