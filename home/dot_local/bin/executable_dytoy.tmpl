@@ -9,13 +9,14 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array screen
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy_tui.sh
-{{- $theme := .catppuccin.macchiato }}
+{{- $flavour := "macchiato" }}
 {{- if not .darkMode }}
-{{-   $theme = .catppuccin.latte }}
+{{-   $flavour = "latte" }}
 {{- end }}
 # The interface takes the Catppuccin flavour the terminal uses.
+DYTOY_TUI_FLAVOUR="{{ $flavour }}"
 DYTOY_TUI_PALETTE=(
-{{- range $name, $hex := $theme }}
+{{- range $name, $hex := index .catppuccin $flavour }}
   [{{ $name }}]="{{ $hex }}"
 {{- end }}
 )

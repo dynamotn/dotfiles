@@ -8,7 +8,7 @@ DOTFILES_REAL_HOME="${HOME}"
 # Bats runs each test in its own process, where the module registry
 # `dybatpho::load` reads cannot follow (Bash cannot export an associative
 # array), so every module the libraries under test load is named here.
-. "${DYBATPHO_DIR}/init.sh" --modules cli network archive json array pkg screen
+. "${DYBATPHO_DIR}/init.sh" --modules cli network archive json array pkg screen privilege
 DOTFILES_REAL_XDG_CONFIG_HOME="$(dybatpho::xdg_config_dir)"
 
 bats_require_minimum_version 1.5.0

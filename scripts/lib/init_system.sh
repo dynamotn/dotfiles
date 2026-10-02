@@ -4,6 +4,7 @@
 # @description Library `init` to manage services of init systems, covering systemd,
 # OpenRC and the service managers of the other supported distributions.
 # shellcheck disable=2154
+dybatpho::load privilege
 
 #######################################
 # @description Enable systemd service
@@ -24,8 +25,8 @@ function init_system::enable_systemd_service {
     if dybatpho::is true "$is_user_service"; then
       systemctl enable --now --user "$service"
     else
-      # dyshellint disable=BSG035 enabling a system unit is a root-only action
-      sudo systemctl enable --now "$service"
+      # Enabling a system unit is a root-only action
+      dybatpho::privilege_run -- systemctl enable --now "$service"
     fi
   fi
 }
@@ -51,12 +52,12 @@ function init_system::enable_openrc_service {
     if dybatpho::is file /proc/self/cgroup; then
       cgroup_contents="$(< /proc/self/cgroup)"
     fi
-    # dyshellint disable=BSG035 adding a system runlevel entry needs root
-    sudo rc-update add "$service" default
+    # Adding a system runlevel entry needs root
+    dybatpho::privilege_run -- rc-update add "$service" default
     if ! dybatpho::string_contains "$cgroup_contents" "docker" \
       && ! dybatpho::is file /.dockerenv; then
-      # dyshellint disable=BSG035 starting a system service needs root
-      sudo rc-service "$service" start
+      # Starting a system service needs root
+      dybatpho::privilege_run -- rc-service "$service" start
     fi
   fi
 }

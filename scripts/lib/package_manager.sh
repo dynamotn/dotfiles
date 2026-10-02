@@ -9,7 +9,7 @@
 # managers are driven through it instead of hand-written commands. Managers it
 # doesn't support (Termux's `pkg`, `fdroidcl`, `flatpak`, `mas`, `.dmg` files)
 # and Arch's AUR helper `paru` keep their own implementation here.
-dybatpho::load network pkg
+dybatpho::load network pkg privilege
 
 #######################################
 # @description Run a dybatpho `pkg` command against an explicit package manager
@@ -179,7 +179,7 @@ function package_manager::init_arch {
     # shellcheck disable=SC2154
     dybatpho::dry_run git clone https://aur.archlinux.org/paru.git "$paru"
     dybatpho::dry_run bash -c "cd \"${paru}\" && makepkg -si --noconfirm"
-    dybatpho::dry_run sudo pacman -Rscn --noconfirm rust
+    dybatpho::privilege_run -- pacman -Rscn --noconfirm rust
   fi
 }
 
@@ -245,7 +245,7 @@ function package_manager::add_overlay {
   local name url
   dybatpho::expect_args name url -- "$@"
   if ! dybatpho::is file "/etc/portage/repos.conf/${name}.conf"; then
-    dybatpho::dry_run sudo mkdir -p /etc/portage/repos.conf
+    dybatpho::privilege_run -- mkdir -p /etc/portage/repos.conf
     dybatpho::create_temp repo_conf ".conf"
     # shellcheck disable=SC2154
     cat > "${repo_conf}" << EOF
@@ -254,8 +254,8 @@ location = /var/db/repos/${name}
 sync-type = git
 sync-uri = ${url}
 EOF
-    dybatpho::dry_run sudo cp "${repo_conf}" "/etc/portage/repos.conf/${name}.conf"
-    dybatpho::dry_run sudo emaint sync --yes --repo "$name" || dybatpho::die "Failed to sync repository $name"
+    dybatpho::privilege_run -- cp "${repo_conf}" "/etc/portage/repos.conf/${name}.conf"
+    dybatpho::privilege_run -- emaint sync --yes --repo "$name" || dybatpho::die "Failed to sync repository $name"
   fi
 }
 
@@ -286,14 +286,14 @@ function package_manager::add_apt_repo {
     # shellcheck disable=SC2154
     dybatpho::curl_download "$key" "$temp_key"
     if ! [[ "$key" =~ ^https://.* ]]; then
-      dybatpho::dry_run sudo cp "$temp_key" "$gpg_path"
+      dybatpho::privilege_run -- cp "$temp_key" "$gpg_path"
     else
-      dybatpho::dry_run sudo gpg --dearmor --yes -o "$gpg_path" "$temp_key"
+      dybatpho::privilege_run -- gpg --dearmor --yes -o "$gpg_path" "$temp_key"
     fi
     dybatpho::create_temp repo_list ".list"
     # shellcheck disable=SC2154
     printf '%s\n' "deb [signed-by=${gpg_path}] ${url} ${suite} ${components}" > "${repo_list}"
-    dybatpho::dry_run sudo cp "${repo_list}" "${path}"
+    dybatpho::privilege_run -- cp "${repo_list}" "${path}"
   else
     dybatpho::debug "Repository $name already exists, skipping."
   fi
@@ -555,8 +555,7 @@ function package_manager::install_via_dmg {
   dybatpho::curl_download "$url" "$temp_file"
   local mount_dir
   mount_dir=$(hdiutil mount -plist "$temp_file" | grep -oE '/Volumes/[^"<]+' | head -n 1)
-  # dyshellint disable=BSG035 /Applications is not writable by the user
-  sudo cp -r "${mount_dir}/${app_name}.app" /Applications
-  # dyshellint disable=BSG035 unmounting a volume mounted as root needs root
-  sudo hdiutil unmount "$mount_dir"
+  # /Applications is not writable by the user, and the volume is mounted as root
+  dybatpho::privilege_run -- cp -r "${mount_dir}/${app_name}.app" /Applications
+  dybatpho::privilege_run -- hdiutil unmount "$mount_dir"
 }
