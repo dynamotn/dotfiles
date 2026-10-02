@@ -116,6 +116,11 @@ if status is-interactive
 
     # Hooks
     # Fzf config
+    # Set before __fzf_setup: it guards this with `set --query`, so naming
+    # the previewer here is what keeps it off its own default. The `-c`
+    # forces cat mode -- fzf hands the preview a pipe, and on a pipe
+    # nvimpager execs plain cat and the colours are lost.
+    type -q nvimpager; and set -gx FZF_PREVIEW_TEXT_FILE_CMD 'nvimpager -c'
     type -q __fzf_setup; and __fzf_setup
     set -Ux FZF_COLOR_OPTS "\
         --color=bg+:{{ $theme.surface0 }},bg:{{ $theme.base }},spinner:{{ $theme.rosewater }},hl:{{ $theme.red}} \
@@ -169,8 +174,6 @@ if status is-interactive
     # Other completions generation
     # task
     type -q task; and task --completion fish | source
-    # bat
-    type -q bat; and bat --completion fish | source
     # ltcc
     type -q ltcc; and ltcc completion --shell fish | source
     # rg

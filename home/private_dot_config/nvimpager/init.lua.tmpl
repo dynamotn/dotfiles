@@ -1,0 +1,296 @@
+-- Nvimpager runs under `NVIM_APPNAME=nvimpager`, so this file is its whole
+-- configuration: lazy.nvim, LazyVim, mason and the plugins Neovim loads never
+-- run here. Reading a file needs none of them, and the data directory is
+-- scoped to the app name, so sharing the Neovim config wholesale would clone
+-- every plugin a second time.
+--
+-- What is shared, and how:
+--   * `ftdetect/` and `after/queries/` are symlinked into this directory, so
+--     they are picked up as ordinary runtime files. `plugin/` is deliberately
+--     left out: `ai_guard.lua` and `spell.lua` are there for editing.
+--   * `package.path` reaches into Neovim's `lua/`, which lets `dofile` lift
+--     the colorscheme options out of the plugin spec without putting the
+--     config root on 'runtimepath' -- that would source `plugin/` again.
+
+---@param var string Name of the XDG variable to read
+---@param fallback string Path to expand when the variable is unset or empty
+---@return string
+local function xdg(var, fallback)
+  local dir = vim.env[var]
+  if dir == nil or dir == '' then dir = vim.fn.expand(fallback) end
+  return dir
+end
+
+---@param path string
+---@return string? path The path itself when it exists, `nil` otherwise
+local function present(path)
+  return vim.uv.fs_stat(path) ~= nil and path or nil
+end
+
+local nvim_config = xdg('XDG_CONFIG_HOME', '~/.config') .. '/nvim'
+local nvim_data = xdg('XDG_DATA_HOME', '~/.local/share') .. '/nvim'
+
+package.path = table.concat({
+  nvim_config .. '/lua/?.lua',
+  nvim_config .. '/lua/?/init.lua',
+  package.path,
+}, ';')
+
+-- Cat mode prints the colours `synID()` reports and reads 'termguicolors' to
+-- choose between 24-bit escapes and the 16 terminal colours. The option
+-- defaults to off under `--headless`, which is exactly the mode that replaces
+-- `cat`, so without this the palette silently degrades.
+vim.o.termguicolors = true
+vim.o.background = '{{ if .darkMode }}dark{{ else }}light{{ end }}'
+
+-- Cat mode is `--headless`, and nvimpager picks it for any file shorter than
+-- the terminal, not just for a pipe. So this is the common path, not the
+-- exception.
+local cat_mode = #vim.api.nvim_list_uis() == 0
+
+local catppuccin = present(nvim_data .. '/lazy/catppuccin')
+if catppuccin then
+  -- Prepended, not appended: Neovim ships a `colors/catppuccin.vim` of its own
+  -- in $VIMRUNTIME, and it is mocha. Appending leaves that one first, so
+  -- `:colorscheme catppuccin` would quietly load it and ignore every option
+  -- set below. Neovim's config dodges this with its own `colors/` shim, which
+  -- sits ahead of $VIMRUNTIME for the same reason.
+  vim.opt.rtp:prepend(catppuccin)
+  -- `colorscheme.lua` is a plain spec table with no LazyVim dependency, so
+  -- the options can be lifted out of it instead of being copied here, where
+  -- the two would drift apart. It is data today; `pcall` is what keeps a
+  -- future `config = function()` in it from taking the pager down.
+  local opts = {
+    flavour = 'auto',
+    background = { light = 'latte', dark = 'macchiato' },
+  }
+  local ok, spec =
+    pcall(dofile, nvim_config .. '/lua/plugins/ui/colorscheme.lua')
+  if ok and type(spec) == 'table' then
+    for _, plugin in ipairs(spec) do
+      if type(plugin) == 'table' and plugin.name == 'catppuccin' then
+        if type(plugin.opts) == 'table' then opts = plugin.opts end
+        break
+      end
+    end
+  end
+  -- Detecting integrations reads `lazy.core.config`, which does not exist
+  -- here. The spec sets this already; repeating it is what makes the pager
+  -- survive the spec changing its mind.
+  opts.auto_integrations = false
+  -- `flavour = 'auto'` resolves through state catppuccin only builds up under
+  -- the full configuration, and lands on mocha here. Naming the flavour keeps
+  -- the pager on the same half of the day as everything else chezmoi renders.
+  opts.flavour = '{{ if .darkMode }}macchiato{{ else }}latte{{ end }}'
+  pcall(function()
+    require('catppuccin').setup(opts)
+    vim.cmd.colorscheme('catppuccin')
+  end)
+end
+
+-- `site/` carries the parsers and the queries together, so one entry covers
+-- highlighting in either mode. Prepended for the same reason as the
+-- colorscheme: $VIMRUNTIME ships a handful of parsers and queries of its own
+-- and would otherwise win. The nvim-treesitter plugin is added only for the
+-- filetype-to-language aliases in its `plugin/filetypes.lua` (`sh` -> `bash`).
+local site = present(nvim_data .. '/site')
+if site then
+  vim.opt.rtp:prepend(site)
+  local treesitter = present(nvim_data .. '/lazy/nvim-treesitter')
+  if treesitter then vim.opt.rtp:prepend(treesitter) end
+end
+
+-- The target language of a chezmoi template, told by the file name. These
+-- predicates are named by the `after/queries/gotmpl/injections.scm` that comes
+-- in through the symlinked `after/`, and an unregistered predicate makes the
+-- whole injection query raise E5108 -- so leaving them out costs not just
+-- these patterns but every injection, and a `*.yaml.tmpl` reads as flat text.
+local template_languages = {
+  ['is-bash-file?'] = { '.*%.sh%.tmpl$', 'executable_.*%.tmpl$' },
+  ['is-fish-file?'] = { '.*%.fish%.tmpl$' },
+  ['is-yaml-file?'] = { '.*%.ya?ml%.tmpl$' },
+  ['is-toml-file?'] = { '.*%.toml%.tmpl$' },
+  ['is-ini-file?'] = { '.*%.ini%.tmpl$' },
+  ['is-js-file?'] = { '.*%.js%.tmpl$' },
+  ['is-python-file?'] = { '.*%.py%.tmpl$' },
+  ['is-lua-file?'] = { '.*%.lua%.tmpl$' },
+}
+for predicate, patterns in pairs(template_languages) do
+  vim.treesitter.query.add_predicate(predicate, function(_, _, buf)
+    local name =
+      vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tonumber(buf) or 0), ':t')
+    for _, pattern in ipairs(patterns) do
+      if name:match(pattern) == name then return true end
+    end
+    return false
+  end, { force = true, all = false })
+end
+
+-- `chezmoi-template.nvim` is what injects a target language into the templates
+-- the patterns above do not name, through an `inject-chezmoi!` directive that
+-- its own `after/queries` asks for. Only the directive is taken: with nothing
+-- seeding the buffer it falls back to stripping chezmoi's attributes off the
+-- file name, which is all a pager needs, and the plugin's commands, keymaps,
+-- completion and picker stay out of the startup path.
+local chezmoi_template = present(nvim_data .. '/lazy/chezmoi-template.nvim')
+if chezmoi_template then
+  -- Its `plugin/` script bootstraps the whole plugin -- commands, keymaps,
+  -- completion, picker -- and that costs around 800ms per file here. Claiming
+  -- the load guard before the directory joins 'runtimepath' makes that script
+  -- a no-op, leaving the directive below as the only thing taken from it.
+  vim.g.loaded_chezmoi_template = 1
+  vim.opt.rtp:prepend(chezmoi_template)
+  pcall(function() require('chezmoi-template.inject').register_directive() end)
+end
+
+---@type table<string, integer|false>
+local resolved = {}
+
+--- Resolve a capture to a highlight group that actually paints something.
+---
+--- Queries carry captures that are metadata rather than colour -- `@spell`,
+--- `@nospell`, `@conceal` -- and those resolve to groups with no attributes.
+--- Neovim's highlighter passes over them; here they have to be filtered out by
+--- hand, or `@spell` over the text of a heading would overwrite the heading's
+--- own colour with nothing.
+---@param name string Capture name, without the leading `@`
+---@param lang string Language the capture came from
+---@return integer? group Highlight group id, or `nil` when it paints nothing
+local function highlight_group(name, lang)
+  local key = lang .. '.' .. name
+  if resolved[key] == nil then
+    local group = vim.fn.hlID('@' .. name .. '.' .. lang)
+    local function paints(id)
+      return id ~= 0
+        and not vim.tbl_isempty(vim.api.nvim_get_hl(0, { id = id, link = false }))
+    end
+    if not paints(group) then group = vim.fn.hlID('@' .. name) end
+    resolved[key] = paints(group) and group or false
+  end
+  return resolved[key] or nil
+end
+
+--- Map every character of a buffer to the treesitter highlight covering it.
+---@param buf integer
+---@param lines string[] The buffer's lines, unprefixed
+---@return table<integer, table<integer, integer>>? groups Indexed [row][col], both 0-based
+local function treesitter_groups(buf, lines)
+  local ok, parser =
+    pcall(vim.treesitter.get_parser, buf, nil, { error = false })
+  if not ok or not parser then return nil end
+  parser:parse(true)
+
+  local groups = {}
+  parser:for_each_tree(function(tree, ltree)
+    local lang = ltree:lang()
+    local query = vim.treesitter.query.get(lang, 'highlights')
+    if not query then return end
+    -- Captures arrive in query order and the later one wins, which is how
+    -- Neovim resolves captures of equal priority. Queries that set a priority
+    -- of their own are the one case this does not reproduce.
+    for id, node in query:iter_captures(tree:root(), buf, 0, -1) do
+      local group = highlight_group(query.captures[id], lang)
+      if group then
+        local srow, scol, erow, ecol = node:range()
+        for row = srow, math.min(erow, #lines - 1) do
+          local cols = groups[row] or {}
+          groups[row] = cols
+          local from = row == srow and scol or 0
+          local to = row == erow and ecol or #lines[row + 1]
+          for col = from, to - 1 do
+            cols[col] = group
+          end
+        end
+      end
+    end
+  end)
+  return groups
+end
+
+--- Treesitter highlighting and line numbers for cat mode.
+---
+--- Cat mode asks `vim.fn.synID()` for the highlight of every character, and
+--- that only ever reports legacy `:syntax` -- treesitter paints with extmarks,
+--- which `synID()` cannot see. But the escape sequences are built by
+--- `group2ansi()`, which just calls `nvim_get_hl()` on whatever id it is
+--- handed, so any highlight group works, `@function.lua` included. Pointing
+--- `synID` at the captures is therefore all it takes, and it is *faster* than
+--- the real one, which crosses into vimscript once per character.
+---
+--- Line numbers ride along the same way. `number` is a window option and cat
+--- mode never draws a window, so the gutter is prefixed to the lines on their
+--- way out and `synID` is shifted to match. The buffer itself is left alone,
+--- which is what keeps `:syntax` usable for files treesitter has no parser for.
+local function cat_mode_render()
+  local api = vim.api
+  local buf_get_lines = api.nvim_buf_get_lines
+  local real_synid = vim.fn.synID
+  local linenr = vim.fn.hlID('LineNr')
+
+  -- Nvimpager renders each file on the command line in turn, so this is per
+  -- buffer rather than computed once.
+  local buffers = {}
+  local function info(buf)
+    if not buffers[buf] then
+      local lines = buf_get_lines(buf, 0, -1, false)
+      local width = #tostring(math.max(#lines, 1))
+      buffers[buf] = {
+        groups = treesitter_groups(buf, lines),
+        width = width,
+        gutter = width + 1, -- the number, then one space
+      }
+    end
+    return buffers[buf]
+  end
+
+  api.nvim_buf_get_lines = function(buf, from, to, strict)
+    local lines = buf_get_lines(buf, from, to, strict)
+    local width = info(buf == 0 and api.nvim_get_current_buf() or buf).width
+    for i, line in ipairs(lines) do
+      lines[i] = string.format('%' .. width .. 'd ', from + i) .. line
+    end
+    return lines
+  end
+
+  vim.fn.synID = function(lnum, cnum, trans)
+    local current = info(api.nvim_get_current_buf())
+    if cnum <= current.gutter then return linenr end
+    local col = cnum - current.gutter
+    if current.groups then
+      local cols = current.groups[lnum - 1]
+      -- 0 means "no group", which is what treesitter does with text no
+      -- capture matched.
+      return (cols and cols[col - 1]) or 0
+    end
+    return real_synid(lnum, col, trans)
+  end
+end
+
+if cat_mode then
+  -- Neovim's own `ftplugin/lua.lua` and friends call `vim.treesitter.start()`
+  -- unconditionally, and for a filetype with no parser that throws E5113 and
+  -- aborts the rest of the FileType chain -- an error banner over an
+  -- uncoloured file. Ftplugins set up editing, which a pager does not do, and
+  -- the highlighting below does not go through them. Filetype detection itself
+  -- stays on, so `ftdetect/` still applies.
+  vim.cmd('filetype plugin off')
+  -- Nvimpager registers its own `VimEnter` from `stage2`, which runs through
+  -- `-c` and therefore after this file, and autocommands fire in the order
+  -- they were added. So this one runs with the buffer loaded and still ahead
+  -- of the renderer.
+  vim.api.nvim_create_autocmd('VimEnter', {
+    group = vim.api.nvim_create_augroup('dy_pager_render', {}),
+    once = true,
+    callback = function() pcall(cat_mode_render) end,
+  })
+else
+  -- Pager mode drives a real UI, where treesitter renders on its own and
+  -- 'number' draws the gutter.
+  vim.o.number = true
+  if site then
+    vim.api.nvim_create_autocmd('FileType', {
+      group = vim.api.nvim_create_augroup('dy_pager_render', {}),
+      callback = function(args) pcall(vim.treesitter.start, args.buf) end,
+    })
+  end
+end
