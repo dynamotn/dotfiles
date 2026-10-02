@@ -1,2 +1,31 @@
 [install]
 minimumReleaseAge = 604800
+# Mason pins the copilot language server to whatever the registry last pointed
+# at, and GitHub publishes it faster than the quarantine above lets through, so
+# every bump would leave Neovim without the server for a week.
+#
+# Its platform binaries ship as optional dependencies, and bun resolves all of
+# them -- every platform, not just this one -- so each has to be named here
+# too, or the parent resolves and the install fails one step later. The
+# excludes take exact names, not globs.
+minimumReleaseAgeExcludes = [
+  "@github/copilot-language-server",
+  "@github/copilot-language-server-darwin-arm64",
+  "@github/copilot-language-server-darwin-x64",
+  "@github/copilot-language-server-linux-arm64",
+  "@github/copilot-language-server-linux-x64",
+  "@github/copilot-language-server-win32-arm64",
+  "@github/copilot-language-server-win32-x64",
+  "@github/copilot-darwin-arm64",
+  "@github/copilot-darwin-x64",
+  "@github/copilot-linux-arm64",
+  "@github/copilot-linux-x64",
+  "@github/copilot-win32-arm64",
+  "@github/copilot-win32-x64",
+  "@github/copilot-sdk-darwin-arm64",
+  "@github/copilot-sdk-darwin-x64",
+  "@github/copilot-sdk-linux-arm64",
+  "@github/copilot-sdk-linux-x64",
+  "@github/copilot-sdk-win32-arm64",
+  "@github/copilot-sdk-win32-x64",
+]
