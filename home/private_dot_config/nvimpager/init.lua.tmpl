@@ -261,7 +261,7 @@ end
 
 --- Treesitter highlighting and line numbers for cat mode.
 ---
---- Cat mode asks `vim.fn.synID()` for the highlight of every character, and
+--- Cat mode asks `synID()` for the highlight of every character, and
 --- that only ever reports legacy `:syntax` -- treesitter paints with extmarks,
 --- which `synID()` cannot see. But the escape sequences are built by
 --- `group2ansi()`, which just calls `nvim_get_hl()` on whatever id it is
@@ -276,7 +276,7 @@ end
 local function cat_mode_render()
   local api = vim.api
   local buf_get_lines = api.nvim_buf_get_lines
-  local real_synid = vim.fn.synID
+  local real_call = api.nvim_call_function
   local linenr = vim.fn.hlID('LineNr')
 
   -- Nvimpager renders each file on the command line in turn, so this is per
@@ -304,7 +304,7 @@ local function cat_mode_render()
     return lines
   end
 
-  vim.fn.synID = function(lnum, cnum, trans)
+  local function synid(lnum, cnum, trans)
     local current = info(api.nvim_get_current_buf())
     if cnum <= current.gutter then return linenr end
     local col = cnum - current.gutter
@@ -314,7 +314,30 @@ local function cat_mode_render()
       -- capture matched.
       return (cols and cols[col - 1]) or 0
     end
-    return real_synid(lnum, col, trans)
+    return real_call('synID', { lnum, col, trans })
+  end
+
+  -- `synconcealed` is asked about the same prefixed columns and is shifted
+  -- alongside, or concealing would land off the text by the width of the
+  -- gutter as well.
+  local function synconcealed(lnum, cnum)
+    local col = cnum - info(api.nvim_get_current_buf()).gutter
+    if col < 1 then return { 0, '', 0 } end
+    return real_call('synconcealed', { lnum, col })
+  end
+
+  -- Both entry points are taken over, because nvimpager has used both: 0.14
+  -- asks through `nvim_call_function`, and later versions through `vim.fn`.
+  -- Either way the original is reached through `real_call`, which no version
+  -- touches.
+  local overrides = { synID = synid, synconcealed = synconcealed }
+  for name, fn in pairs(overrides) do
+    vim.fn[name] = fn
+  end
+  api.nvim_call_function = function(fn, args)
+    local override = overrides[fn]
+    if override then return override(unpack(args)) end
+    return real_call(fn, args)
   end
 end
 
