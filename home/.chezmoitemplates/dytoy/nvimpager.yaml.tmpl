@@ -2,7 +2,7 @@ name: nvimpager
 is_essential: true
 dependencies:
   - neovim
-{{- if eq .osid "linux-arch" "darwin" }}
+{{- if eq .osid "linux-arch" "darwin" "linux-gentoo" }}
 method: os
 arch:
   packages:
@@ -10,6 +10,9 @@ arch:
 macos:
   packages:
     - name: nvimpager
+gentoo:
+  packages:
+    - name: sys-apps/nvimpager
 {{- else if eq .osid "linux-gentoo" }}
 # Comes with app-editors/neovim through the `nvimpager` USE flag, set in
 # root/etc/portage/package.use/app-editors/create_neovim.
