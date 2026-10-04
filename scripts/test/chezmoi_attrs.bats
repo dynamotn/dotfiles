@@ -64,3 +64,17 @@ function run_source_path {
   run chezmoi_attrs::validate ""
   assert_success
 }
+
+@test "chezmoi_attrs::source_path fills a caller variable named like its own locals" {
+  # The path was written through a name the caller chose, with the function's
+  # own working variables in plain locals: a caller variable sharing one of
+  # those names received nothing.
+  local name
+  for name in path_var target_path attributes base_prefix relative_path \
+    components processed last_attrs last_index index component component_attrs; do
+    eval "_probe() { local ${name}; chezmoi_attrs::source_path ${name} \"\${HOME}/.config/foo\" create || return 1; printf '%s' \"\${${name}}\"; }"
+    run _probe
+    assert_success
+    assert_output "home/private_dot_config/create_foo"
+  done
+}
