@@ -46,3 +46,15 @@ EOF
   grep -q '^install git curl openssh chezmoi age yq$' "${BREW_LOG}"
   grep -q 'brew shellenv' "${HOME}/.zprofile"
 }
+
+@test "prerequisite.sh stops on macOS when brew shellenv fails" {
+  # The environment was sourced through a process substitution, whose status
+  # is lost: a failing `brew shellenv` read as an empty environment, and the
+  # script went on to install everything without Homebrew on its PATH.
+  fake_brew 1
+
+  run --separate-stderr bash "${DOTFILES_DIR}/scripts/prerequisite.sh"
+  assert_failure
+  assert_stderr --partial "brew shellenv"
+  refute grep -q '^install' "${BREW_LOG}"
+}
