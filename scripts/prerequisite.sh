@@ -25,7 +25,11 @@ function _keep_sudo_alive {
       done
     ) 2> /dev/null &
     local sudo_pid=$!
-    trap 'kill -9 "$sudo_pid" 2>/dev/null || true' EXIT INT TERM
+    # The pid is expanded now, while the local holds it: the trap runs after
+    # this function has returned. EXIT alone also covers an interrupt, which
+    # still ends the script as it would without the keepalive.
+    # shellcheck disable=SC2064
+    trap "kill -9 ${sudo_pid} 2> /dev/null || true" EXIT
   fi
 }
 
