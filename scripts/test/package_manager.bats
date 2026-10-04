@@ -7,12 +7,20 @@ setup() {
 
 @test "package_manager::add_apt_repo converts fingerprints to keyserver URLs in dry-run mode" {
   export DRY_RUN='true'
+  # A rehearsal prints only the host of a URL, so the key's URL is read from
+  # the download call itself.
+  local url_file="${BATS_TEST_TMPDIR}/key-url"
+  # shellcheck disable=SC2329 # invoked by package_manager::add_apt_repo
+  function dybatpho::curl_download {
+    printf '%s\n' "$1" > "${url_file}"
+  }
 
   run package_manager::add_apt_repo sample https://packages.example stable main ABCD1234
   assert_success
-  assert_output --partial 'https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0xABCD1234'
   assert_output --partial '/etc/apt/trusted.gpg.d/sample.gpg'
   assert_output --partial '/etc/apt/sources.list.d/sample.list'
+  run cat "${url_file}"
+  assert_output 'https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0xABCD1234'
 }
 
 @test "package_manager::check_installed_fdroidcl and check_installed_mas read an id that starts with a dash" {

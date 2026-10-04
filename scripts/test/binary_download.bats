@@ -64,7 +64,9 @@ EOF
   assert_output --partial 'v9.8.7'
   run cat "${args_file}"
   assert_success
-  assert_output --partial "https://gitlab.com/api/v4/projects/owner%2frepo/releases/permalink/latest"
+  # The project path is percent-encoded with upper-case hex, as RFC 3986 asks
+  # and as dybatpho::url_encode writes it; GitLab reads either case.
+  assert_output --partial "https://gitlab.com/api/v4/projects/owner%2Frepo/releases/permalink/latest"
   assert_output --partial "Authorization: Bearer secret-token"
 }
 
