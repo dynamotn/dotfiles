@@ -38,10 +38,15 @@ function setup_dotfiles_test_env {
 function render_template {
   local relative_path output_path
   dybatpho::expect_args relative_path output_path -- "$@"
+  # `--source` renders against the checkout under test. Without it chezmoi takes
+  # the source directory from the real configuration, so from a worktree the
+  # rendered paths, and the libraries the script sources, were the main
+  # checkout's.
   (
     cd "${DOTFILES_DIR}" || exit 1
     env HOME="${DOTFILES_REAL_HOME}" XDG_CONFIG_HOME="${DOTFILES_REAL_XDG_CONFIG_HOME}" \
-      chezmoi execute-template < "${DOTFILES_DIR}/${relative_path}" > "${output_path}"
+      chezmoi execute-template --source "${DOTFILES_DIR}" \
+      < "${DOTFILES_DIR}/${relative_path}" > "${output_path}"
   )
   chmod +x "${output_path}"
 }
