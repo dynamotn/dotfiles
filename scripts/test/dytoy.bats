@@ -146,6 +146,16 @@ EOF
   assert_stderr --partial "Tool sample is disabled"
 }
 
+@test "dytoy::is_defined succeeds for a defined, enabled tool" {
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: os
+EOF
+
+  run dytoy::is_defined sample os
+  assert_success
+}
+
 @test "dytoy::is_invalid_essential respects ONLY_ESSENTIAL" {
   export ONLY_ESSENTIAL='true'
   write_tools_yaml << 'EOF'
@@ -240,6 +250,19 @@ EOF
   run cat "${HOME}/softwareupdate.args"
   assert_success
   assert_output "--install-rosetta --agree-to-license"
+}
+
+@test "dytoy::install_macos_rosetta succeeds when rosetta is already there" {
+  function dybatpho::is {
+    if [[ "$1" == "file" && "$2" == "/usr/libexec/rosetta/runtime" ]]; then
+      return 0
+    fi
+    command dybatpho::is "$@"
+  }
+
+  run dytoy::install_macos_rosetta
+  assert_success
+  assert_output ""
 }
 
 # ---------------------------------------------------------------------------

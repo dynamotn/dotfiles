@@ -164,21 +164,25 @@ function dytoy::iterate {
 }
 
 #######################################
-# @description Check if the tool is defined in the YAML file
+# @description Check that the tool is defined in the YAML file and enabled
 # @arg $1 string Name of tool
 # @arg $2 string Method to use for the tool
+# @exitcode 0 The tool is defined and enabled
+# @stderr The reason, before stopping the script when it is missing or disabled
 #######################################
 function dytoy::is_defined {
   local name method
   dybatpho::expect_args name method -- "$@"
   local yaml
   yaml=$(dytoy::get_yaml "$name" "all" "$method")
-  [[ "$yaml" == "[]" ]] || dybatpho::is empty "$yaml" \
-    && dybatpho::die "Not found $name tool in $(dytoy::yaml_file)"
+  if [[ "$yaml" == "[]" ]] || dybatpho::is empty "$yaml"; then
+    dybatpho::die "Not found $name tool in $(dytoy::yaml_file)"
+  fi
   local is_enabled
   is_enabled=$(dytoy::get_yaml "$name" "enabled")
-  dybatpho::is false "$is_enabled" \
-    && dybatpho::die "Tool $name is disabled"
+  if dybatpho::is false "$is_enabled"; then
+    dybatpho::die "Tool $name is disabled"
+  fi
 }
 
 #######################################
@@ -469,6 +473,7 @@ function dytoy::install_macos_package {
 # @noargs
 #######################################
 function dytoy::install_macos_rosetta {
-  ! dybatpho::is file /usr/libexec/rosetta/runtime \
-    && softwareupdate --install-rosetta --agree-to-license
+  if ! dybatpho::is file /usr/libexec/rosetta/runtime; then
+    softwareupdate --install-rosetta --agree-to-license
+  fi
 }
