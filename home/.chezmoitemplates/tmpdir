@@ -1,0 +1,6 @@
+{{- /* Directory for temporary files and sockets: Termux has no writable /tmp */ -}}
+{{- if eq .chezmoi.os "android" -}}
+{{-   env "TMPDIR" | default (printf "%s/tmp" (env "PREFIX" | default "/data/data/com.termux/files/usr")) -}}
+{{- else -}}
+/tmp
+{{- end -}}
