@@ -123,7 +123,7 @@ function mozilla_profile::extract_prefs {
   local temp_file pattern
   dybatpho::create_temp temp_file ".js"
   for pattern in "$@"; do
-    grep "${pattern}" "${prefs_file}" >> "${temp_file}" || true
+    grep -e "${pattern}" -- "${prefs_file}" >> "${temp_file}" || true
   done
 
   if [[ ! -s "${temp_file}" ]]; then
