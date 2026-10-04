@@ -830,3 +830,61 @@ function setup_edit {
   run grep -F "[\"aws\"]=\"${DOTFILES_DIR}/home/.chezmoitemplates/dytoy/awscli.yaml\"" "${rendered}"
   assert_success
 }
+
+# Run a call that writes into a variable it is named, once into a neutral name
+# and once into each of the given names, and fail when any of them comes back
+# different. `@OUT@` in the call stands for the variable's name.
+# @arg $1 string Declaration of the variable: `local`, `local -a` or `local -A`
+# @arg $2 string Call, with `@OUT@` where the variable's name goes
+# @arg $@ string Names the function also uses for its own locals
+function same_result_for_names {
+  local declaration="$1" call="$2" name expected actual
+  shift 2
+  eval "_probe() { ${declaration} probe_out; ${call//@OUT@/probe_out}; __print_var probe_out; }"
+  expected="$(_probe)"
+  for name in "$@"; do
+    eval "_probe() { ${declaration} ${name}; ${call//@OUT@/${name}}; __print_var ${name}; }"
+    actual="$(_probe)"
+    [[ "${actual}" == "${expected}" ]] || {
+      printf 'into %s: got [%s], expected [%s]\n' "${name}" "${actual}" "${expected}" >&2
+      return 1
+    }
+  done
+}
+
+# Print a variable of any kind, keys sorted, so two runs compare as text.
+function __print_var {
+  local -n __print_var_ref="$1"
+  local __print_var_key
+  for __print_var_key in $(printf '%s\n' "${!__print_var_ref[@]}" | sort); do
+    printf '%s=%s\n' "${__print_var_key}" "${__print_var_ref[${__print_var_key}]}"
+  done
+}
+
+@test "functions that fill a caller's variable do so whatever its name" {
+  dytoy_tui::load_tools
+  pick_tools 1 2
+  dytoy_tui::build_queue
+  DYTOY_TUI_STATE[1]=ok DYTOY_TUI_STATE[2]=running
+  DYTOY_TUI_DEPS[3]="pkg,present"
+  DYTOY_TUI_QUERY="s"
+  local log="${BATS_TEST_TMPDIR}/names.log"
+  printf 'one\ntwo\nthree\n' > "${log}"
+  local -A graph=()
+  dytoy_tui::dependency_graph_into graph
+  local colour
+  for colour in "${!DYTOY_TUI_PALETTE[@]}"; do break; done
+
+  same_result_for_names 'local -a' 'dytoy_tui::tab_items @OUT@ binary' method index
+  same_result_for_names 'local -a' 'dytoy_tui::search_matches @OUT@' query index
+  same_result_for_names 'local' 'dytoy_tui::picked_count_into @OUT@ ""' method index
+  same_result_for_names 'local -a' 'dytoy_tui::child_args @OUT@ 1 true' index sync
+  same_result_for_names 'local -a' "dytoy_tui::log_tail @OUT@ ${log} 2" file count tailed cleaned
+  same_result_for_names 'local -A' 'dytoy_tui::dependency_graph_into @OUT@' \
+    index name dependency edges names
+  same_result_for_names 'local -a' 'dytoy_tui::dependency_closure_into @OUT@ graph 3' start index
+  same_result_for_names 'local' 'dytoy_tui::count_state_into @OUT@ ok' state index
+  same_result_for_names 'local' "dytoy_tui::colour_into @OUT@ fg ${colour}" layer name hex code
+  same_result_for_names 'local' 'dytoy_tui::state_mark_into @OUT@ probe_style 1' index
+  same_result_for_names 'local' 'dytoy_tui::method_jobs_into @OUT@ os' method
+}
