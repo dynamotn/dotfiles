@@ -1,4 +1,12 @@
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# A git hook runs the suite with the repository it fires in exported as
+# `GIT_DIR`, `GIT_INDEX_FILE` and friends. Left in place, every git call a test
+# makes reaches that repository instead of the one it names. These are the
+# names `git rev-parse --local-env-vars` lists.
+unset GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_CONFIG GIT_CONFIG_PARAMETERS \
+  GIT_CONFIG_COUNT GIT_OBJECT_DIRECTORY GIT_DIR GIT_WORK_TREE \
+  GIT_IMPLICIT_WORK_TREE GIT_GRAFT_FILE GIT_INDEX_FILE GIT_NO_REPLACE_OBJECTS \
+  GIT_REPLACE_REF_BASE GIT_PREFIX GIT_SHALLOW_FILE GIT_COMMON_DIR
 DYBATPHO_DIR="${DOTFILES_DIR}/scripts/lib/dybatpho"
 DOTFILES_REAL_HOME="${HOME}"
 . "${DYBATPHO_DIR}/test/lib/support/load.bash"
