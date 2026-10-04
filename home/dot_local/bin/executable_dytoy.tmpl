@@ -246,7 +246,7 @@ function _parse_release {
   fi
   dybatpho::info "Using version ${version} for https://${host}/${repo}"
   release_asset=$(echo "${release_asset}" | misc::replace_version "$version")
-  dybatpho::debug "Release asset is ${release_asset}"
+  dybatpho::info "Release asset is ${release_asset}"
 
   artifact_host=$(dytoy::get_yaml "$name" "${type}.artifact_host")
   [[ "${artifact_host}" == "null" ]] && artifact_host=""
