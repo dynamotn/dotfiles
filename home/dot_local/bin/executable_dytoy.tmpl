@@ -165,7 +165,7 @@ function _spec_shell {
 function _install_os_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "$name" "$METHOD" && return
+  dytoy::is_defined "$name" "$METHOD"
   dytoy::is_invalid_essential "$name" && return
   dytoy::install_dependencies "$name"
 
@@ -279,7 +279,7 @@ function _parse_release {
 function _install_binary_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "$name" "$METHOD" && return
+  dytoy::is_defined "$name" "$METHOD"
   dytoy::is_invalid_essential "$name" && return
 
   local type=""
@@ -299,7 +299,7 @@ function _install_binary_tool {
 function _install_mise_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "$name" "$METHOD" && return
+  dytoy::is_defined "$name" "$METHOD"
   dytoy::is_invalid_essential "$name" && return
   dytoy::is_installed_command "$name" && return
   dytoy::install_dependencies "$name"
@@ -340,7 +340,7 @@ function _install_mise_tool {
 function _install_shell_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "$name" "$METHOD" && return
+  dytoy::is_defined "$name" "$METHOD"
   dytoy::is_invalid_essential "$name" && return
   dytoy::is_installed_command "$name" && return
   dytoy::install_dependencies "$name"
