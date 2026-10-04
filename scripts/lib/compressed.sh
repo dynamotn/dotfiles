@@ -57,7 +57,9 @@ function __compressed_copy_selection {
 
   dybatpho::ensure_dir "${destination}" > /dev/null
   if dybatpho::is true "${DRY_RUN}"; then
-    dybatpho::dry_run "cp -R \"$(dybatpho::path_join "${extracted_root}" "${archive_pattern}")\" \"${destination}\""
+    # Separate words, so the rehearsal prints the command as it would run, with
+    # each path quoted on its own; one string would be shown as a single word.
+    dybatpho::dry_run cp -R "$(dybatpho::path_join "${extracted_root}" "${archive_pattern}")" "${destination}"
     return 0
   fi
 
