@@ -222,10 +222,39 @@ EOF
     release_asset: sample-linux-amd64
 EOF
 
+  # A rehearsal names only the host: dybatpho redacts the rest of a URL it
+  # prints, since a download URL can carry a token.
   run bash "${rendered}" binary --dry-run --tool sample --no-check-installed
   assert_success
-  assert_output --partial "https://github.com/owner/repo/releases/download/v1.2.3/sample-linux-amd64"
+  assert_output --partial "https://github.com/[redacted]"
+  refute_output --partial "owner/repo/releases/download"
   assert_output --partial "Installed binary tool: sample"
+
+  # The URL itself is what curl receives, so a stand-in curl records it.
+  local stub_dir="${BATS_TEST_TMPDIR}/stub-bin" args_file="${BATS_TEST_TMPDIR}/curl-args"
+  mkdir -p "${stub_dir}"
+  {
+    printf '%s\n' '#!/usr/bin/env bash'
+    printf 'printf "%%s\\n" "$@" >> %q\n' "${args_file}"
+    cat << 'STUB'
+output="" headers=""
+while (($#)); do
+  case "$1" in
+    -o) output="$2"; shift ;;
+    -D) headers="$2"; shift ;;
+  esac
+  shift
+done
+[[ -z "${headers}" ]] || printf 'HTTP/2 200\r\n\r\n' > "${headers}"
+[[ -z "${output}" || "${output}" == /dev/null ]] || printf 'binary\n' > "${output}"
+printf '200'
+STUB
+  } > "${stub_dir}/curl"
+  chmod +x "${stub_dir}/curl"
+  PATH="${stub_dir}:${PATH}" run bash "${rendered}" binary --tool sample --no-check-installed
+  assert_success
+  run cat "${args_file}"
+  assert_output --partial "https://github.com/owner/repo/releases/download/v1.2.3/sample-linux-amd64"
 }
 
 @test "dytoy mise dry-run uses configured backend and version" {
