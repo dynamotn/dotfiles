@@ -392,7 +392,7 @@ function package_manager::check_installed_apk {
 function package_manager::check_installed_fdroidcl {
   local app_id
   dybatpho::expect_args app_id -- "$@"
-  cmd package list packages 2> /dev/null | grep -wq "$app_id"
+  cmd package list packages 2> /dev/null | grep -wq -e "$app_id"
 }
 
 #######################################
@@ -423,7 +423,7 @@ function package_manager::check_installed_brew {
 function package_manager::check_installed_mas {
   local app_id
   dybatpho::expect_args app_id -- "$@"
-  mas list | awk '{print $1}' | grep -wq "$app_id"
+  mas list | awk '{print $1}' | grep -wq -e "$app_id"
 }
 
 #######################################
