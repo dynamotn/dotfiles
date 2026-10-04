@@ -199,13 +199,14 @@ function dytoy_tui::detect_installed {
 # @arg $2 string Method
 #######################################
 function dytoy_tui::tab_items {
-  local __dytoy_tui_items_ref method index
-  dybatpho::expect_args __dytoy_tui_items_ref method -- "$@"
+  local __dytoy_tui_items_ref __dytoy_tui_tab_method __dytoy_tui_tab_index
+  dybatpho::expect_args __dytoy_tui_items_ref __dytoy_tui_tab_method -- "$@"
   local -n __dytoy_tui_items="${__dytoy_tui_items_ref}"
   __dytoy_tui_items=()
-  for index in "${!DYTOY_TUI_NAME[@]}"; do
-    dybatpho::is true "${DYTOY_TUI_HIDDEN[index]}" && continue
-    [[ "${DYTOY_TUI_METHOD[index]}" == "${method}" ]] && __dytoy_tui_items+=("${index}")
+  for __dytoy_tui_tab_index in "${!DYTOY_TUI_NAME[@]}"; do
+    dybatpho::is true "${DYTOY_TUI_HIDDEN[__dytoy_tui_tab_index]}" && continue
+    [[ "${DYTOY_TUI_METHOD[__dytoy_tui_tab_index]}" == "${__dytoy_tui_tab_method}" ]] \
+      && __dytoy_tui_items+=("${__dytoy_tui_tab_index}")
   done
   return 0
 }
@@ -222,11 +223,12 @@ function dytoy_tui::search_matches {
   local __dytoy_tui_matches_ref
   dybatpho::expect_args __dytoy_tui_matches_ref -- "$@"
   local -n __dytoy_tui_matches="${__dytoy_tui_matches_ref}"
-  local query="${DYTOY_TUI_QUERY,,}" index
+  local __dytoy_tui_search_query="${DYTOY_TUI_QUERY,,}" __dytoy_tui_search_index
   __dytoy_tui_matches=()
-  for index in "${!DYTOY_TUI_NAME[@]}"; do
-    dybatpho::is true "${DYTOY_TUI_HIDDEN[index]}" && continue
-    [[ "${DYTOY_TUI_NAME[index],,}" == *"${query}"* ]] && __dytoy_tui_matches+=("${index}")
+  for __dytoy_tui_search_index in "${!DYTOY_TUI_NAME[@]}"; do
+    dybatpho::is true "${DYTOY_TUI_HIDDEN[__dytoy_tui_search_index]}" && continue
+    [[ "${DYTOY_TUI_NAME[__dytoy_tui_search_index],,}" == *"${__dytoy_tui_search_query}"* ]] \
+      && __dytoy_tui_matches+=("${__dytoy_tui_search_index}")
   done
   return 0
 }
@@ -253,13 +255,14 @@ function dytoy_tui::toggle_pick {
 # @arg $2 string Method, or empty for every method
 #######################################
 function dytoy_tui::picked_count_into {
-  local __dytoy_tui_picked_ref method index
-  dybatpho::expect_args __dytoy_tui_picked_ref method -- "$@"
+  local __dytoy_tui_picked_ref __dytoy_tui_picked_method __dytoy_tui_picked_index
+  dybatpho::expect_args __dytoy_tui_picked_ref __dytoy_tui_picked_method -- "$@"
   local -n __dytoy_tui_picked="${__dytoy_tui_picked_ref}"
   __dytoy_tui_picked=0
-  for index in "${!DYTOY_TUI_NAME[@]}"; do
-    [[ -z "${method}" || "${DYTOY_TUI_METHOD[index]}" == "${method}" ]] || continue
-    dybatpho::is true "${DYTOY_TUI_PICKED[index]}" && __dytoy_tui_picked=$((__dytoy_tui_picked + 1))
+  for __dytoy_tui_picked_index in "${!DYTOY_TUI_NAME[@]}"; do
+    [[ -z "${__dytoy_tui_picked_method}" ||
+      "${DYTOY_TUI_METHOD[__dytoy_tui_picked_index]}" == "${__dytoy_tui_picked_method}" ]] || continue
+    dybatpho::is true "${DYTOY_TUI_PICKED[__dytoy_tui_picked_index]}" && __dytoy_tui_picked=$((__dytoy_tui_picked + 1))
   done
   return 0
 }
@@ -273,11 +276,13 @@ function dytoy_tui::picked_count_into {
 # @env LOG_LEVEL, DRY_RUN, ONLY_ESSENTIAL, ONLY_NOT_INSTALLED, LIST_CONTENTS
 #######################################
 function dytoy_tui::child_args {
-  local __dytoy_tui_args_ref index sync
-  dybatpho::expect_args __dytoy_tui_args_ref index sync -- "$@"
+  local __dytoy_tui_args_ref __dytoy_tui_args_index __dytoy_tui_args_sync
+  dybatpho::expect_args __dytoy_tui_args_ref __dytoy_tui_args_index __dytoy_tui_args_sync -- "$@"
   local -n __dytoy_tui_args="${__dytoy_tui_args_ref}"
   __dytoy_tui_args=(
-    "${DYTOY_TUI_METHOD[index]}" --tool "${DYTOY_TUI_NAME[index]}" --log-level "${LOG_LEVEL}"
+    "${DYTOY_TUI_METHOD[__dytoy_tui_args_index]}"
+    --tool "${DYTOY_TUI_NAME[__dytoy_tui_args_index]}"
+    --log-level "${LOG_LEVEL}"
   )
   dybatpho::is true "${DRY_RUN}" && __dytoy_tui_args+=(--dry-run)
   dybatpho::is true "${ONLY_ESSENTIAL}" && __dytoy_tui_args+=(--essential)
@@ -286,7 +291,7 @@ function dytoy_tui::child_args {
   else
     __dytoy_tui_args+=(--no-check-installed)
   fi
-  dybatpho::is true "${sync}" && __dytoy_tui_args+=(--sync)
+  dybatpho::is true "${__dytoy_tui_args_sync}" && __dytoy_tui_args+=(--sync)
   dybatpho::is true "${LIST_CONTENTS}" && __dytoy_tui_args+=(--list)
   return 0
 }
@@ -300,22 +305,22 @@ function dytoy_tui::child_args {
 # @arg $3 number Number of lines
 #######################################
 function dytoy_tui::log_tail {
-  local __dytoy_tui_lines_ref file count
-  dybatpho::expect_args __dytoy_tui_lines_ref file count -- "$@"
+  local __dytoy_tui_lines_ref __dytoy_tui_tail_file __dytoy_tui_tail_count
+  dybatpho::expect_args __dytoy_tui_lines_ref __dytoy_tui_tail_file __dytoy_tui_tail_count -- "$@"
   local -n __dytoy_tui_lines="${__dytoy_tui_lines_ref}"
   __dytoy_tui_lines=()
-  [[ -f "${file}" ]] && ((count > 0)) || return 0
-  local tailed cleaned
-  tailed="$(tail -n "${count}" "${file}")"
-  [[ -n "${tailed}" ]] || return 0
-  cleaned="$(LC_ALL=C sed -E \
+  [[ -f "${__dytoy_tui_tail_file}" ]] && ((__dytoy_tui_tail_count > 0)) || return 0
+  local __dytoy_tui_tail_tailed __dytoy_tui_tail_cleaned
+  __dytoy_tui_tail_tailed="$(tail -n "${__dytoy_tui_tail_count}" "${__dytoy_tui_tail_file}")"
+  [[ -n "${__dytoy_tui_tail_tailed}" ]] || return 0
+  __dytoy_tui_tail_cleaned="$(LC_ALL=C sed -E \
     -e 's/\x1B\[[0-9;?]*[A-Za-ln-z]//g' \
     -e 's/\x1B\][^\x07]*\x07//g' \
     -e 's/\r$//' -e 's/.*\r//' \
     -e 's/\t/  /g' \
-    -e 's/[\x01-\x08\x0B-\x1A\x1C-\x1F\x7F]//g' <<< "${tailed}")"
-  [[ -n "${cleaned}" ]] || return 0
-  readarray -t __dytoy_tui_lines <<< "${cleaned}"
+    -e 's/[\x01-\x08\x0B-\x1A\x1C-\x1F\x7F]//g' <<< "${__dytoy_tui_tail_tailed}")"
+  [[ -n "${__dytoy_tui_tail_cleaned}" ]] || return 0
+  readarray -t __dytoy_tui_lines <<< "${__dytoy_tui_tail_cleaned}"
 }
 
 #######################################
@@ -330,16 +335,17 @@ function dytoy_tui::dependency_graph_into {
   dybatpho::expect_args __dytoy_tui_graph_ref -- "$@"
   local -n __dytoy_tui_graph="${__dytoy_tui_graph_ref}"
   __dytoy_tui_graph=()
-  local index name dependency edges
-  local -a names=()
-  for index in "${!DYTOY_TUI_NAME[@]}"; do
-    edges=""
-    IFS=, read -r -a names <<< "${DYTOY_TUI_DEPS[index]}"
-    for name in "${names[@]}"; do
-      dependency="${DYTOY_TUI_INDEX[${name}]-}"
-      [[ -z "${dependency}" ]] || edges+="${edges:+ }${dependency}"
+  local __dytoy_tui_graph_index __dytoy_tui_graph_name __dytoy_tui_graph_dependency __dytoy_tui_graph_edges
+  local -a __dytoy_tui_graph_names=()
+  for __dytoy_tui_graph_index in "${!DYTOY_TUI_NAME[@]}"; do
+    __dytoy_tui_graph_edges=""
+    IFS=, read -r -a __dytoy_tui_graph_names <<< "${DYTOY_TUI_DEPS[__dytoy_tui_graph_index]}"
+    for __dytoy_tui_graph_name in "${__dytoy_tui_graph_names[@]}"; do
+      __dytoy_tui_graph_dependency="${DYTOY_TUI_INDEX[${__dytoy_tui_graph_name}]-}"
+      [[ -z "${__dytoy_tui_graph_dependency}" ]] \
+        || __dytoy_tui_graph_edges+="${__dytoy_tui_graph_edges:+ }${__dytoy_tui_graph_dependency}"
     done
-    __dytoy_tui_graph["${index}"]="${edges}"
+    __dytoy_tui_graph["${__dytoy_tui_graph_index}"]="${__dytoy_tui_graph_edges}"
   done
   return 0
 }
@@ -352,15 +358,16 @@ function dytoy_tui::dependency_graph_into {
 # @arg $3 number Index of the tool
 #######################################
 function dytoy_tui::dependency_closure_into {
-  local __dytoy_tui_closure_ref __dytoy_tui_closure_graph start
-  dybatpho::expect_args __dytoy_tui_closure_ref __dytoy_tui_closure_graph start -- "$@"
+  local __dytoy_tui_closure_ref __dytoy_tui_closure_graph __dytoy_tui_closure_start
+  dybatpho::expect_args __dytoy_tui_closure_ref __dytoy_tui_closure_graph __dytoy_tui_closure_start -- "$@"
   local -n __dytoy_tui_closure="${__dytoy_tui_closure_ref}"
   local -a __dytoy_tui_reachable=()
-  dybatpho::array_closure "${__dytoy_tui_closure_graph}" __dytoy_tui_reachable "${start}"
+  dybatpho::array_closure "${__dytoy_tui_closure_graph}" __dytoy_tui_reachable "${__dytoy_tui_closure_start}"
   __dytoy_tui_closure=()
-  local index
-  for index in "${__dytoy_tui_reachable[@]}"; do
-    [[ "${index}" == "${start}" ]] || __dytoy_tui_closure+=("${index}")
+  local __dytoy_tui_closure_index
+  for __dytoy_tui_closure_index in "${__dytoy_tui_reachable[@]}"; do
+    [[ "${__dytoy_tui_closure_index}" == "${__dytoy_tui_closure_start}" ]] \
+      || __dytoy_tui_closure+=("${__dytoy_tui_closure_index}")
   done
   return 0
 }
@@ -433,12 +440,12 @@ function dytoy_tui::build_queue {
 # @arg $2 string State
 #######################################
 function dytoy_tui::count_state_into {
-  local __dytoy_tui_state_count_ref state index
-  dybatpho::expect_args __dytoy_tui_state_count_ref state -- "$@"
+  local __dytoy_tui_state_count_ref __dytoy_tui_count_state __dytoy_tui_count_index
+  dybatpho::expect_args __dytoy_tui_state_count_ref __dytoy_tui_count_state -- "$@"
   local -n __dytoy_tui_state_count="${__dytoy_tui_state_count_ref}"
   __dytoy_tui_state_count=0
-  for index in "${DYTOY_TUI_QUEUE[@]}"; do
-    [[ "${DYTOY_TUI_STATE[index]}" == "${state}" ]] \
+  for __dytoy_tui_count_index in "${DYTOY_TUI_QUEUE[@]}"; do
+    [[ "${DYTOY_TUI_STATE[__dytoy_tui_count_index]}" == "${__dytoy_tui_count_state}" ]] \
       && __dytoy_tui_state_count=$((__dytoy_tui_state_count + 1))
   done
   return 0
@@ -456,16 +463,17 @@ function dytoy_tui::count_state_into {
 # @arg $3 string Colour name in `DYTOY_TUI_PALETTE`
 #######################################
 function dytoy_tui::colour_into {
-  local __dytoy_tui_colour_ref layer name
-  dybatpho::expect_args __dytoy_tui_colour_ref layer name -- "$@"
+  local __dytoy_tui_colour_ref __dytoy_tui_colour_layer __dytoy_tui_colour_name
+  dybatpho::expect_args __dytoy_tui_colour_ref __dytoy_tui_colour_layer __dytoy_tui_colour_name -- "$@"
   local -n __dytoy_tui_colour="${__dytoy_tui_colour_ref}"
-  local hex="${DYTOY_TUI_PALETTE[${name}]-}"
-  hex="${hex#\#}"
-  [[ "${hex}" =~ ^[0-9a-fA-F]{6}$ ]] \
-    || dybatpho::die "${FUNCNAME[0]}: '${name}' is not a #rrggbb colour of the palette"
-  local code=38
-  [[ "${layer}" == bg ]] && code=48
-  __dytoy_tui_colour="${code};2;$((16#${hex:0:2}));$((16#${hex:2:2}));$((16#${hex:4:2}))"
+  local __dytoy_tui_colour_hex="${DYTOY_TUI_PALETTE[${__dytoy_tui_colour_name}]-}"
+  __dytoy_tui_colour_hex="${__dytoy_tui_colour_hex#\#}"
+  [[ "${__dytoy_tui_colour_hex}" =~ ^[0-9a-fA-F]{6}$ ]] \
+    || dybatpho::die "${FUNCNAME[0]}: '${__dytoy_tui_colour_name}' is not a #rrggbb colour of the palette"
+  local __dytoy_tui_colour_code=38
+  [[ "${__dytoy_tui_colour_layer}" == bg ]] && __dytoy_tui_colour_code=48
+  __dytoy_tui_colour="${__dytoy_tui_colour_code};2;$((16#${__dytoy_tui_colour_hex:0:2}))"
+  __dytoy_tui_colour+=";$((16#${__dytoy_tui_colour_hex:2:2}));$((16#${__dytoy_tui_colour_hex:4:2}))"
 }
 
 #######################################
@@ -781,16 +789,16 @@ function dytoy_tui::draw_pick {
 # @arg $3 number Index of the tool
 #######################################
 function dytoy_tui::state_mark_into {
-  local __dytoy_tui_mark_ref __dytoy_tui_mark_style_ref index
-  dybatpho::expect_args __dytoy_tui_mark_ref __dytoy_tui_mark_style_ref index -- "$@"
+  local __dytoy_tui_mark_ref __dytoy_tui_mark_style_ref __dytoy_tui_mark_index
+  dybatpho::expect_args __dytoy_tui_mark_ref __dytoy_tui_mark_style_ref __dytoy_tui_mark_index -- "$@"
   local -n __dytoy_tui_mark="${__dytoy_tui_mark_ref}" __dytoy_tui_mark_style="${__dytoy_tui_mark_style_ref}"
-  case "${DYTOY_TUI_STATE[index]}" in
+  case "${DYTOY_TUI_STATE[__dytoy_tui_mark_index]}" in
     ok) __dytoy_tui_mark="✔" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_OK}" ;;
     failed) __dytoy_tui_mark="✘" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_ERROR}" ;;
     skipped) __dytoy_tui_mark="⊘" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_DIM}" ;;
     running)
-      local tick="${EPOCHREALTIME/[.,]/}"
-      __dytoy_tui_mark="${DYTOY_TUI_SPINNER[(tick / 100000) % ${#DYTOY_TUI_SPINNER[@]}]}"
+      local __dytoy_tui_mark_tick="${EPOCHREALTIME/[.,]/}"
+      __dytoy_tui_mark="${DYTOY_TUI_SPINNER[(__dytoy_tui_mark_tick / 100000) % ${#DYTOY_TUI_SPINNER[@]}]}"
       __dytoy_tui_mark_style="${DYTOY_TUI_STYLE_RUN}"
       ;;
     *) __dytoy_tui_mark="·" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_DIM}" ;;
@@ -1190,10 +1198,10 @@ function dytoy_tui::follow {
 # @arg $2 string Stage: a method, or `dependencies`
 #######################################
 function dytoy_tui::method_jobs_into {
-  local __dytoy_tui_jobs_ref method
-  dybatpho::expect_args __dytoy_tui_jobs_ref method -- "$@"
+  local __dytoy_tui_jobs_ref __dytoy_tui_jobs_method
+  dybatpho::expect_args __dytoy_tui_jobs_ref __dytoy_tui_jobs_method -- "$@"
   local -n __dytoy_tui_jobs="${__dytoy_tui_jobs_ref}"
-  case "${method}" in
+  case "${__dytoy_tui_jobs_method}" in
     os | mise | dependencies) __dytoy_tui_jobs=1 ;;
     *) __dytoy_tui_jobs="${DYTOY_TUI_JOBS}" ;;
   esac
