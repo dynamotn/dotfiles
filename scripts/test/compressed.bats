@@ -110,3 +110,13 @@ PY
   assert_success
   assert_output "name:mytool suffix:.gz"
 }
+
+@test "a dry run shows the copy as a command that could be pasted back" {
+  # The whole command used to reach `dybatpho::dry_run` as one string, so it
+  # came out as a single quoted word rather than `cp` and its arguments.
+  export DRY_RUN="true"
+  local root="${BATS_TEST_TMPDIR}/extracted root" destination="${BATS_TEST_TMPDIR}/the dest"
+  run __compressed_copy_selection "${root}" "bin/*" "${destination}" 0 tree ""
+  assert_success
+  assert_output "🧪 DRY RUN: $(printf '%q ' cp -R "${root}/bin/*" "${destination}" | sed 's/ $//')"
+}

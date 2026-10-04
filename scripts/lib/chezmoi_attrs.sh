@@ -34,25 +34,31 @@ function chezmoi_attrs::validate {
 
 #######################################
 # @description Build the prefix of a single source path component
-# @arg $1 string Name of an array holding the attributes of that component
-# @stdout Attribute prefixes in chezmoi order, each followed by `_`
+# @arg $1 string Name of the variable that receives the prefix
+# @arg $2 string Name of an array holding the attributes of that component
+# @set The variable named by `$1`: attribute prefixes in chezmoi order, each followed by `_`
 #######################################
-function __chezmoi_attrs_prefix {
-  local component_attrs
-  dybatpho::expect_args component_attrs -- "$@"
-  dybatpho::expect_ref "${component_attrs}"
-  local -n __component_attrs="${component_attrs}"
-  local attr prefix=""
-  for attr in "${CHEZMOI_ATTRS_ORDER[@]}"; do
-    if dybatpho::array_contains __component_attrs "${attr}"; then
-      prefix+="${attr}_"
+function __chezmoi_attrs_prefix_into {
+  local __chezmoi_attrs_prefix_out __chezmoi_attrs_prefix_from
+  dybatpho::expect_args __chezmoi_attrs_prefix_out __chezmoi_attrs_prefix_from -- "$@"
+  dybatpho::expect_ref "${__chezmoi_attrs_prefix_out}"
+  dybatpho::expect_ref "${__chezmoi_attrs_prefix_from}"
+  local -n __chezmoi_attrs_prefix_ref="${__chezmoi_attrs_prefix_out}"
+  local -n __chezmoi_attrs_prefix_attrs="${__chezmoi_attrs_prefix_from}"
+  local __chezmoi_attrs_prefix_attr __chezmoi_attrs_prefix_text=""
+  for __chezmoi_attrs_prefix_attr in "${CHEZMOI_ATTRS_ORDER[@]}"; do
+    if dybatpho::array_contains __chezmoi_attrs_prefix_attrs "${__chezmoi_attrs_prefix_attr}"; then
+      __chezmoi_attrs_prefix_text+="${__chezmoi_attrs_prefix_attr}_"
     fi
   done
-  printf '%s' "${prefix}"
+  __chezmoi_attrs_prefix_ref="${__chezmoi_attrs_prefix_text}"
 }
 
 #######################################
 # @description Build the chezmoi source path of a target path
+#   Every working variable carries the `__chezmoi_attrs_sp_` prefix: the path is
+#   written through a name the caller chose, and a plain local of the same name
+#   would receive it instead of the caller's variable.
 # @arg $1 string Variable name that receives the source path
 # @arg $2 string Target path, must start with `/`, `$HOME` or `~`
 # @arg $3 string Attributes of the last component, separated by `,`
@@ -64,52 +70,55 @@ function __chezmoi_attrs_prefix {
 #   # home/private_dot_config/create_encrypted_private_dot_foo
 #######################################
 function chezmoi_attrs::source_path {
-  local path_var target_path attributes
-  dybatpho::expect_args path_var target_path attributes -- "$@"
-  chezmoi_attrs::validate "${attributes}" || return 1
+  local __chezmoi_attrs_sp_var __chezmoi_attrs_sp_target __chezmoi_attrs_sp_attributes
+  dybatpho::expect_args __chezmoi_attrs_sp_var __chezmoi_attrs_sp_target __chezmoi_attrs_sp_attributes -- "$@"
+  chezmoi_attrs::validate "${__chezmoi_attrs_sp_attributes}" || return 1
 
-  local base_prefix relative_path
+  local __chezmoi_attrs_sp_base __chezmoi_attrs_sp_relative
   # shellcheck disable=SC2088 # The `~` below is a literal the caller typed, not an expansion
-  if [[ "${target_path}" == "${HOME}"/* ]]; then
-    base_prefix="home/"
-    relative_path="${target_path#"${HOME}"/}"
-  elif [[ "${target_path}" == '~/'* ]]; then
-    base_prefix="home/"
-    relative_path="${target_path#'~/'}"
-  elif [[ "${target_path}" == /* ]]; then
-    base_prefix="root/"
-    relative_path="${target_path#/}"
+  if [[ "${__chezmoi_attrs_sp_target}" == "${HOME}"/* ]]; then
+    __chezmoi_attrs_sp_base="home/"
+    __chezmoi_attrs_sp_relative="${__chezmoi_attrs_sp_target#"${HOME}"/}"
+  elif [[ "${__chezmoi_attrs_sp_target}" == '~/'* ]]; then
+    __chezmoi_attrs_sp_base="home/"
+    __chezmoi_attrs_sp_relative="${__chezmoi_attrs_sp_target#'~/'}"
+  elif [[ "${__chezmoi_attrs_sp_target}" == /* ]]; then
+    __chezmoi_attrs_sp_base="root/"
+    __chezmoi_attrs_sp_relative="${__chezmoi_attrs_sp_target#/}"
   else
-    dybatpho::error "Target path ${target_path} must start with /, \$HOME or ~"
+    dybatpho::error "Target path ${__chezmoi_attrs_sp_target} must start with /, \$HOME or ~"
     return 1
   fi
-  if [[ -z "${relative_path}" ]]; then
-    dybatpho::error "Target path ${target_path} has no file name"
+  if [[ -z "${__chezmoi_attrs_sp_relative}" ]]; then
+    dybatpho::error "Target path ${__chezmoi_attrs_sp_target} has no file name"
     return 1
   fi
 
-  local -a components=() processed=() last_attrs=()
-  IFS='/' read -r -a components <<< "${relative_path}"
-  mapfile -t last_attrs < <(dybatpho::split "${attributes}" ",")
-  local last_index=$((${#components[@]} - 1))
+  local -a __chezmoi_attrs_sp_components=() __chezmoi_attrs_sp_last_attrs=()
+  IFS='/' read -r -a __chezmoi_attrs_sp_components <<< "${__chezmoi_attrs_sp_relative}"
+  mapfile -t __chezmoi_attrs_sp_last_attrs < <(dybatpho::split "${__chezmoi_attrs_sp_attributes}" ",")
+  local __chezmoi_attrs_sp_last=$((${#__chezmoi_attrs_sp_components[@]} - 1))
 
-  local index component
-  for index in "${!components[@]}"; do
-    component="${components[${index}]}"
-    local -a component_attrs=()
+  local __chezmoi_attrs_sp_index __chezmoi_attrs_sp_component __chezmoi_attrs_sp_prefix
+  local __chezmoi_attrs_sp_joined=""
+  for __chezmoi_attrs_sp_index in "${!__chezmoi_attrs_sp_components[@]}"; do
+    __chezmoi_attrs_sp_component="${__chezmoi_attrs_sp_components[${__chezmoi_attrs_sp_index}]}"
+    local -a __chezmoi_attrs_sp_component_attrs=()
     # A dotted component is renamed and, by the convention above, made private.
     # Collecting `private` as an attribute instead of writing the prefix here is
     # what keeps `--attributes private` from producing `private_private_dot_`.
-    if [[ "${component}" == .* ]]; then
-      component="dot_${component#.}"
-      component_attrs+=("private")
+    if [[ "${__chezmoi_attrs_sp_component}" == .* ]]; then
+      __chezmoi_attrs_sp_component="dot_${__chezmoi_attrs_sp_component#.}"
+      __chezmoi_attrs_sp_component_attrs+=("private")
     fi
-    if ((index == last_index)) && ((${#last_attrs[@]} > 0)); then
-      component_attrs+=("${last_attrs[@]}")
+    if ((__chezmoi_attrs_sp_index == __chezmoi_attrs_sp_last)) \
+      && ((${#__chezmoi_attrs_sp_last_attrs[@]} > 0)); then
+      __chezmoi_attrs_sp_component_attrs+=("${__chezmoi_attrs_sp_last_attrs[@]}")
     fi
-    processed+=("$(__chezmoi_attrs_prefix component_attrs)${component}")
+    __chezmoi_attrs_prefix_into __chezmoi_attrs_sp_prefix __chezmoi_attrs_sp_component_attrs
+    [[ -z "${__chezmoi_attrs_sp_joined}" ]] || __chezmoi_attrs_sp_joined+="/"
+    __chezmoi_attrs_sp_joined+="${__chezmoi_attrs_sp_prefix}${__chezmoi_attrs_sp_component}"
   done
 
-  local IFS="/"
-  printf -v "${path_var}" '%s' "${base_prefix}${processed[*]}"
+  printf -v "${__chezmoi_attrs_sp_var}" '%s' "${__chezmoi_attrs_sp_base}${__chezmoi_attrs_sp_joined}"
 }

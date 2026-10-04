@@ -15,6 +15,20 @@ setup() {
   assert_output --partial '/etc/apt/sources.list.d/sample.list'
 }
 
+@test "package_manager::add_apt_repo finds Termux's prefix when PREFIX is not set" {
+  # Termux exports PREFIX, but a shell that has the Termux tools without it --
+  # a proot, or a stripped environment -- stopped on `PREFIX: unbound variable`.
+  export DRY_RUN='true'
+  printf '#!/bin/sh\n' > "${HOME}/.local/bin/termux-setup-storage"
+  chmod +x "${HOME}/.local/bin/termux-setup-storage"
+  unset PREFIX
+
+  run --separate-stderr package_manager::add_apt_repo sample https://packages.example stable main ABCD1234
+  assert_success
+  refute_stderr --partial "unbound variable"
+  assert_output --partial '/data/data/com.termux/files/usr/etc/apt/sources.list.d/sample.list'
+}
+
 @test "package_manager::add_flatpak_repo adds a missing remote in dry-run mode" {
   export DRY_RUN='true'
   stub flatpak ': if [ "$1" = "remote-list" ]; then exit 0; fi'
