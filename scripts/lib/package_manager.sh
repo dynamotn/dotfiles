@@ -273,7 +273,10 @@ function package_manager::add_apt_repo {
   local path gpg_path
   gpg_path="$(dybatpho::path_join "/etc/apt/trusted.gpg.d" "${name}.gpg")"
   if dybatpho::is command termux-setup-storage; then
-    path="$(dybatpho::path_join "$PREFIX" "etc" "apt" "sources.list.d" "${name}.list")"
+    # Termux exports PREFIX; a shell that has its tools without it falls back to
+    # the prefix Termux installs into, rather than stopping on an unset name.
+    path="$(dybatpho::path_join "${PREFIX:-/data/data/com.termux/files/usr}" \
+      "etc" "apt" "sources.list.d" "${name}.list")"
   else
     path="$(dybatpho::path_join "/etc/apt/sources.list.d" "${name}.list")"
   fi

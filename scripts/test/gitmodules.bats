@@ -119,3 +119,17 @@ function _committed_entries {
 
   ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"
 }
+
+# A pre-commit hook runs this suite with the repository being committed to
+# exported as GIT_DIR and GIT_INDEX_FILE; left in place, every git call in a
+# test reads -- or writes -- that repository instead of the one it means.
+@test "the suite clears the repository-local git variables a hook exports" {
+  local probe="${BATS_TEST_TMPDIR}/probe.bats"
+  printf '%s\n' \
+    "load '${DOTFILES_DIR}/scripts/test/test_helper'" \
+    '@test "no git variable leaks in" { [[ -z "${GIT_DIR-}${GIT_INDEX_FILE-}${GIT_WORK_TREE-}" ]]; }' \
+    > "${probe}"
+  run env GIT_DIR=/nonexistent GIT_INDEX_FILE=/nonexistent/index GIT_WORK_TREE=/nonexistent \
+    "${DOTFILES_DIR}/scripts/lib/dybatpho/test/lib/core/bin/bats" "${probe}"
+  assert_success
+}

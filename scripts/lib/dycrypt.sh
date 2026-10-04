@@ -49,19 +49,19 @@ function dycrypt::validate_identity {
 # @arg $2 string Identity type
 #######################################
 function dycrypt::identity_key {
-  local key_var identity
-  dybatpho::expect_args key_var identity -- "$@"
-  dycrypt::validate_identity "${identity}" || dybatpho::die "Invalid identity type"
+  # Every name here carries the private prefix: this function writes into the
+  # caller's scope, and a plain local of the caller's name would swallow it.
+  local __dycrypt_ik_var __dycrypt_ik_identity
+  dybatpho::expect_args __dycrypt_ik_var __dycrypt_ik_identity -- "$@"
+  dycrypt::validate_identity "${__dycrypt_ik_identity}" || dybatpho::die "Invalid identity type"
 
-  # Named apart from anything a caller may pass as `$1`: this function writes
-  # into the caller's scope, and a local of the same name would swallow it.
-  local __key_path
-  __key_path="$(dybatpho::path_join "${HOME}" ".config" "chezmoi" "${identity}.key")"
-  dybatpho::is file "${__key_path}" \
-    || dybatpho::die "No age identity for '${identity}', expected a key at ${__key_path}"
+  local __dycrypt_ik_path
+  __dycrypt_ik_path="$(dybatpho::path_join "${HOME}" ".config" "chezmoi" "${__dycrypt_ik_identity}.key")"
+  dybatpho::is file "${__dycrypt_ik_path}" \
+    || dybatpho::die "No age identity for '${__dycrypt_ik_identity}', expected a key at ${__dycrypt_ik_path}"
   # Reports a key readable by anyone else before it is used, not after.
-  dybatpho::secret_check_permission "${__key_path}"
-  printf -v "${key_var}" '%s' "${__key_path}"
+  dybatpho::secret_check_permission "${__dycrypt_ik_path}"
+  printf -v "${__dycrypt_ik_var}" '%s' "${__dycrypt_ik_path}"
 }
 
 #######################################
@@ -74,27 +74,31 @@ function dycrypt::identity_key {
 # @arg $6 string Attributes of the chezmoi source file, separated by `,`
 #######################################
 function dycrypt::resolve_paths {
-  local plain_var cipher_var identity filename folder attributes
-  dybatpho::expect_args plain_var cipher_var identity filename folder attributes -- "$@"
-  dycrypt::validate_identity "${identity}" || dybatpho::die "Invalid identity type"
+  # See `dycrypt::identity_key` for why every name carries the private prefix.
+  local __dycrypt_rp_plain_var __dycrypt_rp_cipher_var __dycrypt_rp_identity
+  local __dycrypt_rp_filename __dycrypt_rp_folder __dycrypt_rp_attributes
+  dybatpho::expect_args __dycrypt_rp_plain_var __dycrypt_rp_cipher_var __dycrypt_rp_identity \
+    __dycrypt_rp_filename __dycrypt_rp_folder __dycrypt_rp_attributes -- "$@"
+  dycrypt::validate_identity "${__dycrypt_rp_identity}" || dybatpho::die "Invalid identity type"
 
-  filename="$(dybatpho::trim "${filename}")"
-  [[ -n "${filename}" ]] || dybatpho::die "File name must not be empty"
+  __dycrypt_rp_filename="$(dybatpho::trim "${__dycrypt_rp_filename}")"
+  [[ -n "${__dycrypt_rp_filename}" ]] || dybatpho::die "File name must not be empty"
 
-  # See `dycrypt::identity_key` for why these names are not `plain` and `cipher`.
-  local __plain_path __cipher_path __source_path
-  if [[ "${folder}" == "data" ]]; then
-    __plain_path="$(dybatpho::path_join "${DYCRYPT_DOTFILES_DIR}" "secrets" "data" "${identity}" "${filename}")"
-    __cipher_path="${__plain_path}${DYCRYPT_AGE_EXT}"
+  local __dycrypt_rp_plain __dycrypt_rp_cipher __dycrypt_rp_source
+  if [[ "${__dycrypt_rp_folder}" == "data" ]]; then
+    __dycrypt_rp_plain="$(dybatpho::path_join "${DYCRYPT_DOTFILES_DIR}" "secrets" "data" \
+      "${__dycrypt_rp_identity}" "${__dycrypt_rp_filename}")"
+    __dycrypt_rp_cipher="${__dycrypt_rp_plain}${DYCRYPT_AGE_EXT}"
   else
-    __plain_path="$(dybatpho::path_join "${folder}" "${filename}")"
-    chezmoi_attrs::source_path __source_path "${__plain_path}" "${attributes:+${attributes},}encrypted" \
-      || dybatpho::die "Cannot derive the chezmoi source path of ${__plain_path}"
-    __cipher_path="$(dybatpho::path_join "${DYCRYPT_DOTFILES_DIR}" "${__source_path}${DYCRYPT_AGE_EXT}")"
+    __dycrypt_rp_plain="$(dybatpho::path_join "${__dycrypt_rp_folder}" "${__dycrypt_rp_filename}")"
+    chezmoi_attrs::source_path __dycrypt_rp_source "${__dycrypt_rp_plain}" \
+      "${__dycrypt_rp_attributes:+${__dycrypt_rp_attributes},}encrypted" \
+      || dybatpho::die "Cannot derive the chezmoi source path of ${__dycrypt_rp_plain}"
+    __dycrypt_rp_cipher="$(dybatpho::path_join "${DYCRYPT_DOTFILES_DIR}" "${__dycrypt_rp_source}${DYCRYPT_AGE_EXT}")"
   fi
 
-  printf -v "${plain_var}" '%s' "${__plain_path}"
-  printf -v "${cipher_var}" '%s' "${__cipher_path}"
+  printf -v "${__dycrypt_rp_plain_var}" '%s' "${__dycrypt_rp_plain}"
+  printf -v "${__dycrypt_rp_cipher_var}" '%s' "${__dycrypt_rp_cipher}"
 }
 
 #######################################
