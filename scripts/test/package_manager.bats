@@ -15,6 +15,21 @@ setup() {
   assert_output --partial '/etc/apt/sources.list.d/sample.list'
 }
 
+@test "package_manager::check_installed_fdroidcl and check_installed_mas read an id that starts with a dash" {
+  # The id went to grep as its first operand, so one starting with `-` was read
+  # as an option and an installed application was reported missing.
+  printf '#!/bin/sh\nprintf "package:-42\\npackage:org.example\\n"\n' > "${HOME}/.local/bin/cmd"
+  printf '#!/bin/sh\nprintf -- "-42 Odd App\\n497799835 Xcode\\n"\n' > "${HOME}/.local/bin/mas"
+  chmod +x "${HOME}/.local/bin/cmd" "${HOME}/.local/bin/mas"
+
+  run package_manager::check_installed_fdroidcl -42
+  assert_success
+  run package_manager::check_installed_mas -42
+  assert_success
+  run package_manager::check_installed_mas 1234
+  assert_failure
+}
+
 @test "package_manager::add_apt_repo finds Termux's prefix when PREFIX is not set" {
   # Termux exports PREFIX, but a shell that has the Termux tools without it --
   # a proot, or a stripped environment -- stopped on `PREFIX: unbound variable`.
