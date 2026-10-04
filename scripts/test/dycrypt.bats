@@ -160,3 +160,31 @@ function run_resolve {
     "$(dybatpho::xdg_config_dir chezmoi)/test.key"
   assert_failure
 }
+
+@test "dycrypt::identity_key fills a caller variable named like its own locals" {
+  # The key path is written through a name the caller chose; a caller variable
+  # called like one of the function's plain locals received nothing.
+  local name expected
+  expected="$(dybatpho::xdg_config_dir chezmoi)/test.key"
+  for name in key_var identity; do
+    eval "_probe() { local ${name}; dycrypt::identity_key ${name} test; printf '%s' \"\${${name}}\"; }"
+    run _probe
+    assert_success
+    assert_output "${expected}"
+  done
+}
+
+@test "dycrypt::resolve_paths fills caller variables named like its own locals" {
+  local name
+  for name in plain_var cipher_var identity filename folder attributes; do
+    eval "_probe() { local ${name} other; dycrypt::resolve_paths ${name} other test common.yaml data ''; printf '%s\n%s' \"\${${name}}\" \"\${other}\"; }"
+    run _probe
+    assert_success
+    assert_line --index 0 "${DYCRYPT_DOTFILES_DIR}/secrets/data/test/common.yaml"
+    assert_line --index 1 "${DYCRYPT_DOTFILES_DIR}/secrets/data/test/common.yaml.age"
+    eval "_probe() { local ${name} other; dycrypt::resolve_paths other ${name} test common.yaml data ''; printf '%s' \"\${${name}}\"; }"
+    run _probe
+    assert_success
+    assert_output "${DYCRYPT_DOTFILES_DIR}/secrets/data/test/common.yaml.age"
+  done
+}
