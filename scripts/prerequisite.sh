@@ -25,7 +25,11 @@ function _keep_sudo_alive {
       done
     ) 2> /dev/null &
     local sudo_pid=$!
-    trap 'kill -9 "$sudo_pid" 2>/dev/null || true' EXIT INT TERM
+    # The pid is expanded now, while the local holds it: the trap runs after
+    # this function has returned. EXIT alone also covers an interrupt, which
+    # still ends the script as it would without the keepalive.
+    # shellcheck disable=SC2064
+    trap "kill -9 ${sudo_pid} 2> /dev/null || true" EXIT
   fi
 }
 
@@ -129,12 +133,23 @@ function _setup_macos {
     fi
   fi
 
-  if [[ -x "${brew_prefix}/bin/brew" ]]; then
-    # shellcheck source=/dev/null
-    . <("${brew_prefix}/bin/brew" shellenv)
-    if ! grep -qs 'brew shellenv' ~/.zprofile; then
-      echo "eval \"\$(${brew_prefix}/bin/brew shellenv)\"" >> ~/.zprofile
-    fi
+  # Everything below runs Homebrew from PATH, so a missing brew or an
+  # environment it cannot print stops here rather than as a stream of
+  # `brew: command not found`. The environment is captured first: sourced
+  # through a process substitution, a failing `brew shellenv` read as empty.
+  if [[ ! -x "${brew_prefix}/bin/brew" ]]; then
+    echo "Homebrew is not at ${brew_prefix}/bin/brew; install it and run again" >&2
+    exit 1
+  fi
+  local brew_env
+  if ! brew_env="$("${brew_prefix}/bin/brew" shellenv)"; then
+    echo "\`${brew_prefix}/bin/brew shellenv\` failed; repair Homebrew and run again" >&2
+    exit 1
+  fi
+  # shellcheck source=/dev/null
+  . /dev/stdin <<< "${brew_env}"
+  if ! grep -qs 'brew shellenv' ~/.zprofile; then
+    echo "eval \"\$(${brew_prefix}/bin/brew shellenv)\"" >> ~/.zprofile
   fi
 
   # GNU compatible tools

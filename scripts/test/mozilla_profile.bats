@@ -103,6 +103,21 @@ EOF
   refute_output --partial "privacy.userContext"
 }
 
+@test "mozilla_profile::extract_prefs reads a pattern that starts with a dash" {
+  # The pattern went to grep as its first operand, so one starting with `-`
+  # was read as an option and nothing was ever copied.
+  write_prefs << 'EOF'
+user_pref("-flag.on", true);
+user_pref("mail.account.lastKey", 3);
+EOF
+  local template_file="${MOZILLA_TEMPLATE_ROOT}/03-email.js"
+
+  run mozilla_profile::extract_prefs "${template_file}" "${PREFS_FILE}" "-flag"
+  assert_success
+  run cat "${template_file}"
+  assert_output 'user_pref("-flag.on", true);'
+}
+
 @test "mozilla_profile::extract_prefs keeps the template when no preference matches" {
   write_prefs << 'EOF'
 user_pref("mail.account.lastKey", 3);
