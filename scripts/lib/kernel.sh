@@ -31,6 +31,31 @@ function kernel::run_in_tree {
 }
 
 #######################################
+# @description Check that a directory is a full kernel source tree that can
+# be built. gentoo-kernel leaves a trimmed tree under /usr/src, with Kconfig
+# and Makefiles but no C sources, for out-of-tree modules only: configuring it
+# would only overwrite the .config those modules are built against.
+# @arg $1 string Kernel source directory
+# @exitcode 0 The tree can be configured and built
+# @exitcode 1 It cannot; the reason is printed on stderr
+#######################################
+function kernel::check_tree {
+  local source_dir
+  dybatpho::expect_args source_dir -- "$@"
+  local marker main
+  marker="$(dybatpho::path_join "${source_dir}" "dist-kernel")"
+  main="$(dybatpho::path_join "${source_dir}" "init" "main.c")"
+  if [[ -e "${marker}" ]]; then
+    printf '%s is the module tree of a gentoo-kernel dist kernel\n' "${source_dir}" >&2
+    return 1
+  fi
+  if [[ ! -f "${main}" ]]; then
+    printf '%s holds no kernel sources\n' "${source_dir}" >&2
+    return 1
+  fi
+}
+
+#######################################
 # @description Print the value of one option in a kernel config
 # @arg $1 string Path of the kernel config
 # @arg $2 string Option name, without the `CONFIG_` prefix

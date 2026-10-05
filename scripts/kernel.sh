@@ -41,6 +41,8 @@ function _spec_main {
     MENUCONFIG --menuconfig -m on:true off:false init:="false"
   dybatpho::opts::param "Save the resulting .config as a defconfig to this path" \
     SAVE_BASE --save-base -b init:=""
+  dybatpho::opts::flag "Skip configure and build: rebuild out-of-tree modules and install" \
+    INSTALL_ONLY --install-only -i on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
@@ -69,7 +71,7 @@ function _verify {
 # @noargs
 #######################################
 function _main {
-  local base fragment cpus tree linux release
+  local base fragment cpus
   base="$(dybatpho::path_join "${CONFIG_DIR}" "base.config")"
   fragment="$(dybatpho::path_join "${CONFIG_DIR}" "tuning.config")"
   if [[ -z "${JOBS}" ]]; then
@@ -77,11 +79,22 @@ function _main {
     JOBS="$((cpus + 1))"
   fi
   dybatpho::require "make"
+  # Checked before anything is written: a wrong tree must stay untouched.
+  # shellcheck disable=SC2310
+  kernel::check_tree "${SOURCE_DIR}" \
+    || dybatpho::die "Install sys-kernel/gentoo-sources (USE=symlink) or pass --source"
 
   # Root is needed to write a root-owned tree, and to install anything at all.
   if dybatpho::privilege_needed \
     && { [[ ! -w "${SOURCE_DIR}" ]] || [[ "${CONFIGURE_ONLY}" != "true" ]]; }; then
     dybatpho::privilege_acquire || dybatpho::die "Installing a kernel needs root"
+  fi
+
+  if [[ "${INSTALL_ONLY}" == "true" ]]; then
+    # Resume after an interrupted run, on the tree that was built then.
+    _verify "${fragment}"
+    _install
+    return
   fi
 
   dybatpho::header "Configure ${SOURCE_DIR}"
@@ -98,6 +111,20 @@ function _main {
     return
   fi
 
+  dybatpho::header "Build kernel with ${JOBS} jobs"
+  kernel::run_in_tree "${SOURCE_DIR}" -- make -C "${SOURCE_DIR}" -j "${JOBS}"
+  # Strip only the DWARF: the BTF sections that bcc and sched_ext read stay.
+  # dyshellint disable=BSG035 modules_install writes to /lib/modules
+  dybatpho::privilege_run -- make -C "${SOURCE_DIR}" INSTALL_MOD_STRIP=1 modules_install
+  _install
+}
+
+#######################################
+# @description Rebuild the out-of-tree modules, then install the kernel
+# @noargs
+#######################################
+function _install {
+  local tree linux release
   # linux-mod-r1 builds the out-of-tree modules against /usr/src/linux.
   tree="$(realpath "${SOURCE_DIR}")"
   linux="$(realpath /usr/src/linux || true)"
@@ -105,16 +132,15 @@ function _main {
     dybatpho::warn "/usr/src/linux does not point at ${SOURCE_DIR}; @module-rebuild will target another tree"
   fi
 
-  dybatpho::header "Build kernel with ${JOBS} jobs"
-  kernel::run_in_tree "${SOURCE_DIR}" -- make -C "${SOURCE_DIR}" -j "${JOBS}"
-  # Strip only the DWARF: the BTF sections that bcc and sched_ext read stay.
-  # dyshellint disable=BSG035 modules_install writes to /lib/modules
-  dybatpho::privilege_run -- make -C "${SOURCE_DIR}" INSTALL_MOD_STRIP=1 modules_install
-
   if dybatpho::is command emerge; then
     dybatpho::header "Rebuild out-of-tree modules"
+    # Keep the --ask of EMERGE_DEFAULT_OPTS where someone can answer it: the
+    # merge list and progress stay visible, and a stuck run can be told apart
+    # from a slow one.
+    local -a ask=()
+    dybatpho::is_tty stdin || ask=(--ask=n)
     # dyshellint disable=BSG035 emerge writes to the system package database
-    dybatpho::privilege_run -- emerge --ask=n --oneshot @module-rebuild
+    dybatpho::privilege_run -- emerge ${ask[@]+"${ask[@]}"} --oneshot @module-rebuild
   fi
 
   dybatpho::header "Install kernel"
