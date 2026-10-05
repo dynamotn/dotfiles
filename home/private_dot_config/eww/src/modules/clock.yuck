@@ -6,9 +6,12 @@
 (defwidget clock []
   (eventbox
     :tooltip clock_date
-    (box
+    :cursor "pointer"
+    (button
       :class "module clock"
-      :orientation "v"
-      :space-evenly false
-      (label :class "hour" :text clock_hour)
-      (label :class "minute" :text clock_minute))))
+      :onclick "~/.config/eww/scripts/popup.sh toggle calendar"
+      (box
+        :orientation "v"
+        :space-evenly false
+        (label :class "hour" :text clock_hour)
+        (label :class "minute" :text clock_minute)))))

@@ -1,7 +1,9 @@
 // The detail panel beside the bar: audio, network, battery and media.
 
 window > .panel {
-  background-color: transparent;
+  // More specific than `.panel`, so this is where the paint belongs:
+  // declaring it below would be overridden by this rule.
+  background-color: $bg;
 }
 
 .panel {

@@ -18,7 +18,7 @@
       :space-evenly false
       (button
         :class "icon"
-        :onclick "~/.config/eww/scripts/centre.sh toggle"
+        :onclick "~/.config/eww/scripts/popup.sh toggle notification_centre"
         :onrightclick "dynotify dnd toggle"
         {notifications.dnd ? "󰂛" : (notifications.count > 0 ? "󰂚" : "󰂜")})
       (label

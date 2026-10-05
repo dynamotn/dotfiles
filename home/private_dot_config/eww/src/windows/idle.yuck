@@ -51,6 +51,17 @@
     (label :class "title" :text {mpris.title} :limit-width 60)
     (label :class "artist" :text {mpris.artist} :limit-width 60)))
 
+(defwidget idle_agenda []
+  (box
+    :class "idle_agenda"
+    :orientation "v"
+    :space-evenly false
+    :spacing 6
+    :halign "center"
+    :visible {arraylength(calendar.days[calendar.today] ?: []) > 0}
+    (label :class "heading" :text "Today")
+    (calendar_agenda :day {calendar.today})))
+
 (defwidget idle_pomodoro []
   (box
     :class "idle_pomodoro"
@@ -69,6 +80,7 @@
       :spacing 20
       :valign "center"
       (idle_clock)
+      (idle_agenda)
       (idle_media)
       (idle_pomodoro))
     (box
