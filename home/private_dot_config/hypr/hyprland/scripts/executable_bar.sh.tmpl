@@ -1,7 +1,8 @@
 #!{{ .bash }}
 # @file bar.sh
-# @brief Start the eww daemon and open the bar
-# @description Start the eww daemon and open the bar on the first screen.
+# @brief Start the eww daemon and keep the bar on every monitor
+# @description Start the eww daemon and hand over to the monitor watcher, which
+# opens a bar window on every connected output and follows Hyprland as outputs
+# come and go.
 set -euo pipefail
-eww -c ~/.config/eww daemon \
-  && eww -c ~/.config/eww open bar --screen 0 --id bar0
+exec ~/.config/eww/scripts/monitors.sh

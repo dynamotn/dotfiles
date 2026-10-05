@@ -1,0 +1,86 @@
+;; The idle screen, one window per monitor.
+;;
+;; This is a *cover*, not a lock: eww cannot speak `ext-session-lock-v1`, so it
+;; cannot keep anyone out. hypridle shows it first and hands over to hyprlock,
+;; which is the real lock.
+
+(defwidget idle_clock []
+  (box
+    :class "idle_clock"
+    :orientation "v"
+    :space-evenly false
+    :halign "center"
+    (label :class "time" :text "${clock_hour}:${clock_minute}")
+    (label :class "date" :text clock_date)))
+
+(defwidget idle_status []
+  (box
+    :class "idle_status"
+    :orientation "h"
+    :space-evenly false
+    :halign "center"
+    :spacing 25
+    (box
+      :class "entry"
+      :space-evenly false
+      :spacing 8
+      (label :class "icon" :text {network.icon})
+      (label :class "value" :text {network.name}))
+    (box
+      :class "entry"
+      :space-evenly false
+      :spacing 8
+      (label :class "icon" :text {audio.icon})
+      (label :class "value" :text "${audio.volume}%"))
+    (box
+      :class "entry"
+      :space-evenly false
+      :spacing 8
+      :visible {battery.present}
+      (label :class "icon" :text {battery.icon})
+      (label :class "value" :text "${battery.capacity}%"))))
+
+(defwidget idle_media []
+  (box
+    :class "idle_media"
+    :orientation "v"
+    :space-evenly false
+    :halign "center"
+    :spacing 4
+    :visible {mpris.active}
+    (label :class "title" :text {mpris.title} :limit-width 60)
+    (label :class "artist" :text {mpris.artist} :limit-width 60)))
+
+(defwidget idle_pomodoro []
+  (box
+    :class "idle_pomodoro"
+    :halign "center"
+    :visible {pomodoro.running}
+    (label :text "🍅 ${pomodoro.label} — ${pomodoro.remain}")))
+
+(defwidget idle []
+  (centerbox
+    :class "idle"
+    :orientation "v"
+    (box)
+    (box
+      :orientation "v"
+      :space-evenly false
+      :spacing 20
+      :valign "center"
+      (idle_clock)
+      (idle_media)
+      (idle_pomodoro))
+    (box
+      :orientation "v"
+      :space-evenly false
+      :valign "end"
+      (idle_status))))
+
+(defwindow idle [monitor]
+  :monitor monitor
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  :geometry (geometry :width "100%" :height "100%")
+  (idle))

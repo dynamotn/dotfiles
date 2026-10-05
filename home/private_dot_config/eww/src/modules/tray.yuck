@@ -1,0 +1,9 @@
+;; System tray.
+(defwidget tray []
+  (box
+    :class "module tray"
+    :orientation "v"
+    (systray
+      :orientation "v"
+      :spacing 5
+      :icon-size 20)))

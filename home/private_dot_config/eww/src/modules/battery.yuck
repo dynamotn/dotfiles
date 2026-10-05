@@ -1,0 +1,21 @@
+;; Battery — polled rather than listened to, because sysfs has no change
+;; notification; a minute is often enough for a charge percentage.
+(defpoll battery
+  :interval "60s"
+  :initial '{"present":false,"capacity":0,"charging":false,"icon":"","level":"full","time":""}'
+  "scripts/battery.sh --json")
+
+(defwidget battery []
+  (eventbox
+    :visible {battery.present}
+    :tooltip {battery.time != "" ? "${battery.status} — ${battery.time}" : battery.status}
+    (box
+      :class "module battery ${battery.level}"
+      :orientation "v"
+      :space-evenly false
+      (label
+        :class "icon"
+        :text {battery.icon})
+      (label
+        :class "value"
+        :text "${battery.capacity}"))))

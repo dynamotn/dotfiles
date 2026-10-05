@@ -1,0 +1,25 @@
+;; Audio — the default sink: click to mute, scroll to change, right click for
+;; the mixer. The script reprints on PulseAudio events, so nothing polls.
+(deflisten audio
+  :initial '{"volume":0,"muted":false,"icon":"󰝟","description":""}'
+  "scripts/audio.sh")
+
+(defwidget audio []
+  (eventbox
+    :cursor "pointer"
+    :tooltip "${audio.description} — ${audio.volume}%"
+    ;; eww substitutes `up` or `down` for {}, which is not what wpctl wants.
+    :onscroll "s=+; [ '{}' = down ] && s=-; wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%$s"
+    (box
+      :class "module audio ${audio.muted ? 'muted' : ''}"
+      :orientation "v"
+      :space-evenly false
+      (button
+        :class "icon"
+        :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+        :onrightclick "pavucontrol &"
+        {audio.icon})
+      (label
+        :class "value"
+        :visible {!audio.muted}
+        :text "${audio.volume}"))))

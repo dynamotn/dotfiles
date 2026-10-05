@@ -1,0 +1,20 @@
+// Shared tokens and helpers. The colour variables themselves come from
+// `eww.scss.tmpl`, which renders them from the Catppuccin chezmoi data.
+
+$font-family: "Iosevka Dynamo", monospace;
+$radius: 1rem;
+$radius-pill: 2rem;
+
+// A panel: the rounded, slightly raised surface every module sits on.
+@mixin panel {
+  background: $bg-alt;
+  border-radius: $radius;
+  padding: 0.3rem 0.2rem;
+}
+
+// A bar glyph: the icon size and colour every module icon shares.
+@mixin glyph($color: $fg) {
+  font-size: 1.1rem;
+  color: $color;
+  padding: 0.25rem 0.3rem;
+}

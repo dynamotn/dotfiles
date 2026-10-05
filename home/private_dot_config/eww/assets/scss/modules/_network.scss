@@ -1,0 +1,13 @@
+.network {
+  .icon {
+    @include glyph($lavender);
+
+    &:hover {
+      color: lighten($color: $lavender, $amount: 10%);
+    }
+  }
+
+  &.offline .icon {
+    color: $red;
+  }
+}

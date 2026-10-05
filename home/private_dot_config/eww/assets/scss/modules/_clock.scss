@@ -1,0 +1,13 @@
+.clock {
+  .hour,
+  .minute {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: $fg;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .hour {
+    border-bottom: 0.1rem solid $fg;
+  }
+}

@@ -1,0 +1,57 @@
+// The idle screen: a full-screen cover, not a lock. hyprlock does the locking.
+
+window > .idle {
+  background-color: rgba($bg, 0.92);
+}
+
+.idle {
+  font-family: $font-family;
+  padding: 4rem;
+
+  .idle_clock {
+    .time {
+      font-size: 6rem;
+      font-weight: bold;
+      color: $fg;
+    }
+
+    .date {
+      font-size: 1.4rem;
+      color: $fg-alt2;
+    }
+  }
+
+  .idle_media {
+    .title {
+      font-size: 1.4rem;
+      color: $teal;
+    }
+
+    .artist {
+      font-size: 1.1rem;
+      color: $fg-alt2;
+    }
+  }
+
+  .idle_pomodoro {
+    font-size: 1.2rem;
+    color: $peach;
+  }
+
+  .idle_status {
+    .entry {
+      @include panel;
+      padding: 0.5rem 1rem;
+
+      .icon {
+        font-size: 1.3rem;
+        color: $lavender;
+      }
+
+      .value {
+        font-size: 1rem;
+        color: $fg;
+      }
+    }
+  }
+}

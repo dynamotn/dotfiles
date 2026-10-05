@@ -1,0 +1,18 @@
+.audio {
+  .icon {
+    @include glyph($sapphire);
+
+    &:hover {
+      color: lighten($color: $sapphire, $amount: 10%);
+    }
+  }
+
+  .value {
+    font-size: 0.7rem;
+    color: $fg-alt2;
+  }
+
+  &.muted .icon {
+    color: $fg-alt;
+  }
+}

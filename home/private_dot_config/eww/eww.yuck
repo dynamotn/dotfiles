@@ -1,9 +1,14 @@
-(include "src/widgets/bar.yuck")
+;; Modules
+(include "src/modules/launcher.yuck")
+(include "src/modules/workspaces.yuck")
+(include "src/modules/mpris.yuck")
+(include "src/modules/pomodoro.yuck")
+(include "src/modules/tray.yuck")
+(include "src/modules/audio.yuck")
+(include "src/modules/network.yuck")
+(include "src/modules/battery.yuck")
+(include "src/modules/clock.yuck")
+
+;; Windows
 (include "src/windows/bar.yuck")
-(defwindow bar [screen]
-  :monitor screen
-  :stacking "fg"
-  :geometry (geometry :width 50 :height "100%" :anchor "center left")
-  :exclusive true
-  (bar
-    :monitor screen))
+(include "src/windows/idle.yuck")
