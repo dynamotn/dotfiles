@@ -1,6 +1,10 @@
 app-admin/logrotate
 app-admin/sudo
 app-admin/syslog-ng
+{{- if eq .code "l30n4rd0d4v1nc1" }}
+app-alternatives/bc
+app-alternatives/cpio
+{{- end }}
 app-alternatives/lex
 app-alternatives/yacc
 app-arch/unzip
@@ -52,6 +56,9 @@ dev-util/bcc
 {{- end }}
 dev-util/ccache
 dev-util/kcov
+{{- if eq .code "l30n4rd0d4v1nc1" }}
+dev-util/pahole
+{{- end }}
 dev-util/pkgdev
 dev-util/sccache
 dev-vcs/git
@@ -146,7 +153,11 @@ sys-firmware/sof-firmware
 {{- end }}
 sys-fs/btrfs-progs
 sys-fs/ntfs3g
+{{- if eq .code "l30n4rd0d4v1nc1" }}
+sys-kernel/gentoo-sources
+{{- else }}
 sys-kernel/gentoo-kernel
+{{- end }}
 sys-kernel/installkernel
 sys-kernel/linux-firmware
 sys-kernel/modprobed-db
@@ -157,6 +168,9 @@ sys-process/lsof
 sys-process/nvtop
 {{- end }}
 sys-process/parallel
+{{- if eq .code "l30n4rd0d4v1nc1" }}
+virtual/libelf
+{{- end }}
 www-client/w3m
 {{- if eq .browser "F" }}
 www-client/firefox-bin
