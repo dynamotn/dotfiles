@@ -25,8 +25,10 @@ setup() {
 
 @test "binary_download::get_latest_version queries the GitHub releases API" {
   local args_file="${BATS_TEST_TMPDIR}/curl-args"
+  local headers_file="${BATS_TEST_TMPDIR}/curl-secret-headers"
   function dybatpho::curl_do {
     printf '%s\n' "$*" > "${args_file}"
+    printf '%s\n' "${DYBATPHO_CURL_SECRET_HEADERS[@]}" > "${headers_file}"
     cat << 'EOF' > "$2"
 {"tag_name": "v1.2.3"}
 EOF
@@ -44,13 +46,18 @@ EOF
   run cat "${args_file}"
   assert_success
   assert_output --partial "https://api.github.com/repos/owner/repo/releases/latest"
-  assert_output --partial "Authorization: Bearer secret-token"
+  refute_output --partial "secret-token"
+  run cat "${headers_file}"
+  assert_success
+  assert_output "Authorization: Bearer secret-token"
 }
 
 @test "binary_download::get_latest_version queries the GitLab releases API" {
   local args_file="${BATS_TEST_TMPDIR}/curl-args"
+  local headers_file="${BATS_TEST_TMPDIR}/curl-secret-headers"
   function dybatpho::curl_do {
     printf '%s\n' "$*" > "${args_file}"
+    printf '%s\n' "${DYBATPHO_CURL_SECRET_HEADERS[@]}" > "${headers_file}"
     cat << 'EOF' > "$2"
 tag_name: v9.8.7
 EOF
@@ -67,7 +74,27 @@ EOF
   # The project path is percent-encoded with upper-case hex, as RFC 3986 asks
   # and as dybatpho::url_encode writes it; GitLab reads either case.
   assert_output --partial "https://gitlab.com/api/v4/projects/owner%2Frepo/releases/permalink/latest"
-  assert_output --partial "Authorization: Bearer secret-token"
+  refute_output --partial "secret-token"
+  run cat "${headers_file}"
+  assert_success
+  assert_output "Authorization: Bearer secret-token"
+}
+
+@test "binary_download::get_latest_version sends no secret header without a token" {
+  local headers_file="${BATS_TEST_TMPDIR}/curl-secret-headers"
+  function dybatpho::curl_do {
+    printf '%s\n' "${#DYBATPHO_CURL_SECRET_HEADERS[@]}" > "${headers_file}"
+    printf '{"tag_name": "v1.2.3"}\n' > "$2"
+  }
+  type="github"
+  name="sample"
+  unset GITHUB_TOKEN
+
+  run binary_download::get_latest_version github.com owner/repo
+  assert_success
+  run cat "${headers_file}"
+  assert_success
+  assert_output "0"
 }
 
 @test "binary_download::download_and_extract routes tarballs through compressed::extract_tar" {
