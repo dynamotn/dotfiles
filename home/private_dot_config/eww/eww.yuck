@@ -1,4 +1,5 @@
 ;; Modules
+(include "src/modules/metrics.yuck")
 (include "src/modules/launcher.yuck")
 (include "src/modules/workspaces.yuck")
 (include "src/modules/mpris.yuck")

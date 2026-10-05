@@ -39,7 +39,6 @@ function _close {
 # @arg $2 string The monitor name to show it on.
 function _open {
   local section="$1" monitor="$2" window showing
-
   showing="$(_open_panels | grep -cxF "panel-${monitor}" || true)"
 
   # Keep a single panel around: drop the ones on other monitors, but leave this

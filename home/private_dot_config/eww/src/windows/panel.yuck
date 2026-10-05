@@ -82,7 +82,7 @@
 
 ;; Network --------------------------------------------------------------------
 
-(defwidget panel_network []
+(defwidget panel_network [monitor]
   (box
     :class "section network"
     :orientation "v"
@@ -117,7 +117,7 @@
     (label :class "caption" :text "Connections" :halign "start")
     (scroll
       :class "list"
-      :height 180
+      :height {metrics[monitor].panel_list ?: 180}
       :vscroll true
       (box
         :orientation "v"
@@ -265,7 +265,7 @@
       :transition "crossfade"
       :same-size false
       (panel_audio)
-      (panel_network)
+      (panel_network :monitor monitor)
       (panel_battery)
       (panel_media))))
 
@@ -274,5 +274,5 @@
   :stacking "overlay"
   :exclusive false
   :focusable true
-  :geometry (geometry :x "60px" :width "340px" :anchor "center left")
+  :geometry (geometry :x "5%" :width "22%" :anchor "center left")
   (panel :monitor monitor))
