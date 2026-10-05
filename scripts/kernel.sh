@@ -77,6 +77,10 @@ function _main {
     JOBS="$((cpus + 1))"
   fi
   dybatpho::require "make"
+  # Checked before anything is written: a wrong tree must stay untouched.
+  # shellcheck disable=SC2310
+  kernel::check_tree "${SOURCE_DIR}" \
+    || dybatpho::die "Install sys-kernel/gentoo-sources (USE=symlink) or pass --source"
 
   # Root is needed to write a root-owned tree, and to install anything at all.
   if dybatpho::privilege_needed \

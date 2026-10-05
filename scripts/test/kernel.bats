@@ -39,6 +39,46 @@ EOF
   assert_output 'elevated make olddefconfig'
 }
 
+@test "kernel::check_tree accepts a full source tree" {
+  local tree="${BATS_TEST_TMPDIR}/linux"
+  dybatpho::ensure_dir "${tree}/init" > /dev/null
+  touch "${tree}/init/main.c"
+
+  run kernel::check_tree "${tree}"
+  assert_success
+}
+
+@test "kernel::check_tree refuses the module tree of a dist kernel" {
+  local tree="${BATS_TEST_TMPDIR}/linux"
+  dybatpho::ensure_dir "${tree}/init" > /dev/null
+  touch "${tree}/init/main.c"
+  printf 'sys-kernel/gentoo-kernel-6.18.50:6.18.50\n' > "${tree}/dist-kernel"
+
+  run kernel::check_tree "${tree}"
+  assert_failure
+  assert_output --partial "module tree of a gentoo-kernel dist kernel"
+}
+
+@test "kernel::check_tree refuses a tree without sources" {
+  run kernel::check_tree "${BATS_TEST_TMPDIR}"
+  assert_failure
+  assert_output --partial "holds no kernel sources"
+}
+
+@test "kernel.sh leaves a dist kernel tree untouched" {
+  local tree="${BATS_TEST_TMPDIR}/linux"
+  dybatpho::ensure_dir "${tree}/scripts/kconfig" > /dev/null
+  touch "${tree}/scripts/kconfig/merge_config.sh" "${tree}/dist-kernel"
+  printf 'original\n' > "${tree}/.config"
+
+  run "${DOTFILES_DIR}/scripts/kernel.sh" --configure-only --source "${tree}" \
+    --config-dir "${BATS_TEST_TMPDIR}"
+  assert_failure
+  assert_output --partial "Install sys-kernel/gentoo-sources"
+  run cat "${tree}/.config"
+  assert_output 'original'
+}
+
 @test "kernel::config_value prints the value of a set option" {
   printf 'CONFIG_HZ=1000\nCONFIG_LSM="selinux,bpf"\n' > "${BATS_TEST_TMPDIR}/.config"
 
