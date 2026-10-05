@@ -29,14 +29,16 @@ function _render {
     *) icon="󰓛" ;;
   esac
 
-  jq -nc \
-    --arg status "${status}" \
-    --arg title "${title:-Unknown track}" \
-    --arg artist "${artist}" \
-    --arg player "${player}" \
-    --arg icon "${icon}" \
-    '{active: true, status: $status, icon: $icon, title: $title,
-      artist: $artist, player: $player}'
+  STATUS="${status}" TITLE="${title:-Unknown track}" ARTIST="${artist}" \
+    PLAYER="${player}" ICON="${icon}" \
+    yq -n -o json -I 0 '{
+      "active": true,
+      "status": strenv(STATUS),
+      "icon": strenv(ICON),
+      "title": strenv(TITLE),
+      "artist": strenv(ARTIST),
+      "player": strenv(PLAYER)
+    }'
 }
 
 # @description Follow playerctl, restarting it whenever the last player exits.

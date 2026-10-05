@@ -4,7 +4,7 @@
 ;; output even when shikane reorders the monitors or wayvnc adds a headless one.
 (deflisten workspaces
   :initial "{}"
-  "scripts/workspaces.py")
+  "scripts/workspaces.sh")
 
 (defwidget workspaces [monitor]
   (box

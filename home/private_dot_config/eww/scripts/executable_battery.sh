@@ -105,15 +105,17 @@ function _main {
       fi
       ;;
     *)
-      jq -nc \
-        --argjson capacity "${capacity}" \
-        --argjson charging "${charging}" \
-        --arg icon "${icon}" \
-        --arg level "${level}" \
-        --arg status "${status}" \
-        --arg time "${time}" \
-        '{present: true, capacity: $capacity, charging: $charging, icon: $icon,
-          level: $level, status: $status, time: $time}'
+      CAPACITY="${capacity}" CHARGING="${charging}" ICON="${icon}" \
+        LEVEL="${level}" STATUS="${status}" TIME="${time}" \
+        yq -n -o json -I 0 '{
+          "present": true,
+          "capacity": env(CAPACITY),
+          "charging": env(CHARGING),
+          "icon": strenv(ICON),
+          "level": strenv(LEVEL),
+          "status": strenv(STATUS),
+          "time": strenv(TIME)
+        }'
       ;;
   esac
 }
