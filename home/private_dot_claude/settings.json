@@ -86,11 +86,22 @@
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
   },
+  "extraKnownMarketplaces": {
+    "i-have-adhd": {
+      "source": {
+        "source": "github",
+        "repo": "ayghri/i-have-adhd"
+      }
+    }
+  },
   "effortLevel": "medium",
   "tui": "fullscreen",
   "theme": "auto",
   "preferredNotifChannel": "auto",
   "remoteControlAtStartup": false,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "enabledPlugins": {
+    "i-have-adhd@i-have-adhd": true
+  }
 }
