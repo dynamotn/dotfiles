@@ -11,4 +11,5 @@
 
 ;; Windows
 (include "src/windows/bar.yuck")
+(include "src/windows/panel.yuck")
 (include "src/windows/idle.yuck")

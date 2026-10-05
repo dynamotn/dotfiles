@@ -1,10 +1,10 @@
-;; Network — the connection NetworkManager routes through, reprinted on every
-;; NetworkManager event.
+;; Network — the connection NetworkManager routes through. Click opens the
+;; panel; the script reprints on every NetworkManager event.
 (deflisten network
-  :initial '{"type":"none","name":"Disconnected","icon":"󰤭","state":"unknown","signal":0}'
+  :initial '{"type":"none","name":"Disconnected","icon":"󰤭","state":"unknown","signal":0,"device":"","address":"","wifi_enabled":false,"connections":[]}'
   "scripts/network.sh")
 
-(defwidget network []
+(defwidget network [monitor]
   (eventbox
     :cursor "pointer"
     :tooltip {network.type == "wifi"
@@ -16,5 +16,5 @@
       :space-evenly false
       (button
         :class "icon"
-        :onclick "nm-connection-editor &"
+        :onclick "~/.config/eww/scripts/panel.sh open network ${monitor}"
         {network.icon}))))

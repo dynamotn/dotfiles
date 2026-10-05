@@ -1,21 +1,21 @@
 ;; Battery — polled rather than listened to, because sysfs has no change
-;; notification; a minute is often enough for a charge percentage.
+;; notification; a minute is often enough for a charge percentage. Click opens
+;; the panel.
 (defpoll battery
   :interval "60s"
-  :initial '{"present":false,"capacity":0,"charging":false,"icon":"","level":"full","time":""}'
+  :initial '{"present":false,"capacity":0,"charging":false,"icon":"","level":"full","status":"","time":"","health":0,"cycles":0,"power":0,"model":""}'
   "scripts/battery.sh --json")
 
-(defwidget battery []
+(defwidget battery [monitor]
   (eventbox
     :visible {battery.present}
+    :cursor "pointer"
     :tooltip {battery.time != "" ? "${battery.status} — ${battery.time}" : battery.status}
-    (box
+    (button
       :class "module battery ${battery.level}"
-      :orientation "v"
-      :space-evenly false
-      (label
-        :class "icon"
-        :text {battery.icon})
-      (label
-        :class "value"
-        :text "${battery.capacity}"))))
+      :onclick "~/.config/eww/scripts/panel.sh open battery ${monitor}"
+      (box
+        :orientation "v"
+        :space-evenly false
+        (label :class "icon" :text {battery.icon})
+        (label :class "value" :text "${battery.capacity}")))))

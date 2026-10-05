@@ -5,6 +5,9 @@ $font-family: "Iosevka Dynamo", monospace;
 $radius: 1rem;
 $radius-pill: 2rem;
 
+// A surface one step up from the panel, for an inactive toggle.
+$surface-muted: lighten($color: $bg-alt, $amount: 6%);
+
 // A panel: the rounded, slightly raised surface every module sits on.
 @mixin panel {
   background: $bg-alt;

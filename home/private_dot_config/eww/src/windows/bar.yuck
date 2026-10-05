@@ -14,7 +14,7 @@
     (launcher)
     (workspaces :monitor monitor)))
 
-(defwidget bar_center []
+(defwidget bar_center [monitor]
   (box
     :class "bar_center"
     :orientation "v"
@@ -22,10 +22,10 @@
     :halign "center"
     :valign "center"
     :spacing 10
-    (mpris)
+    (mpris :monitor monitor)
     (pomodoro)))
 
-(defwidget bar_end []
+(defwidget bar_end [monitor]
   (box
     :class "bar_end"
     :orientation "v"
@@ -39,9 +39,9 @@
       :orientation "v"
       :space-evenly false
       :spacing 8
-      (audio)
-      (network)
-      (battery))
+      (audio :monitor monitor)
+      (network :monitor monitor)
+      (battery :monitor monitor))
     (clock)))
 
 (defwidget bar [monitor]
@@ -49,8 +49,8 @@
     :class "bar"
     :orientation "v"
     (bar_start :monitor monitor)
-    (bar_center)
-    (bar_end)))
+    (bar_center :monitor monitor)
+    (bar_end :monitor monitor)))
 
 (defwindow bar [monitor]
   :monitor monitor
