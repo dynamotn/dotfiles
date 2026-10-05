@@ -1,0 +1,110 @@
+;; Notifications — dynotify is the notification server and draws nothing, so
+;; these widgets are the whole notification UI. `dynotify feed` reconnects on
+;; its own, so reloading eww does not disturb the daemon and vice versa.
+;; Click opens the centre, right click turns Do Not Disturb on or off.
+(deflisten notifications
+  :initial '{"count":0,"dnd":false,"dnd_reason":"","notifications":[],"popups":[]}'
+  "dynotify feed")
+
+(defwidget notifications []
+  (eventbox
+    :cursor "pointer"
+    :tooltip {notifications.dnd
+      ? "Do Not Disturb — ${notifications.count} held"
+      : "${notifications.count} notifications"}
+    (box
+      :class "module notifications ${notifications.dnd ? 'dnd' : (notifications.count > 0 ? 'unread' : '')}"
+      :orientation "v"
+      :space-evenly false
+      (button
+        :class "icon"
+        :onclick "~/.config/eww/scripts/centre.sh toggle"
+        :onrightclick "dynotify dnd toggle"
+        {notifications.dnd ? "󰂛" : (notifications.count > 0 ? "󰂚" : "󰂜")})
+      (label
+        :class "badge"
+        :visible {notifications.count > 0}
+        :text "${notifications.count}"))))
+
+;; One notification, shared by the toasts and the centre.
+(defwidget notification [item compact]
+  (box
+    :class "notification ${item.urgency}"
+    :orientation "v"
+    :space-evenly false
+    :spacing 6
+    (box
+      :space-evenly false
+      :spacing 8
+      (image
+        :class "thumb"
+        :visible {item.icon != ""}
+        :path {item.icon}
+        :image-width 32
+        :image-height 32)
+      (box
+        :orientation "v"
+        :space-evenly false
+        :hexpand true
+        (box
+          :space-evenly false
+          (label :class "app" :text {item.app} :halign "start" :limit-width 18)
+          (label :class "clock" :text {item.clock} :halign "end" :hexpand true))
+        (label
+          :class "summary"
+          :text {item.summary}
+          :halign "start"
+          :wrap true
+          :limit-width 34))
+      (button
+        :class "close"
+        :valign "start"
+        :onclick "dynotify dismiss ${item.id}"
+        "󰅖"))
+    (label
+      :class "body"
+      :visible {item.body != ""}
+      :text {item.body}
+      :halign "start"
+      :wrap true
+      :lines {compact ? 2 : 6}
+      :limit-width 40)
+    ;; dynotify reports -1 when the sender gave no `value` hint, which is how a
+    ;; volume step tells itself apart from an ordinary notification.
+    (box
+      :class "progress"
+      :visible {item.progress >= 0}
+      :space-evenly false
+      :spacing 8
+      (scale
+        :hexpand true
+        :value {item.progress}
+        :min 0
+        :max 101
+        :active false)
+      (label :class "value" :text "${item.progress}%"))
+    (box
+      :class "actions"
+      :visible {item.has_default || arraylength(item.actions) > 0}
+      :space-evenly false
+      :spacing 6
+      (button
+        :class "action"
+        :visible {item.has_default}
+        :onclick "dynotify invoke ${item.id} default"
+        "Open")
+      (for action in {item.actions}
+        (button
+          :class "action"
+          :onclick "dynotify invoke ${item.id} ${action.name}"
+          {action.label})))
+    (box
+      :class "reply"
+      :visible {item.reply && !compact}
+      :space-evenly false
+      :spacing 6
+      (input
+        :class "field"
+        :hexpand true
+        :onaccept "dynotify reply ${item.id} {}"
+        :value ""))))

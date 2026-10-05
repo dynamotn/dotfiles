@@ -29,9 +29,12 @@ exec-once = ~/.config/hypr/hyprland/scripts/gtk.sh
 exec-once = awww-daemon
 exec = awww img ~/Multimedia/Pictures/Wallpaper/all/working.gif
 
+# Notifications: dynotify owns the bus and eww draws what it streams, so the
+# daemon starts first and outlives any eww reload.
+exec-once = dynotify serve
+
 # Bar & Panel & Widgets
 exec-once = ~/.config/hypr/hyprland/scripts/bar.sh
-exec-once = swaync
 
 # Screen shader and changes detection
 exec = hyprshade auto

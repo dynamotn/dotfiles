@@ -6,7 +6,8 @@
 # the idle screen is only ever a cover, never the lock itself.
 set -euo pipefail
 
-readonly CONFIG="${HOME}/.config/eww"
+# Overridable so the config can be exercised from a throwaway eww daemon.
+readonly CONFIG="${EWW_CONFIG_DIR:-${HOME}/.config/eww}"
 
 # @description List the names of every monitor Hyprland currently drives.
 # @noargs

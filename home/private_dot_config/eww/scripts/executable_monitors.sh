@@ -8,7 +8,8 @@
 # right output across a reconfiguration.
 set -euo pipefail
 
-readonly CONFIG="${HOME}/.config/eww"
+# Overridable so the config can be exercised from a throwaway eww daemon.
+readonly CONFIG="${EWW_CONFIG_DIR:-${HOME}/.config/eww}"
 readonly SCRIPTS="${CONFIG}/scripts"
 
 # @description List the names of every monitor Hyprland currently drives.

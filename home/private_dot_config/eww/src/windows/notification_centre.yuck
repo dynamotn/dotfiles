@@ -1,0 +1,55 @@
+;; The notification centre, opened beside the bar by scripts/centre.sh.
+
+(defwidget notification_centre []
+  (box
+    :class "notification_centre"
+    :orientation "v"
+    :space-evenly false
+    :spacing 10
+    (box
+      :class "head"
+      :space-evenly false
+      :spacing 8
+      (label :class "title" :text "Notifications" :halign "start")
+      (button
+        :class "toggle ${notifications.dnd ? 'on' : ''}"
+        :halign "end"
+        :hexpand true
+        :tooltip "Do Not Disturb"
+        :onclick "dynotify dnd toggle"
+        {notifications.dnd ? "󰂛" : "󰂚"})
+      (button
+        :class "toggle close"
+        :tooltip "Close"
+        :onclick "~/.config/eww/scripts/centre.sh close"
+        "󰅖"))
+    (box
+      :class "empty"
+      :visible {notifications.count == 0}
+      (label :text {notifications.dnd ? "Muted — nothing to show" : "Nothing new"}))
+    (scroll
+      :class "list"
+      :visible {notifications.count > 0}
+      :height 520
+      :vscroll true
+      (box
+        :orientation "v"
+        :space-evenly false
+        :spacing 8
+        (for item in {notifications.notifications}
+          (notification :item item :compact false))))
+    ;; Clearing is not undoable, so it sits away from the close button as a
+    ;; worded button rather than a glyph beside it.
+    (button
+      :class "clear"
+      :visible {notifications.count > 0}
+      :onclick "dynotify clear"
+      "Clear all")))
+
+(defwindow notification_centre [monitor]
+  :monitor monitor
+  :stacking "overlay"
+  :exclusive false
+  :focusable true
+  :geometry (geometry :x "60px" :width "400px" :anchor "center left")
+  (notification_centre))

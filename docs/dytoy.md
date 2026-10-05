@@ -159,7 +159,7 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[swappy](https://github.com/jtheoof/swappy)|Editing snapshot tool for Wayland|
 |[grim](https://github.com/emersion/grim)|Screen capturing tool for Wayland|
 |[slurp](https://github.com/emersion/slurp)|Selecting region tool for Wayland|
-|[swaync](https://github.com/ErikReider/SwayNotificationCenter)|Notification center for Wayland|
+|[dynotify](https://github.com/dynamotn/dynotify)|Notification daemon that eww draws|
 |[cliphist](https://github.com/sentriz/cliphist)|Clipboard manager for Wayland|
 |[shikane](https://github.com/hw0lff/shikane)|Automatically detects and configures connected monitors|
 |[wdisplays](https://github.com/cyclopsian/wdisplays)|Configure display monitors manually with GUI|
