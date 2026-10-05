@@ -120,21 +120,21 @@ function binary_download::get_latest_version {
       type="github"
     fi
   fi
+  local token="${GITHUB_TOKEN:-}"
+  if [[ "$type" == "gitlab" ]]; then
+    token="${GITLAB_TOKEN:-}"
+  fi
+  # The token goes out of band, through a private curl config file, so it never
+  # shows up in curl's command line (`ps`, `/proc/<pid>/cmdline`).
+  # dyshellint disable=SC2034 read by dybatpho::curl_do through dynamic scoping
+  local -a DYBATPHO_CURL_SECRET_HEADERS=(${token:+"Authorization: Bearer ${token}"})
   if [[ "$type" == "github" ]]; then
-    local -a param=()
-    if [[ "${GITHUB_TOKEN:-x}" != "x" ]]; then
-      param=("-H" "Authorization: Bearer ${GITHUB_TOKEN}")
-    fi
     if dybatpho::is true "${DRY_RUN}"; then
       echo '{"tag_name": "v0.0.0"}' > "$temp_file"
     else
-      dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$temp_file" "${param[@]}"
+      dybatpho::curl_do "https://api.${host}/repos/${repo}/releases/latest" "$temp_file"
     fi
   elif [[ "$type" == "gitlab" ]]; then
-    local -a param=()
-    if [[ "${GITLAB_TOKEN:-x}" != "x" ]]; then
-      param=("-H" "Authorization: Bearer ${GITLAB_TOKEN}")
-    fi
     if dybatpho::is true "${DRY_RUN}"; then
       echo '{"tag_name": "v0.0.0"}' > "$temp_file"
     else
@@ -142,7 +142,7 @@ function binary_download::get_latest_version {
       project="$(dybatpho::url_encode "$repo")"
       dybatpho::curl_do \
         "https://${host}/api/v4/projects/${project}/releases/permalink/latest" \
-        "$temp_file" "${param[@]}"
+        "$temp_file"
     fi
   fi
   # json_get works with either backend; `-o=props` was a yq-only flag.
