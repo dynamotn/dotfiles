@@ -10,7 +10,8 @@ set -euo pipefail
 # dyshellint disable=BSG099 this drives Hyprland, so it never runs on macOS
 shopt -s inherit_errexit
 
-readonly CONFIG="${HOME}/.config/eww"
+# Overridable so the config can be exercised from a throwaway eww daemon.
+readonly CONFIG="${EWW_CONFIG_DIR:-${HOME}/.config/eww}"
 
 # @description List the panel windows eww currently has open.
 # @noargs

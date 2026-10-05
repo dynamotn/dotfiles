@@ -41,7 +41,8 @@
       :spacing 8
       (audio :monitor monitor)
       (network :monitor monitor)
-      (battery :monitor monitor))
+      (battery :monitor monitor)
+      (notifications))
     (clock)))
 
 (defwidget bar [monitor]

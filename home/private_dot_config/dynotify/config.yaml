@@ -1,0 +1,26 @@
+menu: "wofi --dmenu --prompt Action"
+
+# The toast window is eww's, but the daemon knows when one is due, so it is the
+# daemon that opens and closes it.
+toasts:
+  on_show: >-
+    eww -c ~/.config/eww open notification_popup
+    --id notification_popup-{monitor} --screen {monitor} --arg monitor={monitor}
+  on_hide: "eww -c ~/.config/eww close notification_popup-{monitor}"
+
+rules:
+  # A volume or brightness step should replace the last one and never be kept.
+  - match:
+      app: "^(volume|brightness)$"
+    skip_history: true
+    timeout: 1500ms
+
+  # Something that failed is worth interrupting for, and worth leaving up.
+  - match:
+      summary: "(?i)(failed|error)"
+    urgency: critical
+    timeout: 0s
+
+context:
+  # A film or a presentation should not be talked over.
+  fullscreen: true

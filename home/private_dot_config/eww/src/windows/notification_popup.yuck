@@ -1,0 +1,20 @@
+;; The toasts. dynotify opens this window on the focused
+;; monitor while a toast is live and closes it once the last one ages out, so
+;; the window itself never sits on screen doing nothing.
+
+(defwidget notification_popup []
+  (box
+    :class "notification_popup"
+    :orientation "v"
+    :space-evenly false
+    :spacing 8
+    (for item in {notifications.popups}
+      (notification :item item :compact true))))
+
+(defwindow notification_popup [monitor]
+  :monitor monitor
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  :geometry (geometry :x "0px" :y "12px" :width "380px" :anchor "top right")
+  (notification_popup))

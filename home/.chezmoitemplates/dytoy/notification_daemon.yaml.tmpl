@@ -1,0 +1,12 @@
+{{- if and (eq .guiServer "W") (eq .chezmoi.os "linux") }}
+# Only for Linux Wayland server
+name: dynotify
+method: binary
+is_essential: true
+github:
+  repo: dynamotn/dynotify
+  release_asset: dynotify_linux_{{ .chezmoi.arch }}.tar.gz
+  sha256: CHECKSUMS
+archive:
+  - path: dynotify
+{{- end }}

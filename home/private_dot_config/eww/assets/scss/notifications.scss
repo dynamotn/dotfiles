@@ -1,0 +1,193 @@
+// The toasts, the notification centre, and the bell on the bar.
+
+.bar .notifications {
+  .icon {
+    @include glyph($fg-alt2);
+
+    &:hover {
+      color: $fg;
+    }
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    color: $fg-alt2;
+  }
+
+  &.unread .icon {
+    color: $teal;
+  }
+
+  &.dnd .icon {
+    color: $fg-alt;
+  }
+}
+
+// One notification, shared by the toasts and the centre.
+.notification {
+  background: $bg-alt;
+  border-radius: $radius;
+  padding: 0.7rem 0.8rem;
+  border-left: 0.2rem solid $teal;
+
+  &.critical {
+    border-left-color: $red;
+  }
+
+  &.low {
+    border-left-color: $fg-alt;
+  }
+
+  .thumb {
+    border-radius: 0.4rem;
+  }
+
+  .app {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: $teal;
+  }
+
+  .clock {
+    font-size: 0.7rem;
+    color: $fg-alt;
+  }
+
+  .summary {
+    font-size: 0.95rem;
+    color: $fg;
+  }
+
+  .body {
+    font-size: 0.85rem;
+    color: $fg-alt2;
+  }
+
+  .close {
+    font-size: 0.8rem;
+    color: $fg-alt;
+    padding: 0.1rem 0.3rem;
+
+    &:hover {
+      color: $red;
+    }
+  }
+
+  .progress {
+    .value {
+      font-size: 0.75rem;
+      color: $fg-alt2;
+      min-width: 2.4rem;
+    }
+
+    scale trough {
+      background: $surface-muted;
+      border-radius: $radius-pill;
+      min-height: 0.4rem;
+
+      highlight {
+        background: $teal;
+        border-radius: $radius-pill;
+      }
+    }
+  }
+
+  .reply .field {
+    font-size: 0.85rem;
+    color: $fg;
+    background: $surface-muted;
+    border-radius: $radius;
+    padding: 0.3rem 0.5rem;
+
+    &:focus {
+      background: lighten($color: $surface-muted, $amount: 5%);
+    }
+  }
+
+  .actions .action {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: $radius-pill;
+    background: $surface-muted;
+    color: $fg;
+
+    &:hover {
+      background: $teal;
+      color: $bg;
+    }
+  }
+}
+
+window > .notification_popup {
+  background-color: transparent;
+}
+
+.notification_popup {
+  font-family: $font-family;
+  margin: 0.5rem;
+
+  .notification {
+    box-shadow: 0 0 6px 2px rgba(black, 0.5);
+  }
+}
+
+window > .notification_centre {
+  background-color: transparent;
+}
+
+.notification_centre {
+  font-family: $font-family;
+  background: $bg;
+  border-radius: $radius;
+  box-shadow: 0 0 6px 2px rgba(black, 0.5);
+  padding: 0.9rem;
+  margin: 0.5rem;
+
+  .head {
+    .title {
+      font-size: 1rem;
+      font-weight: bold;
+      color: $fg;
+    }
+
+    .toggle {
+      font-size: 1rem;
+      color: $fg-alt2;
+      padding: 0.3rem 0.5rem;
+      border-radius: $radius;
+
+      &:hover {
+        background: $bg-alt;
+        color: $fg;
+      }
+
+      &.on {
+        color: $peach;
+      }
+
+      &.close:hover {
+        background: $red;
+        color: $bg;
+      }
+    }
+  }
+
+  .empty {
+    font-size: 0.9rem;
+    color: $fg-alt;
+    padding: 2.5rem 0;
+  }
+
+  .clear {
+    font-size: 0.85rem;
+    padding: 0.45rem;
+    border-radius: $radius;
+    background: $bg-alt;
+    color: $fg-alt2;
+
+    &:hover {
+      background: $red;
+      color: $bg;
+    }
+  }
+}

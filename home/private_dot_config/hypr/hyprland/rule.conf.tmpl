@@ -2,7 +2,7 @@
 {{- $matchTagKeyword := "match:tag " }}
 {{- $windowRuleSection := "windowrule" }}
 # Layer
-{{- $layers := list "wofi" "swaync-control-center" "gtk-layer-shell" }}
+{{- $layers := list "wofi" "gtk-layer-shell" }}
 {{- range $layers }}
 layerrule = blur on, ignore_alpha 0, match:namespace {{ . }}
 {{- end }}
