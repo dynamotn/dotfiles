@@ -10,6 +10,7 @@ shopt -s inherit_errexit
 
 # Overridable so the config can be exercised from a throwaway eww daemon.
 readonly CONFIG="${EWW_CONFIG_DIR:-${HOME}/.config/eww}"
+readonly SCRIPTS="${CONFIG}/scripts"
 
 # @description List the notification centre windows eww has open.
 # @noargs
@@ -27,6 +28,7 @@ function _close {
   while read -r window; do
     [[ -n ${window} ]] || continue
     eww -c "${CONFIG}" close "${window}" || true
+    "${SCRIPTS}/autoclose.sh" stop "${window}" || true
   done < <(_open_centres)
 }
 
@@ -42,6 +44,9 @@ function _open {
     --id "notification_centre-${monitor}" \
     --screen "${monitor}" \
     --arg "monitor=${monitor}"
+  # Clicking anywhere else should put it away, which the compositor has to tell
+  # us about: a layer surface never hears that it lost focus.
+  "${SCRIPTS}/autoclose.sh" watch "notification_centre-${monitor}" || true
 }
 
 # @description Dispatch on the requested action.
