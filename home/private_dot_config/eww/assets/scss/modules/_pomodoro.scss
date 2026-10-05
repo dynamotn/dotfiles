@@ -1,0 +1,15 @@
+.pomodoro {
+  .icon,
+  .remain,
+  .count {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: $fg;
+    padding: 0.15rem 0.3rem;
+  }
+
+  .icon,
+  .remain {
+    border-bottom: 0.1rem solid $fg-alt;
+  }
+}

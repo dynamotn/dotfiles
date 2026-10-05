@@ -1,0 +1,20 @@
+;; Network — the connection NetworkManager routes through, reprinted on every
+;; NetworkManager event.
+(deflisten network
+  :initial '{"type":"none","name":"Disconnected","icon":"󰤭","state":"unknown","signal":0}'
+  "scripts/network.sh")
+
+(defwidget network []
+  (eventbox
+    :cursor "pointer"
+    :tooltip {network.type == "wifi"
+      ? "${network.name} — ${network.signal}%"
+      : network.name}
+    (box
+      :class "module network ${network.type == 'none' ? 'offline' : ''}"
+      :orientation "v"
+      :space-evenly false
+      (button
+        :class "icon"
+        :onclick "nm-connection-editor &"
+        {network.icon}))))

@@ -1,0 +1,21 @@
+.mpris {
+  .icon {
+    @include glyph($mauve);
+
+    &:hover {
+      color: lighten($color: $mauve, $amount: 10%);
+    }
+  }
+
+  .title {
+    font-size: 0.7rem;
+    color: $fg-alt2;
+  }
+
+  &.paused {
+    .icon,
+    .title {
+      color: $fg-alt;
+    }
+  }
+}

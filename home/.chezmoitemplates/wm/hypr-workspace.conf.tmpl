@@ -1,0 +1,11 @@
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $rules.workspaces }}
+{{-   $attrs := list }}
+{{-   if get . "persistent" }}
+{{-     $attrs = append $attrs "persistent:true" }}
+{{-   end }}
+{{-   if get . "default" }}
+{{-     $attrs = append $attrs "default:true" }}
+{{-   end }}
+workspace = name:{{ .name }}{{ if $attrs }}, {{ join ", " $attrs }}{{ end }}
+{{- end }}

@@ -1,38 +1,60 @@
-(defwidget top [monitor]
+;; The vertical bar, one window per monitor.
+;;
+;; `monitor` is the Hyprland output *name*, not an index: scripts/monitors.sh
+;; passes it on open and reopens the window when the output set changes.
+
+(defwidget bar_start [monitor]
   (box
+    :class "bar_start"
+    :orientation "v"
     :space-evenly false
     :halign "center"
     :valign "start"
     :spacing 15
-    :orientation "v"
-    (launcher_icon)
-    (workspaces
-      :monitor monitor)))
+    (launcher)
+    (workspaces :monitor monitor)))
 
-(defwidget middle []
+(defwidget bar_center []
   (box
+    :class "bar_center"
+    :orientation "v"
     :space-evenly false
     :halign "center"
     :valign "center"
-    :spacing 5
-    :orientation "v"
+    :spacing 10
+    (mpris)
     (pomodoro)))
 
-(defwidget end []
+(defwidget bar_end []
   (box
+    :class "bar_end"
+    :orientation "v"
     :space-evenly false
     :halign "center"
     :valign "end"
-    :spacing 15
-    :orientation "v"
+    :spacing 10
     (tray)
-    (time)))
+    (box
+      :class "module status"
+      :orientation "v"
+      :space-evenly false
+      :spacing 8
+      (audio)
+      (network)
+      (battery))
+    (clock)))
 
 (defwidget bar [monitor]
   (box
     :class "bar"
     :orientation "v"
-    (top
-      :monitor monitor)
-    (middle)
-    (end)))
+    (bar_start :monitor monitor)
+    (bar_center)
+    (bar_end)))
+
+(defwindow bar [monitor]
+  :monitor monitor
+  :stacking "fg"
+  :exclusive true
+  :geometry (geometry :width 50 :height "100%" :anchor "center left")
+  (bar :monitor monitor))

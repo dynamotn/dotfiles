@@ -1,0 +1,22 @@
+;; Pomodoro — hidden while no pomodoro is running.
+(defpoll pomodoro
+  :interval "1s"
+  :initial '{"running":false,"remain":"","count":"","label":""}'
+  "scripts/pomodoro.sh")
+
+(defwidget pomodoro []
+  (box
+    :class "module pomodoro"
+    :orientation "v"
+    :space-evenly false
+    :visible {pomodoro.running}
+    :tooltip "${pomodoro.label} — ${pomodoro.count} done"
+    (label
+      :class "icon"
+      :text "🍅")
+    (label
+      :class "remain"
+      :text {pomodoro.remain})
+    (label
+      :class "count"
+      :text {pomodoro.count})))

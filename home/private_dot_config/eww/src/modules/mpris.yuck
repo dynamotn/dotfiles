@@ -1,0 +1,29 @@
+;; Media — the active MPRIS player. The title is rotated, because the bar is
+;; only wide enough for an icon.
+(deflisten mpris
+  :initial '{"active":false,"status":"Stopped","icon":"󰝛","title":"","artist":"","player":""}'
+  "scripts/mpris.sh")
+
+(defwidget mpris []
+  (eventbox
+    :visible {mpris.active}
+    :cursor "pointer"
+    :tooltip {mpris.artist != "" ? "${mpris.artist} — ${mpris.title}" : mpris.title}
+    ;; eww substitutes `up` or `down` for {}, which is not a playerctl command.
+    :onscroll "[ '{}' = up ] && playerctl next || playerctl previous"
+    (box
+      :class "module mpris ${mpris.status == 'Playing' ? 'playing' : 'paused'}"
+      :orientation "v"
+      :space-evenly false
+      :spacing 4
+      (button
+        :class "icon"
+        :onclick "playerctl play-pause"
+        :onrightclick "playerctl next"
+        :onmiddleclick "playerctl previous"
+        {mpris.icon})
+      (label
+        :class "title"
+        :angle 270
+        :limit-width 18
+        :text {mpris.title}))))
