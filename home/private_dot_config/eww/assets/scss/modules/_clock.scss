@@ -2,12 +2,12 @@
   .hour,
   .minute {
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.2em;
     color: $fg;
-    padding: 0.2rem 0.4rem;
+    padding: 0.2em 0.4em;
   }
 
   .hour {
-    border-bottom: 0.1rem solid $fg;
+    border-bottom: 0.1em solid $fg;
   }
 }

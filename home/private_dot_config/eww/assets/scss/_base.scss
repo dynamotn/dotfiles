@@ -2,6 +2,31 @@
 // `eww.scss.tmpl`, which renders them from the Catppuccin chezmoi data.
 
 $font-family: "Iosevka Dynamo", monospace;
+
+// The root size everything in the bar is measured against, in `em`.
+//
+// A constant in logical pixels, deliberately: the compositor scales a surface
+// per monitor, so this comes out the same physical size on a 1920 screen at
+// scale 1 and on a 2800 one at scale 1.6. Sizing it from the monitor instead
+// double counts that scale — a screen set to 0.8 to fit more would get a
+// *larger* bar, which is the opposite of what the setting asked for.
+// Raise this one value to make the whole bar bigger.
+$bar-font: 15px;
+
+// The type scale for the panels and the notification centre.
+//
+// `rem` is relative to the root font size, not to the parent, so a panel that
+// sets a larger size on itself does not scale the text inside it: every value
+// has to come from here. Raise the whole scale to make the panels bigger.
+$text-xs: 0.95rem;  // timestamps, badges, captions
+$text-sm: 1.05rem;  // secondary text, buttons, list rows
+$text-md: 1.15rem;  // body text
+$text-lg: 1.3rem;   // names and titles
+$text-xl: 1.5rem;   // section headings
+
+$glyph-sm: 1.2rem;
+$glyph-md: 1.45rem;
+$glyph-lg: 2rem;
 $radius: 1rem;
 $radius-pill: 2rem;
 
@@ -16,8 +41,12 @@ $surface-muted: lighten($color: $bg-alt, $amount: 6%);
 }
 
 // A bar glyph: the icon size and colour every module icon shares.
+//
+// `em`, not `rem`: the bar sets its own font size from the width of the monitor
+// it is on, and everything inside it is measured against that. A `rem` here
+// would stay the same size however wide the bar got.
 @mixin glyph($color: $fg) {
-  font-size: 1.1rem;
+  font-size: 1.1em;
   color: $color;
-  padding: 0.25rem 0.3rem;
+  padding: 0.25em 0.3em;
 }

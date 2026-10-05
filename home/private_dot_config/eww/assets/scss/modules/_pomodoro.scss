@@ -3,13 +3,13 @@
   .remain,
   .count {
     font-weight: bold;
-    font-size: 0.85rem;
+    font-size: 0.85em;
     color: $fg;
-    padding: 0.15rem 0.3rem;
+    padding: 0.15em 0.3em;
   }
 
   .icon,
   .remain {
-    border-bottom: 0.1rem solid $fg-alt;
+    border-bottom: 0.1em solid $fg-alt;
   }
 }

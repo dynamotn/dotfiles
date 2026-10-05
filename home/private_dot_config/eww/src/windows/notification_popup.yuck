@@ -16,5 +16,5 @@
   :stacking "overlay"
   :exclusive false
   :focusable false
-  :geometry (geometry :x "0px" :y "12px" :width "380px" :anchor "top right")
+  :geometry (geometry :x "0px" :y "12px" :width "24%" :anchor "top right")
   (notification_popup))

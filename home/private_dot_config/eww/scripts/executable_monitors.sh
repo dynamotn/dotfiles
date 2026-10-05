@@ -7,6 +7,8 @@
 # gets its own id and is passed the monitor name, so the bar keeps following the
 # right output across a reconfiguration.
 set -euo pipefail
+# dyshellint disable=BSG099 this drives Hyprland, so it never runs on macOS
+shopt -s inherit_errexit
 
 # Overridable so the config can be exercised from a throwaway eww daemon.
 readonly CONFIG="${EWW_CONFIG_DIR:-${HOME}/.config/eww}"

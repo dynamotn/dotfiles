@@ -1,7 +1,7 @@
 .workspaces {
   .workspace {
     border-radius: $radius-pill;
-    margin: 0.4rem 0.4rem;
+    margin: 0.4em 0.4em;
 
     &.empty {
       background: lighten($color: $bg, $amount: 3%);
@@ -38,9 +38,9 @@
     }
 
     .name {
-      font-size: 1rem;
+      font-size: 1em;
       color: $fg;
-      margin: 0.4rem;
+      margin: 0.4em;
     }
   }
 }
