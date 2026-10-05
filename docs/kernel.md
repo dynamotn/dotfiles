@@ -18,7 +18,13 @@ renamed symbol), so a choice never disappears silently.
 ```bash
 ./scripts/kernel.sh --configure-only   # write and verify .config only
 ./scripts/kernel.sh                    # build, modules_install, @module-rebuild, install
+./scripts/kernel.sh --install-only     # resume: @module-rebuild and install, no build
 ```
+
+`emerge` keeps the `--ask` of `EMERGE_DEFAULT_OPTS` when run from a terminal,
+so its merge list and progress stay visible. If it ever hangs, interrupt it,
+make sure no orphaned `emerge` is left (`pgrep -a emerge`), and resume with
+`--install-only` rather than building again.
 
 The order matters: the NVIDIA modules are rebuilt before `make install`,
 because installkernel runs dracut, which must find them for the initramfs.
