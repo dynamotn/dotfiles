@@ -1,12 +1,42 @@
 #!/usr/bin/env bash
 # @file network.sh
-# @brief Stream the primary network connection state for the eww bar
-# @description Print the kind, name, signal strength and an icon of the
-# connection NetworkManager is currently routing through as one JSON line,
+# @brief Stream the network state for the eww bar and its panel
+# @description Print the connection NetworkManager is routing through, its
+# address, the Wi-Fi radio state and every saved connection as one JSON line,
 # then reprint it on every NetworkManager event rather than polling.
 set -euo pipefail
 # dyshellint disable=BSG099 this drives Hyprland, so it never runs on macOS
 shopt -s inherit_errexit
+
+# The query that folds the collected values into the shape the widgets read.
+# `-t` escapes a colon inside a field, and NAME is the only field that can hold
+# one, so it goes last and the query splits off the three fixed fields first.
+# The UUID is what the panel acts on: a name with a quote in it would break the
+# shell command eww builds for a click.
+# dyshellint disable=SC2016 the $ names are yq variables, not shell expansions
+readonly PROGRAM='{
+  "type": strenv(TYPE),
+  "name": strenv(NAME),
+  "icon": strenv(ICON),
+  "state": strenv(STATE),
+  "signal": env(SIGNAL),
+  "device": strenv(DEVICE),
+  "address": strenv(ADDRESS),
+  "wifi_enabled": (strenv(WIFI) == "enabled"),
+  "connections": (
+    strenv(CONNECTIONS)
+    | split("\n")
+    | map(select(. != ""))
+    | map(capture("^(?P<type>[^:]*):(?P<device>[^:]*):(?P<uuid>[^:]*):(?P<name>.*)$"))
+    | map(select(.type | test("wireless|ethernet|wireguard|vpn")))
+    | map({
+        "name": (.name | sub("\\\\:"; ":")),
+        "uuid": .uuid,
+        "type": .type,
+        "active": (.device != "")
+      })
+  )
+}'
 
 # @description Print the icon matching a Wi-Fi signal strength.
 # @arg $1 int The signal strength, as a percentage.
@@ -25,13 +55,14 @@ function _wifi_icon {
   fi
 }
 
-# @description Print the current connection state as a JSON object.
+# @description Print the current network state as a JSON object.
 # @noargs
 # @stdout One JSON object.
 function _emit {
-  local state line type device name signal icon
+  local state line type device name signal icon address wifi connections
 
   state="$(nmcli -t -f STATE general 2> /dev/null || printf '%s\n' "unknown")"
+  wifi="$(nmcli radio wifi 2> /dev/null || printf '%s\n' "disabled")"
 
   # The first connected row of `nmcli device` is the one carrying the default
   # route, since nmcli orders devices by activation priority.
@@ -60,18 +91,23 @@ function _emit {
     *) icon="󰛳" ;;
   esac
 
+  address=""
+  if [[ -n ${device} ]]; then
+    address="$(
+      nmcli -t -f IP4.ADDRESS device show "${device}" 2> /dev/null \
+        | head -1 | cut -d: -f2
+    )"
+  fi
+  connections="$(nmcli -t -f TYPE,DEVICE,UUID,NAME connection show 2> /dev/null || true)"
+
   TYPE="${type:-none}" NAME="${name:-Disconnected}" ICON="${icon}" \
-    STATE="${state}" SIGNAL="${signal}" \
-    yq -n -o json -I 0 '{
-      "type": strenv(TYPE),
-      "name": strenv(NAME),
-      "icon": strenv(ICON),
-      "state": strenv(STATE),
-      "signal": env(SIGNAL)
-    }'
+    STATE="${state}" SIGNAL="${signal}" DEVICE="${device:-}" \
+    ADDRESS="${address:-No address}" WIFI="${wifi}" \
+    CONNECTIONS="${connections}" \
+    yq -n -o json -I 0 "${PROGRAM}"
 }
 
-# @description Print the connection state once, then on every NetworkManager event.
+# @description Print the state once, then on every NetworkManager event.
 # @noargs
 # @stdout One JSON object per line.
 function _main {

@@ -8,8 +8,10 @@ set -euo pipefail
 # dyshellint disable=BSG099 this drives Hyprland, so it never runs on macOS
 shopt -s inherit_errexit
 
-# A single line, because eww reads one JSON object per line.
-readonly ABSENT='{"present":false,"capacity":0,"charging":false,"icon":"","level":"full","status":"","time":""}'
+# Printed in two pieces to keep the source lines short; it stays one line of
+# output, which is what eww reads.
+readonly ABSENT_HEAD='{"present":false,"capacity":0,"charging":false,"icon":"","level":"full",'
+readonly ABSENT_TAIL='"status":"","time":"","health":0,"cycles":0,"power":0,"model":""}'
 
 # @description Print the sysfs path of the first real battery, if there is one.
 # @noargs
@@ -62,18 +64,32 @@ function _remaining_time {
     | sed -n 's/^ *time to \(empty\|full\): *\(.*\)$/\2/p' | head -1
 }
 
+# @description Read one sysfs attribute of a battery, or print a fallback.
+# @arg $1 string The battery directory.
+# @arg $2 string The attribute file name.
+# @arg $3 string The value to print when the attribute is missing.
+# @stdout The attribute value.
+function _attribute {
+  if [[ -r "$1/$2" ]]; then
+    cat -- "$1/$2"
+  else
+    printf '%s\n' "$3"
+  fi
+}
+
 # @description Print the battery state in the requested format.
 # @arg $1 string Either `--json` (the default) or `--text`.
 # @stdout One JSON object, or one line of text.
 function _main {
   local format="${1:---json}"
   local battery capacity status charging icon time level
+  local full design health cycles power model
 
   battery="$(_find_battery)"
   if [[ -z ${battery} ]]; then
     case "${format}" in
       --text) printf '\n' ;;
-      *) printf '%s\n' "${ABSENT}" ;;
+      *) printf '%s%s\n' "${ABSENT_HEAD}" "${ABSENT_TAIL}" ;;
     esac
     return 0
   fi
@@ -87,6 +103,16 @@ function _main {
   fi
   icon="$(_battery_icon "${capacity}" "${charging}")"
   time="$(_remaining_time)"
+  # Health is what the pack still holds against what it shipped with; sysfs
+  # reports both in microwatt hours, and a missing pair reads as 0.
+  full="$(_attribute "${battery}" energy_full 0)"
+  design="$(_attribute "${battery}" energy_full_design 0)"
+  health=0
+  ((design > 0)) && health=$((full * 100 / design))
+  cycles="$(_attribute "${battery}" cycle_count 0)"
+  # sysfs reports the draw in microwatts; one decimal of a watt is plenty.
+  power="$(_attribute "${battery}" power_now 0 | awk '{ printf "%.1f", $1 / 1000000 }')"
+  model="$(_attribute "${battery}" model_name "")"
 
   if [[ ${charging} == false ]] && ((10#${capacity} <= 15)); then
     level="critical"
@@ -107,6 +133,7 @@ function _main {
     *)
       CAPACITY="${capacity}" CHARGING="${charging}" ICON="${icon}" \
         LEVEL="${level}" STATUS="${status}" TIME="${time}" \
+        HEALTH="${health}" CYCLES="${cycles}" POWER="${power}" MODEL="${model}" \
         yq -n -o json -I 0 '{
           "present": true,
           "capacity": env(CAPACITY),
@@ -114,7 +141,11 @@ function _main {
           "icon": strenv(ICON),
           "level": strenv(LEVEL),
           "status": strenv(STATUS),
-          "time": strenv(TIME)
+          "time": strenv(TIME),
+          "health": env(HEALTH),
+          "cycles": env(CYCLES),
+          "power": env(POWER),
+          "model": strenv(MODEL)
         }'
       ;;
   esac

@@ -1,10 +1,11 @@
 ;; Media — the active MPRIS player. The title is rotated, because the bar is
-;; only wide enough for an icon.
+;; only wide enough for an icon. Click opens the panel, right click plays or
+;; pauses, scroll skips.
 (deflisten mpris
-  :initial '{"active":false,"status":"Stopped","icon":"󰝛","title":"","artist":"","player":""}'
+  :initial '{"active":false,"status":"Stopped","icon":"󰝛","title":"","artist":"","album":"","player":"","art":"","shuffle":false,"loop":"None"}'
   "scripts/mpris.sh")
 
-(defwidget mpris []
+(defwidget mpris [monitor]
   (eventbox
     :visible {mpris.active}
     :cursor "pointer"
@@ -18,9 +19,8 @@
       :spacing 4
       (button
         :class "icon"
-        :onclick "playerctl play-pause"
-        :onrightclick "playerctl next"
-        :onmiddleclick "playerctl previous"
+        :onclick "~/.config/eww/scripts/panel.sh open media ${monitor}"
+        :onrightclick "playerctl play-pause"
         {mpris.icon})
       (label
         :class "title"
