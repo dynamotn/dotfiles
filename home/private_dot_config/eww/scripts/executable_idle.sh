@@ -12,7 +12,10 @@ readonly CONFIG="${HOME}/.config/eww"
 # @noargs
 # @stdout One monitor name per line.
 function _monitor_names {
-  hyprctl monitors -j | jq -r '.[] | select(.disabled | not) | .name'
+  # `-o yaml` prints the names unquoted, one per line, and keeps yq from
+  # warning about an unspecified output format.
+  hyprctl monitors -j \
+    | yq -p json -o yaml '.[] | select(.disabled == false) | .name'
 }
 
 # @description Open the idle screen on every connected monitor.

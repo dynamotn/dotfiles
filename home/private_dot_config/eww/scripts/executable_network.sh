@@ -60,13 +60,15 @@ function _emit {
     *) icon="󰛳" ;;
   esac
 
-  jq -nc \
-    --arg type "${type:-none}" \
-    --arg name "${name:-Disconnected}" \
-    --arg icon "${icon}" \
-    --arg state "${state}" \
-    --argjson signal "${signal}" \
-    '{type: $type, name: $name, icon: $icon, state: $state, signal: $signal}'
+  TYPE="${type:-none}" NAME="${name:-Disconnected}" ICON="${icon}" \
+    STATE="${state}" SIGNAL="${signal}" \
+    yq -n -o json -I 0 '{
+      "type": strenv(TYPE),
+      "name": strenv(NAME),
+      "icon": strenv(ICON),
+      "state": strenv(STATE),
+      "signal": env(SIGNAL)
+    }'
 }
 
 # @description Print the connection state once, then on every NetworkManager event.

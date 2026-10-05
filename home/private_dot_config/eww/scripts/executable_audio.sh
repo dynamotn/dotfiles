@@ -39,12 +39,14 @@ function _emit {
       | sed -n 's/^ *\*\? *node\.description = "\(.*\)"$/\1/p' | head -1
   )"
 
-  jq -nc \
-    --argjson volume "${volume}" \
-    --argjson muted "${muted}" \
-    --arg icon "${icon}" \
-    --arg description "${description:-Unknown output}" \
-    '{volume: $volume, muted: $muted, icon: $icon, description: $description}'
+  VOLUME="${volume}" MUTED="${muted}" ICON="${icon}" \
+    DESCRIPTION="${description:-Unknown output}" \
+    yq -n -o json -I 0 '{
+      "volume": env(VOLUME),
+      "muted": env(MUTED),
+      "icon": strenv(ICON),
+      "description": strenv(DESCRIPTION)
+    }'
 }
 
 # @description Print the sink state once, then on every event that can change it.

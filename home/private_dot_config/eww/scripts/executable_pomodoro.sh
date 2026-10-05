@@ -19,11 +19,15 @@ function _main {
     return 0
   fi
 
-  jq -nc \
-    --arg remain "$(pomodoro status -f '%!r' 2> /dev/null || true)" \
-    --arg count "$(pomodoro status -f '%c' 2> /dev/null || true)" \
-    --arg label "${label}" \
-    '{running: true, remain: $remain, count: $count, label: $label}'
+  REMAIN="$(pomodoro status -f '%!r' 2> /dev/null || true)" \
+  COUNT="$(pomodoro status -f '%c' 2> /dev/null || true)" \
+  LABEL="${label}" \
+    yq -n -o json -I 0 '{
+      "running": true,
+      "remain": strenv(REMAIN),
+      "count": strenv(COUNT),
+      "label": strenv(LABEL)
+    }'
 }
 
 _main "$@"
