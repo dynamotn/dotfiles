@@ -1,0 +1,4 @@
+{{- if eq .guiDriver "N" -}}
+add_drivers+=" nvidia nvidia-modeset nvidia-drm nvidia-uvm "
+omit_drivers+=" nouveau "
+{{- end }}
