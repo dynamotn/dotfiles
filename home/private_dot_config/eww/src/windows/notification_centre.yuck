@@ -1,4 +1,4 @@
-;; The notification centre, opened beside the bar by scripts/centre.sh.
+;; The notification centre, opened beside the bar by scripts/popup.sh.
 
 (defwidget notification_centre [monitor]
   (box
@@ -21,7 +21,7 @@
       (button
         :class "toggle close"
         :tooltip "Close"
-        :onclick "~/.config/eww/scripts/centre.sh close"
+        :onclick "~/.config/eww/scripts/popup.sh close notification_centre"
         "󰅖"))
     (box
       :class "empty"

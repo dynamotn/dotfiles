@@ -10,10 +10,12 @@
 (include "src/modules/battery.yuck")
 (include "src/modules/notifications.yuck")
 (include "src/modules/clock.yuck")
+(include "src/modules/calendar.yuck")
 
 ;; Windows
 (include "src/windows/bar.yuck")
 (include "src/windows/panel.yuck")
+(include "src/windows/calendar.yuck")
 (include "src/windows/notification_popup.yuck")
 (include "src/windows/notification_centre.yuck")
 (include "src/windows/idle.yuck")

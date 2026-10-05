@@ -82,7 +82,7 @@ bind = $mainMod, Q, exec, $browser -P Personal
 bind = $mainMod, M, exec, $mailClient -P Enterprise-{{ .company }}
 bind = $mainMod, K, exec, $mailClient -P Personal
 {{- end }}
-bind = $mainMod, N, exec, ~/.config/eww/scripts/centre.sh toggle
+bind = $mainMod, N, exec, ~/.config/eww/scripts/popup.sh toggle notification_centre
 bind = $mainMod SHIFT, N, exec, dynotify dnd toggle
 bind = $altMod, N, exec, dynotify menu
 bind = $mainMod, J, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
