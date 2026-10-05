@@ -79,6 +79,32 @@ EOF
   assert_output 'original'
 }
 
+@test "kernel.sh --install-only rebuilds modules and installs without building" {
+  local tree="${BATS_TEST_TMPDIR}/linux" log="${BATS_TEST_TMPDIR}/calls"
+  dybatpho::ensure_dir "${tree}/init" > /dev/null
+  touch "${tree}/init/main.c"
+  printf 'CONFIG_HZ_1000=y\n' > "${tree}/.config"
+  printf 'CONFIG_HZ_1000=y\n' > "${BATS_TEST_TMPDIR}/tuning.config"
+  touch "${BATS_TEST_TMPDIR}/base.config"
+  local tool
+  for tool in make emerge; do
+    cat > "${HOME}/.local/bin/${tool}" << EOF
+#!/usr/bin/env bash
+printf '${tool} %s\n' "\$*" >> "${log}"
+EOF
+    chmod +x "${HOME}/.local/bin/${tool}"
+  done
+
+  # No terminal on stdin: emerge must not wait for an answer.
+  run "${DOTFILES_DIR}/scripts/kernel.sh" --install-only --source "${tree}" \
+    --config-dir "${BATS_TEST_TMPDIR}" < /dev/null
+  assert_success
+  run cat "${log}"
+  assert_output "emerge --ask=n --oneshot @module-rebuild
+make -C ${tree} install
+make -s -C ${tree} kernelrelease"
+}
+
 @test "kernel::config_value prints the value of a set option" {
   printf 'CONFIG_HZ=1000\nCONFIG_LSM="selinux,bpf"\n' > "${BATS_TEST_TMPDIR}/.config"
 
