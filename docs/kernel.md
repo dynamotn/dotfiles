@@ -26,9 +26,20 @@ so its merge list and progress stay visible. If it ever hangs, interrupt it,
 make sure no orphaned `emerge` is left (`pgrep -a emerge`), and resume with
 `--install-only` rather than building again.
 
-The order matters: the NVIDIA modules are rebuilt before `make install`,
-because installkernel runs dracut, which must find them for the initramfs.
-Each new version gets its own `/boot` entry; the previous kernel stays in GRUB.
+The NVIDIA modules are rebuilt before `make install`, so the kernel is never
+in GRUB without a driver to go with it. Each new version gets its own `/boot`
+entry; the previous kernel stays in GRUB.
+
+## Initramfs
+
+installkernel builds it with dracut, host-only (Gentoo's default). Root is on
+NVMe and btrfs, both built in, so it holds little more than udev, btrfs tools
+and the resume hook: about 15M. The NVIDIA modules stay out of it, as
+nvidia-drivers intends; pulled in, they and the GSP firmware a Pascal card
+never uses make it about 175M. Check one with
+`lsinitrd /boot/initramfs-<version>.img | head -30`: an `Early CPIO image`
+section with `AuthenticAMD.bin` means the Zen 3 microcode is loaded early,
+which needs `amd-ucode/microcode_amd_fam19h.bin` from linux-firmware.
 
 ## Switching from gentoo-kernel
 

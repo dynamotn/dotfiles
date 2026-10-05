@@ -5,8 +5,8 @@
 # fragment that chezmoi applies under `/etc/kernel/gentoo-sources`, refuse to
 # go on when Kconfig dropped any option the fragment asks for, then build and
 # install the kernel. Out-of-tree modules are rebuilt before `make install`,
-# because installkernel runs dracut, which must find the NVIDIA modules to put
-# them in the initramfs. The previous kernel is left in place as a fallback.
+# so that GRUB never offers a kernel without its NVIDIA driver. The previous
+# kernel is left in place as a fallback.
 # The upper-case options are assigned by dybatpho::opts from _spec_main.
 # shellcheck disable=SC2153,SC2154
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"

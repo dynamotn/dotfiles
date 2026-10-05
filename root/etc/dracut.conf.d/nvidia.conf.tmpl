@@ -1,4 +1,10 @@
 {{- if eq .guiDriver "N" -}}
-add_drivers+=" nvidia nvidia-modeset nvidia-drm nvidia-uvm "
+{{- /*
+  nvidia-drivers keeps its modules out of the initramfs on purpose
+  (/usr/lib/dracut/dracut.conf.d/10-nvidia-drivers.conf): pulled in, they and
+  the GSP firmware that a Pascal card never uses grow it from ~15M to ~175M.
+  Root needs no GPU, so they load from the root filesystem; only nouveau,
+  built as a module for the DRM helpers, must never load early.
+*/ -}}
 omit_drivers+=" nouveau "
 {{- end }}
