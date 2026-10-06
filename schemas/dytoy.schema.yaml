@@ -36,7 +36,11 @@ properties:
 
   version:
     type: string
-    description: Specific version to install. Defaults to 'latest'. Use 'system' for mise.
+    description: >
+      Specific version to install. Defaults to 'latest'. mise installs
+      backend@version ('system' uses the system install); binary falls back to
+      it when the release source sets no version; shell content and every hook
+      read it from $DYTOY_VERSION.
 
   backend:
     type: string
@@ -147,7 +151,7 @@ $defs:
         pattern: "^[^/]+/[^/]+$"
       version:
         type: string
-        description: Specific release version tag. Defaults to 'latest'.
+        description: Specific release version tag. Defaults to the top-level version, then 'latest'.
       release_asset:
         type: string
         description: >
@@ -164,7 +168,7 @@ $defs:
         type: string
         description: >
           Custom CDN / artifact host URL. When set the download URL is
-          constructed as artifact_host/release_asset.
+          constructed as artifact_host/release_asset. Supports %v / %1v.
 
   archive_entry:
     type: object

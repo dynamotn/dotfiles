@@ -16,6 +16,18 @@ function run_replace_version {
   assert_output 'tool-v1.2.3-1.2.3'
 }
 
+@test "misc::replace_version keeps a tag without a leading v whole" {
+  run run_replace_version 'tool-%v-%1v' '1.2.3'
+  assert_success
+  assert_output 'tool-1.2.3-1.2.3'
+}
+
+@test "misc::replace_version takes a tag holding sed metacharacters literally" {
+  run run_replace_version $'a-%v\nb-%1v' 'cli/v1&2'
+  assert_success
+  assert_output $'a-cli/v1&2\nb-cli/v1&2'
+}
+
 @test "misc::install_tool dispatches through dytoy when the command is missing" {
   export DRY_RUN='true'
 

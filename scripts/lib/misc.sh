@@ -15,12 +15,20 @@ function misc::install_tool {
 }
 
 #######################################
-# @description Replace version of tool in release assets file name or hook scripts
+# @description Replace version of tool in release assets file name or hook scripts.
+# `%v` takes the version as is, `%1v` without its leading `v`.
 # @arg $1 string Version of tool
 # @stdin $2 string Input stream
 #######################################
 function misc::replace_version {
   local version
   dybatpho::expect_args version -- "$@"
-  sed -e "s/%v/${version}/g" -e "s/%1v/${version:1}/g"
+  # Plain substitution rather than `sed`, which choked on a tag holding `/` or
+  # `&`. A tag without a leading `v` keeps its first digit under `%1v`. The
+  # pattern and replacement are quoted, so neither is read as a glob or `&`.
+  local line
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    line="${line//"%1v"/"${version#v}"}"
+    printf '%s\n' "${line//"%v"/"${version}"}"
+  done
 }
