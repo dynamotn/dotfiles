@@ -135,6 +135,58 @@ EOF
 }
 
 #######################################
+# @description Run the hooks of a tool for one stage of its installation.
+#   The top-level `hook` runs for every method and every OS. An OS section
+#   may carry a `hook` of its own, for what only that distro needs, and it
+#   runs inside the top-level one: after it before the install, ahead of it
+#   after the install.
+# @arg $1 string Name of tool
+# @arg $2 string Stage, `before` or `after`
+# @arg $3 string OS section whose own hook runs too (e.g., "arch"), empty for none
+#######################################
+function dytoy::run_hook {
+  local name stage
+  dybatpho::expect_args name stage -- "$@"
+  local section="${3:-}"
+  case "$stage" in
+    before)
+      dytoy::run_section_hook "$name" before
+      [[ -z "$section" ]] || dytoy::run_section_hook "$name" before "$section"
+      ;;
+    after)
+      [[ -z "$section" ]] || dytoy::run_section_hook "$name" after "$section"
+      dytoy::run_section_hook "$name" after
+      ;;
+    *) dybatpho::die "Unknown hook stage: $stage" ;;
+  esac
+}
+
+#######################################
+# @description Run the hook of one section of a tool for one stage, and no
+#   other: the top-level `hook` when no section is named, otherwise the one of
+#   that section, such as `flatpak` around the Flatpak packages it installs.
+# @arg $1 string Name of tool
+# @arg $2 string Stage, `before` or `after`
+# @arg $3 string Section whose hook runs (e.g., "arch", "flatpak"), empty for the top-level one
+#######################################
+function dytoy::run_section_hook {
+  local name stage
+  dybatpho::expect_args name stage -- "$@"
+  local section="${3:-}"
+  case "$stage" in
+    before | after) ;;
+    *) dybatpho::die "Unknown hook stage: $stage" ;;
+  esac
+  local field="hook.${stage}"
+  [[ -z "$section" ]] || field="${section}.${field}"
+
+  local path
+  dybatpho::create_temp path ".sh"
+  dytoy::create_script "$name" "$path" "$(dytoy::get_yaml "$name" "$field")" "${stage}-hook"
+  dytoy::run_script "$path"
+}
+
+#######################################
 # @description Iterate over tools defined in the YAML file and install them
 # @arg $1 string Command to run when iterate over tools
 # @env TOOL string Tool name to install, if set to "@empty", all tools for the specified method will be installed

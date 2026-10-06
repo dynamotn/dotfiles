@@ -173,9 +173,7 @@ function binary_download::download_and_extract {
     binary_download::verify_sha256 "${name}" "${temp_file}" "${url}" "${sha256_asset}"
   fi
 
-  dybatpho::create_temp before_path ".sh"
-  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook"
-  dytoy::run_script "$before_path"
+  dytoy::run_hook "$name" before
 
   if [[ "$url" =~ \.(tar\.gz|tgz|tar\.xz|tar\.bz2|tbz2|xz|tar|tar\.zst|tbz)$ ]]; then
     compressed::extract_tar "$name" "$temp_file" "$location" "$url" "$version"
@@ -192,9 +190,7 @@ function binary_download::download_and_extract {
     dybatpho::dry_run chmod +x "$output_path"
   fi
 
-  dybatpho::create_temp after_path ".sh"
-  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook"
-  dytoy::run_script "$after_path"
+  dytoy::run_hook "$name" after
 
   dybatpho::success "Installed binary tool: $name"
 }

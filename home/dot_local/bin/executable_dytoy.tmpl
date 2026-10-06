@@ -169,9 +169,7 @@ function _install_os_tool {
   dytoy::is_invalid_essential "$name" && return
   dytoy::install_dependencies "$name"
 
-  dybatpho::create_temp before_path ".sh"
-  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook"
-  dytoy::run_script "$before_path"
+  dytoy::run_hook "$name" before "{{ $shortCode }}"
 
   {{- if eq .chezmoi.os "darwin" }}
   dybatpho::is true "$(dytoy::get_yaml "$name" "need_rosetta")" \
@@ -182,9 +180,11 @@ function _install_os_tool {
   if dybatpho::array_first packages > /dev/null 2>&1; then
     misc::install_tool flatpak
     package_manager::init_flatpak
+    dytoy::run_section_hook "$name" before flatpak
     for package in "${packages[@]}"; do
       dytoy::install_flatpak_package "$package"
     done
+    dytoy::run_section_hook "$name" after flatpak
   fi
   {{- else if eq .chezmoi.os "android" }}
   # Install fdroid applications if defined
@@ -202,9 +202,7 @@ function _install_os_tool {
     dytoy::install_{{ $shortCode }}_package "$package" "{{ .initSystem }}"
   done
 
-  dybatpho::create_temp after_path ".sh"
-  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook"
-  dytoy::run_script "$after_path"
+  dytoy::run_hook "$name" after "{{ $shortCode }}"
 
   dybatpho::success "Installed os tool: $name"
 }
@@ -304,9 +302,7 @@ function _install_mise_tool {
   dytoy::is_installed_command "$name" && return
   dytoy::install_dependencies "$name"
 
-  dybatpho::create_temp before_path ".sh"
-  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook"
-  dytoy::run_script "$before_path"
+  dytoy::run_hook "$name" before
 
   dybatpho::progress "Installing tool $name"
   # For some tools need specific backend
@@ -326,9 +322,7 @@ function _install_mise_tool {
   version=$(dybatpho::coalesce "${version}" "latest")
   dybatpho::dry_run ${mise_command} use -g ${backend}@${version}
 
-  dybatpho::create_temp after_path ".sh"
-  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook"
-  dytoy::run_script "$after_path"
+  dytoy::run_hook "$name" after
 
   dybatpho::success "Installed mise tool: $name"
 }

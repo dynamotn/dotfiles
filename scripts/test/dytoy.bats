@@ -52,6 +52,99 @@ EOF
   assert_output ''
 }
 
+@test "dytoy::run_hook runs the top-level hook without an OS section" {
+  local log="${BATS_TEST_TMPDIR}/hooks"
+  write_tools_yaml << EOF
+- name: sample
+  method: mise
+  hook:
+    after: echo top >> '${log}'
+EOF
+
+  run dytoy::run_hook sample after
+  assert_success
+  run cat "${log}"
+  assert_output 'top'
+}
+
+@test "dytoy::run_hook runs the OS hook inside the top-level one" {
+  local log="${BATS_TEST_TMPDIR}/hooks"
+  write_tools_yaml << EOF
+- name: sample
+  method: os
+  hook:
+    before: echo top-before >> '${log}'
+    after: echo top-after >> '${log}'
+  arch:
+    packages:
+      - name: sample
+    hook:
+      before: echo arch-before >> '${log}'
+      after: echo arch-after >> '${log}'
+  ubuntu:
+    hook:
+      after: echo ubuntu-after >> '${log}'
+EOF
+
+  run dytoy::run_hook sample before arch
+  assert_success
+  run dytoy::run_hook sample after arch
+  assert_success
+  run cat "${log}"
+  assert_output "$(printf '%s\n' top-before arch-before arch-after top-after)"
+}
+
+@test "dytoy::run_hook skips an OS section without a hook" {
+  local log="${BATS_TEST_TMPDIR}/hooks"
+  write_tools_yaml << EOF
+- name: sample
+  method: os
+  hook:
+    after: echo top >> '${log}'
+  arch:
+    packages:
+      - name: sample
+EOF
+
+  run dytoy::run_hook sample after arch
+  assert_success
+  run cat "${log}"
+  assert_output 'top'
+}
+
+@test "dytoy::run_section_hook runs only the hook of the section it names" {
+  local log="${BATS_TEST_TMPDIR}/hooks"
+  write_tools_yaml << EOF
+- name: sample
+  method: os
+  hook:
+    after: echo top >> '${log}'
+  flatpak:
+    packages:
+      - name: org.example.Sample
+    hook:
+      after: echo flatpak >> '${log}'
+EOF
+
+  run dytoy::run_section_hook sample after flatpak
+  assert_success
+  run dytoy::run_section_hook sample after
+  assert_success
+  run cat "${log}"
+  assert_output "$(printf '%s\n' flatpak top)"
+}
+
+@test "dytoy::run_hook refuses an unknown stage" {
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: os
+EOF
+
+  run dytoy::run_hook sample during arch
+  assert_failure
+  assert_output --partial 'Unknown hook stage: during'
+}
+
 @test "dytoy::run_script shows the script content in dry-run mode" {
   export DRY_RUN='true'
   local script_path="${BATS_TEST_TMPDIR}/sample.sh"
