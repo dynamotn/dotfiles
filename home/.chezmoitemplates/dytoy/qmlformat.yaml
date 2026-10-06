@@ -1,0 +1,22 @@
+name: qmlformat
+method: os
+# `qmlformat` comes with Qt Declarative but lives in Qt's own bin directory,
+# outside PATH, so it is linked into ~/.local/bin
+# https://repology.org/project/qt6-declarative/versions
+gentoo:
+  packages:
+    - name: dev-qt/qtdeclarative
+arch:
+  packages:
+    - name: qt6-declarative
+ubuntu:
+  packages:
+    - name: qt6-declarative-dev-tools
+hook:
+  after: |-
+    for dir in /usr/lib/qt6/bin /usr/lib/*-linux-gnu/qt6/bin /usr/lib64/qt6/bin; do
+      if [[ -x "$dir/qmlformat" ]]; then
+        ln -sf "$dir/qmlformat" "$HOME/.local/bin/qmlformat"
+        break
+      fi
+    done

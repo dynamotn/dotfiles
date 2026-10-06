@@ -1,0 +1,5 @@
+name: prisma-lint
+method: shell
+dependencies:
+  - bun
+content: bun install -g prisma-lint

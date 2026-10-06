@@ -1,0 +1,13 @@
+name: bicep
+method: binary
+github:
+  repo: Azure/bicep
+  {{- $os := "linux" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "osx" }}
+  {{- end }}
+  {{- $arch := "x64" }}
+  {{- if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "arm64" }}
+  {{- end }}
+  release_asset: bicep-{{ $os }}-{{ $arch }}

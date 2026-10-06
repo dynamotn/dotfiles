@@ -1,0 +1,5 @@
+name: beancount
+method: shell
+dependencies:
+  - uv
+content: uv tool install beancount

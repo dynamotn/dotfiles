@@ -256,6 +256,27 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[shfmt](https://github.com/mvdan/sh)|Formatter for shell scripts|
 |[scc](https://github.com/boyter/scc)|Display statistics about code|
 |[ys](https://github.com/yaml-schema/yaml-schema)|YAML schema validator (`yaml-schema` crate)|
+|[beancount](https://github.com/beancount/beancount)|Double-entry accounting from text files, with `bean-check` and `bean-format`|
+|[bicep](https://github.com/Azure/bicep)|Language to deploy Azure resources, and its formatter|
+|[clang](https://github.com/llvm/llvm-project)|C family compiler, for `clang-tidy`|
+|[dart](https://github.com/dart-lang/sdk)|SDK for Dart, with `dart format`|
+|[erlang](https://github.com/erlang/otp)|Runtime for Erlang, with `rebar3`|
+|[erlfmt](https://github.com/WhatsApp/erlfmt)|Formatter for Erlang|
+|[elixir](https://github.com/elixir-lang/elixir)|Language for Elixir, with `mix`|
+|[foundry](https://github.com/foundry-rs/foundry)|Toolkit for Solidity, with `forge`|
+|[gawk](https://www.gnu.org/software/gawk/)|GNU implementation of `awk`|
+|[gleam](https://github.com/gleam-lang/gleam)|Compiler, formatter and language server for Gleam|
+|[hurl](https://github.com/Orange-OpenSource/hurl)|Run and test HTTP requests in plain text, with `hurlfmt`|
+|[just](https://github.com/casey/just)|Command runner|
+|[nix](https://github.com/NixOS/nix)|Purely functional package manager|
+|[nufmt](https://github.com/nushell/nufmt)|Formatter for Nushell|
+|[perlcritic](https://github.com/Perl-Critic/Perl-Critic)|Linter for Perl|
+|[perltidy](https://github.com/perltidy/perltidy)|Formatter for Perl|
+|[prisma-lint](https://github.com/loop-payments/prisma-lint)|Linter for Prisma schemas|
+|[qmlformat](https://github.com/qt/qtdeclarative)|Formatter for QML|
+|[scalafmt](https://github.com/scalameta/scalafmt)|Formatter for Scala|
+|[zig](https://github.com/ziglang/zig)|Compiler and toolchain for Zig|
+|[zsh](https://github.com/zsh-users/zsh)|Z shell|
 
 ## DevOps tools
 

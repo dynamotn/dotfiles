@@ -1,0 +1,6 @@
+name: nufmt
+method: shell
+dependencies:
+  - rust
+# Not on crates.io and no release ships a binary
+content: cargo install --locked --git https://github.com/nushell/nufmt nufmt

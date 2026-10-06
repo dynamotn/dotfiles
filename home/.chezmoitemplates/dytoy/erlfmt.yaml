@@ -1,0 +1,13 @@
+name: erlfmt
+method: shell
+dependencies:
+  - erlang
+# No release ships the escript, so it is built from the newest release tag
+content: |-
+  repo=https://github.com/WhatsApp/erlfmt
+  tag="$(git ls-remote --tags --refs --sort=-v:refname "$repo" 'v*' | head -n 1 | sed 's#.*refs/tags/##')"
+  [[ -n "$tag" ]] || dybatpho::die "No release tag of erlfmt found"
+  dybatpho::create_temp_dir build "erlfmt"
+  git clone --quiet --depth 1 --branch "$tag" "$repo" "$build/erlfmt"
+  (cd "$build/erlfmt" && rebar3 as release escriptize)
+  install -m 755 "$build/erlfmt/_build/release/bin/erlfmt" "$HOME/.local/bin/erlfmt"

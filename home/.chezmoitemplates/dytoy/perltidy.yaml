@@ -1,0 +1,12 @@
+name: perltidy
+method: os
+# https://repology.org/project/perltidy/versions
+gentoo:
+  packages:
+    - name: dev-perl/Perl-Tidy
+arch:
+  packages:
+    - name: perl-tidy
+ubuntu:
+  packages:
+    - name: perltidy

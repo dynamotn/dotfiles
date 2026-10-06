@@ -1,0 +1,22 @@
+name: clang
+method: os
+# For `clang-tidy`, which comes with clang
+# https://repology.org/project/clang/versions
+gentoo:
+  packages:
+    - name: llvm-core/clang
+arch:
+  packages:
+    - name: clang
+ubuntu:
+  packages:
+    - name: clang
+    - name: clang-tidy
+alpine:
+  packages:
+    - name: clang
+    - name: clang-extra-tools
+termux:
+  packages:
+    - name: clang
+macos: # Homebrew's llvm is keg-only, so its clang-tidy is not on PATH
