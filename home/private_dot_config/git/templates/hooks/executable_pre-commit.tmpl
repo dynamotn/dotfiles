@@ -1,17 +1,47 @@
 #!{{ .bash }}
 # @file pre-commit
 # @brief Reject a commit that still has conflict markers
-# @description Reject a commit whose staged changes still contain merge conflict markers,
-# and list the files they are in.
+# @description Reject a commit whose staged content still contains merge conflict
+# markers, and point at the exact lines. A file that carries markers on purpose,
+# such as a document explaining a conflict or a test fixture, opts out with the
+# `conflict-markers=allowed` gitattribute.
 {{ template "git/hooks/modern_bash.sh.tmpl" . }}
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
 dybatpho::register_common_handlers
 
+# Only the opening, the base and the closing marker, anchored and at their exact
+# length. The `=======` separator is left out on purpose: it is a Setext heading
+# in Markdown and a divider comment nearly everywhere else, while no conflict
+# can exist without one of the three below.
+readonly MARKER_PATTERN='^(<{7}|\|{7}|>{7})( |$)'
+
+# A deletion leaves no content to check, and a rename reports its new path.
+staged=()
+while IFS= read -r -d '' path; do
+  staged+=("${path}")
+done < <(git diff --cached --name-only -z --diff-filter=ACMRT)
+((${#staged[@]} > 0)) || exit 0
+
+# Paths reach `git grep` as pathspecs, so a name holding `*` or `[` would match
+# the wrong files; `:(literal)` turns the glob off.
+candidates=()
+while IFS= read -r -d '' path \
+  && IFS= read -r -d '' _attribute \
+  && IFS= read -r -d '' value; do
+  [[ ${value} == "allowed" ]] || candidates+=(":(literal)${path}")
+done < <(git check-attr -z conflict-markers -- "${staged[@]}")
+((${#candidates[@]} > 0)) || exit 0
+
+# The index holds what the commit will record, so search that instead of the
+# diff hunks: `git diff -G` matches a hunk that *removes* a marker just as well
+# as one that adds it, and so rejected the very commit resolving the conflict.
 conflicts=()
-mapfile -t conflicts < <(git diff --cached --name-only -G"<<<<<|=====|>>>>>")
+mapfile -t conflicts < <(
+  git grep --cached --no-color -I -n -E -e "${MARKER_PATTERN}" -- "${candidates[@]}" || true
+)
 
 if ((${#conflicts[@]} > 0)); then
-  dybatpho::error "Unresolved merge conflicts in these files:"
+  dybatpho::error "Unresolved merge conflicts at these lines:"
   dybatpho::array_print conflicts >&2
   dybatpho::die "Resolve the conflict markers before committing"
 fi
