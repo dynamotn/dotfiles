@@ -60,6 +60,21 @@ function dytoy::get_yaml {
 }
 
 #######################################
+# @description Print the version a tool asks for, `latest` when it names none
+# @arg $1 string Name of tool
+# @arg $2 string Field holding the version, `version` by default
+# @stdout The version
+#######################################
+function dytoy::get_version {
+  local name
+  dybatpho::expect_args name -- "$@"
+  local field="${2:-version}" version
+  version=$(dytoy::get_yaml "${name}" "${field}")
+  [[ "${version}" == "null" ]] && version=""
+  dybatpho::coalesce "${version}" "latest"
+}
+
+#######################################
 # @description Install dependencies from the YAML file
 # @arg $1 string Name of tool
 #######################################
@@ -113,10 +128,12 @@ function dytoy::run_script {
 # @arg $2 string Path of the script file to create
 # @arg $3 string Content of the script
 # @arg $4 string Kind of script (e.g., shell, before-install hook, after-install hook)
+# @arg $5 string Version of the tool, exported to the script as `DYTOY_VERSION` (optional)
 #######################################
 function dytoy::create_script {
   local name path content kind
   dybatpho::expect_args name path content kind -- "$@"
+  local version="${5:-}"
   if [[ "$content" == "null" ]] || dybatpho::string_is_blank "$content"; then
     return 0
   fi
@@ -131,6 +148,9 @@ dybatpho::progress "Running ${kind} to install ${name}"
 export GOBIN="$(dybatpho::path_join "$HOME" ".local" "bin")"
 export CARGO_INSTALL_ROOT="$(dybatpho::path_join "$HOME" ".local")"
 EOF
+  if ! dybatpho::string_is_blank "${version}"; then
+    printf 'export DYTOY_VERSION=%q\n' "${version}" >> "${path}"
+  fi
   printf '%s\n' "${content}" >> "${path}"
 }
 

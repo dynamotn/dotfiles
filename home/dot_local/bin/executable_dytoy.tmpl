@@ -233,10 +233,11 @@ function _parse_release {
   host=$(dybatpho::coalesce "${host}" "${type}.com")
   dybatpho::debug "Host is ${host}"
   repo=$(dytoy::get_yaml "$name" "${type}.repo")
-  version=$(dytoy::get_yaml "$name" "${type}.version")
   release_asset=$(dytoy::get_yaml "$name" "${type}.release_asset")
-  [[ "${version}" == "null" ]] && version=""
-  version=$(dybatpho::coalesce "${version}" "latest")
+  # The release source pins its own tag; the top-level `version` every method
+  # reads is the fallback.
+  version=$(dytoy::get_version "$name" "${type}.version")
+  [[ "$version" == "latest" ]] && version=$(dytoy::get_version "$name")
 
   if [[ "$version" == "latest" ]]; then
     version=$(binary_download::get_latest_version "$host" "$repo")
@@ -250,6 +251,7 @@ function _parse_release {
 
   artifact_host=$(dytoy::get_yaml "$name" "${type}.artifact_host")
   [[ "${artifact_host}" == "null" ]] && artifact_host=""
+  artifact_host=$(echo "${artifact_host}" | misc::replace_version "$version")
   local url
   if dybatpho::string_is_blank "${artifact_host}"; then
     if [[ "$type" == "github" ]]; then
@@ -304,8 +306,9 @@ function _install_mise_tool {
   dytoy::is_installed_command "$name" && return
   dytoy::install_dependencies "$name"
 
+  local version=$(dytoy::get_version "$name")
   dybatpho::create_temp before_path ".sh"
-  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook"
+  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook" "$version"
   dytoy::run_script "$before_path"
 
   dybatpho::progress "Installing tool $name"
@@ -314,7 +317,6 @@ function _install_mise_tool {
   [[ "${backend}" == "null" ]] && backend=""
   backend=$(dybatpho::coalesce "${backend}" "${name}")
 
-  local version=$(dytoy::get_yaml "$name" "version")
   local mise_bin mise_command
   mise_bin="$(dybatpho::path_join "$HOME" ".local" "bin" "mise")"
   mise_command="mise"
@@ -322,12 +324,10 @@ function _install_mise_tool {
   mise_command="proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl \"$mise_bin\""
   {{- end }}
 
-  [[ "${version}" == "null" ]] && version=""
-  version=$(dybatpho::coalesce "${version}" "latest")
   dybatpho::dry_run ${mise_command} use -g ${backend}@${version}
 
   dybatpho::create_temp after_path ".sh"
-  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook"
+  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook" "$version"
   dytoy::run_script "$after_path"
 
   dybatpho::success "Installed mise tool: $name"
@@ -347,7 +347,9 @@ function _install_shell_tool {
 
   dybatpho::progress "Installing tool $name"
   dybatpho::create_temp path ".sh"
-  dytoy::create_script "$name" "$path" "$(dytoy::get_yaml "$name" "content")" "commands"
+  # The content reads the version it should install from `$DYTOY_VERSION`.
+  dytoy::create_script "$name" "$path" "$(dytoy::get_yaml "$name" "content")" "commands" \
+    "$(dytoy::get_version "$name")"
   dytoy::run_script "$path"
   dybatpho::success "Installed shell tool: $name"
 }

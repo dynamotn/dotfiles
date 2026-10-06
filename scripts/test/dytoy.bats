@@ -52,6 +52,43 @@ EOF
   assert_output ''
 }
 
+@test "dytoy::create_script exports the version of the tool to the script" {
+  local script_path="${BATS_TEST_TMPDIR}/sample.sh"
+  local result_path="${BATS_TEST_TMPDIR}/result"
+
+  run dytoy::create_script sample "${script_path}" \
+    "echo \"\${DYTOY_VERSION}\" > '${result_path}'" commands 'v1.2.3 rc'
+  assert_success
+  run dytoy::run_script "${script_path}"
+  assert_success
+  run cat "${result_path}"
+  assert_output 'v1.2.3 rc'
+
+  run dytoy::create_script sample "${script_path}" "echo none" commands
+  assert_success
+  run cat "${script_path}"
+  refute_output --partial 'DYTOY_VERSION'
+}
+
+@test "dytoy::get_version falls back to latest" {
+  write_tools_yaml << 'EOF'
+- name: pinned
+  method: shell
+  version: 1.4.0
+  github:
+    version: v2.0.0
+- name: unpinned
+  method: shell
+EOF
+
+  run dytoy::get_version pinned
+  assert_output '1.4.0'
+  run dytoy::get_version pinned github.version
+  assert_output 'v2.0.0'
+  run dytoy::get_version unpinned
+  assert_output 'latest'
+}
+
 @test "dytoy::run_script shows the script content in dry-run mode" {
   export DRY_RUN='true'
   local script_path="${BATS_TEST_TMPDIR}/sample.sh"

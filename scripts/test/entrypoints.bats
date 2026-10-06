@@ -288,3 +288,94 @@ EOF
   assert_output --partial "Running commands to install sample"
   assert_output --partial "hello from sample shell tool"
 }
+
+@test "dytoy binary falls back to the top-level version and expands artifact_host" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: binary
+  version: v1.2.3
+  hook:
+    after: echo "hook sees ${DYTOY_VERSION}"
+  github:
+    repo: owner/repo
+    release_asset: sample-%1v-linux-amd64
+- name: hosted
+  method: binary
+  github:
+    repo: owner/repo
+    version: v2.0.0
+    artifact_host: https://cdn.example.com/%v
+    release_asset: hosted-%1v
+EOF
+
+  run bash "${rendered}" binary --dry-run --tool sample --no-check-installed
+  assert_success
+  assert_output --partial "Using version v1.2.3"
+  assert_output --partial "Release asset is sample-1.2.3-linux-amd64"
+  assert_output --partial "export DYTOY_VERSION=v1.2.3"
+
+  local stub_dir="${BATS_TEST_TMPDIR}/stub-bin" args_file="${BATS_TEST_TMPDIR}/curl-args"
+  mkdir -p "${stub_dir}"
+  {
+    printf '%s\n' '#!/usr/bin/env bash'
+    printf 'printf "%%s\\n" "$@" >> %q\n' "${args_file}"
+    cat << 'STUB'
+output="" headers=""
+while (($#)); do
+  case "$1" in
+    -o) output="$2"; shift ;;
+    -D) headers="$2"; shift ;;
+  esac
+  shift
+done
+[[ -z "${headers}" ]] || printf 'HTTP/2 200\r\n\r\n' > "${headers}"
+[[ -z "${output}" || "${output}" == /dev/null ]] || printf 'binary\n' > "${output}"
+printf '200'
+STUB
+  } > "${stub_dir}/curl"
+  chmod +x "${stub_dir}/curl"
+  PATH="${stub_dir}:${PATH}" run bash "${rendered}" binary --tool hosted --no-check-installed
+  assert_success
+  run cat "${args_file}"
+  assert_output --partial "https://cdn.example.com/v2.0.0/hosted-2.0.0"
+}
+
+@test "dytoy mise passes its version to the hooks" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: mise
+  version: system
+  hook:
+    before: echo "before ${DYTOY_VERSION}"
+EOF
+
+  run bash "${rendered}" mise --dry-run --tool sample --no-check-installed
+  assert_success
+  assert_output --partial "export DYTOY_VERSION=system"
+  assert_output --partial "mise use -g sample@system"
+}
+
+@test "dytoy shell exposes the version to its content" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  write_tools_yaml << 'EOF'
+- name: pinned
+  method: shell
+  version: 1.4.0
+  content: echo "installing pinned@${DYTOY_VERSION}"
+- name: unpinned
+  method: shell
+  content: echo "installing unpinned@${DYTOY_VERSION}"
+EOF
+
+  run bash "${rendered}" shell --tool pinned --no-check-installed
+  assert_success
+  assert_output --partial "installing pinned@1.4.0"
+  run bash "${rendered}" shell --tool unpinned --no-check-installed
+  assert_success
+  assert_output --partial "installing unpinned@latest"
+}

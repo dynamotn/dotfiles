@@ -174,7 +174,7 @@ function binary_download::download_and_extract {
   fi
 
   dybatpho::create_temp before_path ".sh"
-  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook"
+  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook" "${version}"
   dytoy::run_script "$before_path"
 
   if [[ "$url" =~ \.(tar\.gz|tgz|tar\.xz|tar\.bz2|tbz2|xz|tar|tar\.zst|tbz)$ ]]; then
@@ -193,7 +193,7 @@ function binary_download::download_and_extract {
   fi
 
   dybatpho::create_temp after_path ".sh"
-  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook"
+  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook" "${version}"
   dytoy::run_script "$after_path"
 
   dybatpho::success "Installed binary tool: $name"
