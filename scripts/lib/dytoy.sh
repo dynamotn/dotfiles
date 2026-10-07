@@ -27,6 +27,63 @@ function dytoy::get_field {
 }
 
 #######################################
+# @description Read the `params` of a package, the extra flags handed to its
+# package manager
+# @arg $1 string Name of the array variable to fill
+# @arg $2 string YAML content of the package
+# @set The named array: one flag per element, empty when unset
+#######################################
+function dytoy::get_params_into {
+  local __dytoy_params_var __dytoy_params_yaml
+  dybatpho::expect_args __dytoy_params_var __dytoy_params_yaml -- "$@"
+  local -n __dytoy_params_ref="${__dytoy_params_var}"
+  __dytoy_params_ref=()
+  readarray -t __dytoy_params_ref < <(dytoy::get_field "${__dytoy_params_yaml}" "params // [] | .[]")
+}
+
+#######################################
+# @description Print the package an OS package manager should install for the
+# version a package entry asks for
+# @arg $1 string Package manager, one of "portage", "pacman", "apt", "termux" or "apk"
+# @arg $2 string Package name
+# @arg $3 string Version: `latest` or `null` for the default one, `HEAD` for
+#   the development branch, anything else for that exact version
+# @stdout The package to install, such as `=app-editors/neovim-9999`,
+#   `neovim-git` or `ripgrep=14.1.0-1`
+#######################################
+function dytoy::get_package_spec {
+  local manager name version
+  dybatpho::expect_args manager name version -- "$@"
+  case "${version}" in
+    null | latest)
+      printf '%s\n' "${name}"
+      return 0
+      ;;
+    *) ;;
+  esac
+  case "${manager}" in
+    # The live ebuild of a Gentoo package builds its development branch.
+    portage)
+      [[ "${version}" != "HEAD" ]] || version="9999"
+      printf '=%s-%s\n' "${name}" "${version}"
+      ;;
+    # The AUR carries the development branch as `<name>-git`, and paru can't
+    # pick an older version.
+    pacman)
+      [[ "${version}" == "HEAD" ]] \
+        || dybatpho::die "pacman can't install version ${version} of ${name}, only HEAD"
+      printf '%s-git\n' "${name}"
+      ;;
+    apt | termux | apk)
+      [[ "${version}" != "HEAD" ]] \
+        || dybatpho::die "${manager} can't install the HEAD of ${name}"
+      printf '%s=%s\n' "${name}" "${version}"
+      ;;
+    *) dybatpho::die "Version of ${name} isn't supported with ${manager}" ;;
+  esac
+}
+
+#######################################
 # @description Get YAML content for a specific tool
 # @arg $1 string Name of tool
 # @arg $2 string Field to extract from the YAML file, `all` to get all fields
@@ -309,12 +366,16 @@ function dytoy::install_gentoo_package {
   dybatpho::expect_args yaml init_system -- "$@"
   local name repo url
   name=$(dytoy::get_field "$yaml" "name")
+  local -a params
+  dytoy::get_params_into params "$yaml"
   repo=$(dytoy::get_field "$yaml" "repo")
   url=$(dytoy::get_field "$yaml" "url")
   [[ "$repo" == "null" ]] || package_manager::add_overlay "$repo" "$url" > /dev/null
 
+  local spec
+  spec=$(dytoy::get_package_spec portage "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
   dytoy::install_package "$name" "portage" "$init_system" "$yaml" \
-    package_manager::install_via_portage "$name"
+    package_manager::install_via_portage "$spec" "${params[@]}"
 }
 
 #######################################
@@ -326,8 +387,12 @@ function dytoy::install_arch_package {
   dybatpho::expect_args yaml -- "$@"
   local name
   name=$(dytoy::get_field "$yaml" "name")
+  local -a params
+  dytoy::get_params_into params "$yaml"
+  # A `-git` package is a package of its own, so it is also the one checked.
+  name=$(dytoy::get_package_spec pacman "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
   dytoy::install_package "$name" "pacman" "systemd" "$yaml" \
-    package_manager::install_via_pacman "$name"
+    package_manager::install_via_pacman "$name" "${params[@]}"
 }
 
 #######################################
@@ -379,8 +444,12 @@ function dytoy::install_ubuntu_package {
 
   local name
   name=$(dytoy::get_field "$yaml" "name")
+  local -a params
+  dytoy::get_params_into params "$yaml"
+  local spec
+  spec=$(dytoy::get_package_spec apt "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
   dytoy::install_package "$name" "apt" "systemd" "$yaml" \
-    package_manager::install_via_apt "$name"
+    package_manager::install_via_apt "$spec" "${params[@]}"
 }
 
 #######################################
@@ -392,8 +461,12 @@ function dytoy::install_alpine_package {
   dybatpho::expect_args yaml -- "$@"
   local name
   name=$(dytoy::get_field "$yaml" "name")
+  local -a params
+  dytoy::get_params_into params "$yaml"
+  local spec
+  spec=$(dytoy::get_package_spec apk "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
   dytoy::install_package "$name" "apk" "openrc" "$yaml" \
-    package_manager::install_via_apk "$name"
+    package_manager::install_via_apk "$spec" "${params[@]}"
 }
 
 #######################################
@@ -405,8 +478,12 @@ function dytoy::install_termux_package {
   dybatpho::expect_args yaml -- "$@"
   local name
   name=$(dytoy::get_field "$yaml" "name")
+  local -a params
+  dytoy::get_params_into params "$yaml"
+  local spec
+  spec=$(dytoy::get_package_spec termux "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
   dytoy::install_package "$name" "apt" "termux" "$yaml" \
-    package_manager::install_via_termux "$name"
+    package_manager::install_via_termux "$spec" "${params[@]}"
 }
 
 #######################################
@@ -418,12 +495,14 @@ function dytoy::install_fdroid_package {
   dybatpho::expect_args yaml -- "$@"
   local name repo url
   name=$(dytoy::get_field "$yaml" "name")
+  local -a params
+  dytoy::get_params_into params "$yaml"
   repo=$(dytoy::get_field "$yaml" "repo")
   url=$(dytoy::get_field "$yaml" "url")
   [[ "$repo" == "null" ]] || package_manager::add_fdroid_repo "$repo" "$url" > /dev/null
 
   dytoy::install_package "$name" "fdroidcl" "" "$yaml" \
-    package_manager::install_via_fdroidcl "$name"
+    package_manager::install_via_fdroidcl "$name" "${params[@]}"
 }
 
 #######################################
@@ -435,12 +514,14 @@ function dytoy::install_flatpak_package {
   dybatpho::expect_args yaml -- "$@"
   local name repo url
   name=$(dytoy::get_field "$yaml" "name")
+  local -a params
+  dytoy::get_params_into params "$yaml"
   repo=$(dytoy::get_field "$yaml" "repo")
   url=$(dytoy::get_field "$yaml" "url")
   [[ "$repo" == "null" ]] || package_manager::add_flatpak_repo "$repo" "$url" > /dev/null
 
   dytoy::install_package "$name" "flatpak" "" "$yaml" \
-    package_manager::install_via_flatpak "$name" "$repo"
+    package_manager::install_via_flatpak "$name" "$repo" "${params[@]}"
 }
 
 #######################################
@@ -452,11 +533,13 @@ function dytoy::install_macos_package {
   dybatpho::expect_args yaml -- "$@"
   local name type
   name=$(dytoy::get_field "$yaml" "name")
+  local -a params
+  dytoy::get_params_into params "$yaml"
   type=$(dytoy::get_field "$yaml" "type")
   case "$type" in
     store)
       dytoy::install_package "$name" "mas" "" "$yaml" \
-        package_manager::install_via_mas "$name"
+        package_manager::install_via_mas "$name" "${params[@]}"
       ;;
     download)
       local url
@@ -465,20 +548,23 @@ function dytoy::install_macos_package {
         package_manager::install_via_dmg "$name" "$url"
       ;;
     *)
-      local unstable
+      local version
       local -a brew_params=()
-      unstable=$(dytoy::get_field "$yaml" "unstable")
+      version=$(dytoy::get_field "$yaml" "version")
       if [[ "$type" == "cask" ]]; then
-        brew_params=("--cask")
+        # Take over an app or font files left behind without a Caskroom
+        # record, which brew otherwise refuses to overwrite.
+        brew_params=("--cask" "--force")
       else
         brew_params=("--formula")
       fi
-      if [[ "$unstable" == "true" ]]; then
-        brew_params+=("--HEAD")
-      fi
-      local -a brew_args=()
-      readarray -t brew_args < <(dytoy::get_field "$yaml" "brew_args // [] | .[]")
-      brew_params+=("${brew_args[@]}")
+      case "$version" in
+        null | latest) ;;
+        HEAD) brew_params+=("--HEAD") ;;
+        # Homebrew ships other versions as their own `name@version` package.
+        *) name="${name}@${version}" ;;
+      esac
+      brew_params+=("${params[@]}")
       local repo
       repo=$(dytoy::get_field "$yaml" "repo")
       [[ "$repo" == "null" ]] || package_manager::add_brew_tap "$repo" > /dev/null

@@ -10,7 +10,8 @@ gentoo:
       url: https://github.com/gentoo-mirror/guru.git
 arch:
   packages:
-    - name: eww-git
+    - name: eww
+      version: HEAD
 {{- else if eq .guiWinManager "A" }}
 name: sketchybar
 method: os

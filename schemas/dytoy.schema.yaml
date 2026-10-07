@@ -207,6 +207,14 @@ $defs:
       hook:
         $ref: "#/$defs/hook"
 
+  params:
+    type: array
+    items:
+      type: string
+    description: >-
+      Extra flags handed to the package manager when installing the package,
+      such as '--no-quarantine' for 'brew install'
+
   package_entry:
     type: object
     description: A single OS package entry
@@ -231,6 +239,16 @@ $defs:
       key:
         type: string
         description: GPG key URL or fingerprint for the repository
+      params:
+        $ref: "#/$defs/params"
+      version:
+        type: string
+        description: >-
+          Version of the package. 'HEAD' builds its development branch: the
+          live '9999' ebuild on Gentoo, the '<name>-git' AUR package on Arch;
+          apt and apk have none. Any other value but 'latest' installs that
+          exact version: '=<name>-<version>' on Gentoo, '<name>=<version>' with
+          apt and apk; paru can't pick one. Defaults to 'latest'.
 
   macos_packages:
     type: object
@@ -274,14 +292,14 @@ $defs:
       is_user_service:
         type: boolean
         description: When true the service is managed as a user launchd agent
-      unstable:
-        type: boolean
-        description: When true installs the HEAD/nightly build of the formula
-      brew_args:
-        type: array
-        items:
-          type: string
-        description: Extra arguments passed to 'brew install', such as '--force'
+      version:
+        type: string
+        description: >-
+          Version of the formula or cask. 'HEAD' builds it from its development
+          branch, any other value but 'latest' installs the versioned package
+          'name@version' (e.g. 'python@3.12'). Defaults to 'latest'.
+      params:
+        $ref: "#/$defs/params"
 
   flatpak_config:
     type: object
@@ -310,6 +328,8 @@ $defs:
       url:
         type: string
         description: Flatpak remote URL to add when not already configured
+      params:
+        $ref: "#/$defs/params"
 
   fdroid_config:
     type: object
@@ -336,3 +356,5 @@ $defs:
       url:
         type: string
         description: F-Droid repository URL to add when not already configured
+      params:
+        $ref: "#/$defs/params"

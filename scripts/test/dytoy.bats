@@ -248,25 +248,151 @@ EOF
   function dytoy::enable_service { true; }
   function package_manager::install_via_brew { printf 'brew:%s\n' "$*" >> "${actions_file}"; }
 
-  run dytoy::install_macos_package '{"name":"firefox","type":"cask","unstable":"true","repo":"null"}'
+  run dytoy::install_macos_package '{"name":"firefox","type":"cask","version":"HEAD","repo":"null"}'
   assert_success
-  run dytoy::install_macos_package '{"name":"fzf","type":"formula","unstable":"false","repo":"null"}'
+  run dytoy::install_macos_package '{"name":"fzf","type":"formula","version":"latest","repo":"null"}'
+  assert_success
+  run dytoy::install_macos_package '{"name":"neovim","repo":"null"}'
   assert_success
   run cat "${actions_file}"
-  assert_output $'brew:firefox --cask --HEAD\nbrew:fzf --formula'
+  assert_output $'brew:firefox --cask --force --HEAD\nbrew:fzf --formula\nbrew:neovim --formula'
 }
 
-@test "dytoy::install_macos_package appends the brew_args of the tool" {
+@test "dytoy::install_macos_package installs a pinned version as its versioned package" {
+  local actions_file="${BATS_TEST_TMPDIR}/actions"
+  function dytoy::is_installed_package { printf 'check:%s\n' "$1" >> "${actions_file}"; return 1; }
+  function dytoy::enable_service { true; }
+  function package_manager::install_via_brew { printf 'brew:%s\n' "$*" >> "${actions_file}"; }
+
+  run dytoy::install_macos_package '{"name":"python","version":"3.12","repo":"null"}'
+  assert_success
+  run cat "${actions_file}"
+  assert_output $'check:python@3.12\nbrew:python@3.12 --formula'
+}
+
+@test "dytoy::install_macos_package appends the params of the tool" {
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function dytoy::is_installed_package { return 1; }
   function dytoy::enable_service { true; }
   function package_manager::install_via_brew { printf 'brew:%s\n' "$*" >> "${actions_file}"; }
 
   run dytoy::install_macos_package \
-    '{"name":"font-roboto","type":"cask","unstable":"false","repo":"null","brew_args":["--force","--no-quarantine"]}'
+    '{"name":"font-roboto","type":"cask","repo":"null","params":["--no-quarantine","--require-sha"]}'
   assert_success
   run cat "${actions_file}"
-  assert_output 'brew:font-roboto --cask --force --no-quarantine'
+  assert_output 'brew:font-roboto --cask --force --no-quarantine --require-sha'
+}
+
+@test "dytoy::install_* hand the params of the tool to every package manager" {
+  local actions_file="${BATS_TEST_TMPDIR}/actions"
+  function dytoy::is_installed_package { return 1; }
+  function dytoy::enable_service { true; }
+  function dytoy::add_apt_repo { true; }
+  local via
+  for via in portage pacman apt apk termux fdroidcl flatpak mas; do
+    eval "function package_manager::install_via_${via} { printf '${via}:%s\\n' \"\$*\" >> \"\${actions_file}\"; }"
+  done
+  local yaml='{"name":"tool","repo":"null","url":"null","params":["--one","--two"]}'
+
+  run dytoy::install_gentoo_package "${yaml}" openrc
+  assert_success
+  run dytoy::install_arch_package "${yaml}"
+  assert_success
+  run dytoy::install_ubuntu_package "${yaml}"
+  assert_success
+  run dytoy::install_alpine_package "${yaml}"
+  assert_success
+  run dytoy::install_termux_package "${yaml}"
+  assert_success
+  run dytoy::install_fdroid_package "${yaml}"
+  assert_success
+  run dytoy::install_flatpak_package '{"name":"tool","repo":"flathub","url":"null","params":["--one","--two"]}'
+  assert_success
+  run dytoy::install_macos_package '{"name":"tool","type":"store","params":["--one","--two"]}'
+  assert_success
+  run cat "${actions_file}"
+  assert_output "$(printf '%s\n' \
+    'portage:tool --one --two' 'pacman:tool --one --two' 'apt:tool --one --two' \
+    'apk:tool --one --two' 'termux:tool --one --two' 'fdroidcl:tool --one --two' \
+    'flatpak:tool flathub --one --two' 'mas:tool --one --two')"
+}
+
+@test "dytoy::get_package_spec maps a version onto each OS package manager" {
+  run dytoy::get_package_spec portage app-editors/neovim null
+  assert_output 'app-editors/neovim'
+  run dytoy::get_package_spec apt ripgrep latest
+  assert_output 'ripgrep'
+  run dytoy::get_package_spec portage app-editors/neovim HEAD
+  assert_output '=app-editors/neovim-9999'
+  run dytoy::get_package_spec portage app-editors/neovim 0.11.4
+  assert_output '=app-editors/neovim-0.11.4'
+  run dytoy::get_package_spec pacman neovim HEAD
+  assert_output 'neovim-git'
+  run dytoy::get_package_spec apt ripgrep 14.1.0-1
+  assert_output 'ripgrep=14.1.0-1'
+  run dytoy::get_package_spec termux neovim 0.11.4
+  assert_output 'neovim=0.11.4'
+  run dytoy::get_package_spec apk neovim 0.11.4-r0
+  assert_output 'neovim=0.11.4-r0'
+}
+
+@test "dytoy::get_package_spec rejects a version the package manager can't install" {
+  run dytoy::get_package_spec pacman neovim 0.11.4
+  assert_failure
+  assert_output --partial "pacman can't install version 0.11.4 of neovim"
+  run dytoy::get_package_spec apt neovim HEAD
+  assert_failure
+  assert_output --partial "apt can't install the HEAD of neovim"
+  run dytoy::get_package_spec flatpak org.example.App 1.0
+  assert_failure
+}
+
+@test "dytoy::install_* install the version of an OS package" {
+  local actions_file="${BATS_TEST_TMPDIR}/actions"
+  function dytoy::is_installed_package { printf 'check:%s\n' "$1" >> "${actions_file}"; return 1; }
+  function dytoy::enable_service { true; }
+  function dytoy::add_apt_repo { true; }
+  local via
+  for via in portage pacman apt apk termux; do
+    eval "function package_manager::install_via_${via} { printf '${via}:%s\\n' \"\$*\" >> \"\${actions_file}\"; }"
+  done
+
+  run dytoy::install_gentoo_package '{"name":"app-editors/neovim","repo":"null","version":"HEAD"}' openrc
+  assert_success
+  run dytoy::install_arch_package '{"name":"neovim","version":"HEAD"}'
+  assert_success
+  run dytoy::install_ubuntu_package '{"name":"ripgrep","version":"14.1.0-1"}'
+  assert_success
+  run dytoy::install_alpine_package '{"name":"neovim","version":"0.11.4-r0"}'
+  assert_success
+  run dytoy::install_termux_package '{"name":"neovim","version":"0.11.4"}'
+  assert_success
+  run cat "${actions_file}"
+  assert_output "$(printf '%s\n' \
+    'check:app-editors/neovim' 'portage:=app-editors/neovim-9999' \
+    'check:neovim-git' 'pacman:neovim-git' \
+    'check:ripgrep' 'apt:ripgrep=14.1.0-1' \
+    'check:neovim' 'apk:neovim=0.11.4-r0' \
+    'check:neovim' 'termux:neovim=0.11.4')"
+}
+
+@test "dytoy::install_arch_package stops on a version paru can't install" {
+  function dytoy::install_package { printf 'installed\n'; }
+  run dytoy::install_arch_package '{"name":"neovim","version":"0.11.4"}'
+  assert_failure
+  refute_output --partial 'installed'
+}
+
+@test "dytoy::install_* pass no params when the tool has none" {
+  local actions_file="${BATS_TEST_TMPDIR}/actions"
+  function dytoy::is_installed_package { return 1; }
+  function dytoy::enable_service { true; }
+  function package_manager::install_via_pacman { printf 'pacman:%s|\n' "$*" >> "${actions_file}"; }
+
+  run dytoy::install_arch_package '{"name":"tool"}'
+  assert_success
+  run cat "${actions_file}"
+  assert_output 'pacman:tool|'
 }
 
 @test "dytoy::install_macos_rosetta installs rosetta when runtime is missing" {
