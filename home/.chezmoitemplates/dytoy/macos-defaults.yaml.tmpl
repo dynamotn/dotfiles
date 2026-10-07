@@ -1,0 +1,13 @@
+{{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") }}
+# The dsully/tap Homebrew tap fails to load on recent Homebrew, so install the
+# release binary directly. Upstream only ships Apple Silicon builds.
+name: macos-defaults
+method: binary
+is_essential: true
+github:
+  repo: dsully/macos-defaults
+  release_asset: macos-defaults-aarch64-apple-darwin.tar.xz
+archive:
+  - path: macos-defaults-aarch64-apple-darwin/macos-defaults
+    strip: 1
+{{- end }}
