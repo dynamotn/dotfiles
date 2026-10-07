@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=2154,2155
+# shellcheck disable=SC2154 # DRY_RUN, TOOL, METHOD and ONLY_* are set by the dytoy CLI
 # @file dytoy.sh
 # @brief Library `dytoy` to read the tools YAML file and install what it describes
 # @description Library `dytoy` to read the tools YAML file and install what it
@@ -12,7 +12,32 @@ dybatpho::load json os semver
 # @noargs
 #######################################
 function dytoy::yaml_file {
-  dybatpho::path_join "$(dybatpho::xdg_config_dir dytoy)" "tools.yaml"
+  local config_dir
+  config_dir="$(dybatpho::xdg_config_dir dytoy)"
+  dybatpho::path_join "${config_dir}" "tools.yaml"
+}
+
+#######################################
+# @description Run a command and split what it prints into an array, one line
+# per element
+# @arg $1 string Name of the array variable to fill
+# @arg $@ string Command and its arguments
+# @set The named array: one line per element, empty when nothing is printed.
+# It holds what the command printed even when the command fails.
+# @exitcode The exit code of the command
+# @internal
+#######################################
+function __dytoy_lines_into {
+  local __dytoy_lines_var
+  dybatpho::expect_args __dytoy_lines_var -- "$@"
+  shift
+  local -n __dytoy_lines_ref="${__dytoy_lines_var}"
+  __dytoy_lines_ref=()
+  local __dytoy_lines_output __dytoy_lines_status=0
+  __dytoy_lines_output="$("$@")" || __dytoy_lines_status=$?
+  [[ -z "${__dytoy_lines_output}" ]] \
+    || readarray -t __dytoy_lines_ref <<< "${__dytoy_lines_output}"
+  return "${__dytoy_lines_status}"
 }
 
 #######################################
@@ -23,7 +48,7 @@ function dytoy::yaml_file {
 function dytoy::get_field {
   local yaml field
   dybatpho::expect_args yaml field -- "$@"
-  dybatpho::json_get "$yaml" ".${field}"
+  dybatpho::json_get "${yaml}" ".${field}"
 }
 
 #######################################
@@ -37,8 +62,10 @@ function dytoy::get_params_into {
   local __dytoy_params_var __dytoy_params_yaml
   dybatpho::expect_args __dytoy_params_var __dytoy_params_yaml -- "$@"
   local -n __dytoy_params_ref="${__dytoy_params_var}"
-  __dytoy_params_ref=()
-  readarray -t __dytoy_params_ref < <(dytoy::get_field "${__dytoy_params_yaml}" "params // [] | .[]")
+  # A package whose params can't be read is installed without them.
+  __dytoy_lines_into "${__dytoy_params_var}" \
+    dytoy::get_field "${__dytoy_params_yaml}" "params // [] | .[]" \
+    || dybatpho::debug "Can't read params, installing without them"
 }
 
 #######################################
@@ -68,7 +95,9 @@ function dytoy::is_package_for_release {
   local yaml
   dybatpho::expect_args yaml -- "$@"
   local -a releases
-  readarray -t releases < <(dytoy::get_field "${yaml}" "releases // [] | .[]")
+  # Releases that can't be read restrict nothing.
+  __dytoy_lines_into releases dytoy::get_field "${yaml}" "releases // [] | .[]" \
+    || dybatpho::debug "Can't read releases, matching every release"
   ((${#releases[@]})) || return 0
   local name release range
   name=$(dytoy::get_field "${yaml}" "name")
@@ -140,7 +169,7 @@ function dytoy::get_yaml {
   # Only a scalar field is read raw: the others stay JSON so a caller can pipe
   # them back through `yq`.
   local -a options=(-o=j -I=0)
-  case $field in
+  case ${field} in
     all)
       local method="${3:-}"
       filter="filter(.name == \"${name}\" and .method == \"${method}\") | explode ."
@@ -157,7 +186,9 @@ function dytoy::get_yaml {
       options+=(-r)
       ;;
   esac
-  dybatpho::yaml_query "$(dytoy::yaml_file)" "$filter" "${options[@]}"
+  local yaml_file
+  yaml_file="$(dytoy::yaml_file)"
+  dybatpho::yaml_query "${yaml_file}" "${filter}" "${options[@]}"
 }
 
 #######################################
@@ -182,12 +213,15 @@ function dytoy::get_version {
 function dytoy::install_dependencies {
   local name
   dybatpho::expect_args name -- "$@"
-  readarray -t dependencies < <(dytoy::get_yaml "$name" "dependencies")
+  local -a dependencies
+  __dytoy_lines_into dependencies dytoy::get_yaml "${name}" "dependencies" \
+    || dybatpho::debug "Can't read dependencies of ${name}"
+  local dytoy_bin dependency method
+  dytoy_bin="$(dybatpho::path_join "${HOME}" ".local" "bin" "dytoy")"
   for dependency in "${dependencies[@]}"; do
-    dybatpho::debug "Need dependency: $dependency"
-    local method
-    method=$(dytoy::get_yaml "$dependency" "method")
-    dybatpho::dry_run "$(dybatpho::path_join "$HOME" ".local" "bin" "dytoy")" "${method}" -i -t "$dependency"
+    dybatpho::debug "Need dependency: ${dependency}"
+    method=$(dytoy::get_yaml "${dependency}" "method")
+    dybatpho::dry_run "${dytoy_bin}" "${method}" -i -t "${dependency}"
   done
 }
 
@@ -197,30 +231,32 @@ function dytoy::install_dependencies {
 # @env DRY_RUN boolean If true, show the script file instead of running it
 #######################################
 function dytoy::run_script {
-  local script_file
-  dybatpho::expect_args script_file -- "$@"
+  # Prefixed, as the script sourced here would otherwise see these locals.
+  local __dytoy_run_script_file
+  dybatpho::expect_args __dytoy_run_script_file -- "$@"
   # A tool without a hook still gets a temp file, and reporting an empty script
   # as something about to run says nothing.
-  if ! dybatpho::is file "$script_file"; then
-    dybatpho::debug "No script at $script_file, skipping"
+  if ! dybatpho::is file "${__dytoy_run_script_file}"; then
+    dybatpho::debug "No script at ${__dytoy_run_script_file}, skipping"
     return 0
   fi
-  local content
-  content="$(< "$script_file")"
-  if dybatpho::string_is_blank "$content"; then
-    dybatpho::debug "Nothing to run in $script_file, skipping"
+  local __dytoy_run_script_content
+  __dytoy_run_script_content="$(< "${__dytoy_run_script_file}")"
+  if dybatpho::string_is_blank "${__dytoy_run_script_content}"; then
+    dybatpho::debug "Nothing to run in ${__dytoy_run_script_file}, skipping"
     return 0
   fi
-  if dybatpho::is true "$DRY_RUN"; then
+  if dybatpho::is true "${DRY_RUN}"; then
     # The contents go to stderr, so the header goes with them rather than to
     # stdout where the two would be separated.
-    dybatpho::info "RUN: $script_file"
-    dybatpho::show_file "$script_file"
+    dybatpho::info "RUN: ${__dytoy_run_script_file}"
+    dybatpho::show_file "${__dytoy_run_script_file}"
   else
     # shellcheck disable=1090
-    . "$script_file"
+    . "${__dytoy_run_script_file}"
   fi
-  echo > "${script_file}" # Clear the script file after running
+  # Clear the script file after running
+  printf '\n' > "${__dytoy_run_script_file}"
 }
 
 #######################################
@@ -235,19 +271,22 @@ function dytoy::create_script {
   local name path content kind
   dybatpho::expect_args name path content kind -- "$@"
   local version="${5:-}"
-  if [[ "$content" == "null" ]] || dybatpho::string_is_blank "$content"; then
+  if [[ "${content}" == "null" ]] || dybatpho::string_is_blank "${content}"; then
     return 0
   fi
 
-  local lib_dir
+  local lib_dir init_file bin_dir local_dir
   lib_dir="$(dybatpho::path_dirname "${BASH_SOURCE[0]}")"
+  init_file="$(dybatpho::path_join "${lib_dir}" "dybatpho" "init.sh")"
+  local_dir="$(dybatpho::path_join "${HOME}" ".local")"
+  bin_dir="$(dybatpho::path_join "${local_dir}" "bin")"
   cat << EOF > "${path}"
-. $(dybatpho::path_join "$lib_dir" "dybatpho" "init.sh") --modules network
+. ${init_file} --modules network
 dybatpho::register_common_handlers
 dybatpho::progress "Running ${kind} to install ${name}"
 
-export GOBIN="$(dybatpho::path_join "$HOME" ".local" "bin")"
-export CARGO_INSTALL_ROOT="$(dybatpho::path_join "$HOME" ".local")"
+export GOBIN="${bin_dir}"
+export CARGO_INSTALL_ROOT="${local_dir}"
 EOF
   if ! dybatpho::string_is_blank "${version}"; then
     printf 'export DYTOY_VERSION=%q\n' "${version}" >> "${path}"
@@ -263,24 +302,27 @@ EOF
 #######################################
 # shellcheck disable=SC2153
 function dytoy::iterate {
-  local command
-  dybatpho::expect_args command -- "$@"
-  dybatpho::is function "$command" \
-    || dybatpho::die "${command} function of ${METHOD} method is not defined"
-  if [[ "$TOOL" == "@empty" ]]; then
+  # Prefixed, as the command run for each tool would otherwise see these locals.
+  local __dytoy_iterate_command
+  dybatpho::expect_args __dytoy_iterate_command -- "$@"
+  dybatpho::is function "${__dytoy_iterate_command}" \
+    || dybatpho::die "${__dytoy_iterate_command} function of ${METHOD} method is not defined"
+  if [[ "${TOOL}" == "@empty" ]]; then
     dybatpho::info "Install ${METHOD} tools"
-    readarray -t tools < <(
-      dybatpho::yaml_query "$(dytoy::yaml_file)" \
-        "filter(.method == \"${METHOD}\" and .enabled != \"false\") | .[].name" \
-        -r -o=j -I=0
-    )
-    for tool in "${tools[@]}"; do
-      "$command" "$tool"
+    local __dytoy_iterate_yaml_file __dytoy_iterate_tool
+    local -a __dytoy_iterate_tools
+    __dytoy_iterate_yaml_file="$(dytoy::yaml_file)"
+    __dytoy_lines_into __dytoy_iterate_tools dybatpho::yaml_query "${__dytoy_iterate_yaml_file}" \
+      "filter(.method == \"${METHOD}\" and .enabled != \"false\") | .[].name" \
+      -r -o=j -I=0 \
+      || dybatpho::debug "Can't read tools from ${__dytoy_iterate_yaml_file}"
+    for __dytoy_iterate_tool in "${__dytoy_iterate_tools[@]}"; do
+      "${__dytoy_iterate_command}" "${__dytoy_iterate_tool}"
     done
     dybatpho::success "Installed all ${METHOD} tools"
   else
     dybatpho::info "Install ${METHOD} tool: ${TOOL}"
-    "$command" "$TOOL"
+    "${__dytoy_iterate_command}" "${TOOL}"
   fi
 }
 
@@ -295,14 +337,16 @@ function dytoy::is_defined {
   local name method
   dybatpho::expect_args name method -- "$@"
   local yaml
-  yaml=$(dytoy::get_yaml "$name" "all" "$method")
-  if [[ "$yaml" == "[]" ]] || dybatpho::is empty "$yaml"; then
-    dybatpho::die "Not found $name tool in $(dytoy::yaml_file)"
+  yaml=$(dytoy::get_yaml "${name}" "all" "${method}")
+  if [[ "${yaml}" == "[]" ]] || dybatpho::is empty "${yaml}"; then
+    local yaml_file
+    yaml_file="$(dytoy::yaml_file)"
+    dybatpho::die "Not found ${name} tool in ${yaml_file}"
   fi
   local is_enabled
-  is_enabled=$(dytoy::get_yaml "$name" "enabled")
-  if dybatpho::is false "$is_enabled"; then
-    dybatpho::die "Tool $name is disabled"
+  is_enabled=$(dytoy::get_yaml "${name}" "enabled")
+  if dybatpho::is false "${is_enabled}"; then
+    dybatpho::die "Tool ${name} is disabled"
   fi
 }
 
@@ -315,8 +359,8 @@ function dytoy::is_invalid_essential {
   local name
   dybatpho::expect_args name -- "$@"
   local is_essential
-  is_essential=$(dytoy::get_yaml "$name" "is_essential")
-  dybatpho::is true "$ONLY_ESSENTIAL" && ! dybatpho::is true "$is_essential"
+  is_essential=$(dytoy::get_yaml "${name}" "is_essential")
+  dybatpho::is true "${ONLY_ESSENTIAL}" && ! dybatpho::is true "${is_essential}"
 }
 
 #######################################
@@ -329,10 +373,12 @@ function dytoy::is_installed_command {
   local name
   dybatpho::expect_args name -- "$@"
   local location
-  location="${2:-$(dybatpho::path_join "$HOME" ".local" "bin")}"
-  if dybatpho::is true "$ONLY_NOT_INSTALLED"; then
-    if dybatpho::is command "$name" || dybatpho::is file "$(dybatpho::path_join "$location" "$name")"; then
-      dybatpho::debug "$name tool is already installed, skipping"
+  location="${2:-$(dybatpho::path_join "${HOME}" ".local" "bin")}"
+  if dybatpho::is true "${ONLY_NOT_INSTALLED}"; then
+    local tool_path
+    tool_path="$(dybatpho::path_join "${location}" "${name}")"
+    if dybatpho::is command "${name}" || dybatpho::is file "${tool_path}"; then
+      dybatpho::debug "${name} tool is already installed, skipping"
       return 0
     fi
     return 1
@@ -350,9 +396,9 @@ function dytoy::is_installed_command {
 function dytoy::is_installed_package {
   local name pkg_tool
   dybatpho::expect_args name pkg_tool -- "$@"
-  if dybatpho::is true "$ONLY_NOT_INSTALLED"; then
-    if "package_manager::check_installed_${pkg_tool}" "$name"; then
-      dybatpho::debug "$name package is already installed, skipping."
+  if dybatpho::is true "${ONLY_NOT_INSTALLED}"; then
+    if "package_manager::check_installed_${pkg_tool}" "${name}"; then
+      dybatpho::debug "${name} package is already installed, skipping."
       return 0
     else
       return 1
@@ -371,13 +417,13 @@ function dytoy::enable_service {
   dybatpho::expect_args yaml init_system -- "$@"
 
   local service_name
-  service_name=$(dytoy::get_field "$yaml" "service")
-  if [[ "$service_name" == "null" ]]; then
+  service_name=$(dytoy::get_field "${yaml}" "service")
+  if [[ "${service_name}" == "null" ]]; then
     return 0
   fi
   local is_user_service
-  is_user_service=$(dytoy::get_field "$yaml" "is_user_service")
-  "init_system::enable_${init_system}_service" "$service_name" "$is_user_service"
+  is_user_service=$(dytoy::get_field "${yaml}" "is_user_service")
+  "init_system::enable_${init_system}_service" "${service_name}" "${is_user_service}"
 }
 
 #######################################
@@ -389,15 +435,18 @@ function dytoy::enable_service {
 # @arg $@ string Command installing the package
 #######################################
 function dytoy::install_package {
-  local name pkg_tool init_system yaml
-  dybatpho::expect_args name pkg_tool init_system yaml -- "$@"
+  # Prefixed, as the install command would otherwise see these locals.
+  local __dytoy_install_name __dytoy_install_tool __dytoy_install_init __dytoy_install_yaml
+  dybatpho::expect_args __dytoy_install_name __dytoy_install_tool \
+    __dytoy_install_init __dytoy_install_yaml -- "$@"
   shift 4
-  if dytoy::is_installed_package "$name" "$pkg_tool"; then
+  if dytoy::is_installed_package "${__dytoy_install_name}" "${__dytoy_install_tool}"; then
     return 0
   fi
-  "$@" || dybatpho::die "Can't install $name"
-  dybatpho::debug "Installed $name"
-  [[ -z "$init_system" ]] || dytoy::enable_service "$yaml" "$init_system"
+  "$@" || dybatpho::die "Can't install ${__dytoy_install_name}"
+  dybatpho::debug "Installed ${__dytoy_install_name}"
+  [[ -z "${__dytoy_install_init}" ]] \
+    || dytoy::enable_service "${__dytoy_install_yaml}" "${__dytoy_install_init}"
 }
 
 #######################################
@@ -409,17 +458,19 @@ function dytoy::install_gentoo_package {
   local yaml init_system
   dybatpho::expect_args yaml init_system -- "$@"
   local name repo url
-  name=$(dytoy::get_field "$yaml" "name")
+  name=$(dytoy::get_field "${yaml}" "name")
   local -a params
-  dytoy::get_params_into params "$yaml"
-  repo=$(dytoy::get_field "$yaml" "repo")
-  url=$(dytoy::get_field "$yaml" "url")
-  [[ "$repo" == "null" ]] || package_manager::add_overlay "$repo" "$url" > /dev/null
+  dytoy::get_params_into params "${yaml}"
+  repo=$(dytoy::get_field "${yaml}" "repo")
+  url=$(dytoy::get_field "${yaml}" "url")
+  [[ "${repo}" == "null" ]] || package_manager::add_overlay "${repo}" "${url}" > /dev/null
 
   local spec
-  spec=$(dytoy::get_package_spec portage "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
-  dytoy::install_package "$name" "portage" "$init_system" "$yaml" \
-    package_manager::install_via_portage "$spec" "${params[@]}"
+  local version
+  version=$(dytoy::get_field "${yaml}" "version")
+  spec=$(dytoy::get_package_spec portage "${name}" "${version}") || return 1
+  dytoy::install_package "${name}" "portage" "${init_system}" "${yaml}" \
+    package_manager::install_via_portage "${spec}" "${params[@]}"
 }
 
 #######################################
@@ -430,13 +481,15 @@ function dytoy::install_arch_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
   local name
-  name=$(dytoy::get_field "$yaml" "name")
+  name=$(dytoy::get_field "${yaml}" "name")
   local -a params
-  dytoy::get_params_into params "$yaml"
+  dytoy::get_params_into params "${yaml}"
   # A `-git` package is a package of its own, so it is also the one checked.
-  name=$(dytoy::get_package_spec pacman "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
-  dytoy::install_package "$name" "pacman" "systemd" "$yaml" \
-    package_manager::install_via_pacman "$name" "${params[@]}"
+  local version
+  version=$(dytoy::get_field "${yaml}" "version")
+  name=$(dytoy::get_package_spec pacman "${name}" "${version}") || return 1
+  dytoy::install_package "${name}" "pacman" "systemd" "${yaml}" \
+    package_manager::install_via_pacman "${name}" "${params[@]}"
 }
 
 #######################################
@@ -448,29 +501,30 @@ function dytoy::add_apt_repo {
   local yaml os
   dybatpho::expect_args yaml os -- "$@"
   local name repo
-  name=$(dytoy::get_field "$yaml" "name")
-  repo=$(dytoy::get_field "$yaml" "repo")
-  [[ "$repo" == "null" ]] && return
+  name=$(dytoy::get_field "${yaml}" "name")
+  repo=$(dytoy::get_field "${yaml}" "repo")
+  [[ "${repo}" == "null" ]] && return
 
   local repo_name components suite key
-  repo_name=$(dytoy::get_field "$yaml" "repo_name")
-  components=$(dytoy::get_field "$yaml" "components")
-  suite=$(dytoy::get_field "$yaml" "suite")
-  key=$(dytoy::get_field "$yaml" "key")
+  repo_name=$(dytoy::get_field "${yaml}" "repo_name")
+  components=$(dytoy::get_field "${yaml}" "components")
+  suite=$(dytoy::get_field "${yaml}" "suite")
+  key=$(dytoy::get_field "${yaml}" "key")
 
-  [[ "$repo_name" == "null" ]] && repo_name=$name
-  if [[ "$suite" == "null" ]]; then
-    case "$os" in
+  [[ "${repo_name}" == "null" ]] && repo_name=${name}
+  if [[ "${suite}" == "null" ]]; then
+    case "${os}" in
       ubuntu)
-        suite=$(grep -is UBUNTU_CODENAME /etc/os-release | cut -d= -f2)
+        suite=$(dybatpho::os_release UBUNTU_CODENAME) || suite=""
         ;;
       termux)
         suite=""
         ;;
+      *) ;;
     esac
   fi
   local url="${repo//%v/${suite}}"
-  package_manager::add_apt_repo "$repo_name" "$url" "$suite" "$components" "$key"
+  package_manager::add_apt_repo "${repo_name}" "${url}" "${suite}" "${components}" "${key}"
   package_manager::sync_apt_repo
 }
 
@@ -481,16 +535,18 @@ function dytoy::add_apt_repo {
 function dytoy::install_ubuntu_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  dytoy::add_apt_repo "$yaml" "ubuntu"
+  dytoy::add_apt_repo "${yaml}" "ubuntu"
 
   local name
-  name=$(dytoy::get_field "$yaml" "name")
+  name=$(dytoy::get_field "${yaml}" "name")
   local -a params
-  dytoy::get_params_into params "$yaml"
+  dytoy::get_params_into params "${yaml}"
   local spec
-  spec=$(dytoy::get_package_spec apt "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
-  dytoy::install_package "$name" "apt" "systemd" "$yaml" \
-    package_manager::install_via_apt "$spec" "${params[@]}"
+  local version
+  version=$(dytoy::get_field "${yaml}" "version")
+  spec=$(dytoy::get_package_spec apt "${name}" "${version}") || return 1
+  dytoy::install_package "${name}" "apt" "systemd" "${yaml}" \
+    package_manager::install_via_apt "${spec}" "${params[@]}"
 }
 
 #######################################
@@ -501,13 +557,15 @@ function dytoy::install_alpine_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
   local name
-  name=$(dytoy::get_field "$yaml" "name")
+  name=$(dytoy::get_field "${yaml}" "name")
   local -a params
-  dytoy::get_params_into params "$yaml"
+  dytoy::get_params_into params "${yaml}"
   local spec
-  spec=$(dytoy::get_package_spec apk "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
-  dytoy::install_package "$name" "apk" "openrc" "$yaml" \
-    package_manager::install_via_apk "$spec" "${params[@]}"
+  local version
+  version=$(dytoy::get_field "${yaml}" "version")
+  spec=$(dytoy::get_package_spec apk "${name}" "${version}") || return 1
+  dytoy::install_package "${name}" "apk" "openrc" "${yaml}" \
+    package_manager::install_via_apk "${spec}" "${params[@]}"
 }
 
 #######################################
@@ -518,13 +576,15 @@ function dytoy::install_termux_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
   local name
-  name=$(dytoy::get_field "$yaml" "name")
+  name=$(dytoy::get_field "${yaml}" "name")
   local -a params
-  dytoy::get_params_into params "$yaml"
+  dytoy::get_params_into params "${yaml}"
   local spec
-  spec=$(dytoy::get_package_spec termux "$name" "$(dytoy::get_field "$yaml" "version")") || return 1
-  dytoy::install_package "$name" "apt" "termux" "$yaml" \
-    package_manager::install_via_termux "$spec" "${params[@]}"
+  local version
+  version=$(dytoy::get_field "${yaml}" "version")
+  spec=$(dytoy::get_package_spec termux "${name}" "${version}") || return 1
+  dytoy::install_package "${name}" "apt" "termux" "${yaml}" \
+    package_manager::install_via_termux "${spec}" "${params[@]}"
 }
 
 #######################################
@@ -535,15 +595,15 @@ function dytoy::install_fdroid_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
   local name repo url
-  name=$(dytoy::get_field "$yaml" "name")
+  name=$(dytoy::get_field "${yaml}" "name")
   local -a params
-  dytoy::get_params_into params "$yaml"
-  repo=$(dytoy::get_field "$yaml" "repo")
-  url=$(dytoy::get_field "$yaml" "url")
-  [[ "$repo" == "null" ]] || package_manager::add_fdroid_repo "$repo" "$url" > /dev/null
+  dytoy::get_params_into params "${yaml}"
+  repo=$(dytoy::get_field "${yaml}" "repo")
+  url=$(dytoy::get_field "${yaml}" "url")
+  [[ "${repo}" == "null" ]] || package_manager::add_fdroid_repo "${repo}" "${url}" > /dev/null
 
-  dytoy::install_package "$name" "fdroidcl" "" "$yaml" \
-    package_manager::install_via_fdroidcl "$name" "${params[@]}"
+  dytoy::install_package "${name}" "fdroidcl" "" "${yaml}" \
+    package_manager::install_via_fdroidcl "${name}" "${params[@]}"
 }
 
 #######################################
@@ -554,15 +614,15 @@ function dytoy::install_flatpak_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
   local name repo url
-  name=$(dytoy::get_field "$yaml" "name")
+  name=$(dytoy::get_field "${yaml}" "name")
   local -a params
-  dytoy::get_params_into params "$yaml"
-  repo=$(dytoy::get_field "$yaml" "repo")
-  url=$(dytoy::get_field "$yaml" "url")
-  [[ "$repo" == "null" ]] || package_manager::add_flatpak_repo "$repo" "$url" > /dev/null
+  dytoy::get_params_into params "${yaml}"
+  repo=$(dytoy::get_field "${yaml}" "repo")
+  url=$(dytoy::get_field "${yaml}" "url")
+  [[ "${repo}" == "null" ]] || package_manager::add_flatpak_repo "${repo}" "${url}" > /dev/null
 
-  dytoy::install_package "$name" "flatpak" "" "$yaml" \
-    package_manager::install_via_flatpak "$name" "$repo" "${params[@]}"
+  dytoy::install_package "${name}" "flatpak" "" "${yaml}" \
+    package_manager::install_via_flatpak "${name}" "${repo}" "${params[@]}"
 }
 
 #######################################
@@ -573,33 +633,33 @@ function dytoy::install_macos_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
   local name type
-  name=$(dytoy::get_field "$yaml" "name")
+  name=$(dytoy::get_field "${yaml}" "name")
   local -a params
-  dytoy::get_params_into params "$yaml"
-  type=$(dytoy::get_field "$yaml" "type")
-  case "$type" in
+  dytoy::get_params_into params "${yaml}"
+  type=$(dytoy::get_field "${yaml}" "type")
+  case "${type}" in
     store)
-      dytoy::install_package "$name" "mas" "" "$yaml" \
-        package_manager::install_via_mas "$name" "${params[@]}"
+      dytoy::install_package "${name}" "mas" "" "${yaml}" \
+        package_manager::install_via_mas "${name}" "${params[@]}"
       ;;
     download)
       local url
-      url=$(dytoy::get_field "$yaml" "url")
-      dytoy::install_package "$name" "dmg" "" "$yaml" \
-        package_manager::install_via_dmg "$name" "$url"
+      url=$(dytoy::get_field "${yaml}" "url")
+      dytoy::install_package "${name}" "dmg" "" "${yaml}" \
+        package_manager::install_via_dmg "${name}" "${url}"
       ;;
     *)
       local version
       local -a brew_params=()
-      version=$(dytoy::get_field "$yaml" "version")
-      if [[ "$type" == "cask" ]]; then
+      version=$(dytoy::get_field "${yaml}" "version")
+      if [[ "${type}" == "cask" ]]; then
         # Take over an app or font files left behind without a Caskroom
         # record, which brew otherwise refuses to overwrite.
         brew_params=("--cask" "--force")
       else
         brew_params=("--formula")
       fi
-      case "$version" in
+      case "${version}" in
         null | latest) ;;
         HEAD) brew_params+=("--HEAD") ;;
         # Homebrew ships other versions as their own `name@version` package.
@@ -607,10 +667,10 @@ function dytoy::install_macos_package {
       esac
       brew_params+=("${params[@]}")
       local repo
-      repo=$(dytoy::get_field "$yaml" "repo")
-      [[ "$repo" == "null" ]] || package_manager::add_brew_tap "$repo" > /dev/null
-      dytoy::install_package "$name" "brew" "launchd" "$yaml" \
-        package_manager::install_via_brew "$name" "${brew_params[@]}"
+      repo=$(dytoy::get_field "${yaml}" "repo")
+      [[ "${repo}" == "null" ]] || package_manager::add_brew_tap "${repo}" > /dev/null
+      dytoy::install_package "${name}" "brew" "launchd" "${yaml}" \
+        package_manager::install_via_brew "${name}" "${brew_params[@]}"
       ;;
   esac
 }

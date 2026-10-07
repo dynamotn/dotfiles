@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=2154
+# dyshellint disable=SC2154 the globals it reads are set by dytoy.sh and the dytoy executable
 # @file dytoy_tui.sh
 # @brief Library `dytoy_tui` to pick and install dytoy tools in a full-screen interface
 # @description Library `dytoy_tui` drives `dytoy` from a full-screen interface
@@ -100,7 +100,7 @@ DYTOY_TUI_STYLE_BRAND="" DYTOY_TUI_STYLE_ROW_BG="" DYTOY_TUI_STYLE_TEXT=""
 DYTOY_TUI_STYLE_STRONG="" DYTOY_TUI_STYLE_RUN="" DYTOY_TUI_STYLE_KEY=""
 DYTOY_TUI_STYLE_VALUE="" DYTOY_TUI_STYLE_GAUGE_EMPTY="" DYTOY_TUI_STYLE_BADGE=""
 # `true` once a picked tool failed or was stopped, read by the caller.
-# shellcheck disable=SC2034
+# dyshellint disable=SC2034 read by the dytoy executable that sources this file
 DYTOY_TUI_FAILED=false
 
 #######################################
@@ -185,11 +185,11 @@ function dytoy_tui::detect_installed {
   local local_bin_file
   local_bin_file="$(dybatpho::path_join "${HOME}" ".local" "bin" "${name}")"
   if [[ "${method}" == "os" ]]; then
-    echo "unknown"
+    printf '%s\n' "unknown"
   elif dybatpho::is command "${name}" || dybatpho::is file "${local_bin_file}"; then
-    echo "yes"
+    printf '%s\n' "yes"
   else
-    echo "no"
+    printf '%s\n' "no"
   fi
 }
 
@@ -201,6 +201,7 @@ function dytoy_tui::detect_installed {
 function dytoy_tui::tab_items {
   local __dytoy_tui_items_ref __dytoy_tui_tab_method __dytoy_tui_tab_index
   dybatpho::expect_args __dytoy_tui_items_ref __dytoy_tui_tab_method -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_items_ref}"
   local -n __dytoy_tui_items="${__dytoy_tui_items_ref}"
   __dytoy_tui_items=()
   for __dytoy_tui_tab_index in "${!DYTOY_TUI_NAME[@]}"; do
@@ -222,6 +223,7 @@ function dytoy_tui::tab_items {
 function dytoy_tui::search_matches {
   local __dytoy_tui_matches_ref
   dybatpho::expect_args __dytoy_tui_matches_ref -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_matches_ref}"
   local -n __dytoy_tui_matches="${__dytoy_tui_matches_ref}"
   local __dytoy_tui_search_query="${DYTOY_TUI_QUERY,,}" __dytoy_tui_search_index
   __dytoy_tui_matches=()
@@ -257,6 +259,7 @@ function dytoy_tui::toggle_pick {
 function dytoy_tui::picked_count_into {
   local __dytoy_tui_picked_ref __dytoy_tui_picked_method __dytoy_tui_picked_index
   dybatpho::expect_args __dytoy_tui_picked_ref __dytoy_tui_picked_method -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_picked_ref}"
   local -n __dytoy_tui_picked="${__dytoy_tui_picked_ref}"
   __dytoy_tui_picked=0
   for __dytoy_tui_picked_index in "${!DYTOY_TUI_NAME[@]}"; do
@@ -278,6 +281,7 @@ function dytoy_tui::picked_count_into {
 function dytoy_tui::child_args {
   local __dytoy_tui_args_ref __dytoy_tui_args_index __dytoy_tui_args_sync
   dybatpho::expect_args __dytoy_tui_args_ref __dytoy_tui_args_index __dytoy_tui_args_sync -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_args_ref}"
   local -n __dytoy_tui_args="${__dytoy_tui_args_ref}"
   __dytoy_tui_args=(
     "${DYTOY_TUI_METHOD[__dytoy_tui_args_index]}"
@@ -307,6 +311,7 @@ function dytoy_tui::child_args {
 function dytoy_tui::log_tail {
   local __dytoy_tui_lines_ref __dytoy_tui_tail_file __dytoy_tui_tail_count
   dybatpho::expect_args __dytoy_tui_lines_ref __dytoy_tui_tail_file __dytoy_tui_tail_count -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_lines_ref}"
   local -n __dytoy_tui_lines="${__dytoy_tui_lines_ref}"
   __dytoy_tui_lines=()
   [[ -f "${__dytoy_tui_tail_file}" ]] && ((__dytoy_tui_tail_count > 0)) || return 0
@@ -333,6 +338,7 @@ function dytoy_tui::log_tail {
 function dytoy_tui::dependency_graph_into {
   local __dytoy_tui_graph_ref
   dybatpho::expect_args __dytoy_tui_graph_ref -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_graph_ref}"
   local -n __dytoy_tui_graph="${__dytoy_tui_graph_ref}"
   __dytoy_tui_graph=()
   local __dytoy_tui_graph_index __dytoy_tui_graph_name __dytoy_tui_graph_dependency __dytoy_tui_graph_edges
@@ -360,6 +366,7 @@ function dytoy_tui::dependency_graph_into {
 function dytoy_tui::dependency_closure_into {
   local __dytoy_tui_closure_ref __dytoy_tui_closure_graph __dytoy_tui_closure_start
   dybatpho::expect_args __dytoy_tui_closure_ref __dytoy_tui_closure_graph __dytoy_tui_closure_start -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_closure_ref}"
   local -n __dytoy_tui_closure="${__dytoy_tui_closure_ref}"
   local -a __dytoy_tui_reachable=()
   dybatpho::array_closure "${__dytoy_tui_closure_graph}" __dytoy_tui_reachable "${__dytoy_tui_closure_start}"
@@ -391,7 +398,7 @@ function dytoy_tui::build_queue {
   local index dependency
   local -a closure=() roots=() order=()
   local -A needed_by=() early=()
-  # shellcheck disable=SC2034 # read by name through the dybatpho::array_* calls
+  # dyshellint disable=SC2034 read by name through the dybatpho::array_* calls
   local -A graph=()
   dytoy_tui::dependency_graph_into graph
   for index in "${!DYTOY_TUI_NAME[@]}"; do
@@ -442,6 +449,7 @@ function dytoy_tui::build_queue {
 function dytoy_tui::count_state_into {
   local __dytoy_tui_state_count_ref __dytoy_tui_count_state __dytoy_tui_count_index
   dybatpho::expect_args __dytoy_tui_state_count_ref __dytoy_tui_count_state -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_state_count_ref}"
   local -n __dytoy_tui_state_count="${__dytoy_tui_state_count_ref}"
   __dytoy_tui_state_count=0
   for __dytoy_tui_count_index in "${DYTOY_TUI_QUEUE[@]}"; do
@@ -465,6 +473,7 @@ function dytoy_tui::count_state_into {
 function dytoy_tui::colour_into {
   local __dytoy_tui_colour_ref __dytoy_tui_colour_layer __dytoy_tui_colour_name
   dybatpho::expect_args __dytoy_tui_colour_ref __dytoy_tui_colour_layer __dytoy_tui_colour_name -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_colour_ref}"
   local -n __dytoy_tui_colour="${__dytoy_tui_colour_ref}"
   local __dytoy_tui_colour_hex="${DYTOY_TUI_PALETTE[${__dytoy_tui_colour_name}]-}"
   __dytoy_tui_colour_hex="${__dytoy_tui_colour_hex#\#}"
@@ -791,6 +800,8 @@ function dytoy_tui::draw_pick {
 function dytoy_tui::state_mark_into {
   local __dytoy_tui_mark_ref __dytoy_tui_mark_style_ref __dytoy_tui_mark_index
   dybatpho::expect_args __dytoy_tui_mark_ref __dytoy_tui_mark_style_ref __dytoy_tui_mark_index -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_mark_ref}"
+  dybatpho::expect_ref "${__dytoy_tui_mark_style_ref}"
   local -n __dytoy_tui_mark="${__dytoy_tui_mark_ref}" __dytoy_tui_mark_style="${__dytoy_tui_mark_style_ref}"
   case "${DYTOY_TUI_STATE[__dytoy_tui_mark_index]}" in
     ok) __dytoy_tui_mark="✔" __dytoy_tui_mark_style="${DYBATPHO_SCREEN_STYLE_OK}" ;;
@@ -1005,7 +1016,7 @@ function dytoy_tui::edit_source {
   local -a editor=()
   read -r -a editor <<< "${VISUAL:-${EDITOR:-vi}}"
 
-  dytoy_tui::screen_end
+  dybatpho::screen_end
   # The editor gets the terminal itself, opened once for both directions,
   # whatever this script's own streams were redirected to.
   local status=0 tty
@@ -1200,6 +1211,7 @@ function dytoy_tui::follow {
 function dytoy_tui::method_jobs_into {
   local __dytoy_tui_jobs_ref __dytoy_tui_jobs_method
   dybatpho::expect_args __dytoy_tui_jobs_ref __dytoy_tui_jobs_method -- "$@"
+  dybatpho::expect_ref "${__dytoy_tui_jobs_ref}"
   local -n __dytoy_tui_jobs="${__dytoy_tui_jobs_ref}"
   case "${__dytoy_tui_jobs_method}" in
     os | mise | dependencies) __dytoy_tui_jobs=1 ;;
@@ -1334,19 +1346,6 @@ function dytoy_tui::stop {
 }
 
 #######################################
-# @description Give the terminal back, keeping stderr. `dybatpho::screen_end`
-# closes its terminal with `exec {fd}>&- 2> /dev/null`, and an `exec` without a
-# command keeps its redirections, so every message after it would be lost.
-# @noargs
-#######################################
-function dytoy_tui::screen_end {
-  local stderr
-  exec {stderr}>&2
-  dybatpho::screen_end
-  exec 2>&"${stderr}" {stderr}>&-
-}
-
-#######################################
 # @description Return success when a picked tool installs with the package
 # manager, which is what runs `sudo`.
 # @noargs
@@ -1373,7 +1372,7 @@ function dytoy_tui::privilege_hand_over {
     suspend)
       local command_name
       command_name="$(dybatpho::privilege_command)"
-      dytoy_tui::screen_end
+      dybatpho::screen_end
       printf 'dytoy needs %s to install packages.\n' "${command_name}" >&2
       ;;
     resume) dybatpho::screen_begin ;;
@@ -1392,7 +1391,7 @@ function dytoy_tui::privilege_hand_over {
 #######################################
 function dytoy_tui::prepare_sudo {
   dytoy_tui::needs_sudo || return 0
-  # shellcheck disable=SC2034 # read by dybatpho::privilege_acquire
+  # dyshellint disable=SC2034 read by dybatpho::privilege_acquire
   DYBATPHO_PRIVILEGE_SUSPEND_HOOK="dytoy_tui::privilege_hand_over"
   dybatpho::privilege_acquire --shield
 }
@@ -1424,7 +1423,7 @@ function dytoy_tui::summary {
       ok) dybatpho::success "Installed ${DYTOY_TUI_METHOD[index]} tool: ${DYTOY_TUI_NAME[index]}" ;;
       skipped) dybatpho::warn "Skipped ${DYTOY_TUI_METHOD[index]} tool: ${DYTOY_TUI_NAME[index]}" ;;
       *)
-        # shellcheck disable=SC2034
+        # dyshellint disable=SC2034 read by the dytoy executable that sources this file
         DYTOY_TUI_FAILED=true
         dybatpho::error "Failed ${DYTOY_TUI_METHOD[index]} tool: ${DYTOY_TUI_NAME[index]}, see ${DYTOY_TUI_LOG[index]}"
         ;;
@@ -1458,7 +1457,7 @@ function dytoy_tui::run {
   dytoy_tui::theme
 
   # Mouse reporting would take text selection away from the log pane.
-  # shellcheck disable=SC2034 # read by dybatpho::screen_begin
+  # dyshellint disable=SC2034 read by dybatpho::screen_begin
   DYBATPHO_SCREEN_MOUSE=false
   dybatpho::screen_begin || return 1
   dybatpho::trap "dytoy_tui::cleanup" EXIT INT TERM
@@ -1485,7 +1484,7 @@ function dytoy_tui::run {
     [[ "${DYTOY_TUI_PHASE}" == "pick" ]] || dytoy_tui::poll
   done
 
-  dytoy_tui::screen_end
+  dybatpho::screen_end
   dytoy_tui::cleanup
   dytoy_tui::summary
 }

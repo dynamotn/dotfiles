@@ -18,6 +18,7 @@ if ! dybatpho::is dir "${tpm_dir}"; then
 fi
 
 dybatpho::progress "Install other plugins"
-bash "$(dybatpho::path_join "${tpm_dir}" "bin" "install_plugins")"
+install_plugins="$(dybatpho::path_join "${tpm_dir}" "bin" "install_plugins")"
+bash "${install_plugins}"
 dybatpho::success "Setup tmux"
 {{- end }}

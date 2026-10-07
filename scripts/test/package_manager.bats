@@ -435,3 +435,34 @@ EOF
   assert_success
   assert_output --partial 'flatpak install -y --user --noninteractive flathub com.example.App'
 }
+
+@test "package_manager::check_installed_flatpak and check_installed_mas reject an absent id" {
+  stub flatpak 'list --app : printf "Name com.example.App stable flathub\n"'
+  run package_manager::check_installed_flatpak com.example
+  assert_failure
+  unstub flatpak
+
+  printf '#!/bin/sh\nprintf "  497799835  Xcode (15.0)\\n"\n' > "${HOME}/.local/bin/mas"
+  chmod +x "${HOME}/.local/bin/mas"
+  run package_manager::check_installed_mas 497799835
+  assert_success
+  run package_manager::check_installed_mas 49779
+  assert_failure
+}
+
+@test "package_manager::install_via_dmg copies the app from the first mounted volume" {
+  # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
+  function dybatpho::curl_download { :; }
+  # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
+  function dybatpho::privilege_run { shift; printf 'run:%s\n' "$*"; }
+  cat > "${HOME}/.local/bin/hdiutil" << 'SH'
+#!/bin/sh
+printf '<key>mount-point</key>\n<string>/Volumes/My App</string>\n<string>/Volumes/Other</string>\n'
+SH
+  chmod +x "${HOME}/.local/bin/hdiutil"
+
+  run package_manager::install_via_dmg MyApp https://example.com/MyApp.dmg
+  assert_success
+  assert_output --partial 'run:cp -r /Volumes/My App/MyApp.app /Applications'
+  assert_output --partial 'run:hdiutil unmount /Volumes/My App'
+}

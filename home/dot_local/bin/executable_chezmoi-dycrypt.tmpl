@@ -6,14 +6,18 @@
 # `scripts/lib/chezmoi_attrs.sh`, where they can be tested without rendering
 # this template.
 DYCRYPT_DOTFILES_DIR="{{ .chezmoi.sourceDir }}/.."
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 . "${DYCRYPT_DOTFILES_DIR}/scripts/lib/dybatpho/init.sh" --modules cli array
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/chezmoi_attrs.sh
 . "${DYCRYPT_DOTFILES_DIR}/scripts/lib/chezmoi_attrs.sh"
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dycrypt.sh
 . "${DYCRYPT_DOTFILES_DIR}/scripts/lib/dycrypt.sh"
 dybatpho::register_common_handlers
 
 #######################################
 # @description Options both commands share, declared once as persistent so the
 # subcommands inherit them instead of restating them
+# @noargs
 #######################################
 function _spec_common {
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" \
@@ -33,6 +37,7 @@ function _spec_common {
 
 #######################################
 # @description Spec of chezmoi-dycrypt
+# @noargs
 #######################################
 function _spec_main {
   _spec_common
@@ -44,6 +49,7 @@ function _spec_main {
 
 #######################################
 # @description Spec of decrypt command
+# @noargs
 #######################################
 function _spec_decrypt {
   dybatpho::opts::setup "Decrypt secrets data" DECRYPT_ARGS action:"_decrypt \"\${DECRYPT_ARGS[@]}\""
@@ -53,9 +59,11 @@ function _spec_decrypt {
 
 #######################################
 # @description Spec of encrypt command
+# @noargs
 #######################################
 function _spec_encrypt {
-  dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS action:"_encrypt \"\${ENCRYPT_ARGS[@]}\""
+  dybatpho::opts::setup "Encrypt secrets data and target file in your home/root folder" ENCRYPT_ARGS \
+    action:"_encrypt \"\${ENCRYPT_ARGS[@]}\""
   dybatpho::opts::arg "Name of the file to encrypt" FILENAME
   dybatpho::opts::arg "Name of the other files to encrypt from the same folder" MORE_FILENAMES \
     required:false variadic:true
@@ -71,14 +79,15 @@ function _spec_encrypt {
 #   ends the shell it runs in: one unreadable file would otherwise abandon the
 #   rest of the batch. The failures are collected and reported together.
 #######################################
+# dyshellint disable=SC2153,SC2154,SC2310 the parser sets the options; each file is tested on its own
 function _encrypt {
   (($# > 0)) || dybatpho::die "Expected at least one file to encrypt"
   local filename plain cipher
   local -a failed=()
   for filename in "$@"; do
     if ! (
-      dycrypt::resolve_paths plain cipher "${IDENTITY_TYPE}" "${filename}" "${FOLDER}" "${ATTRIBUTES}"
-      dycrypt::encrypt "${IDENTITY_TYPE}" "${plain}" "${cipher}" "${FORCE}" "${REMOVE}"
+      dycrypt::resolve_paths plain cipher "${IDENTITY_TYPE}" "${filename}" "${FOLDER}" "${ATTRIBUTES}" \
+        && dycrypt::encrypt "${IDENTITY_TYPE}" "${plain}" "${cipher}" "${FORCE}" "${REMOVE}"
     ); then
       failed+=("${filename}")
     fi
@@ -90,6 +99,7 @@ function _encrypt {
 # @description Decrypt file with single custom identity
 # @arg $1 string Name of file to decrypt
 #######################################
+# dyshellint disable=SC2153,SC2154 IDENTITY_TYPE, FOLDER, ATTRIBUTES and FORCE are set by the option parser
 function _decrypt {
   local filename
   dybatpho::expect_args filename -- "$@"

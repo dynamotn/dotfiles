@@ -1,27 +1,33 @@
 #!{{ .bash }}
-source {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+# @file scz
+# @brief Run chezmoi as root over the system files of the dotfiles
+# @description Run chezmoi with `/` as its destination and `root/` as its
+# source, elevated, while keeping the caller's `PATH` and `HOME` so the user
+# configuration is the one read. Every argument is handed on to chezmoi.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules privilege
 dybatpho::register_common_handlers
 
-dotfiles="$(dybatpho::path_normalize "$(dybatpho::path_join "{{ .chezmoi.sourceDir }}" "..")")"
-chezmoi_config="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "chezmoi.yaml")"
+dotfiles_root="$(dybatpho::path_join "{{ .chezmoi.sourceDir }}" "..")"
+dotfiles="$(dybatpho::path_normalize "${dotfiles_root}")"
+chezmoi_config="$(dybatpho::path_join "${HOME}" ".config" "chezmoi" "chezmoi.yaml")"
 {{- if eq .chezmoi.os "darwin" }}
 if dybatpho::string_contains "$*" "/Applications"; then
-  dybatpho::file_replace "$chezmoi_config" '^# \(umask:\)' '\1'
+  dybatpho::file_replace "${chezmoi_config}" '^# \(umask:\)' '\1'
 fi
 {{- end }}
 env_args=(env
   "PATH=${PATH}"
   "HOME=${HOME}"
 )
-sudo "${env_args[@]}" \
+dybatpho::privilege_run -- "${env_args[@]}" \
   chezmoi --destination / \
-  --source "$dotfiles/root" \
+  --source "${dotfiles}/root" \
   --mode file \
-  --working-tree "$dotfiles" \
-  --config "$chezmoi_config" \
+  --working-tree "${dotfiles}" \
+  --config "${chezmoi_config}" \
   "$@"
 {{- if eq .chezmoi.os "darwin" }}
 if dybatpho::string_contains "$*" "/Applications"; then
-  dybatpho::file_replace "$chezmoi_config" '^\(umask:\)' '# \1'
+  dybatpho::file_replace "${chezmoi_config}" '^\(umask:\)' '# \1'
 fi
 {{- end }}

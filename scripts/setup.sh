@@ -7,15 +7,16 @@
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 # The library lives in a submodule, which a fresh clone or a new worktree
 # does not populate. Fetch it before sourcing, or nothing below is defined.
-if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
-  git -C "$SCRIPT_DIR/.." submodule update --init "$SCRIPT_DIR/lib/dybatpho"
+if [[ ! -f "${SCRIPT_DIR}/lib/dybatpho/init.sh" ]]; then
+  git -C "${SCRIPT_DIR}/.." submodule update --init "${SCRIPT_DIR}/lib/dybatpho"
 fi
 # shellcheck source-path=SCRIPTDIR
 # shellcheck source=lib/dybatpho/init.sh
-. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli network archive array privilege
+. "${SCRIPT_DIR}/lib/dybatpho/init.sh" --modules cli network archive array privilege
 dybatpho::register_common_handlers
-BIN_DIR="$(dybatpho::ensure_dir "$(dybatpho::path_join "$HOME" ".local" "bin")")"
-export PATH="$BIN_DIR":"$PATH"
+BIN_DIR="$(dybatpho::path_join "${HOME}" ".local" "bin")"
+BIN_DIR="$(dybatpho::ensure_dir "${BIN_DIR}")"
+export PATH="${BIN_DIR}:${PATH}"
 
 #######################################
 # @description Spec of setup.sh
@@ -37,8 +38,13 @@ function _spec_main {
 # @noargs
 #######################################
 function _install_chezmoi {
-  dybatpho::info "Installing chezmoi to $BIN_DIR"
-  sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$BIN_DIR"
+  dybatpho::info "Installing chezmoi to ${BIN_DIR}"
+  # Fetched to a file first, so a failed download stops here instead of
+  # handing an empty script to `sh`.
+  local installer
+  dybatpho::create_temp installer ".sh"
+  dybatpho::curl_download "https://get.chezmoi.io" "${installer}"
+  sh "${installer}" -b "${BIN_DIR}"
 }
 
 #######################################
@@ -47,12 +53,14 @@ function _install_chezmoi {
 # @noargs
 #######################################
 function _install_age {
-  dybatpho::info "Installing age to $BIN_DIR"
+  dybatpho::info "Installing age to ${BIN_DIR}"
   dybatpho::require "tar"
-  dybatpho::create_temp "temp" ".tar.gz"
-  # shellcheck disable=SC2154
-  dybatpho::curl_download "https://dl.filippo.io/age/latest?for=$(dybatpho::goos)/$(dybatpho::goarch)" "$temp"
-  dybatpho::archive_extract "$temp" "$BIN_DIR" 1
+  local archive os arch
+  os="$(dybatpho::goos)"
+  arch="$(dybatpho::goarch)"
+  dybatpho::create_temp archive ".tar.gz"
+  dybatpho::curl_download "https://dl.filippo.io/age/latest?for=${os}/${arch}" "${archive}"
+  dybatpho::archive_extract "${archive}" "${BIN_DIR}" 1
 }
 
 #######################################
@@ -61,14 +69,15 @@ function _install_age {
 # @noargs
 #######################################
 function _install_yq {
-  dybatpho::info "Installing yq to $BIN_DIR"
-  local yq_path
-  yq_path=$(dybatpho::path_join "$BIN_DIR" "yq")
-  # shellcheck disable=SC2154
+  dybatpho::info "Installing yq to ${BIN_DIR}"
+  local yq_path os arch
+  yq_path=$(dybatpho::path_join "${BIN_DIR}" "yq")
+  os="$(dybatpho::goos)"
+  arch="$(dybatpho::goarch)"
   local yq_url="https://github.com/mikefarah/yq/releases/latest/download"
-  yq_url+="/yq_$(dybatpho::goos)_$(dybatpho::goarch)"
-  dybatpho::curl_download "$yq_url" "$yq_path"
-  chmod +x "$yq_path"
+  yq_url+="/yq_${os}_${arch}"
+  dybatpho::curl_download "${yq_url}" "${yq_path}"
+  chmod +x "${yq_path}"
 }
 
 #######################################
@@ -81,20 +90,22 @@ function _install_yq {
 # shellcheck disable=SC2016
 function _generate_chezmoi_config {
   local root_dir origin_config dest_config
-  root_dir="$(dybatpho::path_normalize "$(dybatpho::path_join "$SCRIPT_DIR" "..")")"
-  origin_config="$(dybatpho::path_join "$root_dir" ".chezmoi.yaml.tmpl")"
-  dest_config="$(dybatpho::path_join "$root_dir" "home" ".chezmoi.yaml.tmpl")"
+  root_dir="$(dybatpho::path_join "${SCRIPT_DIR}" "..")"
+  root_dir="$(dybatpho::path_normalize "${root_dir}")"
+  origin_config="$(dybatpho::path_join "${root_dir}" ".chezmoi.yaml.tmpl")"
+  dest_config="$(dybatpho::path_join "${root_dir}" "home" ".chezmoi.yaml.tmpl")"
 
   # Put current chezmoi source directory
-  echo "sourceDir: \"${root_dir}\"" > "$dest_config"
+  printf 'sourceDir: "%s"\n' "${root_dir}" > "${dest_config}"
   # Put rest of config from origin template
-  command cat "$origin_config" >> "$dest_config"
+  command cat "${origin_config}" >> "${dest_config}"
 
-  # Generate decrypt config
-  local enable_personal=false identity
+  # Generate decrypt config. Blank fields, such as the one a trailing `,`
+  # leaves, are skipped below.
+  local enable_personal=false identity fields
   local -a identities=()
-  local raw_identities="${IDENTITIES:-}"
-  IFS=',' read -r -a identities <<< "$raw_identities"
+  fields="$(dybatpho::split "${IDENTITIES:-}" ",")"
+  mapfile -t identities <<< "${fields}"
   local -a enterprise_identities=()
   for identity in "${identities[@]}"; do
     identity="$(dybatpho::trim "${identity}")"
@@ -104,18 +115,18 @@ function _generate_chezmoi_config {
     if [[ "${identity}" == "personal" ]]; then
       enable_personal=true
     else
-      enterprise_identities+=("$identity")
+      enterprise_identities+=("${identity}")
     fi
   done
   if [[ "${enable_personal}" == true ]]; then
-    dybatpho::file_replace "$dest_config" 'decryptPersonal: .*' 'decryptPersonal: true'
-    dybatpho::file_replace "$dest_config" '\(\$decryptPersonal := .*\) false }}' '\1 true }}'
+    dybatpho::file_replace "${dest_config}" 'decryptPersonal: .*' 'decryptPersonal: true'
+    dybatpho::file_replace "${dest_config}" '\(\$decryptPersonal := .*\) false }}' '\1 true }}'
   fi
   if dybatpho::array_first enterprise_identities > /dev/null 2>&1; then
-    dybatpho::file_replace "$dest_config" '\(\$decryptEnterprise := .*\) false }}' '\1 true }}'
-    dybatpho::file_replace "$dest_config" '$company := \(.*\) }}' '$company := "" }}'
+    dybatpho::file_replace "${dest_config}" '\(\$decryptEnterprise := .*\) false }}' '\1 true }}'
+    dybatpho::file_replace "${dest_config}" '$company := \(.*\) }}' '$company := "" }}'
     for identity in "${enterprise_identities[@]}"; do
-      dybatpho::file_replace "$dest_config" '\(\$listDecryptEnterprise := .*\) }}' "\\1 \"${identity}\" }}"
+      dybatpho::file_replace "${dest_config}" '\(\$listDecryptEnterprise := .*\) }}' "\\1 \"${identity}\" }}"
     done
   fi
 }
@@ -146,6 +157,7 @@ function _install_prerequisites {
 # @description Main function
 # @noargs
 #######################################
+# dyshellint disable=SC2154 USE_DEFAULT is assigned by dybatpho::opts from _spec_main
 function _main {
   _install_prerequisites
 
@@ -155,32 +167,30 @@ function _main {
   # Initialize chezmoi config from user input
   dybatpho::info "Please answer the following questions"
   local prompt="--prompt"
-  # shellcheck disable=SC2086
-  if [[ "$USE_DEFAULT" == "true" ]]; then
+  if [[ "${USE_DEFAULT}" == "true" ]]; then
     prompt="--promptDefaults"
   fi
-  chezmoi init -S "$SCRIPT_DIR/.." "$prompt"
+  chezmoi init -S "${SCRIPT_DIR}/.." "${prompt}"
 
   # Apply configuration by order
   local -a params=()
-  # shellcheck disable=SC2086
   if dybatpho::compare_log_level trace; then
     params=("--debug")
   fi
   dybatpho::header "Setup Git modules"
   chezmoi apply \
-    "$SCRIPT_DIR/../.gitmodules" \
-    --destination "$SCRIPT_DIR/.." \
-    --source "$SCRIPT_DIR/../cascadeur" \
+    "${SCRIPT_DIR}/../.gitmodules" \
+    --destination "${SCRIPT_DIR}/.." \
+    --source "${SCRIPT_DIR}/../cascadeur" \
     --mode file "${params[@]}"
   dybatpho::header "Setup SSH"
   chezmoi apply "${HOME}/.ssh" "${params[@]}"
   local proxy
   proxy="$(chezmoi data | yq .httpProxy 2> /dev/null || true)"
   [[ "${proxy}" == "null" ]] && proxy=""
-  if ! dybatpho::string_is_blank "$proxy"; then
-    export https_proxy="$proxy"
-    export http_proxy="$proxy"
+  if ! dybatpho::string_is_blank "${proxy}"; then
+    export https_proxy="${proxy}"
+    export http_proxy="${proxy}"
     local -a addresses=()
     readarray -t addresses < <(
       chezmoi data 2> /dev/null \
@@ -190,7 +200,7 @@ function _main {
     if ((${#addresses[@]} > 0)); then
       local no_proxy_val
       no_proxy_val="$(dybatpho::array_join "addresses" ",")"
-      export no_proxy="$no_proxy_val"
+      export no_proxy="${no_proxy_val}"
     fi
   fi
   dybatpho::header "Setup other dotfiles"
@@ -199,16 +209,20 @@ function _main {
   # Apply OS specific configuration if not Termux. The OS layer is root-owned,
   # so it is skipped without root, and the escalation is held for its run.
   if dybatpho::is_root || { dybatpho::privilege_needed && dybatpho::privilege_acquire; }; then
-    case "$(dybatpho::goos)" in
+    local os scz
+    os="$(dybatpho::goos)"
+    scz="$(dybatpho::path_join "${BIN_DIR}" "scz")"
+    case "${os}" in
       darwin)
         dybatpho::header "Setup operating system"
-        "$(dybatpho::path_join "$BIN_DIR" "scz")" apply /Applications
-        "$(dybatpho::path_join "$BIN_DIR" "scz")" apply /private
+        "${scz}" apply /Applications
+        "${scz}" apply /private
         ;;
       linux)
         dybatpho::header "Setup operating system"
-        "$(dybatpho::path_join "$BIN_DIR" "scz")" apply
+        "${scz}" apply
         ;;
+      *) dybatpho::debug "No operating system layer for ${os}" ;;
     esac
   fi
 

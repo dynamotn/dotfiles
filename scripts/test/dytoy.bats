@@ -536,12 +536,9 @@ EOF
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function package_manager::add_apt_repo { printf 'add_apt_repo:%s|%s\n' "$1" "$3" >> "${actions_file}"; }
   function package_manager::sync_apt_repo { true; }
-  # Stub /etc/os-release
-  function grep {
-    if [[ "$*" == *UBUNTU_CODENAME* ]]; then
-      printf 'UBUNTU_CODENAME=jammy\n'
-    else command grep "$@"; fi
-  }
+  # dybatpho::os_release reads this file instead of /etc/os-release
+  export DYBATPHO_OS_RELEASE="${BATS_TEST_TMPDIR}/os-release"
+  printf 'ID=ubuntu\nVERSION_ID="22.04"\nUBUNTU_CODENAME=jammy\n' > "${DYBATPHO_OS_RELEASE}"
   run dytoy::add_apt_repo "$yaml" "ubuntu"
   assert_success
   run cat "${actions_file}"
@@ -612,4 +609,31 @@ EOF
   function dybatpho::distro_version { return 1; }
   run dytoy::is_package_for_release '{"name":"neovim","releases":[">=24.04"]}'
   assert_failure
+}
+
+@test "__dytoy_lines_into splits output into lines and keeps the exit code" {
+  local -a lines=(stale)
+  __dytoy_lines_into lines printf 'one\ntwo words\n'
+  assert_equal "${#lines[@]}" 2
+  assert_equal "${lines[1]}" 'two words'
+
+  __dytoy_lines_into lines printf ''
+  assert_equal "${#lines[@]}" 0
+
+  run __dytoy_lines_into lines false
+  assert_failure
+
+  # What a failing command printed is kept.
+  __dytoy_lines_into lines sh -c 'printf "partial\n"; exit 3' || assert_equal "$?" 3
+  assert_equal "${lines[*]}" 'partial'
+}
+
+@test "dytoy::iterate installs nothing when tools.yaml is missing" {
+  export TOOL='@empty' METHOD='os'
+  # shellcheck disable=SC2329 # invoked by dytoy::iterate
+  function _install { printf 'install:%s\n' "$1"; }
+  run dytoy::iterate _install
+  assert_success
+  refute_output --partial 'install:'
+  assert_output --partial 'Installed all os tools'
 }

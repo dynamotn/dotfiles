@@ -32,7 +32,6 @@ DYTOY_TUI_SOURCE=(
 {{-   end }}
 {{- end }}
 )
-. {{ .chezmoi.sourceDir }}/../scripts/lib/compressed.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/binary_download.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
 . {{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh
@@ -68,8 +67,8 @@ DYTOY_METHODS=(os binary mise shell)
 #######################################
 # @description Options every method accepts. Declared once on the root command
 # as persistent, so each subcommand inherits them instead of restating them.
+# @noargs
 #######################################
-# shellcheck disable=SC2154
 function _spec_common {
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" \
     validate:"dybatpho::validate_log_level \$OPTARG" persistent:true
@@ -87,6 +86,7 @@ function _spec_common {
 
 #######################################
 # @description Spec of dytoy
+# @noargs
 #######################################
 function _spec_main {
   _spec_common
@@ -105,6 +105,7 @@ function _spec_main {
 
 #######################################
 # @description Spec of the completion subcommand
+# @noargs
 #######################################
 function _spec_completion {
   dybatpho::opts::setup "Print a shell completion script for dytoy" COMPLETION_ARGS \
@@ -116,7 +117,9 @@ function _spec_completion {
 
 #######################################
 # @description Print the completion script for the requested shell
+# @noargs
 #######################################
+# dyshellint disable=SC2154 COMPLETION_SHELL is set by the option parser
 function _run_completion {
   dybatpho::generate_completion _spec_main "${COMPLETION_SHELL}" dytoy
   exit 0
@@ -124,6 +127,7 @@ function _run_completion {
 
 #######################################
 # @description Spec of the os subcommand
+# @noargs
 #######################################
 function _spec_os {
   dybatpho::opts::setup "Install packages with the package manager of this OS" OS_ARGS \
@@ -133,6 +137,7 @@ function _spec_os {
 
 #######################################
 # @description Spec of the binary subcommand
+# @noargs
 #######################################
 function _spec_binary {
   dybatpho::opts::setup "Install binary tools from GitHub or GitLab releases" BINARY_ARGS \
@@ -142,6 +147,7 @@ function _spec_binary {
 
 #######################################
 # @description Spec of the mise subcommand
+# @noargs
 #######################################
 function _spec_mise {
   dybatpho::opts::setup "Install tools with mise" MISE_ARGS \
@@ -151,6 +157,7 @@ function _spec_mise {
 
 #######################################
 # @description Spec of the shell subcommand
+# @noargs
 #######################################
 function _spec_shell {
   dybatpho::opts::setup "Install tools by running the shell commands they declare" SHELL_ARGS \
@@ -162,52 +169,58 @@ function _spec_shell {
 # @description Install a tool with the package manager of this OS
 # @arg $1 string Name of tool
 #######################################
+# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function _install_os_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "$name" "$METHOD"
-  dytoy::is_invalid_essential "$name" && return
-  dytoy::install_dependencies "$name"
+  dytoy::is_defined "${name}" "${METHOD}"
+  dytoy::is_invalid_essential "${name}" && return
+  dytoy::install_dependencies "${name}"
 
+  local hook before_path after_path package
+  local -a packages=()
+  hook="$(dytoy::get_yaml "${name}" "hook.before")"
   dybatpho::create_temp before_path ".sh"
-  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook"
-  dytoy::run_script "$before_path"
+  dytoy::create_script "${name}" "${before_path}" "${hook}" "before-hook"
+  dytoy::run_script "${before_path}"
 
   {{- if eq .chezmoi.os "darwin" }}
-  dybatpho::is true "$(dytoy::get_yaml "$name" "need_rosetta")" \
-    && dytoy::install_macos_rosetta
+  local need_rosetta
+  need_rosetta="$(dytoy::get_yaml "${name}" "need_rosetta")"
+  dybatpho::is true "${need_rosetta}" && dytoy::install_macos_rosetta
   {{- else if eq .chezmoi.os "linux" }}
   # Install flatpak packages if defined
-  readarray packages < <(dytoy::get_yaml "$name" "flatpak.packages")
+  readarray packages < <(dytoy::get_yaml "${name}" "flatpak.packages" || true)
   if dybatpho::array_first packages > /dev/null 2>&1; then
     misc::install_tool flatpak
     package_manager::init_flatpak
     for package in "${packages[@]}"; do
-      dytoy::install_flatpak_package "$package"
+      dytoy::install_flatpak_package "${package}"
     done
   fi
   {{- else if eq .chezmoi.os "android" }}
   # Install fdroid applications if defined
-  readarray packages < <(dytoy::get_yaml "$name" "fdroid.packages")
+  readarray packages < <(dytoy::get_yaml "${name}" "fdroid.packages" || true)
   if dybatpho::array_first packages > /dev/null 2>&1; then
     misc::install_tool fdroidcl
     package_manager::init_fdroid
     for package in "${packages[@]}"; do
-      dytoy::install_fdroid_package "$package"
+      dytoy::install_fdroid_package "${package}"
     done
   fi
   {{- end }}
-  readarray packages < <(dytoy::get_yaml "$name" "{{ $shortCode }}.packages")
+  readarray packages < <(dytoy::get_yaml "${name}" "{{ $shortCode }}.packages" || true)
   for package in "${packages[@]}"; do
-    dytoy::is_package_for_release "$package" || continue
-    dytoy::install_{{ $shortCode }}_package "$package" "{{ .initSystem }}"
+    dytoy::is_package_for_release "${package}" || continue
+    dytoy::install_{{ $shortCode }}_package "${package}" "{{ .initSystem }}"
   done
 
+  hook="$(dytoy::get_yaml "${name}" "hook.after")"
   dybatpho::create_temp after_path ".sh"
-  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook"
-  dytoy::run_script "$after_path"
+  dytoy::create_script "${name}" "${after_path}" "${hook}" "after-hook"
+  dytoy::run_script "${after_path}"
 
-  dybatpho::success "Installed os tool: $name"
+  dybatpho::success "Installed os tool: ${name}"
 }
 
 #######################################
@@ -216,48 +229,50 @@ function _install_os_tool {
 # @arg $1 string Name of tool
 # @arg $2 string "github" or "gitlab"
 #######################################
+# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function _parse_release {
   local name type
   dybatpho::expect_args name type -- "$@"
-  local location host repo version release_asset artifact_host
-  location=$(dytoy::get_yaml "$name" "location")
+  local location default_location host repo version release_asset artifact_host
+  location=$(dytoy::get_yaml "${name}" "location")
   [[ "${location}" == "null" ]] && location=""
-  location=$(dybatpho::coalesce "${location}" "$(dybatpho::path_join "$HOME" ".local" "bin")")
-  dytoy::is_installed_command "$name" "$location" && return
-  dytoy::install_dependencies "$name"
+  default_location="$(dybatpho::path_join "${HOME}" ".local" "bin")"
+  location=$(dybatpho::coalesce "${location}" "${default_location}")
+  dytoy::is_installed_command "${name}" "${location}" && return
+  dytoy::install_dependencies "${name}"
   dybatpho::debug "Download tool ${name} to ${location}"
 
   dybatpho::progress "Installing ${name}"
-  dybatpho::ensure_dir "$location" > /dev/null
-  host=$(dytoy::get_yaml "$name" "${type}.host")
+  dybatpho::ensure_dir "${location}" > /dev/null
+  host=$(dytoy::get_yaml "${name}" "${type}.host")
   [[ "${host}" == "null" ]] && host=""
   host=$(dybatpho::coalesce "${host}" "${type}.com")
   dybatpho::debug "Host is ${host}"
-  repo=$(dytoy::get_yaml "$name" "${type}.repo")
-  release_asset=$(dytoy::get_yaml "$name" "${type}.release_asset")
+  repo=$(dytoy::get_yaml "${name}" "${type}.repo")
+  release_asset=$(dytoy::get_yaml "${name}" "${type}.release_asset")
   # The release source pins its own tag; the top-level `version` every method
   # reads is the fallback.
-  version=$(dytoy::get_version "$name" "${type}.version")
-  [[ "$version" == "latest" ]] && version=$(dytoy::get_version "$name")
+  version=$(dytoy::get_version "${name}" "${type}.version")
+  [[ "${version}" == "latest" ]] && version=$(dytoy::get_version "${name}")
 
-  if [[ "$version" == "latest" ]]; then
-    version=$(binary_download::get_latest_version "$host" "$repo")
-    if dybatpho::string_is_blank "$version"; then
+  if [[ "${version}" == "latest" ]]; then
+    version=$(binary_download::get_latest_version "${host}" "${repo}")
+    if dybatpho::string_is_blank "${version}"; then
       dybatpho::die "You're limited request to ${type} API"
     fi
   fi
   dybatpho::info "Using version ${version} for https://${host}/${repo}"
-  release_asset=$(echo "${release_asset}" | misc::replace_version "$version")
+  release_asset=$(misc::replace_version "${version}" <<< "${release_asset}")
   dybatpho::info "Release asset is ${release_asset}"
 
-  artifact_host=$(dytoy::get_yaml "$name" "${type}.artifact_host")
+  artifact_host=$(dytoy::get_yaml "${name}" "${type}.artifact_host")
   [[ "${artifact_host}" == "null" ]] && artifact_host=""
-  artifact_host=$(echo "${artifact_host}" | misc::replace_version "$version")
+  artifact_host=$(misc::replace_version "${version}" <<< "${artifact_host}")
   local url
   if dybatpho::string_is_blank "${artifact_host}"; then
-    if [[ "$type" == "github" ]]; then
+    if [[ "${type}" == "github" ]]; then
       url="https://${host}/${repo}/releases/download/${version}/${release_asset}"
-    elif [[ "$type" == "gitlab" ]]; then
+    elif [[ "${type}" == "gitlab" ]]; then
       url="https://${host}/${repo}/-/releases/${version}/downloads/${release_asset}"
     fi
   else
@@ -265,10 +280,10 @@ function _parse_release {
   fi
 
   local sha256_asset
-  sha256_asset=$(dytoy::get_yaml "$name" "${type}.sha256")
+  sha256_asset=$(dytoy::get_yaml "${name}" "${type}.sha256")
   [[ "${sha256_asset}" == "null" ]] && sha256_asset=""
   if ! dybatpho::string_is_blank "${sha256_asset}"; then
-    sha256_asset=$(echo "${sha256_asset}" | misc::replace_version "$version")
+    sha256_asset=$(misc::replace_version "${version}" <<< "${sha256_asset}")
     dybatpho::debug "SHA256 asset is ${sha256_asset}"
   fi
 
@@ -279,80 +294,91 @@ function _parse_release {
 # @description Install a tool from a forge release
 # @arg $1 string Name of tool
 #######################################
+# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function _install_binary_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "$name" "$METHOD"
-  dytoy::is_invalid_essential "$name" && return
+  dytoy::is_defined "${name}" "${METHOD}"
+  dytoy::is_invalid_essential "${name}" && return
 
-  local type=""
-  if [ "$(dytoy::get_yaml "$name" "github")" != "null" ]; then
-    type="github"
-  elif [ "$(dytoy::get_yaml "$name" "gitlab")" != "null" ]; then
-    type="gitlab"
-  fi
+  local type="" forge release_source
+  for forge in github gitlab; do
+    release_source="$(dytoy::get_yaml "${name}" "${forge}")"
+    if [[ "${release_source}" != "null" ]]; then
+      type="${forge}"
+      break
+    fi
+  done
   dybatpho::string_is_blank "${type}" && dybatpho::die "No supported release source configured for ${name}"
-  _parse_release "$name" "$type"
+  _parse_release "${name}" "${type}"
 }
 
 #######################################
 # @description Install a tool with mise
 # @arg $1 string Name of tool
 #######################################
+# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function _install_mise_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "$name" "$METHOD"
-  dytoy::is_invalid_essential "$name" && return
-  dytoy::is_installed_command "$name" && return
-  dytoy::install_dependencies "$name"
+  dytoy::is_defined "${name}" "${METHOD}"
+  dytoy::is_invalid_essential "${name}" && return
+  dytoy::is_installed_command "${name}" && return
+  dytoy::install_dependencies "${name}"
 
-  local version=$(dytoy::get_version "$name")
+  local version hook before_path after_path
+  version=$(dytoy::get_version "${name}")
+  hook="$(dytoy::get_yaml "${name}" "hook.before")"
   dybatpho::create_temp before_path ".sh"
-  dytoy::create_script "$name" "$before_path" "$(dytoy::get_yaml "$name" "hook.before")" "before-hook" "$version"
-  dytoy::run_script "$before_path"
+  dytoy::create_script "${name}" "${before_path}" "${hook}" "before-hook" "${version}"
+  dytoy::run_script "${before_path}"
 
-  dybatpho::progress "Installing tool $name"
+  dybatpho::progress "Installing tool ${name}"
   # For some tools need specific backend
-  local backend=$(dytoy::get_yaml "$name" "backend")
+  local backend
+  backend=$(dytoy::get_yaml "${name}" "backend")
   [[ "${backend}" == "null" ]] && backend=""
   backend=$(dybatpho::coalesce "${backend}" "${name}")
 
-  local mise_bin mise_command
-  mise_bin="$(dybatpho::path_join "$HOME" ".local" "bin" "mise")"
-  mise_command="mise"
+  local -a mise_command=(mise)
   {{- if eq .chezmoi.os "android" }}
-  mise_command="proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf -b $PREFIX/etc/tls:/etc/ssl \"$mise_bin\""
+  local mise_bin
+  mise_bin="$(dybatpho::path_join "${HOME}" ".local" "bin" "mise")"
+  mise_command=(proot -b "${PREFIX}/etc/resolv.conf:/etc/resolv.conf" -b "${PREFIX}/etc/tls:/etc/ssl" "${mise_bin}")
   {{- end }}
 
-  dybatpho::dry_run ${mise_command} use -g ${backend}@${version}
+  dybatpho::dry_run "${mise_command[@]}" use -g "${backend}@${version}"
 
+  hook="$(dytoy::get_yaml "${name}" "hook.after")"
   dybatpho::create_temp after_path ".sh"
-  dytoy::create_script "$name" "$after_path" "$(dytoy::get_yaml "$name" "hook.after")" "after-hook" "$version"
-  dytoy::run_script "$after_path"
+  dytoy::create_script "${name}" "${after_path}" "${hook}" "after-hook" "${version}"
+  dytoy::run_script "${after_path}"
 
-  dybatpho::success "Installed mise tool: $name"
+  dybatpho::success "Installed mise tool: ${name}"
 }
 
 #######################################
 # @description Install a tool by running the shell commands it declares
 # @arg $1 string Name of tool
 #######################################
+# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function _install_shell_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "$name" "$METHOD"
-  dytoy::is_invalid_essential "$name" && return
-  dytoy::is_installed_command "$name" && return
-  dytoy::install_dependencies "$name"
+  dytoy::is_defined "${name}" "${METHOD}"
+  dytoy::is_invalid_essential "${name}" && return
+  dytoy::is_installed_command "${name}" && return
+  dytoy::install_dependencies "${name}"
 
-  dybatpho::progress "Installing tool $name"
-  dybatpho::create_temp path ".sh"
+  dybatpho::progress "Installing tool ${name}"
+  local content version script_path
+  content="$(dytoy::get_yaml "${name}" "content")"
+  version="$(dytoy::get_version "${name}")"
+  dybatpho::create_temp script_path ".sh"
   # The content reads the version it should install from `$DYTOY_VERSION`.
-  dytoy::create_script "$name" "$path" "$(dytoy::get_yaml "$name" "content")" "commands" \
-    "$(dytoy::get_version "$name")"
-  dytoy::run_script "$path"
-  dybatpho::success "Installed shell tool: $name"
+  dytoy::create_script "${name}" "${script_path}" "${content}" "commands" "${version}"
+  dytoy::run_script "${script_path}"
+  dybatpho::success "Installed shell tool: ${name}"
 }
 
 #######################################
@@ -360,14 +386,15 @@ function _install_shell_tool {
 # @arg $1 string Method name, one of ${DYTOY_METHODS[@]}
 # @env METHOD string Set to the method being run, read by dytoy::iterate
 #######################################
+# dyshellint disable=SC2154 TOOL and SYNC_REPO are set by the option parser
 function _run_method {
   dybatpho::expect_args METHOD -- "$@"
   case "${METHOD}" in
     os)
-      if [[ "$TOOL" == "@empty" ]]; then
+      if [[ "${TOOL}" == "@empty" ]]; then
         dybatpho::info "Distro of this machine is {{ $name }}."
       fi
-      if dybatpho::is true "$SYNC_REPO"; then
+      if dybatpho::is true "${SYNC_REPO}"; then
         package_manager::init_{{ $shortCode }}
       fi
       dytoy::iterate _install_os_tool
@@ -394,17 +421,21 @@ function _run_method {
 # @arg $1 string Method name
 #######################################
 function _run_one_method {
-  _run_method "$1"
+  local method
+  dybatpho::expect_args method -- "$@"
+  _run_method "${method}"
   exit $?
 }
 
 #######################################
 # @description Main function
+# @noargs
 #######################################
+# dyshellint disable=SC2154,SC2310 TOOL and TUI are set by the option parser; the predicates are meant to be tested
 function _main {
-  if [[ "$TOOL" == "@empty" ]]; then
+  if [[ "${TOOL}" == "@empty" ]]; then
     # A chezmoi hook or a pipe has no terminal and keeps the plain run.
-    if dybatpho::is true "$TUI" && dytoy_tui::has_terminal; then
+    if dybatpho::is true "${TUI}" && dytoy_tui::has_terminal; then
       dytoy_tui::run "$0"
       dybatpho::is true "${DYTOY_TUI_FAILED}" && exit 1
       return 0
@@ -417,7 +448,7 @@ function _main {
   fi
 
   local method
-  method=$(dytoy::get_yaml "$TOOL" "method")
+  method=$(dytoy::get_yaml "${TOOL}" "method")
   [[ "${method}" == "null" ]] && method=""
   dybatpho::string_is_blank "${method}" \
     && dybatpho::die "Not found installer method for tool: ${TOOL}"

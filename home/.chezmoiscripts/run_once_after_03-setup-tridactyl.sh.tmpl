@@ -7,11 +7,12 @@
 dybatpho::register_common_handlers
 
 {{- if eq .browser "F" "Z" }}
-dybatpho::create_temp TEMP_FILE ".sh"
+installer_file=""
+dybatpho::create_temp installer_file ".sh"
 dybatpho::header "Setup tridactyl"
-INSTALLER_URL="https://raw.githubusercontent.com/tridactyl/native_messenger"
-INSTALLER_URL+="/master/installers/install.sh"
-dybatpho::curl_download "$INSTALLER_URL" "$TEMP_FILE"
-bash "$TEMP_FILE" master
+installer_url="https://raw.githubusercontent.com/tridactyl/native_messenger"
+installer_url+="/master/installers/install.sh"
+dybatpho::curl_download "${installer_url}" "${installer_file}"
+bash "${installer_file}" master
 dybatpho::success "Setup tridactyl"
 {{- end }}

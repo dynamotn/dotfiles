@@ -12,7 +12,7 @@ dybatpho::register_common_handlers
 # config hash: {{ $configHash }}
 
 if dybatpho::string_is_blank "${HYPRLAND_INSTANCE_SIGNATURE:-}"; then
-  exit
+  exit 0
 fi
 dybatpho::header "Setup hyprland"
 
@@ -22,9 +22,9 @@ hyprpm update
 dybatpho::progress "Install plugins"
 while IFS="" read -r plugin; do
   dybatpho::progress "Install plugin ${plugin}"
-  hyprpm add -f https://github.com/${plugin} || true
-  hyprpm enable ${plugin#*/}
-done < {{ joinPath .chezmoi.sourceDir "private_dot_config/hypr/hyprland/plugins.list" }}
+  hyprpm add -f "https://github.com/${plugin}" || true
+  hyprpm enable "${plugin#*/}"
+done < "{{ joinPath .chezmoi.sourceDir "private_dot_config/hypr/hyprland/plugins.list" }}"
 hyprpm reload -n
 dybatpho::success "Setup hyprland"
 {{- end }}

@@ -31,7 +31,8 @@ function run_replace_version {
 @test "misc::install_tool dispatches through dytoy when the command is missing" {
   export DRY_RUN='true'
 
-  run misc::install_tool sample
+  # A name no system ships: macOS has a `sample` command of its own.
+  run misc::install_tool dytoy-missing-tool
   assert_success
-  assert_output --partial "${HOME}/.local/bin/dytoy -t sample"
+  assert_output --partial "${HOME}/.local/bin/dytoy -t dytoy-missing-tool"
 }

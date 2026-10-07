@@ -731,7 +731,7 @@ EOF
 
 @test "dytoy_tui::privilege_hand_over gives the terminal back around the prompt" {
   local calls="${BATS_TEST_TMPDIR}/screen"
-  function dytoy_tui::screen_end { echo end >> "${calls}"; }
+  function dybatpho::screen_end { echo end >> "${calls}"; }
   function dybatpho::screen_begin { echo begin >> "${calls}"; }
   function dybatpho::privilege_command { echo doas; }
   run dytoy_tui::privilege_hand_over suspend
@@ -769,7 +769,7 @@ EOF
 # terminal to give back, and the render should only echo the edited file.
 function setup_edit {
   dytoy_tui::load_tools
-  function dytoy_tui::screen_end { :; }
+  function dybatpho::screen_end { :; }
   function dybatpho::screen_begin { :; }
   DYTOY_TUI_TTY=/dev/null
   printf '#!/usr/bin/env bash\ncat "$3"\n' > "${HOME}/.local/bin/chezmoi"
@@ -887,4 +887,14 @@ function __print_var {
   same_result_for_names 'local' "dytoy_tui::colour_into @OUT@ fg ${colour}" layer name hex code
   same_result_for_names 'local' 'dytoy_tui::state_mark_into @OUT@ probe_style 1' index
   same_result_for_names 'local' 'dytoy_tui::method_jobs_into @OUT@ os' method
+}
+
+@test "functions that fill a caller's variable refuse a name that is not one" {
+  dytoy_tui::load_tools
+  run dytoy_tui::tab_items "not-a-name" binary
+  assert_failure
+  assert_output --partial "Invalid variable name: 'not-a-name'"
+  run dytoy_tui::state_mark_into probe_mark "bad name" 1
+  assert_failure
+  assert_output --partial "Invalid variable name: 'bad name'"
 }

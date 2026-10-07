@@ -4,15 +4,15 @@
 # @description The images differ only in registry name, identity, base
 #   distribution and which secrets they carry; everything else is shared.
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
+REPO_DIR="$(dirname "${SCRIPT_DIR}")"
 # The library lives in a submodule, which a fresh clone or a new worktree
 # does not populate. Fetch it before sourcing, or nothing below is defined.
-if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
-  git -C "$REPO_DIR" submodule update --init "$SCRIPT_DIR/lib/dybatpho"
+if [[ ! -f "${SCRIPT_DIR}/lib/dybatpho/init.sh" ]]; then
+  git -C "${REPO_DIR}" submodule update --init "${SCRIPT_DIR}/lib/dybatpho"
 fi
 # shellcheck source-path=SCRIPTDIR
 # shellcheck source=lib/dybatpho/init.sh
-. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli
+. "${SCRIPT_DIR}/lib/dybatpho/init.sh" --modules cli
 dybatpho::register_common_handlers
 IMAGE=""
 DOCKERFILE=""
@@ -41,12 +41,12 @@ function _export_age_passphrase {
   local identity passphrase
   dybatpho::expect_args identity -- "$@"
   dybatpho::require "rbw"
-  if [[ "$identity" == "personal" ]]; then
+  if [[ "${identity}" == "personal" ]]; then
     passphrase="$(rbw get 'Age Dotfiles')"
   else
-    passphrase="$(rbw get 'Age Dotfiles' --field "$identity")"
+    passphrase="$(rbw get 'Age Dotfiles' --field "${identity}")"
   fi
-  dybatpho::secret_register "$passphrase"
+  dybatpho::secret_register "${passphrase}"
   export AGE_PASSPHRASES="${identity}=${passphrase}"
   SECRETS+=(--secret "id=age_passphrases,env=AGE_PASSPHRASES")
 }
@@ -57,7 +57,7 @@ function _export_age_passphrase {
 #######################################
 function _configure_public {
   IMAGE="dynamotn/toolbox"
-  DOCKERFILE="$(dybatpho::path_join "$REPO_DIR" "docker" "Dockerfile.alpine")"
+  DOCKERFILE="$(dybatpho::path_join "${REPO_DIR}" "docker" "Dockerfile.alpine")"
   export TOOLBOX_TYPE=""
 }
 
@@ -67,7 +67,7 @@ function _configure_public {
 #######################################
 function _configure_personal {
   IMAGE="git.dynamotn.dev/config/dotfiles"
-  DOCKERFILE="$(dybatpho::path_join "$REPO_DIR" "docker" "Dockerfile.alpine")"
+  DOCKERFILE="$(dybatpho::path_join "${REPO_DIR}" "docker" "Dockerfile.alpine")"
   export TOOLBOX_TYPE="personal"
   BUILD_ARGS+=(--build-arg IDENTITIES="personal")
   _export_age_passphrase "personal"
@@ -79,7 +79,7 @@ function _configure_personal {
 #######################################
 function _configure_personal_arch {
   IMAGE="git.dynamotn.dev/config/dotfiles:arch"
-  DOCKERFILE="$(dybatpho::path_join "$REPO_DIR" "docker" "Dockerfile.arch")"
+  DOCKERFILE="$(dybatpho::path_join "${REPO_DIR}" "docker" "Dockerfile.arch")"
   export TOOLBOX_TYPE="personal"
   _export_age_passphrase "personal"
 }
@@ -90,22 +90,20 @@ function _configure_personal_arch {
 # @arg $1 string Enterprise code, such as `F1`
 #######################################
 function _configure_enterprise {
-  local enterprise key certificate
+  local enterprise key cipher certificate
   dybatpho::expect_args enterprise -- "$@"
   dybatpho::require "age"
   IMAGE="git.example.com/dynamo/toolbox:${enterprise}"
-  DOCKERFILE="$(dybatpho::path_join "$REPO_DIR" "docker" "Dockerfile.alpine")"
-  export TOOLBOX_TYPE="$enterprise"
-  _export_age_passphrase "$enterprise"
+  DOCKERFILE="$(dybatpho::path_join "${REPO_DIR}" "docker" "Dockerfile.alpine")"
+  export TOOLBOX_TYPE="${enterprise}"
+  _export_age_passphrase "${enterprise}"
 
-  key="$(dybatpho::path_join "$HOME" ".config" "chezmoi" "enterprise-${enterprise}.key")"
-  dybatpho::is file "$key" || dybatpho::die "No age identity at $key"
-  certificate="$(
-    age -d -i "$key" \
-      "$(dybatpho::path_join "$REPO_DIR" "secrets" "data" "enterprise-${enterprise}" "ssl.crt.age")"
-  )"
-  dybatpho::secret_register "$certificate"
-  export SSL_CERT="$certificate"
+  key="$(dybatpho::path_join "${HOME}" ".config" "chezmoi" "enterprise-${enterprise}.key")"
+  dybatpho::is file "${key}" || dybatpho::die "No age identity at ${key}"
+  cipher="$(dybatpho::path_join "${REPO_DIR}" "secrets" "data" "enterprise-${enterprise}" "ssl.crt.age")"
+  certificate="$(age -d -i "${key}" "${cipher}")"
+  dybatpho::secret_register "${certificate}"
+  export SSL_CERT="${certificate}"
   SECRETS+=(--secret "id=ssl_cert,env=SSL_CERT")
 }
 
@@ -114,6 +112,7 @@ function _configure_enterprise {
 # @env MAIN_ARGS Positional arguments; the first names the image to build
 # @noargs
 #######################################
+# dyshellint disable=SC2154 MAIN_ARGS is assigned by dybatpho::opts from _spec_main
 function _main {
   local target bin_dir
   ((${#MAIN_ARGS[@]} > 0)) \
@@ -122,39 +121,42 @@ function _main {
 
   # Reject a name we do not know before asking for any tool, so a typo does
   # not first complain about a missing docker.
-  case "$target" in
+  case "${target}" in
     public | personal | personal-arch | enterprise-?*) ;;
-    *) dybatpho::die "Unknown image $target" ;;
+    *) dybatpho::die "Unknown image ${target}" ;;
   esac
 
   dybatpho::require "docker"
   dybatpho::require "gomplate"
   SECRETS=(--secret "id=github_token,env=GITHUB_TOKEN")
 
-  case "$target" in
+  case "${target}" in
     public) _configure_public ;;
     personal) _configure_personal ;;
     personal-arch) _configure_personal_arch ;;
     enterprise-*) _configure_enterprise "${target#enterprise-}" ;;
+    *) dybatpho::die "Unknown image ${target}" ;;
   esac
 
   # A quoted "~" never expands, which is why the tasks this replaces silently
   # ran without ~/.local/bin on PATH.
-  bin_dir="$(dybatpho::path_join "$HOME" ".local" "bin")"
-  export PATH="$bin_dir:$PATH"
+  bin_dir="$(dybatpho::path_join "${HOME}" ".local" "bin")"
+  export PATH="${bin_dir}:${PATH}"
 
+  local ignore_template ignore_file
+  ignore_template="$(dybatpho::path_join "${REPO_DIR}" ".dockerignore.tmpl")"
+  ignore_file="$(dybatpho::path_join "${REPO_DIR}" ".dockerignore")"
   dybatpho::header "Rendering .dockerignore"
-  gomplate -f "$(dybatpho::path_join "$REPO_DIR" ".dockerignore.tmpl")" \
-    -o "$(dybatpho::path_join "$REPO_DIR" ".dockerignore")"
+  gomplate -f "${ignore_template}" -o "${ignore_file}"
 
-  dybatpho::header "Building $IMAGE"
+  dybatpho::header "Building ${IMAGE}"
   docker build --network=host \
     "${SECRETS[@]}" \
     "${BUILD_ARGS[@]}" \
     --no-cache \
-    -f "$DOCKERFILE" \
-    -t "$IMAGE" "$REPO_DIR"
-  dybatpho::success "Built $IMAGE"
+    -f "${DOCKERFILE}" \
+    -t "${IMAGE}" "${REPO_DIR}"
+  dybatpho::success "Built ${IMAGE}"
 }
 
 dybatpho::generate_from_spec _spec_main "$@"

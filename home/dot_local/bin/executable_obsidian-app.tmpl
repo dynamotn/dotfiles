@@ -7,22 +7,24 @@
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-user_flags_file="$(dybatpho::path_join "$(dybatpho::xdg_config_dir obsidian)" "user-flags.conf")"
+obsidian_config_dir="$(dybatpho::xdg_config_dir obsidian)"
+user_flags_file="$(dybatpho::path_join "${obsidian_config_dir}" "user-flags.conf")"
 flags=()
 
 # Allow users to override command-line options
-if dybatpho::is file "$user_flags_file"; then
-  while IFS= read -r line || [[ -n "$line" ]]; do
+if dybatpho::is file "${user_flags_file}"; then
+  while IFS= read -r line || [[ -n "${line}" ]]; do
     line="$(dybatpho::trim "${line%%#*}")"
-    if ! dybatpho::string_is_blank "$line"; then
-      flags+=("$line")
+    if ! dybatpho::string_is_blank "${line}"; then
+      flags+=("${line}")
     fi
-  done < "$user_flags_file"
+  done < "${user_flags_file}"
 fi
 
 # dybatpho exports its functions to subshells; stop them outliving this script
 # through exec, so Electron's own child shells don't choke on importing them.
-for fn in $(declare -F | awk '$2 == "-fx" && $3 ~ /^dybatpho::/ { print $3 }'); do
+readarray -t dybatpho_functions < <(dybatpho::function_list || true)
+for fn in "${dybatpho_functions[@]}"; do
   export -nf "${fn?}"
 done
 

@@ -20,13 +20,14 @@ dybatpho::load network pkg privilege
 # @exitcode The exit code of the command
 #######################################
 function __package_manager_with_manager {
-  local manager
-  dybatpho::expect_args manager -- "$@"
+  # Prefixed, as the command it runs would otherwise see this local.
+  local __package_manager_with_name
+  dybatpho::expect_args __package_manager_with_name -- "$@"
   shift
   (
-    export DYBATPHO_PKG_MANAGER="${manager}"
+    export DYBATPHO_PKG_MANAGER="${__package_manager_with_name}"
     # Homebrew 7 asks before installing, which stalls an unattended run.
-    [[ "${manager}" != "brew" ]] || export HOMEBREW_NO_ASK=1
+    [[ "${__package_manager_with_name}" != "brew" ]] || export HOMEBREW_NO_ASK=1
     "$@"
   )
 }
@@ -44,9 +45,9 @@ function __package_manager_arg_options_into {
   shift
   local -n __package_manager_options_ref="${__package_manager_options_var}"
   __package_manager_options_ref=()
-  local flag
-  for flag in "$@"; do
-    __package_manager_options_ref+=(--arg "${flag}")
+  local __package_manager_options_flag
+  for __package_manager_options_flag in "$@"; do
+    __package_manager_options_ref+=(--arg "${__package_manager_options_flag}")
   done
 }
 
@@ -58,7 +59,7 @@ function package_manager::sync_repo {
   local manager
   dybatpho::expect_args manager -- "$@"
   dybatpho::progress "Syncing package repositories"
-  __package_manager_with_manager "$manager" dybatpho::pkg_update --force
+  __package_manager_with_manager "${manager}" dybatpho::pkg_update --force
 }
 
 #######################################
@@ -70,7 +71,7 @@ function package_manager::sync_repo {
 function package_manager::check_installed {
   local manager package
   dybatpho::expect_args manager package -- "$@"
-  __package_manager_with_manager "$manager" dybatpho::pkg_installed "$package"
+  __package_manager_with_manager "${manager}" dybatpho::pkg_installed "${package}"
 }
 
 #######################################
@@ -96,7 +97,7 @@ function package_manager::install {
   done
   ((${#packages[@]})) || dybatpho::die "package_manager::install: expected at least one package"
   dybatpho::progress "Installing package ${packages[*]}"
-  __package_manager_with_manager "$manager" dybatpho::pkg_install --force "${options[@]}" -- "${packages[@]}"
+  __package_manager_with_manager "${manager}" dybatpho::pkg_install --force "${options[@]}" -- "${packages[@]}"
 }
 
 #######################################
@@ -109,7 +110,7 @@ function package_manager::install {
 function package_manager::require {
   local manager command package
   dybatpho::expect_args manager command package -- "$@"
-  __package_manager_with_manager "$manager" dybatpho::pkg_require --force "$command" "${manager}:${package}"
+  __package_manager_with_manager "${manager}" dybatpho::pkg_require --force "${command}" "${manager}:${package}"
 }
 
 #######################################
@@ -196,9 +197,9 @@ function package_manager::init_arch {
   if ! dybatpho::is command paru; then
     dybatpho::progress "Installing \`paru\` for managing AUR packages"
     package_manager::install pacman git base-devel rust
+    local paru
     dybatpho::create_temp_dir paru
-    # shellcheck disable=SC2154
-    dybatpho::dry_run git clone https://aur.archlinux.org/paru.git "$paru"
+    dybatpho::dry_run git clone https://aur.archlinux.org/paru.git "${paru}"
     dybatpho::dry_run bash -c "cd \"${paru}\" && makepkg -si --noconfirm"
     dybatpho::privilege_run -- pacman -Rscn --noconfirm rust
   fi
@@ -267,8 +268,8 @@ function package_manager::add_overlay {
   dybatpho::expect_args name url -- "$@"
   if ! dybatpho::is file "/etc/portage/repos.conf/${name}.conf"; then
     dybatpho::privilege_run -- mkdir -p /etc/portage/repos.conf
+    local repo_conf
     dybatpho::create_temp repo_conf ".conf"
-    # shellcheck disable=SC2154
     cat > "${repo_conf}" << EOF
 [${name}]
 location = /var/db/repos/${name}
@@ -276,7 +277,7 @@ sync-type = git
 sync-uri = ${url}
 EOF
     dybatpho::privilege_run -- cp "${repo_conf}" "/etc/portage/repos.conf/${name}.conf"
-    dybatpho::privilege_run -- emaint sync --yes --repo "$name" || dybatpho::die "Failed to sync repository $name"
+    dybatpho::privilege_run -- emaint sync --yes --repo "${name}" || dybatpho::die "Failed to sync repository ${name}"
   fi
 }
 
@@ -301,25 +302,24 @@ function package_manager::add_apt_repo {
   else
     path="$(dybatpho::path_join "/etc/apt/sources.list.d" "${name}.list")"
   fi
-  if ! dybatpho::is file "$path"; then
-    dybatpho::debug "Adding repository $name."
-    if ! [[ "$key" =~ ^https://.* ]]; then
+  if ! dybatpho::is file "${path}"; then
+    dybatpho::debug "Adding repository ${name}."
+    if ! [[ "${key}" =~ ^https://.* ]]; then
       key="https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x${key#0x}"
     fi
+    local temp_key repo_list
     dybatpho::create_temp temp_key ".gpg"
-    # shellcheck disable=SC2154
-    dybatpho::curl_download "$key" "$temp_key"
-    if ! [[ "$key" =~ ^https://.* ]]; then
-      dybatpho::privilege_run -- cp "$temp_key" "$gpg_path"
+    dybatpho::curl_download "${key}" "${temp_key}"
+    if ! [[ "${key}" =~ ^https://.* ]]; then
+      dybatpho::privilege_run -- cp "${temp_key}" "${gpg_path}"
     else
-      dybatpho::privilege_run -- gpg --dearmor --yes -o "$gpg_path" "$temp_key"
+      dybatpho::privilege_run -- gpg --dearmor --yes -o "${gpg_path}" "${temp_key}"
     fi
     dybatpho::create_temp repo_list ".list"
-    # shellcheck disable=SC2154
     printf '%s\n' "deb [signed-by=${gpg_path}] ${url} ${suite} ${components}" > "${repo_list}"
     dybatpho::privilege_run -- cp "${repo_list}" "${path}"
   else
-    dybatpho::debug "Repository $name already exists, skipping."
+    dybatpho::debug "Repository ${name} already exists, skipping."
   fi
 }
 
@@ -331,7 +331,7 @@ function package_manager::add_apt_repo {
 function package_manager::add_fdroid_repo {
   local name url
   dybatpho::expect_args name url -- "$@"
-  dybatpho::dry_run fdroidcl repo add "$name" "$url"
+  dybatpho::dry_run fdroidcl repo add "${name}" "${url}"
 }
 
 #######################################
@@ -345,11 +345,15 @@ function package_manager::add_flatpak_repo {
   if ! dybatpho::is command flatpak; then
     dybatpho::die "Flatpak is not installed. Please install it first."
   fi
-  if ! flatpak remote-list | grep -q "^$name$"; then
-    dybatpho::progress "Adding Flatpak repository $name"
-    dybatpho::dry_run flatpak remote-add --user --if-not-exists "$name" "$url"
+  # Listed first, then searched: `grep -q` stops reading at a match, and the
+  # broken pipe that leaves `flatpak` with fails the pipeline under pipefail.
+  local remotes
+  remotes=$(flatpak remote-list) || remotes=""
+  if ! grep -q -e "^${name}$" <<< "${remotes}"; then
+    dybatpho::progress "Adding Flatpak repository ${name}"
+    dybatpho::dry_run flatpak remote-add --user --if-not-exists "${name}" "${url}"
   else
-    dybatpho::debug "Flatpak repository $name already exists, skipping."
+    dybatpho::debug "Flatpak repository ${name} already exists, skipping."
   fi
 }
 
@@ -361,8 +365,8 @@ function package_manager::add_brew_tap {
   local name
   dybatpho::expect_args name -- "$@"
 
-  dybatpho::progress "Adding Homebrew tap $name"
-  dybatpho::dry_run brew tap "$name"
+  dybatpho::progress "Adding Homebrew tap ${name}"
+  dybatpho::dry_run brew tap "${name}"
 }
 
 #######################################
@@ -373,7 +377,7 @@ function package_manager::add_brew_tap {
 function package_manager::check_installed_portage {
   local package
   dybatpho::expect_args package -- "$@"
-  package_manager::check_installed emerge "$package"
+  package_manager::check_installed emerge "${package}"
 }
 
 #######################################
@@ -383,7 +387,7 @@ function package_manager::check_installed_portage {
 function package_manager::check_installed_pacman {
   local package
   dybatpho::expect_args package -- "$@"
-  package_manager::check_installed pacman "$package"
+  package_manager::check_installed pacman "${package}"
 }
 
 #######################################
@@ -393,7 +397,7 @@ function package_manager::check_installed_pacman {
 function package_manager::check_installed_apt {
   local package
   dybatpho::expect_args package -- "$@"
-  package_manager::check_installed apt "$package"
+  package_manager::check_installed apt "${package}"
 }
 
 #######################################
@@ -403,7 +407,7 @@ function package_manager::check_installed_apt {
 function package_manager::check_installed_apk {
   local package
   dybatpho::expect_args package -- "$@"
-  package_manager::check_installed apk "$package"
+  package_manager::check_installed apk "${package}"
 }
 
 #######################################
@@ -413,7 +417,9 @@ function package_manager::check_installed_apk {
 function package_manager::check_installed_fdroidcl {
   local app_id
   dybatpho::expect_args app_id -- "$@"
-  cmd package list packages 2> /dev/null | grep -wq -e "$app_id"
+  local packages
+  packages=$(cmd package list packages 2> /dev/null) || return 1
+  grep -wq -e "${app_id}" <<< "${packages}"
 }
 
 #######################################
@@ -423,7 +429,15 @@ function package_manager::check_installed_fdroidcl {
 function package_manager::check_installed_flatpak {
   local package
   dybatpho::expect_args package -- "$@"
-  flatpak list --app | awk '{print $2}' | grep -q "^$package$"
+  local apps
+  apps=$(flatpak list --app) || return 1
+  # The application ID is the second whitespace-separated field.
+  local -a ids=()
+  local id
+  while read -r _ id _; do
+    ids+=("${id}")
+  done <<< "${apps}"
+  dybatpho::array_contains ids "${package}"
 }
 
 #######################################
@@ -433,7 +447,7 @@ function package_manager::check_installed_flatpak {
 function package_manager::check_installed_brew {
   local package
   dybatpho::expect_args package -- "$@"
-  package_manager::check_installed brew "$package"
+  package_manager::check_installed brew "${package}"
 }
 
 #######################################
@@ -444,7 +458,15 @@ function package_manager::check_installed_brew {
 function package_manager::check_installed_mas {
   local app_id
   dybatpho::expect_args app_id -- "$@"
-  mas list | awk '{print $1}' | grep -wq -e "$app_id"
+  local apps
+  apps=$(mas list) || return 1
+  # The app ID is the first whitespace-separated field.
+  local -a ids=()
+  local id
+  while read -r id _; do
+    ids+=("${id}")
+  done <<< "${apps}"
+  dybatpho::array_contains ids "${app_id}"
 }
 
 #######################################
@@ -455,7 +477,9 @@ function package_manager::check_installed_mas {
 function package_manager::check_installed_dmg {
   local app_name
   dybatpho::expect_args app_name -- "$@"
-  find /Applications -maxdepth 1 -name "${app_name}.app" -print -quit | grep -q "${app_name}.app"
+  local found
+  found=$(find /Applications -maxdepth 1 -name "${app_name}.app" -print -quit) || return 1
+  [[ -n "${found}" ]]
 }
 
 #######################################
@@ -469,7 +493,7 @@ function package_manager::install_via_portage {
   shift
   local -a options
   __package_manager_arg_options_into options "$@"
-  package_manager::install emerge "${options[@]}" "$package"
+  package_manager::install emerge "${options[@]}" "${package}"
 }
 
 #######################################
@@ -481,10 +505,10 @@ function package_manager::install_via_pacman {
   local package
   dybatpho::expect_args package -- "$@"
   shift
-  dybatpho::progress "Installing package $package"
+  dybatpho::progress "Installing package ${package}"
   # `dybatpho::pkg_install` drives `pacman`, which can't build AUR packages, so
   # `paru` stays in charge here.
-  dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$@" "$package"
+  dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$@" "${package}"
 }
 
 #######################################
@@ -498,7 +522,7 @@ function package_manager::install_via_apt {
   shift
   local -a options
   __package_manager_arg_options_into options "$@"
-  package_manager::install apt "${options[@]}" "$package"
+  package_manager::install apt "${options[@]}" "${package}"
 }
 
 #######################################
@@ -513,7 +537,7 @@ function package_manager::install_via_apk {
   local -a options
   # No index is kept on these machines, and nothing is watching the install.
   __package_manager_arg_options_into options --no-cache --no-interactive "$@"
-  package_manager::install apk "${options[@]}" "$package"
+  package_manager::install apk "${options[@]}" "${package}"
 }
 
 #######################################
@@ -525,8 +549,8 @@ function package_manager::install_via_termux {
   local package
   dybatpho::expect_args package -- "$@"
   shift
-  dybatpho::progress "Installing package $package"
-  dybatpho::dry_run pkg install -y "$@" "$package"
+  dybatpho::progress "Installing package ${package}"
+  dybatpho::dry_run pkg install -y "$@" "${package}"
 }
 
 #######################################
@@ -538,8 +562,8 @@ function package_manager::install_via_fdroidcl {
   local app_id
   dybatpho::expect_args app_id -- "$@"
   shift
-  dybatpho::progress "Installing application $app_id"
-  dybatpho::dry_run fdroidcl install "$@" "$app_id"
+  dybatpho::progress "Installing application ${app_id}"
+  dybatpho::dry_run fdroidcl install "$@" "${app_id}"
 }
 
 #######################################
@@ -552,8 +576,8 @@ function package_manager::install_via_flatpak {
   local app_id repo
   dybatpho::expect_args app_id repo -- "$@"
   shift 2
-  dybatpho::progress "Installing Flatpak app $app_id from $repo repo"
-  dybatpho::dry_run flatpak install -y --user "$@" "$repo" "$app_id"
+  dybatpho::progress "Installing Flatpak app ${app_id} from ${repo} repo"
+  dybatpho::dry_run flatpak install -y --user "$@" "${repo}" "${app_id}"
 }
 
 #######################################
@@ -567,7 +591,7 @@ function package_manager::install_via_brew {
   shift
   local -a options
   __package_manager_arg_options_into options "$@"
-  package_manager::install brew "${options[@]}" "$package"
+  package_manager::install brew "${options[@]}" "${package}"
 }
 
 #######################################
@@ -579,8 +603,11 @@ function package_manager::install_via_mas {
   local app_id
   dybatpho::expect_args app_id -- "$@"
   shift
-  dybatpho::progress "Installing app $(mas info "$app_id" | head -n 1)"
-  dybatpho::dry_run mas install "$@" "$app_id"
+  # The title is only shown, so an app `mas` can't describe still installs.
+  local info
+  info=$(mas info "${app_id}") || info=""
+  dybatpho::progress "Installing app ${info%%$'\n'*}"
+  dybatpho::dry_run mas install "$@" "${app_id}"
 }
 
 #######################################
@@ -592,13 +619,17 @@ function package_manager::install_via_mas {
 function package_manager::install_via_dmg {
   local app_name url
   dybatpho::expect_args app_name url -- "$@"
-  dybatpho::progress "Installing app $app_name"
+  dybatpho::progress "Installing app ${app_name}"
+  local temp_file
   dybatpho::create_temp temp_file ".dmg"
-  # shellcheck disable=SC2154
-  dybatpho::curl_download "$url" "$temp_file"
-  local mount_dir
-  mount_dir=$(hdiutil mount -plist "$temp_file" | grep -oE '/Volumes/[^"<]+' | head -n 1)
+  dybatpho::curl_download "${url}" "${temp_file}"
+  local plist mount_dir
+  plist=$(hdiutil mount -plist "${temp_file}")
+  # The first mount point the property list names; none means nothing to copy.
+  local -a mount_match=()
+  dybatpho::string_match mount_match "${plist}" $'/Volumes/[^"<\n]+' || return 1
+  mount_dir="${mount_match[0]}"
   # /Applications is not writable by the user, and the volume is mounted as root
   dybatpho::privilege_run -- cp -r "${mount_dir}/${app_name}.app" /Applications
-  dybatpho::privilege_run -- hdiutil unmount "$mount_dir"
+  dybatpho::privilege_run -- hdiutil unmount "${mount_dir}"
 }

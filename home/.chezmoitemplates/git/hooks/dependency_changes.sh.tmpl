@@ -33,8 +33,9 @@ function dependency_changes::report {
     '.tool-versions'
   )
 
+  # A range git cannot resolve reports nothing rather than failing the hook.
   local -a changed=()
-  mapfile -t changed < <(git diff --name-only "${range}" -- "${watched[@]}")
+  mapfile -t changed < <(git diff --name-only "${range}" -- "${watched[@]}" || true)
 
   if ((${#changed[@]} > 0)); then
     dybatpho::warn "Dependencies changed, re-run the install step for:"

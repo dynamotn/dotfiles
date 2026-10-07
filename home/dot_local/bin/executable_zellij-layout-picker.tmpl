@@ -1,15 +1,20 @@
 #!{{ .bash }}
 # @file zellij-layout-picker
 # @brief Pick a zellij layout with fzf and launch/attach zellij using it.
+# @description List the layouts under `$ZELLIJ_LAYOUT_DIR`, or the zellij
+# configuration's `layouts` folder, with `default` first, and start zellij with
+# the one picked. Without a pick, zellij starts with its own default.
 . {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
 dybatpho::register_common_handlers
 
-layouts_dir="${ZELLIJ_LAYOUT_DIR:-$(dybatpho::path_join "$(dybatpho::xdg_config_dir zellij)" "layouts")}"
+zellij_config_dir="$(dybatpho::xdg_config_dir zellij)"
+default_layouts_dir="$(dybatpho::path_join "${zellij_config_dir}" "layouts")"
+layouts_dir="${ZELLIJ_LAYOUT_DIR:-${default_layouts_dir}}"
 
 layout=""
-if dybatpho::is dir "$layouts_dir"; then
+if dybatpho::is dir "${layouts_dir}"; then
   layout=$(
-    find -L "$layouts_dir" -maxdepth 1 -type f -name '*.kdl' \
+    find -L "${layouts_dir}" -maxdepth 1 -type f -name '*.kdl' \
       -exec basename {} \; \
       | sed -E 's/\.kdl$//' \
       | sort -u \
@@ -23,12 +28,13 @@ fi
 # dybatpho exports its functions to subshells; stop them outliving this script
 # through exec. /bin/sh on macOS is bash 3.2, which can't import them and
 # prints an error from every shell zellij starts (e.g. git's pager).
-for fn in $(declare -F | awk '$2 == "-fx" && $3 ~ /^dybatpho::/ { print $3 }'); do
+readarray -t dybatpho_functions < <(dybatpho::function_list || true)
+for fn in "${dybatpho_functions[@]}"; do
   export -nf "${fn?}"
 done
 
-if [[ -n "$layout" ]]; then
-  exec zellij --layout "$layout"
+if [[ -n "${layout}" ]]; then
+  exec zellij --layout "${layout}"
 else
   exec zellij
 fi
