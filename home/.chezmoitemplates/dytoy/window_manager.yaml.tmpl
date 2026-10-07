@@ -19,7 +19,8 @@ gentoo:
 arch:
   packages:
     {{- if eq .guiDriver "N" }}
-    - name: hyprland-nvidia-git
+    - name: hyprland-nvidia
+      version: HEAD
     {{- else }}
     - name: hyprland
     {{- end }}
@@ -45,7 +46,7 @@ macos:
       service: Aerospace
       is_user_service: true
     - name: autoraise
-      unstable: true
+      version: HEAD
       repo: dimentium/autoraise
       service: autoraise
 {{- end }}

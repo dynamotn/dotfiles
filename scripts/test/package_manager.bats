@@ -402,3 +402,36 @@ EOF
   assert_success
   assert_output --partial 'mas install 497799835'
 }
+
+@test "package_manager::install_via_brew runs brew without its confirmation prompt" {
+  # Homebrew 7 asks before installing unless HOMEBREW_NO_ASK is set.
+  printf '#!/bin/sh\nprintf "ask=%%s args=%%s\\n" "${HOMEBREW_NO_ASK:-}" "$*"\n' > "${HOME}/.local/bin/brew"
+  chmod +x "${HOME}/.local/bin/brew"
+
+  run package_manager::install_via_brew fzf
+  assert_success
+  assert_output --partial 'ask=1 args=install fzf'
+  [[ -z "${HOMEBREW_NO_ASK:-}" ]]
+}
+
+@test "package_manager::install_via_* hand extra flags to the package manager in dry-run mode" {
+  export DRY_RUN='true'
+  run package_manager::install_via_pacman foo --asdeps
+  assert_success
+  assert_output --partial '--skipreview --asdeps foo'
+  run package_manager::install_via_apk foo --virtual
+  assert_success
+  assert_output --partial 'apk add --no-cache --no-interactive --virtual foo'
+  run package_manager::install_via_apt foo --no-install-recommends
+  assert_success
+  assert_output --partial '--no-install-recommends foo'
+  run package_manager::install_via_termux foo --reinstall
+  assert_success
+  assert_output --partial 'pkg install -y --reinstall foo'
+  run package_manager::install_via_fdroidcl com.example.App --user=0
+  assert_success
+  assert_output --partial 'fdroidcl install --user=0 com.example.App'
+  run package_manager::install_via_flatpak com.example.App flathub --noninteractive
+  assert_success
+  assert_output --partial 'flatpak install -y --user --noninteractive flathub com.example.App'
+}

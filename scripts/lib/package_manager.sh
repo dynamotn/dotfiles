@@ -25,8 +25,29 @@ function __package_manager_with_manager {
   shift
   (
     export DYBATPHO_PKG_MANAGER="${manager}"
+    # Homebrew 7 asks before installing, which stalls an unattended run.
+    [[ "${manager}" != "brew" ]] || export HOMEBREW_NO_ASK=1
     "$@"
   )
+}
+
+#######################################
+# @description Turn manager flags into the `--arg` options of
+# `package_manager::install`
+# @arg $1 string Name of the array variable to fill
+# @arg $@ string Flags handed to the manager itself
+# @set The named array: `--arg <flag>` for each flag
+#######################################
+function __package_manager_arg_options_into {
+  local __package_manager_options_var
+  dybatpho::expect_args __package_manager_options_var -- "$@"
+  shift
+  local -n __package_manager_options_ref="${__package_manager_options_var}"
+  __package_manager_options_ref=()
+  local flag
+  for flag in "$@"; do
+    __package_manager_options_ref+=(--arg "${flag}")
+  done
 }
 
 #######################################
@@ -440,79 +461,99 @@ function package_manager::check_installed_dmg {
 #######################################
 # @description Install a package in Gentoo
 # @arg $1 string Package name
+# @arg $@ string Flags of `emerge`
 #######################################
 function package_manager::install_via_portage {
   local package
   dybatpho::expect_args package -- "$@"
-  package_manager::install emerge "$package"
+  shift
+  local -a options
+  __package_manager_arg_options_into options "$@"
+  package_manager::install emerge "${options[@]}" "$package"
 }
 
 #######################################
 # @description Install a package in Arch
 # @arg $1 string Package name
+# @arg $@ string Flags of `paru -S`
 #######################################
 function package_manager::install_via_pacman {
   local package
   dybatpho::expect_args package -- "$@"
+  shift
   dybatpho::progress "Installing package $package"
   # `dybatpho::pkg_install` drives `pacman`, which can't build AUR packages, so
   # `paru` stays in charge here.
-  dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$package"
+  dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$@" "$package"
 }
 
 #######################################
 # @description Install a package in Ubuntu
 # @arg $1 string Package name
+# @arg $@ string Flags of `apt-get install`
 #######################################
 function package_manager::install_via_apt {
   local package
   dybatpho::expect_args package -- "$@"
-  package_manager::install apt "$package"
+  shift
+  local -a options
+  __package_manager_arg_options_into options "$@"
+  package_manager::install apt "${options[@]}" "$package"
 }
 
 #######################################
 # @description Install a package in Alpine
 # @arg $1 string Package name
+# @arg $@ string Flags of `apk add`
 #######################################
 function package_manager::install_via_apk {
   local package
   dybatpho::expect_args package -- "$@"
+  shift
+  local -a options
   # No index is kept on these machines, and nothing is watching the install.
-  package_manager::install apk --arg --no-cache --arg --no-interactive "$package"
+  __package_manager_arg_options_into options --no-cache --no-interactive "$@"
+  package_manager::install apk "${options[@]}" "$package"
 }
 
 #######################################
 # @description Install a package in Termux
 # @arg $1 string Package name
+# @arg $@ string Flags of `pkg install`
 #######################################
 function package_manager::install_via_termux {
   local package
   dybatpho::expect_args package -- "$@"
+  shift
   dybatpho::progress "Installing package $package"
-  dybatpho::dry_run pkg install -y "$package"
+  dybatpho::dry_run pkg install -y "$@" "$package"
 }
 
 #######################################
 # @description Install a package in Android
 # @arg $1 string Application ID
+# @arg $@ string Flags of `fdroidcl install`
 #######################################
 function package_manager::install_via_fdroidcl {
   local app_id
   dybatpho::expect_args app_id -- "$@"
+  shift
   dybatpho::progress "Installing application $app_id"
-  dybatpho::dry_run fdroidcl install "$app_id"
+  dybatpho::dry_run fdroidcl install "$@" "$app_id"
 }
 
 #######################################
 # @description Install a flatpak application
 # @arg $1 string Application ID
 # @arg $2 string Repository name
+# @arg $@ string Flags of `flatpak install`
 #######################################
 function package_manager::install_via_flatpak {
   local app_id repo
   dybatpho::expect_args app_id repo -- "$@"
+  shift 2
   dybatpho::progress "Installing Flatpak app $app_id from $repo repo"
-  dybatpho::dry_run flatpak install -y --user "$repo" "$app_id"
+  dybatpho::dry_run flatpak install -y --user "$@" "$repo" "$app_id"
 }
 
 #######################################
@@ -524,23 +565,22 @@ function package_manager::install_via_brew {
   local package
   dybatpho::expect_args package -- "$@"
   shift
-  local -a options=()
-  local flag
-  for flag in "$@"; do
-    options+=(--arg "$flag")
-  done
+  local -a options
+  __package_manager_arg_options_into options "$@"
   package_manager::install brew "${options[@]}" "$package"
 }
 
 #######################################
 # @description Install a package in MacOS via Apple Store
 # @arg $1 string Apple Store app ID
+# @arg $@ string Flags of `mas install`
 #######################################
 function package_manager::install_via_mas {
   local app_id
   dybatpho::expect_args app_id -- "$@"
+  shift
   dybatpho::progress "Installing app $(mas info "$app_id" | head -n 1)"
-  dybatpho::dry_run mas install "$app_id"
+  dybatpho::dry_run mas install "$@" "$app_id"
 }
 
 #######################################

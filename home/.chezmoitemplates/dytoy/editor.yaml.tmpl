@@ -9,7 +9,8 @@ gentoo:
     - name: app-editors/neovim
 arch:
   packages:
-    - name: neovim-git
+    - name: neovim
+      version: HEAD
 alpine:
   packages:
     - name: neovim
@@ -20,6 +21,7 @@ termux:
 macos:
   packages:
     - name: neovim
+      version: HEAD
 {{- else }}
 method: mise
 {{- end }}
