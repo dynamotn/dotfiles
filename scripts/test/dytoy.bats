@@ -548,6 +548,7 @@ EOF
   assert_output "add_apt_repo:sample|jammy"
 }
 
+
 @test "dytoy::add_apt_repo returns early when repo is null" {
   local yaml='{"name":"sample","repo":"null","suite":"null","components":"main","key":"ABCD1234","repo_name":"null"}'
   local called_file="${BATS_TEST_TMPDIR}/called"
@@ -555,4 +556,60 @@ EOF
   run dytoy::add_apt_repo "$yaml" "ubuntu"
   assert_success
   refute [ -f "${called_file}" ]
+}
+
+@test "dytoy::is_package_for_release matches the release against semver ranges" {
+  export DYTOY_RELEASE='24.04'
+  dytoy::is_package_for_release '{"name":"neovim","releases":["24.04"]}'
+  dytoy::is_package_for_release '{"name":"neovim","releases":[">=24.04"]}'
+  dytoy::is_package_for_release '{"name":"neovim","releases":[">22.04 <24.10"]}'
+  dytoy::is_package_for_release '{"name":"neovim","releases":["22.04 || 24.04"]}'
+  run dytoy::is_package_for_release '{"name":"neovim","releases":[">=22.04 <24.04"]}'
+  assert_failure
+  run dytoy::is_package_for_release '{"name":"neovim","releases":["24.10"]}'
+  assert_failure
+}
+
+@test "dytoy::is_package_for_release matches a partial range against a full release" {
+  export DYTOY_RELEASE='3.20.3'
+  dytoy::is_package_for_release '{"name":"neovim","releases":["3.20"]}'
+  dytoy::is_package_for_release '{"name":"neovim","releases":["3"]}'
+  run dytoy::is_package_for_release '{"name":"neovim","releases":["3.21"]}'
+  assert_failure
+}
+
+@test "dytoy::is_package_for_release skips a package with releases on a rolling release" {
+  export DYTOY_RELEASE='rolling'
+  run dytoy::is_package_for_release '{"name":"neovim","releases":[">=1"]}'
+  assert_failure
+}
+
+@test "dytoy::is_package_for_release keeps a package without releases" {
+  export DYTOY_RELEASE='22.04'
+  dytoy::is_package_for_release '{"name":"ripgrep"}'
+}
+
+@test "dytoy::is_package_for_release keeps a package when any of its releases matches" {
+  export DYTOY_RELEASE='24.04'
+  dytoy::is_package_for_release '{"name":"neovim","releases":["<22.04",">=24.04"]}'
+  run dytoy::is_package_for_release '{"name":"neovim","releases":["<24.04"]}'
+  assert_failure
+}
+
+@test "dytoy::is_package_for_release reads the release from os-release" {
+  unset DYTOY_RELEASE
+  # dybatpho::distro_version asks sw_vers on macOS, so pretend to be Linux.
+  function dybatpho::platform { printf 'linux\n'; }
+  export DYBATPHO_OS_RELEASE="${BATS_TEST_TMPDIR}/os-release"
+  printf 'ID=ubuntu\nVERSION_ID="22.04"\n' > "${DYBATPHO_OS_RELEASE}"
+  dytoy::is_package_for_release '{"name":"neovim","releases":["<24.04"]}'
+  run dytoy::is_package_for_release '{"name":"neovim","releases":[">=24.04"]}'
+  assert_failure
+}
+
+@test "dytoy::is_package_for_release skips a package with releases on an OS without one" {
+  unset DYTOY_RELEASE
+  function dybatpho::distro_version { return 1; }
+  run dytoy::is_package_for_release '{"name":"neovim","releases":[">=24.04"]}'
+  assert_failure
 }

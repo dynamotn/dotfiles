@@ -215,6 +215,21 @@ $defs:
       Extra flags handed to the package manager when installing the package,
       such as '--no-quarantine' for 'brew install'
 
+  releases:
+    type: array
+    items:
+      type: string
+    minItems: 1
+    description: >-
+      Releases of the OS the package is installed on, matched against its
+      VERSION_ID ('24.04' on Ubuntu, '3.20' on Alpine) or the
+      macOS version. Each item is a range written the npm way: a partial
+      release ('24.04', '12') covers every release under it, '>=', '>', '<=',
+      '<', '^' and '~' compare, comparators separated by spaces must all hold
+      ('>=22.04 <24.04') and '||' joins alternatives. The package is installed
+      when any item matches, and on every release when unset; an OS with no
+      numeric release (Arch) skips it.
+
   package_entry:
     type: object
     description: A single OS package entry
@@ -249,6 +264,8 @@ $defs:
           apt and apk have none. Any other value but 'latest' installs that
           exact version: '=<name>-<version>' on Gentoo, '<name>=<version>' with
           apt and apk; paru can't pick one. Defaults to 'latest'.
+      releases:
+        $ref: "#/$defs/releases"
 
   macos_packages:
     type: object
@@ -298,6 +315,8 @@ $defs:
           Version of the formula or cask. 'HEAD' builds it from its development
           branch, any other value but 'latest' installs the versioned package
           'name@version' (e.g. 'python@3.12'). Defaults to 'latest'.
+      releases:
+        $ref: "#/$defs/releases"
       params:
         $ref: "#/$defs/params"
 
