@@ -195,6 +195,64 @@ EOF
   refute_output --partial "Installed shell tool"
 }
 
+@test "dytoy os installs only the packages meant for the release of this OS" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  # Only the section of the OS running the test is read.
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: os
+  gentoo:
+    packages:
+      - name: everywhere
+      - name: new-release
+        releases: [">=24.04"]
+      - name: old-release
+        releases: ["<24.04"]
+  arch:
+    packages:
+      - name: everywhere
+      - name: new-release
+        releases: [">=24.04"]
+      - name: old-release
+        releases: ["<24.04"]
+  ubuntu:
+    packages:
+      - name: everywhere
+      - name: new-release
+        releases: [">=24.04"]
+      - name: old-release
+        releases: ["<24.04"]
+  alpine:
+    packages:
+      - name: everywhere
+      - name: new-release
+        releases: [">=24.04"]
+      - name: old-release
+        releases: ["<24.04"]
+  termux:
+    packages:
+      - name: everywhere
+      - name: new-release
+        releases: [">=24.04"]
+      - name: old-release
+        releases: ["<24.04"]
+  macos:
+    packages:
+      - name: everywhere
+      - name: new-release
+        releases: [">=24.04"]
+      - name: old-release
+        releases: ["<24.04"]
+EOF
+
+  DYTOY_RELEASE='24.04' run bash "${rendered}" os --dry-run --tool sample --no-check-installed
+  assert_success
+  assert_output --partial "Installing package everywhere"
+  assert_output --partial "Installing package new-release"
+  refute_output --partial "Installing package old-release"
+}
+
 @test "dytoy fails on a tool whose method is not in the YAML" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"

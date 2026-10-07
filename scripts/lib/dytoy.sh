@@ -5,7 +5,7 @@
 # @description Library `dytoy` to read the tools YAML file and install what it
 # describes. Queries go through the `json` module of dybatpho instead of calling
 # `yq` by hand, and every distro installer shares `dytoy::install_package`.
-dybatpho::load json
+dybatpho::load json os semver
 
 #######################################
 # @description Print the path of the tools YAML file
@@ -39,6 +39,50 @@ function dytoy::get_params_into {
   local -n __dytoy_params_ref="${__dytoy_params_var}"
   __dytoy_params_ref=()
   readarray -t __dytoy_params_ref < <(dytoy::get_field "${__dytoy_params_yaml}" "params // [] | .[]")
+}
+
+#######################################
+# @description Print the release of the OS this machine runs, the version that
+# the `releases` of a package are matched against
+# @noargs
+# @stdout The release, such as `24.04` on Ubuntu or `15.1` on macOS
+# @env DYTOY_RELEASE string Release to use instead of the detected one
+# @exitcode 1 The OS publishes no release, as on Arch
+#######################################
+function dytoy::get_release {
+  if [[ -n "${DYTOY_RELEASE:-}" ]]; then
+    printf '%s\n' "${DYTOY_RELEASE}"
+    return 0
+  fi
+  dybatpho::distro_version
+}
+
+#######################################
+# @description Check if a package is meant for the release of this OS: it has
+# no `releases`, or the release satisfies one of them
+# @arg $1 string YAML content of the package
+# @exitcode 0 The package should be installed here
+# @exitcode 1 It is meant for other releases
+#######################################
+function dytoy::is_package_for_release {
+  local yaml
+  dybatpho::expect_args yaml -- "$@"
+  local -a releases
+  readarray -t releases < <(dytoy::get_field "${yaml}" "releases // [] | .[]")
+  ((${#releases[@]})) || return 0
+  local name release range
+  name=$(dytoy::get_field "${yaml}" "name")
+  # A release such as Arch's `rolling` is no version, so no range can hold it.
+  if ! release=$(dytoy::get_release) \
+    || ! release=$(dybatpho::semver_coerce "${release}" 2> /dev/null); then
+    dybatpho::debug "Skip ${name}: this OS publishes no release to match ${releases[*]}"
+    return 1
+  fi
+  for range in "${releases[@]}"; do
+    dybatpho::semver_satisfies "${release}" "${range}" && return 0
+  done
+  dybatpho::debug "Skip ${name}: release ${release} satisfies none of ${releases[*]}"
+  return 1
 }
 
 #######################################
@@ -398,7 +442,7 @@ function dytoy::install_arch_package {
 #######################################
 # @description Add an APT repository from the YAML file
 # @arg $1 string YAML content
-# @arg $2 string OS type (e.g., "ubuntu", "debian", "termux")
+# @arg $2 string OS type, "ubuntu" or "termux"
 #######################################
 function dytoy::add_apt_repo {
   local yaml os
@@ -419,9 +463,6 @@ function dytoy::add_apt_repo {
     case "$os" in
       ubuntu)
         suite=$(grep -is UBUNTU_CODENAME /etc/os-release | cut -d= -f2)
-        ;;
-      debian)
-        suite=$(grep -is VERSION_CODENAME /etc/os-release | cut -d= -f2)
         ;;
       termux)
         suite=""

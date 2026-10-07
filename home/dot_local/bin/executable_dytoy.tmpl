@@ -47,9 +47,9 @@ dybatpho::register_common_handlers
 {{- else if eq .osid "linux-arch" }}
 {{- $shortCode = "arch" }}
 {{- $name = "Arch Linux" }}
-{{- else if eq .osid "linux-debian" "linux-ubuntu" }}
+{{- else if eq .osid "linux-ubuntu" }}
 {{- $shortCode = "ubuntu" }}
-{{- $name = "Debian-based Linux" }}
+{{- $name = "Ubuntu" }}
 {{- else if eq .osid "linux-alpine" }}
 {{- $shortCode = "alpine" }}
 {{- $name = "Alpine" }}
@@ -199,6 +199,7 @@ function _install_os_tool {
   {{- end }}
   readarray packages < <(dytoy::get_yaml "$name" "{{ $shortCode }}.packages")
   for package in "${packages[@]}"; do
+    dytoy::is_package_for_release "$package" || continue
     dytoy::install_{{ $shortCode }}_package "$package" "{{ .initSystem }}"
   done
 
