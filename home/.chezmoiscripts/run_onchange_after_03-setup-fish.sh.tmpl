@@ -8,8 +8,8 @@ dybatpho::register_common_handlers
 dybatpho::header "Setup fish shell"
 # plugins hash: {{ joinPath .chezmoi.homeDir ".config/fish/plugins.list" | include | sha256sum }}
 {{- if ne .kind "container" }}
-dybatpho::is command fish || dybatpho::die "fish isn't installed"
-fish_bin="$(command -v fish)"
+dybatpho::require fish
+fish_bin="$(dybatpho::command_path fish)"
 if [[ "${SHELL:-}" != "${fish_bin}" ]]; then
   dybatpho::info "Change default shell to fish"
   {{- if eq .chezmoi.os "linux" }}
@@ -25,6 +25,7 @@ fi
 {{- end }}
 fish_config_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".config" "fish")"
 rm -rf "${fish_config_dir}"/{conf.d,functions,completions,fishd*}
-fish "$(dybatpho::path_join "${fish_config_dir}" "setup.fish")"
+fish_setup_script="$(dybatpho::path_join "${fish_config_dir}" "setup.fish")"
+fish "${fish_setup_script}"
 
 dybatpho::success "Setup fish shell"

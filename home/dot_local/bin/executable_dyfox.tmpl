@@ -40,65 +40,69 @@ declare -a MOZILLA_PROFILES=({{ range $profiles }}{{ . | quote }} {{ end }})
 # @description Update current live data of one profile to dotfiles
 # @arg $1 string Profile
 #######################################
+# dyshellint disable=SC2154 COOKIES is set by the option parser
 function _update_profile {
   local profile
   dybatpho::expect_args profile -- "$@"
   local profile_dir prefs_file prefs_dir storage_dir
   profile_dir="$(mozilla_profile::profile_dir "${profile}")"
-  prefs_file="$(dybatpho::path_join "$profile_dir" "prefs.js")"
+  prefs_file="$(dybatpho::path_join "${profile_dir}" "prefs.js")"
   prefs_dir="$(mozilla_profile::prefs_template_dir "${profile}")"
-  storage_dir="$(dybatpho::path_join "$profile_dir" "storage" "default")"
+  storage_dir="$(dybatpho::path_join "${profile_dir}" "storage" "default")"
 
-  if dybatpho::is file "$prefs_file"; then
+  if dybatpho::is file "${prefs_file}"; then
     dybatpho::progress "Update toolbar setting for profile ${profile}"
-    mozilla_profile::extract_prefs "$prefs_dir/01-toolbar.js" "$prefs_file" \
+    mozilla_profile::extract_prefs "${prefs_dir}/01-toolbar.js" "${prefs_file}" \
       "browser.uiCustomization.state"
 
     dybatpho::progress "Update addon setting for profile ${profile}"
-    mozilla_profile::extract_prefs "$prefs_dir/02-extensions.js" "$prefs_file" \
+    mozilla_profile::extract_prefs "${prefs_dir}/02-extensions.js" "${prefs_file}" \
       "extensions.webextensions.uuids" \
       "extensions.webextensions.ExtensionStorageIDB.migrated" \
       "privacy.userContext.extension"
   fi
 
   dybatpho::progress "Update containers for profile ${profile}"
-  mozilla_profile::add "$profile_dir" "containers.json"
+  mozilla_profile::add "${profile_dir}" "containers.json"
 
   dybatpho::progress "Update extensions data for profile ${profile}"
-  mozilla_profile::add "$profile_dir" \
+  mozilla_profile::add "${profile_dir}" \
     "addons.json" "addonStartup.json.lz4" "extensions.json" "extension-preferences.json"
 
   dybatpho::progress "Update search engines for profile ${profile}"
-  mozilla_profile::add "$profile_dir" "search.json.mozlz4"
+  mozilla_profile::add "${profile_dir}" "search.json.mozlz4"
 
   dybatpho::progress "Update bookmarks, history and workspaces for profile ${profile}"
-  mozilla_profile::store "${profile}" "$profile_dir" "favicons.sqlite" "places.sqlite"
+  mozilla_profile::store "${profile}" "${profile_dir}" "favicons.sqlite" "places.sqlite"
 
   dybatpho::progress "Update storage data for profile ${profile}"
-  mozilla_profile::store "${profile}" "$profile_dir" "storage.sqlite"
-  if [ "${profile}" = "public" ]; then
-    mozilla_profile::add "$storage_dir" "moz-extension+++*"
+  mozilla_profile::store "${profile}" "${profile_dir}" "storage.sqlite"
+  if [[ "${profile}" == "public" ]]; then
+    mozilla_profile::add "${storage_dir}" "moz-extension+++*"
   else
-    mozilla_profile::store_tree "${profile}" "$storage_dir" -path "*/moz-extension+++*"
+    mozilla_profile::store_tree "${profile}" "${storage_dir}" -path "*/moz-extension+++*"
   fi
 
   if dybatpho::is true "${COOKIES}"; then
     dybatpho::progress "Update cookies for profile ${profile}"
-    mozilla_profile::store "${profile}" "$profile_dir" "cookies.sqlite"
+    mozilla_profile::store "${profile}" "${profile_dir}" "cookies.sqlite"
   fi
 
   {{ if eq .browser "Z" -}}
   dybatpho::progress "Update Zen customization for profile ${profile}"
-  mozilla_profile::add "$profile_dir" "zen-themes.json" "zen-keyboard-shortcuts.json"
+  mozilla_profile::add "${profile_dir}" "zen-themes.json" "zen-keyboard-shortcuts.json"
   {{- end }}
 }
 
 #######################################
 # @description Spec of dyfox cli
+# @noargs
 #######################################
 function _spec_main {
-  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} browser to/from your dotfiles" MAIN_ARGS action:"mozilla_profile::run _update_profile"
-  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" validate:"dybatpho::validate_log_level \$OPTARG"
+  dybatpho::opts::setup "Update/Refresh your live data of {{ $appName }} browser to/from your dotfiles" MAIN_ARGS \
+    action:"mozilla_profile::run _update_profile"
+  dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" \
+    validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::flag "Dry run" DRY_RUN --dry-run -D on:true off:false init:="false"
   dybatpho::opts::param "Profile code" PROFILE --profile -p validate:"mozilla_profile::validate_profile \$OPTARG"
   dybatpho::opts::flag "Refresh from scratch live data" REFRESH --refresh -r on:true off:false init:="false"

@@ -9,15 +9,17 @@ dybatpho::header "Start rclone"
 # config hash: {{ joinPath .chezmoi.homeDir ".config/rclone/rclone.conf" | include | sha256sum }}
 
 rclone_conf="{{ .chezmoi.homeDir }}/.config/rclone/rclone.conf"
-remotes=$(grep '^\[' "${rclone_conf}" | tr -d '[]')
-if [[ -z "${remotes}" ]]; then
+# A config without any remote section makes grep fail, which is the empty case
+# handled below rather than an error.
+readarray -t remotes < <(grep '^\[' "${rclone_conf}" | tr -d '[]' || true)
+if ((${#remotes[@]} == 0)); then
   dybatpho::warn "No rclone remotes configured, skipping"
   exit 0
 fi
 
 {{- if eq .initSystem "systemd" }}
 systemctl --user daemon-reload
-for remote in ${remotes}; do
+for remote in "${remotes[@]}"; do
   dybatpho::progress "Enable rclone for remote: ${remote}"
   dybatpho::ensure_dir "{{ .chezmoi.homeDir }}/Sync/${remote}" > /dev/null
   systemctl --user enable --now "rclone@${remote}.service" || true
@@ -26,7 +28,7 @@ done
 openrc_initd="{{ .chezmoi.homeDir }}/.config/openrc/init.d"
 openrc_default="{{ .chezmoi.homeDir }}/.config/openrc/runlevels/default"
 dybatpho::ensure_dir "${openrc_default}" > /dev/null
-for remote in ${remotes}; do
+for remote in "${remotes[@]}"; do
   dybatpho::progress "Enable rclone for remote: ${remote}"
   dybatpho::ensure_dir "{{ .chezmoi.homeDir }}/Sync/${remote}" > /dev/null
   # Create per-remote symlink if not exists

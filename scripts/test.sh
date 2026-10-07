@@ -7,17 +7,17 @@
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 # The library lives in a submodule, which a fresh clone or a new worktree
 # does not populate. Fetch it before sourcing, or nothing below is defined.
-if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
-  git -C "$SCRIPT_DIR/.." submodule update --init "$SCRIPT_DIR/lib/dybatpho"
+if [[ ! -f "${SCRIPT_DIR}/lib/dybatpho/init.sh" ]]; then
+  git -C "${SCRIPT_DIR}/.." submodule update --init "${SCRIPT_DIR}/lib/dybatpho"
 fi
-if [[ ! -f "$SCRIPT_DIR/lib/dybatpho/init.sh" ]]; then
+if [[ ! -f "${SCRIPT_DIR}/lib/dybatpho/init.sh" ]]; then
   echo "dybatpho is missing and could not be fetched." >&2
   echo "Run: git submodule update --init scripts/lib/dybatpho" >&2
   exit 1
 fi
 # shellcheck source-path=SCRIPTDIR
 # shellcheck source=lib/dybatpho/init.sh
-. "$SCRIPT_DIR/lib/dybatpho/init.sh" --modules cli
+. "${SCRIPT_DIR}/lib/dybatpho/init.sh" --modules cli
 BATS_CMD="${DYBATPHO_DIR}/test/lib/core/bin/bats"
 dybatpho::register_common_handlers
 
@@ -39,6 +39,7 @@ function _spec_main {
 # @description Main function
 # @noargs
 #######################################
+# dyshellint disable=SC2154 the options are assigned by dybatpho::opts from _spec_main
 function _main {
   if [[ ! -x "${BATS_CMD}" ]]; then
     if dybatpho::is command bats; then
@@ -52,15 +53,15 @@ function _main {
     dybatpho::die "Bats test runner not found. Install bats, or run: ${hint}"
   fi
 
-  if [[ "$DYTOY" == "true" ]]; then
+  if [[ "${DYTOY}" == "true" ]]; then
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run \
       "${SCRIPT_DIR}/test/dytoy_schema.bats"
   fi
-  if [[ "$SECRETS" == "true" ]]; then
+  if [[ "${SECRETS}" == "true" ]]; then
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run \
       "${SCRIPT_DIR}/test/secrets_schema.bats"
   fi
-  if [[ "$ALL" == "true" ]]; then
+  if [[ "${ALL}" == "true" ]]; then
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${SCRIPT_DIR}/test"
   fi
   if ((${#MAIN_ARGS[@]} > 0)); then

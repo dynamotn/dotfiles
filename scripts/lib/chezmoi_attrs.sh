@@ -21,8 +21,10 @@ function chezmoi_attrs::validate {
   local attributes
   dybatpho::expect_args attributes -- "$@"
 
+  local fields
   local -a attrs=()
-  mapfile -t attrs < <(dybatpho::split "${attributes}" ",")
+  fields="$(dybatpho::split "${attributes}" ",")"
+  mapfile -t attrs <<< "${fields}"
   local attr
   for attr in "${attrs[@]}"; do
     if [[ -n "${attr}" ]] && ! dybatpho::array_contains CHEZMOI_ATTRS_ORDER "${attr}"; then
@@ -94,9 +96,11 @@ function chezmoi_attrs::source_path {
     return 1
   fi
 
+  local __chezmoi_attrs_sp_fields
   local -a __chezmoi_attrs_sp_components=() __chezmoi_attrs_sp_last_attrs=()
   IFS='/' read -r -a __chezmoi_attrs_sp_components <<< "${__chezmoi_attrs_sp_relative}"
-  mapfile -t __chezmoi_attrs_sp_last_attrs < <(dybatpho::split "${__chezmoi_attrs_sp_attributes}" ",")
+  __chezmoi_attrs_sp_fields="$(dybatpho::split "${__chezmoi_attrs_sp_attributes}" ",")"
+  mapfile -t __chezmoi_attrs_sp_last_attrs <<< "${__chezmoi_attrs_sp_fields}"
   local __chezmoi_attrs_sp_last=$((${#__chezmoi_attrs_sp_components[@]} - 1))
 
   local __chezmoi_attrs_sp_index __chezmoi_attrs_sp_component __chezmoi_attrs_sp_prefix

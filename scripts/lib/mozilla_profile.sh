@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dyshellint disable=SC2154 the MOZILLA_* layout, PROFILE and REFRESH are set by the entry point
 # @file mozilla_profile.sh
 # @brief Shared machinery of the Gecko profile managers, `dyfox` and `dybird`
 # @description Firefox/Zen and Thunderbird/Betterbird keep the same shape of
@@ -78,12 +79,13 @@ function mozilla_profile::validate_profile {
 # @arg $1 string Name of a function taking the profile as its only argument
 #######################################
 function mozilla_profile::for_each_profile {
-  local callback
-  dybatpho::expect_args callback -- "$@"
-  local profile
-  for profile in "${MOZILLA_PROFILES[@]}"; do
-    if mozilla_profile::selected "${profile}"; then
-      "${callback}" "${profile}"
+  # Prefixed, since the callback runs in this scope and sees every local here.
+  local __mozilla_profile_callback
+  dybatpho::expect_args __mozilla_profile_callback -- "$@"
+  local __mozilla_profile_each
+  for __mozilla_profile_each in "${MOZILLA_PROFILES[@]}"; do
+    if mozilla_profile::selected "${__mozilla_profile_each}"; then
+      "${__mozilla_profile_callback}" "${__mozilla_profile_each}"
     else
       dybatpho::debug "${PROFILE}"
     fi
@@ -203,8 +205,9 @@ function mozilla_profile::store_tree {
 
   local -a files=()
   # Sorted so that the files of one folder arrive together, and null separated
-  # so that a space in a profile path cannot split one name into two.
-  mapfile -d '' -t files < <(command find "${root}" -type f "$@" -print0 | sort -z)
+  # so that a space in a profile path cannot split one name into two. A folder
+  # `find` cannot fully read still hands over the files it did read.
+  mapfile -d '' -t files < <(command find "${root}" -type f "$@" -print0 | sort -z || true)
   ((${#files[@]})) || return 0
 
   local file folder current=""
@@ -227,8 +230,9 @@ function mozilla_profile::store_tree {
 # @env REFRESH string Refresh the live data instead of updating the dotfiles
 #######################################
 function mozilla_profile::run {
-  local update_profile
-  dybatpho::expect_args update_profile -- "$@"
+  # Prefixed, since the update function runs in this scope.
+  local __mozilla_profile_update
+  dybatpho::expect_args __mozilla_profile_update -- "$@"
   dybatpho::info "Your ${MOZILLA_APP_KIND} in chezmoi settings is ${MOZILLA_APP_NAME}"
 
   # Copying a profile out from under a running application reads half written
@@ -241,7 +245,7 @@ function mozilla_profile::run {
     dybatpho::success "Refresh from scratch ${MOZILLA_APP_NAME} settings"
   else
     dybatpho::header "Update ${MOZILLA_APP_NAME} settings"
-    mozilla_profile::for_each_profile "${update_profile}"
+    mozilla_profile::for_each_profile "${__mozilla_profile_update}"
     ((MOZILLA_FAILED_STORES == 0)) \
       || dybatpho::die "${MOZILLA_FAILED_STORES} folder(s) could not be encrypted, the dotfiles are not up to date"
     dybatpho::success "Update ${MOZILLA_APP_NAME} settings"

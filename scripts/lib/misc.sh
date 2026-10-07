@@ -10,8 +10,10 @@
 function misc::install_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dybatpho::is command "$name" \
-    || dybatpho::dry_run "$(dybatpho::path_join "$HOME" ".local" "bin" "dytoy")" -t "$name"
+  dybatpho::is command "${name}" && return 0
+  local dytoy_bin
+  dytoy_bin="$(dybatpho::path_join "${HOME}" ".local" "bin" "dytoy")"
+  dybatpho::dry_run "${dytoy_bin}" -t "${name}"
 }
 
 #######################################
