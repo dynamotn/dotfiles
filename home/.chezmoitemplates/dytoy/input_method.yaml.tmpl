@@ -23,15 +23,23 @@ gentoo:
     - name: app-i18n/fcitx-chinese-addon
     - name: app-i18n/fcitx-m17n
     {{- end }}
+  {{- if has "vi" .languages }}
   hook:
     after: |-
       {{- if eq .initSystem "openrc" }}
-      sudo ln -s /etc/init.d/fcitx5-lotus /etc/init.d/fcitx5-lotus.\$(whoami)
-      sudo rc-update add fcitx5-lotus.\$(whoami) default
-      sudo rc-service fcitx5-lotus.\$(whoami) restart
+      # The bare service refuses to start, only a per-user link runs the server.
+      if [[ -e /etc/runlevels/default/fcitx5-lotus ]]; then
+        sudo rc-update del fcitx5-lotus default
+      fi
+      sudo ln -sfn /etc/init.d/fcitx5-lotus "/etc/init.d/fcitx5-lotus.${USER}"
+      if [[ ! -e "/etc/runlevels/default/fcitx5-lotus.${USER}" ]]; then
+        sudo rc-update add "fcitx5-lotus.${USER}" default
+      fi
+      sudo rc-service "fcitx5-lotus.${USER}" restart
       {{- else if eq .initSystem "systemd" }}
-      sudo systemctl enable --now fcitx5-lotus-server@\$(whoami).service
+      sudo systemctl enable --now "fcitx5-lotus-server@${USER}.service"
       {{- end }}
+  {{- end }}
 arch:
   packages:
     - name: fcitx5-configtool
@@ -45,9 +53,11 @@ arch:
     - name: fcitx5-chinese-addons
     - name: fcitx5-m17n
     {{- end }}
+  {{- if has "vi" .languages }}
   hook:
     after: |-
-      sudo systemctl enable --now fcitx5-lotus-server@\$(whoami).service
+      sudo systemctl enable --now "fcitx5-lotus-server@${USER}.service"
+  {{- end }}
 ubuntu:
   packages:
     - name: fcitx5-configtool
@@ -64,9 +74,11 @@ ubuntu:
     - name: fcitx5-chinese-addons
     - name: fcitx5-m17n
     {{- end }}
+  {{- if has "vi" .languages }}
   hook:
     after: |-
-      sudo systemctl enable --now fcitx5-lotus-server@\$(whoami).service
+      sudo systemctl enable --now "fcitx5-lotus-server@${USER}.service"
+  {{- end }}
 alpine:
   packages:
     - name: fcitx5-configtool
