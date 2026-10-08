@@ -1,7 +1,11 @@
 {
   "cleanupPeriodDays": 20,
   "permissions": {
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "ask": [
+      "Bash(git push)",
+      "Bash(git push:*)"
+    ]
   },
   "model": "opus",
   "hooks": {

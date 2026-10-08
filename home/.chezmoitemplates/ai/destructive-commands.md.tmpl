@@ -12,9 +12,10 @@ a destructive one can cost the whole machine.
 - Discarding work in git: `reset --hard`, `restore`/`checkout --` over
   uncommitted changes, `clean -fdx`, `branch -D`, `tag -d`, `stash drop`,
   `stash clear`, and any rebase or history rewrite of already-pushed commits.
-- Changing shared state: force pushes of any kind, pushing to `main` or
-  `master`, deleting a remote branch, merging, and creating remote tags or
-  releases.
+- Changing shared state: any `git push` to any remote and any branch,
+  including a new branch and including at the end of a finished task, as well
+  as deleting a remote branch, merging, and creating remote tags or releases.
+  Finish with local commits and let the user push.
 - Anything system-wide: `sudo`, installing or removing packages with
   `pacman`, `paru`, `apt` or `brew`, `systemctl` enable/disable/start/stop,
   writing under `/etc`, and changing ownership or permissions outside the
@@ -27,7 +28,7 @@ a destructive one can cost the whole machine.
 ## Safe without asking
 
 - Read-only inspection: `status`, `diff`, `log`, `show`, `ls`, `rg`, `fd`.
-- Creating a branch, committing to it, and pushing that new branch.
+- Creating a branch and committing to it locally.
 - Creating or editing files inside the repository working tree.
 
 ## Work additively
