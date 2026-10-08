@@ -96,6 +96,8 @@ Library/thunderbird
 {{/* Window manager and WM-related files */}}
 {{- if empty .languages }}
 .config/fcitx5
+{{- else if not (has "vi" .languages) }}
+.config/fcitx5/conf/lotus*.conf
 {{- end }}
 {{- if ne .guiServer "X" }}
 .xprofile
