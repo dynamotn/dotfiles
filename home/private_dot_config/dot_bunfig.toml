@@ -28,4 +28,5 @@ minimumReleaseAgeExcludes = [
   "@github/copilot-sdk-linux-x64",
   "@github/copilot-sdk-win32-arm64",
   "@github/copilot-sdk-win32-x64",
+  "@dynamotn/datme",
 ]
