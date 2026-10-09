@@ -1,0 +1,7 @@
+{{- if eq .kind "pc" -}}
+# Bound dirty page cache in bytes rather than as a share of RAM: 20% of 16G
+# lets gigabytes pile up for a slow USB stick, then stalls every writer while
+# they drain. Writeback starts at 256M and writers block past 1G.
+vm.dirty_background_bytes = 268435456
+vm.dirty_bytes = 1073741824
+{{- end }}
