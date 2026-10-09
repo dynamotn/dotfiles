@@ -3,8 +3,9 @@
   config passed through `make localmodconfig`, with the subsystems that load
   modules by name (crypto, netfilter, qdiscs, HID, md/dm, USB storage and
   network) kept whole. Refresh it with `scripts/kernel.sh --menuconfig
-  --save-base <path>`; tuning belongs in tuning.config, not here.
+  --save-base <path>`, or `--refresh-base <path>` after a version bump;
+  tuning belongs in tuning.config, not here.
 */ -}}
-{{- if eq .code "l30n4rd0d4v1nc1" -}}
-{{ template "kernel/l30n4rd0d4v1nc1.defconfig" . }}
+{{- if has .code .gentooSourcesMachines -}}
+{{ includeTemplate (printf "kernel/%s.defconfig" .code) . }}
 {{- end }}

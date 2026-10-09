@@ -1,4 +1,4 @@
-{{- if eq .code "l30n4rd0d4v1nc1" -}}
+{{- if has .code .gentooSourcesMachines -}}
 # Track the 7.2 series only: base.config and tuning.config are written and
 # checked against its Kconfig, so a new major moves only when they do.
 =sys-kernel/gentoo-sources-7.2* ~amd64
