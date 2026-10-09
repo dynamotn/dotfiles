@@ -41,6 +41,8 @@ function _spec_main {
     MENUCONFIG --menuconfig -m on:true off:false init:="false"
   dybatpho::opts::param "Save the resulting .config as a defconfig to this path" \
     SAVE_BASE --save-base -b init:=""
+  dybatpho::opts::param "After a version bump, re-resolve base.config against the new Kconfig into this path" \
+    REFRESH_BASE --refresh-base -r init:=""
   dybatpho::opts::flag "Skip configure and build: rebuild out-of-tree modules and install" \
     INSTALL_ONLY --install-only -i on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
@@ -95,6 +97,13 @@ function _main {
     _verify "${fragment}"
     _install
     return
+  fi
+
+  if [[ -n "${REFRESH_BASE}" ]]; then
+    dybatpho::header "Refresh base config for ${SOURCE_DIR}"
+    kernel::refresh_base "${SOURCE_DIR}" "${base}" "${REFRESH_BASE}"
+    dybatpho::success "Saved refreshed base to ${REFRESH_BASE}"
+    base="${REFRESH_BASE}"
   fi
 
   dybatpho::header "Configure ${SOURCE_DIR}"

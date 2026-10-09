@@ -161,6 +161,21 @@ function kernel::merge_config {
 }
 
 #######################################
+# @description Re-resolve a base defconfig against the Kconfig of another
+# kernel version, without any fragment: options that were renamed, became
+# built-in or disappeared drop out, and every hardware choice stays.
+# @arg $1 string Kernel source directory of the new version
+# @arg $2 string Path of the current base defconfig
+# @arg $3 string Destination path of the refreshed base defconfig
+#######################################
+function kernel::refresh_base {
+  local source_dir base destination
+  dybatpho::expect_args source_dir base destination -- "$@"
+  kernel::merge_config "${source_dir}" "${base}"
+  kernel::save_defconfig "${source_dir}" "${destination}"
+}
+
+#######################################
 # @description Save the `.config` of a kernel source tree as a minimal
 # defconfig, to refresh a base config after `make menuconfig`
 # @arg $1 string Kernel source directory

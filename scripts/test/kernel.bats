@@ -195,6 +195,33 @@ EOF
 make -C ${tree} olddefconfig"
 }
 
+@test "kernel::refresh_base re-resolves the base alone and saves it as a defconfig" {
+  local tree="${BATS_TEST_TMPDIR}/linux" log="${BATS_TEST_TMPDIR}/calls"
+  dybatpho::ensure_dir "${tree}/scripts/kconfig" > /dev/null
+  cat > "${tree}/scripts/kconfig/merge_config.sh" << EOF
+#!/usr/bin/env bash
+printf 'merge %s\n' "\$*" >> "${log}"
+EOF
+  # savedefconfig writes the defconfig the refreshed base is copied from.
+  cat > "${HOME}/.local/bin/make" << EOF
+#!/usr/bin/env bash
+printf 'make %s\n' "\$*" >> "${log}"
+[[ "\${*: -1}" == savedefconfig ]] && printf 'CONFIG_NEW=y\n' > "${tree}/defconfig"
+exit 0
+EOF
+  chmod +x "${tree}/scripts/kconfig/merge_config.sh" "${HOME}/.local/bin/make"
+  printf 'CONFIG_OLD=y\n' > "${BATS_TEST_TMPDIR}/base.config"
+
+  run kernel::refresh_base "${tree}" "${BATS_TEST_TMPDIR}/base.config" "${BATS_TEST_TMPDIR}/new.config"
+  assert_success
+  run cat "${BATS_TEST_TMPDIR}/new.config"
+  assert_output 'CONFIG_NEW=y'
+  # No fragment is merged into a base.
+  run cat "${log}"
+  assert_output "make -C ${tree} olddefconfig
+make -C ${tree} savedefconfig"
+}
+
 @test "kernel::merge_config refuses a directory that is not a kernel tree" {
   printf 'CONFIG_HZ_300=y\n' > "${BATS_TEST_TMPDIR}/base.config"
 
