@@ -19,9 +19,6 @@ net.ipv4.conf.all.proxy_arp = 0
 net.ipv4.conf.all.log_martians = 1
 net.ipv4.conf.default.log_martians = 1
 
-# Disable Proxy Address Resolution Protocol
-net.ipv4.conf.all.proxy_arp = 0
-
 # Reverse path filtering to help protect against IP spoofing
 net.ipv4.conf.all.rp_filter = 1
 net.ipv4.conf.default.rp_filter = 1
@@ -30,9 +27,10 @@ net.ipv4.conf.default.rp_filter = 1
 net.ipv4.conf.all.send_redirects = 0
 net.ipv4.conf.default.send_redirects = 0
 
-# Ignore ICMP redirects from non-GW hosts
-net.ipv4.conf.all.secure_redirects = 1
-net.ipv4.conf.default.secure_redirects = 1
+# Not even from the default gateway: secure_redirects only narrows what
+# accept_redirects lets in, and that is already off above
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
 
 {{- if eq .kind "pc" }}
 # Need to traverse the system interfaces

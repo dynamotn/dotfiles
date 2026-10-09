@@ -38,7 +38,10 @@ kernel.sysrq = 0
 
 # Prevent unprivileged use of BPF for generic hooks and networking programmings
 kernel.unprivileged_bpf_disabled = 1
-net.core.bpf_jit_harden = 2
+# Constant blinding for unprivileged programs only: with the line above there
+# are none, while 2 would also slow every root-loaded program, such as the
+# sched_ext scheduler on its hot path
+net.core.bpf_jit_harden = 1
 
 # Increase the bits of entropy used for the kernel ASLR. There is a compat
 # control as well but that only applies to 32 bit compatible applications which
