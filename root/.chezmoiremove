@@ -1,0 +1,7 @@
+# Paths are relative to the destination directory (/).
+
+# The linux-firmware ebuild saves the list it installed as
+# savedconfig/sys-kernel/linux-firmware-<version>, and savedconfig.eclass reads
+# that file before the unversioned one managed here. Left in place, it silently
+# overrides every later edit of linux-firmware.tmpl for the same version.
+etc/portage/savedconfig/sys-kernel/linux-firmware-*
