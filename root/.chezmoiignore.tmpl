@@ -48,6 +48,7 @@ etc/systemd
 etc/vconsole.conf
 {{- end }}
 {{- if ne .initSystem "openrc" }}
+etc/rc.conf.d
 etc/syslog-ng
 {{- end }}
 {{- if ne .osid "linux-arch" }}
@@ -60,6 +61,7 @@ etc/dracut.conf.d
 etc/kernel
 etc/ntp
 etc/portage
+etc/scx_loader
 etc/selinux
 etc/sandbox.d
 var/lib/portage

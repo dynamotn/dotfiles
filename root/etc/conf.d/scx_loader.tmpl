@@ -1,0 +1,5 @@
+{{- if eq .code "l30n4rd0d4v1nc1" -}}
+# scx_loader serves org.scx.Loader on the system bus, but its init script
+# declares no dependency: with rc_parallel it could start before dbus.
+rc_need="dbus"
+{{- end }}

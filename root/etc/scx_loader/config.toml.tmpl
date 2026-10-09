@@ -1,0 +1,9 @@
+{{- if eq .code "l30n4rd0d4v1nc1" -}}
+# sched_ext scheduler started by the scx_loader service on boot. scx_cosmos is
+# upstream's general-purpose default and keeps tasks near their cache, which
+# suits the two CCDs of the 5950X. If it ever stalls, the kernel ejects it and
+# falls back to the built-in scheduler on its own.
+# Try another one live, without a reboot: scxctl switch --sched lavd
+default_sched = "scx_cosmos"
+default_mode = "Auto"
+{{- end }}
