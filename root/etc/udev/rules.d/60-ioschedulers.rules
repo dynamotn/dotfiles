@@ -1,0 +1,4 @@
+# NVMe and SATA SSDs keep the kernel's choice (none, mq-deadline). Spinning
+# disks, usually a USB backup drive here, get BFQ: it keeps the desktop
+# responsive while a long copy runs.
+ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
