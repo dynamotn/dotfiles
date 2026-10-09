@@ -60,6 +60,30 @@ which needs `amd-ucode/microcode_amd_fam19h.bin` from linux-firmware.
 - A driver for new hardware goes in the base:
   `./scripts/kernel.sh --menuconfig --configure-only --save-base <repo>/root/.chezmoitemplates/kernel/<code>.defconfig`.
 
+## Moving to a new major version
+
+`package.accept_keywords/sys-kernel/gentoo-sources` pins one series (now
+7.2, still `~amd64`), so portage never jumps to the next one on its own.
+Both config files are written against that series' Kconfig. To move on:
+
+1. Unpack the new tree anywhere writable and list what it adds:
+   `make listnewconfig` after copying the running config (`zcat
+   /proc/config.gz > .config`). Read the help of anything that touches the
+   scheduler, memory, security or this hardware, and put the choices in
+   `tuning.config.tmpl`.
+2. `./scripts/kernel.sh --configure-only --source <tree> --refresh-base
+   <repo>/root/.chezmoitemplates/kernel/<code>.defconfig` re-resolves the
+   base against the new Kconfig (renamed or now built-in options drop out,
+   hardware choices stay) and verifies the fragment on top of it.
+3. Build the tree and the NVIDIA modules against it before switching: the
+   GTX 1060 is held on the 580 driver branch, whose support for a new kernel
+   is only known by compiling it.
+4. Move the pin in `package.accept_keywords` to the new series.
+
+Keep the old series' kernel in GRUB until the new one has booted well; once
+`emerge --depclean` drops its sources, its NVIDIA modules can no longer be
+rebuilt.
+
 ## SELinux
 
 The kernel enables SELinux (`CONFIG_LSM` lists `selinux`); the policy is
