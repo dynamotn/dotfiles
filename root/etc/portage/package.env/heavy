@@ -1,0 +1,10 @@
+# Packages whose compile jobs need much more memory than a thread's share.
+dev-libs/boost heavy.conf
+dev-qt/qtbase heavy.conf
+dev-util/bcc heavy.conf
+gui-wm/hyprland heavy.conf
+llvm-core/clang heavy.conf
+llvm-core/llvm heavy.conf
+net-misc/rustdesk heavy.conf
+sys-devel/gcc heavy.conf
+sys-kernel/scx heavy.conf
