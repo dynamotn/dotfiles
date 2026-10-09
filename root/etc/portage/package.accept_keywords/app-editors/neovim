@@ -1,1 +1,8 @@
 app-editors/neovim **
+dev-lua/luv ~amd64
+dev-libs/libuv ~amd64
+dev-libs/libutf8proc ~amd64
+dev-libs/tree-sitter ~amd64
+dev-libs/tree-sitter-lua ~amd64
+dev-libs/tree-sitter-query ~amd64
+dev-libs/tree-sitter-vim ~amd64
