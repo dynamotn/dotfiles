@@ -161,6 +161,9 @@ sys-kernel/gentoo-kernel
 sys-kernel/installkernel
 sys-kernel/linux-firmware
 sys-kernel/modprobed-db
+{{- if eq .code "l30n4rd0d4v1nc1" }}
+sys-kernel/scx
+{{- end }}
 sys-libs/gpm
 sys-process/cronie
 sys-process/lsof
