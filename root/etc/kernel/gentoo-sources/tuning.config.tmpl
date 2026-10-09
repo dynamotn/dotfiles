@@ -183,6 +183,17 @@ CONFIG_LRU_GEN_ENABLED=y
 CONFIG_ZSWAP=y
 CONFIG_ZSWAP_DEFAULT_ON=y
 CONFIG_ZSWAP_COMPRESSOR_DEFAULT_ZSTD=y
+{{/*
+  Network: BBR paced by fq as the built-in defaults, so every socket gets
+  them from boot instead of once sysctl has loaded the module.
+*/}}
+CONFIG_TCP_CONG_BBR=y
+CONFIG_DEFAULT_BBR=y
+CONFIG_DEFAULT_TCP_CONG="bbr"
+CONFIG_NET_SCH_FQ=y
+CONFIG_NET_SCH_DEFAULT=y
+CONFIG_DEFAULT_FQ=y
+CONFIG_DEFAULT_NET_SCH="fq"
 {{/* the kernel command line resumes from swap */}}
 CONFIG_HIBERNATION=y
 {{/* boot from NVMe, lm-sensors for NVMe */}}

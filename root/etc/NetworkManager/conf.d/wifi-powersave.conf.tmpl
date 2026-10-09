@@ -1,0 +1,6 @@
+{{- if and .hasWifi (eq .kind "pc") -}}
+# A desktop on mains power: Wi-Fi power saving only adds latency and jitter
+# (2 = disable). Ignored where there is no Wi-Fi device.
+[connection]
+wifi.powersave = 2
+{{- end }}
