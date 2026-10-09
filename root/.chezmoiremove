@@ -5,3 +5,8 @@
 # that file before the unversioned one managed here. Left in place, it silently
 # overrides every later edit of linux-firmware.tmpl for the same version.
 etc/portage/savedconfig/sys-kernel/linux-firmware-*
+
+# Once applied from this repository, never read: gentoo-kernel only uses a
+# saved config with USE=savedconfig, which is set nowhere. Dist kernels take
+# config fragments from /etc/kernel/config.d instead.
+etc/portage/savedconfig/sys-kernel/gentoo-kernel
