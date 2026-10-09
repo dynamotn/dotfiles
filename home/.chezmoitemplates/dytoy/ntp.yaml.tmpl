@@ -6,15 +6,23 @@ method: os
 is_essential: true
 gentoo:
   {{- if eq .initSystem "openrc" }}
+  # ntpd runs with -g, so it steps a large offset at start by itself: the
+  # one-shot ntp-client only makes boot wait for the network. netmount waits
+  # for it too, and nothing here is mounted over the network.
   packages:
     - name: net-misc/ntp
-      service: ntp-client
+      service: ntpd
   {{- else if eq .initSystem "systemd" }}
   packages:
     - name:  sys-apps/systemd
       service: systemd-timesyncd
   {{- end }}
   hook:
+    {{- if eq .initSystem "openrc" }}
+    before: |-
+      sudo rc-update del ntp-client default || true
+      sudo rc-update del netmount default || true
+    {{- end }}
     after: |-
       {{- if eq .initSystem "systemd" }}
       sudo timedatectl set-ntp true
