@@ -15,31 +15,33 @@
 
 # <fs>			<mountpoint>	<type>		<opts>		<dump> <pass>
 {{- if eq .code "l30n4rd0d4v1nc1" }}
+# NVMe names follow probe order and may swap between boots; the UUIDs
+# below are what mount, the device names are only a hint.
 # btrfs on NVMe: noatime keeps reads from writing metadata (and snapshots
 # from diverging), zstd:1 trades a little ratio for much faster writes, and
 # no autodefrag, which rewrites extents on SSD and unshares them from snapshots
-# /dev/nvme0n1p4 LABEL=System
+# /dev/nvme1n1p4 LABEL=System
 UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/         	btrfs     	rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=259,subvol=/_active/root	0 0
 
-# /dev/nvme0n1p4 LABEL=System
+# /dev/nvme1n1p4 LABEL=System
 UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/boot     	btrfs     	rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=2670,subvol=/_active/boot	0 0
 
-# /dev/nvme0n1p1
+# /dev/nvme1n1p1
 UUID=AA29-CB6F      	/boot/efi 	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 2
 
-# /dev/nvme0n1p3 LABEL=Data
+# /dev/nvme1n1p3 LABEL=Data
 UUID=5ccb0e95-f187-492d-968a-d051861ef409	/home     	btrfs     	rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=258,subvol=/_active/home	0 0
 
-# /dev/nvme0n1p4 LABEL=System
+# /dev/nvme1n1p4 LABEL=System
 UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/snapshot/system	btrfs     	rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/_snapshot	0 0
 
-# /dev/nvme0n1p3 LABEL=Data
+# /dev/nvme1n1p3 LABEL=Data
 UUID=5ccb0e95-f187-492d-968a-d051861ef409	/snapshot/data	btrfs     	rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/_snapshot	0 0
 
-# /dev/nvme0n1p4 LABEL=System
+# /dev/nvme1n1p4 LABEL=System
 UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/var      	btrfs     	rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=260,subvol=/_active/var	0 0
 
-# /dev/nvme0n1p2
+# /dev/nvme1n1p2
 UUID=38bb8bfd-5a4b-4c37-b614-29b6229dec92	none      	swap      	defaults  	0 0
 {{- else if eq .code "c40c40" }}
 # / was on /dev/nvme0n1p5 during installation
