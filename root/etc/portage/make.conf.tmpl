@@ -18,8 +18,11 @@ LC_MESSAGES=C.UTF-8
 # Advanced Features
 # =================
 {{- $proc := output "nproc" | trim | int }}
+{{- $mem := output "awk" "/MemTotal/ { print int($2 / 1048576) }" "/proc/meminfo" | trim | int }}
+# Load average bounds CPU use but not memory: parallel packages are capped by
+# RAM (one per 4G), and the heavy ones get fewer jobs in env/heavy.conf.
 MAKEOPTS="-j{{ add $proc 1 }} -l{{ $proc }}"
-EMERGE_DEFAULT_OPTS="--ask --tree --complete-graph --autounmask-write --color=y --with-bdeps=n --keep-going --load-average={{ mulf $proc 0.9 }} --jobs={{ mulf $proc 1.5 }}"
+EMERGE_DEFAULT_OPTS="--ask --tree --complete-graph --autounmask-write --color=y --with-bdeps=n --keep-going --load-average={{ mulf $proc 0.9 }} --jobs={{ max 2 (div $mem 4) }}"
 {{- if eq .initSystem "openrc" }}
 INSTALL_MASK="/etc/systemd /etc/X11"
 {{- end }}
