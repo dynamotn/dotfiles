@@ -1,0 +1,6 @@
+{{- /*
+  Hardware of the machine rendering the template, as YAML for fromYaml:
+    {{- $res := includeTemplate "system/resources.yaml.tmpl" . | fromYaml }}
+*/ -}}
+threads: {{ output "nproc" | trim }}
+memGiB: {{ output "awk" "/MemTotal/ { print int($2 / 1048576) }" "/proc/meminfo" | trim }}
