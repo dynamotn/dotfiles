@@ -1,0 +1,6 @@
+# Machines that build their own sys-kernel/gentoo-sources kernel with
+# scripts/kernel.sh, from root/.chezmoitemplates/kernel/<code>.defconfig and
+# <code>.tuning.config.tmpl. Every other Gentoo machine runs the gentoo-kernel
+# dist kernel. Read by both the home and the root source (root links here).
+gentooSourcesMachines:
+  - l30n4rd0d4v1nc1

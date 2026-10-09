@@ -5,7 +5,12 @@ is_essential: true
 gentoo:
   packages:
     - name: sys-kernel/installkernel
+    {{- if has .code .gentooSourcesMachines }}
+    # Configured and built by scripts/kernel.sh, see docs/kernel.md
+    - name: sys-kernel/gentoo-sources
+    {{- else }}
     - name: sys-kernel/gentoo-kernel
+    {{- end }}
     - name: sys-kernel/linux-firmware
     - name: sys-kernel/modprobed-db
 arch:

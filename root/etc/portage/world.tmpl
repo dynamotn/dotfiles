@@ -1,7 +1,7 @@
 app-admin/logrotate
 app-admin/sudo
 app-admin/syslog-ng
-{{- if eq .code "l30n4rd0d4v1nc1" }}
+{{- if has .code .gentooSourcesMachines }}
 app-alternatives/bc
 app-alternatives/cpio
 {{- end }}
@@ -56,7 +56,7 @@ dev-util/bcc
 {{- end }}
 dev-util/ccache
 dev-util/kcov
-{{- if eq .code "l30n4rd0d4v1nc1" }}
+{{- if has .code .gentooSourcesMachines }}
 dev-util/pahole
 {{- end }}
 dev-util/pkgdev
@@ -155,7 +155,7 @@ sys-firmware/sof-firmware
 {{- end }}
 sys-fs/btrfs-progs
 sys-fs/ntfs3g
-{{- if eq .code "l30n4rd0d4v1nc1" }}
+{{- if has .code .gentooSourcesMachines }}
 sys-kernel/gentoo-sources
 {{- else }}
 sys-kernel/gentoo-kernel
@@ -173,7 +173,7 @@ sys-process/lsof
 sys-process/nvtop
 {{- end }}
 sys-process/parallel
-{{- if eq .code "l30n4rd0d4v1nc1" }}
+{{- if has .code .gentooSourcesMachines }}
 virtual/libelf
 {{- end }}
 www-client/w3m
