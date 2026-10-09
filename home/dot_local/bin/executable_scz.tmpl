@@ -19,6 +19,12 @@ env_args=(env
   "PATH=${PATH}"
   "HOME=${HOME}"
 )
+# Templates that read secrets call rbw, which reaches the caller's unlocked
+# agent through its socket under XDG_RUNTIME_DIR. Without it, root starts a
+# locked agent of its own and prompts for the master password over the diff.
+if [[ -n "${XDG_RUNTIME_DIR:-}" ]]; then
+  env_args+=("XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-}")
+fi
 dybatpho::privilege_run -- "${env_args[@]}" \
   chezmoi --destination / \
   --source "${dotfiles}/root" \
