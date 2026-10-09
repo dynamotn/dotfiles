@@ -1,0 +1,3 @@
+{{- if has "vi" .languages -}}
+app-i18n/fcitx-lotus{{ if eq .initSystem "openrc" }} openrc{{ end }}
+{{- end }}
