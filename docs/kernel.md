@@ -1,13 +1,20 @@
 # Kernel
 
-`l30n4rd0d4v1nc1` runs a hand-configured `sys-kernel/gentoo-sources` kernel;
-other Gentoo machines keep the `gentoo-kernel` dist kernel. Two files under
-`/etc/kernel/gentoo-sources/` describe it:
+The machines listed in `gentooSourcesMachines`
+(`home/.chezmoidata/kernel.yaml`, linked into the root source) run a
+hand-configured `sys-kernel/gentoo-sources` kernel; every other Gentoo machine
+keeps the `gentoo-kernel` dist kernel. That one list decides the kernel
+package in world and dytoy, USE `dist-kernel` and the keyword pin. Two files
+under `/etc/kernel/gentoo-sources/` describe each such kernel:
 
-| File            | Source                                              | Holds |
-|-----------------|-----------------------------------------------------|-------|
-| `base.config`   | `root/.chezmoitemplates/kernel/<code>.defconfig`    | hardware-trimmed defconfig |
-| `tuning.config` | `root/etc/kernel/gentoo-sources/tuning.config.tmpl` | performance and security choices |
+| File            | Source in `root/.chezmoitemplates/kernel/` | Holds |
+|-----------------|--------------------------------------------|-------|
+| `base.config`   | `<code>.defconfig`                         | hardware-trimmed defconfig |
+| `tuning.config` | `<code>.tuning.config.tmpl`                | performance and security choices |
+
+A new machine joins by adding its code to the list and both partials.
+Tuning outside the kernel config (network, disks, memory, scheduler, boot,
+portage builds) is described in [tuning.md](tuning.md).
 
 `scripts/kernel.sh` merges them into `/usr/src/linux/.config`, then stops if
 Kconfig dropped any option of `tuning.config` (a missing dependency or a
@@ -56,7 +63,7 @@ which needs `amd-ucode/microcode_amd_fam19h.bin` from linux-firmware.
 
 ## Changing the configuration
 
-- A tuning choice goes in `tuning.config.tmpl`, with a comment saying why.
+- A tuning choice goes in `<code>.tuning.config.tmpl`, with a comment saying why.
 - A driver for new hardware goes in the base:
   `./scripts/kernel.sh --menuconfig --configure-only --save-base <repo>/root/.chezmoitemplates/kernel/<code>.defconfig`.
 
@@ -70,7 +77,7 @@ Both config files are written against that series' Kconfig. To move on:
    `make listnewconfig` after copying the running config (`zcat
    /proc/config.gz > .config`). Read the help of anything that touches the
    scheduler, memory, security or this hardware, and put the choices in
-   `tuning.config.tmpl`.
+   `<code>.tuning.config.tmpl`.
 2. `./scripts/kernel.sh --configure-only --source <tree> --refresh-base
    <repo>/root/.chezmoitemplates/kernel/<code>.defconfig` re-resolves the
    base against the new Kconfig (renamed or now built-in options drop out,
