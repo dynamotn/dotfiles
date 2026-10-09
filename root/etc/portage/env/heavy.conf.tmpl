@@ -1,5 +1,6 @@
-{{- $proc := output "nproc" | trim | int -}}
-{{- $mem := output "awk" "/MemTotal/ { print int($2 / 1048576) }" "/proc/meminfo" | trim | int -}}
+{{- $res := includeTemplate "system/resources.yaml.tmpl" . | fromYaml -}}
+{{- $proc := $res.threads | int -}}
+{{- $mem := $res.memGiB | int -}}
 # Large C++ and Rust builds: a single compile or codegen job can take 2G, so
 # run one per 2G of RAM instead of one per thread, which would end in swap.
 MAKEOPTS="-j{{ max 1 (min $proc (div $mem 2)) }} -l{{ $proc }}"
