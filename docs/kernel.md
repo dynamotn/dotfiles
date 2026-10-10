@@ -115,14 +115,14 @@ The kernel enables SELinux (`CONFIG_LSM` lists `selinux`); the policy is
    then `audit2why` to sort them. Denials logged before auditd starts, and
    any while it is down, only reach the kernel log:
    `grep -hE 'avc: +denied' /var/log/dmesg /var/log/messages`. Label
-   errors are fixed by relabelling; real policy gaps go into the local module
-   `/etc/selinux/local/dotfiles.te`, built and loaded with:
-
-   ```bash
-   cd /etc/selinux/local
-   make -f /usr/share/selinux/mcs/include/Makefile dotfiles.pp
-   semodule -i dotfiles.pp
-   ```
+   errors are fixed by relabelling, and gaps a boolean already covers by
+   `setsebool`; real policy gaps go into the local module
+   `/etc/selinux/local/dotfiles.te`. `scz apply` runs
+   `root/.chezmoiscripts/run_onchange_after_01-setup-selinux.sh.tmpl` whenever
+   it changes: the script maps root to the `root` SELinux user (so `/root`
+   gets labels), sets the booleans and builds and loads the module.
+   `sudoers.d/default` moves wheel into `sysadm_r:sysadm_t`, since `staff_t`
+   cannot administer the system once SELinux enforces.
 4. Only then set `SELINUX=enforcing`. If a boot ever fails because of it,
    add `enforcing=0` to the kernel command line in GRUB to recover.
 

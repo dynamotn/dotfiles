@@ -1,0 +1,40 @@
+{{- if eq .osid "linux-gentoo" -}}
+#!{{ .bash }}
+# @file 01-setup-selinux.sh
+# @brief Apply the SELinux settings kept in the dotfiles
+# @description Map root to an SELinux user, set the booleans and load the
+# local policy module. Runs as root through `scz apply`, again whenever the
+# module source or this script changes.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_common_handlers
+
+dybatpho::header "Setup SELinux"
+# module hash: {{ include "etc/selinux/local/dotfiles.te" | sha256sum }}
+
+if ! dybatpho::is command semanage || ! selinuxenabled; then
+  dybatpho::warn "SELinux is not enabled, skipping"
+  exit 0
+fi
+
+# Without a login mapping root falls back to __default__ (unconfined_u), and
+# genhomedircon writes no file contexts for /root, which stays default_t.
+if ! semanage login -l -C | grep -q '^root[[:space:]]'; then
+  dybatpho::progress "Map root to the root SELinux user"
+  semanage login -a -s root -r s0-s0:c0.c1023 root
+  restorecon -RF /root
+fi
+
+# sudo moves wheel into sysadm_t (sudoers.d/default); let it write to the
+# pipes of the staff_t shell that started it, as in `sudo cmd | grep`.
+dybatpho::progress "Set SELinux booleans"
+setsebool -P sysadm_allow_rw_inherited_fifo on
+
+dybatpho::progress "Load the dotfiles policy module"
+build_dir=""
+dybatpho::create_temp build_dir "/" "selinux"
+cp /etc/selinux/local/dotfiles.te "${build_dir}/"
+make -C "${build_dir}" -f /usr/share/selinux/mcs/include/Makefile dotfiles.pp
+semodule -i "${build_dir}/dotfiles.pp"
+
+dybatpho::success "Setup SELinux"
+{{- end }}

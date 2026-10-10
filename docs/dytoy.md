@@ -215,6 +215,7 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[wireguard](https://www.wireguard.com/)|Simple and modern VPN|
 |[tailscale](https://github.com/tailscale/tailscale)|VPN built on Wireguard to connect securely to my machines|
 |[fail2ban](https://github.com/fail2ban/fail2ban)|Intrusion prevention software framework|
+|[audit](https://github.com/linux-audit/audit-userspace)|Keep the kernel audit events, SELinux denials included|
 |[radare2](https://github.com/radareorg/radare2)|Reverse engineering framework|
 |[lynis](https://github.com/CISOfy/lynis)|Security auditing and hardening tool|
 |[kubescape](https://github.com/kubescape/kubescape)|Kubernetes security platform|

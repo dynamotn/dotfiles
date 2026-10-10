@@ -1,1 +1,7 @@
+{{- if eq .osid "linux-gentoo" }}
+# Run as sysadm_r:sysadm_t: the staff_t domain of a login cannot administer
+# the system once SELinux enforces.
+%wheel ALL=(ALL:ALL) ROLE=sysadm_r TYPE=sysadm_t NOPASSWD: ALL
+{{- else }}
 %wheel ALL=(ALL:ALL) NOPASSWD: ALL
+{{- end }}
