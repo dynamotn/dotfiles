@@ -1,0 +1,15 @@
+{{- /* Monitors from wm/rules.yaml.tmpl as hl.monitor() calls. A field left
+       out falls back to what Hyprland picks for the monitor itself. */ -}}
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $rules.monitors }}
+{{-   if get . "disabled" }}
+hl.monitor({ output = "{{ .name }}", disabled = true })
+{{-   else }}
+hl.monitor({
+  output = "{{ .name }}",
+  mode = "{{ get . "resolution" | default "preferred" }}",
+  position = "{{ get . "position" | default "auto" }}",
+  scale = {{ if hasKey . "scale" }}{{ .scale }}{{ else }}"auto"{{ end }},
+})
+{{-   end }}
+{{- end }}

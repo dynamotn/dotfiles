@@ -1,0 +1,8 @@
+-- Applications started both at login and from key bindings.
+{{- $firefoxSettings := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{- $thunderbirdSettings := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
+return {
+  terminal = "kitty zellij",
+  browser = "{{ $firefoxSettings.executableFile }}",
+  mail_client = "{{ $thunderbirdSettings.executableFile }}",
+}

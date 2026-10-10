@@ -148,7 +148,6 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[xdg-user-dirs](https://www.freedesktop.org/wiki/Software/xdg-user-dirs/)|Manage well-known user directories|
 |[hyprland](https://github.com/hyprwm/Hyprland)|Window manager for Wayland|
 |[hyprshade](https://github.com/loqusion/hyprshade)|Adjusts the color temperature of screen|
-|[hdrop](https://github.com/hyprwm/contrib#hdrop)|Dropdown utilities|
 |[noctalia](https://github.com/noctalia-dev/noctalia)|Desktop shell: bar, launcher, clipboard, notifications, OSD, wallpaper, idle, lock screen and screenshots|
 |[wtype](https://github.com/atx/wtype)|Simulate keyboard input for Wayland|
 |[greetd](https://sr.ht/~kennylevinsen/greetd/)|GreetD, display manager for Wayland|

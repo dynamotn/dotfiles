@@ -10,3 +10,6 @@ etc/portage/savedconfig/sys-kernel/linux-firmware-*
 # saved config with USE=savedconfig, which is set nowhere. Dist kernels take
 # config fragments from /etc/kernel/config.d instead.
 etc/portage/savedconfig/sys-kernel/gentoo-kernel
+
+# The hyprlang configuration of the login screen, replaced by hyprland.lua.
+etc/greetd/hyprland.conf

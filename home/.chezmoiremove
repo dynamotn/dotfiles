@@ -11,3 +11,21 @@
 
 # Replaced by nvimpager, which reads files through Neovim itself.
 .config/bat
+
+# Replaced by noctalia, which draws the bar, launcher, clipboard,
+# notifications, wallpaper, idle and lock screen itself.
+.config/eww
+.config/wofi
+.config/dynotify
+.config/hypr/hypridle.conf
+.config/hypr/hyprlock.conf
+.config/hypr/hyprlock
+.config/hypr/hyprland/scripts/bar.sh
+.config/hypr/hyprland/scripts/clipboard.sh
+.config/hypr/hyprland/scripts/launcher.sh
+# Replaced by a special workspace that starts btop on first use.
+.local/bin/hdrop
+
+# The hyprlang configuration, replaced by hyprland.lua and its modules.
+.config/hypr/hyprland.conf
+.config/hypr/hyprland/*.conf

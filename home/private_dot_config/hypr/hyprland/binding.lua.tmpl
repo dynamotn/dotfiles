@@ -1,0 +1,104 @@
+local app = require("hyprland.app")
+
+local mainMod = "SUPER"
+local altMod = "ALT"
+
+local function exec(keys, cmd, opts)
+  hl.bind(keys, hl.dsp.exec_cmd(cmd), opts)
+end
+
+-- Session --
+hl.bind("CTRL + ALT + Delete", hl.dsp.exit())
+exec(mainMod .. " + SHIFT + R", "hyprctl reload")
+
+-- Prompt --
+exec(mainMod .. " + F2", "noctalia msg panel-toggle launcher")
+exec(altMod .. " + F2", "noctalia msg panel-toggle launcher")
+
+-- Workspace --
+-- Switch workspaces with mainMod + [0-9], move the active window there
+-- without following it with mainMod + SHIFT + [0-9]
+local workspaces = { "term", "web", "mail", "doc", "chat", "media", "game", "sys", "misc", "sec" }
+for i, name in ipairs(workspaces) do
+  local key = tostring(i % 10)
+  hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = "name:" .. name }))
+  hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = "name:" .. name, follow = false }))
+end
+
+-- Move workspace to another monitor and swap monitors
+hl.bind(mainMod .. " + D", hl.dsp.workspace.swap_monitors({ monitor1 = 0, monitor2 = 1 }))
+hl.bind(mainMod .. " + CTRL + left", hl.dsp.workspace.move({ monitor = "-1" }))
+hl.bind(mainMod .. " + CTRL + right", hl.dsp.workspace.move({ monitor = "+1" }))
+
+-- Scroll through existing workspaces with mainMod + scroll
+hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
+hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
+
+-- Window --
+-- Move focus with mainMod + arrow keys
+hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
+hl.bind(mainMod .. " + down", hl.dsp.focus({ direction = "down" }))
+
+-- Switch between windows in a workspace
+hl.bind(altMod .. " + Tab", hl.dsp.window.cycle_next())
+
+-- Move/resize windows with mainMod + LMB/RMB and dragging
+hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
+hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+-- Resize the active window with the keyboard
+hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.resize({ x = 100, y = 0, relative = true }))
+hl.bind(mainMod .. " + SHIFT + left", hl.dsp.window.resize({ x = -100, y = 0, relative = true }))
+hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.resize({ x = 0, y = 100, relative = true }))
+hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.resize({ x = 0, y = -100, relative = true }))
+
+-- Windows
+hl.bind(altMod .. " + F4", hl.dsp.window.close())
+hl.bind(mainMod .. " + period", hl.dsp.window.fullscreen())
+hl.bind(mainMod .. " + slash", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + comma", hl.dsp.layout("togglesplit"))
+hl.bind(mainMod .. " + semicolon", hl.dsp.group.toggle())
+hl.bind(mainMod .. " + apostrophe", hl.dsp.layout("swapnext"))
+
+-- 3rd apps --
+exec(mainMod .. " + Return", app.terminal)
+{{- if eq .place "home" }}
+exec(mainMod .. " + E", app.browser .. " -P Personal")
+exec(mainMod .. " + Q", app.browser .. " -P Enterprise-F1")
+exec(mainMod .. " + M", app.mail_client .. " -P Personal")
+exec(mainMod .. " + K", app.mail_client .. " -P Enterprise-F1")
+{{- else if eq .place "office" }}
+exec(mainMod .. " + E", app.browser .. " -P Enterprise-{{ .company }}")
+exec(mainMod .. " + Q", app.browser .. " -P Personal")
+exec(mainMod .. " + M", app.mail_client .. " -P Enterprise-{{ .company }}")
+exec(mainMod .. " + K", app.mail_client .. " -P Personal")
+{{- end }}
+exec(mainMod .. " + N", "noctalia msg panel-toggle control-center")
+exec(mainMod .. " + SHIFT + N", "noctalia msg notification-dnd-toggle")
+exec(altMod .. " + N", "noctalia msg notification-invoke-latest")
+exec(mainMod .. " + J", "noctalia msg panel-toggle clipboard")
+{{- $rbwProfile := "" }}
+{{- if eq .place "office" }}
+{{-   $rbwProfile = printf "RBW_PROFILE=enterprise-%s " .company }}
+{{- end }}
+exec(mainMod .. " + P", [[fish -c "{{ $rbwProfile }}bitrofi"]])
+exec(mainMod .. " + T", [[fish -c "{{ $rbwProfile }}bitrofi totp"]])
+exec(mainMod .. " + L", "noctalia msg session lock")
+exec(mainMod .. " + S", "noctalia msg screenshot-region")
+-- Drop-down system monitor; the workspace rule starts btop on first use
+hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special("monitor"))
+
+{{- if .hasSound }}
+
+-- Multimedia --
+-- Through noctalia, so its OSD follows the change
+exec("XF86AudioRaiseVolume", "noctalia msg volume-up", { locked = true, repeating = true })
+exec("XF86AudioLowerVolume", "noctalia msg volume-down", { locked = true, repeating = true })
+exec("XF86AudioMute", "noctalia msg volume-mute", { locked = true })
+exec("XF86AudioMicMute", "noctalia msg mic-mute", { locked = true })
+exec("XF86AudioPlay", "playerctl play-pause")
+exec("XF86AudioPause", "playerctl pause")
+exec("XF86AudioNext", "playerctl next")
+exec("XF86AudioPrev", "playerctl previous")
+{{- end }}
