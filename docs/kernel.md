@@ -109,8 +109,12 @@ The kernel enables SELinux (`CONFIG_LSM` lists `selinux`); the policy is
    umount /mnt/rootfs
    ```
 
-3. Review denials and fix them. Without `auditd` they only reach the kernel
-   log: `grep -hE 'avc: +denied' /var/log/dmesg /var/log/messages`. Label
+3. Review denials and fix them. `auditd` (dytoy `audit.yaml`, rules in
+   `/etc/audit/audit.rules`) keeps every one in `/var/log/audit/audit.log`
+   with its syscall context: `ausearch -m avc,user_avc,selinux_err -ts boot`,
+   then `audit2why` to sort them. Denials logged before auditd starts, and
+   any while it is down, only reach the kernel log:
+   `grep -hE 'avc: +denied' /var/log/dmesg /var/log/messages`. Label
    errors are fixed by relabelling; real policy gaps go into the local module
    `/etc/selinux/local/dotfiles.te`, built and loaded with:
 
