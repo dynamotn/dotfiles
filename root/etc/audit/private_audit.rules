@@ -1,0 +1,19 @@
+# Rules loaded by auditctl whenever auditd starts (RULEFILE_STARTUP in
+# /etc/conf.d/auditd). Each line is the arguments of one auditctl call.
+#
+# auditd is here to keep SELinux AVC denials, which the kernel sends on its
+# own: no syscall rules are needed for them. Gentoo's default `exit,never`
+# rules are dropped on purpose, as they strip the SYSCALL record that tells
+# which call an AVC came from.
+
+# Delete every rule first, so a restart does not append to the old set
+-D
+
+# Buffers to survive bursts of denials, e.g. right after a relabel
+-b 8192
+
+# On a lost event, log it to the kernel log rather than panic (the default,
+# kept explicit)
+-f 1
+
+# vim:ft=conf:

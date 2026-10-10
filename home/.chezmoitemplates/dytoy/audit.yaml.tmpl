@@ -1,0 +1,13 @@
+{{- if ne .kind "container" }}
+# Not need in container
+name: audit
+method: os
+# https://repology.org/project/audit/versions
+is_essential: true
+# Only the Gentoo machines run SELinux. Without auditd its AVC denials reach
+# the kernel log alone, where printk rate-limiting drops them.
+gentoo:
+  packages:
+    - name: sys-process/audit
+      service: auditd
+{{- end }}
