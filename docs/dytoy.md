@@ -149,18 +149,10 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[hyprland](https://github.com/hyprwm/Hyprland)|Window manager for Wayland|
 |[hyprshade](https://github.com/loqusion/hyprshade)|Adjusts the color temperature of screen|
 |[hdrop](https://github.com/hyprwm/contrib#hdrop)|Dropdown utilities|
-|[eww](https://github.com/elkowar/eww)|Widgets and status bar|
-|[wofi](https://sr.ht/~scoopta/wofi/)|Application launcher, simple switcher|
+|[noctalia](https://github.com/noctalia-dev/noctalia)|Desktop shell: bar, launcher, clipboard, notifications, OSD, wallpaper, idle, lock screen and screenshots|
 |[wtype](https://github.com/atx/wtype)|Simulate keyboard input for Wayland|
-|[awww](https://codeberg.org/LGFae/swww)|Animated wallpaper daemon|
 |[greetd](https://sr.ht/~kennylevinsen/greetd/)|GreetD, display manager for Wayland|
 |[regreet](https://github.com/rharish101/ReGreet)|ReGreet, greeter for GreetD|
-|[hyprlock](https://github.com/hyprwm/hyprlock)|Screen locker for Wayland|
-|[swappy](https://github.com/jtheoof/swappy)|Editing snapshot tool for Wayland|
-|[grim](https://github.com/emersion/grim)|Screen capturing tool for Wayland|
-|[slurp](https://github.com/emersion/slurp)|Selecting region tool for Wayland|
-|[dynotify](https://github.com/dynamotn/dynotify)|Notification daemon that eww draws|
-|[cliphist](https://github.com/sentriz/cliphist)|Clipboard manager for Wayland|
 |[shikane](https://github.com/hw0lff/shikane)|Automatically detects and configures connected monitors|
 |[wdisplays](https://github.com/cyclopsian/wdisplays)|Configure display monitors manually with GUI|
 |[fcitx5](https://github.com/fcitx/fcitx5)|Input method framework|

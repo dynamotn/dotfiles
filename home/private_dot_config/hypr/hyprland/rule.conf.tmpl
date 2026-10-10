@@ -2,10 +2,8 @@
 {{- $matchTagKeyword := "match:tag " }}
 {{- $windowRuleSection := "windowrule" }}
 # Layer
-{{- $layers := list "wofi" "gtk-layer-shell" }}
-{{- range $layers }}
-layerrule = blur on, ignore_alpha 0, match:namespace {{ . }}
-{{- end }}
+# noctalia animates its own surfaces, so Hyprland only blurs them
+layerrule = blur on, ignore_alpha 0.5, no_anim on, match:namespace ^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$
 
 # Common #
 # Floating

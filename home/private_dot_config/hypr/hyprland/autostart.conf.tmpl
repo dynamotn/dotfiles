@@ -4,13 +4,6 @@
 exec-once = hyprpm reload -n && hyprctl reload
 {{- end }}
 
-# Authentication agent
-{{- if eq .chezmoi.osRelease.id "gentoo" }}
-exec = /usr/lib64/libexec/polkit-gnome-authentication-agent-1
-{{- else }}
-exec = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-{{- end }}
-
 # Sound & Screencast
 {{- if .hasSound }}
 {{- if eq .chezmoi.osRelease.id "gentoo" }}
@@ -25,29 +18,13 @@ exec-once = ~/.config/hypr/hyprland/scripts/screencast.sh
 # Gtk theme
 exec-once = ~/.config/hypr/hyprland/scripts/gtk.sh
 
-# Wallpaper
-exec-once = awww-daemon
-exec = awww img ~/Multimedia/Pictures/Wallpaper/all/working.gif
-
-# Notifications: dynotify owns the bus and eww draws what it streams, so the
-# daemon starts first and outlives any eww reload.
-exec-once = dynotify serve
-
-# Bar & Panel & Widgets
-exec-once = ~/.config/hypr/hyprland/scripts/bar.sh
+# Desktop shell: bar, launcher, clipboard, notifications, OSD, wallpaper,
+# idle, lock screen and the polkit agent
+exec-once = noctalia
 
 # Screen shader and changes detection
 exec = hyprshade auto
 exec-once = shikane
-
-{{- if ne .place "home" }}
-# Screen idle
-exec-once = hypridle
-{{- end }}
-
-# Clipboard
-exec-once = wl-paste --type text --watch cliphist store
-exec-once = wl-paste --type image --watch cliphist store
 
 # IM
 exec-once = fcitx5 -d --replace

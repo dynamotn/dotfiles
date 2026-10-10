@@ -1,0 +1,16 @@
+{{- if and (eq .guiWinManager "H") (eq .osid "linux-gentoo" "linux-arch") }}
+# Bar, launcher, clipboard, notifications, OSD, wallpaper, idle and lock screen
+# Only available packages for Gentoo and Arch
+name: noctalia
+method: os
+# https://repology.org/project/noctalia/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-apps/noctalia
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+arch:
+  packages:
+    - name: noctalia
+{{- end }}

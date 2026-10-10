@@ -1,8 +1,0 @@
-{{- $theme := .catppuccin.macchiato }}
-{{- if not .darkMode }}
-{{-   $theme = .catppuccin.latte }}
-{{- end }}
-$color_text = rgba({{ $theme.text | trimPrefix "#" }}ff)
-$color_crust = rgba({{ $theme.crust | trimPrefix "#" }}ff)
-$color_main = rgba({{ get $theme .catppuccin.variant | trimPrefix "#" }}ff)
-$color_subtext0 = rgba({{ $theme.subtext0 | trimPrefix "#" }}ff)
