@@ -9,11 +9,6 @@ gentoo:
       repo: hyproverlay
       url: https://codeberg.org/hyproverlay/hyproverlay.git
     - name: x11-libs/xcb-util
-    {{- if ne .place "home" }}
-    - name: gui-apps/hypridle
-      repo: hyproverlay
-      url: https://codeberg.org/hyproverlay/hyproverlay.git
-    {{- end }}
     - name: x11-base/xwayland
     - name: gui-libs/xdg-desktop-portal-wlr
 arch:
@@ -26,9 +21,6 @@ arch:
     {{- end }}
     - name: xdg-desktop-portal-wlr
     - name: xdg-desktop-portal-hyprland
-    {{- if ne .place "home" }}
-    - name: hypridle
-    {{- end }}
     - name: cpio
     - name: cmake
     - name: meson

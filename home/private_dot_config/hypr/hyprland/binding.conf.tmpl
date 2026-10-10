@@ -6,8 +6,8 @@ bind = CTRL ALT, DELETE, exit,
 bind = $mainMod SHIFT, R, exec, hyprctl reload
 
 # Prompt #
-bind = $altMod, F2, exec, wofi --show run
-bind = $mainMod, F2, exec, wofi --show drun
+bind = $mainMod, F2, exec, noctalia msg panel-toggle launcher
+bind = $altMod, F2, exec, noctalia msg panel-toggle launcher
 
 # Workspace #
 # Switch workspaces with mainMod + [0-9]
@@ -82,22 +82,23 @@ bind = $mainMod, Q, exec, $browser -P Personal
 bind = $mainMod, M, exec, $mailClient -P Enterprise-{{ .company }}
 bind = $mainMod, K, exec, $mailClient -P Personal
 {{- end }}
-bind = $mainMod, N, exec, ~/.config/eww/scripts/popup.sh toggle notification_centre
-bind = $mainMod SHIFT, N, exec, dynotify dnd toggle
-bind = $altMod, N, exec, dynotify menu
-bind = $mainMod, J, exec, cliphist list | wofi --dmenu --allow-images --allow-markup | cliphist decode | wl-copy
+bind = $mainMod, N, exec, noctalia msg panel-toggle control-center
+bind = $mainMod SHIFT, N, exec, noctalia msg notification-dnd-toggle
+bind = $altMod, N, exec, noctalia msg notification-invoke-latest
+bind = $mainMod, J, exec, noctalia msg panel-toggle clipboard
 bind = $mainMod, P, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise-{{ .company }}{{- end }} bitrofi"
 bind = $mainMod, T, exec, fish -c "{{- if eq .place "office" }}RBW_PROFILE=enterprise-{{ .company }}{{- end }} bitrofi totp"
-bind = $mainMod, L, exec, loginctl lock-session
-bind = $mainMod, S, exec, grim -g "$(slurp)" - | swappy -f -
+bind = $mainMod, L, exec, noctalia msg session lock
+bind = $mainMod, S, exec, noctalia msg screenshot-region
 bind = $mainMod, Z, exec, hdrop kitty --class btop --session ~/.config/kitty/sessions/monitor.conf
 
 {{- if .hasSound }}
 # Multimedia #
-bindle = , XF86AudioRaiseVolume, exec, wpctl set-volume -l "1.0" @DEFAULT_AUDIO_SINK@ 6%+
-bindle = , XF86AudioLowerVolume, exec, wpctl set-volume -l "1.0" @DEFAULT_AUDIO_SINK@ 6%-
-bindl = , XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-bindl = , XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+# Through noctalia, so its OSD follows the change
+bindle = , XF86AudioRaiseVolume, exec, noctalia msg volume-up
+bindle = , XF86AudioLowerVolume, exec, noctalia msg volume-down
+bindl = , XF86AudioMute, exec, noctalia msg volume-mute
+bindl = , XF86AudioMicMute, exec, noctalia msg mic-mute
 bind = , XF86AudioPlay, exec, playerctl play-pause
 bind = , XF86AudioPause, exec, playerctl pause
 bind = , XF86AudioNext, exec, playerctl next

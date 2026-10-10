@@ -10,7 +10,6 @@
 {{- if eq .guiServer "0" "M" }}
 .local/share/themes
 .local/share/icons
-.config/dynotify
 .config/fontconfig
 .config/gtk-3.0
 .config/gtk-4.0
@@ -106,9 +105,7 @@ Library/thunderbird
 .config/hypr
 .config/hyprshade
 .wayland_init.fish
-.config/wofi
-.config/swaylock
-.config/eww
+.config/noctalia
 {{- end }}
 {{- if ne .guiWinManager "G" }}
 .xprofile

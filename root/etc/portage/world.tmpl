@@ -66,21 +66,12 @@ dev-vcs/git
 dev-vcs/git-lfs
 {{- end }}
 games-util/game-device-udev-rules
-gui-apps/awww
 {{- if eq .guiServer "W" }}
-gui-apps/eww
-gui-apps/grim
-{{-   if not (and (eq .kind "pc") (eq .place "home")) }}
-gui-apps/hypridle
-gui-apps/hyprlock
-{{-   end }}
 gui-apps/hyprshade
+gui-apps/noctalia
 gui-apps/regreet
-gui-apps/slurp
-gui-apps/swappy
 gui-apps/wev
 gui-apps/wl-clipboard
-gui-apps/wofi
 gui-apps/wtype
 gui-libs/display-manager-init
 gui-libs/greetd

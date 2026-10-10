@@ -1,7 +1,7 @@
 {{- if eq .guiServer "W" -}}
 # libnotify pulls virtual/notification-daemon, which accepts only daemons
-# packaged by portage. On Wayland the daemon is dynotify, installed by dytoy
-# from its GitHub release, so declare one provider as taken care of instead of
-# keeping an unused daemon (swaync) installed to satisfy it.
+# packaged by portage as one. On Wayland the daemon is built into noctalia, so
+# declare one provider as taken care of instead of keeping an unused daemon
+# (swaync) installed to satisfy it.
 x11-misc/notification-daemon-3.20.0-r1
 {{- end }}

@@ -1,8 +1,0 @@
-;; Per-monitor measurements, keyed by monitor name.
-;;
-;; The bar reads its root font size from here rather than taking it as a window
-;; argument: `eww reload` recreates a window from the arguments it was opened
-;; with, so a window opened before an argument existed could never be reopened.
-(deflisten metrics
-  :initial "{}"
-  "scripts/metrics.sh")

@@ -15,7 +15,7 @@
 
 | Keybind | Action |
 |---------|--------|
-| `Alt+F2` | Run launcher|
+| `Alt+F2` | Application launcher (same as `Super+F2`) |
 | `Super+F2` | Application launcher|
 
 ## Workspace navigation
@@ -67,20 +67,20 @@ Workspaces are named, not numbered:
 | `Super+Q` | Browser, the other profile |
 | `Super+M` | Mail client, personal profile at home / enterprise profile at the office |
 | `Super+K` | Mail client, the other profile |
-| `Super+N` | Notification center |
+| `Super+N` | Control center |
+| `Super+Shift+N` | Toggle do not disturb |
+| `Alt+N` | Act on the latest notification |
 | `Super+J` | Clipboard history |
-| `Super+P` | Password manager (get password) |
-| `Super+T` | Password manager (Get TOTP) |
 | `Super+L` | Lock session |
-| `Super+S` | Screenshot a selected region (`grim` + `slurp`), then edit in `swappy` |
+| `Super+S` | Screenshot a selected region, then annotate it |
 | `Super+Z` | Drop-down `btop` in kitty (needs `hdrop`) |
 
 ## Media control
 
 | Keybind | Action |
 |---------|--------|
-| `XF86AudioRaiseVolume` | Increase volume +6% |
-| `XF86AudioLowerVolume` | Decrease volume -6% |
+| `XF86AudioRaiseVolume` | Increase volume |
+| `XF86AudioLowerVolume` | Decrease volume |
 | `XF86AudioMute` | Mute/unmute audio |
 | `XF86AudioMicMute` | Mute/unmute microphone |
 | `XF86AudioPlay` | Play/pause |

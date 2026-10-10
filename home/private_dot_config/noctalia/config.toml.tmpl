@@ -1,0 +1,74 @@
+# Noctalia, the desktop shell on Hyprland: bar, launcher, clipboard,
+# notifications, OSD, wallpaper, idle, lock screen and the polkit agent. Only
+# what differs from the defaults is set here; the full list with every default
+# is the upstream `example.toml` (https://github.com/noctalia-dev/noctalia).
+# Changes made in the Settings window go to ~/.local/state/noctalia/settings.toml,
+# which loads after this file and wins over it.
+
+[shell]
+font_family = "Iosevka Dynamo"
+polkit_agent = true
+clipboard_enabled = true
+clipboard_auto_paste = "auto"
+
+[shell.panel]
+transparency_mode = "glass"
+launcher_placement = "floating"
+launcher_position = "center"
+clipboard_placement = "floating"
+clipboard_position = "center"
+
+[shell.launcher]
+sort_by_usage = true
+
+[wallpaper]
+enabled = true
+fill_mode = "crop"
+directory = "{{ .chezmoi.homeDir }}/Multimedia/Pictures/Wallpaper/all"
+directory_light = "{{ .chezmoi.homeDir }}/Multimedia/Pictures/Wallpaper/day"
+directory_dark = "{{ .chezmoi.homeDir }}/Multimedia/Pictures/Wallpaper/night"
+
+[wallpaper.default]
+path = "{{ .chezmoi.homeDir }}/Multimedia/Pictures/Wallpaper/all/catppuccin_triangle.png"
+
+[theme]
+mode = "{{ if .darkMode }}dark{{ else }}light{{ end }}"
+source = "builtin"
+builtin = "Catppuccin"
+
+# Only the palette for noctalia itself; no template may rewrite another app's
+# config behind chezmoi's back
+[theme.templates]
+enable_builtin_templates = false
+enable_community_templates = false
+
+[notification]
+enable_daemon = true
+follow_focused_output = true
+
+[osd]
+follow_focused_output = true
+
+[lockscreen]
+enabled = true
+
+# Away from home the screen locks itself, goes dark and then suspends; at home
+# nothing happens on idle
+{{- $awayFromHome := ne .place "home" }}
+[idle.behavior.lock]
+enabled = {{ $awayFromHome }}
+timeout = 180
+action = "lock"
+
+[idle.behavior.screen-off]
+enabled = {{ $awayFromHome }}
+timeout = 300
+action = "screen_off"
+
+[idle.behavior.suspend]
+enabled = {{ $awayFromHome }}
+timeout = 540
+action = "suspend"
+
+[bar.main]
+position = "left"
