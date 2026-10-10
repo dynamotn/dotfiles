@@ -25,13 +25,38 @@ env_args=(env
 if [[ -n "${XDG_RUNTIME_DIR:-}" ]]; then
   env_args+=("XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-}")
 fi
-dybatpho::privilege_run -- "${env_args[@]}" \
-  chezmoi --destination / \
-  --source "${dotfiles}/root" \
-  --mode file \
-  --working-tree "${dotfiles}" \
-  --config "${chezmoi_config}" \
-  "$@"
+chezmoi_args=(chezmoi --destination /
+  --source "${dotfiles}/root"
+  --mode file
+  --working-tree "${dotfiles}"
+  --config "${chezmoi_config}"
+)
+dybatpho::privilege_run -- "${env_args[@]}" "${chezmoi_args[@]}" "$@"
+{{- if eq .chezmoi.os "linux" }}
+
+# chezmoi writes every target through a temporary file, so on SELinux a file
+# it creates keeps the label of the temporary directory (user_tmp_t) rather
+# than the one its path should have. Relabel the managed targets after a
+# write; restorecon leaves correct labels alone and skips missing paths.
+writes=false
+for arg in "$@"; do
+  case "${arg}" in
+    apply | update) writes=true ;;
+    *) ;;
+  esac
+done
+if dybatpho::is true "${writes}" && dybatpho::is command selinuxenabled \
+  && selinuxenabled; then
+  managed="$(dybatpho::privilege_run -- "${env_args[@]}" \
+    "${chezmoi_args[@]}" managed --path-style absolute \
+    --include files,dirs,symlinks)"
+  targets=()
+  [[ -n "${managed}" ]] && readarray -t targets <<< "${managed}"
+  if ((${#targets[@]} > 0)); then
+    dybatpho::privilege_run -- restorecon -i "${targets[@]}"
+  fi
+fi
+{{- end }}
 {{- if eq .chezmoi.os "darwin" }}
 if dybatpho::string_contains "$*" "/Applications"; then
   dybatpho::file_replace "${chezmoi_config}" '^\(umask:\)' '# \1'
