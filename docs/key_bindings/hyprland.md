@@ -73,7 +73,7 @@ Workspaces are named, not numbered:
 | `Super+J` | Clipboard history |
 | `Super+L` | Lock session |
 | `Super+S` | Screenshot a selected region, then annotate it |
-| `Super+Z` | Drop-down `btop` in kitty (needs `hdrop`) |
+| `Super+Z` | Drop-down `btop` in kitty |
 
 ## Media control
 

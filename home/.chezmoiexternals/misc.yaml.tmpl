@@ -51,10 +51,3 @@
   executable: true
   refreshPeriod: 168h
 {{- end }}
-{{- if eq .guiServer "W" }}
-.local/bin/hdrop:
-  type: file
-  url: https://raw.githubusercontent.com/hyprwm/contrib/main/hdrop/hdrop
-  executable: true
-  refreshPeriod: 168h
-{{- end }}

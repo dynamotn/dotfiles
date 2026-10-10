@@ -1,0 +1,77 @@
+-- Layer
+-- noctalia animates its own surfaces, so Hyprland only blurs them
+hl.layer_rule({
+  match = { namespace = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$" },
+  blur = true,
+  ignore_alpha = 0.5,
+  no_anim = true,
+})
+
+-- Common --
+-- Floating
+hl.window_rule({ match = { float = true }, float = true })
+-- Smart gaps: no gaps or decorations around a lone tiled window
+for _, workspace in ipairs({ "w[tv1]", "f[1]" }) do
+  hl.workspace_rule({ workspace = workspace, gaps_out = 0, gaps_in = 0 })
+  hl.window_rule({
+    match = { float = false, workspace = workspace },
+    border_size = 0,
+    rounding = 0,
+    decorate = false,
+    no_shadow = true,
+  })
+end
+-- Fix dragging issues with XWayland
+hl.window_rule({
+  match = { class = "^$", title = "^$", xwayland = true, float = true, fullscreen = false, pin = false },
+  no_focus = true,
+})
+
+-- Per app --
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $rules.tags }}
+{{-   $name := .name }}
+{{-   range .classes }}
+hl.window_rule({ match = { class = {{ . | quote }} }, tag = "+{{ $name }}" })
+{{-   end }}
+{{-   $effects := list }}
+{{-   if hasKey . "workspace" }}
+{{-     $effects = append $effects (printf "workspace = \"name:%s silent\"" .workspace) }}
+{{-   end }}
+{{-   if and (hasKey . "float") (get . "float") }}
+{{-     $effects = append $effects "float = true" }}
+{{-   end }}
+{{-   if and (hasKey . "center") (get . "center") }}
+{{-     $effects = append $effects "center = true" }}
+{{-   end }}
+{{-   if and (hasKey . "fullscreen") (get . "fullscreen") }}
+{{-     $effects = append $effects "no_blur = true" }}
+{{-     $effects = append $effects "fullscreen = true" }}
+{{-   end }}
+{{-   if and (hasKey . "size") (get . "size") }}
+{{-     $effects = append $effects (printf "size = { \"(monitor_w*%.2f)\", \"(monitor_h*%.2f)\" }" .size.width .size.height) }}
+{{-   end }}
+{{-   if $effects }}
+hl.window_rule({ match = { tag = "{{ $name }}*" }, {{ join ", " $effects }} })
+{{-   end }}
+{{- end }}
+
+-- Other tweaks --
+-- Calendar Reminders
+hl.window_rule({ match = { initial_title = "^(Calendar Reminders)$" }, float = true })
+-- Picture-in-Picture
+hl.window_rule({
+  match = { title = "^(Picture-in-Picture)$" },
+  float = true,
+  keep_aspect_ratio = true,
+  pin = true,
+  move = { "(cursor_x-(window_w*0.5))", "(cursor_y-(window_h*0.5))" },
+})
+-- IME preedit box
+hl.window_rule({
+  match = { class = "^(ibus-ui-gtk3)$" },
+  float = true,
+  no_initial_focus = true,
+  border_size = 0,
+  pin = true,
+})

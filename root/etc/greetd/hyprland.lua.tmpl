@@ -1,0 +1,29 @@
+-- Hyprland for the login screen only: regreet, then exit once it is done
+hl.on("hyprland.start", function()
+  hl.exec_cmd("regreet; hyprctl dispatch 'hl.dsp.exit()'")
+  hl.exec_cmd("bash {{ .chezmoi.sourceDir }}/../../.config/hypr/hyprland/scripts/gtk.sh")
+end)
+
+{{ template "wm/hypr-monitor.lua.tmpl" . }}
+
+{{- if eq .guiDriver "N" }}
+
+-- NVIDIA setting
+hl.env("LIBVA_DRIVER_NAME", "nvidia")
+hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+hl.env("GBM_BACKEND", "nvidia-drm")
+{{- end }}
+
+-- XDG specification
+hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
+hl.env("XDG_SESSION_TYPE", "wayland")
+hl.env("XDG_SESSION_DESKTOP", "Hyprland")
+
+hl.config({
+  cursor = {
+    no_hardware_cursors = true,
+  },
+  misc = {
+    disable_hyprland_logo = true,
+  },
+})

@@ -1,0 +1,11 @@
+-- The Catppuccin palette, macchiato in dark mode and latte in light mode,
+-- rendered from home/.chezmoidata/catppuccin.yaml as Hyprland colours.
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end }}
+return {
+{{- range $name, $hex := $theme }}
+  {{ $name }} = "rgb({{ trimPrefix "#" $hex }})",
+{{- end }}
+}

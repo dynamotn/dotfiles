@@ -1,0 +1,19 @@
+-- Generated from home/.chezmoitemplates/wm/rules.yaml.tmpl
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $rules.workspaces }}
+hl.workspace_rule({
+  workspace = "name:{{ .name }}",
+{{-   if get . "persistent" }}
+  persistent = true,
+{{-   end }}
+{{-   if get . "default" }}
+  default = true,
+{{-   end }}
+})
+{{- end }}
+
+-- Drop-down system monitor: btop starts the first time Super+Z shows it
+hl.workspace_rule({
+  workspace = "special:monitor",
+  on_created_empty = "kitty --class btop --session ~/.config/kitty/sessions/monitor.conf",
+})
