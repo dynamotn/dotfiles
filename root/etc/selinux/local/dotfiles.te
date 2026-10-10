@@ -1,0 +1,20 @@
+policy_module(dotfiles, 1.0)
+
+########################################
+#
+# Local fixes for AVC denials the reference policy does not cover yet.
+# Build and load it as described in docs/kernel.md.
+#
+
+require {
+	type tmpfiles_t;
+	type udev_t;
+}
+
+# OpenRC's checkpath runs as tmpfiles_t and links libcap, which reads
+# /proc/sys/kernel/cap_last_cap to learn how many capabilities exist.
+kernel_read_kernel_sysctls(tmpfiles_t)
+
+# systemd-udevd stats /proc/self/ns/pid to tell whether it runs in the
+# initial PID namespace.
+fs_getattr_nsfs_files(udev_t)

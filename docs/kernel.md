@@ -97,8 +97,28 @@ The kernel enables SELinux (`CONFIG_LSM` lists `selinux`); the policy is
 `mcs` and the mode stays `permissive` in `/etc/selinux/config`.
 
 1. Boot the new kernel and check `sestatus` reports `enabled`, `permissive`.
-2. Relabel every filesystem: `rlpkg -a -r`, then reboot.
-3. Review denials with `ausearch -m avc` (or `dmesg | grep avc`) and fix them.
+2. Relabel every filesystem: `rlpkg -a -r`, then reboot. `rlpkg` cannot see
+   the mount-point directories hidden under the btrfs subvolumes, and early
+   boot touches them before the mounts exist (`unlabeled_t` on `var`). Label
+   them through a bind mount of `/`:
+
+   ```bash
+   mkdir -p /mnt/rootfs && mount --bind / /mnt/rootfs
+   setfiles -r /mnt/rootfs /etc/selinux/mcs/contexts/files/file_contexts \
+     /mnt/rootfs/{var,home,boot,snapshot}
+   umount /mnt/rootfs
+   ```
+
+3. Review denials and fix them. Without `auditd` they only reach the kernel
+   log: `grep -hE 'avc: +denied' /var/log/dmesg /var/log/messages`. Label
+   errors are fixed by relabelling; real policy gaps go into the local module
+   `/etc/selinux/local/dotfiles.te`, built and loaded with:
+
+   ```bash
+   cd /etc/selinux/local
+   make -f /usr/share/selinux/mcs/include/Makefile dotfiles.pp
+   semodule -i dotfiles.pp
+   ```
 4. Only then set `SELINUX=enforcing`. If a boot ever fails because of it,
    add `enforcing=0` to the kernel command line in GRUB to recover.
 
