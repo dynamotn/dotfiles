@@ -61,6 +61,7 @@ command -sq nvim; and begin
     alias vim nvim
     alias vimdiff 'nvim -d'
     set -gx MANPAGER 'nvim +Man!'
+    alias nvims 'NVIM_APPNAME=nvim-stable mise exec neovim@stable -- nvim'
 end
 or begin
     set -gx EDITOR vim
