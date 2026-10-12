@@ -1,0 +1,23 @@
+name: nix
+method: os
+# https://repology.org/project/nix/versions
+gentoo:
+  packages:
+    - name: sys-apps/nix
+      service: nix-daemon
+arch:
+  packages:
+    - name: nix
+      service: nix-daemon
+ubuntu:
+  packages:
+    - name: nix-bin
+    - name: nix-setup-systemd
+alpine:
+  packages:
+    - name: nix
+      service: nix-daemon
+# The daemon runs the builds, and a user outside `nix-users` cannot reach it
+hook:
+  after: |-
+    sudo gpasswd -a "$USER" nix-users || :

@@ -225,13 +225,10 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |----|-------|
 |[watchexec](https://github.com/watchexec/watchexec)|Detects modifications and run command|
 |[gomplate](https://github.com/hairyhenderson/gomplate)|Template rendering, like jinja|
-|[semantic-release](https://github.com/go-semantic-release/semantic-release)|Semantic release|
-|[svu](https://github.com/caarlos0/svu)|Get Semantic version|
 |[trdsql](https://github.com/noborus/trdsql)|CLI execute SQL queries tool|
 |[step](https://github.com/smallstep/cli)|CLI tool for PKI systems and workflows|
 |[stripe](https://github.com/stripe/stripe-cli)|CLI to build, test Stripe integration|
 |[d2](https://github.com/terrastruct/d2)|Diagram as code tool|
-|[d2plugin-tala](https://github.com/terrastruct/TALA)|Engine plugin TALA for d2|
 |[zrok](https://github.com/openziti/zrok)|Peer-to-peer sharing platform|
 |[arduino](https://github.com/arduino/arduino-cli)|CLI to manage Arduino board|
 |[posting](https://github.com/darrenburns/posting)|Powerful HTTP client with TUI same as Postman|
@@ -242,12 +239,25 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[go](https://github.com/golang/go)|Compiler and library for Go|
 |[bun](https://github.com/oven-sh/bun)|JavaScript runtime|
 |[deno](https://github.com/denoland/deno)|JavaScript runtime|
+|[clang](https://github.com/llvm/llvm-project)|C family compiler|
+|[dart](https://github.com/dart-lang/sdk)|SDK for Dart|
+|[dotnet](https://github.com/dotnet/runtime)|Runtime for .NET|
+|[erlang](https://github.com/erlang/otp)|Runtime for Erlang|
+|[elixir](https://github.com/elixir-lang/elixir)|Language for Elixir|
+|[foundry](https://github.com/foundry-rs/foundry)|Toolkit for Solidity|
+|[gleam](https://github.com/gleam-lang/gleam)|Compiler, formatter and language server for Gleam|
+|[zig](https://github.com/ziglang/zig)|Compiler and toolchain for Zig|
+|[zsh](https://github.com/zsh-users/zsh)|Z shell|
 |[uv](https://github.com/astral-sh/uv)|Modern Python package and project manager|
+|[nix](https://github.com/NixOS/nix)|Purely functional package manager|
 |[prek](https://github.com/j178/prek)|Framework for manage pre-commit hooks, re-engineered in Rust|
+|[gawk](https://www.gnu.org/software/gawk/)|GNU implementation of `awk`|
 |[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|
-|[shfmt](https://github.com/mvdan/sh)|Formatter for shell scripts|
 |[scc](https://github.com/boyter/scc)|Display statistics about code|
 |[ys](https://github.com/yaml-schema/yaml-schema)|YAML schema validator (`yaml-schema` crate)|
+|[perlcritic](https://github.com/Perl-Critic/Perl-Critic)|Linter for Perl|
+|[perltidy](https://github.com/perltidy/perltidy)|Formatter for Perl|
+|[qmlformat](https://github.com/qt/qtdeclarative)|Formatter for QML|
 
 ## DevOps tools
 

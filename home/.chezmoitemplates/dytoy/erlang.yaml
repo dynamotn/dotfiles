@@ -1,0 +1,27 @@
+name: erlang
+method: os
+# https://repology.org/project/erlang/versions
+# https://repology.org/project/rebar3/versions
+gentoo:
+  packages:
+    - name: dev-lang/erlang
+    - name: dev-util/rebar
+arch:
+  packages:
+    - name: erlang
+    - name: rebar3
+ubuntu:
+  packages:
+    - name: erlang
+    - name: rebar3
+alpine:
+  packages:
+    - name: erlang
+    - name: rebar3
+termux:
+  packages:
+    - name: erlang
+macos:
+  packages:
+    - name: erlang
+    - name: rebar3

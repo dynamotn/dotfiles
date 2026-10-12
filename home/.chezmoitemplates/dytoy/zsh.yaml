@@ -1,0 +1,19 @@
+name: zsh
+method: os
+# https://repology.org/project/zsh/versions
+gentoo:
+  packages:
+    - name: app-shells/zsh
+arch:
+  packages:
+    - name: zsh
+ubuntu:
+  packages:
+    - name: zsh
+alpine:
+  packages:
+    - name: zsh
+termux:
+  packages:
+    - name: zsh
+macos: # ships with macOS

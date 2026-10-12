@@ -1,0 +1,12 @@
+name: perlcritic
+method: os
+# https://repology.org/project/perl:perl-critic/versions
+gentoo:
+  packages:
+    - name: dev-perl/Perl-Critic
+arch:
+  packages:
+    - name: perl-perl-critic
+ubuntu:
+  packages:
+    - name: libperl-critic-perl

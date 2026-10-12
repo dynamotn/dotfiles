@@ -1,0 +1,23 @@
+name: elixir
+method: os
+dependencies:
+  - erlang
+# https://repology.org/project/elixir/versions
+gentoo:
+  packages:
+    - name: dev-lang/elixir
+arch:
+  packages:
+    - name: elixir
+ubuntu:
+  packages:
+    - name: elixir
+alpine:
+  packages:
+    - name: elixir
+termux:
+  packages:
+    - name: elixir
+macos:
+  packages:
+    - name: elixir

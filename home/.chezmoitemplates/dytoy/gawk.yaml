@@ -1,0 +1,21 @@
+name: gawk
+method: os
+# https://repology.org/project/gawk/versions
+gentoo:
+  packages:
+    - name: sys-apps/gawk
+arch:
+  packages:
+    - name: gawk
+ubuntu:
+  packages:
+    - name: gawk
+alpine:
+  packages:
+    - name: gawk
+termux:
+  packages:
+    - name: gawk
+macos:
+  packages:
+    - name: gawk
