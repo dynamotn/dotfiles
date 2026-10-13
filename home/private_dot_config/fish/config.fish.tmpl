@@ -61,6 +61,9 @@ command -sq nvim; and begin
     alias vim nvim
     alias vimdiff 'nvim -d'
     set -gx MANPAGER 'nvim +Man!'
+    # nvimpager execs nvim with argv[0] "nvimpager"; a mise shim resolves
+    # the tool from argv[0] and would run nvimpager itself again.
+    set -gx NVIMPAGER_NVIM (command -sa nvim | string match -v '*/mise/shims/*')[1]
     alias nvims 'NVIM_APPNAME=nvim-stable mise exec neovim@stable -- nvim'
 end
 or begin
