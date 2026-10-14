@@ -1,0 +1,19 @@
+# Global config, picked up through GITLINT_CONFIG (see fish config).
+# Mirrors ~/.config/git/templates/hooks/commit-msg: Conventional Commits,
+# subject at most 72 characters, no agent attribution. Merge, revert, fixup
+# and squash commits are skipped by gitlint's defaults, as in the hook.
+[general]
+# B6: a one-line commit is fine, the body is optional
+ignore=B6
+contrib=contrib-title-conventional-commits
+
+[title-max-length]
+line-length=72
+
+# The hook only warns past 50; gitlint has no warning level, so 72 is the limit.
+[title-match-regex]
+regex=^[a-z]+(\([\w./-]+\))?!?: \S
+
+# The human author is the only author.
+[body-match-regex]
+regex=(?s)^(?!.*(Co-[Aa]uthored-[Bb]y:.*(Claude|Copilot|Cursor|Codex|Gemini|ChatGPT|GPT-|Aider)|[Gg]enerated with|🤖))
