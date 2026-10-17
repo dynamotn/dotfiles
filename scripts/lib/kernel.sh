@@ -187,5 +187,8 @@ function kernel::save_defconfig {
   local defconfig
   defconfig="$(dybatpho::path_join "${source_dir}" "defconfig")"
   kernel::run_in_tree "${source_dir}" -- make -C "${source_dir}" savedefconfig
-  cp "${defconfig}" "${destination}"
+  # The base configs live under /etc/kernel, which only root can write.
+  local destination_dir
+  destination_dir="$(dybatpho::path_dirname "${destination}")"
+  kernel::run_in_tree "${destination_dir}" -- cp "${defconfig}" "${destination}"
 }
