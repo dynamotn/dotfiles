@@ -27,12 +27,13 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{-   $arch = "aarch64" }}
   {{- end }}
-  release_asset: watchexec-%1v-{{ $arch }}-unknown-linux-gnu.tar.xz
+  {{- $os := includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64" "arm64")) }}
+  release_asset: watchexec-%1v-{{ $arch }}-{{ $os }}.tar.xz
   sha256: SHA256SUMS
 archive:
-  - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec
+  - path: watchexec-%1v-{{ $arch }}-{{ $os }}/watchexec
     strip: 1
-  - path: watchexec-%1v-{{ $arch }}-unknown-linux-gnu/watchexec.1
+  - path: watchexec-%1v-{{ $arch }}-{{ $os }}/watchexec.1
     strip: 1
     location: {{ .chezmoi.homeDir }}/.local/man/man1
 {{- end }}

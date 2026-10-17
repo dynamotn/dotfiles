@@ -3,6 +3,10 @@ setup() {
   setup_dotfiles_test_env
   . "${DOTFILES_DIR}/scripts/lib/package_manager.sh"
   eval "$(declare -f dybatpho::is | sed '1s/dybatpho::is/__orig_dybatpho_is/')"
+  # Arch takes another path as root, and CI runs the suite as root, so each
+  # test runs as a regular user unless it says otherwise.
+  # shellcheck disable=SC2329 # invoked by the library under test
+  function dybatpho::is_root { return 1; }
 }
 
 @test "package_manager::add_apt_repo converts fingerprints to keyserver URLs in dry-run mode" {
@@ -214,6 +218,13 @@ EOF
   export DRY_RUN='true'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function package_manager::sync_brew_repo { printf 'synced\n' >> "${actions_file}"; }
+  # The host may already have mas, which would skip the install under test.
+  function dybatpho::is {
+    if [[ "$1" == "command" && "$2" == "mas" ]]; then
+      return 1
+    fi
+    __orig_dybatpho_is "$@"
+  }
   run package_manager::init_macos
   assert_success
   assert_output --partial 'brew install mas'
@@ -230,6 +241,52 @@ EOF
   run package_manager::init_arch
   assert_success
   assert_output --partial 'paru.git'
+}
+
+@test "package_manager::init_arch keeps a Rust that was installed before" {
+  export DRY_RUN='true'
+  function dybatpho::is {
+    if [[ "$1" == "command" && "$2" == "paru" ]]; then
+      return 1
+    fi
+    __orig_dybatpho_is "$@"
+  }
+  printf '#!/bin/sh\n' > "${HOME}/.local/bin/cargo"
+  chmod +x "${HOME}/.local/bin/cargo"
+
+  run package_manager::init_arch
+  assert_success
+  assert_output --partial 'paru.git'
+  refute_output --partial 'rust'
+}
+
+@test "package_manager::init_arch skips paru as root" {
+  export DRY_RUN='true'
+  function dybatpho::is_root { return 0; }
+  function dybatpho::is {
+    if [[ "$1" == "command" && "$2" == "paru" ]]; then
+      return 1
+    fi
+    __orig_dybatpho_is "$@"
+  }
+
+  run package_manager::init_arch
+  assert_success
+  assert_output --partial 'pacman -Syu'
+  assert_output --partial 'makepkg refuses to run as root'
+  refute_output --partial 'paru.git'
+}
+
+@test "package_manager::sync_pacman_repo upgrades with pacman as root even with paru" {
+  export DRY_RUN='true'
+  function dybatpho::is_root { return 0; }
+  printf '#!/bin/sh\n' > "${HOME}/.local/bin/paru"
+  chmod +x "${HOME}/.local/bin/paru"
+
+  run package_manager::sync_pacman_repo
+  assert_success
+  assert_output --partial 'pacman -Syu --noconfirm'
+  refute_output --partial 'paru'
 }
 
 # ---------------------------------------------------------------------------
@@ -346,6 +403,32 @@ EOF
   run package_manager::install_via_pacman neovim
   assert_success
   assert_output --partial 'paru --noconfirm -S --needed --skipreview neovim'
+}
+
+@test "package_manager::install_via_pacman installs a repository package with pacman as root" {
+  export DRY_RUN='true'
+  function dybatpho::is_root { return 0; }
+  # Only `-Si` reaches the stub: the install itself is a dry run.
+  printf '#!/bin/sh\n[ "$1" = "-Si" ] && [ "$3" = "neovim" ]\n' > "${HOME}/.local/bin/pacman"
+  chmod +x "${HOME}/.local/bin/pacman"
+
+  run package_manager::install_via_pacman neovim --asdeps
+  assert_success
+  assert_output --partial 'pacman --noconfirm -S --needed --asdeps neovim'
+  refute_output --partial 'paru'
+}
+
+@test "package_manager::install_via_pacman skips an AUR package as root" {
+  export DRY_RUN='true'
+  function dybatpho::is_root { return 0; }
+  printf '#!/bin/sh\nexit 1\n' > "${HOME}/.local/bin/pacman"
+  chmod +x "${HOME}/.local/bin/pacman"
+
+  run package_manager::install_via_pacman neovim-git
+  assert_success
+  assert_output --partial 'neovim-git is not in the pacman repositories'
+  refute_output --partial 'paru'
+  refute_output --partial '-S --needed'
 }
 
 @test "package_manager::install_via_apt prints apt install command in dry-run mode" {

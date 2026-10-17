@@ -9,7 +9,7 @@ github:
   {{- else if eq .chezmoi.os "android" }}
   {{-   $os = "unknown-linux-musl" }}
   {{- else }}
-  {{-   $os = "unknown-linux-gnu" }}
+  {{-   $os = includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64" "arm64")) }}
   {{- end }}
   {{- $arch := "" }}
   {{- if eq .chezmoi.arch "amd64" }}

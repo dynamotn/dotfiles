@@ -22,8 +22,8 @@ ExecStart= \
     --vfs-cache-mode writes \
     --vfs-cache-max-size 100M \
     --log-level INFO \
-    --log-file /tmp/rclone-%i.log \
-    --umask 022 \
+    --log-file %t/rclone-%i.log \
+    --umask 077 \
     %i: %h/Sync/%i
 ExecStop=/bin/fusermount -u %h/Sync/%i
 

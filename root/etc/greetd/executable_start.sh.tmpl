@@ -15,6 +15,13 @@ export XDG_RUNTIME_DIR
 HOME="$XDG_RUNTIME_DIR"
 export HOME
 mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"
+# Another user may have created the directory first. Its sockets would then be
+# theirs to read, so fall back to a fresh private directory instead.
+if [ ! -O "$XDG_RUNTIME_DIR" ] || [ -L "$XDG_RUNTIME_DIR" ]; then
+  XDG_RUNTIME_DIR="$(mktemp -d "/tmp/user-$(id -u).XXXXXX")"
+  export XDG_RUNTIME_DIR
+  HOME="$XDG_RUNTIME_DIR"
+fi
 {{- $command := "Hyprland" }}
 {{- if lookPath "start-hyprland" }}
 {{-   $command = "start-hyprland --" }}

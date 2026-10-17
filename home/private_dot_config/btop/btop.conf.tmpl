@@ -1,6 +1,9 @@
 {{- $version := "1.4.6" }}
-{{- if and (lookPath "btop") (lookPath "fish") }}
-{{-   $version = (output "fish" "-c" "btop -V | grep -oP '\\d+\\.\\d+\\.\\d+'") }}
+{{- if lookPath "btop" }}
+{{-   $found := output "btop" "--version" | regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" }}
+{{-   if $found }}
+{{-     $version = $found }}
+{{-   end }}
 {{- end -}}
 #? Config file for btop v.{{ $version }}
 
