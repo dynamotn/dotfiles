@@ -221,6 +221,31 @@ EOF
   assert_success
 }
 
+@test "binary_download::verify_sha256 reads an asset name literally" {
+  local asset_file="${BATS_TEST_TMPDIR}/tool"
+  printf 'binary-data' > "${asset_file}"
+  local actual_hash
+  if command -v sha256sum > /dev/null 2>&1; then
+    actual_hash=$(sha256sum "${asset_file}" | awk '{print $1}')
+  else
+    actual_hash=$(shasum -a 256 "${asset_file}" | awk '{print $1}')
+  fi
+
+  function dybatpho::curl_download {
+    {
+      printf '%s *tool-1.0Xtar\n' "0000000000000000000000000000000000000000000000000000000000000000"
+      printf '%s *tool-1.0+build.tar\n' "${actual_hash}"
+    } > "$2"
+  }
+
+  run binary_download::verify_sha256 \
+    sample \
+    "${asset_file}" \
+    "https://example.com/v1.0.0/tool-1.0+build.tar" \
+    "checksums.txt"
+  assert_success
+}
+
 @test "binary_download::verify_sha256 fails when hash does not match" {
   local asset_file="${BATS_TEST_TMPDIR}/tool.tar.gz"
   printf 'binary-data' > "${asset_file}"
