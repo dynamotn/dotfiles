@@ -6,6 +6,11 @@
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
+if ! dybatpho::is command nvim; then
+  dybatpho::warn "nvim is not installed, skip syncing its plugins"
+  exit 0
+fi
+
 dybatpho::header "Setup neovim"
 nvim --headless "+Lazy! sync" +qa
 dybatpho::success "Setup neovim"
