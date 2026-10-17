@@ -1,14 +1,23 @@
 #!{{ .bash }}
 # @file 03-setup-fish.sh
 # @brief Set up the fish shell
-# @description Set up the fish shell after its configuration changes.
+# @description Set up the fish shell after its configuration changes: make it the
+# login shell, then bring the fisher plugins in line with the list. Skipped with
+# a warning where fish is not installed.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules privilege
 dybatpho::register_common_handlers
 
+{{- $fishSource := joinPath .chezmoi.sourceDir "private_dot_config/fish" }}
+# plugins hash: {{ joinPath $fishSource "plugins.list.tmpl" | include | sha256sum }}
+# setup hash: {{ joinPath $fishSource "setup.fish" | include | sha256sum }}
+
+if ! dybatpho::is command fish; then
+  dybatpho::warn "fish is not installed, skip setting up fish shell"
+  exit 0
+fi
+
 dybatpho::header "Setup fish shell"
-# plugins hash: {{ joinPath .chezmoi.homeDir ".config/fish/plugins.list" | include | sha256sum }}
 {{- if ne .kind "container" }}
-dybatpho::require fish
 fish_bin="$(dybatpho::command_path fish)"
 if [[ "${SHELL:-}" != "${fish_bin}" ]]; then
   dybatpho::info "Change default shell to fish"
@@ -23,9 +32,15 @@ if [[ "${SHELL:-}" != "${fish_bin}" ]]; then
   {{- end }}
 fi
 {{- end }}
+
 fish_config_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".config" "fish")"
-rm -rf "${fish_config_dir}"/{conf.d,functions,completions,fishd*}
+# Only the legacy universal variables go. `conf.d`, `functions` and
+# `completions` also hold the links to the files the dotfiles manage, and
+# `fisher update` already prunes the plugins it no longer lists.
+rm -f "${fish_config_dir}"/fishd*
 fish_setup_script="$(dybatpho::path_join "${fish_config_dir}" "setup.fish")"
-fish "${fish_setup_script}"
+# `--update` reinstalls fisher and merges `plugins.list` into `fish_plugins`,
+# which a run with fisher already installed would skip.
+fish "${fish_setup_script}" --update
 
 dybatpho::success "Setup fish shell"
