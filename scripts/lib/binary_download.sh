@@ -77,8 +77,13 @@ function binary_download::verify_sha256 {
   local asset_name="${url##*/}"
   local expected_hash
   # Match 'hash  filename', 'hash  *filename' (sha256sum / shasum binary mode)
-  # or 'hash  ./filename' (checksums generated from inside the release dir)
-  expected_hash=$(grep -E "[[:space:]]\*?(\./)?${asset_name}\$" "${sha256_file}" | awk '{print $1}') || true
+  # or 'hash  ./filename' (checksums generated from inside the release dir).
+  # The name is compared as a string: as a pattern, a `+` in it never matched
+  # and every `.` matched any character.
+  expected_hash=$(awk -v asset="${asset_name}" '
+    { file = $2; sub(/^\*/, "", file); sub(/^\.\//, "", file) }
+    file == asset { print $1; exit }
+  ' "${sha256_file}")
 
   # Fallback: per-asset files that contain only a bare hash (single entry)
   if dybatpho::string_is_blank "${expected_hash}"; then

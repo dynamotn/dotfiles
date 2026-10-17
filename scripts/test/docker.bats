@@ -33,3 +33,33 @@ setup() {
   assert_failure
   assert_output --partial "Unknown image enterprise-"
 }
+
+# Runs a snippet with docker/build.sh sourced, which defines its functions
+# without building, reading the build secrets from the test directory.
+# @arg $1 string Bash code to run
+function run_build {
+  local snippet
+  dybatpho::expect_args snippet -- "$@"
+  SECRETS_DIR_UNDER_TEST="${BATS_TEST_TMPDIR}/secrets"
+  mkdir -p "${SECRETS_DIR_UNDER_TEST}"
+  DOCKER_BUILD_SECRETS_DIR="${SECRETS_DIR_UNDER_TEST}" DYBATPHO_PRIVILEGE=false \
+    run --separate-stderr "${BASH}" -c '. "$1"; '"${snippet}" _ "${DOTFILES_DIR}/docker/build.sh"
+}
+
+@test "build.sh builds the public image, which has no age secret, with no identity" {
+  # It exited 1 without the secret, so the public image could never build.
+  run_build '_read_identities'
+  assert_success
+  assert_output ""
+  assert_stderr --partial "without any identity"
+}
+
+@test "build.sh reads every identity of the age secret, whatever its passphrase" {
+  # Split as words, a passphrase with a space became an identity of its own,
+  # and one with a glob character expanded to file names.
+  run_build ':'
+  printf 'personal=two words\nF1=*\n\n' > "${SECRETS_DIR_UNDER_TEST}/age_passphrases"
+  run_build '_read_identities'
+  assert_success
+  assert_output "personal,F1,"
+}

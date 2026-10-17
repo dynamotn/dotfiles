@@ -10,6 +10,10 @@
 
 # @env CHEZMOI_ATTRS_ORDER array Attributes chezmoi accepts, in the order it writes their prefixes
 CHEZMOI_ATTRS_ORDER=(create encrypted private readonly empty executable)
+# Every prefix chezmoi parses off a source name; a target name that starts with
+# one would lose it to an attribute unless marked `literal_`.
+__CHEZMOI_ATTRS_PREFIX_RE='^(after|before|create|dot|empty|encrypted|exact|executable|external|literal'
+__CHEZMOI_ATTRS_PREFIX_RE+='|modify|once|onchange|private|readonly|remove|run|symlink)_'
 
 #######################################
 # @description Check that every attribute of a list is one chezmoi knows
@@ -114,6 +118,14 @@ function chezmoi_attrs::source_path {
     if [[ "${__chezmoi_attrs_sp_component}" == .* ]]; then
       __chezmoi_attrs_sp_component="dot_${__chezmoi_attrs_sp_component#.}"
       __chezmoi_attrs_sp_component_attrs+=("private")
+    elif [[ "${__chezmoi_attrs_sp_component}" =~ ${__CHEZMOI_ATTRS_PREFIX_RE} ]]; then
+      # `dot_` is the last prefix chezmoi reads, so only an undotted name can
+      # be mistaken for attributes.
+      __chezmoi_attrs_sp_component="literal_${__chezmoi_attrs_sp_component}"
+    fi
+    # The same for a suffix chezmoi would strip and act on.
+    if [[ "${__chezmoi_attrs_sp_component}" == *.tmpl || "${__chezmoi_attrs_sp_component}" == *.literal ]]; then
+      __chezmoi_attrs_sp_component+=".literal"
     fi
     if ((__chezmoi_attrs_sp_index == __chezmoi_attrs_sp_last)) \
       && ((${#__chezmoi_attrs_sp_last_attrs[@]} > 0)); then

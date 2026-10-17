@@ -4,7 +4,7 @@
 # @description Only the list of files this mail client keeps lives here; walking
 # the profiles, reading `prefs.js` and handing files to chezmoi is shared with
 # `dyfox` in `scripts/lib/mozilla_profile.sh`.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules cli array
 . {{ .chezmoi.sourceDir }}/../scripts/lib/mozilla_profile.sh
 dybatpho::register_common_handlers
 

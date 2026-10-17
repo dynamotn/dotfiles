@@ -52,6 +52,16 @@ EOF
   assert_output ''
 }
 
+@test "dytoy::run_script keeps the temp files registered before the hook" {
+  local script_path="${BATS_TEST_TMPDIR}/sample.sh"
+  local temp_file
+  dybatpho::create_temp temp_file ".tmp"
+  local before="${#DYBATPHO_CLEANUP_PATHS[@]}"
+  dytoy::create_script sample "${script_path}" "true" commands
+  dytoy::run_script "${script_path}"
+  assert_equal "${#DYBATPHO_CLEANUP_PATHS[@]}" "${before}"
+}
+
 @test "dytoy::create_script exports the version of the tool to the script" {
   local script_path="${BATS_TEST_TMPDIR}/sample.sh"
   local result_path="${BATS_TEST_TMPDIR}/result"
@@ -215,6 +225,16 @@ EOF
   assert_success
 }
 
+@test "dytoy::enable_service enables nothing without an init system" {
+  function init_system::enable_openrc_service { printf 'called\n'; }
+  run dytoy::enable_service $'service: sshd\nis_user_service: false' none
+  assert_success
+  refute_output --partial 'called'
+  DYTOY_INIT_SYSTEM=none run dytoy::enable_service $'service: sshd\nis_user_service: false' openrc
+  assert_success
+  refute_output --partial 'called'
+}
+
 @test "dytoy::enable_service dispatches to the requested init backend" {
   local args_file="${BATS_TEST_TMPDIR}/service-args"
   function init_system::enable_systemd_service {
@@ -260,7 +280,10 @@ EOF
 
 @test "dytoy::install_macos_package installs a pinned version as its versioned package" {
   local actions_file="${BATS_TEST_TMPDIR}/actions"
-  function dytoy::is_installed_package { printf 'check:%s\n' "$1" >> "${actions_file}"; return 1; }
+  function dytoy::is_installed_package {
+    printf 'check:%s\n' "$1" >> "${actions_file}"
+    return 1
+  }
   function dytoy::enable_service { true; }
   function package_manager::install_via_brew { printf 'brew:%s\n' "$*" >> "${actions_file}"; }
 
@@ -349,7 +372,10 @@ EOF
 
 @test "dytoy::install_* install the version of an OS package" {
   local actions_file="${BATS_TEST_TMPDIR}/actions"
-  function dytoy::is_installed_package { printf 'check:%s\n' "$1" >> "${actions_file}"; return 1; }
+  function dytoy::is_installed_package {
+    printf 'check:%s\n' "$1" >> "${actions_file}"
+    return 1
+  }
   function dytoy::enable_service { true; }
   function dytoy::add_apt_repo { true; }
   local via
@@ -544,7 +570,6 @@ EOF
   run cat "${actions_file}"
   assert_output "add_apt_repo:sample|jammy"
 }
-
 
 @test "dytoy::add_apt_repo returns early when repo is null" {
   local yaml='{"name":"sample","repo":"null","suite":"null","components":"main","key":"ABCD1234","repo_name":"null"}'

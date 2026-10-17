@@ -81,7 +81,44 @@ etc/modprobe.d
 etc/pam.d
 {{- end }}
 {{- if eq .kind "container" }}
+{{/* The runtime owns these: Docker and Podman bind-mount hostname and hosts,
+     so writing them fails with EBUSY, and the rest configure a kernel, a
+     boot, hardware or services the container does not have. CA certificates,
+     sudoers and package manager configuration still apply. */}}
+etc/hostname
 etc/hosts
+etc/fstab
+etc/localtime
+etc/locale.gen
+etc/vconsole.conf
+etc/sysctl.d
+etc/udev
+etc/modprobe.d
+etc/nftables.conf
+etc/ssh/sshd_config.d
+etc/security/limits.conf
+etc/systemd
+etc/rc.conf.d
+etc/syslog-ng
+etc/kernel
+etc/dracut.conf.d
+etc/default/grub
+etc/default/docker
+etc/pam.d
+etc/tlp.conf
+etc/NetworkManager
+etc/fail2ban
+etc/audit
+etc/selinux
+etc/greetd
+etc/scx_loader
+etc/conf.d/scx_loader
+etc/ntp.conf
+usr/share/grub
+usr/share/wayland-sessions
+.chezmoiscripts/01-setup-selinux.sh
+etc/.chezmoiscripts/01-setup-pam.sh
+etc/.chezmoiscripts/03-setup-wifi.sh
 {{- end }}
 {{- if ne .kind "laptop" }}
 etc/tlp.conf

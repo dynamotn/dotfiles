@@ -318,12 +318,14 @@ function dytoy_tui::log_tail {
   local __dytoy_tui_tail_tailed __dytoy_tui_tail_cleaned
   __dytoy_tui_tail_tailed="$(tail -n "${__dytoy_tui_tail_count}" "${__dytoy_tui_tail_file}")"
   [[ -n "${__dytoy_tui_tail_tailed}" ]] || return 0
+  # The control bytes are spelled with ANSI-C quoting, not as `\x1B` escapes:
+  # BSD sed reads those literally, and then strips every digit and capital.
   __dytoy_tui_tail_cleaned="$(LC_ALL=C sed -E \
-    -e 's/\x1B\[[0-9;?]*[A-Za-ln-z]//g' \
-    -e 's/\x1B\][^\x07]*\x07//g' \
-    -e 's/\r$//' -e 's/.*\r//' \
-    -e 's/\t/  /g' \
-    -e 's/[\x01-\x08\x0B-\x1A\x1C-\x1F\x7F]//g' <<< "${__dytoy_tui_tail_tailed}")"
+    -e $'s/\x1B\\[[0-9;?]*[A-Za-ln-z]//g' \
+    -e $'s/\x1B\\][^\x07]*\x07//g' \
+    -e $'s/\r$//' -e $'s/.*\r//' \
+    -e $'s/\t/  /g' \
+    -e $'s/[\x01-\x08\x0B-\x1A\x1C-\x1F\x7F]//g' <<< "${__dytoy_tui_tail_tailed}")"
   [[ -n "${__dytoy_tui_tail_cleaned}" ]] || return 0
   readarray -t __dytoy_tui_lines <<< "${__dytoy_tui_tail_cleaned}"
 }
@@ -1259,7 +1261,9 @@ function dytoy_tui::start_next {
 
   local -a args=()
   dytoy_tui::child_args args "${index}" "${sync}"
-  local log="${DYTOY_TUI_LOG_DIR}/${DYTOY_TUI_METHOD[index]}-${DYTOY_TUI_NAME[index]}.log"
+  # Gentoo names carry their category (`dev-util/android-tools`), which would
+  # point the log into a folder that does not exist.
+  local log="${DYTOY_TUI_LOG_DIR}/${DYTOY_TUI_METHOD[index]}-${DYTOY_TUI_NAME[index]//\//_}.log"
   DYTOY_TUI_LOG[index]="${log}"
   DYTOY_TUI_STATE[index]="running"
   DYTOY_TUI_STARTED[index]="${EPOCHSECONDS}"
@@ -1441,6 +1445,11 @@ function dytoy_tui::summary {
 function dytoy_tui::run {
   local self
   dybatpho::expect_args self -- "$@"
+  # The timers read EPOCHSECONDS and EPOCHREALTIME, which arrived in Bash 5.0;
+  # dybatpho itself accepts 4.3, where `set -u` would end the interface midway.
+  if ((BASH_VERSINFO[0] < 5)); then
+    dybatpho::die "The dytoy interface needs bash 5.0 or newer, this is ${BASH_VERSION}"
+  fi
   DYTOY_TUI_SELF="${self}"
   DYTOY_TUI_JOBS="${JOBS:-4}"
   if [[ ! "${DYTOY_TUI_JOBS}" =~ ^[1-9][0-9]*$ ]]; then

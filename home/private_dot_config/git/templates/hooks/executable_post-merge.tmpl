@@ -4,7 +4,7 @@
 # @description Warn when a merge or a `git pull` changed the submodules, the lockfiles or
 # the pinned tool versions, so the install step is not forgotten.
 {{ template "git/hooks/modern_bash.sh.tmpl" . }}
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules array
 dybatpho::register_common_handlers
 
 {{ template "git/hooks/dependency_changes.sh.tmpl" . }}
