@@ -7,7 +7,11 @@ dybatpho::register_common_handlers
 
 {{- if eq .terminalMultiplexer "T" }}
 dybatpho::header "Setup tmux"
-# config hash: {{ joinPath .chezmoi.sourceDir "../silos/tmux/config" | include | sha256sum }}
+{{- /* A submodule, so absent until the submodules are updated */}}
+{{- $tmuxConfig := joinPath .chezmoi.sourceDir "../silos/tmux/config" }}
+{{- if stat $tmuxConfig }}
+# config hash: {{ include $tmuxConfig | sha256sum }}
+{{- end }}
 tmux_plugin_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "share" "tmux" "plugins")"
 tpm_dir="$(dybatpho::path_join "${tmux_plugin_dir}" "tpm")"
 dybatpho::ensure_dir "${tmux_plugin_dir}" > /dev/null
