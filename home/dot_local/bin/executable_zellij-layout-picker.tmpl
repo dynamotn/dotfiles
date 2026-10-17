@@ -4,7 +4,7 @@
 # @description List the layouts under `$ZELLIJ_LAYOUT_DIR`, or the zellij
 # configuration's `layouts` folder, with `default` first, and start zellij with
 # the one picked. Without a pick, zellij starts with its own default.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
 zellij_config_dir="$(dybatpho::xdg_config_dir zellij)"
