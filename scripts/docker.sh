@@ -16,7 +16,6 @@ fi
 dybatpho::register_common_handlers
 IMAGE=""
 DOCKERFILE=""
-BUILD_ARGS=()
 SECRETS=()
 
 #######################################
@@ -69,7 +68,6 @@ function _configure_personal {
   IMAGE="git.dynamotn.dev/config/dotfiles"
   DOCKERFILE="$(dybatpho::path_join "${REPO_DIR}" "docker" "Dockerfile.alpine")"
   export TOOLBOX_TYPE="personal"
-  BUILD_ARGS+=(--build-arg IDENTITIES="personal")
   _export_age_passphrase "personal"
 }
 
@@ -152,7 +150,6 @@ function _main {
   dybatpho::header "Building ${IMAGE}"
   docker build --network=host \
     "${SECRETS[@]}" \
-    "${BUILD_ARGS[@]}" \
     --no-cache \
     -f "${DOCKERFILE}" \
     -t "${IMAGE}" "${REPO_DIR}"
