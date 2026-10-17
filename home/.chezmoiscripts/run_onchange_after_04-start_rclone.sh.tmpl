@@ -2,7 +2,7 @@
 # @file 04-start_rclone.sh
 # @brief Start the rclone mounts
 # @description Start the rclone mounts after their configuration changes. The
-# configuration only exists on machines that decrypt an enterprise's secrets, and
+# configuration only exists on machines set up with an enterprise's secrets, and
 # a container has no service manager to keep the mounts, so both skip it.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
