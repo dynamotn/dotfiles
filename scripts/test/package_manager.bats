@@ -214,6 +214,13 @@ EOF
   export DRY_RUN='true'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function package_manager::sync_brew_repo { printf 'synced\n' >> "${actions_file}"; }
+  # The host may already have mas, which would skip the install under test.
+  function dybatpho::is {
+    if [[ "$1" == "command" && "$2" == "mas" ]]; then
+      return 1
+    fi
+    __orig_dybatpho_is "$@"
+  }
   run package_manager::init_macos
   assert_success
   assert_output --partial 'brew install mas'
