@@ -29,8 +29,8 @@ for fn in "${dybatpho_functions[@]}"; do
 done
 
 # Launch
-{{- if eq .chezmoi.osRelease.id "gentoo" }}
+{{- if eq .osid "linux-gentoo" }}
 exec /opt/Obsidian/obsidian "${flags[@]}" "$@"
-{{- else if eq .chezmoi.osRelease.id "arch" }}
+{{- else if eq .osid "linux-arch" }}
 exec electron /usr/lib/obsidian/app.asar "${flags[@]}" "$@"
 {{- end }}

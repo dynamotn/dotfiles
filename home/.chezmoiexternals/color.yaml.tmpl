@@ -1,3 +1,5 @@
+{{- /* Terminal colour tests, left out of containers like the scripts in misc */}}
+{{- if ne .kind "container" }}
 .local/bin/color16:
   type: file
   url: 'https://raw.githubusercontent.com/pablopunk/colortest/471509b6db7b5429a065b3eca93b612910a3875d/colortest'
@@ -22,3 +24,4 @@
   checksum:
     sha256: "e0b4a032225b288ecb1404dc4b6d118c2fbf3c76bbf8b176442b9964042c24eb"
   executable: true
+{{- end }}

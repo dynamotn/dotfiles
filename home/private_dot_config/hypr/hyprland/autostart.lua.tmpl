@@ -10,7 +10,7 @@ hl.on("hyprland.start", function()
 
   -- Sound & Screencast
 {{- if .hasSound }}
-{{-   if eq .chezmoi.osRelease.id "gentoo" }}
+{{-   if eq .osid "linux-gentoo" }}
   hl.exec_cmd("gentoo-pipewire-launcher restart")
 {{-   else }}
   hl.exec_cmd("systemctl --user start wireplumber")

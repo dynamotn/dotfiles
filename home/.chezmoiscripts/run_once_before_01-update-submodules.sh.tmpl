@@ -3,15 +3,36 @@
 # @brief Update the submodules before applying the dotfiles
 # @description Update the submodules of the dotfiles repository, so that the libraries the
 # later scripts source are present. Re-runs whenever `.gitmodules` changes.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules git
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules git
 dybatpho::register_common_handlers
 
 dybatpho::header "Update submodules"
 # modules hash: {{ joinPath .chezmoi.sourceDir "../.gitmodules" | include | sha256sum }}
-repo_root="$(dybatpho::git_root "{{ .chezmoi.sourceDir }}/..")"
-git -C "${repo_root}" add .gitmodules
-git -C "${repo_root}" submodule sync --recursive
-git -C "${repo_root}" update-index --assume-unchanged .gitmodules
+dotfiles_dir="{{ .chezmoi.sourceDir }}/.."
+# A source copied without its history, or with no git, has nothing to update.
+if ! dybatpho::is command git \
+  || ! git -C "${dotfiles_dir}" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+  dybatpho::warn "The dotfiles are not a git checkout, skip updating submodules"
+  exit 0
+fi
+repo_root="$(dybatpho::git_root "${dotfiles_dir}")"
+git_common_dir="$(git -C "${repo_root}" rev-parse --path-format=absolute --git-common-dir)"
+# A source mounted read-only, as in a container, keeps the submodules it came with.
+if [[ ! -w "${repo_root}" || ! -w "${git_common_dir}" ]]; then
+  dybatpho::warn "The dotfiles repository is not writable, skip updating submodules"
+  exit 0
+fi
+
+{{- /* A container has no keys for the SSH remotes and may be offline, so
+there a failing git only warns; elsewhere it stops the apply, and the hook
+runs again next time */}}
+{{- $onFailure := "" }}
+{{- if eq .kind "container" }}
+{{-   $onFailure = " || dybatpho::warn \"git failed, the submodules may be out of date\"" }}
+{{- end }}
+git -C "${repo_root}" add .gitmodules{{ $onFailure }}
+git -C "${repo_root}" submodule sync --recursive{{ $onFailure }}
+git -C "${repo_root}" update-index --assume-unchanged .gitmodules{{ $onFailure }}
 git -C "${repo_root}" submodule update --init \
   {{-   if or .decryptPersonal (not (empty .decryptEnterprise)) }}
   secrets/data \
@@ -44,5 +65,5 @@ git -C "${repo_root}" submodule update --init \
   {{- if ne .guiServer "0" }}
   home/Multimedia/Pictures/Wallpaper \
   {{- end }}
-  home/private_dot_config/nvim
+  home/private_dot_config/nvim{{ $onFailure }}
 dybatpho::success "Updated submodules"

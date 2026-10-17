@@ -3,8 +3,13 @@
 # @brief Sync the neovim plugins
 # @description Sync the neovim plugins with Lazy, headless, after the configuration
 # changes.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
+
+if ! dybatpho::is command nvim; then
+  dybatpho::warn "nvim is not installed, skip syncing its plugins"
+  exit 0
+fi
 
 dybatpho::header "Setup neovim"
 nvim --headless "+Lazy! sync" +qa

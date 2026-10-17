@@ -1,14 +1,25 @@
 #!{{ .bash }}
 # @file 04-start_rclone.sh
 # @brief Start the rclone mounts
-# @description Start the rclone mounts after their configuration changes.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+# @description Start the rclone mounts after their configuration changes. The
+# configuration only exists on machines set up with an enterprise's secrets, and
+# a container has no service manager to keep the mounts, so both skip it.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
-dybatpho::header "Start rclone"
-# config hash: {{ joinPath .chezmoi.homeDir ".config/rclone/rclone.conf" | include | sha256sum }}
+{{- if and (not (empty .decryptEnterprise)) (ne .kind "container") }}
+{{- $rcloneConf := joinPath .chezmoi.homeDir ".config/rclone/rclone.conf" }}
+{{- /* Rendered before the files are written, so a first apply has no config yet */}}
+{{- if stat $rcloneConf }}
+# config hash: {{ include $rcloneConf | sha256sum }}
+{{- end }}
 
-rclone_conf="{{ .chezmoi.homeDir }}/.config/rclone/rclone.conf"
+dybatpho::header "Start rclone"
+rclone_conf="{{ $rcloneConf }}"
+if ! dybatpho::is file "${rclone_conf}"; then
+  dybatpho::warn "No rclone config at ${rclone_conf}, skipping"
+  exit 0
+fi
 # A config without any remote section makes grep fail, which is the empty case
 # handled below rather than an error.
 readarray -t remotes < <(grep '^\[' "${rclone_conf}" | tr -d '[]' || true)
@@ -18,6 +29,10 @@ if ((${#remotes[@]} == 0)); then
 fi
 
 {{- if eq .initSystem "systemd" }}
+if ! dybatpho::is dir /run/systemd/system; then
+  dybatpho::warn "systemd is not running, skipping the rclone services"
+  exit 0
+fi
 systemctl --user daemon-reload
 for remote in "${remotes[@]}"; do
   dybatpho::progress "Enable rclone for remote: ${remote}"
@@ -39,9 +54,10 @@ for remote in "${remotes[@]}"; do
   if [[ ! -L "${openrc_default}/rclone.${remote}" ]]; then
     ln -sf "${openrc_initd}/rclone.${remote}" "${openrc_default}/rclone.${remote}"
   fi
-  rc-service --user "rclone.${remote}" start 2>/dev/null || \
-    rc-service "rclone.${remote}" start || true
+  rc-service --user "rclone.${remote}" start 2> /dev/null \
+    || rc-service "rclone.${remote}" start || true
 done
 {{- end }}
 
 dybatpho::success "Start rclone"
+{{- end }}
