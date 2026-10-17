@@ -1,4 +1,8 @@
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# Bats records a stack trace on every command its DEBUG trap sees, which made
+# sourcing the libraries cost about a second per test. Their failures still
+# point at the line of the test that called them.
+bats_add_debug_exclude_path "${DOTFILES_DIR}/scripts/lib/"
 # A git hook runs the suite with the repository it fires in exported as
 # `GIT_DIR`, `GIT_INDEX_FILE` and friends. Left in place, every git call a test
 # makes reaches that repository instead of the one it names. These are the
