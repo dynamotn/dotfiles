@@ -1,3 +1,5 @@
+{{- /* Word lists of several megabytes, which a container does not need */}}
+{{- if ne .kind "container" }}
 .config/dictionaries/english.txt:
   type: file
   url: https://raw.githubusercontent.com/dwyl/english-words/refs/heads/master/words.txt
@@ -34,3 +36,4 @@
   type: file
   url: https://raw.githubusercontent.com/tonghuikang/HSK-3.0-words-list/refs/heads/main/HSK%20List/HSK%207-9.txt
   refreshPeriod: 168h
+{{- end }}

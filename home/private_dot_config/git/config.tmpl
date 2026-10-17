@@ -3,12 +3,16 @@
         # Tôi ra đây có phải xưng danh không nhỉ?
         name = Trần Đức Nam
         email = me@dynamotn.dev
+        {{- /* Only a decrypted key can sign, so signing is turned on with it */}}
+        {{- $signingKey := "" }}
         {{- if .decryptPersonal }}
-        # Signing SSH key
-        signingkey = ~/.ssh/keys/personal_ed25519.pub
+        {{-   $signingKey = "~/.ssh/keys/personal_ed25519.pub" }}
         {{- else if .decryptEnterprise }}
+        {{-   $signingKey = "~/.ssh/keys/enterprise-shared_ed25519.pub" }}
+        {{- end }}
+        {{- if $signingKey }}
         # Signing SSH key
-        signingkey = ~/.ssh/keys/enterprise-shared_ed25519.pub
+        signingkey = {{ $signingKey }}
         {{- end }}
 [feature]
         # Optimize for repos with many files in the working directory
@@ -19,27 +23,34 @@
         addEmptyPathspec = false
         detachedHead = false
         statusHints = false
+{{- if $signingKey }}
 [gpg]
         # Use SSH instead of GPG to sign
         format = ssh
+{{- end }}
 [commit]
+        {{- if $signingKey }}
         # Always sign commit
         gpgsign = true
+        {{- end }}
         # Use my template for commit message
         template = ~/.config/git/COMMITMSG
         cleanup = scissors
 [tag]
         # Sort tags by version
         sort = version:refname
+        {{- if $signingKey }}
         # Always sign tag
         forceSignAnnotated = true
         gpgsign = true
+        {{- end }}
 {{- if lookPath "git" }}
-{{- if gt (semver "2.35" | (output "bash" "-c" "git --version | cut -f3 -d' '" | trim | semver).Compare ) 0 }}
+{{-   $gitVersion := output "git" "--version" | regexFind "[0-9]+\\.[0-9]+(\\.[0-9]+)?" }}
+{{-   if and $gitVersion (gt (semver "2.35" | (semver $gitVersion).Compare) 0) }}
 [merge]
         conflictstyle = zdiff3
-{{- end}}
-{{- end}}
+{{-   end }}
+{{- end }}
 [rerere]
         enabled = true
         autoupdate = true
@@ -103,12 +114,18 @@
         autocrlf = false
         # Work with standard or convention
         whitespace = trailing-space,space-before-tab,cr-at-eol
+        {{- if lookPath "nvim" }}
         # Use neovim to edit message
         editor = nvim
+        {{- else }}
+        editor = vi
+        {{- end }}
         # Custom global ignore file
         excludesfile = ~/.config/git/ignore
         # Custom global attributes file
         attributesfile = ~/.config/git/attributes
+{{- /* A delta or ov that is not installed breaks every paging command and `add -p` */}}
+{{- if and (lookPath "delta") (lookPath "ov") }}
         # Use delta to prettier diff
         pager = delta --pager='ov -F'
 [pager]
@@ -116,9 +133,17 @@
         show = delta --features ov-diff
         diff = delta --features ov-diff
         log = delta --features ov-log
+{{- else if lookPath "delta" }}
+        # Use delta to prettier diff
+        pager = delta
+{{- else }}
+        pager = less -R
+{{- end }}
+{{- if lookPath "delta" }}
 [interactive]
         # Use delta to show diff when interactive each hunks
         diffFilter = delta --color-only
+{{- end }}
 [delta]
         # Use delta with catppuccin theme
         {{- $theme := "macchiato" }}

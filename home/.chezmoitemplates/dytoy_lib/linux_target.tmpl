@@ -1,0 +1,14 @@
+{{- /*
+  Print the Linux part of a Rust target triple for a release asset:
+  `unknown-linux-musl` on a musl system (Alpine, or any with the musl loader)
+  when upstream builds one for this architecture, `unknown-linux-gnu` otherwise.
+  A glibc build does not run on musl. Called with a dict:
+    ctx  the template data of the definition (`.`)
+    musl the chezmoi architectures (amd64, arm64...) upstream ships a musl build for
+*/ -}}
+{{- $isMusl := or (eq .ctx.osid "linux-alpine") (not (empty (glob "/lib/ld-musl-*"))) -}}
+{{- if and $isMusl (has .ctx.chezmoi.arch .musl) -}}
+unknown-linux-musl
+{{- else -}}
+unknown-linux-gnu
+{{- end -}}

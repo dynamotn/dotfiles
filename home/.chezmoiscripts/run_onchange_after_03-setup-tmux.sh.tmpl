@@ -2,19 +2,24 @@
 # @file 03-setup-tmux.sh
 # @brief Set up tmux
 # @description Set up tmux, only when it is the chosen terminal multiplexer.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
 {{- if eq .terminalMultiplexer "T" }}
 dybatpho::header "Setup tmux"
-# config hash: {{ joinPath .chezmoi.sourceDir "../silos/tmux/config" | include | sha256sum }}
+{{- /* A submodule, so absent until the submodules are updated */}}
+{{- $tmuxConfig := joinPath .chezmoi.sourceDir "../silos/tmux/config" }}
+{{- if stat $tmuxConfig }}
+# config hash: {{ include $tmuxConfig | sha256sum }}
+{{- end }}
 tmux_plugin_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "share" "tmux" "plugins")"
 tpm_dir="$(dybatpho::path_join "${tmux_plugin_dir}" "tpm")"
 dybatpho::ensure_dir "${tmux_plugin_dir}" > /dev/null
 
 dybatpho::progress "Install tpm"
 if ! dybatpho::is dir "${tpm_dir}"; then
-  git clone https://github.com/tmux-plugins/tpm "${tpm_dir}"
+  # Pinned to a release, so an apply never runs whatever the branch head is.
+  git clone --depth 1 --branch v3.1.0 https://github.com/tmux-plugins/tpm "${tpm_dir}"
 fi
 
 dybatpho::progress "Install other plugins"

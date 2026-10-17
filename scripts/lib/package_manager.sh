@@ -126,12 +126,14 @@ function package_manager::sync_portage_repo {
 # @noargs
 #######################################
 function package_manager::sync_pacman_repo {
-  # `paru` also refreshes the AUR metadata, so it wins when it is installed.
-  if ! dybatpho::is command paru; then
-    package_manager::sync_repo pacman
+  dybatpho::progress "Syncing package repositories"
+  # The upgrade comes with the sync: installing on top of a bare `-Sy` leaves
+  # the system partially upgraded. `paru` also refreshes the AUR metadata, so
+  # it wins when it is installed and allowed to run.
+  if dybatpho::is command paru && ! dybatpho::is_root; then
+    dybatpho::dry_run paru -Syu --noconfirm
   else
-    dybatpho::progress "Syncing package repositories"
-    dybatpho::dry_run paru -Sy
+    dybatpho::privilege_run -- pacman -Syu --noconfirm
   fi
 }
 
@@ -194,14 +196,28 @@ function package_manager::init_gentoo {
 #######################################
 function package_manager::init_arch {
   package_manager::sync_pacman_repo
+  if dybatpho::is_root; then
+    dybatpho::warn "makepkg refuses to run as root, skip installing \`paru\` and AUR packages"
+    return 0
+  fi
   if ! dybatpho::is command paru; then
     dybatpho::progress "Installing \`paru\` for managing AUR packages"
-    package_manager::install pacman git base-devel rust
+    # Rust is only needed to build paru, so it goes again unless it was there
+    # before, from pacman or from rustup.
+    local -a build_packages=(git base-devel)
+    local remove_rust=false
+    if ! dybatpho::is command cargo; then
+      build_packages+=(rust)
+      remove_rust=true
+    fi
+    package_manager::install pacman "${build_packages[@]}"
     local paru
     dybatpho::create_temp_dir paru
     dybatpho::dry_run git clone https://aur.archlinux.org/paru.git "${paru}"
     dybatpho::dry_run bash -c "cd \"${paru}\" && makepkg -si --noconfirm"
-    dybatpho::privilege_run -- pacman -Rscn --noconfirm rust
+    if dybatpho::is true "${remove_rust}"; then
+      dybatpho::privilege_run -- pacman -Rscn --noconfirm rust
+    fi
   fi
 }
 
@@ -516,6 +532,16 @@ function package_manager::install_via_pacman {
   dybatpho::expect_args package -- "$@"
   shift
   dybatpho::progress "Installing package ${package}"
+  # `makepkg` refuses to run as root, so root installs what the repositories
+  # have with `pacman` and leaves out the AUR.
+  if dybatpho::is_root; then
+    if ! pacman -Si -- "${package}" > /dev/null 2>&1; then
+      dybatpho::warn "${package} is not in the pacman repositories and the AUR needs a non-root user, skip it"
+      return 0
+    fi
+    dybatpho::dry_run pacman --noconfirm -S --needed "$@" "${package}"
+    return
+  fi
   # `dybatpho::pkg_install` drives `pacman`, which can't build AUR packages, so
   # `paru` stays in charge here.
   dybatpho::dry_run paru --noconfirm -S --needed --skipreview "$@" "${package}"

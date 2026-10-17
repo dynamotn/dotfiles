@@ -17,7 +17,7 @@ github:
   {{- end }}
   {{- $os := "" }}
   {{- if eq .chezmoi.os "linux" }}
-  {{-   $os = "unknown-linux-gnu" }}
+  {{-   $os = includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64")) }}
   {{- else if eq .chezmoi.os "darwin" }}
   {{-   $os = "apple-darwin" }}
   {{- end }}

@@ -5,7 +5,7 @@
 # @description Map root to an SELinux user, set the booleans and load the
 # local policy module. Runs as root through `scz apply`, again whenever the
 # module source or this script changes.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
 dybatpho::header "Setup SELinux"

@@ -10,11 +10,11 @@ killall xdg-desktop-portal-wlr || true
 killall xdg-desktop-portal-gnome || true
 killall xdg-desktop-portal-hyprland || true
 killall xdg-desktop-portal || true
-{{ if eq .chezmoi.osRelease.id "gentoo" }}
+{{ if eq .osid "linux-gentoo" }}
 /usr/libexec/xdg-desktop-portal-wlr &
 sleep 2
 /usr/libexec/xdg-desktop-portal
-{{ else if eq .chezmoi.osRelease.id "arch" }}
+{{ else if eq .osid "linux-arch" }}
 /usr/lib64/xdg-desktop-portal-hyprland &
 sleep 2
 /usr/lib64/xdg-desktop-portal
