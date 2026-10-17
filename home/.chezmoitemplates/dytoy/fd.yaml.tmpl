@@ -30,11 +30,12 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{-   $arch = "aarch64" }}
   {{- end }}
-  release_asset: fd-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
+  {{- $os := includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64" "arm64")) }}
+  release_asset: fd-%v-{{ $arch }}-{{ $os }}.tar.gz
 archive:
-  - path: fd-%v-{{ $arch }}-unknown-linux-gnu/fd
+  - path: fd-%v-{{ $arch }}-{{ $os }}/fd
     strip: 1
-  - path: fd-%v-{{ $arch }}-unknown-linux-gnu/fd.1
+  - path: fd-%v-{{ $arch }}-{{ $os }}/fd.1
     strip: 1
     location: {{ .chezmoi.homeDir }}/.local/man/man1
 {{- end }}

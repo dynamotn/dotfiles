@@ -7,7 +7,7 @@ github:
   {{- if eq .chezmoi.os "darwin" }}
   {{-   $os = "apple-darwin" }}
   {{- else if eq .chezmoi.os "linux" "android" }}
-  {{-   $os = "unknown-linux-gnu" }}
+  {{-   $os = includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64" "arm64")) }}
   {{- end }}
   {{- if eq .chezmoi.arch "amd64" }}
   {{-   $arch = "x86_64" }}
