@@ -6,7 +6,7 @@
 # such as a document explaining a conflict or a test fixture, opts out with the
 # `conflict-markers=allowed` gitattribute.
 {{ template "git/hooks/modern_bash.sh.tmpl" . }}
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules array
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules array
 dybatpho::register_common_handlers
 
 # Only the opening, the base and the closing marker, anchored and at their exact

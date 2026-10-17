@@ -5,7 +5,7 @@
 # writes to standard input: the model and its effort, a ten segment context
 # usage bar, the rate limits with the time left until they reset, and the
 # last two components of the working directory.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules json date
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json date
 dybatpho::register_common_handlers
 
 # Segments of the context usage bar
