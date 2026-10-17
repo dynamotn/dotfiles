@@ -54,6 +54,30 @@ setup() {
   assert_success
   refute_stderr --partial "unbound variable"
   assert_output --partial '/data/data/com.termux/files/usr/etc/apt/sources.list.d/sample.list'
+  assert_output --partial '/data/data/com.termux/files/usr/etc/apt/trusted.gpg.d/sample.gpg'
+}
+
+@test "package_manager::add_apt_repo dearmors an armored key and keeps a binary one" {
+  export DRY_RUN='true'
+  local gpg_calls="${BATS_TEST_TMPDIR}/gpg-calls"
+  printf '#!/bin/sh\nprintf "%%s\\n" "$*" >> "%s"\n' "${gpg_calls}" > "${HOME}/.local/bin/gpg"
+  chmod +x "${HOME}/.local/bin/gpg"
+  # shellcheck disable=SC2329 # invoked by package_manager::add_apt_repo
+  function dybatpho::curl_download {
+    printf -- '-----BEGIN PGP PUBLIC KEY BLOCK-----\nabc\n' > "$2"
+  }
+  run package_manager::add_apt_repo sample https://packages.example stable main ABCD1234
+  assert_success
+  assert_output --partial 'install -m 0644'
+  run cat "${gpg_calls}"
+  assert_output --partial '--dearmor'
+
+  rm -f "${gpg_calls}"
+  # shellcheck disable=SC2329 # invoked by package_manager::add_apt_repo
+  function dybatpho::curl_download { printf '\x99\x01binary' > "$2"; }
+  run package_manager::add_apt_repo sample https://packages.example stable main https://example.com/key.gpg
+  assert_success
+  assert_file_not_exist "${gpg_calls}"
 }
 
 @test "package_manager::add_flatpak_repo adds a missing remote in dry-run mode" {
@@ -352,10 +376,19 @@ EOF
 }
 
 @test "package_manager::check_installed_flatpak delegates to flatpak list" {
-  stub flatpak 'list --app : printf "Name com.example.App stable flathub\n"'
+  stub flatpak 'list --app --columns=application : printf "org.other.App\ncom.example.App\n"'
   run package_manager::check_installed_flatpak com.example.App
   assert_success
   unstub flatpak
+}
+
+@test "package_manager::check_installed_fdroidcl matches a whole package id" {
+  printf '#!/bin/sh\nprintf "package:com.x.app.debug\\n"\n' > "${HOME}/.local/bin/cmd"
+  chmod +x "${HOME}/.local/bin/cmd"
+  run package_manager::check_installed_fdroidcl com.x.app
+  assert_failure
+  run package_manager::check_installed_fdroidcl com.x.app.debug
+  assert_success
 }
 
 @test "package_manager::check_installed_brew delegates to brew list" {
@@ -520,7 +553,7 @@ EOF
 }
 
 @test "package_manager::check_installed_flatpak and check_installed_mas reject an absent id" {
-  stub flatpak 'list --app : printf "Name com.example.App stable flathub\n"'
+  stub flatpak 'list --app --columns=application : printf "com.example.App\n"'
   run package_manager::check_installed_flatpak com.example
   assert_failure
   unstub flatpak
@@ -537,7 +570,10 @@ EOF
   # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
   function dybatpho::curl_download { :; }
   # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
-  function dybatpho::privilege_run { shift; printf 'run:%s\n' "$*"; }
+  function dybatpho::privilege_run {
+    shift
+    printf 'run:%s\n' "$*"
+  }
   cat > "${HOME}/.local/bin/hdiutil" << 'SH'
 #!/bin/sh
 printf '<key>mount-point</key>\n<string>/Volumes/My App</string>\n<string>/Volumes/Other</string>\n'
@@ -547,5 +583,22 @@ SH
   run package_manager::install_via_dmg MyApp https://example.com/MyApp.dmg
   assert_success
   assert_output --partial 'run:cp -r /Volumes/My App/MyApp.app /Applications'
+  assert_output --partial 'run:hdiutil unmount /Volumes/My App'
+}
+
+@test "package_manager::install_via_dmg fails and unmounts when the copy fails" {
+  # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
+  function dybatpho::curl_download { :; }
+  # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
+  function dybatpho::privilege_run {
+    shift
+    printf 'run:%s\n' "$*"
+    [[ "$1" != "cp" ]]
+  }
+  printf '#!/bin/sh\nprintf "<string>/Volumes/My App</string>\\n"\n' > "${HOME}/.local/bin/hdiutil"
+  chmod +x "${HOME}/.local/bin/hdiutil"
+
+  run package_manager::install_via_dmg MyApp https://example.com/MyApp.dmg
+  assert_failure
   assert_output --partial 'run:hdiutil unmount /Volumes/My App'
 }

@@ -4,7 +4,7 @@
 # @description Launch the Obsidian GUI with the flags listed in
 # `$XDG_CONFIG_HOME/obsidian/user-flags.conf`, under a name that does not
 # shadow the `obsidian` CLI shipped by the distribution package.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
 obsidian_config_dir="$(dybatpho::xdg_config_dir obsidian)"

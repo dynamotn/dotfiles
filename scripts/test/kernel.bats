@@ -248,3 +248,21 @@ make -C ${tree} savedefconfig"
   assert_output --partial "--configure-only"
   assert_output --partial "--save-base"
 }
+
+@test "kernel::save_defconfig copies into a root-owned folder with privilege" {
+  local tree="${BATS_TEST_TMPDIR}/tree" base_dir="${BATS_TEST_TMPDIR}/etc-kernel"
+  mkdir -p "${tree}" "${base_dir}"
+  chmod 555 "${base_dir}"
+  printf '#!/usr/bin/env bash\nprintf "CONFIG_X=y\\n" > "$2/defconfig"\n' > "${HOME}/.local/bin/make"
+  chmod +x "${HOME}/.local/bin/make"
+  # shellcheck disable=SC2329 # invoked by kernel::run_in_tree
+  function dybatpho::privilege_run {
+    shift
+    printf 'privileged:%s\n' "$*"
+  }
+
+  run kernel::save_defconfig "${tree}" "${base_dir}/base.config"
+  chmod 755 "${base_dir}"
+  assert_success
+  assert_output "privileged:cp ${tree}/defconfig ${base_dir}/base.config"
+}

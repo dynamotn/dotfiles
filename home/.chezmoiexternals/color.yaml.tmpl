@@ -2,22 +2,26 @@
 {{- if ne .kind "container" }}
 .local/bin/color16:
   type: file
-  url: 'https://raw.githubusercontent.com/pablopunk/colortest/master/colortest'
+  url: 'https://raw.githubusercontent.com/pablopunk/colortest/471509b6db7b5429a065b3eca93b612910a3875d/colortest'
+  checksum:
+    sha256: "a9483c0578e04ec3aae48cefb4b6ff89bdc93544b78109aeb7bc3ceba9789311"
   executable: true
-  refreshPeriod: 168h
 .local/bin/color256:
   type: file
-  url: https://misc.flogisoft.com/_export/code/bash/tip_colors_and_formatting?codeblock=56
+  url: 'https://misc.flogisoft.com/_export/code/bash/tip_colors_and_formatting?codeblock=56'
+  checksum:
+    sha256: "9459cc5fb2636869bed3c853aee61649a5914ef6b6d7dec5897e7aac277686b1"
   executable: true
-  refreshPeriod: 168h
 .local/bin/colorfull:
   type: file
-  url: https://misc.flogisoft.com/_export/code/bash/tip_colors_and_formatting?codeblock=55
+  url: 'https://misc.flogisoft.com/_export/code/bash/tip_colors_and_formatting?codeblock=55'
+  checksum:
+    sha256: "d5d5ef03e61a7272719c2aba512b27ba8cb0a8325a97783d56b6d87d8f560b66"
   executable: true
-  refreshPeriod: 168h
 .local/bin/truecolor:
   type: file
-  url: https://gist.githubusercontent.com/lifepillar/09a44b8cf0f9397465614e622979107f/raw/24-bit-color.sh
+  url: 'https://gist.githubusercontent.com/lifepillar/09a44b8cf0f9397465614e622979107f/raw/d89f28711c037e53f03e312f6fef11bcc75006f8/24-bit-color.sh'
+  checksum:
+    sha256: "e0b4a032225b288ecb1404dc4b6d118c2fbf3c76bbf8b176442b9964042c24eb"
   executable: true
-  refreshPeriod: 168h
 {{- end }}

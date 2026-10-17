@@ -4,7 +4,7 @@
 # @description Render the Copilot CLI status line from the JSON the CLI writes
 # to standard input: the model, a context usage bar, the git branch, the usage
 # of the current premium request quota and the working directory.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules json git
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json git
 dybatpho::register_common_handlers
 
 input=$(cat)

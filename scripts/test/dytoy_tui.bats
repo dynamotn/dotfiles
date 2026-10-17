@@ -152,6 +152,19 @@ function run_until_done {
   assert_equal "${#lines[@]}" 0
 }
 
+# A fresh macOS has only BSD sed, which reads `\x1B` in a pattern literally.
+@test "dytoy_tui::log_tail cleans the same way with BSD sed" {
+  [[ -x /usr/bin/sed ]] && ! /usr/bin/sed --version &> /dev/null || skip "no BSD sed"
+  local bin="${BATS_TEST_TMPDIR}/bin"
+  mkdir -p "${bin}" && ln -s /usr/bin/sed "${bin}/sed"
+  local log="${BATS_TEST_TMPDIR}/sample.log"
+  printf '\033[1;31mred 42\033[0m\033[K\nA\tB\n' > "${log}"
+  local -a lines=()
+  PATH="${bin}:${PATH}" dytoy_tui::log_tail lines "${log}" 2
+  assert_equal "${lines[0]}" $'\033[1;31mred 42\033[0m'
+  assert_equal "${lines[1]}" "A  B"
+}
+
 @test "dytoy_tui::handle_pick_key toggles, picks a whole tab and switches tabs" {
   dytoy_tui::load_tools
   DYTOY_TUI_TAB=1
@@ -761,7 +774,8 @@ EOF
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
   run grep -E '^  \[(mauve|base|crust)\]="#[0-9a-f]{6}"$' "${rendered}"
   assert_success
-  assert_equal "${#lines[@]}" "3"  run grep -E '^DYTOY_TUI_FLAVOUR="(latte|macchiato)"$' "${rendered}"
+  assert_equal "${#lines[@]}" "3"
+  run grep -E '^DYTOY_TUI_FLAVOUR="(latte|macchiato)"$' "${rendered}"
   assert_success
 }
 

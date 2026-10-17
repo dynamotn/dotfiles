@@ -6,8 +6,15 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Nothing here writes to the repository, so the token can only read it.
+permissions:
+  contents: read
+
 env:
   SHFMT_VERSION: v3.12.0
+  SHFMT_SHA256: d9fbb2a9c33d13f47e7618cf362a914d029d02a6df124064fff04fd688a745ea
+  CHEZMOI_VERSION: v2.72.2
+  YAML_SCHEMA_VERSION: 0.9.1
 
 jobs:
   lint:
@@ -26,12 +33,15 @@ jobs:
         run: |
           curl -fsSL -o /tmp/shfmt \
             "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64"
+          echo "${SHFMT_SHA256}  /tmp/shfmt" | sha256sum -c -
           chmod +x /tmp/shfmt
           sudo mv /tmp/shfmt /usr/local/bin/shfmt
 
       # The pathspec matches recursively and skips submodule contents.
+      # SC2154/SC2034 are waived in the sources with dyshellint directives,
+      # which plain shellcheck cannot read: those are globals set by callers.
       - name: shellcheck
-        run: git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning
+        run: git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning -e SC2154,SC2034
 
       - name: shfmt
         run: |
@@ -51,16 +61,16 @@ jobs:
         run: git submodule update --init --recursive scripts/lib/dybatpho
 
       - name: Install chezmoi
-        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin -t "${CHEZMOI_VERSION}"
 
       - name: Cache cargo binaries
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin
-          key: cargo-bin-yaml-schema-${{ runner.os }}
+          key: cargo-bin-yaml-schema-${{ env.YAML_SCHEMA_VERSION }}-${{ runner.os }}
 
       - name: Install yaml-schema
-        run: command -v ys > /dev/null || cargo install yaml-schema --locked
+        run: command -v ys > /dev/null || cargo install yaml-schema --version "${YAML_SCHEMA_VERSION}" --locked
 
       # The secrets schema tests skip themselves when secrets/data is absent,
       # so the whole suite is safe to run without the private submodule.

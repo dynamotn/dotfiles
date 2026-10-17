@@ -292,7 +292,7 @@ location = /var/db/repos/${name}
 sync-type = git
 sync-uri = ${url}
 EOF
-    dybatpho::privilege_run -- cp "${repo_conf}" "/etc/portage/repos.conf/${name}.conf"
+    dybatpho::privilege_run -- install -m 0644 "${repo_conf}" "/etc/portage/repos.conf/${name}.conf"
     dybatpho::privilege_run -- emaint sync --yes --repo "${name}" || dybatpho::die "Failed to sync repository ${name}"
   fi
 }
@@ -308,16 +308,15 @@ EOF
 function package_manager::add_apt_repo {
   local name url suite components key
   dybatpho::expect_args name url suite components key -- "$@"
-  local path gpg_path
-  gpg_path="$(dybatpho::path_join "/etc/apt/trusted.gpg.d" "${name}.gpg")"
+  local apt_dir="/etc/apt"
   if dybatpho::is command termux-setup-storage; then
     # Termux exports PREFIX; a shell that has its tools without it falls back to
     # the prefix Termux installs into, rather than stopping on an unset name.
-    path="$(dybatpho::path_join "${PREFIX:-/data/data/com.termux/files/usr}" \
-      "etc" "apt" "sources.list.d" "${name}.list")"
-  else
-    path="$(dybatpho::path_join "/etc/apt/sources.list.d" "${name}.list")"
+    apt_dir="$(dybatpho::path_join "${PREFIX:-/data/data/com.termux/files/usr}" "etc" "apt")"
   fi
+  local path gpg_path
+  path="$(dybatpho::path_join "${apt_dir}" "sources.list.d" "${name}.list")"
+  gpg_path="$(dybatpho::path_join "${apt_dir}" "trusted.gpg.d" "${name}.gpg")"
   if ! dybatpho::is file "${path}"; then
     dybatpho::debug "Adding repository ${name}."
     if ! [[ "${key}" =~ ^https://.* ]]; then
@@ -326,14 +325,21 @@ function package_manager::add_apt_repo {
     local temp_key repo_list
     dybatpho::create_temp temp_key ".gpg"
     dybatpho::curl_download "${key}" "${temp_key}"
-    if ! [[ "${key}" =~ ^https://.* ]]; then
-      dybatpho::privilege_run -- cp "${temp_key}" "${gpg_path}"
-    else
-      dybatpho::privilege_run -- gpg --dearmor --yes -o "${gpg_path}" "${temp_key}"
+    # Keyservers and most vendors serve an armored key, which apt only reads
+    # once dearmored; a few serve the binary keyring apt takes as it is.
+    if grep -q -- '-----BEGIN PGP PUBLIC KEY BLOCK-----' "${temp_key}"; then
+      dybatpho::require gpg
+      local dearmored
+      dybatpho::create_temp dearmored ".gpg"
+      gpg --dearmor --yes -o "${dearmored}" "${temp_key}"
+      temp_key="${dearmored}"
     fi
+    # `install` rather than `cp`: temp files are 0600, and apt run as a normal
+    # user must still read both files.
+    dybatpho::privilege_run -- install -m 0644 "${temp_key}" "${gpg_path}"
     dybatpho::create_temp repo_list ".list"
     printf '%s\n' "deb [signed-by=${gpg_path}] ${url} ${suite} ${components}" > "${repo_list}"
-    dybatpho::privilege_run -- cp "${repo_list}" "${path}"
+    dybatpho::privilege_run -- install -m 0644 "${repo_list}" "${path}"
   else
     dybatpho::debug "Repository ${name} already exists, skipping."
   fi
@@ -364,7 +370,9 @@ function package_manager::add_flatpak_repo {
   # Listed first, then searched: `grep -q` stops reading at a match, and the
   # broken pipe that leaves `flatpak` with fails the pipeline under pipefail.
   local remotes
-  remotes=$(flatpak remote-list) || remotes=""
+  # Only the name column: the default output follows each name with a tab and
+  # its options, which no `^name$` can match.
+  remotes=$(flatpak remote-list --columns=name) || remotes=""
   if ! grep -q -e "^${name}$" <<< "${remotes}"; then
     dybatpho::progress "Adding Flatpak repository ${name}"
     dybatpho::dry_run flatpak remote-add --user --if-not-exists "${name}" "${url}"
@@ -435,7 +443,8 @@ function package_manager::check_installed_fdroidcl {
   dybatpho::expect_args app_id -- "$@"
   local packages
   packages=$(cmd package list packages 2> /dev/null) || return 1
-  grep -wq -e "${app_id}" <<< "${packages}"
+  # A whole line: matching the ID as a word also found `<id>.debug`.
+  grep -Fxq -e "package:${app_id}" <<< "${packages}"
 }
 
 #######################################
@@ -446,11 +455,12 @@ function package_manager::check_installed_flatpak {
   local package
   dybatpho::expect_args package -- "$@"
   local apps
-  apps=$(flatpak list --app) || return 1
-  # The application ID is the second whitespace-separated field.
+  # Only the ID column: in the default output the name comes first, and a name
+  # of several words pushed the ID out of the field it was read from.
+  apps=$(flatpak list --app --columns=application) || return 1
   local -a ids=()
   local id
-  while read -r _ id _; do
+  while read -r id; do
     ids+=("${id}")
   done <<< "${apps}"
   dybatpho::array_contains ids "${package}"
@@ -656,6 +666,12 @@ function package_manager::install_via_dmg {
   dybatpho::string_match mount_match "${plist}" $'/Volumes/[^"<\n]+' || return 1
   mount_dir="${mount_match[0]}"
   # /Applications is not writable by the user, and the volume is mounted as root
-  dybatpho::privilege_run -- cp -r "${mount_dir}/${app_name}.app" /Applications
+  # The caller runs this under `||`, where `set -e` is off, so a failed copy
+  # must fail the install itself, and still unmount the volume.
+  if ! dybatpho::privilege_run -- cp -r "${mount_dir}/${app_name}.app" /Applications; then
+    dybatpho::privilege_run -- hdiutil unmount "${mount_dir}" || true
+    dybatpho::error "Could not copy ${app_name}.app from ${mount_dir}"
+    return 1
+  fi
   dybatpho::privilege_run -- hdiutil unmount "${mount_dir}"
 }

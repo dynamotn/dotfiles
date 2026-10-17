@@ -13,7 +13,7 @@
 # `GITLAB_TOKEN` and `GITHUB_TOKEN`.
 # @arg $1 string Optional GitLab remote, default is `origin`
 # @arg $2 string Optional GitHub remote, default is `gh`
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules git forge
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules git forge
 dybatpho::register_common_handlers
 
 #######################################
