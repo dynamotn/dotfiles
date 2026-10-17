@@ -10,9 +10,16 @@ dybatpho::register_common_handlers
 installer_file=""
 dybatpho::create_temp installer_file ".sh"
 dybatpho::header "Setup tridactyl"
+# The installer is pinned to a release and checked before it runs. The
+# tridactyl version it is given picks the messenger release it downloads.
+installer_version="0.5.0"
+installer_sha256="4d7b77a1ab3189cbbbd1a6ede9eb0edce4d29691bb75fbc3087d240f6e789300"
+tridactyl_version="1.25.1"
 installer_url="https://raw.githubusercontent.com/tridactyl/native_messenger"
-installer_url+="/master/installers/install.sh"
+installer_url+="/${installer_version}/installers/install.sh"
 dybatpho::curl_download "${installer_url}" "${installer_file}"
-bash "${installer_file}" master
+dybatpho::verify_checksum "${installer_file}" "sha256:${installer_sha256}" \
+  || dybatpho::die "The tridactyl installer does not match its checksum"
+bash "${installer_file}" "${tridactyl_version}"
 dybatpho::success "Setup tridactyl"
 {{- end }}

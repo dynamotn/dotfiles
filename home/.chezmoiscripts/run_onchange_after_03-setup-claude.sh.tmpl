@@ -21,6 +21,8 @@ SKILLS_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".agents" "skills")"
 
 # Community skills from https://skills.sh, installed for every agent with
 # `npx skills add -g`. Keep each entry generic to a role, never to one project.
+# The installer is pinned, so an apply never runs a release nobody looked at.
+SKILLS_CLI="skills@1.7.2"
 SKILLS=(
   # discovery
   vercel-labs/skills@find-skills
@@ -139,7 +141,7 @@ function _setup_skills {
       continue
     fi
     dybatpho::info "Install skill ${skill}"
-    npx -y skills add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
+    npx -y "${SKILLS_CLI}" add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
   done
 }
 
