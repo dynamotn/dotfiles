@@ -3,7 +3,7 @@
 # @brief Install the package manager tools declared for dytoy
 # @description Install the package manager tools declared for dytoy. Re-runs whenever a
 # dytoy template changes.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
 local_bin_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "bin")"
