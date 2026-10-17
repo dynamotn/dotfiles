@@ -78,3 +78,12 @@ function run_source_path {
     assert_output "home/private_dot_config/create_foo"
   done
 }
+
+@test "chezmoi_attrs::source_path keeps a name that looks like an attribute or a template" {
+  run run_source_path "${HOME}/certs/private_key.pem" "encrypted"
+  assert_success
+  assert_output "home/certs/encrypted_literal_private_key.pem"
+  run run_source_path "/etc/foo/run.tmpl" ""
+  assert_success
+  assert_output "root/etc/foo/run.tmpl.literal"
+}
