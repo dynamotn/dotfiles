@@ -13,6 +13,8 @@ _remote="${RC_SVCNAME#rclone.}"
 _mount_dir="${HOME}/Sync/${_remote}"
 _config="${HOME}/.config/rclone/rclone.conf"
 _rclone="${HOME}/.local/bin/rclone"
+# Private to this user: /tmp is shared, and its paths are guessable.
+_state_dir="${XDG_STATE_HOME:-${HOME}/.local/state}/rclone"
 
 description="rclone: Remote FUSE filesystem for cloud storage config ${_remote}"
 command="${_rclone}"
@@ -21,11 +23,11 @@ command_args="mount
   --vfs-cache-mode writes
   --vfs-cache-max-size 100M
   --log-level INFO
-  --log-file /tmp/rclone-${_remote}.log
-  --umask 022
+  --log-file ${_state_dir}/${_remote}.log
+  --umask 077
   ${_remote}: ${_mount_dir}"
 command_background=true
-pidfile="/tmp/rclone-${_remote}.pid"
+pidfile="${XDG_RUNTIME_DIR:-${_state_dir}}/rclone-${_remote}.pid"
 
 depend() {
     need net
@@ -38,6 +40,7 @@ start_pre() {
         return 1
     fi
     checkpath --directory --mode 0750 "${_mount_dir}"
+    checkpath --directory --mode 0700 "${_state_dir}"
 }
 
 stop_post() {

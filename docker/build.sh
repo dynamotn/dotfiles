@@ -22,9 +22,9 @@ function _install_ssl_certs {
       update_cmd="update-ca-trust"
     fi
     # dyshellint disable=BSG035 the system trust store is root-owned
-    sudo cp /run/secrets/ssl_cert "$folder/ssl_decryption.crt"
+    sudo cp /run/secrets/ssl_cert "${folder}/ssl_decryption.crt"
     # dyshellint disable=BSG035 refreshing the system trust store needs root
-    sudo "$update_cmd"
+    sudo "${update_cmd}"
   fi
 }
 
@@ -36,7 +36,7 @@ function _install_packages {
   if command -v pacman &> /dev/null; then
     # Choose mirror for VN
     # dyshellint disable=BSG035 the pacman mirrorlist is root-owned
-    echo "Server = http://mirror.bizflycloud.vn/archlinux/\$repo/os/\$arch" | sudo tee /etc/pacman.d/mirrorlist
+    echo "Server = https://mirror.bizflycloud.vn/archlinux/\$repo/os/\$arch" | sudo tee /etc/pacman.d/mirrorlist
     # Container only tools
     # dyshellint disable=BSG035 pacman writes to the system package database
     sudo pacman -Sy --noconfirm expect
@@ -72,16 +72,20 @@ function _main {
   _install_ssl_certs
   _install_packages
 
-  # Disable SSH host key checking
-  export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
+  # Pin the host keys of the public forges, published on their documentation
+  # pages, and trust other hosts on first use: the build has the secrets
+  # mounted, so a swapped github.com or gitlab.com must not be accepted.
+  local known_hosts
+  known_hosts="$(realpath "$(dirname "${BASH_SOURCE[0]}")")/known_hosts"
+  export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=accept-new -oUserKnownHostsFile=${known_hosts}"
   # Get identities from secrets
   if [[ -f /run/secrets/age_passphrases ]]; then
     local age_passphrases
     # dyshellint disable=BSG035 the build secret is mounted root-only
     age_passphrases=$(sudo cat /run/secrets/age_passphrases)
     local identities=""
-    for passphrase in $age_passphrases; do
-      IFS='=' read -r key _ <<< "$passphrase"
+    for passphrase in ${age_passphrases}; do
+      IFS='=' read -r key _ <<< "${passphrase}"
       identities="${identities}${key},"
     done
   else
@@ -89,7 +93,7 @@ function _main {
   fi
 
   # Setup dotfiles
-  "$SCRIPT_DIR"/setup.sh -d -i"$identities"
+  "${SCRIPT_DIR}"/setup.sh -d -i"${identities}"
 
   # Delete sensitive data
   rm -rf ~/.config/chezmoi/*.key ~/Dotfiles/secrets
