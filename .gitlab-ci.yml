@@ -3,6 +3,9 @@
 variables:
   GIT_SUBMODULE_STRATEGY: none
   SHFMT_VERSION: v3.12.0
+  SHFMT_SHA256: d9fbb2a9c33d13f47e7618cf362a914d029d02a6df124064fff04fd688a745ea
+  CHEZMOI_VERSION: v2.72.2
+  YAML_SCHEMA_VERSION: 0.9.1
 
 stages:
   - lint
@@ -21,6 +24,7 @@ lint:shell:
     - apt-get install -y -qq --no-install-recommends shellcheck
     - curl -fsSL -o /usr/local/bin/shfmt
       "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64"
+    - echo "${SHFMT_SHA256}  /usr/local/bin/shfmt" | sha256sum -c -
     - chmod +x /usr/local/bin/shfmt
     # The pathspec matches recursively and skips submodule contents.
     - git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning
@@ -32,8 +36,8 @@ test:bats:
   script:
     # Only the test library, so the private secrets submodule stays out.
     - git submodule update --init --recursive scripts/lib/dybatpho
-    - sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+    - sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin -t "${CHEZMOI_VERSION}"
     - apt-get install -y -qq --no-install-recommends cargo
     - export PATH="$HOME/.cargo/bin:$PATH"
-    - command -v ys > /dev/null || cargo install yaml-schema --locked
+    - command -v ys > /dev/null || cargo install yaml-schema --version "${YAML_SCHEMA_VERSION}" --locked
     - ./scripts/test.sh --all
