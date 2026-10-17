@@ -1,13 +1,12 @@
 {
   "cleanupPeriodDays": 20,
   "permissions": {
-    "defaultMode": "acceptEdits",
     "ask": [
       "Bash(git push)",
       "Bash(git push:*)"
-    ]
+    ],
+    "defaultMode": "acceptEdits"
   },
-  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
@@ -90,11 +89,110 @@
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
   },
+  "enabledPlugins": {
+    "i-have-adhd@i-have-adhd": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "posty-social-media-scheduler@anthropic-plugin-directory": true,
+    "telegram@claude-plugins-official": true,
+    "lua-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "gitlab@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "obsidian@obsidian-skills": true,
+    "playwright@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "semgrep@claude-plugins-official": true,
+    "claude-security@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "appsec-skills@agent-sec-ops-kit-skills": true,
+    "code-simplifier@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "compliance-skills@agent-sec-ops-kit-skills": true,
+    "devsecops-skills@agent-sec-ops-kit-skills": true,
+    "differential-review@trailofbits": true,
+    "elements-of-style@superpowers-marketplace": true,
+    "episodic-memory@superpowers-marketplace": true,
+    "incident-response-skills@agent-sec-ops-kit-skills": true,
+    "insecure-defaults@trailofbits": true,
+    "llm-testing@awesome-security-skills": true,
+    "mattpocock-skills@claude-plugins-official": true,
+    "modern-python@trailofbits": true,
+    "offsec-skills@agent-sec-ops-kit-skills": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "second-opinion@trailofbits": true,
+    "secsdlc-skills@agent-sec-ops-kit-skills": true,
+    "secskills-core@secskills-marketplace": true,
+    "secskills-defense@secskills-marketplace": true,
+    "secskills-offense@secskills-marketplace": true,
+    "secskills@secskills-marketplace": true,
+    "security-fuzzing@awesome-security-skills": true,
+    "security-passwords@awesome-security-skills": true,
+    "security-patterns@awesome-security-skills": true,
+    "security-payloads@awesome-security-skills": true,
+    "security-usernames@awesome-security-skills": true,
+    "security-webshells@awesome-security-skills": true,
+    "sharp-edges@trailofbits": true,
+    "skill-creator@claude-plugins-official": true,
+    "static-analysis@trailofbits": true,
+    "supply-chain-risk-auditor@trailofbits": true,
+    "testing-handbook-skills@trailofbits": true,
+    "threatmodel-skills@agent-sec-ops-kit-skills": true,
+    "trailmark@trailofbits": true,
+    "mcp-server-dev@claude-plugins-official": true,
+    "agent-sdk-dev@claude-plugins-official": true,
+    "redis-development@claude-plugins-official": true,
+    "duckdb-skills@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true
+  },
   "extraKnownMarketplaces": {
     "i-have-adhd": {
       "source": {
         "source": "github",
         "repo": "ayghri/i-have-adhd"
+      }
+    },
+    "superpowers-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers-marketplace"
+      }
+    },
+    "obsidian-skills": {
+      "source": {
+        "source": "github",
+        "repo": "kepano/obsidian-skills"
+      }
+    },
+    "secskills-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "trilwu/secskills"
+      }
+    },
+    "awesome-security-skills": {
+      "source": {
+        "source": "github",
+        "repo": "Eyadkelleh/awesome-claude-skills-security"
+      }
+    },
+    "trailofbits": {
+      "source": {
+        "source": "github",
+        "repo": "trailofbits/skills"
+      }
+    },
+    "agent-sec-ops-kit-skills": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/AgentSecOps/SecOpsAgentKit.git"
       }
     }
   },
@@ -104,8 +202,5 @@
   "preferredNotifChannel": "auto",
   "remoteControlAtStartup": false,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "enabledPlugins": {
-    "i-have-adhd@i-have-adhd": true
-  }
+  "agentPushNotifEnabled": true
 }

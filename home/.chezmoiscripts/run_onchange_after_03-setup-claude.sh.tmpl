@@ -1,0 +1,163 @@
+#!{{ .bash }}
+# @file 03-setup-claude.sh
+# @brief Install the Claude Code marketplaces, plugins and skills
+# @description Bring the Claude Code extensions on this machine in line with the
+# dotfiles: every marketplace and plugin named in `~/.claude/settings.json`, and
+# every community skill from skills.sh listed below. Re-runs whenever the
+# settings or this list change. Nothing here is tied to a single project: a
+# plugin that needs a project tool chain (terraform, a database CLI, ...) does
+# not belong in the settings and is left to that project.
+. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+dybatpho::register_common_handlers
+dybatpho::require jq
+
+# settings hash: {{ joinPath .chezmoi.sourceDir "private_dot_claude/settings.json" | include | sha256sum }}
+SETTINGS_FILE="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude" "settings.json")"
+PLUGINS_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude" "plugins")"
+SKILLS_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".agents" "skills")"
+
+# Community skills from https://skills.sh, installed for every agent with
+# `npx skills add -g`. Keep each entry generic to a role, never to one project.
+SKILLS=(
+  # discovery
+  vercel-labs/skills@find-skills
+  # devops
+  affaan-m/ecc@docker-patterns
+  jeffallan/claude-skills@kubernetes-specialist
+  wshobson/agents@helm-chart-scaffolding
+  wshobson/agents@github-actions-templates
+  wshobson/agents@gitlab-ci-patterns
+  wshobson/agents@gitops-workflow
+  aws/agent-toolkit-for-aws@aws-iam
+  aws/agent-toolkit-for-aws@aws-observability
+  # frontend
+  vercel-labs/agent-skills@vercel-react-best-practices
+  leonxlnx/taste-skill@design-taste-frontend
+  addyosmani/web-quality-skills@accessibility
+  currents-dev/playwright-best-practices-skill@playwright-best-practices
+  wshobson/agents@e2e-testing-patterns
+  # backend
+  wshobson/agents@api-design-principles
+  addyosmani/agent-skills@api-and-interface-design
+  supabase/agent-skills@supabase-postgres-best-practices
+  samber/cc-skills-golang@golang-code-style
+  samber/cc-skills-golang@golang-testing
+  samber/cc-skills-golang@golang-error-handling
+  samber/cc-skills-golang@golang-grpc
+  mindrally/skills@fastapi-python
+  mcollina/skills@fastify-best-practices
+  apollographql/skills@rust-best-practices
+  wshobson/agents@sql-optimization-patterns
+  # security
+  samber/cc-skills-golang@golang-security
+  wshobson/agents@stride-analysis-patterns
+  openai/skills@security-threat-model
+  # architecture
+  spillwavesolutions/design-doc-mermaid@design-doc-mermaid
+  softaworks/agent-toolkit@c4-architecture
+  addyosmani/agent-skills@documentation-and-adrs
+  wshobson/agents@architecture-patterns
+  wondelai/skills@domain-driven-design
+  # ai engineering
+  anthropics/skills@mcp-builder
+  wshobson/agents@prompt-engineering-patterns
+)
+
+#######################################
+# @description Check a filter against a JSON file, false when the file is missing
+# @arg $1 string Path of the JSON file
+# @arg $2 string jq filter that yields true or false
+# @exitcode 0 The file exists and the filter yields true
+#######################################
+function _in_json_file {
+  local file filter
+  dybatpho::expect_args file filter -- "$@"
+  dybatpho::is file "${file}" || return 1
+  jq -e "${filter}" "${file}" > /dev/null
+}
+
+#######################################
+# @description Register every marketplace named in the settings that Claude does not know yet
+# @noargs
+#######################################
+function _setup_marketplaces {
+  local known_file query name source repo url
+  known_file="$(dybatpho::path_join "${PLUGINS_DIR}" "known_marketplaces.json")"
+  query='.extraKnownMarketplaces // {} | to_entries[]'
+  query+=' | [.key, .value.source.source, .value.source.repo // "", .value.source.url // ""] | @tsv'
+  # shellcheck disable=SC2312
+  while IFS=$'\t' read -r name source repo url; do
+    [[ -n "${name}" ]] || continue
+    # shellcheck disable=SC2310
+    if _in_json_file "${known_file}" "has(\"${name}\")"; then
+      dybatpho::debug "Marketplace ${name} already known"
+      continue
+    fi
+    dybatpho::info "Add marketplace ${name}"
+    case "${source}" in
+      github) claude plugin marketplace add "${repo}" ;;
+      *) claude plugin marketplace add "${url}" ;;
+    esac
+  done < <(jq -r "${query}" "${SETTINGS_FILE}")
+}
+
+#######################################
+# @description Install every plugin enabled in the settings that is not installed yet
+# @noargs
+#######################################
+function _setup_plugins {
+  local installed_file plugin
+  installed_file="$(dybatpho::path_join "${PLUGINS_DIR}" "installed_plugins.json")"
+  # shellcheck disable=SC2312
+  while IFS= read -r plugin; do
+    [[ -n "${plugin}" ]] || continue
+    # shellcheck disable=SC2310
+    if _in_json_file "${installed_file}" ".plugins | has(\"${plugin}\")"; then
+      dybatpho::debug "Plugin ${plugin} already installed"
+      continue
+    fi
+    dybatpho::info "Install plugin ${plugin}"
+    claude plugin install "${plugin}" || dybatpho::warn "Could not install plugin ${plugin}"
+  done < <(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "${SETTINGS_FILE}")
+}
+
+#######################################
+# @description Install every skill of the list that is missing from the global skills directory
+# @noargs
+#######################################
+function _setup_skills {
+  local skill name
+  for skill in "${SKILLS[@]}"; do
+    name="${skill##*@}"
+    local target
+    target="$(dybatpho::path_join "${SKILLS_DIR}" "${name}")"
+    if dybatpho::is dir "${target}"; then
+      dybatpho::debug "Skill ${name} already installed"
+      continue
+    fi
+    dybatpho::info "Install skill ${skill}"
+    npx -y skills add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
+  done
+}
+
+#######################################
+# @description Entrypoint
+# @noargs
+#######################################
+function _main {
+  dybatpho::header "Setup Claude Code"
+  if dybatpho::is command claude; then
+    _setup_marketplaces
+    _setup_plugins
+  else
+    dybatpho::warn "claude is not installed, skip marketplaces and plugins"
+  fi
+  if dybatpho::is command npx; then
+    _setup_skills
+  else
+    dybatpho::warn "npx is not installed, skip skills"
+  fi
+  dybatpho::success "Setup Claude Code"
+}
+
+_main "$@"
