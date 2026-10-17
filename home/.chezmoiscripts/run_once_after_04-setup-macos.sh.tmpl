@@ -7,11 +7,11 @@
 dybatpho::register_common_handlers
 
 {{- if eq .chezmoi.os "darwin" }}
-{{- range (joinPath .chezmoi.sourceDir "dot_macos/*" | glob) }}
+{{- range (joinPath .chezmoi.sourceDir "private_dot_macos/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{- end }}
 dybatpho::header "Setup MacOS"
-dybatpho::privilege_run -- scutil --set HostName {{ .code }}
+dybatpho::privilege_run -- scutil --set HostName {{ .code | quote }}
 macos_defaults_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".macos")"
 macos-defaults apply "${macos_defaults_dir}"
 
