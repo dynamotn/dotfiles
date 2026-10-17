@@ -24,8 +24,10 @@
   refreshPeriod: 168h
 {{ $dotfilesFolder }}/.chezmoitemplates/firefox/chrome/js/extensionOptionsPanel.uc.js:
   type: file
-  url: 'https://github.com/aminomancer/uc.css.js/raw/refs/heads/master/JS/extensionOptionsPanel.uc.js'
-  refreshPeriod: 168h
+  # Runs with full browser privileges (autoconfig sandbox off), so pin it.
+  url: 'https://raw.githubusercontent.com/aminomancer/uc.css.js/88514013ddc375f4770f4a35d8d07a91d6dd7d8f/JS/extensionOptionsPanel.uc.js'
+  checksum:
+    sha256: "947d90efce29c6f630ccaceec624d39503d629972f3b1c6158430ca758bee106"
 {{-       range $profiles }}
 .config/firefox/profiles/{{ . }}/extensions/tridactyl.vim.betas.nonewtab@cmcaine.co.uk.xpi:
   type: file

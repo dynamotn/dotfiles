@@ -1,53 +1,62 @@
 {{- if ne .kind "container" }}
 .local/bin/git-quick-stats:
   type: file
-  url: https://raw.githubusercontent.com/arzzen/git-quick-stats/master/git-quick-stats
+  url: 'https://raw.githubusercontent.com/arzzen/git-quick-stats/0f9481a507120ca2ef58c0559f78a007db2291a2/git-quick-stats'
+  checksum:
+    sha256: "4b959afa1284569b7592869e0c23e9fbd7f6c0d0dd869e3398697e8ac35e6d7d"
   executable: true
-  refreshPeriod: 168h
 .local/bin/now:
   type: file
-  url: 'https://raw.githubusercontent.com/apankrat/now.sh/master/now.sh'
+  url: 'https://raw.githubusercontent.com/apankrat/now.sh/f629cb645fff8f47379a7bdd01b89ea183ad348e/now.sh'
+  checksum:
+    sha256: "dffc891cda4709d0af85abdc4ee09fcc6587eb43b92693560e1ac6bb88c633f0"
   executable: true
-  refreshPeriod: 168h
 {{- end }}
 {{- if .hasSound }}
 .local/bin/pulsemixer:
   type: file
-  url: 'https://raw.githubusercontent.com/GeorgeFilipkin/pulsemixer/master/pulsemixer'
+  url: 'https://raw.githubusercontent.com/GeorgeFilipkin/pulsemixer/5d494ab18f48268e557af9d5ad27b1c053dfa152/pulsemixer'
+  checksum:
+    sha256: "01ba6ae01aa14449e0b6e6b7b6a12184268aecb3185773e7a365299ed3d5b3db"
   executable: true
-  refreshPeriod: 168h
 {{- end  }}
 {{- if ne .kind "container" }}
 .local/bin/qrify:
   type: file
-  url: https://raw.githubusercontent.com/alexanderepstein/Bash-Snippets/master/qrify/qrify
+  url: 'https://raw.githubusercontent.com/alexanderepstein/Bash-Snippets/581a6b4ea681005e3f8add37dbed74aaec65479f/qrify/qrify'
+  checksum:
+    sha256: "6a1f3ac051db40d8ca5978a44b95e43a57a64be3021540bdea802f6686575de7"
   executable: true
-  refreshPeriod: 168h
 .local/bin/screensaver:
   type: file
-  url: 'https://raw.githubusercontent.com/pipeseroni/pipes.sh/master/pipes.sh'
+  url: 'https://raw.githubusercontent.com/pipeseroni/pipes.sh/581792d4e0ea51e15889ba14a85db1bc9727b83d/pipes.sh'
+  checksum:
+    sha256: "59ba9cdb0620054e80fb0af981a6ecbe24478a35548dc356f0db082c3dd89de0"
   executable: true
-  refreshPeriod: 168h
 .local/bin/tmpmail:
   type: file
-  url: 'https://raw.githubusercontent.com/sdushantha/tmpmail/master/tmpmail'
+  url: 'https://raw.githubusercontent.com/sdushantha/tmpmail/637090f0f056df4550b52547f9cf4699f4bfd755/tmpmail'
+  checksum:
+    sha256: "9f3c549678bec6b67e489940e274223f739271850aa157b52cc69881475cae1c"
   executable: true
-  refreshPeriod: 168h
 .local/bin/trans:
   type: file
-  url: 'https://raw.githubusercontent.com/soimort/translate-shell/gh-pages/trans'
+  url: 'https://raw.githubusercontent.com/soimort/translate-shell/ffa4f340d857571a4a834bbbe80204883c357145/trans'
+  checksum:
+    sha256: "4169d50782fddd648eb390fe853e55ecb6580777761ca25e9d84eb1b77dbf7bb"
   executable: true
-  refreshPeriod: 168h
 {{- end }}
 {{- if eq .terminalMultiplexer "T" }}
 .local/bin/fzf-tmux:
   type: file
-  url: 'https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux'
+  url: 'https://raw.githubusercontent.com/junegunn/fzf/55c122f1a0e1340546c8709682bea5561fe0e8fd/bin/fzf-tmux'
+  checksum:
+    sha256: "d6f25d7ed61fab3c4d14920bd211d9efbb5beafd2cc4dcbe9accb6a441dcdabc"
   executable: true
-  refreshPeriod: 168h
 .local/bin/xpanes:
   type: file
-  url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/master/bin/xpanes'
+  url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/384b12780759f53056f58fb05645dfac89688da8/bin/xpanes'
+  checksum:
+    sha256: "80646af86d09ed0c337b1cb6df953a2fae8090d6f63b866a6545d3ff50048c69"
   executable: true
-  refreshPeriod: 168h
 {{- end }}

@@ -2,16 +2,19 @@
 {{-   if eq .kind "pc" "laptop" }}
 usr/share/grub/themes/catppuccin:
   type: archive
-  url: https://github.com/catppuccin/grub/archive/refs/heads/main.zip
-  refreshPeriod: 168h
+  url: https://github.com/catppuccin/grub/archive/0a37ab19f654e77129b409fed371891c01ffd0b9.tar.gz
+  checksum:
+    sha256: "285a2f1942d9a7aaaa61d53fbf8eaea40c1bb1a2f5ed662b8355bf9b0499116b"
   stripComponents: 3
   include:
-    - grub-main/src/catppuccin-macchiato-grub-theme/*
+    - grub-0a37ab19f654e77129b409fed371891c01ffd0b9/src/catppuccin-macchiato-grub-theme/*
 {{-   end }}
 {{-   if eq .kind "laptop" }}
 etc/NetworkManager/dispatcher.d/90-open_captive_portal:
   type: file
-  url: https://raw.githubusercontent.com/Seme4eg/captive-portal-sh/refs/heads/master/90-open_captive_portal
-  refreshPeriod: 168h
+  # NetworkManager runs dispatcher scripts as root: pin what lands here.
+  url: https://raw.githubusercontent.com/Seme4eg/captive-portal-sh/babe4a10bae4aa66d97bead01fa36561ced53ba6/90-open_captive_portal
+  checksum:
+    sha256: "9469c886b7aa3b75332d0cb85c393447133c5e38d4fc2bb4b52dd0bba6f70f14"
 {{-   end }}
 {{- end }}
