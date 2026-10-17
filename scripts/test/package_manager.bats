@@ -461,7 +461,10 @@ EOF
   # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
   function dybatpho::curl_download { :; }
   # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
-  function dybatpho::privilege_run { shift; printf 'run:%s\n' "$*"; }
+  function dybatpho::privilege_run {
+    shift
+    printf 'run:%s\n' "$*"
+  }
   cat > "${HOME}/.local/bin/hdiutil" << 'SH'
 #!/bin/sh
 printf '<key>mount-point</key>\n<string>/Volumes/My App</string>\n<string>/Volumes/Other</string>\n'
