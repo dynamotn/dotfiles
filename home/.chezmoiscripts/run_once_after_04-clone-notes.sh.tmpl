@@ -13,9 +13,13 @@ if ! dybatpho::is dir "${notes_dir}"; then
   dybatpho::ensure_dir "${notes_dir}" > /dev/null
   git -C "${notes_dir}" init
   git -C "${notes_dir}" remote add ssh git@gitlab.com:dynamo-brain/digital-garden.git
+  git -C "${notes_dir}" remote add origin https://gitlab.com/dynamo-brain/digital-garden.git
   dybatpho::progress "Pull from remote"
-  git -C "${notes_dir}" pull ssh main
-  git -C "${notes_dir}" remote set-url origin https://gitlab.com/dynamo-brain/digital-garden.git
+  if ! git -C "${notes_dir}" pull ssh main; then
+    # A half-built clone would stop every later run at the check above.
+    rm -rf "${notes_dir}"
+    dybatpho::die "Can't pull the notes, run the hook again once the remote is reachable"
+  fi
   dybatpho::success "Clone notes"
 fi
 {{- end }}
