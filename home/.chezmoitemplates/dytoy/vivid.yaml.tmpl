@@ -27,8 +27,9 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{-   $arch = "aarch64" }}
   {{- end }}
-  release_asset: vivid-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
+  {{- $os := includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64")) }}
+  release_asset: vivid-%v-{{ $arch }}-{{ $os }}.tar.gz
 archive:
-  - path: vivid-%v-{{ $arch }}-unknown-linux-gnu/vivid
+  - path: vivid-%v-{{ $arch }}-{{ $os }}/vivid
     strip: 1
 {{- end }}
