@@ -52,6 +52,16 @@ EOF
   assert_output ''
 }
 
+@test "dytoy::run_script keeps the temp files registered before the hook" {
+  local script_path="${BATS_TEST_TMPDIR}/sample.sh"
+  local temp_file
+  dybatpho::create_temp temp_file ".tmp"
+  local before="${#DYBATPHO_CLEANUP_PATHS[@]}"
+  dytoy::create_script sample "${script_path}" "true" commands
+  dytoy::run_script "${script_path}"
+  assert_equal "${#DYBATPHO_CLEANUP_PATHS[@]}" "${before}"
+}
+
 @test "dytoy::create_script exports the version of the tool to the script" {
   local script_path="${BATS_TEST_TMPDIR}/sample.sh"
   local result_path="${BATS_TEST_TMPDIR}/result"

@@ -280,9 +280,18 @@ function dytoy::create_script {
   init_file="$(dybatpho::path_join "${lib_dir}" "dybatpho" "init.sh")"
   local_dir="$(dybatpho::path_join "${HOME}" ".local")"
   bin_dir="$(dybatpho::path_join "${local_dir}" "bin")"
-  cat << EOF > "${path}"
-. ${init_file} --modules network
-dybatpho::register_common_handlers
+  # `dytoy::run_script` sources this into a shell that already has dybatpho.
+  # Sourcing `init.sh` again there would reset its cleanup registry, so every
+  # temp file registered before the hook would be left behind.
+  {
+    printf 'if declare -F dybatpho::load > /dev/null; then\n'
+    printf '  dybatpho::load network\n'
+    printf 'else\n'
+    printf '  . %q --modules network\n' "${init_file}"
+    printf '  dybatpho::register_common_handlers\n'
+    printf 'fi\n'
+  } > "${path}"
+  cat << EOF >> "${path}"
 dybatpho::progress "Running ${kind} to install ${name}"
 
 export GOBIN="${bin_dir}"
