@@ -20,7 +20,9 @@ dybatpho::progress "Install hyprland's header"
 hyprpm update
 
 dybatpho::progress "Install plugins"
-while IFS="" read -r plugin; do
+# The last line counts without a trailing newline, and blank lines are no plugin.
+while IFS="" read -r plugin || [[ -n "${plugin}" ]]; do
+  dybatpho::string_is_blank "${plugin}" && continue
   dybatpho::progress "Install plugin ${plugin}"
   hyprpm add -f "https://github.com/${plugin}" || true
   hyprpm enable "${plugin#*/}"
