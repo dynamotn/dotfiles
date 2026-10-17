@@ -14,7 +14,8 @@ dybatpho::ensure_dir "${tmux_plugin_dir}" > /dev/null
 
 dybatpho::progress "Install tpm"
 if ! dybatpho::is dir "${tpm_dir}"; then
-  git clone https://github.com/tmux-plugins/tpm "${tpm_dir}"
+  # Pinned to a release, so an apply never runs whatever the branch head is.
+  git clone --depth 1 --branch v3.1.0 https://github.com/tmux-plugins/tpm "${tpm_dir}"
 fi
 
 dybatpho::progress "Install other plugins"
