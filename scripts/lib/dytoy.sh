@@ -430,6 +430,11 @@ function dytoy::enable_service {
   if [[ "${service_name}" == "null" ]]; then
     return 0
   fi
+  # A container has no init system running, so nothing could start it.
+  if [[ "${init_system}" == "none" || "${DYTOY_INIT_SYSTEM:-}" == "none" ]]; then
+    dybatpho::debug "No init system: not enabling ${service_name}"
+    return 0
+  fi
   local is_user_service
   is_user_service=$(dytoy::get_field "${yaml}" "is_user_service")
   "init_system::enable_${init_system}_service" "${service_name}" "${is_user_service}"
