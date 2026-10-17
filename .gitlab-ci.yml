@@ -27,7 +27,9 @@ lint:shell:
     - echo "${SHFMT_SHA256}  /usr/local/bin/shfmt" | sha256sum -c -
     - chmod +x /usr/local/bin/shfmt
     # The pathspec matches recursively and skips submodule contents.
-    - git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning
+    # SC2154/SC2034 are waived in the sources with dyshellint directives,
+    # which plain shellcheck cannot read: those are globals set by callers.
+    - git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning -e SC2154,SC2034
     - git ls-files 'scripts/*.sh' 'scripts/*.bats' 'scripts/*.bash' | xargs shfmt -i 2 -ci -bn -sr -d
 
 test:bats:

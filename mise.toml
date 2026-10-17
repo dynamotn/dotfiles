@@ -7,7 +7,8 @@ description = "Lint and format-check the shell sources"
 run = """
 #!/usr/bin/env bash
 set -Eeuo pipefail
-git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning
+# SC2154/SC2034 are waived in the sources with dyshellint directives.
+git ls-files 'scripts/*.sh' | xargs shellcheck -x -S warning -e SC2154,SC2034
 git ls-files 'scripts/*.sh' 'scripts/*.bats' 'scripts/*.bash'\
   | xargs shfmt -i 2 -ci -bn -sr -d
 """
