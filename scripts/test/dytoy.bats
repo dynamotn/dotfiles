@@ -225,6 +225,16 @@ EOF
   assert_success
 }
 
+@test "dytoy::enable_service enables nothing without an init system" {
+  function init_system::enable_openrc_service { printf 'called\n'; }
+  run dytoy::enable_service $'service: sshd\nis_user_service: false' none
+  assert_success
+  refute_output --partial 'called'
+  DYTOY_INIT_SYSTEM=none run dytoy::enable_service $'service: sshd\nis_user_service: false' openrc
+  assert_success
+  refute_output --partial 'called'
+}
+
 @test "dytoy::enable_service dispatches to the requested init backend" {
   local args_file="${BATS_TEST_TMPDIR}/service-args"
   function init_system::enable_systemd_service {

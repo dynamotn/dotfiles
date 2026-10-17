@@ -90,7 +90,7 @@ TODO: List all screenshots
 Run these commands:
 
 ```sh
-curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | bash -
+curl -sSL https://raw.githubusercontent.com/dynamotn/dotfiles/main/scripts/prerequisite.sh | sh -
 git clone https://github.com/dynamotn/dotfiles ~/Dotfiles
 bash ~/Dotfiles/scripts/setup.sh
 ```
