@@ -40,15 +40,24 @@ dybatpho::register_common_handlers
 
 {{- $shortCode := "" }}
 {{- $name := "" }}
+{{- /* A derivative names its parents in ID_LIKE, such as "ubuntu debian" */}}
+{{- $idLike := "" }}
+{{- if hasKey .chezmoi.osRelease "idLike" }}
+{{-   $idLike = .chezmoi.osRelease.idLike | toString }}
+{{- end }}
 {{- if eq .osid "linux-gentoo" }}
 {{- $shortCode = "gentoo" }}
 {{- $name = "Gentoo Linux" }}
-{{- else if eq .osid "linux-arch" }}
+{{- else if or (eq .osid "linux-arch") (regexMatch "\\barch\\b" $idLike) }}
 {{- $shortCode = "arch" }}
 {{- $name = "Arch Linux" }}
 {{- else if eq .osid "linux-ubuntu" }}
 {{- $shortCode = "ubuntu" }}
 {{- $name = "Ubuntu" }}
+{{- else if or (eq .osid "linux-debian") (regexMatch "\\b(debian|ubuntu)\\b" $idLike) }}
+{{- /* Debian and its derivatives install the packages listed for Ubuntu, with apt */}}
+{{- $shortCode = "ubuntu" }}
+{{- $name = printf "%s (with the Ubuntu packages)" (.osid | trimPrefix "linux-") }}
 {{- else if eq .osid "linux-alpine" }}
 {{- $shortCode = "alpine" }}
 {{- $name = "Alpine" }}
@@ -391,6 +400,17 @@ function _run_method {
   dybatpho::expect_args METHOD -- "$@"
   case "${METHOD}" in
     os)
+      {{- if not $shortCode }}
+      dybatpho::warn "No package manager is known for {{ .osid }}, skip os tools"
+      return 0
+      {{- else }}
+      {{-   if hasPrefix "linux" .osid }}
+      # Without root, sudo or doas the package manager runs unprivileged and fails.
+      if ! dybatpho::is_root && ! dybatpho::privilege_command > /dev/null; then
+        dybatpho::warn "Neither root nor sudo or doas is available, skip os tools"
+        return 0
+      fi
+      {{-   end }}
       if [[ "${TOOL}" == "@empty" ]]; then
         dybatpho::info "Distro of this machine is {{ $name }}."
       fi
@@ -398,6 +418,7 @@ function _run_method {
         package_manager::init_{{ $shortCode }}
       fi
       dytoy::iterate _install_os_tool
+      {{- end }}
       ;;
     binary)
       dytoy::iterate _install_binary_tool
