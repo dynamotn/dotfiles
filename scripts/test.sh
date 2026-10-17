@@ -88,6 +88,7 @@ function _main {
       failed="$(dybatpho::parallel_failed)"
       dybatpho::die "${failed} of ${#files[@]} test files failed"
     fi
+    return 0
   fi
   if ((${#MAIN_ARGS[@]} > 0)); then
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${MAIN_ARGS[@]}"
