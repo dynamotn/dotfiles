@@ -17,7 +17,7 @@ if [[ ! -f "${SCRIPT_DIR}/lib/dybatpho/init.sh" ]]; then
 fi
 # shellcheck source-path=SCRIPTDIR
 # shellcheck source=lib/dybatpho/init.sh
-. "${SCRIPT_DIR}/lib/dybatpho/init.sh" --modules cli
+. "${SCRIPT_DIR}/lib/dybatpho/init.sh" --modules cli parallel
 BATS_CMD="${DYBATPHO_DIR}/test/lib/core/bin/bats"
 dybatpho::register_common_handlers
 
@@ -32,7 +32,21 @@ function _spec_main {
     DYTOY --dytoy -d on:true off:false init:="false"
   dybatpho::opts::flag "Run only the secrets YAML schema validation tests" \
     SECRETS --secrets -s on:true off:false init:="false"
+  dybatpho::opts::param "Test files to run at once with --all, 0 for one per CPU" \
+    JOBS --jobs -j init:="0" type:uint
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Run one bats file, named in its output
+# @arg $1 string Path of the bats file
+# @stdout The TAP output of the file
+#######################################
+function _run_bats_file {
+  local file
+  dybatpho::expect_args file -- "$@"
+  printf '# %s\n' "$(basename "${file}")"
+  "${BATS_CMD}" --print-output-on-failure --verbose-run "${file}"
 }
 
 #######################################
@@ -62,7 +76,18 @@ function _main {
       "${SCRIPT_DIR}/test/secrets_schema.bats"
   fi
   if [[ "${ALL}" == "true" ]]; then
-    exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${SCRIPT_DIR}/test"
+    if ((JOBS == 1)); then
+      exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${SCRIPT_DIR}/test"
+    fi
+    # One bats per file, several at once: a serial run takes minutes, and
+    # `bats --jobs` needs GNU parallel. The output of each file is replayed
+    # whole and in order, and the run fails when any file did.
+    local -a files=("${SCRIPT_DIR}"/test/*.bats)
+    if ! dybatpho::parallel_map "${JOBS}" _run_bats_file "${files[@]}"; then
+      local failed
+      failed="$(dybatpho::parallel_failed)"
+      dybatpho::die "${failed} of ${#files[@]} test files failed"
+    fi
   fi
   if ((${#MAIN_ARGS[@]} > 0)); then
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${MAIN_ARGS[@]}"
