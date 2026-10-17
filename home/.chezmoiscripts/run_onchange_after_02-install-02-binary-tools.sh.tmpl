@@ -2,9 +2,15 @@
 # @file 02-install-02-binary-tools.sh
 # @brief Install the binary tools declared for dytoy
 # @description Install the binary tools declared for dytoy. Re-runs whenever a dytoy
-# template changes.
+# template changes. Set `DOTFILES_SKIP_TOOLS=1` to skip it, as a CI smoke run does.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
+
+{{- /* Decided while rendering, so a run with it unset differs and runs again */}}
+{{- if eq (env "DOTFILES_SKIP_TOOLS") "1" }}
+dybatpho::warn "DOTFILES_SKIP_TOOLS is set, skip installing the binary tools"
+exit 0
+{{- end }}
 
 local_bin_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "bin")"
 export PATH="${local_bin_dir}:${PATH}"
