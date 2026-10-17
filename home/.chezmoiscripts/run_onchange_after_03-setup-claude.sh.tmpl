@@ -7,7 +7,7 @@
 # settings or this list change. Nothing here is tied to a single project: a
 # plugin that needs a project tool chain (terraform, a database CLI, ...) does
 # not belong in the settings and is left to that project.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 dybatpho::require jq
 

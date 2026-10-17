@@ -2,7 +2,7 @@
 # @file 03-setup-fish.sh
 # @brief Set up the fish shell
 # @description Set up the fish shell after its configuration changes.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules privilege
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules privilege
 dybatpho::register_common_handlers
 
 dybatpho::header "Setup fish shell"

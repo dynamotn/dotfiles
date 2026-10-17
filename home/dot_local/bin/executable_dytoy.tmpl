@@ -6,9 +6,9 @@
 # `dytoy -t <tool>` routes a single tool to whichever method its YAML entry
 # declares. Run with no subcommand in a terminal, it opens a full-screen
 # interface to pick the tools and follow their installation instead.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh --modules cli array screen
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy.sh
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dytoy_tui.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules cli array screen
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dytoy.sh"
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dytoy_tui.sh"
 {{- $flavour := "macchiato" }}
 {{- if not .darkMode }}
 {{-   $flavour = "latte" }}
@@ -32,10 +32,10 @@ DYTOY_TUI_SOURCE=(
 {{-   end }}
 {{- end }}
 )
-. {{ .chezmoi.sourceDir }}/../scripts/lib/binary_download.sh
-. {{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh
-. {{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh
-. {{ .chezmoi.sourceDir }}/../scripts/lib/misc.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/binary_download.sh"
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/package_manager.sh"
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh"
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/misc.sh"
 dybatpho::register_common_handlers
 
 {{- $shortCode := "" }}

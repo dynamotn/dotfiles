@@ -2,7 +2,7 @@
 # @file 04-start_rclone.sh
 # @brief Start the rclone mounts
 # @description Start the rclone mounts after their configuration changes.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
 dybatpho::header "Start rclone"
