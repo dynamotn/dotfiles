@@ -23,7 +23,7 @@ if dybatpho::is file /etc/pam.d/system-local-login; then
   fi
   {{- end }}
 fi
-{{-   if eq .chezmoi.osRelease.id "arch" "ubuntu" }}
+{{-   if eq .osid "linux-arch" "linux-ubuntu" }}
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su-l
 {{-   end }}

@@ -14,7 +14,7 @@ dybatpho::header "Setup SSL for {{ . }}"
 # hash: {{ printf "../secrets/data/enterprise-%s/ssl.yaml.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
 {{-   if eq $.osid "linux-arch" }}
 update-ca-trust
-{{-   else if eq $.osid "linux-ubuntu" "linux-gentoo" }}
+{{-   else if eq $.osid "linux-ubuntu" "linux-debian" "linux-gentoo" "linux-alpine" }}
 update-ca-certificates
 {{-   end }}
 dybatpho::success "Setup SSL"
