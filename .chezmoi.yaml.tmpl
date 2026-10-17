@@ -11,8 +11,15 @@ progress: true
 add:
   templateSymlinks: true
 
+# A pager that is not installed makes every `chezmoi diff` fail.
+{{- if lookPath "delta" }}
 diff:
+{{-   if lookPath "ov" }}
   pager: delta --pager="ov -F --section-delimiter '^(added:|removed:|renamed:|Δ)' --section-header --pattern '•'"
+{{-   else }}
+  pager: delta
+{{-   end }}
+{{- end }}
 
 data:
   {{- $osid := .chezmoi.os }}
@@ -20,22 +27,55 @@ data:
   {{-   $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id }}
   {{- end }}
   osid: {{ $osid | quote }}
-  {{- if eq $osid "android" }}
-  initSystem: "termux"
-  {{- else if eq $osid "darwin" }}
-  initSystem: "launchd"
-  {{- else if eq $osid "linux-gentoo" }}
-  {{-   $initCommand := output "/usr/bin/ps" "-p" "1" "-o" "comm=" | trim }}
-  {{-   if eq $initCommand "init" }}
-  initSystem: "openrc"
-  {{-   else }}
-  initSystem: "systemd"
+
+  {{- /* Container detection. The markers come first: Docker and Podman drop a
+         file, systemd-nspawn, LXC and toolbox export `container`, dev
+         containers and Kubernetes set their own variables. The control groups
+         of PID 1 are the last resort, as on cgroup v2 they rarely name the
+         runtime. */}}
+  {{- $inContainer := false }}
+  {{- if eq .chezmoi.os "linux" }}
+  {{-   if or (env "container") (stat "/run/.containerenv") (stat "/.dockerenv") }}
+  {{-     $inContainer = true }}
+  {{-   else if or (env "CODESPACES") (env "REMOTE_CONTAINERS") (env "DEVCONTAINER") (env "KUBERNETES_SERVICE_HOST") }}
+  {{-     $inContainer = true }}
+  {{-   else if stat "/proc/1/cgroup" }}
+  {{-     if include "/proc/1/cgroup" | regexMatch "docker|containerd|kubepods|libpod|podman|lxc" }}
+  {{-       $inContainer = true }}
+  {{-     end }}
   {{-   end }}
-  {{- else if eq $osid "linux-alpine" }}
-  initSystem: "openrc"
-  {{- else }}
-  initSystem: "systemd"
   {{- end }}
+  inContainer: {{ $inContainer }}
+
+  {{- /* The init system that runs, not the one installed: a container image
+         carries systemd or OpenRC files but boots neither. /proc/1/comm is
+         read rather than `ps`, which BusyBox and minimal images lack. "none"
+         means nothing manages services. */}}
+  {{- $initSystem := "none" }}
+  {{- if eq .chezmoi.os "android" }}
+  {{-   $initSystem = "termux" }}
+  {{- else if eq .chezmoi.os "darwin" }}
+  {{-   $initSystem = "launchd" }}
+  {{- else if eq .chezmoi.os "linux" }}
+  {{-   $initCommand := "" }}
+  {{-   if stat "/proc/1/comm" }}
+  {{-     $initCommand = include "/proc/1/comm" | trim }}
+  {{-   end }}
+  {{-   if or (stat "/run/systemd/system") (eq $initCommand "systemd") }}
+  {{-     $initSystem = "systemd" }}
+  {{-   else if or (stat "/run/openrc") (eq $initCommand "openrc-init") }}
+  {{-     $initSystem = "openrc" }}
+  {{-   else if not $inContainer }}
+  {{- /* Not booted from this root, as in a chroot during installation:
+         fall back to the init system that is installed. */}}
+  {{-     if or (eq $osid "linux-alpine") (lookPath "openrc") (stat "/sbin/openrc") }}
+  {{-       $initSystem = "openrc" }}
+  {{-     else if or (stat "/usr/lib/systemd/systemd") (stat "/lib/systemd/systemd") }}
+  {{-       $initSystem = "systemd" }}
+  {{-     end }}
+  {{-   end }}
+  {{- end }}
+  initSystem: {{ $initSystem | quote }}
   {{- if eq .chezmoi.os "android" }}
   bash: {{ lookPath "bash" | quote }}
   {{- else }}
@@ -45,18 +85,27 @@ data:
   {{- $places := list "cloud" "home" "office" "mobility" }}
   {{- $place := promptChoiceOnce . "place" "Where does this machine place" $places (first $places) }}
   place: {{ $place | quote }}
+  {{- /* DOTFILES_KIND wins over the stored answer and the prompt, so an image
+         build or a provisioning script can say what it builds. */}}
   {{- $kinds := list "container" "pc" "laptop" "workstation" "tablet" "mobile" "vm" "sbc" }}
-  {{- $kind := promptChoiceOnce . "kind" "Which kind of this machine is" $kinds (first $kinds) }}
+  {{- $kind := env "DOTFILES_KIND" }}
+  {{- if $kind }}
+  {{-   if not (has $kind $kinds) }}
+  {{-     fail (printf "DOTFILES_KIND=%s is not one of %s" $kind (join ", " $kinds)) }}
+  {{-   end }}
+  {{- else }}
+  {{-   $defaultKind := "pc" }}
+  {{-   if $inContainer }}
+  {{-     $defaultKind = "container" }}
+  {{-   end }}
+  {{-   $kind = promptChoiceOnce . "kind" "Which kind of this machine is" $kinds $defaultKind }}
+  {{- end }}
   kind: {{ $kind | quote }}
 
   {{- $companies := list "F1" "T1" "ZOO" "U3T" }}
   code: {{ promptStringOnce . "code" "What is this machine's name" "t00lb0x" | quote }}
-  {{- $hasCustomName := promptBool "Does this machine has custom hostname" }}
-  {{- if $hasCustomName }}
-  customHostname: {{ promptStringOnce . "customHostname" "What is this machine's hostname" }}
-  {{- else }}
-  customHostname:
-  {{- end }}
+  {{- /* Empty means the hostname is the code above. */}}
+  customHostname: {{ promptStringOnce . "customHostname" "What is this machine's hostname (empty to use its name)" "" | quote }}
   {{- if eq $place "office" }}
   company: {{ promptChoiceOnce . "company" "Which code of owner company is" $companies (first $companies) | quote }}
   {{- else }}
@@ -81,7 +130,7 @@ data:
   {{- $guiWinManagers := list "H" "A" "G" }}
   {{- $guiWinManager := "" }}
   {{- if ne $guiServer "0" }}
-  {{-   $guiDriver = promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" $guiDrivers }}
+  {{-   $guiDriver = promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" $guiDrivers "V" }}
   {{-   $guiWinManager = promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is (A for aerospace, H for hyprland, G for gnome)" $guiWinManagers (first $guiWinManagers) }}
   {{- end }}
   guiDriver: {{ $guiDriver | quote }}
@@ -147,7 +196,7 @@ data:
   noProxyAddresses:
     {{- $isEnd := false }}
     {{- range until 1000 }}
-    {{-   $address := promptString "Fill address that not use proxy (empty to end this list)" }}
+    {{-   $address := promptString "Fill address that not use proxy (empty to end this list)" "" }}
     {{-  if $address }}
     - {{ $address }}
     {{-  else }}
