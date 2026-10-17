@@ -37,6 +37,8 @@ DYTOY_TUI_SOURCE=(
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh"
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/misc.sh"
 dybatpho::register_common_handlers
+# The init system to enable services with, "none" in a container that has none.
+export DYTOY_INIT_SYSTEM={{ .initSystem | quote }}
 
 {{- $shortCode := "" }}
 {{- $name := "" }}
