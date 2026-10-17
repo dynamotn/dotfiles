@@ -12,7 +12,8 @@
 CHEZMOI_ATTRS_ORDER=(create encrypted private readonly empty executable)
 # Every prefix chezmoi parses off a source name; a target name that starts with
 # one would lose it to an attribute unless marked `literal_`.
-__CHEZMOI_ATTRS_PREFIX_RE='^(after|before|create|dot|empty|encrypted|exact|executable|external|literal|modify|once|onchange|private|readonly|remove|run|symlink)_'
+__CHEZMOI_ATTRS_PREFIX_RE='^(after|before|create|dot|empty|encrypted|exact|executable|external|literal'
+__CHEZMOI_ATTRS_PREFIX_RE+='|modify|once|onchange|private|readonly|remove|run|symlink)_'
 
 #######################################
 # @description Check that every attribute of a list is one chezmoi knows
