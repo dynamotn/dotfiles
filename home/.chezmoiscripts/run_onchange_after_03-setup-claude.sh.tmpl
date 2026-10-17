@@ -9,7 +9,10 @@
 # not belong in the settings and is left to that project.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
-dybatpho::require jq
+if ! dybatpho::is command jq; then
+  dybatpho::warn "jq is not installed, skip setting up Claude Code"
+  exit 0
+fi
 
 # settings hash: {{ joinPath .chezmoi.sourceDir "private_dot_claude/settings.json" | include | sha256sum }}
 SETTINGS_FILE="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude" "settings.json")"
