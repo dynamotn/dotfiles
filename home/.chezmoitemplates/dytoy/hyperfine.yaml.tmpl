@@ -19,14 +19,15 @@ github:
   {{- else if eq .chezmoi.arch "arm64" }}
   {{-   $arch = "aarch64" }}
   {{- end }}
-  release_asset: hyperfine-%v-{{ $arch }}-unknown-linux-gnu.tar.gz
+  {{- $os := includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64" "arm64")) }}
+  release_asset: hyperfine-%v-{{ $arch }}-{{ $os }}.tar.gz
 archive:
-  - path: hyperfine-%v-{{ $arch }}-unknown-linux-gnu/hyperfine
+  - path: hyperfine-%v-{{ $arch }}-{{ $os }}/hyperfine
     strip: 1
-  - path: hyperfine-%v-{{ $arch }}-unknown-linux-gnu/hyperfine.1
+  - path: hyperfine-%v-{{ $arch }}-{{ $os }}/hyperfine.1
     strip: 1
     location: {{ .chezmoi.homeDir }}/.local/man/man1
-  - path: hyperfine-%v-{{ $arch }}-unknown-linux-gnu/autocomplete/hyperfine.fish
+  - path: hyperfine-%v-{{ $arch }}-{{ $os }}/autocomplete/hyperfine.fish
     location: {{ .chezmoi.homeDir }}/.config/fish/completions
     strip: 2
 {{- end }}

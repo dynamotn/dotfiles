@@ -12,23 +12,25 @@ if ! dybatpho::is command nmcli; then
   exit
 fi
 
+# Values are single-quoted for the shell: a quote, `$` or backtick in a
+# password must reach nmcli as itself, not run as code.
 device=$(nmcli --get-values GENERAL.DEVICE,GENERAL.TYPE device show | sed '/^wifi$/!{h;d;};x')
 {{-   if .decryptPersonal }}
 # hash: {{ joinPath .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.tmpl" | include | sha256sum }}
 {{-     $wifiSecret := includeTemplate (join .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.tmpl") . | fromYaml }}
 {{-     range $wifiSecret }}
-rm -rf "/etc/NetworkManager/system-connections/{{ .name }}-*.nmconnection"
+rm -f -- /etc/NetworkManager/system-connections/{{ .name | replace "'" "'\\''" | printf "'%s'" }}-*.nmconnection
 nmcli connection add type wifi \
   ifname "${device}" \
-  con-name "{{ .name }}" \
+  con-name {{ .name | replace "'" "'\\''" | printf "'%s'" }} \
   autoconnect yes \
-  ssid "{{ .ssid }}" \
-  wifi-sec.key-mgmt "{{ .type }}" \
+  ssid {{ .ssid | replace "'" "'\\''" | printf "'%s'" }} \
+  wifi-sec.key-mgmt {{ .type | replace "'" "'\\''" | printf "'%s'" }} \
 {{-       if eq .type "wpa-psk" }}
-  wifi-sec.psk "{{ .password }}"
+  wifi-sec.psk {{ .password | replace "'" "'\\''" | printf "'%s'" }}
 {{-       else if eq .type "wpa-eap" }}
-  802-1x.identity "{{ .identity }}" \
-  802-1x.password "{{ .password }}" \
+  802-1x.identity {{ .identity | replace "'" "'\\''" | printf "'%s'" }} \
+  802-1x.password {{ .password | replace "'" "'\\''" | printf "'%s'" }} \
   {{- .params | nindent 2 }}
 {{-       end }}
 {{-     end }}
@@ -42,18 +44,18 @@ nmcli connection add type wifi \
 {{-     $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-     $wifiSecret := printf "../secrets/data/enterprise-%s/wifi.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-     range $wifiSecret }}
-rm -rf "/etc/NetworkManager/system-connections/{{ .name }}-*.nmconnection"
+rm -f -- /etc/NetworkManager/system-connections/{{ .name | replace "'" "'\\''" | printf "'%s'" }}-*.nmconnection
 nmcli connection add type wifi \
   ifname "${device}" \
-  con-name "{{ .name }}" \
+  con-name {{ .name | replace "'" "'\\''" | printf "'%s'" }} \
   autoconnect yes \
-  ssid "{{ .ssid }}" \
-  wifi-sec.key-mgmt "{{ .type }}" \
+  ssid {{ .ssid | replace "'" "'\\''" | printf "'%s'" }} \
+  wifi-sec.key-mgmt {{ .type | replace "'" "'\\''" | printf "'%s'" }} \
 {{-       if eq .type "wpa-psk" }}
-  wifi-sec.psk "{{ .password | replaceAllRegex "\\$ACCOUNT_PASSWORD" $commonSecret.account.password }}"
+  wifi-sec.psk {{ .password | replaceAllRegex "\\$ACCOUNT_PASSWORD" $commonSecret.account.password | replace "'" "'\\''" | printf "'%s'" }}
 {{-       else if eq .type "wpa-eap" }}
-  802-1x.identity "{{ .identity | replaceAllRegex "\\$ACCOUNT_USERNAME" $commonSecret.account.username }}" \
-  802-1x.password "{{ .password | replaceAllRegex "\\$ACCOUNT_PASSWORD" $commonSecret.account.password }}" \
+  802-1x.identity {{ .identity | replaceAllRegex "\\$ACCOUNT_USERNAME" $commonSecret.account.username | replace "'" "'\\''" | printf "'%s'" }} \
+  802-1x.password {{ .password | replaceAllRegex "\\$ACCOUNT_PASSWORD" $commonSecret.account.password | replace "'" "'\\''" | printf "'%s'" }} \
   {{- .params | nindent 2 }}
 {{-       end }}
 {{-     end }}

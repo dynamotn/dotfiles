@@ -10,10 +10,17 @@ RUN useradd -m -s /bin/bash -U -u $UID $USER && \
     echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 USER $UID
-COPY --chown=${USER}:${USER} . /home/${USER}/Dotfiles
 WORKDIR /home/${USER}
-RUN --mount=type=secret,id=github_token,env=GITHUB_TOKEN \
+# Bind the build context instead of COPY: a COPY layer keeps `.git` (with the
+# history of every encrypted secret) and `secrets/` even after build.sh deletes
+# them in a later layer. Copying and cleaning up in one RUN leaves neither in
+# any layer. sudo copies context files a non-root user may not read.
+# hadolint ignore=DL3004
+RUN --mount=type=bind,target=/tmp/dotfiles-src \
+    --mount=type=secret,id=github_token,env=GITHUB_TOKEN \
     --mount=type=secret,id=age_passphrases \
     --mount=type=secret,id=ssl_cert \
+    sudo cp -a /tmp/dotfiles-src /home/${USER}/Dotfiles && \
+    sudo chown -R ${UID}:${GID} /home/${USER}/Dotfiles && \
     /home/${USER}/Dotfiles/docker/build.sh
 ENTRYPOINT [ "/usr/bin/fish" ]

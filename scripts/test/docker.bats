@@ -20,15 +20,16 @@ setup() {
 }
 
 # The check must come before docker and gomplate are required, or a typo
-# reports a missing tool instead of the typo.
+# reports a missing tool instead of the typo. `${BASH}` keeps the shell bats
+# runs in: on macOS the `bash` in /usr/bin is 3.2, which dybatpho rejects.
 @test "docker.sh rejects an unknown image without requiring any tool" {
-  PATH="/usr/bin:/bin" run bash "${DOCKER_SCRIPT}" bogus
+  PATH="/usr/bin:/bin" run "${BASH}" "${DOCKER_SCRIPT}" bogus
   assert_failure
   assert_output --partial "Unknown image bogus"
 }
 
 @test "docker.sh rejects an enterprise image with no code" {
-  PATH="/usr/bin:/bin" run bash "${DOCKER_SCRIPT}" enterprise-
+  PATH="/usr/bin:/bin" run "${BASH}" "${DOCKER_SCRIPT}" enterprise-
   assert_failure
   assert_output --partial "Unknown image enterprise-"
 }

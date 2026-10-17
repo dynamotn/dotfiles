@@ -1,3 +1,5 @@
+{{- /* Terminal colour tests, left out of containers like the scripts in misc */}}
+{{- if ne .kind "container" }}
 .local/bin/color16:
   type: file
   url: 'https://raw.githubusercontent.com/pablopunk/colortest/master/colortest'
@@ -18,3 +20,4 @@
   url: https://gist.githubusercontent.com/lifepillar/09a44b8cf0f9397465614e622979107f/raw/24-bit-color.sh
   executable: true
   refreshPeriod: 168h
+{{- end }}

@@ -5,7 +5,7 @@ github:
   repo: ouch-org/ouch
   {{- $os := "" }}
   {{- if eq .chezmoi.os "linux" "android" }}
-  {{-   $os = "unknown-linux-gnu" }}
+  {{-   $os = includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64" "arm64")) }}
   {{- else if eq .chezmoi.os "darwin" }}
   {{-   $os = "apple-darwin" }}
   {{- end }}

@@ -7,9 +7,12 @@
 # settings or this list change. Nothing here is tied to a single project: a
 # plugin that needs a project tool chain (terraform, a database CLI, ...) does
 # not belong in the settings and is left to that project.
-. {{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
-dybatpho::require jq
+if ! dybatpho::is command jq; then
+  dybatpho::warn "jq is not installed, skip setting up Claude Code"
+  exit 0
+fi
 
 # settings hash: {{ joinPath .chezmoi.sourceDir "private_dot_claude/settings.json" | include | sha256sum }}
 SETTINGS_FILE="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude" "settings.json")"
@@ -18,6 +21,8 @@ SKILLS_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".agents" "skills")"
 
 # Community skills from https://skills.sh, installed for every agent with
 # `npx skills add -g`. Keep each entry generic to a role, never to one project.
+# The installer is pinned, so an apply never runs a release nobody looked at.
+SKILLS_CLI="skills@1.7.2"
 SKILLS=(
   # discovery
   vercel-labs/skills@find-skills
@@ -136,7 +141,7 @@ function _setup_skills {
       continue
     fi
     dybatpho::info "Install skill ${skill}"
-    npx -y skills add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
+    npx -y "${SKILLS_CLI}" add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
   done
 }
 

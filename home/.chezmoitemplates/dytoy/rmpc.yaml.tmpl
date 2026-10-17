@@ -3,7 +3,7 @@ name: rmpc
 method: binary
 github:
   repo: mierak/rmpc
-  {{- $os := "unknown-linux-gnu" }}
+  {{- $os := includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64" "arm64")) }}
   {{- if eq .chezmoi.os "darwin" }}
   {{-   $os = "apple-darwin" }}
   {{- end }}
