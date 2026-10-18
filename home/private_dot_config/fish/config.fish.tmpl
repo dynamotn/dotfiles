@@ -22,29 +22,23 @@ set -gx GPG_TTY (tty)
 # GO workspace
 set -gx GOPATH $HOME/.go
 
-# PATH
-function __add_folder_to_manpath --description "Add folder to MANPATH"
-    if test (count $argv) -ne 1
-        echo 'Must has only one argument'
-        return 1
-    end
-    if test -e $argv[1]
-        set -gx MANPATH $argv[1] $MANPATH
-    end
+# PATH, highest precedence first
+fish_add_path -mpPg \
+    $HOME/.krew/bin \
+    $HOME/.local/share/nvim/mason/bin \
+    $HOME/.go/bin \
+    $HOME/.cargo/bin \
+    $HOME/.cache/.bun/bin \
+    $HOME/.yarn/bin \
+    $HOME/.fzf/bin \
+    $HOME/.local/bin \
+    /opt/homebrew/sbin \
+    /opt/homebrew/bin
+
+# MANPATH, once: a nested shell inherits it already prepended
+if test -d $HOME/.local/man; and not contains -- $HOME/.local/man $MANPATH
+    set -gxp MANPATH $HOME/.local/man
 end
-
-fish_add_path -mpPg /opt/homebrew/bin
-fish_add_path -mpPg /opt/homebrew/sbin
-fish_add_path -mpPg $HOME/.local/bin
-fish_add_path -mpPg $HOME/.fzf/bin
-fish_add_path -mpPg $HOME/.yarn/bin
-fish_add_path -mpPg $HOME/.cache/.bun/bin
-fish_add_path -mpPg $HOME/.cargo/bin
-fish_add_path -mpPg $HOME/.go/bin
-fish_add_path -mpPg $HOME/.local/share/nvim/mason/bin
-fish_add_path -mpPg $HOME/.krew/bin
-
-__add_folder_to_manpath $HOME/.local/man
 
 # Package manager
 type -q brew; and brew shellenv | source
@@ -81,11 +75,11 @@ end
 # grc for color output
 if type -q grc
     set -gx grcplugin_ls --color -Chl --group-directories-first
-    set -x grcplugin_df -H
+    set -gx grcplugin_df -H
 end
 
 # Color for Virtual console
-if test "$TERM" = linux; and test $CONFIG_PATH/console_color
+if test "$TERM" = linux; and test -f $CONFIG_PATH/console_color
     for i in (sed -n "s/.*\*color\([0-9]\{1,\}\).*#\([0-9a-fA-F]\{6\}\).*/\1 \2/p" $CONFIG_PATH/console_color | awk '$1 < 16 {printf "\\\e]P%X%s", $1, $2}')
         echo -en "$i"
     end
@@ -154,21 +148,18 @@ if status is-interactive
     if type -q projekt
         projekt init fish | source
     end
-    # ov
+    # ov, as the pager of everything that takes one
     if type -q ov
         set -gx PAGER ov
+        type -q psql; and set -gx PSQL_PAGER 'ov -F -C -d "|" -H1 --column-rainbow --align'
+        type -q tspin; and set -gx TAILSPIN_PAGER 'ov -f [FILE]'
     end
     # Vivid
-    type -q vivid; and set -gx LS_COLORS (vivid generate catppuccin-{{ if .darkMode }}macchiato{{ else }}latte{{ end }})
+    type -q vivid; and set -gx LS_COLORS (vivid generate catppuccin-{{ $themeName }})
     # Zellij
     if type -q zellij
         set -gx ZELLIJ_AUTO_ATTACH true
         set -q SSH_TTY; and set -gx ZELLIJ_CONFIG_FILE $HOME/.config/zellij/ssh.kdl
-    end
-    # OV with other commands
-    if type -q ov
-      type -q psql; and set -gx PSQL_PAGER 'ov -F -C -d "|" -H1 --column-rainbow --align'
-      type -q tspin; and set -gx TAILSPIN_PAGER 'ov -f [FILE]'
     end
 
     # Completions of fd, projekt, t, b, ov, zellij, task, ltcc, rg, rbw,
