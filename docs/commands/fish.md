@@ -247,6 +247,39 @@ reason.
 | `open_ports` | `netstat -tuplan` |
 | `syncdy` | `rsync --delete -avhz` |
 
+### Anywhere on the line
+
+| Abbr | Expansion |
+|------|-----------|
+| `!!` | the previous command (`sudo !!`) |
+| `!$` | the last argument of the previous command, quoted when it needs it |
+| `...` | `../..`, one more level per dot; `..../src` is `../../../src` |
+
+### Subcommands
+
+Expanded only as the first argument of their command, so a file or branch
+named `co` after `git add` stays as typed.
+
+| Command | Abbr | Expansion |
+|---------|------|-----------|
+| `git` | `br` / `ci` / `co` / `st` / `sw` | `branch` / `commit` / `checkout` / `status` / `switch` |
+| `kubectl` | `a` / `d` / `e` / `g` / `l` / `x` | `apply -f` / `describe` / `edit` / `get` / `logs` / `exec -it` |
+| `docker` | `i` / `l` / `x` | `image` / `logs -f --tail 50` / `exec -it` |
+
+### Per project
+
+A `.fish-abbr` file holds the abbreviations of a project, one
+`name expansion…` per line, `#` for comments. They are loaded below its
+directory and erased on leaving it, and never take over an abbreviation
+defined elsewhere. Enter expands and runs at once, so a file is loaded only
+once trusted, and editing it asks for trust again:
+
+| Command | Action |
+|---------|--------|
+| `dir_abbr` | List what the nearest `.fish-abbr` loaded |
+| `dir_abbr trust [-y]` | Show the nearest `.fish-abbr` and trust its content |
+| `dir_abbr untrust` | Stop loading it |
+
 ## Aliases
 
 Expanded when the command runs, not while typing: they replace a command
@@ -268,15 +301,27 @@ Each lists with fzf, then acts on the pick.
 | Command | Action |
 |---------|--------|
 | `fgcs` | Print the hash of a commit |
-| `fgb` | `git switch` to a local or remote branch |
+| `fgb` | `git switch` to a local or remote branch, listed with how far it is from its upstream; a branch checked out in another worktree takes you to that worktree |
 | `fgwt` | `cd` to a worktree of the repository |
+| `fgst` | Apply, show or drop a stash, with its diff as preview; dropping asks first |
 | `fkctx` | Switch the kubectl context |
 | `fkns` | Switch the namespace of the current kubectl context |
+| `fkpod` | Follow the logs of, open a shell in, describe or delete a pod; deleting asks first |
 | `fdx` | Open a shell in a running container |
 | `fcz` | `chezmoi edit` a managed file; encrypted files are not listed, and there is no preview, since rendering a template can read secrets |
 | `fGpc` | Switch the GCP project |
 | `fGcis` | SSH into an instance |
 | `fGciS` | Search instances |
+
+`ctrl-o` then a letter inserts the pick at the cursor instead of acting on it,
+in emacs and vi insert mode alike:
+
+| Keys | Inserts |
+|------|---------|
+| `ctrl-o b` | a branch |
+| `ctrl-o h` | the hash of a commit |
+| `ctrl-o p` | a pod of the current namespace |
+| `ctrl-o d` | a running container |
 
 ### Navigation
 
@@ -321,16 +366,32 @@ Each is defined only when the replacement is installed.
   carries a credential: an assignment to a variable named like one
   (`GH_TOKEN=…`, `set -gx API_KEY …`), a `--password`/`--token`/`--secret`
   flag with a value, an `Authorization:` header, a `user:password@` URL, or a
-  well-known token shape (GitHub, GitLab, Slack, AWS, `sk-…`).
+  well-known token shape (GitHub, GitLab, Slack, AWS, `sk-…`). Patterns of
+  one machine go in `$history_secret_patterns`, from `per_machine.fish` or
+  `secret.fish`. A refused command prints a dim note saying so, unless
+  `$history_secret_notice` is 0. `history_scrub` finds the entries saved
+  before the filter caught them, lists them with the credential masked, and
+  deletes them once confirmed (`--dry-run` only lists, `--yes` skips the
+  question).
 - **Long command notification**: a command running at least
   `$notify_long_command_seconds` (60 by default, 0 turns it off) sends a
   desktop notification when it ends: through kitty while its window is out of
-  focus, otherwise `osascript` or `notify-send`. Programs listed in
-  `$notify_long_command_ignore` (editors, pagers, `ssh`, TUIs) and SSH
-  sessions never notify, and a command the history filter refuses shows only
-  its program name.
+  focus, otherwise `osascript` or `notify-send`, skipped when kitty reports
+  the window focused (asked over its remote control, so it also works inside
+  zellij). Programs listed in `$notify_long_command_ignore` (editors, pagers,
+  `ssh`, TUIs), directories matching a glob of
+  `$notify_long_command_ignore_dirs` and SSH sessions never notify, and a
+  command the history filter refuses shows only its program name.
+- **`notify_me COMMAND…`** runs the command and notifies however long it took,
+  also to Telegram when `NOTIFY_TELEGRAM_BOT_TOKEN` and
+  `NOTIFY_TELEGRAM_CHAT_ID` are set (in `secret.fish`, never in the
+  repository) - so it reaches the phone from an SSH session too. The token
+  goes to curl through stdin, out of the process list.
 - **Listing on `cd`**: every change of directory lists it with `eza`, unless
   it holds more than `$auto_ls_max_entries` entries (200 by default, 0 lists
-  every directory).
+  every directory). The first `$auto_ls_readme_lines` lines of its README
+  follow (3 by default, 0 for none), and entering a repository shows once its
+  branch, distance from upstream and changed files (`$auto_ls_git_summary` 0
+  turns it off).
 - **prek**: entering a repository with a `.pre-commit-config.yaml` or
   `prek.toml` installs the prek pre-commit shim, unless it is there already.
