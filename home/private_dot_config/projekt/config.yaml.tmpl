@@ -48,14 +48,29 @@ folders:
       repos:
         - name: autopairs
           path: autopairs
-        - name: bitrofi
-          path: bitrofi
         - name: canaudua
           path: canaudua
         - name: caran
           path: caran
         - name: fzf
           path: fzf
+  - path: {{ .chezmoi.homeDir }}/Working/personal/vim
+    prefix: "vim"
+    is_workspace: true
+    regex: ""
+    priority: 0
+    git:
+      host: gl
+      group: dynamo-config/vim-plugins
+      repos:
+        - name: blink-cmp-fuzzy-path
+          path: blink-cmp-fuzzy-path
+        - name: blink-cmp-kitty
+          path: blink-cmp-kitty
+        - name: blink-cmp-zellij
+          path: blink-cmp-zellij
+        - name: blink-cmp-tmux
+          path: blink-cmp-tmux
   - path: {{ .chezmoi.homeDir }}/Working/personal/tools
     prefix: "tool"
     is_workspace: true
@@ -71,6 +86,18 @@ folders:
           path: datme
         - name: sh-docs
           path: sh-docs
+        - name: dybatpho
+          path: dybatpho
+        - name: dyshellint
+          path: dyshellint
+        - name: foxsync
+          path: foxsync
+        - name: blackduck-tui
+          path: blackduck-tui
+        - name: dysyncal
+          path: dysyncal
+        - name: dye
+          path: dye
   - path: {{ .chezmoi.homeDir }}/Working/personal/infra
     prefix: "infra"
     is_workspace: true
@@ -84,14 +111,51 @@ folders:
           path: homeops
         - name: terragrunt
           path: terragrunt
+        - name: helm-charts
+          path: helm-charts
+  - path: {{ .chezmoi.homeDir }}/Working/personal/config
+    prefix: "config"
+    is_workspace: true
+    regex: ""
+    priority: 0
+    git:
+      host: gl
+      group: dynamo-config
+      repos:
+        - name: projekt-templates
+          path: projekt-templates
+  - path: {{ .chezmoi.homeDir }}/Working/personal/obsidian
+    prefix: "obsidian"
+    is_workspace: true
+    regex: ""
+    priority: 0
+    git:
+      host: gl
+      group: dynamo-brain/obsidian
+      repos:
+        - name: datme
+          path: datme
+        - name: lang-blocks
+          path: lang-blocks
+  - path: {{ .chezmoi.homeDir }}/Working/personal/games
+    prefix: "game"
+    is_workspace: true
+    regex: ""
+    priority: 0
+    git:
+      host: gl
+      group: dynamo-games
+      repos:
+        - name: DreaMaker
+          path: dreamaker
   - path: {{ .chezmoi.homeDir }}/Working/personal/misc
     prefix: "misc"
     is_workspace: true
     regex: ""
     priority: 0
     git:
-      host: gh
-      group: dynamotn
+      host: gl
+      group: dynamo.foss
       repos:
         - name: stars-collection
           path: stars-collection
@@ -101,12 +165,10 @@ folders:
           path: font
         - name: bash-coding-style
           path: bash-coding-style
-        - name: dye
-          path: dye
-        - name: cv
-          path: cv
         - name: tree-sitter-dbml
           path: tree-sitter-dbml
+        - name: tree-sitter-yara-x
+          path: tree-sitter-yara-x
   {{- if eq .kind "pc" "laptop" }}
   - path: {{ .chezmoi.homeDir }}/Working/personal/finance
     prefix: "finance"
@@ -119,6 +181,8 @@ folders:
       repos:
         - name: ledger
           path: ledger
+        - name: paisa
+          path: paisa
   - path: {{ .chezmoi.homeDir }}/Documents/Notes
     name: "notes"
     is_workspace: false
@@ -128,6 +192,12 @@ folders:
     is_workspace: true
     regex: ""
     priority: 0
+    git:
+      host: gl
+      group: dynamo-brain/books
+      repos:
+        - name: self-development
+          path: self-development
   {{- end }}
   {{- $top := . }}
   {{- range .decryptEnterprise }}
