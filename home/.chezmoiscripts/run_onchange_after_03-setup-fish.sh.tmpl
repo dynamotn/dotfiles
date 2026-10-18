@@ -39,8 +39,8 @@ fish_config_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".config" "fish"
 # `fisher update` already prunes the plugins it no longer lists.
 rm -f "${fish_config_dir}"/fishd*
 fish_setup_script="$(dybatpho::path_join "${fish_config_dir}" "setup.fish")"
-# `--update` reinstalls fisher and merges `plugins.list` into `fish_plugins`,
-# which a run with fisher already installed would skip.
+# `--update` reinstalls fisher; `plugins.list` then overwrites `fish_plugins`,
+# so `fisher update` also removes the plugins dropped from the list.
 fish "${fish_setup_script}" --update
 
 dybatpho::success "Setup fish shell"
