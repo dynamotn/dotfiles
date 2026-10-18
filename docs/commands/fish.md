@@ -284,8 +284,6 @@ Each lists with fzf, then acts on the pick.
 |----------|--------|
 | `gR` | `cd` to git root folder |
 | `gRu` | `cd` to superproject root if in a submodule, else to the main checkout of the repository |
-| `cd` | `zoxide`: jump to a frecent directory by part of its name (when zoxide is installed) |
-| `cdi` | `zoxide`: pick a directory interactively (when zoxide is installed) |
 
 ### Clipboard
 
