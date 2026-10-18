@@ -1,0 +1,31 @@
+name: zoxide
+{{- if or (eq .chezmoi.os "darwin" "android") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}
+# Use package manager for Android, macOS and container environments
+method: os
+# https://repology.org/project/zoxide/versions
+arch:
+  packages:
+    - name: zoxide
+alpine:
+  packages:
+    - name: zoxide
+termux:
+  packages:
+    - name: zoxide
+macos:
+  packages:
+    - name: zoxide
+{{- else }}
+method: binary
+github:
+  repo: ajeetdsouza/zoxide
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: zoxide-%1v-{{ $arch }}-unknown-linux-musl.tar.gz
+archive:
+  - path: zoxide
+{{- end }}
