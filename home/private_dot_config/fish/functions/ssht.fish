@@ -1,28 +1,18 @@
 function ssht --description "Run terminal workspace after ssh"
-    getopts $argv | while read -l key value
-        switch "$key"
-            case _
-                if test -z "$server"
-                    set server $value
-                else
-                    set server $server $value
-                end
-            case s
-                set session $value
-        end
-    end
-    if not test -n "$server"
-        echo "Must have hostname"
-        return 1
-    end
+    argparse -N1 s= -- $argv
+    or return
+    set -l server $argv
+    set -l session $_flag_s
 
-    if ! test -z "$(ssh $server command -v zellij)"
+    if test -n "$(ssh $server command -v zellij)"
         ssh $server zellij a $session
         or ssh $server zellij --config "\$HOME/.config/zellij/ssh.kdl"
-    else if ! test -z "$(ssh $server command -v tmux)"
+    else if test -n "$(ssh $server command -v tmux)"
+        set -l attach_argv
+        set -l new_argv
         if test -n "$session"
-            set attach_argv "-t $session"
-            set new_argv "-s $session"
+            set attach_argv -t $session
+            set new_argv -s $session
         end
         ssh $server tmux at $attach_argv
         or ssh $server tmux new $new_argv
