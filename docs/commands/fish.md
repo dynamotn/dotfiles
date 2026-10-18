@@ -1,31 +1,24 @@
 # Fish
 
 Everything below is defined in `home/private_dot_config/fish/`: the `conf.d/`
-snippets hold the aliases, `config.fish.tmpl` holds the only real abbreviation.
+snippets hold the abbreviations and aliases, `config.fish.tmpl` the editor
+ones.
 
 ## Abbreviations
 
-Auto expanded on Space/Enter.
+Expanded on Space/Enter, so the command line shows the full command before it
+runs and the history keeps what really ran. A destructive one (`grh`, `gbd`,
+`gcl`, `dsp`, `kdel`) is seen in full before Enter. Completion works on the
+expansion, so none of them needs a completion of its own.
 
 | Abbr | Expansion |
 |------|-----------|
 | `v` | `vim` (aliased to `nvim` when Neovim is available) |
 
-## Aliases
-
-Expanded when the command runs, not while typing.
-
-### Editor
-
-| Alias | Expansion |
-|-------|-----------|
-| `vim` | `nvim` (only when Neovim is available) |
-| `vimdiff` | `nvim -d` (only when Neovim is available) |
-
 ### Docker
 
-| Alias | Expansion |
-|-------|-----------|
+| Abbr | Expansion |
+|------|-----------|
 | `d` | `docker` |
 | `db` | `docker build` |
 | `di` | `docker image` |
@@ -43,8 +36,10 @@ Expanded when the command runs, not while typing.
 
 ### Docker Compose
 
-| Alias | Expansion |
-|-------|-----------|
+`docker-compose` is the standalone Compose v2 binary dytoy installs.
+
+| Abbr | Expansion |
+|------|-----------|
 | `c` | `docker-compose` |
 | `cb` | `docker-compose build` |
 | `cl` | `docker-compose logs -f --tail 50` |
@@ -55,8 +50,8 @@ Expanded when the command runs, not while typing.
 
 ### Git
 
-| Alias | Expansion |
-|-------|-----------|
+| Abbr | Expansion |
+|------|-----------|
 | `g` | `git` |
 | `ga` | `git add` |
 | `gai` | `git add -i` |
@@ -65,8 +60,9 @@ Expanded when the command runs, not while typing.
 | `gbd` | `git branch -D` |
 | `gbl` | `git blame` |
 | `gc` | `git commit -v` |
-| `gca` | `git commit --amend` |
-| `gcan` | `git commit --amend --no-edit --reset-author` |
+| `gca` | `git commit -v --amend` |
+| `gcan` | `git commit -v --amend --no-edit --reset-author` |
+| `gcm` | `git commit -m ""`, the cursor between the quotes |
 | `gcl` | `git clean -df` |
 | `gco` | `git checkout` |
 | `gcp` | `git cherry-pick` |
@@ -79,7 +75,7 @@ Expanded when the command runs, not while typing.
 | `gfu` | `git fetch --unshallow` |
 | `gg` | `git log --graph` with a custom one-line format |
 | `ggp` | `git log -p` |
-| `ggs` | `gg --stat` |
+| `ggs` | `gg` with `--stat` |
 | `gl` | `git pull` |
 | `gm` | `git merge --ff` |
 | `gmc` | `git merge --continue` |
@@ -91,8 +87,6 @@ Expanded when the command runs, not while typing.
 | `gph` | `git push gh` |
 | `gpo` | `git push -u origin` |
 | `gpt` | `git push --tags` |
-| `gR` | `cd` to git root folder |
-| `gRu` | `cd` to superproject root if in a submodule, else to the main checkout of the repository |
 | `grb` | `git rebase` |
 | `grba` | `git rebase --abort` |
 | `grbc` | `git rebase --continue` |
@@ -116,7 +110,6 @@ Expanded when the command runs, not while typing.
 | `gsu` | `git submodule update --init --recursive --remote` |
 | `gt` | `git tag` |
 | `gwt` | `git worktree` |
-| `fgcs` | Pick a commit with fzf |
 
 Completion for `git` extends the one fish ships with, in
 `completions/git.fish`: commands that only accept tracked files (`rm`, `blame`,
@@ -131,8 +124,8 @@ expects, and every alias of
 
 ### Kubectl
 
-| Alias | Expansion |
-|-------|-----------|
+| Abbr | Expansion |
+|------|-----------|
 | `k` | `kubectl` |
 | `ka` | `kubectl apply -f` |
 | `kc` | `kubectl create` |
@@ -157,16 +150,15 @@ Completion for `kubectl` comes from `kubectl completion fish`;
 `completions/kubectl.fish` keeps that and adds what it misses, so
 `kubectl config current-context` and friends no longer fall back to file names,
 `set-cluster`/`set-credentials` name what is in the kubeconfig and `-k` offers
-the directory of a kustomization. `kk` carries its own copy of that last rule:
-`--wraps` cannot express "the next word is the argument of `-k`". The
+the directory of a kustomization, which `kk` gets through its expansion. The
 wrappers `grc` installs used to pass their arguments through `eval`, which lost
 empty and quoted ones and broke completion for every command they colour
 (`kubectl`, `docker`, `systemctl`, …).
 
 ### Helm
 
-| Alias | Expansion |
-|-------|-----------|
+| Abbr | Expansion |
+|------|-----------|
 | `h` | `helm` |
 | `hd` | `helm-docs` |
 | `hdel` | `helm delete` |
@@ -183,8 +175,8 @@ when the cluster is out of reach and a release name cannot be listed, and makes
 
 ### Google Cloud
 
-| Alias | Expansion |
-|-------|-----------|
+| Abbr | Expansion |
+|------|-----------|
 | `G` | `gcloud` |
 | `Gal` | `gcloud auth login` |
 | `Gb` | `bq query --use_legacy_sql=false` |
@@ -198,21 +190,18 @@ when the cluster is out of reach and a release name cannot be listed, and makes
 | `Gp` | `gcloud pubsub` |
 | `Gs` | `gcloud sql` |
 | `Gu` | `gcloud components update` |
-| `fGpc` | Switch project with fzf |
-| `fGcis` | SSH into an instance picked with fzf |
-| `fGciS` | Search instances with fzf |
 
 ### Chezmoi
 
 `cz` drives this repository; `scz` drives the system source applied to `/`.
 
-| Alias | Expansion |
-|-------|-----------|
+| Abbr | Expansion |
+|------|-----------|
 | `cz` | `chezmoi` |
 | `cza` | `chezmoi apply` |
 | `czA` | `chezmoi add` |
 | `czAe` | `chezmoi add --encrypt` |
-| `czd` | `chezmoi diff --recursive` |
+| `czd` | `chezmoi diff --recursive --exclude scripts` |
 | `cze` | `chezmoi edit` |
 | `czs` | `chezmoi status` |
 | `czu` | `chezmoi update` |
@@ -221,7 +210,7 @@ when the cluster is out of reach and a release name cannot be listed, and makes
 | `scza` | `scz apply` |
 | `sczA` | `scz add` |
 | `sczAe` | `scz add --encrypt` |
-| `sczd` | `scz diff --recursive` |
+| `sczd` | `scz diff --recursive --exclude scripts` |
 | `scze` | `scz edit` |
 | `sczs` | `scz status` |
 | `sczu` | `scz update` |
@@ -247,6 +236,56 @@ opens with `complete -c chezmoi -e`; the erase loads
 from `completions/chezmoi.fish` on the first Tab anyway. Any tool that gets a
 file in `completions/` has to be taken out of that eager block for the same
 reason.
+
+### Other tools
+
+| Abbr | Expansion |
+|------|-----------|
+| `bk` | `backup_file` |
+| `rs` | `restore_file` |
+| `listen_ports` | `netstat -tuplen` |
+| `open_ports` | `netstat -tuplan` |
+| `syncdy` | `rsync --delete -avhz` |
+
+## Aliases
+
+Expanded when the command runs, not while typing: they replace a command
+rather than shorten one. The editor and modern replacement ones exist only in
+an interactive shell, so `fish -c` and fish scripts get the real tools.
+
+### Editor
+
+| Alias | Expansion |
+|-------|-----------|
+| `vim` | `nvim` (only when Neovim is available) |
+| `vimdiff` | `nvim -d` (only when Neovim is available) |
+| `nvims` | the stable Neovim from mise, with its own config |
+
+### Pickers
+
+Each lists with fzf, then acts on the pick.
+
+| Command | Action |
+|---------|--------|
+| `fgcs` | Print the hash of a commit |
+| `fgb` | `git switch` to a local or remote branch |
+| `fgwt` | `cd` to a worktree of the repository |
+| `fkctx` | Switch the kubectl context |
+| `fkns` | Switch the namespace of the current kubectl context |
+| `fdx` | Open a shell in a running container |
+| `fcz` | `chezmoi edit` a managed file; encrypted files are not listed, and there is no preview, since rendering a template can read secrets |
+| `fGpc` | Switch the GCP project |
+| `fGcis` | SSH into an instance |
+| `fGciS` | Search instances |
+
+### Navigation
+
+| Function | Action |
+|----------|--------|
+| `gR` | `cd` to git root folder |
+| `gRu` | `cd` to superproject root if in a submodule, else to the main checkout of the repository |
+| `cd` | `zoxide`: jump to a frecent directory by part of its name (when zoxide is installed) |
+| `cdi` | `zoxide`: pick a directory interactively (when zoxide is installed) |
 
 ### Clipboard
 
@@ -274,16 +313,26 @@ Each is defined only when the replacement is installed.
 | `curl` | `curlie` |
 | `dig` | `q` |
 | `less` / `more` | `ov` |
-| `cd` | `z` |
 | `fd` | `fdfind` (Debian/Ubuntu only) |
-
-### Other tools
-
-| Alias | Expansion |
-|-------|-----------|
-| `bk` | `backup_file` |
 | `mise` | `mise` wrapped in `proot` so it can resolve DNS and TLS (Termux only) |
-| `rs` | `restore_file` |
-| `listen_ports` | `netstat -tuplen` |
-| `open_ports` | `netstat -tuplan` |
-| `syncdy` | `rsync --delete -avhz` |
+
+## Hooks
+
+- **History filter**: `fish_should_add_to_history` keeps out of the history a
+  command typed after a space, as fish does by default, and any command that
+  carries a credential: an assignment to a variable named like one
+  (`GH_TOKEN=…`, `set -gx API_KEY …`), a `--password`/`--token`/`--secret`
+  flag with a value, an `Authorization:` header, a `user:password@` URL, or a
+  well-known token shape (GitHub, GitLab, Slack, AWS, `sk-…`).
+- **Long command notification**: a command running at least
+  `$notify_long_command_seconds` (60 by default, 0 turns it off) sends a
+  desktop notification when it ends: through kitty while its window is out of
+  focus, otherwise `osascript` or `notify-send`. Programs listed in
+  `$notify_long_command_ignore` (editors, pagers, `ssh`, TUIs) and SSH
+  sessions never notify, and a command the history filter refuses shows only
+  its program name.
+- **Listing on `cd`**: every change of directory lists it with `eza`, unless
+  it holds more than `$auto_ls_max_entries` entries (200 by default, 0 lists
+  every directory).
+- **prek**: entering a repository with a `.pre-commit-config.yaml` or
+  `prek.toml` installs the prek pre-commit shim, unless it is there already.
