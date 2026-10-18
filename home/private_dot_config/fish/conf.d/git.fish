@@ -73,4 +73,4 @@ complete -c gR -f
 complete -c gRu -f
 complete -c fgcs -f
 
-set -q FZF_GIT_COMMIT_SEARCH_COMMAND; or set -U FZF_GIT_COMMIT_SEARCH_COMMAND "git log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+set -q FZF_GIT_COMMIT_SEARCH_COMMAND; or set -g FZF_GIT_COMMIT_SEARCH_COMMAND "git log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
