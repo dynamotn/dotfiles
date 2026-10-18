@@ -117,7 +117,6 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[viddy](https://github.com/sachaos/viddy)|Alternative to `watch` with colours, diff, time machine...|
 |[dust](https://github.com/bootandy/dust)|Alternative to `du` with more intuitive|
 |[duf](https://github.com/muesli/duf)|Alternative to `df` with colours...|
-|[zoxide](https://github.com/ajeetdsouza/zoxide)|Alternative to `cd` that jumps to frecent directories|
 |[wol](https://github.com/sabhiram/go-wol)|Wake-on-LAN utility|
 |[fzf](https://github.com/junegunn/fzf)|Fuzzy finder on CLI|
 |[lazygit](https://github.com/jesseduffield/lazygit)|TUI for git|

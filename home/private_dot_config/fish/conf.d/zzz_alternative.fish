@@ -14,6 +14,4 @@ type -q duf; and alias df duf
 type -q curlie; and alias curl curlie
 type -q q; and alias dig q
 type -q ov; and alias less ov; and alias more ov
-# Defines `cd` (frecency jump) and `cdi` (interactive pick)
-type -q zoxide; and zoxide init fish --cmd cd | source
 type -q btop; and alias htop btop
