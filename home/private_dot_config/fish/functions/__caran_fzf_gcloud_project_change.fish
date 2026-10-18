@@ -1,5 +1,5 @@
 function __caran_fzf_gcloud_project_change -d "Change project of GCP"
-    eval "$FZF_GCLOUD_PROJECT_SEARCH_COMMAND | "(__fzfcmd) "-m $FZF_DEFAULT_OPTS --ansi" | read -l select
+    eval "$FZF_GCLOUD_PROJECT_SEARCH_COMMAND | "(__fzfcmd) "-m --ansi" | read -l select
 
     if not test -z "$select"
         set -l project_id (echo $select | awk '{ print $1 }')
