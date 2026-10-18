@@ -17,5 +17,5 @@ function __caran_fzf_gcloud_instance_ssh -d "SSH to Gcloud instance"
     else
         eval "$ssh_command"
     end
-    __caran_terminal_workspace_recover_name_window
+    __caran_terminal_workspace_undo_rename_window
 end
