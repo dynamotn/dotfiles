@@ -37,7 +37,7 @@ function __auto_ls_readme --description 'Show the first lines of the README of $
     end
 end
 
-function __auto_ls_git_summary --description 'Show branch, upstream distance and changes on entering a repository'
+function __auto_ls_git_summary --description 'Show branch and upstream distance on entering a repository'
     test "$auto_ls_git_summary" != 0; or return
     set -l root (git rev-parse --show-toplevel 2>/dev/null)
     if test -z "$root"
@@ -48,18 +48,18 @@ function __auto_ls_git_summary --description 'Show branch, upstream distance and
     test "$root" = "$__auto_ls_repo"; and return
     set -g __auto_ls_repo $root
 
-    set -l lines (git status --porcelain=v2 --branch 2>/dev/null)
-    set -l parts (string replace -rf '^# branch\.head ' '' -- $lines)
-    # `# branch.ab +AHEAD -BEHIND`, only when there is an upstream
-    set -l distance (string match -rg '^# branch\.ab \+(\d+) -(\d+)$' -- $lines)
+    # Refs only, never the working tree: `git status` there would run what the
+    # repository's own config names (core.fsmonitor, clean filters), and this
+    # runs on a mere `cd` into any directory, an untrusted one included.
+    set -l parts (git symbolic-ref --quiet --short HEAD 2>/dev/null; or git rev-parse --short HEAD 2>/dev/null)
+    # BEHIND and AHEAD of the upstream, when there is one
+    set -l distance (git rev-list --count --left-right '@{upstream}...HEAD' 2>/dev/null | string split \t)
     if test -n "$distance[1]"; and test "$distance[1]$distance[2]" != 00
-        set -a parts "↑$distance[1] ↓$distance[2]"
+        set -a parts "↑$distance[2] ↓$distance[1]"
     end
-    set -l changed (count (string match -rv '^#' -- $lines))
-    test $changed -gt 0; and set -a parts "$changed changed"
 
     set_color brblack
-    echo '  '(string join ' · ' -- $parts)
+    echo '  on '(string join ' · ' -- $parts)
     set_color normal
 end
 
