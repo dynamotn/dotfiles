@@ -1,5 +1,5 @@
 function __caran_fzf_gcloud_instance_ssh -d "SSH to Gcloud instance"
-    eval "$FZF_GCLOUD_ACTIVE_INSTANCE_SEARCH_COMMAND | "(__fzfcmd) "-m $FZF_DEFAULT_OPTS --ansi" | read -l select
+    eval "$FZF_GCLOUD_ACTIVE_INSTANCE_SEARCH_COMMAND | "(__fzfcmd) "-m --ansi" | read -l select
 
     if test -z "$select"
         return 1
