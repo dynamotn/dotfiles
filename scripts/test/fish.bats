@@ -506,9 +506,9 @@ function _project {
   assert_output --partial '# Title'
   assert_output --partial 'Second line'
   refute_output --partial 'Third line'
-  assert_output --partial 'main · 1 changed'
+  assert_output --partial '  on main'
   local summaries
-  summaries="$(grep -c 'main ·' <<< "${output}" || true)"
+  summaries="$(grep -c '  on main' <<< "${output}" || true)"
   ((summaries == 1)) || fail "the git summary showed ${summaries} times"
 }
 
@@ -519,5 +519,27 @@ function _project {
     source '${FISH_DIR}/conf.d/auto.fish'
     cd '${REPO}'"
   refute_output --partial '# Title'
-  refute_output --partial 'main ·'
+  refute_output --partial '  on main'
+}
+
+@test "the git summary shows the distance from the upstream" {
+  _git_repo
+  git -C "${REPO}" branch -q upstream-base
+  git -C "${REPO}" branch -q --set-upstream-to=upstream-base
+  printf 'more\n' >> "${REPO}/seed.txt"
+  git -C "${REPO}" commit -q -am more
+  run _fishi "source '${FISH_DIR}/conf.d/auto.fish'; cd '${REPO}'"
+  assert_output --partial '  on main · ↑1 ↓0'
+}
+
+# The repository's config is the directory's to choose: entering one must not
+# run what it names, as `git status` would with core.fsmonitor
+@test "entering a repository runs nothing its config names" {
+  _git_repo
+  printf '#!/bin/sh\ntouch "%s/fsmonitor-ran"\n' "${BATS_TEST_TMPDIR}" > "${BATS_TEST_TMPDIR}/fsmonitor"
+  chmod +x "${BATS_TEST_TMPDIR}/fsmonitor"
+  git -C "${REPO}" config core.fsmonitor "${BATS_TEST_TMPDIR}/fsmonitor"
+  run _fishi "source '${FISH_DIR}/conf.d/auto.fish'; cd '${REPO}'"
+  assert_output --partial '  on main'
+  assert_file_not_exists "${BATS_TEST_TMPDIR}/fsmonitor-ran"
 }

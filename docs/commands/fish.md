@@ -391,7 +391,8 @@ Each is defined only when the replacement is installed.
   it holds more than `$auto_ls_max_entries` entries (200 by default, 0 lists
   every directory). The first `$auto_ls_readme_lines` lines of its README
   follow (3 by default, 0 for none), and entering a repository shows once its
-  branch, distance from upstream and changed files (`$auto_ls_git_summary` 0
-  turns it off).
+  branch and distance from upstream (`$auto_ls_git_summary` 0 turns it off).
+  It reads refs only, never the working tree: `git status` would run what the
+  repository's own config names, such as `core.fsmonitor`, on a mere `cd`.
 - **prek**: entering a repository with a `.pre-commit-config.yaml` or
   `prek.toml` installs the prek pre-commit shim, unless it is there already.
