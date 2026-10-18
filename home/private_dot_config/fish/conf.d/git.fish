@@ -63,6 +63,7 @@ abbr -a gwt 'git worktree'
 alias fgcs __caran_fzf_git_commit_search
 alias fgb __caran_fzf_git_branch_switch
 alias fgwt __caran_fzf_git_worktree_change
+alias fgst __caran_fzf_git_stash_action
 
 # The two `cd` shortcuts are functions rather than aliases: an alias wraps `cd`,
 # so fish would offer directory completion for commands that take no argument.
@@ -80,5 +81,6 @@ complete -c gRu -f
 complete -c fgcs -f
 complete -c fgb -f
 complete -c fgwt -f
+complete -c fgst -f
 
 set -q FZF_GIT_COMMIT_SEARCH_COMMAND; or set -g FZF_GIT_COMMIT_SEARCH_COMMAND "git log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"

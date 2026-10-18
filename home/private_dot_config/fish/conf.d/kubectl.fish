@@ -20,10 +20,12 @@ abbr -a kx 'kubectl exec -it'
 
 alias fkctx __caran_fzf_kube_context_change
 alias fkns __caran_fzf_kube_namespace_change
+alias fkpod __caran_fzf_kube_pod_action
 
 # The fzf pickers take no argument
 complete -c fkctx -f
 complete -c fkns -f
+complete -c fkpod -f
 
 abbr -a h helm
 abbr -a hd helm-docs
