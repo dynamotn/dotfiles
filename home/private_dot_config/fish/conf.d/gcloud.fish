@@ -1,16 +1,16 @@
-alias G gcloud
-alias Gal "gcloud auth login"
-alias Gb "bq query --use_legacy_sql=false"
-alias Gc "gcloud compute"
-alias Gca "gcloud compute addresses"
-alias Gci "gcloud compute instances"
-alias Gcf "gcloud compute firewall-rules"
-alias Gi "gcloud iam"
-alias Gk "gcloud container"
-alias Gl "gcloud logging"
-alias Gp "gcloud pubsub"
-alias Gs "gcloud sql"
-alias Gu "gcloud components update"
+abbr -a G gcloud
+abbr -a Gal "gcloud auth login"
+abbr -a Gb "bq query --use_legacy_sql=false"
+abbr -a Gc "gcloud compute"
+abbr -a Gca "gcloud compute addresses"
+abbr -a Gci "gcloud compute instances"
+abbr -a Gcf "gcloud compute firewall-rules"
+abbr -a Gi "gcloud iam"
+abbr -a Gk "gcloud container"
+abbr -a Gl "gcloud logging"
+abbr -a Gp "gcloud pubsub"
+abbr -a Gs "gcloud sql"
+abbr -a Gu "gcloud components update"
 
 alias fGpc __caran_fzf_gcloud_project_change
 alias fGcis __caran_fzf_gcloud_instance_ssh

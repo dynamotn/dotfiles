@@ -1,32 +1,35 @@
-alias k kubectl
-alias ka 'kubectl apply -f'
-alias kc 'kubectl create'
-alias kccc 'kubectl config current-context'
-alias kcdc 'kubectl config delete-context'
-alias kcsc 'kubectl config set-context'
-alias kcuc 'kubectl config use-context'
-alias kd 'kubectl describe'
-alias kdel 'kubectl delete'
-alias ke 'kubectl edit'
-alias kg 'kubectl get'
-alias kgj 'kubectl get -o json'
-alias kgy 'kubectl get -o yaml'
-alias kk 'kubectl apply -k'
-alias kl 'kubectl logs'
-alias klf 'kubectl logs -f --tail 50'
-alias ksc 'kubectl scale'
-alias kr 'kubectl rollout'
-alias kx 'kubectl exec -it'
+abbr -a k kubectl
+abbr -a ka 'kubectl apply -f'
+abbr -a kc 'kubectl create'
+abbr -a kccc 'kubectl config current-context'
+abbr -a kcdc 'kubectl config delete-context'
+abbr -a kcsc 'kubectl config set-context'
+abbr -a kcuc 'kubectl config use-context'
+abbr -a kd 'kubectl describe'
+abbr -a kdel 'kubectl delete'
+abbr -a ke 'kubectl edit'
+abbr -a kg 'kubectl get'
+abbr -a kgj 'kubectl get -o json'
+abbr -a kgy 'kubectl get -o yaml'
+abbr -a kk 'kubectl apply -k'
+abbr -a kl 'kubectl logs'
+abbr -a klf 'kubectl logs -f --tail 50'
+abbr -a ksc 'kubectl scale'
+abbr -a kr 'kubectl rollout'
+abbr -a kx 'kubectl exec -it'
 
-# `--wraps` cannot carry "the next word is the argument of -k", so say here
-# that the alias takes the directory of a kustomization
-complete -f -c kk -a '(__fish_complete_directories)'
+alias fkctx __caran_fzf_kube_context_change
+alias fkns __caran_fzf_kube_namespace_change
 
-alias h helm
-alias hd helm-docs
-alias hdel 'helm delete'
-alias hdu 'helm dependency update'
-alias hgv 'helm get values'
-alias hl 'helm ls'
-alias hs 'helm secrets'
-alias hu 'helm upgrade --install'
+# The fzf pickers take no argument
+complete -c fkctx -f
+complete -c fkns -f
+
+abbr -a h helm
+abbr -a hd helm-docs
+abbr -a hdel 'helm delete'
+abbr -a hdu 'helm dependency update'
+abbr -a hgv 'helm get values'
+abbr -a hl 'helm ls'
+abbr -a hs 'helm secrets'
+abbr -a hu 'helm upgrade --install'

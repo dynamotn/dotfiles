@@ -1,62 +1,68 @@
-alias g git
-alias ga 'git add'
-alias gap 'ga -p'
-alias gai 'ga -i'
-alias gb 'git branch'
-alias gbd 'git branch -D'
-alias gbl 'git blame'
-alias gc 'git commit -v'
-alias gca 'gc --amend'
-alias gcan 'gc --amend --no-edit --reset-author'
-alias gcl 'git clean -df'
-alias gco 'git checkout'
-alias gcp 'git cherry-pick'
-alias gcpa 'gcp --abort'
-alias gcpc 'gcp --continue'
-alias gd 'git diff'
-alias gdc 'gd --cached'
-alias gf 'git fetch'
-alias gfu 'gf --unshallow'
-alias gfa 'gf --all -p'
-alias gg 'git log --graph --pretty=format:\'%C(bold)%h%Creset%C(magenta)%d%Creset %s %C(yellow)<%an> %C(cyan)(%cr)%Creset\' --abbrev-commit --date=relative'
-alias ggs 'gg --stat'
-alias ggp 'git log -p'
-alias gl 'git pull'
-alias gm 'git merge --ff'
-alias gmc 'git merge --continue'
-alias gmt 'git mergetool'
-alias gmv 'git mv'
-alias gn 'git clone --recursive --depth 1'
-alias gnb 'git checkout -b'
-alias gp 'git push'
-alias gpo 'gp -u origin'
-alias gph 'gp gh'
-alias gpt 'git push --tags'
-alias grb 'git rebase'
-alias grba 'grb --abort'
-alias grbi 'grb -i'
-alias grbc 'grb --continue'
-alias grh 'git reset --hard'
-alias grH 'git reset HEAD'
-alias grm 'git remote'
-alias grma 'grm add'
-alias grmd 'grm remove'
-alias grmu 'grm set-url'
-alias grs 'git reset --soft'
-alias grv 'git revert'
-alias gs 'git status'
-alias gsh 'git show'
-alias gsm 'git submodule'
-alias gsn 'git snapshot' # View my dotfile git config
-alias gst 'git stash'
-alias gstd 'gst drop'
-alias gstp 'gst pop'
-alias gsts 'gst show --text'
-alias gsu 'git submodule update --init --recursive --remote'
-alias gt 'git tag'
-alias gwt 'git worktree'
+# Abbreviations rather than aliases: the full command lands on the line before
+# it runs, so history keeps what really ran and a destructive one (`grh`,
+# `gbd`, `gcl`) is seen in full before Enter.
+abbr -a g git
+abbr -a ga 'git add'
+abbr -a gap 'git add -p'
+abbr -a gai 'git add -i'
+abbr -a gb 'git branch'
+abbr -a gbd 'git branch -D'
+abbr -a gbl 'git blame'
+abbr -a gc 'git commit -v'
+abbr -a gca 'git commit -v --amend'
+abbr -a gcan 'git commit -v --amend --no-edit --reset-author'
+abbr -a gcm --set-cursor 'git commit -m "%"'
+abbr -a gcl 'git clean -df'
+abbr -a gco 'git checkout'
+abbr -a gcp 'git cherry-pick'
+abbr -a gcpa 'git cherry-pick --abort'
+abbr -a gcpc 'git cherry-pick --continue'
+abbr -a gd 'git diff'
+abbr -a gdc 'git diff --cached'
+abbr -a gf 'git fetch'
+abbr -a gfu 'git fetch --unshallow'
+abbr -a gfa 'git fetch --all -p'
+abbr -a gg "git log --graph --pretty=format:'%C(bold)%h%Creset%C(magenta)%d%Creset %s %C(yellow)<%an> %C(cyan)(%cr)%Creset' --abbrev-commit --date=relative"
+abbr -a ggs "git log --graph --pretty=format:'%C(bold)%h%Creset%C(magenta)%d%Creset %s %C(yellow)<%an> %C(cyan)(%cr)%Creset' --abbrev-commit --date=relative --stat"
+abbr -a ggp 'git log -p'
+abbr -a gl 'git pull'
+abbr -a gm 'git merge --ff'
+abbr -a gmc 'git merge --continue'
+abbr -a gmt 'git mergetool'
+abbr -a gmv 'git mv'
+abbr -a gn 'git clone --recursive --depth 1'
+abbr -a gnb 'git checkout -b'
+abbr -a gp 'git push'
+abbr -a gpo 'git push -u origin'
+abbr -a gph 'git push gh'
+abbr -a gpt 'git push --tags'
+abbr -a grb 'git rebase'
+abbr -a grba 'git rebase --abort'
+abbr -a grbi 'git rebase -i'
+abbr -a grbc 'git rebase --continue'
+abbr -a grh 'git reset --hard'
+abbr -a grH 'git reset HEAD'
+abbr -a grm 'git remote'
+abbr -a grma 'git remote add'
+abbr -a grmd 'git remote remove'
+abbr -a grmu 'git remote set-url'
+abbr -a grs 'git reset --soft'
+abbr -a grv 'git revert'
+abbr -a gs 'git status'
+abbr -a gsh 'git show'
+abbr -a gsm 'git submodule'
+abbr -a gsn 'git snapshot' # View my dotfile git config
+abbr -a gst 'git stash'
+abbr -a gstd 'git stash drop'
+abbr -a gstp 'git stash pop'
+abbr -a gsts 'git stash show --text'
+abbr -a gsu 'git submodule update --init --recursive --remote'
+abbr -a gt 'git tag'
+abbr -a gwt 'git worktree'
 
 alias fgcs __caran_fzf_git_commit_search
+alias fgb __caran_fzf_git_branch_switch
+alias fgwt __caran_fzf_git_worktree_change
 
 # The two `cd` shortcuts are functions rather than aliases: an alias wraps `cd`,
 # so fish would offer directory completion for commands that take no argument.
@@ -68,9 +74,11 @@ function gRu --description 'Go to the main checkout, or the superproject root'
     cd (git up)
 end
 
-# Neither those nor the fzf commit picker take an argument
+# Neither those nor the fzf pickers take an argument
 complete -c gR -f
 complete -c gRu -f
 complete -c fgcs -f
+complete -c fgb -f
+complete -c fgwt -f
 
 set -q FZF_GIT_COMMIT_SEARCH_COMMAND; or set -g FZF_GIT_COMMIT_SEARCH_COMMAND "git log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
