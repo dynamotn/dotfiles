@@ -1,10 +1,8 @@
 function copy_file --description 'Copy files with some extra behaviors'
-    set count (count $argv | tr -d \n)
-    if test "$count" = 2; and test -d "$argv[1]"
-        set from (echo $argv[1] | sed "s#/\$##")
-        set to (echo $argv[2])
-        mkdir -p (basename $to)
-        command cp -i -r $from $to
+    # A directory is copied recursively, its destination parent created
+    if test (count $argv) -eq 2; and test -d "$argv[1]"
+        mkdir -p (path dirname $argv[2])
+        command cp -i -r (string trim -r -c / -- $argv[1]) $argv[2]
     else
         command cp -i $argv
     end

@@ -1,8 +1,8 @@
 function move_file --description "Move file with some extra behaviors"
-    set from $argv[1]
-    if is_symlink $from and string match --quiet --regex --engire '/$' $file
-        echo move: `from` argument '"'$from'"' is a symlink with a trailing slash.
-        echo move: to rename a symlink, remove the trailing slash from the argument.
+    # `mv link/` moves the directory the link points to, not the link
+    if is_symlink $argv[1]; and string match -q -- '*/' $argv[1]
+        echo "move_file: '$argv[1]' is a symlink with a trailing slash." >&2
+        echo "move_file: to rename the symlink, drop the trailing slash." >&2
         return 1
     end
     command mv -i $argv
