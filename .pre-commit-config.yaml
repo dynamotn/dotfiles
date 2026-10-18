@@ -20,3 +20,17 @@ repos:
     hooks:
       - id: betterleaks-system
         pass_filenames: false
+  - repo: local
+    hooks:
+      - id: fish-indent
+        name: fish_indent
+        entry: fish_indent --check
+        language: system
+        files: \.fish$
+      - id: fish-syntax
+        name: fish syntax
+        # `fish` runs its first argument and hands it the rest, so check
+        # each file in its own call
+        entry: bash -c 'for f in "$@"; do fish --no-execute "$f" || exit 1; done' --
+        language: system
+        files: \.fish$
