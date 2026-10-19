@@ -51,9 +51,10 @@ function _spec_totp {
 }
 
 #######################################
-# @description Print one launcher line for an entry: the name, then a tab and
-# the user and folder that tell entries with the same name apart. Both
-# launchers show the part after the tab as the description.
+# @description Print one launcher line for an entry: the name, then the user
+# and folder that tell entries with the same name apart. noctalia shows what
+# follows a tab as the description; Vicinae prints the line as it is, so there
+# the two parts are joined with a dash instead.
 # @arg $1 string Entry name
 # @arg $2 string User, may be empty
 # @arg $3 string Folder, may be empty
@@ -66,7 +67,15 @@ function _format_line {
   if [[ -n "${folder}" ]]; then
     description="${description:+${description} · }${folder}"
   fi
+  if [[ -z "${description}" ]]; then
+    printf '%s' "${name}"
+    return
+  fi
+  {{- if eq .chezmoi.os "darwin" }}
+  printf '%s — %s' "${name}" "${description}"
+  {{- else }}
   printf '%s\t%s' "${name}" "${description}"
+  {{- end }}
 }
 
 #######################################
