@@ -4,4 +4,15 @@
 {{- else if index . "enterprise" }}
 {{-   $rbwSecret = printf "../secrets/data/enterprise-%s/rbw.yaml.age" .enterprise | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{- end }}
+{{- /* The pinentry is the machine's, not the account's: a GUI one wherever a
+       hotkey can run rbw without a terminal, see dytoy/pinentry.yaml.tmpl */}}
+{{- $pinentry := "pinentry-curses" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $pinentry = "pinentry-mac" }}
+{{- else if ne .guiServer "0" }}
+{{-   $pinentry = "pinentry-gnome3" }}
+{{- end }}
+{{- if $rbwSecret }}
+{{-   $rbwSecret = set $rbwSecret "pinentry" $pinentry }}
+{{- end }}
 {{- $rbwSecret | toPrettyJson }}
