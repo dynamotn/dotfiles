@@ -1,0 +1,23 @@
+// niri for the login screen only: regreet, then exit once it is done
+spawn-sh-at-startup "regreet; niri msg action quit --skip-confirmation"
+spawn-sh-at-startup "bash {{ .chezmoi.sourceDir }}/../../.config/niri/scripts/gtk.sh"
+
+{{ template "wm/niri-output.kdl.tmpl" . }}
+
+environment {
+{{- if eq .guiDriver "N" }}
+  // NVIDIA setting
+  LIBVA_DRIVER_NAME "nvidia"
+  __GLX_VENDOR_LIBRARY_NAME "nvidia"
+  GBM_BACKEND "nvidia-drm"
+{{- end }}
+
+  // XDG specification
+  XDG_CURRENT_DESKTOP "niri"
+  XDG_SESSION_TYPE "wayland"
+  XDG_SESSION_DESKTOP "niri"
+}
+
+hotkey-overlay {
+  skip-at-startup
+}

@@ -31,6 +31,65 @@ hs.hotkey.bind({ 'cmd' }, 'j', deeplink('vicinae://launch/clipboard/history'))
 hs.hotkey.bind({ 'cmd' }, 'p', typeSecret('password'))
 hs.hotkey.bind({ 'cmd' }, 'o', typeSecret('totp'))
 
+{{- if eq .guiWinManager "O" }}
+{{-   $browser := "" }}
+{{-   if eq .browser "F" }}
+{{-     $browser = "Firefox" }}
+{{-   else if eq .browser "Z" }}
+{{-     $browser = "Zen" }}
+{{-   end }}
+{{-   $mailClient := "" }}
+{{-   if eq .mailClient "T" }}
+{{-     $mailClient = "Thunderbird" }}
+{{-   else if eq .mailClient "B" }}
+{{-     $mailClient = "Betterbird" }}
+{{-   end }}
+{{-   $profile := "" }}
+{{-   $otherProfile := "" }}
+{{-   if eq .place "home" }}
+{{-     $profile = "Personal" }}
+{{-     $otherProfile = "Enterprise-F1" }}
+{{-   else if eq .place "office" }}
+{{-     $profile = printf "Enterprise-%s" .company }}
+{{-     $otherProfile = "Personal" }}
+{{-   end }}
+
+-- OmniWM runs no command of its own, so the application keys and the
+-- applications started at login, which aerospace.toml owns, live here
+local function open(...)
+  local args = { ... }
+  return function()
+    hs.task.new('/usr/bin/open', nil, args):start()
+  end
+end
+
+hs.hotkey.bind({ 'cmd' }, 'return', open('-na', 'kitty', '--args', 'zellij'))
+{{-   if $profile }}
+hs.hotkey.bind({ 'cmd' }, 'e', open('-na', '{{ $browser }}', '--args', '-P', '{{ $profile }}'))
+hs.hotkey.bind({ 'cmd' }, 'q', open('-na', '{{ $browser }}', '--args', '-P', '{{ $otherProfile }}'))
+hs.hotkey.bind({ 'cmd' }, 'm', open('-na', '{{ $mailClient }}', '--args', '-P', '{{ $profile }}'))
+hs.hotkey.bind({ 'cmd' }, 'k', open('-na', '{{ $mailClient }}', '--args', '-P', '{{ $otherProfile }}'))
+{{-   end }}
+
+-- At login, Hammerspoon starts OmniWM and the usual applications. Every
+-- config reload runs this file again, so only what is not running starts
+hs.autoLaunch(true)
+local startup = {
+  { app = 'OmniWM', args = { '-a', 'OmniWM' } },
+  { app = 'kitty', args = { '-na', 'kitty', '--args', 'zellij' } },
+{{-   if $profile }}
+  { app = '{{ $browser }}', args = { '-na', '{{ $browser }}', '--args', '-P', '{{ $profile }}' } },
+  { app = '{{ $mailClient }}', args = { '-na', '{{ $mailClient }}', '--args', '-P', '{{ $profile }}' } },
+{{-   end }}
+  { app = 'Obsidian', args = { '-a', 'Obsidian' } },
+}
+for _, entry in ipairs(startup) do
+  if not hs.application.get(entry.app) then
+    open(table.unpack(entry.args))()
+  end
+end
+{{- end }}
+
 hs.hotkey.bind({ 'cmd', 'ctrl', 'shift' }, 'space', function()
   local englishSource = 'com.apple.keylayout.USExtended'
   local success = hs.keycodes.currentSourceID(englishSource)

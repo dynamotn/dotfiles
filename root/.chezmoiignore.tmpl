@@ -20,6 +20,11 @@ usr/lib64
 usr/share/wayland-sessions/dyland.desktop
 etc/greetd
 {{- end }}
+{{- if eq .guiWinManager "N" }}
+etc/greetd/hyprland.lua
+{{- else }}
+etc/greetd/niri.kdl
+{{- end }}
 
 {{/* Browser files */}}
 {{- if ne .osid "linux-gentoo" }}

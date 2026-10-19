@@ -1,0 +1,8 @@
+{{- /* An OmniWM colour table: the body of a [section] holding red, green,
+       blue and alpha as 0-1 floats. Pass a dict with "hex" ("#rrggbb", as in
+       home/.chezmoidata/catppuccin.yaml) and an optional "alpha". */ -}}
+{{- $rgb := (printf "v = 0x%s" (trimPrefix "#" .hex) | fromToml).v | int }}
+red = {{ divf (div $rgb 65536) 255 | printf "%.4f" }}
+green = {{ divf (mod (div $rgb 256) 256) 255 | printf "%.4f" }}
+blue = {{ divf (mod $rgb 256) 255 | printf "%.4f" }}
+alpha = {{ get . "alpha" | default 1.0 | printf "%.2f" }}

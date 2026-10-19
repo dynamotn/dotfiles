@@ -1,0 +1,41 @@
+{{- $firefoxSettings := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{- $thunderbirdSettings := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
+// Once, when niri starts. niri starts xwayland-satellite on its own when it
+// is installed, so X11 applications need nothing here.
+{{- if .hasSound }}
+
+// Sound
+{{-   if eq .osid "linux-gentoo" }}
+spawn-sh-at-startup "gentoo-pipewire-launcher restart"
+{{-   else }}
+spawn-sh-at-startup "systemctl --user start wireplumber pipewire-pulse"
+{{-   end }}
+{{- end }}
+
+// Gtk theme
+spawn-sh-at-startup "~/.config/niri/scripts/gtk.sh"
+
+// Desktop shell: bar, launcher, clipboard, notifications, OSD, wallpaper,
+// idle, lock screen and the polkit agent
+spawn-at-startup "noctalia"
+
+// Screen changes detection
+spawn-at-startup "shikane"
+
+// IM
+spawn-sh-at-startup "fcitx5 -d --replace"
+
+// Terminal
+spawn-at-startup "kitty" "zellij"
+
+// Browser and email client
+{{- if eq .place "home" }}
+spawn-at-startup "{{ $firefoxSettings.executableFile }}" "-P" "Personal"
+spawn-at-startup "{{ $thunderbirdSettings.executableFile }}" "-P" "Personal"
+{{- else if eq .place "office" }}
+spawn-at-startup "{{ $firefoxSettings.executableFile }}" "-P" "Enterprise-{{ .company }}"
+spawn-at-startup "{{ $thunderbirdSettings.executableFile }}" "-P" "Enterprise-{{ .company }}"
+{{- end }}
+
+// Note-taking
+spawn-at-startup "obsidian-app"

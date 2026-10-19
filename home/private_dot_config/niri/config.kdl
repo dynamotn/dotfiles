@@ -1,0 +1,10 @@
+// niri configuration, split into modules under niri/ the same way as the
+// Hyprland one. niri reloads every file on save; `niri validate` checks them.
+// Reference: https://yalter.github.io/niri/Configuration:-Introduction
+include "niri/env.kdl"
+include "niri/core.kdl"
+include "niri/output.kdl"
+include "niri/autostart.kdl"
+include "niri/workspace.kdl"
+include "niri/rule.kdl"
+include "niri/binding.kdl"

@@ -1,0 +1,21 @@
+{{- /* Monitors from wm/rules.yaml.tmpl as niri output sections. A field
+       left out falls back to what niri picks for the monitor itself. */ -}}
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $rules.monitors }}
+output "{{ .name }}" {
+{{-   if get . "disabled" }}
+  off
+{{-   else }}
+{{-     if hasKey . "resolution" }}
+  mode "{{ .resolution }}"
+{{-     end }}
+{{-     if hasKey . "scale" }}
+  scale {{ .scale }}
+{{-     end }}
+{{-     if hasKey . "position" }}
+{{-       $position := splitList "x" .position }}
+  position x={{ index $position 0 }} y={{ index $position 1 }}
+{{-     end }}
+{{-   end }}
+}
+{{- end }}

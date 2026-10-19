@@ -1,0 +1,100 @@
+{{- $firefoxSettings := includeTemplate "firefox/settings.yaml.tmpl" . | fromYaml }}
+{{- $thunderbirdSettings := includeTemplate "thunderbird/settings.yaml.tmpl" . | fromYaml }}
+{{- $browser := $firefoxSettings.executableFile }}
+{{- $mailClient := $thunderbirdSettings.executableFile }}
+// The same keys as the Hyprland bindings (docs/key_bindings/hyprland.md),
+// mapped onto niri's scrolling layout. Mod is Super. niri also moves a window
+// with Mod + left drag and resizes it with Mod + right drag on its own.
+binds {
+  // Session --
+  Ctrl+Alt+Delete { quit; }
+  Mod+Shift+Slash { show-hotkey-overlay; }
+
+  // Prompt --
+  Mod+F2 { spawn-sh "noctalia msg panel-toggle launcher"; }
+  Alt+F2 { spawn-sh "noctalia msg panel-toggle launcher"; }
+
+  // Workspace --
+  // Switch workspaces with Mod + [0-9], move the active column there without
+  // following it with Mod + Shift + [0-9]. The list comes from
+  // home/.chezmoitemplates/wm/rules.yaml.tmpl, in order
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $index, $workspace := $rules.workspaces }}
+{{-   $key := mod (add $index 1) 10 }}
+{{-   $name := includeTemplate "wm/workspace-name.tmpl" $workspace }}
+  Mod+{{ $key }} { focus-workspace "{{ $name }}"; }
+  Mod+Shift+{{ $key }} { move-column-to-workspace "{{ $name }}" focus=false; }
+{{- end }}
+
+  // Move workspace to another monitor
+  Mod+D { move-workspace-to-monitor-next; }
+  Mod+Ctrl+Left { move-workspace-to-monitor-left; }
+  Mod+Ctrl+Right { move-workspace-to-monitor-right; }
+
+  // Scroll through workspaces with Mod + scroll
+  Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+  Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+
+  // Window --
+  // Move focus with Mod + arrow keys
+  Mod+Left { focus-column-left; }
+  Mod+Right { focus-column-right; }
+  Mod+Up { focus-window-up; }
+  Mod+Down { focus-window-down; }
+
+  // Switch between columns in a workspace
+  Alt+Tab { focus-column-right-or-first; }
+
+  // Resize the active column and window with the keyboard
+  Mod+Shift+Right { set-column-width "+10%"; }
+  Mod+Shift+Left { set-column-width "-10%"; }
+  Mod+Shift+Down { set-window-height "+10%"; }
+  Mod+Shift+Up { set-window-height "-10%"; }
+
+  // Windows
+  Alt+F4 { close-window; }
+  Mod+Period { fullscreen-window; }
+  Mod+Slash { toggle-window-floating; }
+  Mod+Comma { switch-preset-column-width; }
+  Mod+Semicolon { toggle-column-tabbed-display; }
+  Mod+Apostrophe { consume-or-expel-window-right; }
+  Mod+Tab { toggle-overview; }
+
+  // 3rd apps --
+  Mod+Return { spawn "kitty" "zellij"; }
+{{- if eq .place "home" }}
+  Mod+E { spawn "{{ $browser }}" "-P" "Personal"; }
+  Mod+Q { spawn "{{ $browser }}" "-P" "Enterprise-F1"; }
+  Mod+M { spawn "{{ $mailClient }}" "-P" "Personal"; }
+  Mod+K { spawn "{{ $mailClient }}" "-P" "Enterprise-F1"; }
+{{- else if eq .place "office" }}
+  Mod+E { spawn "{{ $browser }}" "-P" "Enterprise-{{ .company }}"; }
+  Mod+Q { spawn "{{ $browser }}" "-P" "Personal"; }
+  Mod+M { spawn "{{ $mailClient }}" "-P" "Enterprise-{{ .company }}"; }
+  Mod+K { spawn "{{ $mailClient }}" "-P" "Personal"; }
+{{- end }}
+  Mod+N { spawn-sh "noctalia msg panel-toggle control-center"; }
+  Mod+Shift+N { spawn-sh "noctalia msg notification-dnd-toggle"; }
+  Alt+N { spawn-sh "noctalia msg notification-invoke-latest"; }
+  Mod+J { spawn-sh "noctalia msg panel-toggle clipboard"; }
+  // Bitwarden through noctalia's dmenu; rbw-pick types the pick into the window
+  Mod+P { spawn-sh "rbw-pick password"; }
+  Mod+O { spawn-sh "rbw-pick totp"; }
+  Mod+L { spawn-sh "noctalia msg session lock"; }
+  Mod+S { spawn-sh "noctalia msg screenshot-region"; }
+  // System monitor, floating in the middle like the Hyprland drop-down
+  Mod+Z { spawn-sh "kitty --class btop --session ~/.config/kitty/sessions/monitor.conf"; }
+{{- if .hasSound }}
+
+  // Multimedia --
+  // Through noctalia, so its OSD follows the change
+  XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
+  XF86AudioLowerVolume allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
+  XF86AudioMute allow-when-locked=true repeat=false { spawn-sh "noctalia msg volume-mute"; }
+  XF86AudioMicMute allow-when-locked=true repeat=false { spawn-sh "noctalia msg mic-mute"; }
+  XF86AudioPlay repeat=false { spawn-sh "playerctl play-pause"; }
+  XF86AudioPause repeat=false { spawn-sh "playerctl pause"; }
+  XF86AudioNext repeat=false { spawn-sh "playerctl next"; }
+  XF86AudioPrev repeat=false { spawn-sh "playerctl previous"; }
+{{- end }}
+}
