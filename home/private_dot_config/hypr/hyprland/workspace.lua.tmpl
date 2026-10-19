@@ -2,7 +2,7 @@
 {{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
 {{- range $rules.workspaces }}
 hl.workspace_rule({
-  workspace = "name:{{ .name }}",
+  workspace = "name:{{ includeTemplate "wm/workspace-name.tmpl" . }}",
 {{-   if get . "persistent" }}
   persistent = true,
 {{-   end }}
