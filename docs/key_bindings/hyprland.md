@@ -71,6 +71,8 @@ Workspaces are named, not numbered:
 | `Super+Shift+N` | Toggle do not disturb |
 | `Alt+N` | Act on the latest notification |
 | `Super+J` | Clipboard history |
+| `Super+P` | Pick a Bitwarden entry and type its password |
+| `Super+O` | Pick a Bitwarden entry and type its TOTP code |
 | `Super+L` | Lock session |
 | `Super+S` | Screenshot a selected region, then annotate it |
 | `Super+Z` | Drop-down `btop` in kitty |

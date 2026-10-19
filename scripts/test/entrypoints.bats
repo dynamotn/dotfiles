@@ -68,6 +68,10 @@ function assert_entrypoint_help {
   assert_entrypoint_help "home/dot_local/bin/executable_dyfox.tmpl" "--profile" "--refresh"
 }
 
+@test "rbw-pick shows its password and totp commands" {
+  assert_entrypoint_help "home/dot_local/bin/executable_rbw-pick.tmpl" "password" "totp"
+}
+
 @test "dytoy shows shared installer flags" {
   assert_entrypoint_help "home/dot_local/bin/executable_dytoy.tmpl" "--tool" "--sync"
 }

@@ -1,13 +1,14 @@
-# On Wayland the launcher is noctalia's, see desktop_shell
+# On Wayland the launcher is noctalia's, see desktop_shell. Hammerspoon binds
+# its hotkeys, Vicinae has none of its own on macOS.
 {{- if eq .guiServer "M" }}
-name: raycast
+name: vicinae
 method: os
 is_essential: true
 macos:
   packages:
-    - name: raycast
+    - name: vicinae
       type: cask
   hook:
     after: |-
-      /usr/bin/osascript -e 'tell application "System Events" to make new login item at end with properties {name:"Raycast.app", path:"/Applications/Raycast.app", kind:"Application", hidden:true}'
+      /usr/bin/osascript -e 'tell application "System Events" to make new login item at end with properties {name:"Vicinae.app", path:"/Applications/Vicinae.app", kind:"Application", hidden:true}'
 {{- end }}

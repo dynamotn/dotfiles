@@ -78,12 +78,9 @@ exec(mainMod .. " + N", "noctalia msg panel-toggle control-center")
 exec(mainMod .. " + SHIFT + N", "noctalia msg notification-dnd-toggle")
 exec(altMod .. " + N", "noctalia msg notification-invoke-latest")
 exec(mainMod .. " + J", "noctalia msg panel-toggle clipboard")
-{{- $rbwProfile := "" }}
-{{- if eq .place "office" }}
-{{-   $rbwProfile = printf "RBW_PROFILE=enterprise-%s " .company }}
-{{- end }}
-exec(mainMod .. " + P", [[fish -c "{{ $rbwProfile }}bitrofi"]])
-exec(mainMod .. " + T", [[fish -c "{{ $rbwProfile }}bitrofi totp"]])
+-- Bitwarden through noctalia's dmenu; rbw-pick types the pick into the window
+exec(mainMod .. " + P", "rbw-pick password")
+exec(mainMod .. " + O", "rbw-pick totp")
 exec(mainMod .. " + L", "noctalia msg session lock")
 exec(mainMod .. " + S", "noctalia msg screenshot-region")
 -- Drop-down system monitor; the workspace rule starts btop on first use
