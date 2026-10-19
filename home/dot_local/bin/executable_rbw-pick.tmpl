@@ -1,0 +1,141 @@
+#!{{ .bash }}
+# @file rbw-pick
+# @brief Pick a Bitwarden entry in the desktop launcher and type its password or TOTP code
+# @description List the entries of the unlocked rbw vault in the launcher's
+# dmenu mode (noctalia on Hyprland, Vicinae on macOS) and hand the secret of the
+# picked one to the focused window. On Wayland `wtype` types it from stdin; on
+# macOS it goes to stdout for Hammerspoon, which owns the hotkey and types it,
+# so the secret is never on a command line.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules cli
+dybatpho::register_common_handlers
+
+{{- if eq .place "office" }}
+
+# Office machines work out of the company vault
+export RBW_PROFILE="enterprise-{{ .company }}"
+{{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+
+# Hammerspoon starts this from launchd, whose PATH has no Homebrew
+export PATH="/opt/homebrew/bin:${PATH}"
+{{- end }}
+
+#######################################
+# @description Spec of rbw-pick
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Pick a Bitwarden entry in the launcher and type its secret" MAIN_ARGS \
+    action:"dybatpho::generate_help _spec_main"
+  dybatpho::opts::cmd password _spec_password
+  dybatpho::opts::cmd totp _spec_totp
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Spec of password command
+# @noargs
+#######################################
+function _spec_password {
+  dybatpho::opts::setup "Type the password of the picked entry" PASSWORD_ARGS action:"_pick password"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_password"
+}
+
+#######################################
+# @description Spec of totp command
+# @noargs
+#######################################
+function _spec_totp {
+  dybatpho::opts::setup "Type the current TOTP code of the picked entry" TOTP_ARGS action:"_pick totp"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_totp"
+}
+
+#######################################
+# @description Print one launcher line for an entry: the name, then a tab and
+# the user and folder that tell entries with the same name apart. Both
+# launchers show the part after the tab as the description.
+# @arg $1 string Entry name
+# @arg $2 string User, may be empty
+# @arg $3 string Folder, may be empty
+# @stdout The line, without a trailing newline
+#######################################
+function _format_line {
+  local name user folder
+  dybatpho::expect_args name user folder -- "$@"
+  local description="${user}"
+  if [[ -n "${folder}" ]]; then
+    description="${description:+${description} · }${folder}"
+  fi
+  printf '%s\t%s' "${name}" "${description}"
+}
+
+#######################################
+# @description Show the vault entries in the launcher and type the secret of the
+# picked one
+# @arg $1 string `password` or `totp`
+#######################################
+function _pick {
+  local kind
+  dybatpho::expect_args kind -- "$@"
+  dybatpho::is command rbw || dybatpho::die "rbw is not installed"
+
+  # Unlock first so the listing below never fails on a locked vault. rbw asks
+  # through its configured pinentry, which has to be a GUI one here: there is no
+  # terminal behind a hotkey
+  rbw unlocked &> /dev/null || rbw unlock
+
+  # The id is what rbw gets asked for afterwards: names repeat across folders
+  # and accounts, ids don't
+  local listing
+  listing="$(rbw list --fields id,name,user,folder)"
+  local -a ids=() lines=()
+  local id name user folder line
+  while IFS=$'\t' read -r id name user folder; do
+    line="$(_format_line "${name}" "${user}" "${folder}")"
+    ids+=("${id}")
+    lines+=("${line}")
+  done <<< "${listing}"
+  [[ ${#ids[@]} -gt 0 ]] || dybatpho::die "The vault has no entries"
+
+  local prompt="Password"
+  [[ "${kind}" == "totp" ]] && prompt="TOTP"
+  local selection
+  {{- if eq .chezmoi.os "darwin" }}
+  selection="$(printf '%s\n' ${lines[@]+"${lines[@]}"} \
+    | vicinae dmenu --placeholder "${prompt}" --no-quick-look --no-section --no-footer)" || true
+  {{- else }}
+  selection="$(printf '%s\n' ${lines[@]+"${lines[@]}"} | noctalia dmenu --prompt "${prompt}")" || true
+  {{- end }}
+  if [[ -z "${selection}" ]]; then
+    dybatpho::debug "Nothing picked"
+    return 0
+  fi
+
+  local index entry_id=""
+  for index in "${!lines[@]}"; do
+    if [[ "${lines[${index}]}" == "${selection}" ]]; then
+      entry_id="${ids[${index}]}"
+      break
+    fi
+  done
+  # noctalia returns the typed text when it matches no candidate
+  [[ -n "${entry_id}" ]] || dybatpho::die "No entry matches ${selection}"
+
+  local secret
+  if [[ "${kind}" == "totp" ]]; then
+    secret="$(rbw code "${entry_id}")"
+  else
+    secret="$(rbw get "${entry_id}")"
+  fi
+  dybatpho::secret_register "${secret}"
+  {{- if eq .chezmoi.os "darwin" }}
+  # dyshellint disable=BSG081 typing the secret is the point; stdout goes to Hammerspoon's task callback, nowhere else
+  printf '%s' "${secret}"
+  {{- else }}
+  # dyshellint disable=BSG081 typing the secret is the point; wtype reads it from stdin, not from its arguments
+  printf '%s' "${secret}" | wtype -
+  {{- end }}
+  dybatpho::secret_wipe secret
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

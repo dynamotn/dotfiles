@@ -167,9 +167,10 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |----|-------|
 |[sketchybar](https://github.com/FelixKratz/SketchyBar)|Status bar for MacOS|
 |[aerospace](https://github.com/nikitabobko/AeroSpace)|Window manager for MacOS|
-|[raycast](https://www.raycast.com/)|Launcher for everything|
+|[vicinae](https://vicinae.com/)|Launcher for everything|
 |[alt-tab](https://github.com/lwouis/alt-tab-macos)|Windows alt-tab on macOS|
 |[hammerspoon](https://github.com/Hammerspoon/hammerspoon)|Desktop automation, also simulates keyboard input|
+|[pinentry-mac](https://github.com/GPGTools/pinentry)|GUI prompt for the rbw master password|
 |[macos-defaults](https://github.com/dsully/macos-defaults)|Apply macOS defaults from YAML files|
 
 ## Network tools

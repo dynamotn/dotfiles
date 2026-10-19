@@ -76,12 +76,16 @@ I changed modifier keys from origin key to have new effect
 | Copy | `Command+C` |
 | Paste | `Command+V` |
 
-## Raycast
+## Vicinae
+
+Bound by Hammerspoon, since Vicinae has no global hotkey of its own on macOS.
 
 | Keybind | Action |
 |---------|--------|
-| `Command+F2` | Show Raycast's all actions |
+| `Command+F2` | Toggle Vicinae |
 | `Command+J` | Clipboard history |
+| `Command+P` | Pick a Bitwarden entry and type its password |
+| `Command+O` | Pick a Bitwarden entry and type its TOTP code |
 
 ## Hammerspoon
 

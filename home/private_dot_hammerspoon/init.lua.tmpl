@@ -1,0 +1,43 @@
+-- Vicinae has no global hotkey of its own on macOS, so every launcher key
+-- lives here and goes through its deeplinks
+local vicinae = '/opt/homebrew/bin/vicinae'
+local rbwPick = '{{ .chezmoi.homeDir }}/.local/bin/rbw-pick'
+
+local function deeplink(link)
+  return function()
+    hs.task.new(vicinae, nil, { link }):start()
+  end
+end
+
+-- rbw-pick shows the vault in Vicinae and prints the picked secret; typing it
+-- from here keeps it off every command line
+local function typeSecret(subcommand)
+  return function()
+    hs.task.new(rbwPick, function(exitCode, stdout, stderr)
+      if exitCode ~= 0 then
+        hs.alert.show('rbw-pick: ' .. (stderr ~= '' and stderr or 'failed'), 3)
+        return
+      end
+      local secret = (stdout:gsub('\n$', ''))
+      if secret ~= '' then
+        hs.eventtap.keyStrokes(secret)
+      end
+    end, { subcommand }):start()
+  end
+end
+
+hs.hotkey.bind({ 'cmd' }, 'f2', deeplink('vicinae://toggle'))
+hs.hotkey.bind({ 'cmd' }, 'j', deeplink('vicinae://launch/clipboard/history'))
+hs.hotkey.bind({ 'cmd' }, 'p', typeSecret('password'))
+hs.hotkey.bind({ 'cmd' }, 'o', typeSecret('totp'))
+
+hs.hotkey.bind({ 'cmd', 'ctrl', 'shift' }, 'space', function()
+  local englishSource = 'com.apple.keylayout.USExtended'
+  local success = hs.keycodes.currentSourceID(englishSource)
+
+  if success then
+    hs.alert.show('Keyboard: English', 1)
+  else
+    hs.alert.show('Error: Could not switch', 1)
+  end
+end)
