@@ -127,11 +127,11 @@ data:
   guiServer: {{ $guiServer | quote }}
   {{- $guiDrivers := list "N" "I" "A" "M" "V" }}
   {{- $guiDriver := "" }}
-  {{- $guiWinManagers := list "H" "A" "G" }}
+  {{- $guiWinManagers := list "H" "N" "A" "O" "G" }}
   {{- $guiWinManager := "" }}
   {{- if ne $guiServer "0" }}
   {{-   $guiDriver = promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" $guiDrivers "V" }}
-  {{-   $guiWinManager = promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is (A for aerospace, H for hyprland, G for gnome)" $guiWinManagers (first $guiWinManagers) }}
+  {{-   $guiWinManager = promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is (H for hyprland, N for niri, A for aerospace, O for omniwm, G for gnome)" $guiWinManagers (first $guiWinManagers) }}
   {{- end }}
   guiDriver: {{ $guiDriver | quote }}
   guiWinManager: {{ $guiWinManager | quote }}

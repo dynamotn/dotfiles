@@ -104,6 +104,11 @@ Library/thunderbird
 {{- if ne .guiWinManager "H" }}
 .config/hypr
 .config/hyprshade
+{{- end }}
+{{- if ne .guiWinManager "N" }}
+.config/niri
+{{- end }}
+{{- if not (has .guiWinManager (list "H" "N")) }}
 .wayland_init.fish
 .config/noctalia
 {{- end }}
@@ -113,6 +118,9 @@ Library/thunderbird
 {{- if ne .guiWinManager "A" }}
 .config/aerospace
 .config/sketchybar
+{{- end }}
+{{- if ne .guiWinManager "O" }}
+.config/omniwm
 {{- end }}
 
 {{/* Terminal multiplexer files */}}

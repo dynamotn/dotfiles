@@ -67,7 +67,9 @@ dev-vcs/git-lfs
 {{- end }}
 games-util/game-device-udev-rules
 {{- if eq .guiServer "W" }}
+{{- if eq .guiWinManager "H" }}
 gui-apps/hyprshade
+{{- end }}
 gui-apps/noctalia
 gui-apps/regreet
 gui-apps/wev
@@ -82,6 +84,10 @@ gui-libs/gtk
 {{- if eq .guiWinManager "H" }}
 gui-libs/xdg-desktop-portal-wlr
 gui-wm/hyprland
+{{- else if eq .guiWinManager "N" }}
+gui-apps/xwayland-satellite
+gui-wm/niri
+sys-apps/xdg-desktop-portal-gnome
 {{- end }}
 llvm-core/clang
 llvm-core/clang-common

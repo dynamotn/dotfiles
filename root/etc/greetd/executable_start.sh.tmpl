@@ -22,8 +22,12 @@ if [ ! -O "$XDG_RUNTIME_DIR" ] || [ -L "$XDG_RUNTIME_DIR" ]; then
   export XDG_RUNTIME_DIR
   HOME="$XDG_RUNTIME_DIR"
 fi
-{{- $command := "Hyprland" }}
-{{- if lookPath "start-hyprland" }}
-{{-   $command = "start-hyprland --" }}
-{{- end }}
+{{- if eq .guiWinManager "N" }}
+dbus-run-session niri --config /etc/greetd/niri.kdl
+{{- else }}
+{{-   $command := "Hyprland" }}
+{{-   if lookPath "start-hyprland" }}
+{{-     $command = "start-hyprland --" }}
+{{-   end }}
 dbus-run-session {{ $command }} --config /etc/greetd/hyprland.lua
+{{- end }}

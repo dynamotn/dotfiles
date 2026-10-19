@@ -1,0 +1,50 @@
+// Per app --
+// Generated from home/.chezmoitemplates/wm/rules.yaml.tmpl, one rule per tag
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- $workspaces := dict }}
+{{- range $rules.workspaces }}
+{{-   $_ := set $workspaces .name (includeTemplate "wm/workspace-name.tmpl" .) }}
+{{- end }}
+{{- range $rules.tags }}
+
+// {{ .name }}
+window-rule {
+{{-   range .classes }}
+  match app-id=r#"{{ . }}"#
+{{-   end }}
+{{-   if hasKey . "workspace" }}
+  open-on-workspace "{{ get $workspaces .workspace }}"
+{{-   end }}
+{{-   if and (hasKey . "float") (get . "float") }}
+  open-floating true
+{{-   end }}
+{{-   if and (hasKey . "fullscreen") (get . "fullscreen") }}
+  open-fullscreen true
+{{-   end }}
+{{-   if and (hasKey . "size") (get . "size") }}
+  default-column-width { proportion {{ printf "%.2f" .size.width }}; }
+  default-window-height { proportion {{ printf "%.2f" .size.height }}; }
+{{-   end }}
+}
+{{- end }}
+
+// Other tweaks --
+// Calendar Reminders
+window-rule {
+  match title="^(Calendar Reminders)$"
+  open-floating true
+}
+
+// Picture-in-Picture, in the bottom right corner
+window-rule {
+  match title="^(Picture-in-Picture)$"
+  open-floating true
+  default-floating-position x=32 y=32 relative-to="bottom-right"
+}
+
+// IME preedit box
+window-rule {
+  match app-id="^(ibus-ui-gtk3)$"
+  open-floating true
+  open-focused false
+}

@@ -1,0 +1,6 @@
+// Generated from home/.chezmoitemplates/wm/rules.yaml.tmpl. Named workspaces
+// always exist, in this order, so every one of them is persistent.
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $rules.workspaces }}
+workspace "{{ includeTemplate "wm/workspace-name.tmpl" . }}"
+{{- end }}

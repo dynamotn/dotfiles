@@ -26,6 +26,28 @@ arch:
     - name: meson
     - name: xorg-xwayland
 ubuntu: # Not have package on LTS version
+{{- else if eq .guiWinManager "N" }}
+name: niri
+method: os
+# https://repology.org/project/niri/versions
+is_essential: true
+gentoo:
+  packages:
+    - name: gui-wm/niri
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+    # X11 applications, started by niri on its own
+    - name: gui-apps/xwayland-satellite
+      repo: guru
+      url: https://github.com/gentoo-mirror/guru.git
+    - name: sys-apps/xdg-desktop-portal-gnome
+arch:
+  packages:
+    - name: niri
+    - name: xwayland-satellite
+    - name: xdg-desktop-portal-gnome
+    - name: xdg-desktop-portal-gtk
+ubuntu: # Not have package on LTS version
 {{- else if eq .guiWinManager "A" }}
 name: aerospace
 is_essential: true
@@ -41,4 +63,13 @@ macos:
       version: HEAD
       repo: dimentium/autoraise
       service: autoraise
+{{- else if eq .guiWinManager "O" }}
+# Started at login by Hammerspoon; ~/.config/omniwm/settings.toml is its config
+name: omniwm
+is_essential: true
+method: os
+macos:
+  packages:
+    - name: omniwm
+      type: cask
 {{- end }}

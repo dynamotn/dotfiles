@@ -1,0 +1,75 @@
+// The Catppuccin palette, macchiato in dark mode and latte in light mode,
+// from home/.chezmoidata/catppuccin.yaml
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end }}
+
+input {
+  keyboard {
+    xkb {
+      layout "us"
+    }
+  }
+
+  touchpad {
+    tap
+    natural-scroll
+  }
+
+  // Focus follows the mouse, without scrolling a column into view
+  focus-follows-mouse max-scroll-amount="0%"
+}
+
+layout {
+  gaps 8
+  center-focused-column "never"
+  background-color "transparent"
+
+  preset-column-widths {
+    proportion 0.33333
+    proportion 0.5
+    proportion 0.66667
+  }
+  default-column-width { proportion 0.5; }
+
+  focus-ring {
+    width 2
+    active-gradient from="{{ $theme.lavender }}" to="{{ $theme.teal }}" angle=45
+    inactive-color "{{ $theme.surface2 }}"
+  }
+
+  border {
+    off
+  }
+
+  shadow {
+    on
+    softness 30
+    color "{{ $theme.teal }}70"
+    inactive-color "{{ $theme.base }}70"
+  }
+
+  tab-indicator {
+    active-gradient from="{{ $theme.teal }}" to="{{ $theme.green }}" angle=45
+    inactive-gradient from="{{ $theme.green }}" to="{{ $theme.yellow }}" angle=45
+  }
+}
+
+// Rounded corners, and the inactive windows faded like on Hyprland
+window-rule {
+  geometry-corner-radius 10
+  clip-to-geometry true
+}
+
+window-rule {
+  match is-active=false
+  opacity 0.8
+}
+
+// Client-side decorations off, so every window gets the same frame
+prefer-no-csd
+
+hotkey-overlay {
+  skip-at-startup
+}

@@ -148,6 +148,8 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |----|-------|
 |[xdg-user-dirs](https://www.freedesktop.org/wiki/Software/xdg-user-dirs/)|Manage well-known user directories|
 |[hyprland](https://github.com/hyprwm/Hyprland)|Window manager for Wayland|
+|[niri](https://github.com/YaLTeR/niri)|Scrollable-tiling window manager for Wayland|
+|[xwayland-satellite](https://github.com/Supreeeme/xwayland-satellite)|Runs X11 applications on niri|
 |[hyprshade](https://github.com/loqusion/hyprshade)|Adjusts the color temperature of screen|
 |[noctalia](https://github.com/noctalia-dev/noctalia)|Desktop shell: bar, launcher, clipboard, notifications, OSD, wallpaper, idle, lock screen and screenshots|
 |[wtype](https://github.com/atx/wtype)|Simulate keyboard input for Wayland|
@@ -168,6 +170,7 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |----|-------|
 |[sketchybar](https://github.com/FelixKratz/SketchyBar)|Status bar for MacOS|
 |[aerospace](https://github.com/nikitabobko/AeroSpace)|Window manager for MacOS|
+|[omniwm](https://github.com/BarutSRB/OmniWM)|Scrolling and BSP tiling window manager for MacOS|
 |[vicinae](https://vicinae.com/)|Launcher for everything|
 |[alt-tab](https://github.com/lwouis/alt-tab-macos)|Windows alt-tab on macOS|
 |[hammerspoon](https://github.com/Hammerspoon/hammerspoon)|Desktop automation, also simulates keyboard input|

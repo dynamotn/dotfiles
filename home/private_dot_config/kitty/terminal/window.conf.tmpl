@@ -117,9 +117,9 @@ inactive_text_alpha 1.0
 #: placement_strategy to prevent the rounded corners from clipping
 #: text. Or use titlebar-and-corners.
 {{- $hideWindowDecorations := "no" }}
-{{- if eq .guiWinManager "H" }}
+{{- if eq .guiWinManager "H" "N" }}
 {{-   $hideWindowDecorations = "yes" }}
-{{- else if eq .guiWinManager "A" }}
+{{- else if eq .guiWinManager "A" "O" }}
 {{-   $hideWindowDecorations = "titlebar-only" }}
 {{- end }}
 hide_window_decorations {{ $hideWindowDecorations }}

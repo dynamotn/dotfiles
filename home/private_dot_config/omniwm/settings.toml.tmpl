@@ -1,0 +1,254 @@
+{{- $theme := .catppuccin.macchiato }}
+{{- if not .darkMode }}
+{{-   $theme = .catppuccin.latte }}
+{{- end }}
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+# OmniWM, the same workspaces, keys and app placement as aerospace.toml.
+# Written for OmniWM 0.7.6, the Homebrew release, which reads schema 4; the
+# schema of the docs at https://omniwm.app/config/settings-reference/ follows
+# the main branch and may be ahead of it.
+#
+# OmniWM rejects the whole file over one missing required key, unknown enum
+# value or unknown hotkey id, and then runs on its defaults: keep every
+# section below, and check Settings > Diagnostics after a change. A save from
+# the Settings window rewrites this file without its comments, so make
+# changes here and let chezmoi apply them.
+schemaVersion = 4
+monitorBarOverrides = []
+monitorOrientationOverrides = []
+monitorNiriOverrides = []
+monitorDwindleOverrides = []
+monitorGapOverrides = []
+
+[general]
+hotkeysEnabled = true
+systemHyperTrigger = "None"
+hyperKeyModifiers = "Control+Option+Shift+Command"
+# Niri-style scrolling columns, the other choice being "dwindle"
+defaultLayoutType = "niri"
+preventSleepEnabled = false
+# Updates come from Homebrew
+updateChecksEnabled = false
+# omniwmctl needs the IPC socket
+ipcEnabled = true
+animationsEnabled = true
+
+# Focus follows the mouse and raises the window, as autoraise does for
+# aerospace; the mouse follows the focus to another monitor
+[focus]
+followsMouse = true
+raiseOnMouseFocus = true
+lockModifier = "off"
+moveMouseToFocusedWindow = true
+followsWindowToMonitor = false
+crossesMonitorAtEdge = true
+moveCrossesMonitorAtEdge = false
+
+[mouseWarp]
+margin = 1
+enabled = true
+constrainToArrangement = false
+
+[routing]
+mode = "macOS"
+arrangements = []
+
+[gaps]
+size = 10.0
+fullscreenUsesOuterGaps = false
+
+[gaps.outer]
+left = 10.0
+right = 10.0
+top = 10.0
+bottom = 10.0
+
+[niri]
+visibleContainerCount = 2
+infiniteLoop = false
+centerFocusedColumn = "never"
+alwaysCenterSingleColumn = false
+singleWindowFit = "fill"
+
+[dwindle]
+smartSplit = false
+defaultSplitRatio = 1.0
+splitWidthMultiplier = 1.0
+singleWindowFit = "fill"
+useGlobalGaps = true
+moveToRootStable = true
+
+# The Catppuccin palette from home/.chezmoidata/catppuccin.yaml, macchiato in
+# dark mode and latte in light mode, the same colours as the Hyprland border
+[borders]
+enabled = true
+width = 2.0
+
+[borders.color]
+{{ includeTemplate "omniwm/color.toml.tmpl" (dict "hex" $theme.teal) }}
+
+[overview]
+zoom = 1.0
+
+[overview.backdrop]
+{{ includeTemplate "omniwm/color.toml.tmpl" (dict "hex" $theme.base "alpha" 0.85) }}
+
+[overview.windowBorders.normal]
+{{ includeTemplate "omniwm/color.toml.tmpl" (dict "hex" $theme.surface2 "alpha" 0.5) }}
+
+[overview.windowBorders.hovered]
+{{ includeTemplate "omniwm/color.toml.tmpl" (dict "hex" $theme.lavender) }}
+
+[overview.windowBorders.selected]
+{{ includeTemplate "omniwm/color.toml.tmpl" (dict "hex" $theme.teal) }}
+
+# The built-in workspace bar stands in for sketchybar
+[workspaceBar]
+enabled = true
+showLabels = true
+showFloatingWindows = false
+windowLevel = "popup"
+position = "overlappingMenuBar"
+notchMode = "moveBelowMenuBar"
+notchActiveZoneWidth = 180.0
+systemStatsButton = false
+deduplicateAppIcons = false
+hideEmptyWorkspaces = false
+excludedBundleIDs = []
+reserveLayoutSpace = false
+revealModifier = "off"
+revealHoldMilliseconds = 200.0
+hideInNativeFullscreen = false
+height = 24.0
+backgroundOpacity = 0.1
+xOffset = 0.0
+yOffset = 0.0
+
+[workspaceBar.iconOverrides]
+
+[gestures]
+scrollEnabled = true
+scrollSensitivity = 5.0
+scrollModifierKey = "optionShift"
+mouseMoveModifierKey = "option"
+mouseResizeModifierKey = "option"
+fingerCount = 3
+invertDirection = true
+trackpadScrollStyle = "snap"
+workspaceSwipeEnabled = false
+workspaceSwipeFingerCount = 3
+workspaceSwipeAxis = "vertical"
+
+[statusBar]
+showWorkspaceName = false
+showAppNames = false
+useWorkspaceId = false
+
+[hiddenBar]
+enabled = false
+hiddenBundleIDs = []
+rehideIntervalSeconds = 5.0
+
+# Vicinae keeps the clipboard history
+[clipboard]
+historyEnabled = false
+maxItems = 200
+maxItemBytes = 8388608
+maxTotalBytes = 67108864
+
+[quakeTerminal]
+enabled = false
+position = "center"
+widthPercent = 50.0
+heightPercent = 50.0
+animationDuration = 0.2
+autoHide = false
+backgroundEffect = "standardBlur"
+
+[scratchpads.labels]
+
+[appearance]
+mode = "{{ if .darkMode }}dark{{ else }}light{{ end }}"
+
+# Workspaces from home/.chezmoitemplates/wm/rules.yaml.tmpl, in order. OmniWM
+# only takes numbers as names, so the name from the rules is the label
+{{- range $index, $workspace := $rules.workspaces }}
+
+[[workspaces]]
+id = "00000000-0000-4000-8000-{{ printf "%012d" (add $index 1) }}"
+name = "{{ add $index 1 }}"
+displayName = "{{ includeTemplate "wm/workspace-name.tmpl" $workspace }}"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "main"
+{{- end }}
+
+# Hotkeys --
+# The aerospace keys: an action left out here has no key at all
+{{- $hotkeys := list }}
+{{- range $direction := list "left" "down" "up" "right" }}
+{{-   $arrow := printf "%s Arrow" (title $direction) }}
+{{-   $hotkeys = append $hotkeys (list (printf "focus.%s" $direction) (printf "Command+%s" $arrow)) }}
+{{-   $hotkeys = append $hotkeys (list (printf "move.%s" $direction) (printf "Control+Command+%s" $arrow)) }}
+{{- end }}
+{{- /* aerospace's join-with, as the column moves of the scrolling layout */}}
+{{- $hotkeys = append $hotkeys (list "consumeWindowIntoColumn" "Shift+Command+Left Arrow") }}
+{{- $hotkeys = append $hotkeys (list "expelWindowFromColumn" "Shift+Command+Right Arrow") }}
+{{- $hotkeys = append $hotkeys (list "moveWindowUp" "Shift+Command+Up Arrow") }}
+{{- $hotkeys = append $hotkeys (list "moveWindowDown" "Shift+Command+Down Arrow") }}
+{{- $hotkeys = append $hotkeys (list "toggleWorkspaceLayout" "Command+Comma") }}
+{{- $hotkeys = append $hotkeys (list "toggleFullscreen" "Command+Period") }}
+{{- $hotkeys = append $hotkeys (list "toggleFocusedWindowFloating" "Command+Slash") }}
+{{- $hotkeys = append $hotkeys (list "setContainerPrimarySpan.decrease10Percent" "Shift+Command+Minus") }}
+{{- $hotkeys = append $hotkeys (list "setContainerPrimarySpan.increase10Percent" "Shift+Command+Equal") }}
+{{- /* switchWorkspace and moveToWorkspace count from 0 */}}
+{{- range $index, $workspace := $rules.workspaces }}
+{{-   $key := mod (add $index 1) 10 }}
+{{-   $hotkeys = append $hotkeys (list (printf "switchWorkspace.%d" $index) (printf "Command+%d" $key)) }}
+{{-   $hotkeys = append $hotkeys (list (printf "moveToWorkspace.%d" $index) (printf "Shift+Command+%d" $key)) }}
+{{- end }}
+{{- $hotkeys = append $hotkeys (list "workspaceBackAndForth" "Command+Tab") }}
+{{- $hotkeys = append $hotkeys (list "moveWorkspaceToMonitor.right" "Shift+Command+Tab") }}
+{{- range $hotkeys }}
+
+[[hotkeys]]
+id = "{{ index . 0 }}"
+binding = "{{ index . 1 }}"
+{{- end }}
+{{- range $slot := untilStep 1 11 1 }}
+
+[[hotkeys]]
+id = "toggleScratchpad.{{ $slot }}"
+binding = "Unassigned"
+
+[[hotkeys]]
+id = "assignFocusedWindowToScratchpad.{{ $slot }}"
+binding = "Unassigned"
+{{- end }}
+
+# App rules --
+# The aerospace on-window-detected callbacks: the app name, the workspace
+# number, and whether it floats
+{{- $appRules := list
+  (list "kitty" "1" false)
+  (list "Firefox" "2" false)
+  (list "Zen" "2" false)
+  (list "Thunderbird" "3" false)
+  (list "Betterbird" "3" false)
+  (list "Obsidian" "4" false)
+  (list "Telegram" "5" false)
+  (list "mpv" "6" false)
+  (list "Bluestacks" "7" false)
+  (list "Omnissa" "8" true)
+  (list "Finder" "8" true) }}
+{{- range $appRules }}
+
+[[appRules]]
+bundleId = ""
+appNameSubstring = "{{ index . 0 }}"
+assignToWorkspace = "{{ index . 1 }}"
+{{-   if index . 2 }}
+layout = "float"
+{{-   end }}
+{{- end }}

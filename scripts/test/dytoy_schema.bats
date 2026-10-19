@@ -155,6 +155,22 @@ function _validate_profile {
   _validate_profile "arch-laptop" "${cfg}"
 }
 
+@test "rendered templates valid for profile: arch-laptop-niri" {
+  _require_ys
+  _require_chezmoi
+  local cfg="${BATS_TEST_TMPDIR}/arch-laptop-niri.yaml"
+  _write_profile_config "${cfg}" "linux-arch" "laptop" "systemd" "W" "I" "N"
+  _validate_profile "arch-laptop-niri" "${cfg}"
+}
+
+@test "rendered templates valid for profile: gentoo-pc-niri" {
+  _require_ys
+  _require_chezmoi
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc-niri.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "N"
+  _validate_profile "gentoo-pc-niri" "${cfg}"
+}
+
 @test "rendered templates valid for profile: ubuntu-pc" {
   _require_ys
   _require_chezmoi
@@ -185,6 +201,14 @@ function _validate_profile {
   local cfg="${BATS_TEST_TMPDIR}/macos-laptop.yaml"
   _write_profile_config "${cfg}" "darwin" "laptop" "launchd" "M" "M" "A"
   _validate_profile "macos-laptop" "${cfg}"
+}
+
+@test "rendered templates valid for profile: macos-laptop-omniwm" {
+  _require_ys
+  _require_chezmoi
+  local cfg="${BATS_TEST_TMPDIR}/macos-laptop-omniwm.yaml"
+  _write_profile_config "${cfg}" "darwin" "laptop" "launchd" "M" "M" "O"
+  _validate_profile "macos-laptop-omniwm" "${cfg}"
 }
 
 @test "rendered templates valid for profile: android-mobile" {
