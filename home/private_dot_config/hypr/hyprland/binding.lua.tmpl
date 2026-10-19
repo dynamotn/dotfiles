@@ -17,8 +17,14 @@ exec(altMod .. " + F2", "noctalia msg panel-toggle launcher")
 
 -- Workspace --
 -- Switch workspaces with mainMod + [0-9], move the active window there
--- without following it with mainMod + SHIFT + [0-9]
-local workspaces = { "term", "web", "mail", "doc", "chat", "media", "game", "sys", "misc", "sec" }
+-- without following it with mainMod + SHIFT + [0-9]. The list comes from
+-- home/.chezmoitemplates/wm/rules.yaml.tmpl, in order
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- $workspaces := list }}
+{{- range $rules.workspaces }}
+{{-   $workspaces = append $workspaces (printf "\"%s\"" (includeTemplate "wm/workspace-name.tmpl" .)) }}
+{{- end }}
+local workspaces = { {{ join ", " $workspaces }} }
 for i, name in ipairs(workspaces) do
   local key = tostring(i % 10)
   hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = "name:" .. name }))

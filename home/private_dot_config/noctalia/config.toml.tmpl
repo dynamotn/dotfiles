@@ -72,3 +72,9 @@ action = "suspend"
 
 [bar.main]
 position = "left"
+
+# Hyprland names each workspace "<icon> <name>" (wm/rules.yaml.tmpl); showing
+# one character of the name puts the icon on the pill, the name in the tooltip
+[widget.workspaces]
+label_source = "name"
+max_label_chars = 1

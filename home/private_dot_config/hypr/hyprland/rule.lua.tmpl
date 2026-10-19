@@ -29,6 +29,10 @@ hl.window_rule({
 
 -- Per app --
 {{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- $workspaces := dict }}
+{{- range $rules.workspaces }}
+{{-   $_ := set $workspaces .name (includeTemplate "wm/workspace-name.tmpl" .) }}
+{{- end }}
 {{- range $rules.tags }}
 {{-   $name := .name }}
 {{-   range .classes }}
@@ -36,7 +40,7 @@ hl.window_rule({ match = { class = {{ . | quote }} }, tag = "+{{ $name }}" })
 {{-   end }}
 {{-   $effects := list }}
 {{-   if hasKey . "workspace" }}
-{{-     $effects = append $effects (printf "workspace = \"name:%s silent\"" .workspace) }}
+{{-     $effects = append $effects (printf "workspace = \"name:%s silent\"" (get $workspaces .workspace)) }}
 {{-   end }}
 {{-   if and (hasKey . "float") (get . "float") }}
 {{-     $effects = append $effects "float = true" }}
