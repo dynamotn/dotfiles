@@ -1,0 +1,31 @@
+name: pinentry
+is_essential: true
+method: os
+# https://repology.org/project/pinentry/versions
+macos:
+  packages:
+    - name: pinentry-mac
+# pinentry-gnome3; on Gentoo it comes with the gtk USE flag, see package.use
+gentoo:
+  packages:
+    - name: app-crypt/pinentry
+arch:
+  packages:
+    - name: pinentry
+ubuntu:
+  packages:
+    {{- if ne .guiServer "0" }}
+    - name: pinentry-gnome3
+    {{- else }}
+    - name: pinentry-curses
+    {{- end }}
+alpine:
+  packages:
+    {{- if ne .guiServer "0" }}
+    - name: pinentry-gnome
+    {{- else }}
+    - name: pinentry
+    {{- end }}
+termux:
+  packages:
+    - name: pinentry

@@ -80,8 +80,8 @@ function _pick {
   dybatpho::is command rbw || dybatpho::die "rbw is not installed"
 
   # Unlock first so the listing below never fails on a locked vault. rbw asks
-  # through its configured pinentry, which has to be a GUI one here: there is no
-  # terminal behind a hotkey
+  # through the pinentry its config names, a GUI one wherever a hotkey can start
+  # this script: there is no terminal behind it
   rbw unlocked &> /dev/null || rbw unlock
 
   # The id is what rbw gets asked for afterwards: names repeat across folders

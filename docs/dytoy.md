@@ -85,6 +85,7 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |----|-------|
 |[neovim](https://github.com/neovim/neovim)|My love editor, and IDE in my eyes|
 |[rbw](https://github.com/doy/rbw)|Bitwarden CLI tool|
+|[pinentry](https://www.gnupg.org/related_software/pinentry/)|Prompt for the rbw master password, as pinentry-mac, pinentry-gnome3 or pinentry-curses to match the machine|
 |[fish](https://github.com/fish-shell/fish-shell)|Smart command line shell|
 |[tmux](https://github.com/tmux/tmux)|Terminal multiplexer|
 |[zellij](https://github.com/zellij-org/zellij)|Terminal multiplexer|
@@ -170,7 +171,6 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[vicinae](https://vicinae.com/)|Launcher for everything|
 |[alt-tab](https://github.com/lwouis/alt-tab-macos)|Windows alt-tab on macOS|
 |[hammerspoon](https://github.com/Hammerspoon/hammerspoon)|Desktop automation, also simulates keyboard input|
-|[pinentry-mac](https://github.com/GPGTools/pinentry)|GUI prompt for the rbw master password|
 |[macos-defaults](https://github.com/dsully/macos-defaults)|Apply macOS defaults from YAML files|
 
 ## Network tools
