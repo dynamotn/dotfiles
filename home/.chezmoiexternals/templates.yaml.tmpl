@@ -7,8 +7,8 @@
 .local/share/projekt:
   type: git-repo
   {{- if .blockedGitlab }}
-  url: {{ $gitlab }}dynamo-config/projekt-templates.git
+  url: {{ $github }}dynamo-config/projekt-templates.git
   {{- else }}
-  url: {{ $github }}dynamotn/projekt-templates.git
+  url: {{ $gitlab }}dynamotn/projekt-templates.git
   {{- end }}
   refreshPeriod: 168h
