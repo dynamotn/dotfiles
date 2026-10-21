@@ -3,9 +3,11 @@
 (function(){
   try {
     const NEW_TAB_CONFIG_PATH = "browser.newtab.url";
-    Cu.import("resource:///modules/AboutNewTab.jsm");
+    const { AboutNewTab } = ChromeUtils.importESModule(
+      "resource:///modules/AboutNewTab.sys.mjs"
+    );
     // fetch pref if it exists
-    let xpref = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
+    let xpref = Services.prefs;
 
     function setFocusOnPage() {
       setTimeout(function() {
