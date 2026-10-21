@@ -31,7 +31,6 @@ data:
   bash: "/usr/bin/env bash"
   place: "cloud"
   code: "t00lb0x"
-  customHostname:
   company:
   decryptPersonal: false
   decryptEnterprise: []
@@ -47,8 +46,6 @@ data:
   hasSound: false
   hasBluetooth: false
   hasWifi: false
-  httpProxy: ""
-  noProxyAddresses: []
   preferGitSSH: false
   blockedGitlab: false
   darkMode: true

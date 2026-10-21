@@ -1,7 +1,8 @@
-{{- with .httpProxy }}
+{{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
+{{- with $secret.httpProxy }}
 export http_proxy={{ . | quote}}
 export https_proxy={{ . | quote}}
 {{- end }}
-{{- with .noProxyAddresses }}
+{{- with $secret.noProxyAddresses }}
 export no_proxy={{ join "," . | quote }}
 {{- end }}

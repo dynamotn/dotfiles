@@ -100,7 +100,10 @@ Answer questions, and wait to finish all setup scripts.
 >
 > - If you aren't me, need to answer no (`n`) for "Do you want to decrypt... secrets?" questions.
 > Don't ask me why :)
-> - My chezmoi configurations are stored in [my private chezmoi repo for all machines](https://github.com/dynamotn/chezmoi-keeper)
+> - The answers of my own machines are stored in
+> [`home/.chezmoidata/machines.yaml`](home/.chezmoidata/machines.yaml), so a
+> machine listed there is not asked them again. Its proxy and hostname are
+> kept encrypted in `secrets/data/<identity>/machine.yaml.age`.
 > - You need to grant "Full Disk Access" permission for terminal apps to fully set up machine
 
 ## :scroll:&nbsp; Cheatsheet

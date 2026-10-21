@@ -82,8 +82,28 @@ data:
   bash: "/usr/bin/env bash"
   {{- end }}
 
+  {{- /* The answers of a machine listed in .chezmoidata/machines.yaml are
+         taken from there; only the fields it leaves out are prompted. The
+         code comes first, as it is what picks the entry. */}}
+  {{- $code := promptStringOnce . "code" "What is this machine's name" "t00lb0x" }}
+  code: {{ $code | quote }}
+  {{- $machines := dict }}
+  {{- $machinesFile := joinPath .chezmoi.sourceDir ".chezmoidata" "machines.yaml" }}
+  {{- if stat $machinesFile }}
+  {{-   $machines = include $machinesFile | fromYaml | dig "machines" dict }}
+  {{- end }}
+  {{- $m := dig $code dict $machines }}
+
   {{- $places := list "cloud" "home" "office" "mobility" }}
-  {{- $place := promptChoiceOnce . "place" "Where does this machine place" $places (first $places) }}
+  {{- $place := "" }}
+  {{- if hasKey $m "place" }}
+  {{-   $place = $m.place }}
+  {{-   if not (has $place $places) }}
+  {{-     fail (printf "machines.yaml: place=%s of %s is not one of %s" $place $code (join ", " $places)) }}
+  {{-   end }}
+  {{- else }}
+  {{-   $place = promptChoiceOnce . "place" "Where does this machine place" $places (first $places) }}
+  {{- end }}
   place: {{ $place | quote }}
   {{- /* DOTFILES_KIND wins over the stored answer and the prompt, so an image
          build or a provisioning script can say what it builds. */}}
@@ -92,6 +112,11 @@ data:
   {{- if $kind }}
   {{-   if not (has $kind $kinds) }}
   {{-     fail (printf "DOTFILES_KIND=%s is not one of %s" $kind (join ", " $kinds)) }}
+  {{-   end }}
+  {{- else if hasKey $m "kind" }}
+  {{-   $kind = $m.kind }}
+  {{-   if not (has $kind $kinds) }}
+  {{-     fail (printf "machines.yaml: kind=%s of %s is not one of %s" $kind $code (join ", " $kinds)) }}
   {{-   end }}
   {{- else }}
   {{-   $defaultKind := "pc" }}
@@ -103,18 +128,41 @@ data:
   kind: {{ $kind | quote }}
 
   {{- $companies := list "F1" "T1" "ZOO" "U3T" }}
-  code: {{ promptStringOnce . "code" "What is this machine's name" "t00lb0x" | quote }}
-  {{- /* Empty means the hostname is the code above. */}}
-  customHostname: {{ promptStringOnce . "customHostname" "What is this machine's hostname (empty to use its name)" "" | quote }}
+  {{- $company := "" }}
   {{- if eq $place "office" }}
-  company: {{ promptChoiceOnce . "company" "Which code of owner company is" $companies (first $companies) | quote }}
+  {{-   if hasKey $m "company" }}
+  {{-     $company = $m.company }}
+  {{-     if not (has $company $companies) }}
+  {{-       fail (printf "machines.yaml: company=%s of %s is not one of %s" $company $code (join ", " $companies)) }}
+  {{-     end }}
+  {{-   else }}
+  {{-     $company = promptChoiceOnce . "company" "Which code of owner company is" $companies (first $companies) }}
+  {{-   end }}
+  {{- end }}
+  {{- if $company }}
+  company: {{ $company | quote }}
   {{- else }}
   company:
   {{- end }}
 
-  {{- $decryptPersonal := promptBoolOnce . "decryptPersonal" "Do you want to decrypt personal's secrets (y/n)" false }}
+  {{- $decryptPersonal := false }}
+  {{- if hasKey $m "decryptPersonal" }}
+  {{-   $decryptPersonal = $m.decryptPersonal }}
+  {{- else }}
+  {{-   $decryptPersonal = promptBoolOnce . "decryptPersonal" "Do you want to decrypt personal's secrets (y/n)" false }}
+  {{- end }}
   decryptPersonal: {{ $decryptPersonal }}
-  {{- $decryptEnterprise := promptMultichoiceOnce . "decryptEnterprise" "Which company's secrets do you want to decrypt" $companies list }}
+  {{- $decryptEnterprise := list }}
+  {{- if hasKey $m "decryptEnterprise" }}
+  {{-   $decryptEnterprise = $m.decryptEnterprise | default list }}
+  {{-   range $decryptEnterprise }}
+  {{-     if not (has . $companies) }}
+  {{-       fail (printf "machines.yaml: decryptEnterprise of %s has %s, not one of %s" $code . (join ", " $companies)) }}
+  {{-     end }}
+  {{-   end }}
+  {{- else }}
+  {{-   $decryptEnterprise = promptMultichoiceOnce . "decryptEnterprise" "Which company's secrets do you want to decrypt" $companies list }}
+  {{- end }}
   {{- if $decryptEnterprise }}
   decryptEnterprise:
     {{ toYaml $decryptEnterprise | indent 4 | trim }}
@@ -123,15 +171,37 @@ data:
   {{- end }}
 
   {{- $guiServers := list "0" "W" "X" "M" }}
-  {{- $guiServer := promptChoiceOnce . "guiServer" "Which GUI server of this machine is (W for Wayland, X for XOrg, M for Mac, 0 for CLI-only)" $guiServers (first $guiServers) }}
+  {{- $guiServer := "" }}
+  {{- if hasKey $m "guiServer" }}
+  {{-   $guiServer = $m.guiServer | toString }}
+  {{-   if not (has $guiServer $guiServers) }}
+  {{-     fail (printf "machines.yaml: guiServer=%s of %s is not one of %s" $guiServer $code (join ", " $guiServers)) }}
+  {{-   end }}
+  {{- else }}
+  {{-   $guiServer = promptChoiceOnce . "guiServer" "Which GUI server of this machine is (W for Wayland, X for XOrg, M for Mac, 0 for CLI-only)" $guiServers (first $guiServers) }}
+  {{- end }}
   guiServer: {{ $guiServer | quote }}
   {{- $guiDrivers := list "N" "I" "A" "M" "V" }}
   {{- $guiDriver := "" }}
   {{- $guiWinManagers := list "H" "N" "A" "O" "G" }}
   {{- $guiWinManager := "" }}
   {{- if ne $guiServer "0" }}
-  {{-   $guiDriver = promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" $guiDrivers "V" }}
-  {{-   $guiWinManager = promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is (H for hyprland, N for niri, A for aerospace, O for omniwm, G for gnome)" $guiWinManagers (first $guiWinManagers) }}
+  {{-   if hasKey $m "guiDriver" }}
+  {{-     $guiDriver = $m.guiDriver }}
+  {{-     if not (has $guiDriver $guiDrivers) }}
+  {{-       fail (printf "machines.yaml: guiDriver=%s of %s is not one of %s" $guiDriver $code (join ", " $guiDrivers)) }}
+  {{-     end }}
+  {{-   else }}
+  {{-     $guiDriver = promptChoiceOnce . "guiDriver" "Which GUI video driver of this machine is (N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual)" $guiDrivers "V" }}
+  {{-   end }}
+  {{-   if hasKey $m "guiWinManager" }}
+  {{-     $guiWinManager = $m.guiWinManager }}
+  {{-     if not (has $guiWinManager $guiWinManagers) }}
+  {{-       fail (printf "machines.yaml: guiWinManager=%s of %s is not one of %s" $guiWinManager $code (join ", " $guiWinManagers)) }}
+  {{-     end }}
+  {{-   else }}
+  {{-     $guiWinManager = promptChoiceOnce . "guiWinManager" "Which GUI window manager of this machine is (H for hyprland, N for niri, A for aerospace, O for omniwm, G for gnome)" $guiWinManagers (first $guiWinManagers) }}
+  {{-   end }}
   {{- end }}
   guiDriver: {{ $guiDriver | quote }}
   guiWinManager: {{ $guiWinManager | quote }}
@@ -139,7 +209,16 @@ data:
   {{- $languages := list }}
   {{- if ne $guiServer "0" }}
   {{-   $supportedLanguages := list "vi" "ja" "zh" }}
-  {{-   $languages = promptMultichoiceOnce . "languages" "Which languages do you want to use in input method framework" $supportedLanguages list }}
+  {{-   if hasKey $m "languages" }}
+  {{-     $languages = $m.languages | default list }}
+  {{-     range $languages }}
+  {{-       if not (has . $supportedLanguages) }}
+  {{-         fail (printf "machines.yaml: languages of %s has %s, not one of %s" $code . (join ", " $supportedLanguages)) }}
+  {{-       end }}
+  {{-     end }}
+  {{-   else }}
+  {{-     $languages = promptMultichoiceOnce . "languages" "Which languages do you want to use in input method framework" $supportedLanguages list }}
+  {{-   end }}
   {{- end }}
   {{- if $languages }}
   languages:
@@ -152,9 +231,25 @@ data:
   {{- $browser := "" }}
   {{- $browserEnterpriseProfiles := list }}
   {{- if ne $guiServer "0" }}
-  {{-   $browser = promptChoiceOnce . "browser" "Which web browser do you use (F for Firefox, Z for Zen Browser, or empty)" $browsers (first $browsers) | trim }}
+  {{-   if hasKey $m "browser" }}
+  {{-     $browser = $m.browser | default "" | trim }}
+  {{-     if and $browser (not (has $browser $browsers)) }}
+  {{-       fail (printf "machines.yaml: browser=%s of %s is not one of %s" $browser $code (join ", " $browsers)) }}
+  {{-     end }}
+  {{-   else }}
+  {{-     $browser = promptChoiceOnce . "browser" "Which web browser do you use (F for Firefox, Z for Zen Browser, or empty)" $browsers (first $browsers) | trim }}
+  {{-   end }}
   {{-   if $browser }}
-  {{-     $browserEnterpriseProfiles = promptMultichoiceOnce . "browserEnterpriseProfiles" "Which company's browser profiles do you want to decrypt" $decryptEnterprise list }}
+  {{-     if hasKey $m "browserEnterpriseProfiles" }}
+  {{-       $browserEnterpriseProfiles = $m.browserEnterpriseProfiles | default list }}
+  {{-       range $browserEnterpriseProfiles }}
+  {{-         if not (has . $decryptEnterprise) }}
+  {{-           fail (printf "machines.yaml: browserEnterpriseProfiles of %s has %s, which decryptEnterprise lacks" $code .) }}
+  {{-         end }}
+  {{-       end }}
+  {{-     else }}
+  {{-       $browserEnterpriseProfiles = promptMultichoiceOnce . "browserEnterpriseProfiles" "Which company's browser profiles do you want to decrypt" $decryptEnterprise list }}
+  {{-     end }}
   {{-   end }}
   {{- end }}
   browser: {{ $browser | quote }}
@@ -169,9 +264,25 @@ data:
   {{- $mailClient := "" }}
   {{- $mailEnterpriseProfiles := list }}
   {{- if ne $guiServer "0" }}
-  {{-   $mailClient = promptChoiceOnce . "mailClient" "Which email client do you use (T for Thunderbird, B for Betterbird, or empty)" $mailClients (first $mailClients) | trim }}
+  {{-   if hasKey $m "mailClient" }}
+  {{-     $mailClient = $m.mailClient | default "" | trim }}
+  {{-     if and $mailClient (not (has $mailClient $mailClients)) }}
+  {{-       fail (printf "machines.yaml: mailClient=%s of %s is not one of %s" $mailClient $code (join ", " $mailClients)) }}
+  {{-     end }}
+  {{-   else }}
+  {{-     $mailClient = promptChoiceOnce . "mailClient" "Which email client do you use (T for Thunderbird, B for Betterbird, or empty)" $mailClients (first $mailClients) | trim }}
+  {{-   end }}
   {{-   if $mailClient }}
-  {{-     $mailEnterpriseProfiles = promptMultichoiceOnce . "mailEnterpriseProfiles" "Which company's mail profiles do you want to decrypt" $decryptEnterprise list }}
+  {{-     if hasKey $m "mailEnterpriseProfiles" }}
+  {{-       $mailEnterpriseProfiles = $m.mailEnterpriseProfiles | default list }}
+  {{-       range $mailEnterpriseProfiles }}
+  {{-         if not (has . $decryptEnterprise) }}
+  {{-           fail (printf "machines.yaml: mailEnterpriseProfiles of %s has %s, which decryptEnterprise lacks" $code .) }}
+  {{-         end }}
+  {{-       end }}
+  {{-     else }}
+  {{-       $mailEnterpriseProfiles = promptMultichoiceOnce . "mailEnterpriseProfiles" "Which company's mail profiles do you want to decrypt" $decryptEnterprise list }}
+  {{-     end }}
   {{-   end }}
   {{- end }}
   mailClient: {{ $mailClient | quote }}
@@ -183,34 +294,36 @@ data:
   {{- end }}
 
   {{- $terminalMultiplexers := list "Z" "T" }}
-  terminalMultiplexer: {{ promptChoiceOnce . "terminalMultiplexer" "Which terminal multiplexer do you use (T for tmux, Z for Zellij)" $terminalMultiplexers (first $terminalMultiplexers) | quote }}
-
-  {{- /**/}}
-  hasSound: {{ promptBoolOnce . "hasSound" "Does this machine has a sound card (y/n)" false }}
-  hasBluetooth: {{ promptBoolOnce . "hasBluetooth" "Does this machine has a bluetooth card (y/n)" false }}
-  hasWifi: {{ promptBoolOnce . "hasWifi" "Does this machine has a wifi card (y/n)" false }}
-
-  {{- $httpProxy := promptStringOnce . "httpProxy" "Fill HTTP(S) proxy address, empty for not using" "" }}
-  httpProxy: {{ $httpProxy | quote }}
-  {{- if $httpProxy }}
-  noProxyAddresses:
-    {{- $isEnd := false }}
-    {{- range until 1000 }}
-    {{-   $address := promptString "Fill address that not use proxy (empty to end this list)" "" }}
-    {{-  if $address }}
-    - {{ $address }}
-    {{-  else }}
-    {{-    break }}
-    {{-  end }}
-    {{- end }}
+  {{- $terminalMultiplexer := "" }}
+  {{- if hasKey $m "terminalMultiplexer" }}
+  {{-   $terminalMultiplexer = $m.terminalMultiplexer }}
+  {{-   if not (has $terminalMultiplexer $terminalMultiplexers) }}
+  {{-     fail (printf "machines.yaml: terminalMultiplexer=%s of %s is not one of %s" $terminalMultiplexer $code (join ", " $terminalMultiplexers)) }}
+  {{-   end }}
   {{- else }}
-  noProxyAddresses: []
+  {{-   $terminalMultiplexer = promptChoiceOnce . "terminalMultiplexer" "Which terminal multiplexer do you use (T for tmux, Z for Zellij)" $terminalMultiplexers (first $terminalMultiplexers) }}
   {{- end }}
-  preferGitSSH: {{ promptBoolOnce . "preferGitSSH" "Do you want to prefer SSH than HTTPS for git (y/n)" false }}
-  blockedGitlab: {{ promptBoolOnce . "blockedGitlab" "Is this machines blocked to access Gitlab (y/n)" false }}
+  terminalMultiplexer: {{ $terminalMultiplexer | quote }}
 
-  {{- /**/}}
-  darkMode: {{ promptBoolOnce . "darkMode" "Do you want to use dark mode (y/n)" true }}
+  {{- /* The yes/no questions, as field, prompt and default. */}}
+  {{- $booleans := list
+        (list "hasSound" "Does this machine has a sound card (y/n)" false)
+        (list "hasBluetooth" "Does this machine has a bluetooth card (y/n)" false)
+        (list "hasWifi" "Does this machine has a wifi card (y/n)" false)
+        (list "preferGitSSH" "Do you want to prefer SSH than HTTPS for git (y/n)" false)
+        (list "blockedGitlab" "Is this machines blocked to access Gitlab (y/n)" false)
+        (list "darkMode" "Do you want to use dark mode (y/n)" true) }}
+  {{- range $booleans }}
+  {{-   $field := index . 0 }}
+  {{-   if hasKey $m $field }}
+  {{ $field }}: {{ index $m $field }}
+  {{-   else }}
+  {{ $field }}: {{ promptBoolOnce $ $field (index . 1) (index . 2) }}
+  {{-   end }}
+  {{- end }}
+  {{- /* httpProxy, noProxyAddresses and customHostname are not asked here:
+         they are secrets of the machine, which machine/secret.tmpl decrypts
+         at apply time from secrets/data/<identity>/machine.yaml.age. */}}
 
 age:
   identities:

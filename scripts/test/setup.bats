@@ -90,6 +90,94 @@ function fake_chezmoi_version {
   refute_line -- "--promptDefaults"
 }
 
+# Writes a machines.yaml into the sandbox, from stdin.
+function write_machines_yaml {
+  mkdir -p "${SANDBOX}/home/.chezmoidata"
+  cat > "${SANDBOX}/home/.chezmoidata/machines.yaml"
+}
+
+# Renders the config template of the sandbox as `chezmoi init` would, for the
+# given machine code, with no terminal to answer any other question.
+# @arg $1 string Machine code
+function render_config_for {
+  local code
+  dybatpho::expect_args code -- "$@"
+  run_setup '_generate_chezmoi_config'
+  assert_success
+  run --separate-stderr chezmoi execute-template --init --no-tty --source "${SANDBOX}" \
+    --promptString "What is this machine's name=${code}" \
+    --file "${SANDBOX}/home/.chezmoi.yaml.tmpl" < /dev/null
+}
+
+@test "the config template takes the answers of a machine from machines.yaml" {
+  dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  write_machines_yaml << 'EOF'
+machines:
+  test0:
+    place: "office"
+    kind: "laptop"
+    company: "T1"
+    decryptPersonal: false
+    decryptEnterprise: [T1]
+    guiServer: "W"
+    guiDriver: "I"
+    guiWinManager: "N"
+    languages: [vi]
+    browser: "F"
+    browserEnterpriseProfiles: [T1]
+    mailClient: ""
+    mailEnterpriseProfiles: []
+    terminalMultiplexer: "T"
+    hasSound: true
+    hasBluetooth: false
+    hasWifi: true
+    preferGitSSH: true
+    blockedGitlab: true
+    darkMode: false
+EOF
+  # Without a terminal, a question left would fail the render.
+  render_config_for test0
+  assert_success
+  local config="${output}"
+  local query='.data | [.place, .kind, .company, .guiWinManager, .browser, .mailClient,'
+  query+=' .terminalMultiplexer, .darkMode, .blockedGitlab]'
+  run yq -o=j -I=0 "${query}" <<< "${config}"
+  assert_output '["office","laptop","T1","N","F","","T",false,true]'
+  run yq -o=j -I=0 '.data.decryptEnterprise' <<< "${config}"
+  assert_output '["T1"]'
+  run yq -r '.age.identities[]' <<< "${config}"
+  assert_output --partial "enterprise-T1.key"
+  # The secrets of a machine never land in the plain config.
+  run yq -o=j -I=0 '.data | [has("httpProxy"), has("noProxyAddresses"), has("customHostname")]' <<< "${config}"
+  assert_output '[false,false,false]'
+}
+
+@test "the config template rejects a stored answer it would not offer" {
+  dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  write_machines_yaml << 'EOF'
+machines:
+  test0:
+    kind: "toaster"
+EOF
+  render_config_for test0
+  assert_failure
+  assert_stderr --partial "machines.yaml: kind=toaster of test0 is not one of"
+}
+
+@test "the config template falls back to the questions for an unlisted machine" {
+  dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  write_machines_yaml << 'EOF'
+machines:
+  test0:
+    kind: "laptop"
+EOF
+  # Without a terminal, every question takes its default.
+  render_config_for other
+  assert_success
+  run yq -o=j -I=0 '.data | [.code, .kind]' <<< "${output}"
+  assert_output '["other","pc"]'
+}
+
 @test "setup.sh rejects an identity chezmoi cannot be handed" {
   IDENTITIES="F1/T1" run_setup '_chezmoi_init_args < /dev/null'
   assert_failure
@@ -106,7 +194,7 @@ function fake_chezmoi_version {
   assert_success
 }
 
-@test "setup.sh exports the proxy and its exceptions from the chezmoi data" {
+@test "setup.sh exports the proxy and its exceptions from the machine secrets" {
   # `// empty` is jq, not yq: the parse error was hidden, so no_proxy was
   # never exported.
   cat > "${HOME}/.local/bin/chezmoi" << 'EOF'

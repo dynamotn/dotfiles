@@ -1,7 +1,8 @@
-{{- if .httpProxy }}
-Acquire::http::Proxy "{{ .httpProxy }}";
-Acquire::https::Proxy "{{ .httpProxy }}";
-{{-   range .noProxyAddresses }}
+{{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
+{{- if $secret.httpProxy }}
+Acquire::http::Proxy "{{ $secret.httpProxy }}";
+Acquire::https::Proxy "{{ $secret.httpProxy }}";
+{{-   range $secret.noProxyAddresses }}
 Acquire::http::proxy::{{ . }} "DIRECT";
 {{-   end }}
 {{- end }}
