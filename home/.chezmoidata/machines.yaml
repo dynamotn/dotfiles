@@ -139,3 +139,22 @@ machines:
     preferGitSSH: false
     blockedGitlab: true
     darkMode: true
+  c1f1:
+    place: "cloud"
+    kind: "vm"
+    company: "F1"
+    decryptPersonal: false
+    decryptEnterprise:
+    guiServer: "0"
+    languages:
+    browser: ""
+    browserEnterpriseProfiles: []
+    mailClient: ""
+    mailEnterpriseProfiles: []
+    terminalMultiplexer: "Z"
+    hasSound: false
+    hasBluetooth: false
+    hasWifi: false
+    preferGitSSH: false
+    blockedGitlab: true
+    darkMode: true
