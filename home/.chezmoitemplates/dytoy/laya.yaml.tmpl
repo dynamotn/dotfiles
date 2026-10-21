@@ -1,0 +1,30 @@
+{{- if ne .osid "android" }}
+# Laya picks the GPU on its own when torch supports it, so the torch build
+# follows the GPU: CUDA and MPS come with the default wheels, ROCm and CPU from
+# their own index.
+name: laya
+method: shell
+dependencies:
+  - uv
+  {{- if ne .guiServer "0" }}
+  - gpu
+  {{- end }}
+content: |-
+  args=()
+  {{- if eq .guiDriver "N" }}
+  # The default wheels are built on CUDA 13, which dropped every GPU below
+  # compute capability 7.5 (Pascal such as the GTX 1060, Volta); cu126 still
+  # runs them. With several GPUs the oldest one decides.
+  cap="$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2> /dev/null | sort -V | head -n 1 || true)"
+  older="$(printf '%s\n' "${cap:-7.5}" 7.5 | sort -V | head -n 1)"
+  if [[ "${older}" != 7.5 ]]; then
+    args+=(--index-url https://download.pytorch.org/whl/cu126)
+  fi
+  {{- else if ne .guiDriver "M" }}
+  args+=(--index-url https://download.pytorch.org/whl/{{ if eq .guiDriver "A" }}rocm7.2{{ else }}cpu{{ end }})
+  {{- end }}
+  if ((${#args[@]})); then
+    args+=(--extra-index-url https://pypi.org/simple --index-strategy unsafe-best-match)
+  fi
+  uv tool install ${args[@]+"${args[@]}"} 'laya[mcp]'
+{{- end }}

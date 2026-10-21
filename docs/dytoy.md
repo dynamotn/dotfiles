@@ -334,6 +334,7 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[vectorcode](https://github.com/davidyz/vectorcode)|Code repository indexing tool with LLMs|
 |[opencode](https://github.com/anomalyco/opencode)|AI coding agent|
 |[rtk](https://github.com/rtk-ai/rtk)|Proxy that reduces LLM token consumption|
+|[laya](https://github.com/NandhaKishorM/laya)|Typed decision model, served to agents over MCP|
 
 ## Android tools
 

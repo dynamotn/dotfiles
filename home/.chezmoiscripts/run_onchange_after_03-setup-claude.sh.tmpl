@@ -1,10 +1,11 @@
 #!{{ .bash }}
 # @file 03-setup-claude.sh
-# @brief Install the Claude Code marketplaces, plugins and skills
+# @brief Install the Claude Code marketplaces, plugins, skills and MCP servers
 # @description Bring the Claude Code extensions on this machine in line with the
 # dotfiles: every marketplace and plugin named in `~/.claude/settings.json`, and
-# every community skill from skills.sh listed below. Re-runs whenever the
-# settings or this list change. Nothing here is tied to a single project: a
+# every community skill from skills.sh listed below, and the MCP servers below
+# in every Claude configuration. Re-runs whenever the settings or these lists
+# change. Nothing here is tied to a single project: a
 # plugin that needs a project tool chain (terraform, a database CLI, ...) does
 # not belong in the settings and is left to that project.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
@@ -67,6 +68,14 @@ SKILLS=(
   anthropics/skills@mcp-builder
   wshobson/agents@prompt-engineering-patterns
 )
+
+# MCP servers are registered at user scope in the default configuration and in
+# every enterprise one, the directories mise points `CLAUDE_CONFIG_DIR` at.
+DEFAULT_CONFIG_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude")"
+ENTERPRISE_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" "Working" "enterprise")"
+LAYA_MCP_SERVER="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "bin" "laya-mcp-server")"
+# dytoy installs the ROCm build of torch for laya on an AMD GPU.
+HAS_AMD_GPU='{{ eq .guiDriver "A" }}'
 
 #######################################
 # @description Check a filter against a JSON file, false when the file is missing
@@ -146,6 +155,98 @@ function _setup_skills {
 }
 
 #######################################
+# @description Print every Claude configuration directory of this machine
+# @noargs
+# @stdout One directory per line, the default one first
+#######################################
+function _claude_config_dirs {
+  local dir
+  printf '%s\n' "${DEFAULT_CONFIG_DIR}"
+  for dir in "${ENTERPRISE_DIR}"/*/.claude "${ENTERPRISE_DIR}"/*/*/.claude; do
+    if dybatpho::is dir "${dir}"; then
+      printf '%s\n' "${dir}"
+    fi
+  done
+}
+
+#######################################
+# @description Run claude against one configuration directory
+# @arg $1 string Configuration directory
+# @arg $@ string Arguments of claude, after the directory
+#######################################
+function _claude_in {
+  local dir
+  dybatpho::expect_args dir -- "$@"
+  shift
+  # The default configuration is the one claude reads when CLAUDE_CONFIG_DIR is unset.
+  if [[ "${dir}" == "${DEFAULT_CONFIG_DIR}" ]]; then
+    env -u CLAUDE_CONFIG_DIR claude "$@"
+  else
+    CLAUDE_CONFIG_DIR="${dir}" claude "$@"
+  fi
+}
+
+#######################################
+# @description Register an MCP server in every configuration where it is missing or differs
+# @arg $1 string Name of the server
+# @arg $2 string Server definition as JSON, as `claude mcp add-json` takes it
+#######################################
+function _setup_mcp_server {
+  local name definition
+  dybatpho::expect_args name definition -- "$@"
+  local dir state_file current wanted
+  wanted="$(jq -cS . <<< "${definition}")"
+  # shellcheck disable=SC2312 # the directories are globbed, the loop cannot fail on them
+  while IFS= read -r dir; do
+    # The default configuration keeps its state next to the directory, not in it.
+    if [[ "${dir}" == "${DEFAULT_CONFIG_DIR}" ]]; then
+      state_file="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude.json")"
+    else
+      state_file="$(dybatpho::path_join "${dir}" ".claude.json")"
+    fi
+    current=""
+    if dybatpho::is file "${state_file}"; then
+      current="$(jq -cS --arg name "${name}" '.mcpServers[$name] // empty' "${state_file}")"
+    fi
+    if [[ "${current}" == "${wanted}" ]]; then
+      dybatpho::debug "MCP server ${name} already registered in ${dir}"
+      continue
+    fi
+    dybatpho::info "Register MCP server ${name} in ${dir}"
+    if [[ -n "${current}" ]]; then
+      _claude_in "${dir}" mcp remove --scope user "${name}" > /dev/null
+    fi
+    _claude_in "${dir}" mcp add-json --scope user "${name}" "${definition}" > /dev/null \
+      || dybatpho::warn "Could not register MCP server ${name} in ${dir}"
+  done < <(_claude_config_dirs)
+}
+
+#######################################
+# @description Register the Laya decision model, installed by dytoy, as an MCP server
+# @noargs
+#######################################
+function _setup_laya {
+  if ! dybatpho::is executable "${LAYA_MCP_SERVER}"; then
+    dybatpho::warn "laya is not installed, skip its MCP server"
+    return 0
+  fi
+  local env='{"HF_HUB_DISABLE_TELEMETRY": "1"}'
+  # The ROCm build of torch ships no kernels for the RDNA2 chips other than
+  # gfx1030 (Radeon 680M, RX 6600, ...); they run the gfx1030 ones instead.
+  if dybatpho::is true "${HAS_AMD_GPU}"; then
+    local agents
+    agents="$(PATH="${PATH}:/opt/rocm/bin" rocminfo 2> /dev/null || true)"
+    if [[ "${agents}" =~ gfx103[1-6] ]]; then
+      env="$(jq -c '. + {HSA_OVERRIDE_GFX_VERSION: "10.3.0"}' <<< "${env}")"
+    fi
+  fi
+  local definition
+  definition="$(jq -cn --arg command "${LAYA_MCP_SERVER}" --argjson env "${env}" \
+    '{type: "stdio", command: $command, args: [], env: $env}')"
+  _setup_mcp_server laya "${definition}"
+}
+
+#######################################
 # @description Entrypoint
 # @noargs
 #######################################
@@ -154,6 +255,7 @@ function _main {
   if dybatpho::is command claude; then
     _setup_marketplaces
     _setup_plugins
+    _setup_laya
   else
     dybatpho::warn "claude is not installed, skip marketplaces and plugins"
   fi
