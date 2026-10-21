@@ -22,11 +22,7 @@ HoldPkg     = pacman glibc
 Architecture = auto
 
 # Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
-{{- if eq .code "c40c40" }}
-IgnorePkg   = linux-hardened linux-firmware alsa-firmware sof-firmware linux-hardened-headers
-{{- else }}
-#IngorePkg
-{{- end }}
+#IgnorePkg   =
 #IgnoreGroup =
 
 #NoUpgrade   =

@@ -1,22 +1,2 @@
 [[profile]]
 name = "standalone"
-
-{{- if eq .code "c40c40" }}
-  [[profile.output]]
-  enable = true
-  search = ["m=0x419D", "s=", "v=Samsung Display Corp."]
-  mode = "2880x1800@120Hz"
-  position = "0,0"
-  scale = 1.6
-  transform = "normal"
-  adaptive_sync = false
-
-  [[profile.output]]
-  enable = true
-  search = ["n=Wayvnc-1"]
-  mode = "1920x1080@60Hz"
-  position = "1920,0"
-  scale = 1
-  transform = "normal"
-  adaptive_sync = false
-{{- end }}
