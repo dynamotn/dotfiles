@@ -4,12 +4,13 @@ setup() {
   SETUP="${DOTFILES_DIR}/scripts/setup.sh"
   CALL_LOG="${BATS_TEST_TMPDIR}/calls.log"
   : > "${CALL_LOG}"
-  # A sandbox stands in for the repository: `_generate_chezmoi_config` writes
-  # into `home/` of the root it is given, and a test must never write there.
+  # A sandbox stands in for the repository, which a test must never write
+  # into. Its config template is reached through home/, as in the repository.
   SANDBOX="${BATS_TEST_TMPDIR}/dotfiles"
   mkdir -p "${SANDBOX}/home/.chezmoidata"
   cp "${DOTFILES_DIR}/.chezmoi.yaml.tmpl" "${DOTFILES_DIR}/.chezmoiroot" \
     "${DOTFILES_DIR}/.chezmoiversion" "${SANDBOX}/"
+  cp -P "${DOTFILES_DIR}/home/.chezmoi.yaml.tmpl" "${SANDBOX}/home/"
   # The options of its choice questions are data the config template reads.
   cp "${DOTFILES_DIR}/home/.chezmoidata/choices.yaml" \
     "${DOTFILES_DIR}/home/.chezmoidata/companies.yaml" "${SANDBOX}/home/.chezmoidata/"
@@ -53,7 +54,7 @@ function fake_chezmoi_version {
   dybatpho::is command chezmoi || skip "chezmoi is not installed"
 
   IDENTITIES="personal, F1,,ZOO," run_setup \
-    '_generate_chezmoi_config; _chezmoi_init_args; chezmoi "${CHEZMOI_INIT_ARGS[@]}" < /dev/null'
+    '_chezmoi_init_args; chezmoi "${CHEZMOI_INIT_ARGS[@]}" < /dev/null'
   assert_success
   local config="${XDG_CONFIG_HOME}/chezmoi/chezmoi.yaml"
   run yq -o=j -I=0 '.data.decryptPersonal' "${config}"
@@ -63,6 +64,19 @@ function fake_chezmoi_version {
   run yq -r '.age.identities[]' "${config}"
   assert_output --partial "enterprise-F1.key"
   assert_output --partial "enterprise-ZOO.key"
+}
+
+@test "chezmoi init reads the config template of the repository through home/" {
+  dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  # A copy in home/ went stale whenever the template changed without a run
+  # of setup.sh, and `chezmoi init` then asked the old questions.
+  run readlink "${DOTFILES_DIR}/home/.chezmoi.yaml.tmpl"
+  assert_output "../.chezmoi.yaml.tmpl"
+
+  run_setup '_chezmoi_init_args; chezmoi "${CHEZMOI_INIT_ARGS[@]}" < /dev/null'
+  assert_success
+  run yq -r '.sourceDir' "${XDG_CONFIG_HOME}/chezmoi/chezmoi.yaml"
+  assert_output "${SANDBOX}"
 }
 
 @test "setup.sh takes the defaults when stdin is not a terminal" {
@@ -104,8 +118,6 @@ function write_machines_yaml {
 function render_config_for {
   local code
   dybatpho::expect_args code -- "$@"
-  run_setup '_generate_chezmoi_config'
-  assert_success
   run --separate-stderr chezmoi execute-template --init --no-tty --source "${SANDBOX}" \
     --promptString "What is this machine's name=${code}" \
     --file "${SANDBOX}/home/.chezmoi.yaml.tmpl" < /dev/null

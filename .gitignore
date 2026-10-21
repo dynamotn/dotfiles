@@ -1,4 +1,3 @@
-home/.chezmoi.*.tmpl
 .DS_Store
 secrets/*
 !secrets/data

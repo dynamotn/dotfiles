@@ -156,22 +156,6 @@ function _chezmoi_is_recent {
 }
 
 #######################################
-# @description Generate chezmoi config file from template
-# @env ROOT_DIR Root of the dotfiles repository
-# @noargs
-#######################################
-function _generate_chezmoi_config {
-  local origin_config dest_config
-  origin_config="$(dybatpho::path_join "${ROOT_DIR}" ".chezmoi.yaml.tmpl")"
-  dest_config="$(dybatpho::path_join "${ROOT_DIR}" "home" ".chezmoi.yaml.tmpl")"
-
-  # Put current chezmoi source directory
-  printf 'sourceDir: "%s"\n' "${ROOT_DIR}" > "${dest_config}"
-  # Put rest of config from origin template
-  command cat "${origin_config}" >> "${dest_config}"
-}
-
-#######################################
 # @description Build the arguments of `chezmoi init`, answering the decryption
 # questions from `--identities`. They are answered through chezmoi's own
 # `--promptBool` and `--promptMultichoice`, which the template cannot drift
@@ -315,7 +299,6 @@ function _main {
   _install_prerequisites
 
   dybatpho::header "Initialize chezmoi"
-  _generate_chezmoi_config
   _chezmoi_init_args
   chezmoi "${CHEZMOI_INIT_ARGS[@]}"
 

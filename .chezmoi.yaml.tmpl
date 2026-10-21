@@ -1,3 +1,7 @@
+{{- /* chezmoi reads this template through the home/.chezmoi.yaml.tmpl link,
+       as .chezmoiroot points at home/. The source is the repository itself,
+       its working tree, not home/ which .chezmoi.sourceDir names here. */}}
+sourceDir: {{ .chezmoi.workingTree | quote }}
 encryption: age
 format: yaml
 mode: symlink
