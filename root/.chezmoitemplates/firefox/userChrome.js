@@ -12,17 +12,19 @@ Services.obs.addObserver(function (aSubject, aTopic, aData) {
       if (chromeWindow.userChromeJsMod) return;
       chromeWindow.userChromeJsMod = true;
       const ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-      const fph = ios.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
       const ds = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
 
       let workDir = ds.get("UChrm", Ci.nsIFile);
       workDir.append('js');
+      // Newer Firefox refuses to load subscripts from file:// URIs, so expose
+      // the scripts directory under resource:// instead
+      const res = ios.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
+      res.setSubstitution("userchromejs", ios.newFileURI(workDir));
       var files = workDir.directoryEntries.QueryInterface(Ci.nsISimpleEnumerator);
       while (files.hasMoreElements()) {
         var file = files.getNext().QueryInterface(Ci.nsIFile);
         if(/\.uc\.js$/i.test(file.leafName)) {
-          let fileURL = fph
-            .getURLSpecFromActualFile(file) + "?" + file.lastModifiedTime;
+          let fileURL = "resource://userchromejs/" + file.leafName + "?" + file.lastModifiedTime;
           Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader)
             .loadSubScriptWithOptions(fileURL, {
               target: chromeWindow,
@@ -32,7 +34,7 @@ Services.obs.addObserver(function (aSubject, aTopic, aData) {
         }
       }
     } catch (e) {
-      Cu.reportError(e);
+      console.error(e);
     }
   }, 10);
 }, "browser-delayed-startup-finished", false);
