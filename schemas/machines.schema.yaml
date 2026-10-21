@@ -3,17 +3,22 @@ title: Machine Answers
 description: >
   Schema for home/.chezmoidata/machines.yaml, the answers the config template
   (.chezmoi.yaml.tmpl) takes instead of asking, per machine code. Every field
-  is optional; one left out is asked. The secrets of a machine (httpProxy,
-  noProxyAddresses, customHostname) are rejected here, as they belong to
+  is optional; one left out is asked. Which values a choice may take is not
+  repeated here: the config template checks them against choices.yaml and
+  companies.yaml. The secrets of a machine (httpProxy, noProxyAddresses,
+  customHostname) are rejected, as they belong to
   secrets/data/<identity>/machine.yaml.age.
 type: object
 required: [machines]
 additionalProperties: false
 
 $defs:
-  company:
+  choice:
     type: string
-    enum: [F1, T1, ZOO, U3T]
+  choices:
+    type: array
+    items:
+      type: string
 
 properties:
   machines:
@@ -23,59 +28,36 @@ properties:
       additionalProperties: false
       properties:
         place:
-          type: string
-          enum: [cloud, home, office, mobility]
+          $ref: "#/$defs/choice"
         kind:
-          type: string
-          enum: [container, pc, laptop, workstation, tablet, mobile, vm, sbc]
+          $ref: "#/$defs/choice"
         company:
           description: Owner company, read on office machines only
           oneOf:
-            - $ref: "#/$defs/company"
+            - type: string
             - type: "null"
         decryptPersonal:
           type: boolean
         decryptEnterprise:
-          type: array
-          items:
-            $ref: "#/$defs/company"
+          $ref: "#/$defs/choices"
         guiServer:
-          type: string
-          enum: ["0", W, X, M]
-          description: W for Wayland, X for XOrg, M for Mac, 0 for CLI-only
+          $ref: "#/$defs/choice"
         guiDriver:
-          type: string
-          enum: [N, I, A, M, V]
-          description: N for Nvidia, I for Intel, A for AMD, M for Mac, V for virtual
+          $ref: "#/$defs/choice"
         guiWinManager:
-          type: string
-          enum: [H, N, A, O, G]
-          description: H for hyprland, N for niri, A for aerospace, O for omniwm, G for gnome
+          $ref: "#/$defs/choice"
         languages:
-          type: array
-          items:
-            type: string
-            enum: [vi, ja, zh]
+          $ref: "#/$defs/choices"
         browser:
-          type: string
-          enum: [Z, F, ""]
-          description: Z for Zen Browser, F for Firefox, empty for none
+          $ref: "#/$defs/choice"
         browserEnterpriseProfiles:
-          type: array
-          items:
-            $ref: "#/$defs/company"
+          $ref: "#/$defs/choices"
         mailClient:
-          type: string
-          enum: [B, T, ""]
-          description: B for Betterbird, T for Thunderbird, empty for none
+          $ref: "#/$defs/choice"
         mailEnterpriseProfiles:
-          type: array
-          items:
-            $ref: "#/$defs/company"
+          $ref: "#/$defs/choices"
         terminalMultiplexer:
-          type: string
-          enum: [Z, T]
-          description: Z for Zellij, T for tmux
+          $ref: "#/$defs/choice"
         hasSound:
           type: boolean
         hasBluetooth:
