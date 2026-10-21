@@ -1,0 +1,53 @@
+# Options of the choice questions of the config template (.chezmoi.yaml.tmpl),
+# in the order they are offered, which is also how the answers stored in
+# machines.yaml are checked. The first option is the default unless `default`
+# says otherwise. A `labels` entry shows as "<option> for <label>" in the
+# prompt, and an "" option means none. The companies come from companies.yaml.
+choices:
+  place:
+    options: [cloud, home, office, mobility]
+  kind:
+    # The default is container inside a container.
+    options: [container, pc, laptop, workstation, tablet, mobile, vm, sbc]
+    default: pc
+  guiServer:
+    options: ["0", W, X, M]
+    labels:
+      W: Wayland
+      X: XOrg
+      M: Mac
+      "0": CLI-only
+  guiDriver:
+    options: [N, I, A, M, V]
+    default: V
+    labels:
+      N: Nvidia
+      I: Intel
+      A: AMD
+      M: Mac
+      V: virtual
+  guiWinManager:
+    options: [H, N, A, O, G]
+    labels:
+      H: hyprland
+      N: niri
+      A: aerospace
+      O: omniwm
+      G: gnome
+  languages:
+    options: [vi, ja, zh]
+  browser:
+    options: [Z, F, ""]
+    labels:
+      F: Firefox
+      Z: Zen Browser
+  mailClient:
+    options: [B, T, ""]
+    labels:
+      T: Thunderbird
+      B: Betterbird
+  terminalMultiplexer:
+    options: [Z, T]
+    labels:
+      T: tmux
+      Z: Zellij

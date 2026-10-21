@@ -1,7 +1,7 @@
 setup() {
   load test_helper
-  SCHEMA_FILE="${DOTFILES_DIR}/schemas/machines.schema.yaml"
-  MACHINES_FILE="${DOTFILES_DIR}/home/.chezmoidata/machines.yaml"
+  SCHEMA_DIR="${DOTFILES_DIR}/schemas"
+  DATA_DIR="${DOTFILES_DIR}/home/.chezmoidata"
 }
 
 function _require_ys {
@@ -10,25 +10,30 @@ function _require_ys {
 
 @test "home/.chezmoidata/machines.yaml conforms to schema" {
   _require_ys
-  run ys -f "${SCHEMA_FILE}" "${MACHINES_FILE}"
+  run ys -f "${SCHEMA_DIR}/machines.schema.yaml" "${DATA_DIR}/machines.yaml"
+  assert_success
+}
+
+@test "home/.chezmoidata/choices.yaml conforms to schema" {
+  _require_ys
+  run ys -f "${SCHEMA_DIR}/choices.schema.yaml" "${DATA_DIR}/choices.yaml"
   assert_success
 }
 
 @test "machines schema rejects the secrets of a machine" {
   _require_ys
-  local file
+  local field file="${BATS_TEST_TMPDIR}/machines.yaml"
   for field in "httpProxy: http://proxy:3128" "noProxyAddresses: []" "customHostname: h"; do
-    file="${BATS_TEST_TMPDIR}/machines.yaml"
     printf 'machines:\n  test0:\n    %s\n' "${field}" > "${file}"
-    run ys -f "${SCHEMA_FILE}" "${file}"
+    run ys -f "${SCHEMA_DIR}/machines.schema.yaml" "${file}"
     assert_failure
   done
 }
 
-@test "machines schema rejects an answer the config template would not offer" {
+@test "choices schema rejects a choice without options" {
   _require_ys
-  local file="${BATS_TEST_TMPDIR}/machines.yaml"
-  printf 'machines:\n  test0:\n    kind: toaster\n' > "${file}"
-  run ys -f "${SCHEMA_FILE}" "${file}"
+  local file="${BATS_TEST_TMPDIR}/choices.yaml"
+  yq '.choices.place = {"default": "home"}' "${DATA_DIR}/choices.yaml" > "${file}"
+  run ys -f "${SCHEMA_DIR}/choices.schema.yaml" "${file}"
   assert_failure
 }

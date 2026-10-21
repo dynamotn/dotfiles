@@ -7,9 +7,12 @@ setup() {
   # A sandbox stands in for the repository: `_generate_chezmoi_config` writes
   # into `home/` of the root it is given, and a test must never write there.
   SANDBOX="${BATS_TEST_TMPDIR}/dotfiles"
-  mkdir -p "${SANDBOX}/home"
+  mkdir -p "${SANDBOX}/home/.chezmoidata"
   cp "${DOTFILES_DIR}/.chezmoi.yaml.tmpl" "${DOTFILES_DIR}/.chezmoiroot" \
     "${DOTFILES_DIR}/.chezmoiversion" "${SANDBOX}/"
+  # The options of its choice questions are data the config template reads.
+  cp "${DOTFILES_DIR}/home/.chezmoidata/choices.yaml" \
+    "${DOTFILES_DIR}/home/.chezmoidata/companies.yaml" "${SANDBOX}/home/.chezmoidata/"
   # The suite may itself run on CI or in a container; each test says which.
   unset CI GITHUB_ACTIONS GITLAB_CI container CODESPACES REMOTE_CONTAINERS DEVCONTAINER KUBERNETES_SERVICE_HOST
 }
@@ -92,7 +95,6 @@ function fake_chezmoi_version {
 
 # Writes a machines.yaml into the sandbox, from stdin.
 function write_machines_yaml {
-  mkdir -p "${SANDBOX}/home/.chezmoidata"
   cat > "${SANDBOX}/home/.chezmoidata/machines.yaml"
 }
 
@@ -176,6 +178,43 @@ EOF
   assert_success
   run yq -o=j -I=0 '.data | [.code, .kind]' <<< "${output}"
   assert_output '["other","pc"]'
+}
+
+@test "every machine of machines.yaml gives answers the config template offers" {
+  dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  cp "${DOTFILES_DIR}/home/.chezmoidata/machines.yaml" "${SANDBOX}/home/.chezmoidata/"
+  local code listed
+  local -a codes
+  listed="$(yq -r '.machines | keys | .[]' "${SANDBOX}/home/.chezmoidata/machines.yaml")"
+  mapfile -t codes <<< "${listed}"
+  assert [ "${#codes[@]}" -gt 0 ]
+  for code in "${codes[@]}"; do
+    render_config_for "${code}"
+    assert_success
+  done
+}
+
+@test "the config template offers the options of choices.yaml" {
+  dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  yq -i '.choices.place.options = ["moon", "home"] | .choices.kind.default = "laptop"' \
+    "${SANDBOX}/home/.chezmoidata/choices.yaml"
+  write_machines_yaml << 'EOF'
+machines:
+  test0:
+    place: "home"
+  test1:
+    place: "cloud"
+EOF
+  # Without a terminal, every question left takes its default.
+  render_config_for other
+  assert_success
+  run yq -o=j -I=0 '.data | [.place, .kind]' <<< "${output}"
+  assert_output '["moon","laptop"]'
+  render_config_for test0
+  assert_success
+  render_config_for test1
+  assert_failure
+  assert_stderr --partial "machines.yaml: place=cloud of test1 is not one of moon, home"
 }
 
 @test "setup.sh rejects an identity chezmoi cannot be handed" {

@@ -1,6 +1,7 @@
 # Answers of the config template (.chezmoi.yaml.tmpl) per machine, keyed by the
 # machine's code. A field left out is asked at `chezmoi init`, and a machine
-# not listed here is asked everything. Only what is safe to publish belongs
+# not listed here is asked everything. A choice must be one of the options of
+# choices.yaml (companies.yaml for a company). Only what is safe to publish belongs
 # here, as checked by schemas/machines.schema.yaml: the proxy and the hostname
 # live encrypted in secrets/data/<identity>/machine.yaml.age.
 machines:
