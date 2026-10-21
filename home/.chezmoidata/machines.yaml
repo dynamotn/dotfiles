@@ -32,3 +32,110 @@ machines:
     preferGitSSH: true
     blockedGitlab: false
     darkMode: true
+  l30n4rd0d4v1nc1:
+    place: "home"
+    kind: "pc"
+    decryptPersonal: true
+    decryptEnterprise:
+      - F1
+      - ZOO
+      - T1
+    guiServer: "W"
+    guiDriver: "N"
+    guiWinManager: "H"
+    languages:
+      - vi
+      - zh
+    browser: "Z"
+    browserEnterpriseProfiles:
+      - F1
+    mailClient: "B"
+    mailEnterpriseProfiles:
+      - F1
+    terminalMultiplexer: "Z"
+    hasSound: true
+    hasBluetooth: true
+    hasWifi: false
+    preferGitSSH: true
+    blockedGitlab: false
+    darkMode: true
+  n0t3:
+    place: "home"
+    kind: "tablet"
+    decryptPersonal: true
+    decryptEnterprise:
+      - F1
+      - ZOO
+      - T1
+    guiServer: "0"
+    terminalMultiplexer: "Z"
+    hasSound: false
+    hasBluetooth: false
+    hasWifi: true
+    preferGitSSH: true
+    blockedGitlab: false
+    darkMode: false
+  tr4nhun9d40:
+    place: "home"
+    kind: "mobile"
+    decryptPersonal: true
+    decryptEnterprise: []
+    guiServer: "0"
+    terminalMultiplexer: "Z"
+    hasSound: false
+    hasBluetooth: false
+    hasWifi: true
+    preferGitSSH: true
+    blockedGitlab: false
+    darkMode: true
+  v0n9uy3n914p:
+    place: "home"
+    kind: "laptop"
+    decryptPersonal: true
+    decryptEnterprise:
+      - F1
+      - ZOO
+      - T1
+    guiServer: "M"
+    guiDriver: "M"
+    guiWinManager: "A"
+    languages:
+      - vi
+      - zh
+    browser: "Z"
+    browserEnterpriseProfiles:
+      - F1
+    mailClient: "B"
+    mailEnterpriseProfiles:
+      - F1
+    terminalMultiplexer: "Z"
+    hasSound: true
+    hasBluetooth: true
+    hasWifi: true
+    preferGitSSH: true
+    blockedGitlab: false
+    darkMode: true
+  vd10p:
+    place: "office"
+    kind: "vm"
+    company: "F1"
+    decryptPersonal: false
+    decryptEnterprise:
+      - F1
+    guiServer: "X"
+    guiDriver: "V"
+    guiWinManager: "G"
+    languages:
+      - vi
+    browser: "Z"
+    browserEnterpriseProfiles:
+      - F1
+    mailClient: ""
+    mailEnterpriseProfiles: []
+    terminalMultiplexer: "Z"
+    hasSound: true
+    hasBluetooth: false
+    hasWifi: false
+    preferGitSSH: false
+    blockedGitlab: true
+    darkMode: true
