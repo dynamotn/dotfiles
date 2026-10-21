@@ -1,5 +1,6 @@
-{{- if .customHostname }}
-{{-   .customHostname }}
+{{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
+{{- if $secret.customHostname }}
+{{-   $secret.customHostname }}
 {{- else }}
 {{-   .code }}
 {{- end }}

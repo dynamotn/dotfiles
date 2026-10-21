@@ -189,3 +189,17 @@ function _validate {
   _require_ys
   _validate "${SCHEMA_DIR}/ssl.schema.yaml" "${DATA_DIR}/enterprise-F1/ssl.yaml"
 }
+
+# ---------------------------------------------------------------------------
+# machine.yaml
+# ---------------------------------------------------------------------------
+
+@test "secrets/personal/machine.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/machine.schema.yaml" "${DATA_DIR}/personal/machine.yaml"
+}
+
+@test "secrets/enterprise-F1/machine.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/machine.schema.yaml" "${DATA_DIR}/enterprise-F1/machine.yaml"
+}

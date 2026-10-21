@@ -54,8 +54,6 @@ data:
   bash: "/usr/bin/env bash"
   terminalMultiplexer: "Z"
   darkMode: true
-  httpProxy: ""
-  noProxyAddresses: []
   preferGitSSH: true
   blockedGitlab: false
   decryptPersonal: false

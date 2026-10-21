@@ -44,6 +44,8 @@ export PATH="${BIN_DIR}:${PATH}"
 # The questions of `.chezmoi.yaml.tmpl` that `--identities` answers. chezmoi
 # matches `--promptBool` and `--promptMultichoice` on the prompt text, so these
 # must stay identical to the template, which scripts/test/setup.bats checks.
+# A machine listed in home/.chezmoidata/machines.yaml is not asked them: its
+# stored answers win over these.
 PROMPT_PERSONAL="Do you want to decrypt personal's secrets (y/n)"
 PROMPT_ENTERPRISE="Which company's secrets do you want to decrypt"
 
@@ -223,13 +225,15 @@ function _chezmoi_init_args {
 }
 
 #######################################
-# @description Export the proxy of the chezmoi data, if any, for the
-# downloads of the next applies
+# @description Export the proxy of this machine, if any, for the downloads of
+# the next applies. It is a secret of the machine, so it is only known once
+# the secrets submodule and the age identities are in place, after `~/.ssh`.
 # @noargs
 #######################################
 function _export_proxy {
   local data proxy
-  data="$(chezmoi data --format json)"
+  # dyshellint disable=SC2016 a chezmoi template, not a shell expansion
+  data="$(chezmoi execute-template '{{ includeTemplate "machine/secret.tmpl" . }}')"
   proxy="$(yq -r '.httpProxy // ""' <<< "${data}")"
   if dybatpho::string_is_blank "${proxy}"; then
     return 0

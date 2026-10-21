@@ -1,3 +1,4 @@
+{{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
 {{- if eq .chezmoi.os "darwin" }}
 fish_add_path -mpPg /opt/homebrew/opt/coreutils/libexec/gnubin
 fish_add_path -mpPg /opt/homebrew/opt/findutils/libexec/gnubin
@@ -44,10 +45,10 @@ set -gx MISE_OFFLINE 1
 set -gx MISE_PREFER_OFFLINE 1
 {{- end }}
 
-{{- if .httpProxy }}
-set -gx http_proxy {{ .httpProxy | quote }}
-set -gx https_proxy {{ .httpProxy | quote }}
+{{- if $secret.httpProxy }}
+set -gx http_proxy {{ $secret.httpProxy | quote }}
+set -gx https_proxy {{ $secret.httpProxy | quote }}
 {{- end }}
-{{- with .noProxyAddresses }}
+{{- with $secret.noProxyAddresses }}
 set -gx no_proxy {{ join "," . | quote }}
 {{- end }}

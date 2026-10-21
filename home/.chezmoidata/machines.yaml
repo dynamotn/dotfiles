@@ -1,0 +1,33 @@
+# Answers of the config template (.chezmoi.yaml.tmpl) per machine, keyed by the
+# machine's code. A field left out is asked at `chezmoi init`, and a machine
+# not listed here is asked everything. Only what is safe to publish belongs
+# here, as checked by schemas/machines.schema.yaml: the proxy and the hostname
+# live encrypted in secrets/data/<identity>/machine.yaml.age.
+machines:
+  b0n9u4:
+    place: "office"
+    kind: "laptop"
+    company: "F1"
+    decryptPersonal: true
+    decryptEnterprise:
+      - F1
+      - U3T
+    guiServer: "W"
+    guiDriver: "A"
+    guiWinManager: "H"
+    languages:
+      - vi
+      - zh
+    browser: "Z"
+    browserEnterpriseProfiles:
+      - F1
+    mailClient: "B"
+    mailEnterpriseProfiles:
+      - F1
+    terminalMultiplexer: "Z"
+    hasSound: true
+    hasBluetooth: true
+    hasWifi: true
+    preferGitSSH: true
+    blockedGitlab: false
+    darkMode: true

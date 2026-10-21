@@ -1,8 +1,9 @@
-{{- if .httpProxy }}
+{{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
+{{- if $secret.httpProxy }}
 [Service]
-Environment="http_proxy={{ .httpProxy }}"
-Environment="https_proxy={{ .httpProxy }}"
-{{-   with .noProxyAddresses }}
+Environment="http_proxy={{ $secret.httpProxy }}"
+Environment="https_proxy={{ $secret.httpProxy }}"
+{{-   with $secret.noProxyAddresses }}
 Environment="no_proxy={{ join "," . }}"
 {{-   end }}
 {{- end }}
