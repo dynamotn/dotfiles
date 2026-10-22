@@ -105,6 +105,19 @@ listen_on unix:/tmp/kitty-{kitty_pid}
 #:     env VAR2=${HOME}/${VAR1}/b
 #: The value of VAR2 will be <path to home directory>/a/b.
 # env
+{{- /* kitty started from a desktop launcher gets the bare system PATH, so a
+       program run through launch (not the shell) misses ~/.local/bin and
+       Homebrew and `#!/usr/bin/env bash` finds the system bash. Prepend the
+       directories that exist here, in the order fish uses. */}}
+{{- $paths := list }}
+{{- range list (joinPath .chezmoi.homeDir ".local/bin") "/opt/homebrew/sbin" "/opt/homebrew/bin" "/home/linuxbrew/.linuxbrew/sbin" "/home/linuxbrew/.linuxbrew/bin" }}
+{{-   if stat . }}
+{{-     $paths = append $paths . }}
+{{-   end }}
+{{- end }}
+{{- if $paths }}
+env PATH={{ join ":" $paths }}:${PATH}
+{{- end }}
 
 #: Specify rules to filter out notifications sent by applications
 #: running in kitty. Can be specified multiple times to create
