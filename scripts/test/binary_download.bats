@@ -2,6 +2,7 @@ setup() {
   load test_helper
   setup_dotfiles_test_env
   . "${DOTFILES_DIR}/scripts/lib/misc.sh"
+  . "${DOTFILES_DIR}/scripts/lib/dytoy.sh"
   . "${DOTFILES_DIR}/scripts/lib/binary_download.sh"
 }
 
@@ -341,37 +342,27 @@ EOF
   assert_output --partial "SHA256 mismatch"
 }
 
-@test "__binary_download_run_hook renders the hook of a tool and runs it" {
+@test "binary_download::download_and_extract runs the hooks around the extraction" {
   local calls="${BATS_TEST_TMPDIR}/hook-calls"
-  function dytoy::get_yaml { printf 'echo %s\n' "$2"; }
-  function dytoy::create_script {
-    printf 'create %s %s %s %s\n' "$1" "$3" "$4" "$5" >> "${calls}"
-    printf '%s\n' "$2" > "${BATS_TEST_TMPDIR}/script-path"
+  function dytoy::run_hook { printf 'hook %s [%s] %s\n' "$2" "$3" "$4" >> "${calls}"; }
+  function dybatpho::curl_download {
+    printf 'binary-data' > "$2"
+    printf 'download\n' >> "${calls}"
   }
-  function dytoy::run_script { printf 'run %s\n' "$1" >> "${calls}"; }
+  function dybatpho::dry_run {
+    [[ "$1" != mv ]] || printf 'extract\n' >> "${calls}"
+    "$@"
+  }
+  mkdir -p "${BATS_TEST_TMPDIR}/out"
 
-  run __binary_download_run_hook sample hook.before before-hook v1.0.0
-  assert_success
-  local script_path
-  script_path="$(< "${BATS_TEST_TMPDIR}/script-path")"
-  run cat "${calls}"
-  assert_success
-  assert_line --index 0 "create sample echo hook.before before-hook v1.0.0"
-  assert_line --index 1 "run ${script_path}"
-}
-
-@test "__binary_download_run_hook renders an empty hook when the specification cannot be read" {
-  local calls="${BATS_TEST_TMPDIR}/hook-calls"
-  function dytoy::get_yaml { return 1; }
-  function dytoy::create_script { printf 'create [%s]\n' "$3" >> "${calls}"; }
-  function dytoy::run_script { printf 'run\n' >> "${calls}"; }
-
-  run __binary_download_run_hook sample hook.after after-hook v1.0.0
+  run binary_download::download_and_extract sample "${BATS_TEST_TMPDIR}/out" "https://example.com/tool" "v1.0.0"
   assert_success
   run cat "${calls}"
   assert_success
-  assert_line --index 0 "create []"
-  assert_line --index 1 "run"
+  assert_line --index 0 "download"
+  assert_line --index 1 "hook before [] v1.0.0"
+  assert_line --index 2 "extract"
+  assert_line --index 3 "hook after [] v1.0.0"
 }
 
 @test "__binary_download_strip_path removes leading path components" {
