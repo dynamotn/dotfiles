@@ -80,6 +80,127 @@ EOF
   refute_output --partial 'DYTOY_VERSION'
 }
 
+# @description Write a tool whose hooks each append their own name to `$1`
+function _write_hooked_tool {
+  local log
+  dybatpho::expect_args log -- "$@"
+  write_tools_yaml << EOF
+- name: sample
+  method: os
+  hook:
+    before: echo top-before >> '${log}'
+    after: echo "top-after \${DYTOY_VERSION:-}" >> '${log}'
+  arch:
+    packages:
+      - name: sample
+    hook:
+      before: echo arch-before >> '${log}'
+      after: echo arch-after >> '${log}'
+  ubuntu:
+    packages:
+      - name: sample
+  flatpak:
+    packages:
+      - name: org.example.Sample
+    hook:
+      before: echo flatpak-before >> '${log}'
+EOF
+}
+
+@test "dytoy::run_hook runs the top-level hook without an OS section" {
+  local log="${BATS_TEST_TMPDIR}/hooks"
+  _write_hooked_tool "${log}"
+
+  run dytoy::run_hook sample before
+  assert_success
+  run dytoy::run_hook sample after "" v1.2.3
+  assert_success
+  run cat "${log}"
+  assert_success
+  assert_output "$(printf 'top-before\ntop-after v1.2.3')"
+}
+
+@test "dytoy::run_hook runs the OS hook inside the top-level one" {
+  local log="${BATS_TEST_TMPDIR}/hooks"
+  _write_hooked_tool "${log}"
+
+  run dytoy::run_hook sample before arch
+  assert_success
+  run dytoy::run_hook sample after arch
+  assert_success
+  run cat "${log}"
+  assert_success
+  assert_output "$(printf 'top-before\narch-before\narch-after\ntop-after ')"
+}
+
+@test "dytoy::run_hook skips an OS section without a hook" {
+  local log="${BATS_TEST_TMPDIR}/hooks"
+  _write_hooked_tool "${log}"
+
+  run dytoy::run_hook sample before ubuntu
+  assert_success
+  run dytoy::run_hook sample after termux
+  assert_success
+  run cat "${log}"
+  assert_success
+  assert_output "$(printf 'top-before\ntop-after ')"
+}
+
+@test "dytoy::run_section_hook runs only the hook of the section it names" {
+  local log="${BATS_TEST_TMPDIR}/hooks"
+  _write_hooked_tool "${log}"
+
+  run dytoy::run_section_hook sample before flatpak
+  assert_success
+  run dytoy::run_section_hook sample after flatpak
+  assert_success
+  run cat "${log}"
+  assert_success
+  assert_output 'flatpak-before'
+}
+
+@test "dytoy::run_section_hook names the section in the rendered script" {
+  local calls="${BATS_TEST_TMPDIR}/hook-calls"
+  function dytoy::get_yaml { printf 'echo %s\n' "$2"; }
+  function dytoy::create_script { printf 'create %s [%s] %s [%s]\n' "$1" "$3" "$4" "$5" >> "${calls}"; }
+  function dytoy::run_script { printf 'run\n' >> "${calls}"; }
+
+  run dytoy::run_section_hook sample after arch v1.0.0
+  assert_success
+  run dytoy::run_section_hook sample before
+  assert_success
+  run cat "${calls}"
+  assert_success
+  assert_line --index 0 'create sample [echo arch.hook.after] arch after-hook [v1.0.0]'
+  assert_line --index 1 'run'
+  assert_line --index 2 'create sample [echo hook.before] before-hook []'
+  assert_line --index 3 'run'
+}
+
+@test "dytoy::run_section_hook renders an empty hook when the specification cannot be read" {
+  local calls="${BATS_TEST_TMPDIR}/hook-calls"
+  function dytoy::get_yaml { return 1; }
+  function dytoy::create_script { printf 'create [%s]\n' "$3" >> "${calls}"; }
+  function dytoy::run_script { printf 'run\n' >> "${calls}"; }
+
+  run dytoy::run_section_hook sample after "" v1.0.0
+  assert_success
+  run cat "${calls}"
+  assert_success
+  assert_line --index 0 "create []"
+  assert_line --index 1 "run"
+}
+
+@test "dytoy::run_hook refuses an unknown stage" {
+  run dytoy::run_hook sample during
+  assert_failure
+  assert_output --partial 'Unknown hook stage: during'
+
+  run dytoy::run_section_hook sample during arch
+  assert_failure
+  assert_output --partial 'Unknown hook stage: during'
+}
+
 @test "dytoy::get_version falls back to latest" {
   write_tools_yaml << 'EOF'
 - name: pinned

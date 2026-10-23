@@ -163,24 +163,6 @@ function binary_download::get_latest_version {
 }
 
 #######################################
-# @description Render and run one hook of a tool, `hook.before` or `hook.after`
-# @arg $1 string File name of command
-# @arg $2 string Field of the hook in the tool specification
-# @arg $3 string Label of the hook, used in the rendered script
-# @arg $4 string Version of tool
-#######################################
-function __binary_download_run_hook {
-  local name field label version
-  dybatpho::expect_args name field label version -- "$@"
-  local content script_path
-  # A hook that cannot be read renders as an empty script, as it always has.
-  content="$(dytoy::get_yaml "${name}" "${field}")" || true
-  dybatpho::create_temp script_path ".sh"
-  dytoy::create_script "${name}" "${script_path}" "${content}" "${label}" "${version}"
-  dytoy::run_script "${script_path}"
-}
-
-#######################################
 # @description Remove leading path components from a relative path.
 # @arg $1 string Relative path
 # @arg $2 number Number of leading components to drop
@@ -361,7 +343,7 @@ function binary_download::download_and_extract {
     binary_download::verify_sha256 "${name}" "${temp_file}" "${url}" "${sha256_asset}"
   fi
 
-  __binary_download_run_hook "${name}" "hook.before" "before-hook" "${version}"
+  dytoy::run_hook "${name}" before "" "${version}"
 
   # The temp file carries the archive suffix of the URL, without its query.
   case "${temp_file}" in
@@ -384,7 +366,7 @@ function binary_download::download_and_extract {
     dybatpho::dry_run chmod +x "${output_path}"
   fi
 
-  __binary_download_run_hook "${name}" "hook.after" "after-hook" "${version}"
+  dytoy::run_hook "${name}" after "" "${version}"
 
   dybatpho::success "Installed binary tool: ${name}"
 }

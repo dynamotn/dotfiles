@@ -421,6 +421,42 @@ EOF
   assert_output --partial "mise use -g sample@system"
 }
 
+@test "dytoy os runs the hook of the section of this OS after the top-level one" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
+  render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
+  # Every section carries a hook, so the test holds on whichever OS renders it.
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: os
+  hook:
+    before: echo top-before
+  gentoo:
+    hook:
+      after: echo section-after
+  arch:
+    hook:
+      after: echo section-after
+  ubuntu:
+    hook:
+      after: echo section-after
+  alpine:
+    hook:
+      after: echo section-after
+  termux:
+    hook:
+      after: echo section-after
+  macos:
+    hook:
+      after: echo section-after
+EOF
+
+  run bash "${rendered}" os --dry-run --tool sample --no-check-installed
+  assert_success
+  assert_output --partial "echo top-before"
+  assert_output --regexp "Running [a-z]+ after-hook to install sample"
+  assert_output --partial "echo section-after"
+}
+
 @test "dytoy shell exposes the version to its content" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"
