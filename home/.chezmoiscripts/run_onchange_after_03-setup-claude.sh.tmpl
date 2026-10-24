@@ -95,23 +95,22 @@ function _in_json_file {
 # @noargs
 #######################################
 function _setup_marketplaces {
-  local known_file query name source repo url
+  local known_file query name source
   known_file="$(dybatpho::path_join "${PLUGINS_DIR}" "known_marketplaces.json")"
+  # One field per source: a tab is IFS whitespace, so `read` would collapse an
+  # empty repo or url field and shift the ones after it.
   query='.extraKnownMarketplaces // {} | to_entries[]'
-  query+=' | [.key, .value.source.source, .value.source.repo // "", .value.source.url // ""] | @tsv'
-  # shellcheck disable=SC2312
-  while IFS=$'\t' read -r name source repo url; do
+  query+=' | [.key, .value.source.repo // .value.source.url // ""] | @tsv'
+  # shellcheck disable=SC2312 # jq reads the settings chezmoi just wrote
+  while IFS=$'\t' read -r name source; do
     [[ -n "${name}" ]] || continue
-    # shellcheck disable=SC2310
+    # shellcheck disable=SC2310 # a missing or non-matching file is a plain no
     if _in_json_file "${known_file}" "has(\"${name}\")"; then
       dybatpho::debug "Marketplace ${name} already known"
       continue
     fi
     dybatpho::info "Add marketplace ${name}"
-    case "${source}" in
-      github) claude plugin marketplace add "${repo}" ;;
-      *) claude plugin marketplace add "${url}" ;;
-    esac
+    claude plugin marketplace add "${source}" || dybatpho::warn "Could not add marketplace ${name}"
   done < <(jq -r "${query}" "${SETTINGS_FILE}")
 }
 
@@ -122,10 +121,10 @@ function _setup_marketplaces {
 function _setup_plugins {
   local installed_file plugin
   installed_file="$(dybatpho::path_join "${PLUGINS_DIR}" "installed_plugins.json")"
-  # shellcheck disable=SC2312
+  # shellcheck disable=SC2312 # jq reads the settings chezmoi just wrote
   while IFS= read -r plugin; do
     [[ -n "${plugin}" ]] || continue
-    # shellcheck disable=SC2310
+    # shellcheck disable=SC2310 # a missing or non-matching file is a plain no
     if _in_json_file "${installed_file}" ".plugins | has(\"${plugin}\")"; then
       dybatpho::debug "Plugin ${plugin} already installed"
       continue
@@ -214,8 +213,11 @@ function _setup_mcp_server {
     fi
     dybatpho::info "Register MCP server ${name} in ${dir}"
     if [[ -n "${current}" ]]; then
-      _claude_in "${dir}" mcp remove --scope user "${name}" > /dev/null
+      # dyshellint disable=SC2310 a failure only warns, the other configurations still run
+      _claude_in "${dir}" mcp remove --scope user "${name}" > /dev/null \
+        || dybatpho::warn "Could not remove the outdated MCP server ${name} from ${dir}"
     fi
+    # dyshellint disable=SC2310 a failure only warns, the other configurations still run
     _claude_in "${dir}" mcp add-json --scope user "${name}" "${definition}" > /dev/null \
       || dybatpho::warn "Could not register MCP server ${name} in ${dir}"
   done < <(_claude_config_dirs)

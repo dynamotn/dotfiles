@@ -121,7 +121,6 @@
     "episodic-memory@superpowers-marketplace": true,
     "incident-response-skills@agent-sec-ops-kit-skills": true,
     "insecure-defaults@trailofbits": true,
-    "llm-testing@awesome-security-skills": true,
     "mattpocock-skills@claude-plugins-official": true,
     "modern-python@trailofbits": true,
     "offsec-skills@agent-sec-ops-kit-skills": true,
@@ -133,12 +132,6 @@
     "secskills-defense@secskills-marketplace": true,
     "secskills-offense@secskills-marketplace": true,
     "secskills@secskills-marketplace": true,
-    "security-fuzzing@awesome-security-skills": true,
-    "security-passwords@awesome-security-skills": true,
-    "security-patterns@awesome-security-skills": true,
-    "security-payloads@awesome-security-skills": true,
-    "security-usernames@awesome-security-skills": true,
-    "security-webshells@awesome-security-skills": true,
     "sharp-edges@trailofbits": true,
     "skill-creator@claude-plugins-official": true,
     "static-analysis@trailofbits": true,
@@ -175,12 +168,6 @@
       "source": {
         "source": "github",
         "repo": "trilwu/secskills"
-      }
-    },
-    "awesome-security-skills": {
-      "source": {
-        "source": "github",
-        "repo": "Eyadkelleh/awesome-claude-skills-security"
       }
     },
     "trailofbits": {
