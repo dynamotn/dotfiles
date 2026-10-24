@@ -9,7 +9,7 @@ gentoo:
       service: NetworkManager
   hook:
     before: |-
-      sudo rc-update del dhcpcd default
+      sudo rc-update del dhcpcd default || :
     after: |-
       sudo usermod -aG plugdev $USER
 arch:
