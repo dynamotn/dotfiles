@@ -11,7 +11,7 @@ gentoo:
       yubico_dir="$(dybatpho::path_join "$HOME" ".config" "Yubico")"
       if [ ! -d "$yubico_dir" ]; then
         mkdir -p "$yubico_dir"
-        pamu2fcfg > "$(dybatpho::path_join "$yubico_dir" "u2f_keys")"
+        pamu2fcfg > "$(dybatpho::path_join "$yubico_dir" "u2f_keys")" | :
       fi
 arch:
   packages:
