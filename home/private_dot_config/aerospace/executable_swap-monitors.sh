@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# @file swap-monitors.sh
+# @brief Swap the workspaces shown on the focused monitor and the next one
+# @description Like Hyprland's swap_monitors: the workspace on the focused
+# monitor moves to the next monitor and the one shown there comes here, then
+# focus stays on this monitor. Does nothing with a single monitor. Bound to
+# cmd-d in aerospace.toml.
+set -euo pipefail
+# readarray, associative arrays and inherit_errexit need bash 4.4; macOS ships 3.2
+if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 4))); then
+  printf 'bash 4.4 or later is needed, found %s\n' "${BASH_VERSION}" >&2
+  exit 1
+fi
+shopt -s inherit_errexit
+
+#######################################
+# @description Swap the visible workspaces of the two monitors
+# @noargs
+#######################################
+function _main {
+  local -a monitors=()
+  local listing here there here_workspace there_workspace index
+  listing=$(aerospace list-monitors --format '%{monitor-id}')
+  readarray -t monitors <<< "${listing}"
+  ((${#monitors[@]} >= 2)) || return 0
+
+  here=$(aerospace list-monitors --focused --format '%{monitor-id}')
+  there=""
+  for index in "${!monitors[@]}"; do
+    if [[ "${monitors[index]}" == "${here}" ]]; then
+      there=${monitors[(index + 1) % ${#monitors[@]}]}
+    fi
+  done
+  [[ -n "${there}" ]] || return 0
+
+  here_workspace=$(aerospace list-workspaces --focused)
+  there_workspace=$(aerospace list-workspaces --monitor "${there}" --visible)
+
+  aerospace move-workspace-to-monitor --workspace "${here_workspace}" "${there}"
+  aerospace move-workspace-to-monitor --workspace "${there_workspace}" "${here}"
+  aerospace workspace "${there_workspace}"
+  sketchybar --trigger aerospace_workspace_change
+}
+
+_main "$@"

@@ -173,10 +173,10 @@ cmd-up = 'focus up'
 cmd-right = 'focus right'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
-ctrl-cmd-left = 'move left'
-ctrl-cmd-down = 'move down'
-ctrl-cmd-up = 'move up'
-ctrl-cmd-right = 'move right'
+alt-cmd-left = 'move left'
+alt-cmd-down = 'move down'
+alt-cmd-up = 'move up'
+alt-cmd-right = 'move right'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#resize
 cmd-shift-minus = 'resize smart -50'
@@ -194,20 +194,30 @@ cmd-8 = 'workspace 8'
 cmd-9 = 'workspace 9'
 cmd-0 = 'workspace 0'
 
+# Like Hyprland, the window moves and the focus stays on this workspace
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
-cmd-shift-1 = 'move-node-to-workspace 1 --focus-follows-window'
-cmd-shift-2 = 'move-node-to-workspace 2 --focus-follows-window'
-cmd-shift-3 = 'move-node-to-workspace 3 --focus-follows-window'
-cmd-shift-4 = 'move-node-to-workspace 4 --focus-follows-window'
-cmd-shift-5 = 'move-node-to-workspace 5 --focus-follows-window'
-cmd-shift-6 = 'move-node-to-workspace 6 --focus-follows-window'
-cmd-shift-7 = 'move-node-to-workspace 7 --focus-follows-window'
-cmd-shift-8 = 'move-node-to-workspace 8 --focus-follows-window'
-cmd-shift-9 = 'move-node-to-workspace 9 --focus-follows-window'
-cmd-shift-0 = 'move-node-to-workspace 0 --focus-follows-window'
+cmd-shift-1 = 'move-node-to-workspace 1'
+cmd-shift-2 = 'move-node-to-workspace 2'
+cmd-shift-3 = 'move-node-to-workspace 3'
+cmd-shift-4 = 'move-node-to-workspace 4'
+cmd-shift-5 = 'move-node-to-workspace 5'
+cmd-shift-6 = 'move-node-to-workspace 6'
+cmd-shift-7 = 'move-node-to-workspace 7'
+cmd-shift-8 = 'move-node-to-workspace 8'
+cmd-shift-9 = 'move-node-to-workspace 9'
+cmd-shift-0 = 'move-node-to-workspace 0'
 
 cmd-tab = 'workspace-back-and-forth'
-cmd-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
+# Each monitor keeps its own workspaces, as on Hyprland: the bindings below move
+# the whole workspace, and sketchybar shows each one on its monitor's bar. The
+# focused workspace does not change, so sketchybar is told explicitly
+# See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
+cmd-shift-tab = ['move-workspace-to-monitor --wrap-around next', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+ctrl-cmd-left = ['move-workspace-to-monitor --wrap-around left', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+ctrl-cmd-right = ['move-workspace-to-monitor --wrap-around right', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+# Swap the workspaces shown on the focused monitor and the next one
+cmd-d = 'exec-and-forget ~/.config/aerospace/swap-monitors.sh'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
 cmd-semicolon = 'mode service'
