@@ -133,7 +133,10 @@ inner.horizontal = 10
 inner.vertical = 10
 outer.left = 10
 outer.bottom = 10
-outer.top = 10
+# macOS keeps the notch strip (32px) of the built-in display free, and the
+# 32px sketchybar fits in it; other monitors keep nothing, so leave room there
+# for the bar (its height is in sketchybarrc) plus the usual gap
+outer.top = [{ monitor."built-in" = 10 }, 42]
 outer.right = 10
 
 # 'main' binding mode declaration
