@@ -1,3 +1,24 @@
+-- The `hs` command line client talks to this instance through hs.ipc; the
+-- sketchybar click scripts rely on it
+require('hs.ipc')
+
+-- chezmoi apply rewrites the files here, so pick the new config up on its own.
+-- A global, or the watcher is garbage collected once this chunk returns
+configWatcher = hs.pathwatcher
+  .new(hs.configdir, function(paths)
+    for _, path in ipairs(paths) do
+      if path:match('%.lua$') then
+        hs.reload()
+        return
+      end
+    end
+  end)
+  :start()
+
+local inputSource = require('input_source')
+require('laptop')
+require('url_router')
+
 -- Vicinae has no global hotkey of its own on macOS, so every launcher key
 -- lives here and goes through its deeplinks
 local vicinae = '/opt/homebrew/bin/vicinae'
@@ -10,7 +31,8 @@ local function deeplink(link)
 end
 
 -- rbw-pick shows the vault in Vicinae and prints the picked secret; typing it
--- from here keeps it off every command line
+-- from here keeps it off every command line. It is typed on the US layout, as
+-- Telex would turn `dd` or `aa` in a password into `đ` or `â`
 local function typeSecret(subcommand)
   return function()
     hs.task.new(rbwPick, function(exitCode, stdout, stderr)
@@ -20,7 +42,9 @@ local function typeSecret(subcommand)
       end
       local secret = (stdout:gsub('\n$', ''))
       if secret ~= '' then
-        hs.eventtap.keyStrokes(secret)
+        inputSource.withEnglish(function()
+          hs.eventtap.keyStrokes(secret)
+        end)
       end
     end, { subcommand }):start()
   end
@@ -91,8 +115,7 @@ end
 {{- end }}
 
 hs.hotkey.bind({ 'cmd', 'ctrl', 'shift' }, 'space', function()
-  local englishSource = 'com.apple.keylayout.USExtended'
-  local success = hs.keycodes.currentSourceID(englishSource)
+  local success = hs.keycodes.currentSourceID(inputSource.english)
 
   if success then
     hs.alert.show('Keyboard: English', 1)
