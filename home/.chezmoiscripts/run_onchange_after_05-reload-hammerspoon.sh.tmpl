@@ -1,0 +1,14 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!{{ .bash }}
+# @file 05-reload-hammerspoon.sh
+# @brief Reload Hammerspoon when its config changed
+# @description Reload Hammerspoon, if it is running, after `chezmoi apply`
+# changed anything under private_dot_hammerspoon. The hook carries one hash
+# over that whole directory, so it re-runs on any change there.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+# The reload is deferred so the `hs` client gets its answer first; a reload
+# that drops the connection makes `hs` exit non-zero.
+{{ template "chezmoiscripts/reload_app.sh.tmpl" (dict "ctx" . "label" "Hammerspoon" "process" "Hammerspoon" "dirs" (list "private_dot_hammerspoon") "command" "hs -q -c '_dotfilesReload = hs.timer.doAfter(0.2, hs.reload)'") }}
+{{- end }}

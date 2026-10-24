@@ -1,0 +1,18 @@
+{{- /*
+  Body of the run_onchange_after_05-reload-* hooks: reload one application
+  after `chezmoi apply` changed its config. Nothing happens when it is not
+  running, as it reads the new config when it starts. Called with a dict:
+    ctx     the template data of the hook (`.`)
+    label   name of the application in the messages
+    process exact process name, as `pgrep -x` matches it
+    dirs    source directories of its config, hashed by dir_hash.tmpl
+    command reload command
+*/ -}}
+# config hash: {{ includeTemplate "chezmoiscripts/dir_hash.tmpl" (dict "ctx" .ctx "dirs" .dirs) }}
+if ! pgrep -x {{ .process | quote }} > /dev/null; then
+  exit 0
+fi
+dybatpho::header "Reload {{ .label }}"
+{{ .command }}
+dybatpho::success "Reload {{ .label }}"
+{{- /* the hook adds its own newline */ -}}
