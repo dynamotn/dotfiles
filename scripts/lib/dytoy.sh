@@ -43,7 +43,7 @@ function __dytoy_lines_into {
 #######################################
 # @description Get a field of a YAML content of a tool
 # @arg $1 string YAML content
-# @arg $2 string Field to extract, as a `yq` expression without the leading dot
+# @arg $2 string Field to extract, as a `jq` expression without the leading dot
 #######################################
 function dytoy::get_field {
   local yaml field
@@ -157,6 +157,26 @@ function dytoy::get_package_spec {
 }
 
 #######################################
+# @description Run a `jq` filter over the tools of the YAML file, read as JSON
+#   with its anchors already resolved. Each result is printed on its own line:
+#   a string raw, anything else as compact JSON, so a caller can query an
+#   object again with `dybatpho::json_get`.
+# @arg $1 string `jq` filter
+# @arg $@ string Further `jq` options, such as `--arg name value`
+# @stdout One result per line
+# @internal
+#######################################
+function __dytoy_query_tools {
+  local filter
+  dybatpho::expect_args filter -- "$@"
+  shift
+  local yaml_file document
+  yaml_file="$(dytoy::yaml_file)"
+  document="$(dybatpho::yaml_to_json "${yaml_file}")" || return
+  dybatpho::json_query - "${filter}" -c -r "$@" <<< "${document}"
+}
+
+#######################################
 # @description Get YAML content for a specific tool
 # @arg $1 string Name of tool
 # @arg $2 string Field to extract from the YAML file, `all` to get all fields
@@ -166,29 +186,22 @@ function dytoy::get_yaml {
   local name field
   dybatpho::expect_args name field -- "$@"
   local filter
-  # Only a scalar field is read raw: the others stay JSON so a caller can pipe
-  # them back through `yq`.
-  local -a options=(-o=j -I=0)
   case ${field} in
     all)
-      local method="${3:-}"
-      filter="filter(.name == \"${name}\" and .method == \"${method}\") | explode ."
+      # Every definition of the tool for that method, as one JSON array
+      # dyshellint disable=SC2016 $name and $method are jq variables, set by --arg
+      filter='[.[] | select(.name == $name and .method == $method)]'
       ;;
-    archive | *.packages | *.services)
-      filter="filter(.name == \"${name}\") | explode . | .[].${field}.[]"
-      ;;
-    dependencies)
-      filter="filter(.name == \"${name}\") | explode . | .[].${field}.[]"
-      options+=(-r)
+    archive | *.packages | *.services | dependencies)
+      # One line per entry; a tool without the list has none
+      filter=".[] | select(.name == \$name) | (.${field} // []) | .[]"
       ;;
     *)
-      filter="filter(.name == \"${name}\") | explode . | .[].${field}"
-      options+=(-r)
+      # `null` for a field the tool does not set
+      filter=".[] | select(.name == \$name) | .${field}"
       ;;
   esac
-  local yaml_file
-  yaml_file="$(dytoy::yaml_file)"
-  dybatpho::yaml_query "${yaml_file}" "${filter}" "${options[@]}"
+  __dytoy_query_tools "${filter}" --arg name "${name}" --arg method "${3:-}"
 }
 
 #######################################
@@ -380,9 +393,10 @@ function dytoy::iterate {
     local __dytoy_iterate_yaml_file __dytoy_iterate_tool
     local -a __dytoy_iterate_tools
     __dytoy_iterate_yaml_file="$(dytoy::yaml_file)"
-    __dytoy_lines_into __dytoy_iterate_tools dybatpho::yaml_query "${__dytoy_iterate_yaml_file}" \
-      "filter(.method == \"${METHOD}\" and .enabled != \"false\") | .[].name" \
-      -r -o=j -I=0 \
+    # dyshellint disable=SC2016 $method is a jq variable, set by --arg
+    __dytoy_lines_into __dytoy_iterate_tools __dytoy_query_tools \
+      '.[] | select(.method == $method and .enabled != false and .enabled != "false") | .name' \
+      --arg method "${METHOD}" \
       || dybatpho::debug "Can't read tools from ${__dytoy_iterate_yaml_file}"
     for __dytoy_iterate_tool in "${__dytoy_iterate_tools[@]}"; do
       "${__dytoy_iterate_command}" "${__dytoy_iterate_tool}"

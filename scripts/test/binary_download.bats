@@ -59,9 +59,8 @@ EOF
   function dybatpho::curl_do {
     printf '%s\n' "$*" > "${args_file}"
     printf '%s\n' "${DYBATPHO_CURL_SECRET_HEADERS[@]}" > "${headers_file}"
-    cat << 'EOF' > "$2"
-tag_name: v9.8.7
-EOF
+    # The releases API answers JSON
+    printf '%s\n' '{"tag_name": "v9.8.7"}' > "$2"
   }
   type="gitlab"
   name="sample"

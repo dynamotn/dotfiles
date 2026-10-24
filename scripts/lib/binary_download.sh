@@ -158,7 +158,7 @@ function binary_download::get_latest_version {
   fi
   local response
   response="$(< "${temp_file}")"
-  # json_get works with either backend; `-o=props` was a yq-only flag.
+  # Both release APIs answer JSON, read by `jq`.
   dybatpho::json_get "${response}" ".tag_name"
 }
 

@@ -348,10 +348,10 @@ EOF
 
 @test "dytoy::enable_service enables nothing without an init system" {
   function init_system::enable_openrc_service { printf 'called\n'; }
-  run dytoy::enable_service $'service: sshd\nis_user_service: false' none
+  run dytoy::enable_service '{"service": "sshd", "is_user_service": false}' none
   assert_success
   refute_output --partial 'called'
-  DYTOY_INIT_SYSTEM=none run dytoy::enable_service $'service: sshd\nis_user_service: false' openrc
+  DYTOY_INIT_SYSTEM=none run dytoy::enable_service '{"service": "sshd", "is_user_service": false}' openrc
   assert_success
   refute_output --partial 'called'
 }
@@ -362,7 +362,7 @@ EOF
     printf '%s|%s\n' "$1" "$2" > "${args_file}"
   }
 
-  run dytoy::enable_service $'service: sshd\nis_user_service: true' systemd
+  run dytoy::enable_service '{"service": "sshd", "is_user_service": true}' systemd
   assert_success
   run cat "${args_file}"
   assert_success
@@ -376,7 +376,7 @@ EOF
   function package_manager::install_via_apt { printf 'install:%s\n' "$1" >> "${actions_file}"; }
   function dytoy::enable_service { printf 'service:%s\n' "$2" >> "${actions_file}"; }
 
-  run dytoy::install_ubuntu_package $'name: ripgrep\nservice: sshd'
+  run dytoy::install_ubuntu_package '{"name": "ripgrep", "service": "sshd"}'
   assert_success
   run cat "${actions_file}"
   assert_success
