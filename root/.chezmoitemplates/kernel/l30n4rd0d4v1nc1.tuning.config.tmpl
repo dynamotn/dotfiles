@@ -206,6 +206,8 @@ CONFIG_GIGABYTE_WMI=m
 CONFIG_SP5100_TCO=m
 CONFIG_AMD_IOMMU=y
 CONFIG_IOMMU_DEFAULT_DMA_LAZY=y
+{{/* /dev/i2c-* for ddcutil: DDC/CI to the external monitors, see dymonitor */}}
+CONFIG_I2C_CHARDEV=y
 {{/*
   The proprietary NVIDIA module needs the DRM KMS and TTM helpers, which only
   a DRM driver can select: nouveau stays a module for that, and as a fallback,

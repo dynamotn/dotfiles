@@ -92,6 +92,19 @@ exec(mainMod .. " + S", "noctalia msg screenshot-region")
 -- Drop-down system monitor; the workspace rule starts btop on first use
 hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special("monitor"))
 
+-- External monitors --
+-- Over DDC/CI through dymonitor, on every monitor that answers. Not repeating:
+-- each step takes the bus for a moment, and dymonitor queues the next one
+exec(mainMod .. " + ALT + equal", "dymonitor --notify brightness up")
+exec(mainMod .. " + ALT + minus", "dymonitor --notify brightness down")
+exec(mainMod .. " + ALT + SHIFT + equal", "dymonitor --notify contrast up")
+exec(mainMod .. " + ALT + SHIFT + minus", "dymonitor --notify contrast down")
+-- Switch the input source with mainMod + ALT + [1-9]. The list comes from
+-- home/.chezmoitemplates/wm/rules.yaml.tmpl, in order
+{{- range $index, $input := $rules.monitorInputs }}
+exec(mainMod .. " + ALT + {{ add $index 1 }}", "dymonitor --notify input {{ $input }}")
+{{- end }}
+
 {{- if .hasSound }}
 
 -- Multimedia --

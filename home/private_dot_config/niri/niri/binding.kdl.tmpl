@@ -84,6 +84,19 @@ binds {
   Mod+S { spawn-sh "noctalia msg screenshot-region"; }
   // System monitor, floating in the middle like the Hyprland drop-down
   Mod+Z { spawn-sh "kitty --class btop --session ~/.config/kitty/sessions/monitor.conf"; }
+
+  // External monitors --
+  // Over DDC/CI through dymonitor, on every monitor that answers. Not repeating:
+  // each step takes the bus for a moment, and dymonitor queues the next one
+  Mod+Alt+Equal repeat=false { spawn "dymonitor" "--notify" "brightness" "up"; }
+  Mod+Alt+Minus repeat=false { spawn "dymonitor" "--notify" "brightness" "down"; }
+  Mod+Alt+Shift+Equal repeat=false { spawn "dymonitor" "--notify" "contrast" "up"; }
+  Mod+Alt+Shift+Minus repeat=false { spawn "dymonitor" "--notify" "contrast" "down"; }
+  // Switch the input source with Mod + Alt + [1-9]. The list comes from
+  // home/.chezmoitemplates/wm/rules.yaml.tmpl, in order
+{{- range $index, $input := $rules.monitorInputs }}
+  Mod+Alt+{{ add $index 1 }} repeat=false { spawn "dymonitor" "--notify" "input" "{{ $input }}"; }
+{{- end }}
 {{- if .hasSound }}
 
   // Multimedia --

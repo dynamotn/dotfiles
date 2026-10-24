@@ -141,6 +141,8 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[nvitop](https://github.com/XuehaiPan/nvitop)|Monitor resources of GPU (NVIDIA only)|
 |[obsidian](https://obsidian.md/)|Note-taking app|
 |[steam](https://store.steampowered.com/about/)|Online game platform|
+|[ddcutil](https://www.ddcutil.com/)|Control external monitors over DDC/CI on Linux, behind `dymonitor`|
+|[m1ddc](https://github.com/waydabber/m1ddc)|Control external monitors over DDC/CI on Apple silicon, behind `dymonitor`|
 
 ## Wayland server applications
 

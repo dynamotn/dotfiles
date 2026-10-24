@@ -25,6 +25,10 @@ etc/greetd/hyprland.lua
 {{- else }}
 etc/greetd/niri.kdl
 {{- end }}
+{{/* DDC/CI to external monitors, for dymonitor */}}
+{{- if eq .guiServer "0" }}
+etc/modules-load.d/i2c-dev.conf
+{{- end }}
 
 {{/* Browser files */}}
 {{- if ne .osid "linux-gentoo" }}
@@ -99,6 +103,7 @@ etc/vconsole.conf
 etc/sysctl.d
 etc/udev
 etc/modprobe.d
+etc/modules-load.d
 etc/nftables.conf
 etc/ssh/sshd_config.d
 etc/security/limits.conf

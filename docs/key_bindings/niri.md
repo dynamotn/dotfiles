@@ -85,6 +85,21 @@ Workspaces are named, not numbered, the same as on Hyprland:
 | `Super+S` | Screenshot a selected region, then annotate it |
 | `Super+Z` | Floating `btop` in kitty |
 
+## External monitors
+
+Over DDC/CI with `dymonitor` (ddcutil), on every monitor that answers; the
+outcome shows as a notification.
+
+| Keybind | Action |
+|---------|--------|
+| `Super+Alt+=` / `Super+Alt+-` | Raise/lower the brightness by 10 |
+| `Super+Alt+Shift+=` / `Super+Alt+Shift+-` | Raise/lower the contrast by 10 |
+| `Super+Alt+1` | Input source DisplayPort 1 |
+| `Super+Alt+2` | Input source DisplayPort 2 |
+| `Super+Alt+3` | Input source HDMI 1 |
+| `Super+Alt+4` | Input source HDMI 2 |
+| `Super+Alt+5` | Input source USB-C |
+
 ## Media control
 
 | Keybind | Action |
