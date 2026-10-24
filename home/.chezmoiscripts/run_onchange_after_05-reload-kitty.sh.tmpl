@@ -1,0 +1,11 @@
+#!{{ .bash }}
+# @file 05-reload-kitty.sh
+# @brief Reload kitty when its config changed
+# @description Reload kitty, if it is running, after `chezmoi apply`
+# changed anything under private_dot_config/kitty. The hook carries one hash
+# over that whole directory, so it re-runs on any change there.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+# kitty reloads its config in every window on SIGUSR1.
+{{ template "chezmoiscripts/reload_app.sh.tmpl" (dict "ctx" . "label" "kitty" "process" "kitty" "dirs" (list "private_dot_config/kitty") "command" "pkill -USR1 -x kitty") }}

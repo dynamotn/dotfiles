@@ -1,0 +1,19 @@
+{{- /*
+  Print one hash over every file under some source directories, so a
+  run_onchange_ hook re-runs whenever anything in them changes. Each file is
+  hashed together with its path, so adding, removing or renaming a file counts
+  as a change too. Called with a dict:
+    ctx  the template data of the hook (`.`)
+    dirs source directories, relative to the source directory
+  Only the source is hashed: a change to the chezmoi data alone does not count.
+*/ -}}
+{{- $sourceDir := .ctx.chezmoi.sourceDir -}}
+{{- $entries := list -}}
+{{- range .dirs -}}
+{{-   range (joinPath $sourceDir . "**" | glob) -}}
+{{-     if not (stat .).isDir -}}
+{{-       $entries = append $entries (printf "%s %s" (trimPrefix $sourceDir .) (include . | sha256sum)) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- join "\n" $entries | sha256sum -}}

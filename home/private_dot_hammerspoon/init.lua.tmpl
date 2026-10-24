@@ -1,19 +1,6 @@
 -- The `hs` command line client talks to this instance through hs.ipc; the
--- sketchybar click scripts rely on it
+-- sketchybar click scripts and the chezmoi reload hook rely on it
 require('hs.ipc')
-
--- chezmoi apply rewrites the files here, so pick the new config up on its own.
--- A global, or the watcher is garbage collected once this chunk returns
-configWatcher = hs.pathwatcher
-  .new(hs.configdir, function(paths)
-    for _, path in ipairs(paths) do
-      if path:match('%.lua$') then
-        hs.reload()
-        return
-      end
-    end
-  end)
-  :start()
 
 local inputSource = require('input_source')
 require('laptop')
