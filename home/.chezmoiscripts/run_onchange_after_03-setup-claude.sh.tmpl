@@ -21,7 +21,7 @@ PLUGINS_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude" "plugins")
 SKILLS_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".agents" "skills")"
 
 # Community skills from https://skills.sh, installed for every agent with
-# `npx skills add -g`. Keep each entry generic to a role, never to one project.
+# `bunx skills add -g`. Keep each entry generic to a role, never to one project.
 # The installer is pinned, so an apply never runs a release nobody looked at.
 SKILLS_CLI="skills@1.7.2"
 SKILLS=(
@@ -149,7 +149,7 @@ function _setup_skills {
       continue
     fi
     dybatpho::info "Install skill ${skill}"
-    npx -y "${SKILLS_CLI}" add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
+    bunx "${SKILLS_CLI}" add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
   done
 }
 
@@ -261,10 +261,10 @@ function _main {
   else
     dybatpho::warn "claude is not installed, skip marketplaces and plugins"
   fi
-  if dybatpho::is command npx; then
+  if dybatpho::is command bunx; then
     _setup_skills
   else
-    dybatpho::warn "npx is not installed, skip skills"
+    dybatpho::warn "bunx is not installed, skip skills"
   fi
   dybatpho::success "Setup Claude Code"
 }
