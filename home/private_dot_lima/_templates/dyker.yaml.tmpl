@@ -62,7 +62,10 @@ provision:
       SocketUser={{ "{{" }}.User{{ "}}" }}
       EOF
       fi
-      command -v docker >/dev/null 2>&1 || pacman -Sy --noconfirm docker
+      # Upgrade the whole system with docker: `-Sy` alone is a partial upgrade,
+      # which breaks once the cloud image is older than the repos (e.g. the
+      # gcc-libs/libgcc split conflicts on /usr/lib/libgcc_s.so)
+      command -v docker >/dev/null 2>&1 || pacman -Syu --noconfirm docker
       # Start dockerd at boot, not only on the first socket connection,
       # otherwise the probe below never sees it and `limactl start` times out
       systemctl enable --now docker.socket docker.service
