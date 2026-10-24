@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# @file indicators.sh
+# @brief Declare the status indicators that Hammerspoon drives
+# @description Declare the caffeinate and microphone mute indicators. They
+# start hidden; Hammerspoon (laptop.lua) shows and hides them, and a click
+# toggles the state back through the `hs` command line client. Run by
+# sketchybarrc, which exports the theme colors.
+set -euo pipefail
+
+#######################################
+# @description Declare one hidden indicator on the right of the bar
+# @arg $1 string Item name, as laptop.lua refers to it
+# @arg $2 string Icon
+# @arg $3 string Color of the icon
+# @arg $4 string Lua function of laptop.lua to call on click
+#######################################
+function _add_indicator {
+  local name=$1 icon=$2 color=$3 toggle=$4
+  sketchybar --add item "${name}" right
+  sketchybar --set "${name}" \
+    drawing=off \
+    icon="${icon}" \
+    icon.color="${color}" \
+    label.drawing=off \
+    click_script="hs -c \"require('laptop').${toggle}()\""
+}
+
+#######################################
+# @description Declare every indicator
+# @noargs
+#######################################
+function _main {
+  local yellow=${SKETCHY_YELLOW:?sketchybarrc exports the theme}
+  local red=${SKETCHY_RED:?sketchybarrc exports the theme}
+  _add_indicator caffeinate "" "${yellow}" toggleCaffeinate
+  _add_indicator mic "" "${red}" toggleMic
+}
+
+_main "$@"
