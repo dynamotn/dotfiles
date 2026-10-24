@@ -211,6 +211,11 @@ cmd-shift-9 = 'move-node-to-workspace 9'
 cmd-shift-0 = 'move-node-to-workspace 0'
 
 cmd-tab = 'workspace-back-and-forth'
+# Cycle the windows of this workspace, as Alt+Tab does on Hyprland; this
+# replaces AltTab
+# See: https://nikitabobko.github.io/AeroSpace/commands#focus
+alt-tab = 'focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-next'
+alt-shift-tab = 'focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-prev'
 
 # Each monitor keeps its own workspaces, as on Hyprland: the bindings below move
 # the whole workspace, and sketchybar shows each one on its monitor's bar. The
