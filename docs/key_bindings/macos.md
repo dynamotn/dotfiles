@@ -93,4 +93,20 @@ Bound by Hammerspoon, since Vicinae has no global hotkey of its own on macOS.
 |---------|--------|
 | `Command+Ctrl+Shift+Space` | Reset keyboard input source to US |
 
+## External monitors
+
+Bound by Hammerspoon under AeroSpace and OmniWM alike, over DDC/CI with
+`dymonitor` (m1ddc, Apple silicon only) on every monitor that answers; the
+outcome shows as an alert.
+
+| Keybind | Action |
+|---------|--------|
+| `Command+Option+=` / `Command+Option+-` | Raise/lower the brightness by 10 |
+| `Command+Option+Shift+=` / `Command+Option+Shift+-` | Raise/lower the contrast by 10 |
+| `Command+Option+1` | Input source DisplayPort 1 |
+| `Command+Option+2` | Input source DisplayPort 2 |
+| `Command+Option+3` | Input source HDMI 1 |
+| `Command+Option+4` | Input source HDMI 2 |
+| `Command+Option+5` | Input source USB-C |
+
 ---

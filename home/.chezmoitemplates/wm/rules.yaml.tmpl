@@ -129,3 +129,11 @@ monitors:
     position: "3840x0"
     scale: 1
 {{- end }}
+# Input sources the external monitors switch to over DDC/CI (`dymonitor
+# input`), bound in this order to Mod+Alt+1.. by every window manager
+monitorInputs:
+  - dp1
+  - dp2
+  - hdmi1
+  - hdmi2
+  - usbc

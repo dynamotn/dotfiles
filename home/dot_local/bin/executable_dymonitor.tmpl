@@ -1,0 +1,388 @@
+#!{{ .bash }}
+# @file dymonitor
+# @brief Control external monitors over DDC/CI: input source, brightness, contrast and volume
+# @description Talk to every external monitor, or the one `--display` names,
+# through DDC/CI: `ddcutil` on Linux, `m1ddc` on macOS. The window manager
+# hotkeys call it too, so `--notify` shows the outcome as a desktop
+# notification where there is no terminal to read it from. A lock keeps a held
+# hotkey from sending a second command over the bus before the first is done.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" \
+  --modules cli lock notification
+dybatpho::register_common_handlers
+{{- if eq .chezmoi.os "darwin" }}
+
+# Hammerspoon starts this from launchd, whose PATH has no Homebrew
+export PATH="/opt/homebrew/bin:${PATH}"
+{{- end }}
+
+# A plain non-negative decimal: what DDC/CI values are, and no leading zero
+# for Bash arithmetic to read as octal
+NUMBER_PATTERN='^(0|[1-9][0-9]*)$'
+
+#######################################
+# @description Spec of dymonitor
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Control external monitors over DDC/CI" MAIN_ARGS
+  dybatpho::opts::param "Monitor to control, numbered as \`list\` shows; every monitor when left out" \
+    MONITOR --display -d init:@empty type:uint persistent:true
+  dybatpho::opts::param "Step of \`up\` and \`down\`" STEP --step -s init:="10" type:uint persistent:true
+  dybatpho::opts::flag "Show the outcome as a desktop notification" NOTIFY --notify -n \
+    on:true off:false init:="false" persistent:true
+  dybatpho::opts::cmd list _spec_list
+  dybatpho::opts::cmd input _spec_input
+  dybatpho::opts::cmd brightness _spec_brightness
+  dybatpho::opts::cmd contrast _spec_contrast
+  dybatpho::opts::cmd volume _spec_volume
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Spec of list command
+# @noargs
+#######################################
+function _spec_list {
+  dybatpho::opts::setup "List the monitors that answer over DDC/CI" LIST_ARGS action:"_list"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_list"
+}
+
+#######################################
+# @description Spec of input command
+# @noargs
+#######################################
+function _spec_input {
+  dybatpho::opts::setup "Show or switch the input source" INPUT_ARGS \
+    action:"_run_feature input \${INPUT_ARGS[@]+\"\${INPUT_ARGS[@]}\"}"
+  dybatpho::opts::arg \
+    "dp1, dp2, hdmi1, hdmi2, usbc, or a raw VCP 60 value (17 or 0x11); the current one when left out" \
+    SOURCE required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_input"
+}
+
+#######################################
+# @description Spec of brightness command
+# @noargs
+#######################################
+function _spec_brightness {
+  dybatpho::opts::setup "Show, raise, lower or set the brightness" BRIGHTNESS_ARGS \
+    action:"_run_feature brightness \${BRIGHTNESS_ARGS[@]+\"\${BRIGHTNESS_ARGS[@]}\"}"
+  dybatpho::opts::arg "up, down or a value from 0 to 100; the current value when left out" \
+    VALUE required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_brightness"
+}
+
+#######################################
+# @description Spec of contrast command
+# @noargs
+#######################################
+function _spec_contrast {
+  dybatpho::opts::setup "Show, raise, lower or set the contrast" CONTRAST_ARGS \
+    action:"_run_feature contrast \${CONTRAST_ARGS[@]+\"\${CONTRAST_ARGS[@]}\"}"
+  dybatpho::opts::arg "up, down or a value from 0 to 100; the current value when left out" \
+    VALUE required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_contrast"
+}
+
+#######################################
+# @description Spec of volume command
+# @noargs
+#######################################
+function _spec_volume {
+  dybatpho::opts::setup "Show, raise, lower or set the volume of the monitor speakers" VOLUME_ARGS \
+    action:"_run_feature volume \${VOLUME_ARGS[@]+\"\${VOLUME_ARGS[@]}\"}"
+  dybatpho::opts::arg "up, down or a value from 0 to 100; the current value when left out" \
+    VALUE required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_volume"
+}
+
+#######################################
+# @description Stop with an error, shown as a notification too under `--notify`
+# @arg $1 string Message
+#######################################
+# dyshellint disable=SC2154 NOTIFY is assigned by dybatpho::opts from _spec_main
+function _fail {
+  local message
+  dybatpho::expect_args message -- "$@"
+  if dybatpho::is true "${NOTIFY}"; then
+    dybatpho::notify_desktop "Monitor" "${message}" critical || true
+  fi
+  dybatpho::die "${message}"
+}
+
+#######################################
+# @description Stop unless the DDC/CI client of this OS is installed
+# @noargs
+#######################################
+function _require_client {
+  {{- if eq .chezmoi.os "darwin" }}
+  dybatpho::is command m1ddc || _fail "m1ddc is not installed: dytoy --tool m1ddc"
+  {{- else }}
+  dybatpho::is command ddcutil || _fail "ddcutil is not installed: dytoy --tool ddcutil"
+  {{- end }}
+}
+
+#######################################
+# @description Name a feature the way the DDC/CI client of this OS does: a VCP
+# code of the MCCS standard for ddcutil, a word for m1ddc
+# @arg $1 string brightness, contrast, volume or input
+# @stdout The code or name
+# @exitcode 1 Unknown feature
+#######################################
+function _feature_code {
+  local feature
+  dybatpho::expect_args feature -- "$@"
+  case "${feature}" in
+    {{- if eq .chezmoi.os "darwin" }}
+    brightness) printf 'luminance' ;;
+    contrast | volume | input) printf '%s' "${feature}" ;;
+    {{- else }}
+    brightness) printf '10' ;;
+    contrast) printf '12' ;;
+    volume) printf '62' ;;
+    input) printf '60' ;;
+    {{- end }}
+    *) return 1 ;;
+  esac
+}
+
+#######################################
+# @description Turn an input source name into its VCP 60 value. The names are
+# the MCCS ones most monitors follow; `dymonitor input` shows what a monitor
+# actually reports, for one that numbers its inputs its own way.
+# @arg $1 string Name, or a raw value in decimal or `0x` hex
+# @stdout The value, in decimal
+# @exitcode 1 Unknown input source
+#######################################
+function _input_value {
+  local source
+  dybatpho::expect_args source -- "$@"
+  case "${source,,}" in
+    vga) printf '1' ;;
+    dvi | dvi1) printf '3' ;;
+    dvi2) printf '4' ;;
+    dp | dp1) printf '15' ;;
+    dp2) printf '16' ;;
+    hdmi | hdmi1) printf '17' ;;
+    hdmi2) printf '18' ;;
+    usbc | usb-c) printf '27' ;;
+    0x[0-9a-f] | 0x[0-9a-f][0-9a-f]) printf '%d' "$((16#${source:2}))" ;;
+    *)
+      [[ "${source}" =~ ${NUMBER_PATTERN} ]] || return 1
+      printf '%s' "${source}"
+      ;;
+  esac
+}
+
+#######################################
+# @description Name a VCP 60 value, the reverse of `_input_value`
+# @arg $1 number Value, in decimal
+# @stdout The name, or the value in hex when it has none
+#######################################
+function _input_name {
+  local value
+  dybatpho::expect_args value -- "$@"
+  case "${value}" in
+    1) printf 'vga' ;;
+    3) printf 'dvi1' ;;
+    4) printf 'dvi2' ;;
+    15) printf 'dp1' ;;
+    16) printf 'dp2' ;;
+    17) printf 'hdmi1' ;;
+    18) printf 'hdmi2' ;;
+    27) printf 'usbc' ;;
+    *) printf '0x%02x' "${value}" ;;
+  esac
+}
+
+#######################################
+# @description Print the numbers of the monitors to work on: the one
+# `--display` names, or every monitor that answers over DDC/CI
+# @noargs
+# @stdout One number per line
+#######################################
+# dyshellint disable=SC2154 MONITOR is assigned by dybatpho::opts from _spec_main
+function _monitors {
+  if [[ -n "${MONITOR}" ]]; then
+    printf '%s\n' "${MONITOR}"
+    return
+  fi
+  local detected
+  {{- if eq .chezmoi.os "darwin" }}
+  # `[1] DELL U2720Q (UUID)`
+  detected="$(m1ddc display list)" || return 0
+  sed -n 's/^\[\([0-9][0-9]*\)\].*/\1/p' <<< "${detected}"
+  {{- else }}
+  # `Display 1` heads each monitor that answers, the others are `Invalid
+  # display`; ddcutil fails when none answers at all
+  detected="$(ddcutil detect --terse 2> /dev/null)" || return 0
+  sed -n 's/^Display \([0-9][0-9]*\).*/\1/p' <<< "${detected}"
+  {{- end }}
+}
+
+#######################################
+# @description Read the current value of a feature
+# @arg $1 number Monitor
+# @arg $2 string Feature
+# @stdout The value, in decimal
+# @exitcode 1 The monitor did not answer
+#######################################
+function _get {
+  local monitor feature
+  dybatpho::expect_args monitor feature -- "$@"
+  local code value
+  code="$(_feature_code "${feature}")"
+  {{- if eq .chezmoi.os "darwin" }}
+  value="$(m1ddc display "${monitor}" get "${code}")" || return 1
+  {{- else }}
+  local reply
+  # `VCP 10 C 50 100` for a continuous feature, `VCP 60 SNC x0f` for a list
+  reply="$(ddcutil --display "${monitor}" getvcp "${code}" --brief)" || return 1
+  value="$(awk '{ print $4 }' <<< "${reply}")"
+  [[ "${value}" == x[0-9a-fA-F]* ]] && value="$((16#${value:1}))"
+  {{- end }}
+  if [[ ! "${value}" =~ ${NUMBER_PATTERN} ]]; then
+    dybatpho::error "Monitor ${monitor} gave no ${feature}"
+    return 1
+  fi
+  printf '%s' "${value}"
+}
+
+#######################################
+# @description Write a feature
+# @arg $1 number Monitor
+# @arg $2 string Feature
+# @arg $3 string An absolute value, or a change prefixed by `+` or `-`
+# @exitcode 1 The monitor did not answer
+#######################################
+function _put {
+  local monitor feature value
+  dybatpho::expect_args monitor feature value -- "$@"
+  local code
+  code="$(_feature_code "${feature}")"
+  {{- if eq .chezmoi.os "darwin" }}
+  case "${value}" in
+    [+-]*) m1ddc display "${monitor}" chg "${code}" "${value}" > /dev/null ;;
+    *) m1ddc display "${monitor}" set "${code}" "${value}" > /dev/null ;;
+  esac
+  {{- else }}
+  case "${value}" in
+    [+-]*) ddcutil --display "${monitor}" setvcp "${code}" "${value:0:1}" "${value:1}" ;;
+    *) ddcutil --display "${monitor}" setvcp "${code}" "${value}" ;;
+  esac
+  {{- end }}
+}
+
+#######################################
+# @description Describe a value the way a person reads it
+# @arg $1 string Feature
+# @arg $2 number Value
+# @stdout The description
+#######################################
+function _describe {
+  local feature value
+  dybatpho::expect_args feature value -- "$@"
+  if [[ "${feature}" == "input" ]]; then
+    local name
+    name="$(_input_name "${value}")"
+    printf 'input %s' "${name}"
+  else
+    printf '%s %s' "${feature}" "${value}"
+  fi
+}
+
+#######################################
+# @description Read or write a feature on every monitor to work on, then print
+# one line per monitor, and notify under `--notify`. A monitor that does not
+# answer is reported once the others are done, rather than stopping them.
+# @arg $1 string Feature
+# @arg $2 string Empty to read, an absolute value, or a change prefixed by `+` or `-`
+# @stdout One line per monitor
+#######################################
+function _apply {
+  local feature value
+  dybatpho::expect_args feature value -- "$@"
+  local listing
+  listing="$(_monitors)"
+  local -a monitors=()
+  [[ -n "${listing}" ]] && readarray -t monitors <<< "${listing}"
+  ((${#monitors[@]} > 0)) || _fail "No monitor answers over DDC/CI"
+
+  local monitor current
+  local -a lines=() failed=()
+  for monitor in ${monitors[@]+"${monitors[@]}"}; do
+    # dyshellint disable=SC2310 a monitor that does not answer must not stop the others
+    if [[ -n "${value}" ]] && ! _put "${monitor}" "${feature}" "${value}"; then
+      failed+=("${monitor}")
+      continue
+    fi
+    if [[ -n "${value}" && "${value}" != [+-]* ]]; then
+      # A monitor that has just left this input may no longer answer, so an
+      # absolute value is reported as written rather than read back
+      current="${value}"
+    # dyshellint disable=SC2310 a monitor that does not answer must not stop the others
+    elif ! current="$(_get "${monitor}" "${feature}")"; then
+      failed+=("${monitor}")
+      continue
+    fi
+    lines+=("Monitor ${monitor}: $(_describe "${feature}" "${current}")")
+  done
+
+  if ((${#lines[@]} > 0)); then
+    printf '%s\n' ${lines[@]+"${lines[@]}"}
+    if dybatpho::is true "${NOTIFY}"; then
+      dybatpho::notify_desktop "Monitor" "$(printf '%s\n' ${lines[@]+"${lines[@]}"})" low || true
+    fi
+  fi
+  if ((${#failed[@]} > 0)); then
+    _fail "No answer over DDC/CI from monitor ${failed[*]+${failed[*]}}"
+  fi
+}
+
+#######################################
+# @description Show or change one feature of the monitors
+# @arg $1 string brightness, contrast, volume or input
+# @arg $2 string `up`, `down`, a value, or nothing to show the current one
+#######################################
+# dyshellint disable=SC2154 STEP is assigned by dybatpho::opts from _spec_main
+function _run_feature {
+  local feature
+  dybatpho::expect_args feature -- "$@"
+  shift
+  local value="${1:-}"
+  _require_client
+
+  case "${value}" in
+    "") ;;
+    up | down)
+      [[ "${feature}" != "input" ]] || _fail "An input source has no ${value}"
+      local sign="+"
+      [[ "${value}" == "down" ]] && sign="-"
+      value="${sign}${STEP}"
+      ;;
+    *)
+      if [[ "${feature}" == "input" ]]; then
+        # dyshellint disable=SC2310 the subshell only says no; stopping, with the name, happens here
+        value="$(_input_value "${value}")" || _fail "Unknown input source: ${value}"
+      elif [[ ! "${value}" =~ ${NUMBER_PATTERN} ]] || ((value > 100)); then
+        _fail "The ${feature} goes from 0 to 100, not ${value}"
+      fi
+      ;;
+  esac
+  dybatpho::with_lock dymonitor 15 -- _apply "${feature}" "${value}"
+}
+
+#######################################
+# @description List the monitors that answer over DDC/CI
+# @noargs
+#######################################
+function _list {
+  _require_client
+  {{- if eq .chezmoi.os "darwin" }}
+  m1ddc display list
+  {{- else }}
+  ddcutil detect --brief
+  {{- end }}
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

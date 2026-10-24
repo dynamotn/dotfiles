@@ -1,0 +1,41 @@
+-- External monitors over DDC/CI through dymonitor (m1ddc underneath), on the
+-- keys of the Hyprland bindings with Command+Option for Super+Alt. Both
+-- AeroSpace and OmniWM leave these keys free. macOS shows no OSD for an
+-- external monitor, so the outcome comes back as an alert
+local M = {}
+
+local mod = { 'cmd', 'alt' }
+local dymonitor = '{{ .chezmoi.homeDir }}/.local/bin/dymonitor'
+
+-- The last line dymonitor wrote, without the colours of its log
+local function lastLine(text)
+  local clean = text:gsub('\27%[[%d;]*m', ''):gsub('%s+$', '')
+  return clean:match('([^\n]*)$') or clean
+end
+
+local function run(...)
+  local args = { ... }
+  return function()
+    hs.task.new(dymonitor, function(exitCode, stdout, stderr)
+      if exitCode ~= 0 then
+        hs.alert.show('Monitor: ' .. (stderr ~= '' and lastLine(stderr) or 'failed'), 3)
+      elseif stdout ~= '' then
+        hs.alert.show((stdout:gsub('%s+$', '')), 1)
+      end
+    end, args):start()
+  end
+end
+
+hs.hotkey.bind(mod, '=', run('brightness', 'up'))
+hs.hotkey.bind(mod, '-', run('brightness', 'down'))
+hs.hotkey.bind({ 'cmd', 'alt', 'shift' }, '=', run('contrast', 'up'))
+hs.hotkey.bind({ 'cmd', 'alt', 'shift' }, '-', run('contrast', 'down'))
+
+-- Switch the input source with Command+Option+[1-9]. The list comes from
+-- home/.chezmoitemplates/wm/rules.yaml.tmpl, in order
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- range $index, $input := $rules.monitorInputs }}
+hs.hotkey.bind(mod, '{{ add $index 1 }}', run('input', '{{ $input }}'))
+{{- end }}
+
+return M

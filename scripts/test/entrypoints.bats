@@ -72,6 +72,100 @@ function assert_entrypoint_help {
   assert_entrypoint_help "home/dot_local/bin/executable_rbw-pick.tmpl" "password" "totp"
 }
 
+@test "dymonitor shows its feature commands" {
+  assert_entrypoint_help "home/dot_local/bin/executable_dymonitor.tmpl" "brightness" "input"
+}
+
+# A ddcutil that logs every call and answers like two monitors on a bus that
+# also has a device which is not one; monitor 3 never answers
+function stub_ddcutil {
+  export DDCUTIL_LOG="${BATS_TEST_TMPDIR}/ddcutil.log"
+  : > "${DDCUTIL_LOG}"
+  cat > "${HOME}/.local/bin/ddcutil" << 'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "${DDCUTIL_LOG}"
+case "$*" in
+  "detect --terse")
+    printf 'Display 1\n   I2C bus:  /dev/i2c-5\n\nInvalid display\n   I2C bus:  /dev/i2c-7\n\nDisplay 2\n   I2C bus:  /dev/i2c-6\n'
+    ;;
+  "--display 3 "*) exit 1 ;;
+  *"getvcp 10 --brief") printf 'VCP 10 C 60 100\n' ;;
+  *"getvcp 60 --brief") printf 'VCP 60 SNC x11\n' ;;
+esac
+STUB
+  chmod +x "${HOME}/.local/bin/ddcutil"
+}
+
+@test "dymonitor raises and lowers the brightness of every monitor by the step" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dymonitor"
+  render_template "home/dot_local/bin/executable_dymonitor.tmpl" "${rendered}"
+  stub_ddcutil
+
+  run bash "${rendered}" brightness --step 5 up
+  assert_success
+  assert_output --partial "Monitor 1: brightness 60"
+  assert_output --partial "Monitor 2: brightness 60"
+  assert_file_contains "${DDCUTIL_LOG}" "^--display 1 setvcp 10 + 5$"
+  assert_file_contains "${DDCUTIL_LOG}" "^--display 2 setvcp 10 + 5$"
+  run bash "${rendered}" brightness down
+  assert_success
+  assert_file_contains "${DDCUTIL_LOG}" "^--display 1 setvcp 10 - 10$"
+}
+
+@test "dymonitor switches the input of one monitor by name or raw value" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dymonitor"
+  render_template "home/dot_local/bin/executable_dymonitor.tmpl" "${rendered}"
+  stub_ddcutil
+
+  run bash "${rendered}" --display 2 input dp1
+  assert_success
+  assert_output "Monitor 2: input dp1"
+  assert_file_contains "${DDCUTIL_LOG}" "^--display 2 setvcp 60 15$"
+  assert_file_not_contains "${DDCUTIL_LOG}" "detect"
+
+  run bash "${rendered}" --display 1 input 0x12
+  assert_success
+  assert_output "Monitor 1: input hdmi2"
+  assert_file_contains "${DDCUTIL_LOG}" "^--display 1 setvcp 60 18$"
+}
+
+@test "dymonitor names the input a monitor reports" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dymonitor"
+  render_template "home/dot_local/bin/executable_dymonitor.tmpl" "${rendered}"
+  stub_ddcutil
+
+  run bash "${rendered}" input
+  assert_success
+  assert_output --partial "Monitor 1: input hdmi1"
+  assert_output --partial "Monitor 2: input hdmi1"
+}
+
+@test "dymonitor refuses a value it cannot send" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dymonitor"
+  render_template "home/dot_local/bin/executable_dymonitor.tmpl" "${rendered}"
+  stub_ddcutil
+
+  run bash "${rendered}" contrast 300
+  assert_failure
+  assert_output --partial "from 0 to 100"
+  run bash "${rendered}" input up
+  assert_failure
+  run bash "${rendered}" input thunderbolt
+  assert_failure
+  assert_output --partial "Unknown input source"
+  refute [ -s "${DDCUTIL_LOG}" ]
+}
+
+@test "dymonitor fails when a monitor does not answer" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_dymonitor"
+  render_template "home/dot_local/bin/executable_dymonitor.tmpl" "${rendered}"
+  stub_ddcutil
+
+  run bash "${rendered}" --display 3 brightness 50
+  assert_failure
+  assert_output --partial "No answer over DDC/CI from monitor 3"
+}
+
 @test "dytoy shows shared installer flags" {
   assert_entrypoint_help "home/dot_local/bin/executable_dytoy.tmpl" "--tool" "--sync"
 }

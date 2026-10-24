@@ -1,0 +1,40 @@
+{{- if ne .guiServer "0" }}
+{{-   if eq .chezmoi.os "linux" }}
+# DDC/CI client behind dymonitor, which the window manager hotkeys call to
+# switch the input source and set the brightness of external monitors
+name: ddcutil
+method: os
+# https://repology.org/project/ddcutil/versions
+gentoo:
+  packages:
+    - name: app-misc/ddcutil
+arch:
+  packages:
+    - name: ddcutil
+ubuntu:
+  packages:
+    - name: ddcutil
+alpine:
+  packages:
+    - name: ddcutil
+# ddcutil reaches the monitors through /dev/i2c-*: load i2c-dev now, rather
+# than at the next boot from /etc/modules-load.d/i2c-dev.conf (a kernel with it
+# built in takes the modprobe as done). The udev rule of ddcutil hands the
+# devices to the seat user; a distribution that ships the i2c group instead
+# needs the user in it, from the next login on.
+hook:
+  after: |-
+    sudo modprobe i2c-dev
+    if getent group i2c > /dev/null; then
+      sudo gpasswd -a "${USER}" i2c
+    fi
+{{-   else if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") }}
+# DDC/CI client behind dymonitor on macOS; it speaks to Apple silicon only,
+# an Intel Mac has none
+name: m1ddc
+method: os
+macos:
+  packages:
+    - name: m1ddc
+{{-   end }}
+{{- end }}
