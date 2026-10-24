@@ -1,0 +1,13 @@
+{{- if .hasSound -}}
+#!{{ .bash }}
+# @file 05-reload-cava.sh
+# @brief Reload cava when its config changed
+# @description Reload cava, if it is running, after `chezmoi apply`
+# changed anything under private_dot_config/cava. The hook carries one hash
+# over that whole directory, so it re-runs on any change there.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+# cava reloads its whole config on SIGUSR1, as if `r` was pressed.
+{{ template "chezmoiscripts/reload_app.sh.tmpl" (dict "ctx" . "label" "cava" "process" "cava" "dirs" (list "private_dot_config/cava") "command" "pkill -USR1 -x cava") }}
+{{- end }}

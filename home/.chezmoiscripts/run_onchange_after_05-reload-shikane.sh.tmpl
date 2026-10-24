@@ -1,0 +1,12 @@
+{{- if and (eq .kind "laptop") (eq .chezmoi.os "linux") -}}
+#!{{ .bash }}
+# @file 05-reload-shikane.sh
+# @brief Reload shikane when its config changed
+# @description Reload shikane, if it is running, after `chezmoi apply`
+# changed anything under private_dot_config/shikane. The hook carries one hash
+# over that whole directory, so it re-runs on any change there.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+{{ template "chezmoiscripts/reload_app.sh.tmpl" (dict "ctx" . "label" "shikane" "process" "shikane" "dirs" (list "private_dot_config/shikane") "command" "shikanectl reload") }}
+{{- end }}
