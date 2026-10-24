@@ -43,7 +43,7 @@ macos:
       type: download
       url: https://www.betterbird.eu/downloads/get.php?os=mac{{ if eq .chezmoi.arch "arm64" }}-arm64{{ end }}&lang=en-US&version=release
   hook:
-    after: xattr -r -d com.apple.quarantine /Applications/Betterbird.app
+    after: sudo xattr -r -d com.apple.quarantine /Applications/Betterbird.app
 {{-   else }}
 flatpak:
   packages:
