@@ -105,7 +105,7 @@ EOF
 
   run --separate-stderr sh "${PREREQUISITE}"
   assert_success
-  grep -q '^install git curl openssh chezmoi age yq$' "${BREW_LOG}"
+  grep -q '^install git curl openssh chezmoi age yq jq$' "${BREW_LOG}"
   grep -q 'brew shellenv' "${HOME}/.zprofile"
 }
 
@@ -132,7 +132,7 @@ EOF
   assert_success
   run cat "${CALL_LOG}"
   assert_line "apt-get [noninteractive] update"
-  assert_line --partial "apt-get [noninteractive] install -y ca-certificates git curl openssh-client bash"
+  assert_line --partial "apt-get [noninteractive] install -y ca-certificates git curl openssh-client bash jq"
   refute_output --partial "sudo"
 }
 
@@ -144,7 +144,7 @@ EOF
   run env PATH="${FAKE_BIN}" "${SH_BIN}" "${PREREQUISITE}"
   assert_success
   run cat "${CALL_LOG}"
-  assert_line "sudo dnf install -y ca-certificates git curl openssh-clients bash"
+  assert_line "sudo dnf install -y ca-certificates git curl openssh-clients bash jq"
   assert_line --partial "dnf [] install -y"
 }
 
@@ -156,7 +156,7 @@ EOF
   run env PATH="${FAKE_BIN}" "${SH_BIN}" "${PREREQUISITE}"
   assert_success
   run cat "${CALL_LOG}"
-  assert_output "pacman [] -Syu --needed --noconfirm ca-certificates git curl openssh bash"
+  assert_output "pacman [] -Syu --needed --noconfirm ca-certificates git curl openssh bash jq"
 }
 
 @test "prerequisite.sh installs bash on Alpine" {

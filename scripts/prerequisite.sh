@@ -3,8 +3,9 @@
 # @file prerequisite.sh
 # @brief Install prerequisite packages for chezmoi and dotfiles setup
 # @description Install what `scripts/setup.sh` cannot install itself: the
-# package manager of the distribution, Git, curl, OpenSSH, Bash and the GNU
-# tools the templates expect.
+# package manager of the distribution, Git, curl, OpenSSH, Bash, the GNU
+# tools the templates expect, and jq, which dytoy needs to read its own list
+# of tools before it can install anything.
 #
 # It runs on a bare machine, often as `curl ... | sh`, where Bash may not be
 # installed yet (Alpine and other minimal images ship only BusyBox `sh`). So it
@@ -86,8 +87,8 @@ _keep_sudo_alive() {
 #######################################
 _setup_gentoo() {
   _keep_sudo_alive
-  # Cloning code
-  _as_root emerge -uDN dev-vcs/git net-misc/curl net-misc/openssh
+  # Cloning code, and jq for dytoy
+  _as_root emerge -uDN dev-vcs/git net-misc/curl net-misc/openssh app-misc/jq
   # Templating of chezmoi
   _as_root emerge -uDN app-portage/cpuid2cpuflags app-misc/resolve-march-native
 }
@@ -98,9 +99,10 @@ _setup_gentoo() {
 #######################################
 _setup_arch() {
   _keep_sudo_alive
-  # Cloning code. One full upgrade with the install: `-Sy` alone refreshes the
-  # database without upgrading, a partial upgrade Arch does not support.
-  _as_root pacman -Syu --needed --noconfirm ca-certificates git curl openssh bash
+  # Cloning code, and jq for dytoy. One full upgrade with the install: `-Sy`
+  # alone refreshes the database without upgrading, a partial upgrade Arch does
+  # not support.
+  _as_root pacman -Syu --needed --noconfirm ca-certificates git curl openssh bash jq
 }
 
 #######################################
@@ -112,9 +114,9 @@ _setup_ubuntu_debian() {
   # `apt-get` is the interface meant for scripts; `apt` warns that its own is
   # not stable. Without a terminal, debconf must not stop to ask anything.
   _as_root env DEBIAN_FRONTEND=noninteractive apt-get update
-  # Cloning code
+  # Cloning code, and jq for dytoy
   _as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    ca-certificates git curl openssh-client bash
+    ca-certificates git curl openssh-client bash jq
 }
 
 #######################################
@@ -123,8 +125,8 @@ _setup_ubuntu_debian() {
 #######################################
 _setup_dnf() {
   _keep_sudo_alive
-  # Cloning code
-  _as_root dnf install -y ca-certificates git curl openssh-clients bash
+  # Cloning code, and jq for dytoy
+  _as_root dnf install -y ca-certificates git curl openssh-clients bash jq
 }
 
 #######################################
@@ -136,8 +138,8 @@ _setup_alpine() {
   _as_root apk update
   # GNU compatible tools
   _as_root apk add --no-cache ca-certificates coreutils grep bash
-  # Cloning code
-  _as_root apk add --no-cache git curl openssh
+  # Cloning code, and jq for dytoy
+  _as_root apk add --no-cache git curl openssh jq
 }
 
 #######################################
@@ -154,8 +156,8 @@ _setup_termux() {
   pkg install -y termux-services termux-exec proot
   # Cloning code
   pkg install -y git curl openssh
-  # Chezmoi tools
-  pkg install -y chezmoi age yq
+  # Chezmoi tools, and jq for dytoy
+  pkg install -y chezmoi age yq jq
   # F-Droid tools
   pkg install -y fdroidcl
   # Turn on Android Settings, setting Wireless debugging manually
@@ -210,8 +212,8 @@ EOF
 
   # GNU compatible tools
   brew install bash coreutils findutils gnu-tar gnu-sed gawk gnutls gnu-indent grep
-  # Cloning code & chezmoi tools
-  brew install git curl openssh chezmoi age yq
+  # Cloning code & chezmoi tools, and jq for dytoy
+  brew install git curl openssh chezmoi age yq jq
 
   local gnubin_path="${brew_prefix}/bin"
   local formula
