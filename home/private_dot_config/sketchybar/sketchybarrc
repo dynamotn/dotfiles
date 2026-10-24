@@ -39,4 +39,5 @@ sketchybar --default "${default[@]}"
 # Items
 ################################################################################
 source "${CONFIG_DIR}/items/workspaces.sh"
+"${CONFIG_DIR}/items/indicators.sh"
 sketchybar --update
