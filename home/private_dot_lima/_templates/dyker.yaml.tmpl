@@ -1,8 +1,14 @@
-minimumLimaVersion: 1.1.0
+minimumLimaVersion: 2.0.0
 
 base:
-  - template://_images/archlinux
-  - template://_default/mounts
+  - template:_images/archlinux
+  - template:_default/mounts
+
+# Size the VM from the host: half of the cores, a third of the memory
+{{- $hostCpus := output "sysctl" "-n" "hw.ncpu" | trim | int }}
+{{- $hostMemGiB := div (output "sysctl" "-n" "hw.memsize" | trim | int64) 1073741824 }}
+cpus: {{ max 4 (div $hostCpus 2) }}
+memory: "{{ max 4 (div $hostMemGiB 3) }}GiB"
 
 additionalDisks:
 - docker
@@ -14,9 +20,11 @@ containerd:
 {{- if eq .chezmoi.arch "arm64" }}
 # rosetta to run Intel containers on Archlinux ARM64 VM on MacOS ARM64
 vmType: "vz"
-rosetta:
-  enabled: true
-  binfmt: true
+vmOpts:
+  vz:
+    rosetta:
+      enabled: true
+      binfmt: true
 {{- end }}
 
 provision:
@@ -77,6 +85,10 @@ hostResolver:
   hosts:
     host.docker.internal: host.lima.internal
 portForwards:
+  # mDNS and LLMNR from systemd-resolved; the host already owns these ports
+  - guestPortRange: [5353, 5355]
+    proto: any
+    ignore: true
   - guestSocket: "/var/run/docker.sock"
     hostSocket: "{{ "{{" }}.Dir{{ "}}" }}/sock/docker.sock"
 message: |
