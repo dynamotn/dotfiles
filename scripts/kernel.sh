@@ -121,6 +121,7 @@ function _main {
   fi
 
   dybatpho::header "Build kernel with ${JOBS} jobs"
+  kernel::clean_stale_tools "${SOURCE_DIR}"
   kernel::run_in_tree "${SOURCE_DIR}" -- make -C "${SOURCE_DIR}" -j "${JOBS}"
   # Strip only the DWARF: the BTF sections that bcc and sched_ext read stay.
   # dyshellint disable=BSG035 modules_install writes to /lib/modules
