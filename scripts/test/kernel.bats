@@ -266,3 +266,64 @@ make -C ${tree} savedefconfig"
   assert_success
   assert_output "privileged:cp ${tree}/defconfig ${base_dir}/base.config"
 }
+
+# A tools/ tree whose objtool was built with a compiler that is gone: its
+# dependency file names one header that still exists and one that does not,
+# the way the .cmd files of a GCC 15 build look once GCC 16 replaced it.
+function _tools_built_by_removed_compiler {
+  local tree="$1"
+  local present="${BATS_TEST_TMPDIR}/include/stdio.h"
+  dybatpho::ensure_dir "${tree}/tools/objtool" > /dev/null
+  dybatpho::ensure_dir "${BATS_TEST_TMPDIR}/include" > /dev/null
+  touch "${present}"
+  # The command line holds a relative path and a make pattern that are no
+  # headers to look for.
+  cat > "${tree}/tools/objtool/.fixdep.o.cmd" << EOF
+cmd_fixdep.o := gcc -Wp,-MD,${tree}/tools/objtool/.\$@.h -include arch/x86/../../lib/ctype.h
+deps_fixdep.o := \\
+  ${present} \\
+  /usr/lib/gcc/x86_64-pc-linux-gnu/0/include/stddef.h \\
+EOF
+  printf 'fixdep.o: fixdep.c %s\n' "${present}" > "${tree}/tools/objtool/.fixdep.o.d"
+}
+
+@test "kernel::stale_tool_deps prints only the headers that are gone, once each" {
+  local tree="${BATS_TEST_TMPDIR}/linux"
+  _tools_built_by_removed_compiler "${tree}"
+  cp "${tree}/tools/objtool/.fixdep.o.cmd" "${tree}/tools/objtool/.check.o.cmd"
+
+  run kernel::stale_tool_deps "${tree}"
+  assert_success
+  assert_output "/usr/lib/gcc/x86_64-pc-linux-gnu/0/include/stddef.h"
+}
+
+@test "kernel::stale_tool_deps prints nothing for a tree without built tools" {
+  run kernel::stale_tool_deps "${BATS_TEST_TMPDIR}"
+  assert_success
+  assert_output ""
+}
+
+@test "kernel::clean_stale_tools cleans objtool and resolve_btfids when a header is gone" {
+  local tree="${BATS_TEST_TMPDIR}/linux" log="${BATS_TEST_TMPDIR}/calls"
+  _tools_built_by_removed_compiler "${tree}"
+  printf '#!/usr/bin/env bash\nprintf "make %%s\\n" "$*" >> "%s"\n' "${log}" > "${HOME}/.local/bin/make"
+  chmod +x "${HOME}/.local/bin/make"
+
+  run kernel::clean_stale_tools "${tree}"
+  assert_success
+  assert_output --partial "depend on 1 header(s) that are gone"
+  run cat "${log}"
+  assert_output "make -C ${tree} objtool_clean resolve_btfids_clean"
+}
+
+@test "kernel::clean_stale_tools leaves tools alone while every header exists" {
+  local tree="${BATS_TEST_TMPDIR}/linux" log="${BATS_TEST_TMPDIR}/calls"
+  _tools_built_by_removed_compiler "${tree}"
+  rm "${tree}/tools/objtool/.fixdep.o.cmd"
+  printf '#!/usr/bin/env bash\nprintf "make %%s\\n" "$*" >> "%s"\n' "${log}" > "${HOME}/.local/bin/make"
+  chmod +x "${HOME}/.local/bin/make"
+
+  run kernel::clean_stale_tools "${tree}"
+  assert_success
+  assert [ ! -e "${log}" ]
+}

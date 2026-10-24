@@ -192,3 +192,57 @@ function kernel::save_defconfig {
   destination_dir="$(dybatpho::path_dirname "${destination}")"
   kernel::run_in_tree "${destination_dir}" -- cp "${defconfig}" "${destination}"
 }
+
+#######################################
+# @description Print the headers that the host tools built under `tools/`
+# depend on and that no longer exist. objtool and resolve_btfids record the
+# compiler's own headers by absolute path and are rebuilt only when one of
+# them changes, so once the compiler they were built with is removed (GCC 15
+# after an upgrade to 16), make finds no rule for those headers and stops.
+# @arg $1 string Kernel source directory
+# @stdout One missing header per line
+#######################################
+function kernel::stale_tool_deps {
+  local source_dir
+  dybatpho::expect_args source_dir -- "$@"
+  local tools
+  tools="$(dybatpho::path_join "${source_dir}" "tools")"
+  dybatpho::is dir "${tools}" || return 0
+  local listing
+  # Only a whole absolute path naming a header counts: the command lines in
+  # these files also hold relative paths and make patterns such as `/.$@.d`.
+  # grep fails on a batch without any header, which is no error here.
+  listing="$(find "${tools}" -type f \( -name '.*.cmd' -o -name '.*.d' \) \
+    -exec grep -ohE '(^|[[:space:]])/[^[:space:]:\\]*/[[:alnum:]_][^/[:space:]:\\]*\.h' {} + \
+    2> /dev/null || true)"
+  [[ -n "${listing}" ]] || return 0
+  local header
+  local -A seen=()
+  while IFS= read -r header; do
+    header="${header#"${header%%[![:space:]]*}"}"
+    [[ -z "${seen[${header}]:-}" ]] || continue
+    seen["${header}"]=1
+    [[ -e "${header}" ]] || printf '%s\n' "${header}"
+  done <<< "${listing}"
+}
+
+#######################################
+# @description Clean objtool and resolve_btfids when they depend on a header
+# that is gone, so the next build makes them again with the current compiler
+# instead of stopping on `No rule to make target`. The kernel objects are left
+# alone: Kbuild already rebuilds them when the compiler changes.
+# @arg $1 string Kernel source directory
+#######################################
+function kernel::clean_stale_tools {
+  local source_dir
+  dybatpho::expect_args source_dir -- "$@"
+  local missing
+  missing="$(kernel::stale_tool_deps "${source_dir}")"
+  [[ -n "${missing}" ]] || return 0
+  local -a headers=()
+  readarray -t headers <<< "${missing}"
+  dybatpho::warn "The host tools depend on ${#headers[@]} header(s) that are gone, such as ${headers[0]}"
+  dybatpho::progress "Cleaning objtool and resolve_btfids to build them with the current compiler"
+  kernel::run_in_tree "${source_dir}" -- \
+    make -C "${source_dir}" objtool_clean resolve_btfids_clean
+}
