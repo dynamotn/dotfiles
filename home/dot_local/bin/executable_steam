@@ -1,1 +1,1 @@
-flatpak run --filesystem=~/.local/share/fonts --filesystem=~/.config/fontconfig com.valvesoftware.Steam
+flatpak run --filesystem=~/.local/share/fonts --filesystem=~/.config/fontconfig --env=PROTON_ENABLE_WAYLAND=1 com.valvesoftware.Steam

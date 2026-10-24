@@ -18,7 +18,11 @@ flatpak:
   packages:
     - name: com.valvesoftware.Steam
       repo: flathub
+    - name: com.valvesoftware.Steam.CompatibilityTool.Proton-GE
+      repo: flathub
   hook:
     after: |
       flatpak permission-set background background com.valvesoftware.Steam yes
+      # Let Proton-GE draw games through Wine's Wayland driver instead of XWayland
+      flatpak override --user --env=PROTON_ENABLE_WAYLAND=1 com.valvesoftware.Steam
 {{- end }}
