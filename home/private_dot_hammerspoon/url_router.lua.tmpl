@@ -1,0 +1,82 @@
+{{- $browser := "" }}
+{{- if eq .browser "F" }}
+{{-   $browser = "Firefox" }}
+{{- else if eq .browser "Z" }}
+{{-   $browser = "Zen" }}
+{{- end }}
+{{- $profile := "" }}
+{{- $otherProfile := "" }}
+{{- if eq .place "home" }}
+{{-   $profile = "Personal" }}
+{{-   $otherProfile = "Enterprise-F1" }}
+{{- else if eq .place "office" }}
+{{-   $profile = printf "Enterprise-%s" .company }}
+{{-   $otherProfile = "Personal" }}
+{{- end }}
+{{- $enterpriseProfile := "Enterprise-F1" }}
+{{- if eq .place "office" }}
+{{-   $enterpriseProfile = $profile }}
+{{- end -}}
+-- Hammerspoon is the default browser and hands every http(s) link to the
+-- right {{ $browser }} profile:
+-- - hosts listed in the `enterpriseHosts` chezmoi data, and links opened from
+--   a remote desktop client, go to the enterprise profile
+-- - holding alt while clicking flips to the other profile
+-- - everything else goes to the profile of this place
+local M = {}
+
+{{- if and $browser $profile }}
+
+local browser = '{{ $browser }}'
+local defaultProfile = '{{ $profile }}'
+local otherProfile = '{{ $otherProfile }}'
+local enterpriseProfile = '{{ $enterpriseProfile }}'
+
+-- Kept in the chezmoi data, so company domains stay out of this repository
+local enterpriseHosts = {
+{{- range (get . "enterpriseHosts" | default list) }}
+  {{ . | squote }},
+{{- end }}
+}
+
+local enterpriseSenders = {
+  ['com.microsoft.rdc.macos'] = true,
+  ['com.omnissa.horizon.client.mac'] = true,
+}
+
+local function matchesHost(host, pattern)
+  return host == pattern or host:sub(-#pattern - 1) == '.' .. pattern
+end
+
+local function isEnterprise(host, senderPID)
+  for _, pattern in ipairs(enterpriseHosts) do
+    if host and matchesHost(host:lower(), pattern:lower()) then
+      return true
+    end
+  end
+  local sender = senderPID and senderPID > 0 and hs.application.applicationForPID(senderPID)
+  return sender and enterpriseSenders[sender:bundleID()] or false
+end
+
+function M.profileFor(host, senderPID)
+  local profile = isEnterprise(host, senderPID) and enterpriseProfile or defaultProfile
+  if hs.eventtap.checkKeyboardModifiers().alt then
+    profile = profile == defaultProfile and otherProfile or defaultProfile
+  end
+  return profile
+end
+
+-- Opened by name with `open`, never through hs.urlevent.openURL, which would
+-- come straight back here
+hs.urlevent.httpCallback = function(_, host, _, url, senderPID)
+  local profile = M.profileFor(host, senderPID)
+  hs.task.new('/usr/bin/open', nil, { '-na', browser, '--args', '-P', profile, url }):start()
+end
+
+-- macOS asks once to confirm the new default browser
+if (hs.urlevent.getDefaultHandler('http') or ''):lower() ~= hs.processInfo.bundleID:lower() then
+  hs.urlevent.setDefaultHandler('http')
+end
+{{- end }}
+
+return M
