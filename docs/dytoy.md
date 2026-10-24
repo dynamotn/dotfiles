@@ -172,7 +172,6 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[aerospace](https://github.com/nikitabobko/AeroSpace)|Window manager for MacOS|
 |[omniwm](https://github.com/BarutSRB/OmniWM)|Scrolling and BSP tiling window manager for MacOS|
 |[vicinae](https://vicinae.com/)|Launcher for everything|
-|[alt-tab](https://github.com/lwouis/alt-tab-macos)|Windows alt-tab on macOS|
 |[hammerspoon](https://github.com/Hammerspoon/hammerspoon)|Desktop automation, also simulates keyboard input|
 |[macos-defaults](https://github.com/dsully/macos-defaults)|Apply macOS defaults from YAML files|
 
