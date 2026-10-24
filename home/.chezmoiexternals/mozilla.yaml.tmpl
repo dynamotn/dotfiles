@@ -20,7 +20,7 @@
 {{-     if le (output "bash" "-c" (printf "pgrep -f %s | wc -l" $processFirefox) | trim | int) $numberOfRunningProcess }}
 {{ $dotfilesFolder }}/.chezmoitemplates/firefox/prefs/00-arkenfox.js:
   type: file
-  url: 'https://raw.githubusercontent.com/arkenfox/user.js/master/user.js'
+  url: 'https://raw.githubusercontent.com/arkenfox/user.js/refs/heads/Thorin-Oakenpants-patch-1/user.js'
   refreshPeriod: 168h
 {{ $dotfilesFolder }}/.chezmoitemplates/firefox/chrome/js/extensionOptionsPanel.uc.js:
   type: file
@@ -56,7 +56,7 @@
 # Linguist
 .config/firefox/profiles/{{ . }}/extensions/{e5b6e4ac-ec96-44f5-b257-e4d3c8291b41}.xpi:
   type: file
-  url: "https://addons.mozilla.org/firefox/downloads/file/4306398/"
+  url: "https://addons.mozilla.org/firefox/downloads/file/4735848/"
   refreshPeriod: 168h
 # Virus Total
 .config/firefox/profiles/{{ . }}/extensions/{06def8b7-bcc3-4f1e-add7-7d8222ca0efc}.xpi:
