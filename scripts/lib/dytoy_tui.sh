@@ -143,7 +143,7 @@ function dytoy_tui::load_tools {
   local rows yaml_file
   yaml_file="$(dytoy::yaml_file)"
   rows=$(dybatpho::yaml_query "${yaml_file}" \
-    'explode(.) | .[] | select(.enabled != false and .enabled != "false")
+    '.[] | select(.enabled != false and .enabled != "false")
       | [.name, .method, (.is_essential // false), ((.dependencies // []) | join(","))] | @tsv' -r)
 
   local method name tool_method essential dependencies installed hidden
@@ -677,7 +677,7 @@ function dytoy_tui::load_detail {
   local yaml_file
   yaml_file="$(dytoy::yaml_file)"
   DYTOY_TUI_DETAIL["${index}"]="$(dybatpho::yaml_query "${yaml_file}" \
-    "explode(.) | .[] | select(.name == \"${DYTOY_TUI_NAME[index]}\" and .method == \"${DYTOY_TUI_METHOD[index]}\")" \
+    ".[] | select(.name == \"${DYTOY_TUI_NAME[index]}\" and .method == \"${DYTOY_TUI_METHOD[index]}\")" \
     2> /dev/null)" || DYTOY_TUI_DETAIL["${index}"]=""
 }
 
