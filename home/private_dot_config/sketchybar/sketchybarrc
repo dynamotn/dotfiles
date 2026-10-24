@@ -11,7 +11,7 @@ source "${CONFIG_DIR}/themes/catppuccin.sh"
 ################################################################################
 bar=(
   position=top
-  height=30
+  height=32
   color="$SKETCHY_MANTLE"
   shadow=on
 )
