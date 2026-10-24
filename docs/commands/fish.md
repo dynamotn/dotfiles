@@ -382,6 +382,11 @@ Each is defined only when the replacement is installed.
   `ssh`, TUIs), directories matching a glob of
   `$notify_long_command_ignore_dirs` and SSH sessions never notify, and a
   command the history filter refuses shows only its program name.
+- **Gap between commands**: every command that ran leaves
+  `$command_gap_lines` blank lines (1 by default, 0 turns it off) after its
+  output, so in the scrollback each command and its output stand apart from
+  the next prompt. A bare Enter and the commands in `$command_gap_ignore`
+  (`clear`, `reset`) leave none.
 - **`notify_me COMMAND…`** runs the command and notifies however long it took,
   also to Telegram when `NOTIFY_TELEGRAM_BOT_TOKEN` and
   `NOTIFY_TELEGRAM_CHAT_ID` are set (in `secret.fish`, never in the
