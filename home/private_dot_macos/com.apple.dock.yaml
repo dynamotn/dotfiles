@@ -4,6 +4,9 @@ data:
   com.apple.dock:
     autohide: true
     enterMissionControlByTopWindowDrag: true
+    # Group windows by application, so Mission Control does not shrink the
+    # windows AeroSpace parks in the screen corner
+    expose-group-apps: true
     largesize: 16.0
     mineffect: scale
     minimize-to-application: false

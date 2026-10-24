@@ -1,0 +1,7 @@
+description: com.apple.spaces
+kill: ["SystemUIServer"]
+data:
+  com.apple.spaces:
+    # Turn off "Displays have separate Spaces", as AeroSpace recommends: focus
+    # and the public window APIs are more stable that way. Needs a logout
+    spans-displays: true
