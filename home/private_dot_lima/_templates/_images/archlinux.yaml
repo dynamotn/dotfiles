@@ -1,4 +1,5 @@
+# Built locally by scripts/lima-image.sh from the current Arch Linux ARM
+# repos; rerun it to refresh the image before creating a new instance
 images:
-  - location: "https://github.com/SuperGregM/archlinux-arm-lima/releases/download/20260106-0/Arch-Linux-aarch64-cloudimg-20260106.0.qcow2.xz"
+  - location: "~/.local/share/lima/images/Arch-Linux-aarch64-cloudimg-latest.qcow2"
     arch: "aarch64"
-    digest: "sha256:de9764b90ad76c0721b91c698209419b4d73e3d6111652b8794d6b68de33d19d"
