@@ -35,18 +35,17 @@ provision:
 
       MNT=/mnt/lima-docker
       ROOT_DOCKER=/var/lib/docker
-      USER_DOCKER=/home/{{ "{{" }}.User{{ "}}" }}/.local/share/docker
+      USER_DOCKER={{ "{{" }}.Home{{ "}}" }}/.local/share/docker
 
       mkdir -p $MNT/root $MNT/user $ROOT_DOCKER $USER_DOCKER
       mount --bind /$MNT/root $ROOT_DOCKER
       mount --bind /$MNT/user $USER_DOCKER
 
-      chown -R {{ "{{" }}.User{{ "}}" }}:{{ "{{" }}.User{{ "}}" }} $USER
+      chown -R {{ "{{" }}.User{{ "}}" }}:{{ "{{" }}.User{{ "}}" }} $MNT/user $USER_DOCKER
   - mode: system
     script: |
       #!/bin/bash
       set -eux -o pipefail
-      command -v docker >/dev/null 2>&1 && exit 0
       if [ ! -e /etc/systemd/system/docker.socket.d/override.conf ]; then
         mkdir -p /etc/systemd/system/docker.socket.d
         # Alternatively we could just add the user to the "docker" group, but that requires restarting the user session
@@ -55,8 +54,10 @@ provision:
       SocketUser={{ "{{" }}.User{{ "}}" }}
       EOF
       fi
-      pacman -Sy --noconfirm docker
-      systemctl enable --now docker.socket
+      command -v docker >/dev/null 2>&1 || pacman -Sy --noconfirm docker
+      # Start dockerd at boot, not only on the first socket connection,
+      # otherwise the probe below never sees it and `limactl start` times out
+      systemctl enable --now docker.socket docker.service
 probes:
   - script: |
       #!/bin/bash
