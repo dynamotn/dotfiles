@@ -1,0 +1,15 @@
+{{- if eq .initSystem "systemd" -}}
+#!{{ .bash }}
+# @file 05-reload-systemd.sh
+# @brief Reload the systemd user units when one of them changed
+# @description Run `systemctl --user daemon-reload`, if systemd is running,
+# after `chezmoi apply` changed anything under private_dot_config/systemd. The
+# hook carries one hash over that whole directory, so it re-runs on any change
+# there.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+# Only the unit definitions are reloaded; running units keep going, so an
+# rclone mount is not dropped. Restart a unit by hand to apply its change.
+{{ template "chezmoiscripts/reload_app.sh.tmpl" (dict "ctx" . "label" "systemd user units" "process" "systemd" "dirs" (list "private_dot_config/systemd") "command" "systemctl --user daemon-reload") }}
+{{- end }}

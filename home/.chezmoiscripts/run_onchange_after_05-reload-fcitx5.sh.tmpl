@@ -1,0 +1,12 @@
+{{- if and (eq .chezmoi.os "linux") (not (empty .languages)) -}}
+#!{{ .bash }}
+# @file 05-reload-fcitx5.sh
+# @brief Reload fcitx5 when its config changed
+# @description Reload fcitx5, if it is running, after `chezmoi apply`
+# changed anything under private_dot_config/private_fcitx5. The hook carries one hash
+# over that whole directory, so it re-runs on any change there.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+{{ template "chezmoiscripts/reload_app.sh.tmpl" (dict "ctx" . "label" "fcitx5" "process" "fcitx5" "dirs" (list "private_dot_config/private_fcitx5") "command" "fcitx5-remote -r") }}
+{{- end }}
