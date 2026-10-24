@@ -10,6 +10,13 @@
 {{- else if eq .mailClient "B" }}
 {{-   $mailClient = "Betterbird" }}
 {{- end }}
+# See: https://nikitabobko.github.io/AeroSpace/guide#config-version
+config-version = 2
+
+# Workspaces that always exist; version 2 no longer infers them from the
+# key bindings below, so keep this in sync with the cmd-<n> bindings
+persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+
 after-startup-command = [
   ## SketchyBar
   'exec-and-forget sketchybar --reload ~/.config/sketchybar/sketchybarrc',
