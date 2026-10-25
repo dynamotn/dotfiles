@@ -8,6 +8,11 @@
 {{- range $d.plugins }}{{ $_ := set $enabled . true }}{{ end -}}
 {{- $static := `
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "cleanupPeriodDays": 20,
   "hooks": {
     "SessionStart": [
@@ -62,6 +67,18 @@
           {
             "type": "command",
             "command": "rtk hook claude"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/lint-shell.sh",
+            "timeout": 60
           }
         ]
       }

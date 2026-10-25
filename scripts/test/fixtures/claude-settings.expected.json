@@ -1,5 +1,10 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "agentPushNotifEnabled": true,
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "cleanupPeriodDays": 20,
   "effortLevel": "medium",
   "enabledPlugins": {
@@ -124,6 +129,18 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash ~/.claude/hooks/lint-shell.sh",
+            "timeout": 60,
+            "type": "command"
+          }
+        ],
+        "matcher": "Edit|Write|MultiEdit"
+      }
+    ],
     "PreToolUse": [
       {
         "hooks": [
@@ -183,9 +200,61 @@
   "permissions": {
     "ask": [
       "Bash(git push)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(rtk git push)",
+      "Bash(rtk git push *)",
+      "Bash(git reset --hard*)",
+      "Bash(rtk git reset --hard*)",
+      "Bash(git clean *)",
+      "Bash(rtk git clean *)",
+      "Bash(git branch -D *)",
+      "Bash(rtk git branch -D *)",
+      "Bash(git tag -d *)",
+      "Bash(rtk git tag -d *)",
+      "Bash(git stash drop*)",
+      "Bash(rtk git stash drop*)",
+      "Bash(git stash clear*)",
+      "Bash(rtk git stash clear*)",
+      "Bash(rm -rf *)",
+      "Bash(rm -fr *)",
+      "Bash(shred *)",
+      "Bash(sudo *)",
+      "Bash(emerge *)",
+      "Bash(pacman *)",
+      "Bash(paru *)",
+      "Bash(chezmoi apply*)",
+      "Bash(chezmoi destroy*)",
+      "Bash(chezmoi forget*)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "deny": [
+      "Read(**/secrets/data/**)",
+      "Edit(**/secrets/data/**)",
+      "Read(**/*.age)",
+      "Edit(**/*.age)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/.envrc)",
+      "Read(~/.ssh/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.kube/**)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.netrc)",
+      "Read(~/.password-store/**)",
+      "Read(~/.local/share/keyrings/**)",
+      "Bash(chezmoi-dycrypt*)",
+      "Bash(age -d *)",
+      "Bash(age --decrypt *)",
+      "Bash(sops -d *)",
+      "Bash(sops --decrypt *)",
+      "Bash(gpg -d *)",
+      "Bash(gpg --decrypt *)",
+      "Bash(pass show *)",
+      "Bash(vault read *)",
+      "Bash(op read *)",
+      "Bash(aws configure get *)"
+    ]
   },
   "preferredNotifChannel": "auto",
   "remoteControlAtStartup": false,

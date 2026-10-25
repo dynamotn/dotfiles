@@ -34,3 +34,38 @@ function _render_settings {
   diff <(jq -S . "${out}") "${EXPECTED}" \
     || fail "rendered settings.json differs from the pre-dyai baseline"
 }
+
+@test "settings.json enforces no commit or PR attribution" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json"
+  _render_settings "${out}" || fail "render failed: $(cat "${out}.err")"
+  [[ "$(jq -r '.attribution.commit' "${out}")" == "" ]]
+  [[ "$(jq -r '.attribution.pr' "${out}")" == "" ]]
+}
+
+@test "settings.json denies the credential stores to Read and Edit" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json"
+  _render_settings "${out}" || fail "render failed: $(cat "${out}.err")"
+  local rule
+  for rule in 'Read(**/secrets/data/**)' 'Edit(**/secrets/data/**)' \
+    'Read(~/.ssh/**)' 'Read(**/*.age)' 'Bash(chezmoi-dycrypt*)'; do
+    jq -e --arg r "${rule}" '.permissions.deny | index($r) != null' "${out}" > /dev/null \
+      || fail "missing deny rule ${rule}"
+  done
+}
+
+@test "every git ask rule also covers its rtk rewrite" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json"
+  _render_settings "${out}" || fail "render failed: $(cat "${out}.err")"
+  # The rtk PreToolUse hook turns `git push` into `rtk git push`; a rule
+  # without the rtk spelling would be bypassed by that rewrite. The legacy
+  # `:*` form is covered by its space-glob twin.
+  local missing
+  missing="$(jq -r '.permissions.ask as $a
+    | $a[] | select(startswith("Bash(git ")) | select(endswith(":*)") | not)
+    | ("Bash(rtk " + ltrimstr("Bash(")) as $r
+    | select(($a | index($r)) == null) | $r' "${out}")"
+  [[ -z "${missing}" ]] || fail "ask rules without an rtk variant: ${missing}"
+}
