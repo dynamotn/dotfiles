@@ -396,7 +396,7 @@ EOF
   [[ "$(yq '.registry.infra.cicd.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "4" ]]
-  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "12" ]]
+  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "18" ]]
   # Registry-expansion presets (nvim-supported languages/tools)
   [[ "$(yq '.registry.languages.vue.subagents[0]' "${out}")" == "vue-expert" ]]
   [[ "$(yq '.registry.languages.swift.subagents[0]' "${out}")" == "swift-expert" ]]
@@ -422,7 +422,7 @@ EOF
   # shellcheck disable=SC2312 # a bad read yields no match, which grep's own exit code catches
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'graphql-architect' > /dev/null
   # Vendor skills picked from VoltAgent/awesome-agent-skills
-  [[ "$(yq '.registry.infra.terraform.skills | length' "${out}")" == "4" ]]
+  [[ "$(yq '.registry.infra.terraform.skills | length' "${out}")" == "7" ]]
   [[ "$(yq '.registry.infra.cloudflare.skills | length' "${out}")" == "4" ]]
   [[ "$(yq '.registry.infra.mongodb.skills | length' "${out}")" == "3" ]]
   [[ "$(yq '.registry.presets.graphql.skills | length' "${out}")" == "4" ]]
@@ -432,4 +432,17 @@ EOF
   [[ "$(yq '.registry.presets.context.skills | length' "${out}")" == "8" ]]
   yq '.registry.presets.context.skills[]' "${out}" \
     | grep -x 'https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/[0-9a-f]\{40\}/skills/tool-design' > /dev/null
+  # Role presets: SRE, platform, FinOps, architecture, product, extra clouds
+  yq -e '.registry.presets.sre.subagents[0] == "sre-engineer"
+    and (.registry.presets.sre.skills | length) == 11
+    and .registry.presets.sre.mcp.grafana.command == "docker"
+    and .registry.presets.platform.subagents[0] == "platform-engineer"
+    and (.registry.presets.finops.skills | length) == 3
+    and (.registry.presets.architecture.skills | length) == 5
+    and .registry.presets.product.subagents[0] == "business-analyst"
+    and (.registry.presets.product.skills | length) == 18
+    and .registry.infra.kubernetes.mcp.kubernetes.command == "bunx"
+    and .registry.infra.azure.subagents[0] == "azure-infra-engineer"
+    and .registry.infra.gcp.mcp.gcloud.command == "bunx"
+    and .registry.infra.argocd.mcp.argocd.args[1] == "stdio"' "${out}" > /dev/null
 }
