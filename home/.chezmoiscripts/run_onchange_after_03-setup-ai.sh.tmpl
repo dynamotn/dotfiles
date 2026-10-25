@@ -162,10 +162,16 @@ function _claude_in {
 function _setup_mcp_server {
   local name definition
   dybatpho::expect_args name definition -- "$@"
-  local dir state_file current wanted
-  wanted="$(jq -cS . <<< "${definition}")"
+  local dir state_file current wanted def_dir
   # shellcheck disable=SC2312 # the directories are globbed, the loop cannot fail on them
   while IFS= read -r dir; do
+    # filesystem is scoped to the enterprise tree in an enterprise config dir,
+    # so an enterprise-context agent never sees personal or community files.
+    def_dir="${definition}"
+    if [[ "${name}" == "filesystem" && "${dir}" == "${ENTERPRISE_DIR}"/* ]]; then
+      def_dir="$(jq -c --arg d "${ENTERPRISE_DIR}" '.args = [.args[0], $d]' <<< "${definition}")"
+    fi
+    wanted="$(jq -cS . <<< "${def_dir}")"
     # The default configuration keeps its state next to the directory, not in it.
     if [[ "${dir}" == "${DEFAULT_CONFIG_DIR}" ]]; then
       state_file="$(dybatpho::path_join "${HOME}" ".claude.json")"
@@ -187,7 +193,7 @@ function _setup_mcp_server {
         || dybatpho::warn "Could not remove the outdated MCP server ${name} from ${dir}"
     fi
     # dyshellint disable=SC2310 a failure only warns, the other configurations still run
-    _claude_in "${dir}" mcp add-json --scope user "${name}" "${definition}" > /dev/null \
+    _claude_in "${dir}" mcp add-json --scope user "${name}" "${def_dir}" > /dev/null \
       || dybatpho::warn "Could not register MCP server ${name} in ${dir}"
   done < <(_claude_config_dirs)
 }

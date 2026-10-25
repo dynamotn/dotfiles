@@ -173,3 +173,34 @@ CFG
   assert_success
   [[ "$(jq -r '.mcpServers.seqthink.command' "${HOME}/.gemini/settings.json")" == "bunx" ]]
 }
+
+@test "filesystem scopes to enterprise in an enterprise config dir, personal+community by default" {
+  cat > "${HOME}/.local/bin/claude" << CL
+#!/usr/bin/env bash
+printf '%s|%s\n' "\${CLAUDE_CONFIG_DIR:-DEFAULT}" "\$*" >> "${HOME}/claude.log"
+exit 0
+CL
+  chmod +x "${HOME}/.local/bin/claude"
+  _stub_agent bunx
+  dybatpho::ensure_dir "${HOME}/Working/enterprise/U3T/.claude" > /dev/null
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << CFG
+global:
+  skills: []
+  mcp:
+    filesystem:
+      command: bunx
+      args: ["@modelcontextprotocol/server-filesystem@2.0.0", "${HOME}/Working/personal", "${HOME}/Working/community"]
+      env: {}
+agents:
+  claude: {}
+CFG
+  run bash "${HOOK}"
+  assert_success
+  # Default config: personal + community.
+  grep '^DEFAULT|' "${HOME}/claude.log" | grep -q 'Working/personal'
+  # Enterprise config dir: scoped to the enterprise tree, not personal/community.
+  grep 'enterprise/U3T/.claude|' "${HOME}/claude.log" | grep -q 'Working/enterprise'
+  run grep 'enterprise/U3T/.claude|' "${HOME}/claude.log"
+  refute_output --partial 'Working/personal'
+}
