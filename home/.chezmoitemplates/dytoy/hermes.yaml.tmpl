@@ -1,0 +1,11 @@
+{{- /* The hermes installer pulls a full Python/uv/node toolchain, so it is
+       installed only on pc and laptop profiles, not containers or mobile.
+       Pinned to a release tag so an apply never runs an unreviewed script. */ -}}
+{{- if eq .kind "pc" "laptop" }}
+name: hermes
+method: shell
+dependencies:
+  - git
+content: |-
+  curl -fsSL "https://raw.githubusercontent.com/NousResearch/hermes-agent/v0.22.5/scripts/install.sh" | bash -s -- --non-interactive
+{{- end }}
