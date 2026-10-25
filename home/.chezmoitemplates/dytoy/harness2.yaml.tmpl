@@ -1,0 +1,17 @@
+{{- if ne .osid "android" }}
+{{- /* Harness² optimises the "harness" around a language model. Despite the
+       README documenting an editable clone for development, it is a plain
+       PEP 517 package (setuptools) whose console scripts (harness2-demo and
+       the rest) and its 'render' extra install straight from the git source,
+       so dytoy installs it with `uv tool` the same way as laya instead of
+       cloning. The repository is untagged, so this tracks the default branch.
+       The model-backed benchmarks additionally need Node 20+, gcloud and
+       Vertex AI credentials, set up separately; the local demo runs without
+       them. */ -}}
+name: harness2
+method: shell
+dependencies:
+  - uv
+content: |-
+  uv tool install --python 3.12 'harness2[render] @ git+https://github.com/google-research/harness2'
+{{- end }}
