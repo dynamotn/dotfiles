@@ -53,34 +53,37 @@ global:
     # Community servers from the official modelcontextprotocol registry (and
     # Upstash's context7), pinned. Node servers run via bunx, Python via uvx,
     # github via docker. An agent missing the launcher is skipped by the hook.
+    # uv (exclude-newer) and bun (minimum-release-age) refuse any release
+    # younger than 7 days, so a pin must be at least that old or the server
+    # never starts; the "MCP pins clear the cooldown" bats test checks it.
     sequential-thinking:
       command: bunx
-      args: ["@modelcontextprotocol/server-sequential-thinking@2.0.0"]
+      args: ["@modelcontextprotocol/server-sequential-thinking@1.0.0"]
       env: {}
     fetch:
       command: uvx
-      args: ["mcp-server-fetch@2026.10.19"]
+      args: ["mcp-server-fetch@2026.10.10"]
       env: {}
     time:
       command: uvx
-      args: ["mcp-server-time@2026.10.19"]
+      args: ["mcp-server-time@2026.10.10"]
       env: {}
     git:
       command: uvx
-      args: ["mcp-server-git@2026.10.19"]
+      args: ["mcp-server-git@2026.10.10"]
       env: {}
     memory:
       command: bunx
-      args: ["@modelcontextprotocol/server-memory@2.0.0"]
+      args: ["@modelcontextprotocol/server-memory@1.0.0"]
       env: {}
     context7:
       command: bunx
-      args: ["@upstash/context7-mcp@4.4.4"]
+      args: ["@upstash/context7-mcp@4.4.2"]
       env: {}
     filesystem:
       command: bunx
       args:
-        - "@modelcontextprotocol/server-filesystem@2.0.0"
+        - "@modelcontextprotocol/server-filesystem@1.0.0"
         - {{ printf "%s/Working/personal" .chezmoi.homeDir | quote }}
         - {{ printf "%s/Working/community" .chezmoi.homeDir | quote }}
       env: {}
