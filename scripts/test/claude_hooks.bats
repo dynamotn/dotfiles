@@ -101,6 +101,22 @@ function _legacy_repo {
   [[ "${stderr}" != *"legacy.sh:2:"* ]] || fail "old finding reported: ${stderr}"
 }
 
+@test "lint-shell hook never runs a program the edited repo's git config names" {
+  _require_dyshellint
+  _legacy_repo
+  local marker="${WORK}/pwned"
+  printf '#!/bin/sh\ntouch %s\n' "${marker}" > "${WORK}/evil"
+  chmod +x "${WORK}/evil"
+  git -C "${WORK}/repo" config core.fsmonitor "${WORK}/evil"
+  # Precondition: plain git in this repo does run it.
+  git -C "${WORK}/repo" status > /dev/null 2>&1 || true
+  [[ -e "${marker}" ]] || skip "this git does not run core.fsmonitor"
+  rm -f -- "${marker}"
+  printf '#!/usr/bin/env bash\necho $1\ncd /tmp\n' > "${WORK}/repo/legacy.sh"
+  _run_hook "${WORK}/repo/legacy.sh"
+  [[ ! -e "${marker}" ]] || fail "the hook ran the repo's core.fsmonitor"
+}
+
 @test "lint-shell hook is a no-op without dyshellint on PATH" {
   printf 'echo $1\n' > "${WORK}/bad.sh"
   PATH="/usr/bin:/bin" _run_hook "${WORK}/bad.sh"
