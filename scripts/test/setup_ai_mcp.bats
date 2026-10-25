@@ -94,6 +94,23 @@ EOF
   [[ "$(yq -p=toml -r '.model' "${f}")" == "gpt-5" ]]
 }
 
+@test "codex: a readonly server gets supports_parallel_tool_calls, only in Codex" {
+  _stub_agent codex
+  _stub_agent gemini
+  _write_config
+  yq -i '.global.mcp.laya.readonly = true' "${HOME}/.config/dyai/config.yaml"
+  run bash "${HOOK}"
+  assert_success
+  local f="${HOME}/.codex/config.toml"
+  yq -p=toml -e '.mcp_servers.laya.supports_parallel_tool_calls == true' "${f}" > /dev/null
+  jq -e '.mcpServers.laya | has("supports_parallel_tool_calls") or has("readonly") | not' \
+    "${HOME}/.gemini/settings.json" > /dev/null
+  cp "${f}" "${f}.before"
+  run bash "${HOOK}"
+  assert_success
+  cmp -s "${f}" "${f}.before"
+}
+
 @test "hermes: laya in config.yaml mcp_servers, unrelated key preserved" {
   _stub_agent hermes
   dybatpho::ensure_dir "${HOME}/.hermes" > /dev/null
