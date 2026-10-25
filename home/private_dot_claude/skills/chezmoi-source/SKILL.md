@@ -42,7 +42,7 @@ Examples:
 | Target | Source |
 |--------|--------|
 | `~/.config/fish/config.fish` | `home/private_dot_config/fish/config.fish` |
-| `~/.claude/settings.json` | `home/private_dot_claude/settings.json` |
+| `~/.claude/settings.json` | `home/private_dot_claude/settings.json.tmpl` |
 | `~/.local/bin/dyfox` | `home/dot_local/bin/executable_dyfox.tmpl` |
 | `~/.config/tstruct/auth.json` | `home/private_dot_config/tstruct/encrypted_auth.json.age` |
 | `~/.ssh/keys/enterprise-F1_ed25519` | `home/private_dot_ssh/keys/encrypted_private_readonly_enterprise-F1_ed25519.age` |
