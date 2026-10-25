@@ -1,86 +1,37 @@
 #!{{ .bash }}
-# @file 03-setup-claude.sh
-# @brief Install the Claude Code marketplaces, plugins, skills and MCP servers
-# @description Bring the Claude Code extensions on this machine in line with the
-# dotfiles: every marketplace and plugin named in `~/.claude/settings.json`, and
-# every community skill from skills.sh listed below, and the MCP servers below
-# in every Claude configuration. Re-runs whenever the settings or these lists
-# change. Nothing here is tied to a single project: a
-# plugin that needs a project tool chain (terraform, a database CLI, ...) does
-# not belong in the settings and is left to that project.
+# @file 03-setup-ai.sh
+# @brief Install the AI-agent marketplaces, plugins, skills and MCP servers
+# @description Bring the AI-agent extensions on this machine in line with the
+# dotfiles, from the single declarative source `~/.config/dyai/config.yaml`:
+# the skills under `global.skills`, the MCP servers under `global.mcp`, and the
+# Claude marketplaces and plugins under `agents.claude`. Re-runs whenever the
+# config or the shared data partial changes. Nothing here is tied to a single
+# project: a plugin that needs a project tool chain (terraform, a database
+# CLI, ...) does not belong here and is left to that project.
+# dyshellint disable=BSG104 config reads tolerate failure by design; inherit_errexit would abort the warn-and-continue
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
-if ! dybatpho::is command jq; then
-  dybatpho::warn "jq is not installed, skip setting up Claude Code"
+if ! dybatpho::is command jq || ! dybatpho::is command yq; then
+  dybatpho::warn "jq or yq is not installed, skip setting up AI agents"
   exit 0
 fi
 
-# settings hash: {{ joinPath .chezmoi.sourceDir "private_dot_claude/settings.json" | include | sha256sum }}
-SETTINGS_FILE="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude" "settings.json")"
-PLUGINS_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude" "plugins")"
-SKILLS_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".agents" "skills")"
+# Re-run when the config or its shared data changes.
+# dyai config hash: {{ include (joinPath .chezmoi.sourceDir "private_dot_config/dyai/config.yaml.tmpl") | sha256sum }}
+# dyai data hash: {{ include (joinPath .chezmoi.sourceDir ".chezmoitemplates/ai/dyai-data.yaml.tmpl") | sha256sum }}
+# Paths come from ${HOME} at run time; an apply runs with HOME set to the home
+# this config belongs to, so this matches `{{ .chezmoi.homeDir }}` there.
+CONFIG_FILE="$(dybatpho::path_join "${HOME}" ".config" "dyai" "config.yaml")"
+PLUGINS_DIR="$(dybatpho::path_join "${HOME}" ".claude" "plugins")"
+SKILLS_DIR="$(dybatpho::path_join "${HOME}" ".agents" "skills")"
 
-# Community skills from https://skills.sh, installed for every agent with
-# `bunx skills add -g`. Keep each entry generic to a role, never to one project.
-# The installer is pinned, so an apply never runs a release nobody looked at.
+# The skills CLI is pinned, so an apply never runs a release nobody looked at.
 SKILLS_CLI="skills@1.7.2"
-SKILLS=(
-  # discovery
-  vercel-labs/skills@find-skills
-  # devops
-  affaan-m/ecc@docker-patterns
-  jeffallan/claude-skills@kubernetes-specialist
-  wshobson/agents@helm-chart-scaffolding
-  wshobson/agents@github-actions-templates
-  wshobson/agents@gitlab-ci-patterns
-  wshobson/agents@gitops-workflow
-  aws/agent-toolkit-for-aws@aws-iam
-  aws/agent-toolkit-for-aws@aws-observability
-  # frontend
-  vercel-labs/agent-skills@vercel-react-best-practices
-  leonxlnx/taste-skill@design-taste-frontend
-  addyosmani/web-quality-skills@accessibility
-  currents-dev/playwright-best-practices-skill@playwright-best-practices
-  wshobson/agents@e2e-testing-patterns
-  # backend
-  wshobson/agents@api-design-principles
-  addyosmani/agent-skills@api-and-interface-design
-  supabase/agent-skills@supabase-postgres-best-practices
-  samber/cc-skills-golang@golang-code-style
-  samber/cc-skills-golang@golang-testing
-  samber/cc-skills-golang@golang-error-handling
-  samber/cc-skills-golang@golang-grpc
-  mindrally/skills@fastapi-python
-  mcollina/skills@fastify-best-practices
-  apollographql/skills@rust-best-practices
-  wshobson/agents@sql-optimization-patterns
-  # security
-  samber/cc-skills-golang@golang-security
-  wshobson/agents@stride-analysis-patterns
-  openai/skills@security-threat-model
-  Eyadkelleh/awesome-skills-security@llm-testing
-  Eyadkelleh/awesome-skills-security@security-fuzzing
-  Eyadkelleh/awesome-skills-security@security-passwords
-  Eyadkelleh/awesome-skills-security@security-patterns
-  Eyadkelleh/awesome-skills-security@security-payloads
-  Eyadkelleh/awesome-skills-security@security-usernames
-  Eyadkelleh/awesome-skills-security@security-webshells
-  # architecture
-  spillwavesolutions/design-doc-mermaid@design-doc-mermaid
-  softaworks/agent-toolkit@c4-architecture
-  addyosmani/agent-skills@documentation-and-adrs
-  wshobson/agents@architecture-patterns
-  wondelai/skills@domain-driven-design
-  # ai engineering
-  anthropics/skills@mcp-builder
-  wshobson/agents@prompt-engineering-patterns
-)
 
 # MCP servers are registered at user scope in the default configuration and in
 # every enterprise one, the directories mise points `CLAUDE_CONFIG_DIR` at.
-DEFAULT_CONFIG_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude")"
-ENTERPRISE_DIR="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" "Working" "enterprise")"
-LAYA_MCP_SERVER="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".local" "bin" "laya-mcp-server")"
+DEFAULT_CONFIG_DIR="$(dybatpho::path_join "${HOME}" ".claude")"
+ENTERPRISE_DIR="$(dybatpho::path_join "${HOME}" "Working" "enterprise")"
 # dytoy installs the ROCm build of torch for laya on an AMD GPU.
 HAS_AMD_GPU='{{ eq .guiDriver "A" }}'
 
@@ -98,17 +49,27 @@ function _in_json_file {
 }
 
 #######################################
-# @description Register every marketplace named in the settings that Claude does not know yet
+# @description Read a section of the dyai config as compact JSON
+# @arg $1 string yq path expression, e.g. '.global.mcp // {}'
+# @stdout The section as JSON, or the empty object/array the expression defaults to
+#######################################
+function _config_json {
+  local expr
+  dybatpho::expect_args expr -- "$@"
+  yq -o=json -I=0 "${expr}" "${CONFIG_FILE}"
+}
+
+#######################################
+# @description Register every Claude marketplace the config names that Claude does not know yet
 # @noargs
 #######################################
 function _setup_marketplaces {
-  local known_file query name source
+  local known_file marketplaces name source
   known_file="$(dybatpho::path_join "${PLUGINS_DIR}" "known_marketplaces.json")"
+  marketplaces="$(_config_json '.agents.claude.marketplaces // {}')"
   # One field per source: a tab is IFS whitespace, so `read` would collapse an
   # empty repo or url field and shift the ones after it.
-  query='.extraKnownMarketplaces // {} | to_entries[]'
-  query+=' | [.key, .value.source.repo // .value.source.url // ""] | @tsv'
-  # shellcheck disable=SC2312 # jq reads the settings chezmoi just wrote
+  # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
   while IFS=$'\t' read -r name source; do
     [[ -n "${name}" ]] || continue
     # shellcheck disable=SC2310 # a missing or non-matching file is a plain no
@@ -118,17 +79,17 @@ function _setup_marketplaces {
     fi
     dybatpho::info "Add marketplace ${name}"
     claude plugin marketplace add "${source}" || dybatpho::warn "Could not add marketplace ${name}"
-  done < <(jq -r "${query}" "${SETTINGS_FILE}")
+  done < <(jq -r 'to_entries[] | [.key, (.value.source.repo // .value.source.url // "")] | @tsv' <<< "${marketplaces}")
 }
 
 #######################################
-# @description Install every plugin enabled in the settings that is not installed yet
+# @description Install every Claude plugin the config names that is not installed yet
 # @noargs
 #######################################
 function _setup_plugins {
   local installed_file plugin
   installed_file="$(dybatpho::path_join "${PLUGINS_DIR}" "installed_plugins.json")"
-  # shellcheck disable=SC2312 # jq reads the settings chezmoi just wrote
+  # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
   while IFS= read -r plugin; do
     [[ -n "${plugin}" ]] || continue
     # shellcheck disable=SC2310 # a missing or non-matching file is a plain no
@@ -138,18 +99,19 @@ function _setup_plugins {
     fi
     dybatpho::info "Install plugin ${plugin}"
     claude plugin install "${plugin}" || dybatpho::warn "Could not install plugin ${plugin}"
-  done < <(jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' "${SETTINGS_FILE}")
+  done < <(_config_json '.agents.claude.plugins // []' | jq -r '.[]')
 }
 
 #######################################
-# @description Install every skill of the list that is missing from the global skills directory
+# @description Install every skill in global.skills missing from the global skills directory
 # @noargs
 #######################################
 function _setup_skills {
-  local skill name
-  for skill in "${SKILLS[@]}"; do
+  local skill name target
+  # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
+  while IFS= read -r skill; do
+    [[ -n "${skill}" ]] || continue
     name="${skill##*@}"
-    local target
     target="$(dybatpho::path_join "${SKILLS_DIR}" "${name}")"
     if dybatpho::is dir "${target}"; then
       dybatpho::debug "Skill ${name} already installed"
@@ -157,7 +119,7 @@ function _setup_skills {
     fi
     dybatpho::info "Install skill ${skill}"
     bunx "${SKILLS_CLI}" add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
-  done
+  done < <(_config_json '.global.skills // []' | jq -r '.[]')
 }
 
 #######################################
@@ -193,7 +155,7 @@ function _claude_in {
 }
 
 #######################################
-# @description Register an MCP server in every configuration where it is missing or differs
+# @description Register an MCP server in every Claude configuration where it is missing or differs
 # @arg $1 string Name of the server
 # @arg $2 string Server definition as JSON, as `claude mcp add-json` takes it
 #######################################
@@ -206,7 +168,7 @@ function _setup_mcp_server {
   while IFS= read -r dir; do
     # The default configuration keeps its state next to the directory, not in it.
     if [[ "${dir}" == "${DEFAULT_CONFIG_DIR}" ]]; then
-      state_file="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".claude.json")"
+      state_file="$(dybatpho::path_join "${HOME}" ".claude.json")"
     else
       state_file="$(dybatpho::path_join "${dir}" ".claude.json")"
     fi
@@ -231,28 +193,35 @@ function _setup_mcp_server {
 }
 
 #######################################
-# @description Register the Laya decision model, installed by dytoy, as an MCP server
+# @description Register every server in global.mcp into the Claude configurations
 # @noargs
 #######################################
-function _setup_laya {
-  if ! dybatpho::is executable "${LAYA_MCP_SERVER}"; then
-    dybatpho::warn "laya is not installed, skip its MCP server"
-    return 0
-  fi
-  local env='{"HF_HUB_DISABLE_TELEMETRY": "1"}'
-  # The ROCm build of torch ships no kernels for the RDNA2 chips other than
-  # gfx1030 (Radeon 680M, RX 6600, ...); they run the gfx1030 ones instead.
-  if dybatpho::is true "${HAS_AMD_GPU}"; then
-    local agents
-    agents="$(PATH="${PATH}:/opt/rocm/bin" rocminfo 2> /dev/null || true)"
-    if [[ "${agents}" =~ gfx103[1-6] ]]; then
-      env="$(jq -c '. + {HSA_OVERRIDE_GFX_VERSION: "10.3.0"}' <<< "${env}")"
+function _setup_mcp {
+  local servers name command definition
+  servers="$(_config_json '.global.mcp // {}')"
+  # A scalar or otherwise malformed section yields no keys and is skipped.
+  # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
+  while IFS= read -r name; do
+    [[ -n "${name}" ]] || continue
+    command="$(jq -r --arg n "${name}" '.[$n].command // ""' <<< "${servers}")"
+    if [[ -n "${command}" ]] && ! dybatpho::is executable "${command}"; then
+      dybatpho::warn "MCP server ${name} command not found (${command}), skip"
+      continue
     fi
-  fi
-  local definition
-  definition="$(jq -cn --arg command "${LAYA_MCP_SERVER}" --argjson env "${env}" \
-    '{type: "stdio", command: $command, args: [], env: $env}')"
-  _setup_mcp_server laya "${definition}"
+    definition="$(jq -c --arg n "${name}" \
+      '.[$n] | {type: "stdio", command: .command, args: (.args // []), env: (.env // {})}' <<< "${servers}")"
+    # The ROCm build of torch ships no kernels for the RDNA2 chips other than
+    # gfx1030 (Radeon 680M, RX 6600, ...); they run the gfx1030 ones instead.
+    if [[ "${name}" == "laya" ]] && dybatpho::is true "${HAS_AMD_GPU}"; then
+      local agents
+      agents="$(PATH="${PATH}:/opt/rocm/bin" rocminfo 2> /dev/null || true)"
+      if [[ "${agents}" =~ gfx103[1-6] ]]; then
+        definition="$(jq -c '.env += {HSA_OVERRIDE_GFX_VERSION: "10.3.0"}' <<< "${definition}")"
+      fi
+    fi
+    # shellcheck disable=SC2310 # a failure only warns, the other servers still run
+    _setup_mcp_server "${name}" "${definition}"
+  done < <(jq -r 'if type == "object" then keys[] else empty end' <<< "${servers}")
 }
 
 #######################################
@@ -260,20 +229,24 @@ function _setup_laya {
 # @noargs
 #######################################
 function _main {
-  dybatpho::header "Setup Claude Code"
+  dybatpho::header "Setup AI"
+  if ! dybatpho::is file "${CONFIG_FILE}"; then
+    dybatpho::warn "dyai config not found at ${CONFIG_FILE}, skip setting up AI agents"
+    exit 0
+  fi
   if dybatpho::is command claude; then
     _setup_marketplaces
     _setup_plugins
-    _setup_laya
+    _setup_mcp
   else
-    dybatpho::warn "claude is not installed, skip marketplaces and plugins"
+    dybatpho::warn "claude is not installed, skip marketplaces, plugins and MCP"
   fi
   if dybatpho::is command bunx; then
     _setup_skills
   else
     dybatpho::warn "bunx is not installed, skip skills"
   fi
-  dybatpho::success "Setup Claude Code"
+  dybatpho::success "Setup AI"
 }
 
 _main "$@"
