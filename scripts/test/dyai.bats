@@ -235,6 +235,25 @@ CFG
   [[ "$(yq -p=toml '.use | length' "${proj}/.dyai.toml")" == "0" ]]
 }
 
+@test "dyai::prune_and_record refuses to delete outside the project subtrees" {
+  local proj="${BATS_TEST_TMPDIR}/trav"
+  mkdir -p "${proj}/.claude/agents"
+  local victim="${BATS_TEST_TMPDIR}/victim"
+  mkdir -p "${victim}"
+  : > "${victim}/keep"
+  local toml="${proj}/.dyai.toml"
+  # a manifest crafted to escape the project via .. and to name a path
+  # outside the two subtrees dyai writes
+  printf 'materialized = ["%s/../victim/keep", "%s/.ssh/id_ed25519", "%s/.claude/agents/stale.md"]\n' \
+    "${proj}" "${proj}" "${proj}" > "${toml}"
+  : > "${proj}/.claude/agents/stale.md"
+  # desired is empty, so every manifest entry is a prune candidate
+  dyai::prune_and_record "${toml}"
+  # the escape and the out-of-subtree path survive; only the real subtree file is pruned
+  [ -f "${victim}/keep" ]
+  [ ! -f "${proj}/.claude/agents/stale.md" ]
+}
+
 @test "dyai::rm errors on a preset the project does not use" {
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null

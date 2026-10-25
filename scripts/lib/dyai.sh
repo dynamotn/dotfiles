@@ -591,7 +591,17 @@ function dyai::prune_and_record {
   desired_nl="$(printf '%s\n' "$@")"
   # shellcheck disable=SC2312 # a missing manifest lists nothing, so nothing is pruned
   while IFS= read -r old; do
-    [[ -n "${old}" && "${old}" == "${root}"/* ]] || continue
+    [[ -n "${old}" ]] || continue
+    # .dyai.toml is an on-disk file; a crafted or corrupt manifest must never
+    # turn this prune into an arbitrary recursive delete. Reject any entry
+    # with a traversal segment, and confine deletion to the two subtrees
+    # materialize actually writes — a prefix glob alone would let `${root}/..`
+    # match, so the allow-list is on the literal subtree paths.
+    case "${old}" in
+      *'/../'* | *'/./'* | */.. | */.) continue ;;
+      "${root}/.claude/agents/"* | "${root}/.agents/skills/"*) ;;
+      *) continue ;;
+    esac
     grep -qxF -- "${old}" <<< "${desired_nl}" || rm -rf -- "${old}"
   done < <(yq -p=toml '.materialized[]?' "${toml}" 2> /dev/null)
   # shellcheck disable=SC2312 # the desired list is dyai-built project paths
