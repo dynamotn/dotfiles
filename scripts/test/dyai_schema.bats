@@ -245,6 +245,44 @@ function _render_config {
   yq '.global.mcp.filesystem.args[]' "${out}" | grep 'Working/community' > /dev/null
 }
 
+@test "MCP pins clear the 7-day uv/bun release cooldown" {
+  _require_chezmoi
+  _require_yq
+  command -v curl &> /dev/null || skip "curl not found"
+  curl -fsS --max-time 10 -o /dev/null https://pypi.org/simple/ 2> /dev/null || skip "offline"
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.mcp.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(< "${out}.err")"
+  # Every uvx/bunx server, global or in a preset, as `launcher<TAB>pkg<TAB>version`.
+  local servers="${BATS_TEST_TMPDIR}/servers.json" pins="${BATS_TEST_TMPDIR}/pins"
+  local meta="${BATS_TEST_TMPDIR}/meta.json"
+  yq -o=json -I=0 '[.global.mcp[], .registry[][].mcp[]?] | .[]
+    | select(.command == "uvx" or .command == "bunx")' "${out}" > "${servers}"
+  jq -r '.command + "\t" + (.args[0] | capture("^(?<p>@?[^@]+)@(?<v>.+)$") | .p + "\t" + .v)' \
+    "${servers}" > "${pins}"
+  local launcher pkg ver published age now stamp bad=""
+  printf -v now '%(%s)T' -1
+  while IFS=$'\t' read -r launcher pkg ver; do
+    published=""
+    if [[ "${launcher}" == "uvx" ]]; then
+      curl -fsS --max-time 20 -o "${meta}" "https://pypi.org/pypi/${pkg}/${ver}/json" \
+        && published="$(jq -r '.urls[0].upload_time_iso_8601 // empty' "${meta}")"
+    else
+      curl -fsS --max-time 20 -o "${meta}" "https://registry.npmjs.org/${pkg/\//%2F}" \
+        && published="$(jq -r --arg v "${ver}" '.time[$v] // empty' "${meta}")"
+    fi
+    if [[ -z "${published}" ]]; then
+      bad+=" ${pkg}@${ver}(unpublished)"
+      continue
+    fi
+    stamp="$(date -d "${published}" +%s)"
+    age=$((now - stamp))
+    ((age >= 7 * 86400)) || bad+=" ${pkg}@${ver}($((age / 86400))d)"
+  done < "${pins}"
+  [[ -z "${bad}" ]] || fail "pinned younger than the 7-day cooldown, so they never start:${bad}"
+}
+
 @test "every preset plugin is an optional plugin, off globally and installed" {
   _require_chezmoi
   _require_yq
