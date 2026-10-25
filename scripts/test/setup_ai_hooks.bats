@@ -79,14 +79,32 @@ EOF
   jq -e '.hooks.notification[0].bash | test("notify-send")' "${f}" > /dev/null
 }
 
-@test "codex: notify hooks written to config.toml hooks tables" {
+@test "codex: notify hooks written as matcher groups Codex can load" {
   _stub_agent codex
   _write_config
   run bash "${HOOK}"
   assert_success
   local f="${HOME}/.codex/config.toml"
-  yq -p=toml -e '.hooks.Stop.hooks[0].command | test("notify-send")' "${f}" > /dev/null
-  yq -p=toml -e '.hooks.Notification.hooks[0].command | test("notify-send")' "${f}" > /dev/null
+  yq -p=toml -e '.hooks.Stop[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
+  yq -p=toml -e '.hooks.PermissionRequest[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
+  yq -p=toml -e '.hooks.Stop[0].hooks[0].type == "command"' "${f}" > /dev/null
+  cp "${f}" "${f}.before"
+  run bash "${HOOK}"
+  assert_success
+  cmp -s "${f}" "${f}.before"
+}
+
+@test "codex: the old map-shaped hooks are replaced" {
+  _stub_agent codex
+  _write_config
+  local f="${HOME}/.codex/config.toml"
+  mkdir -p "${HOME}/.codex"
+  printf '[hooks.Stop]\nhooks = [{ command = "old" }]\n' > "${f}"
+  printf '[hooks.Notification]\nhooks = [{ command = "old" }]\n' >> "${f}"
+  run bash "${HOOK}"
+  assert_success
+  yq -p=toml -e '.hooks.Stop | type == "!!seq"' "${f}" > /dev/null
+  yq -p=toml -e '.hooks | has("Notification") | not' "${f}" > /dev/null
 }
 
 @test "no hook config is written for agy or opencode" {

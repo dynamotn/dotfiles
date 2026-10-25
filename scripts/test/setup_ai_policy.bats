@@ -75,13 +75,27 @@ EOF
   [[ "$(jq -r '.permission.edit' "${HOME}/.config/opencode/opencode.json")" == "allow" ]]
 }
 
-@test "approval is NOT written for agents without a clean edits-only preset" {
+@test "approval accept-edits sets codex workspace-write and on-request" {
   _stub_agent codex
   _write_config
+  local f="${HOME}/.codex/config.toml"
+  mkdir -p "${HOME}/.codex"
+  # A table already in the file must not swallow the new top-level keys.
+  printf '[[hooks.Stop]]\nhooks = [{ type = "command", command = "x" }]\n' > "${f}"
   run bash "${HOOK}"
   assert_success
-  # codex got its MCP server but no approval_policy from dyai.
+  yq -p=toml -e '.sandbox_mode == "workspace-write"' "${f}" > /dev/null
+  yq -p=toml -e '.approval_policy == "on-request"' "${f}" > /dev/null
+}
+
+@test "approval keeps codex values the user already set" {
+  _stub_agent codex
+  _write_config
+  mkdir -p "${HOME}/.codex"
+  printf 'sandbox_mode = "read-only"\napproval_policy = "untrusted"\n' > "${HOME}/.codex/config.toml"
+  run bash "${HOOK}"
+  assert_success
   local f="${HOME}/.codex/config.toml"
-  [ -f "${f}" ]
-  [[ "$(yq -p=toml '.approval_policy // "none"' "${f}")" == "none" ]]
+  yq -p=toml -e '.sandbox_mode == "read-only"' "${f}" > /dev/null
+  yq -p=toml -e '.approval_policy == "untrusted"' "${f}" > /dev/null
 }
