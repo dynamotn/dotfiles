@@ -68,6 +68,22 @@ function _render_settings {
   jq -e '.sandbox.excludedCommands | all(test("^rtk( \\*)?$") | not)' "${out}" > /dev/null \
     || fail "rtk is excluded from the sandbox as a whole"
   jq -e '.sandbox.excludedCommands | all(test("^(cat|rtk read)") | not)' "${out}" > /dev/null
+  # Nothing writable may contain a PATH directory or a tool's trust state:
+  # an auto-approved sandboxed command could plant code that later runs
+  # outside the sandbox.
+  jq -e '.sandbox.filesystem as $fs | [$fs.allowWrite[] as $w | $fs.denyWrite[]
+    | select(startswith($w + "/") or . == $w)] | length == 0' "${out}" > /dev/null \
+    || fail "an allowWrite path contains a denyWrite one"
+  jq -e '.sandbox.filesystem.allowWrite | all(. as $w
+    | ["~", "~/.cache", "~/.local", "~/.local/state", "~/.local/share", "~/.claude"] | index($w) | not)' \
+    "${out}" > /dev/null || fail "a broad home directory is writable from the sandbox"
+  jq -e '.sandbox.filesystem.denyWrite | index("~/.local/bin") != null and index("~/.cache/.bun/bin") != null' \
+    "${out}" > /dev/null
+  # Only download hosts: a host that accepts writes would let a sandboxed
+  # command send data out without a prompt.
+  jq -e '.sandbox.network.allowedDomains | all(. as $d
+    | ["github.com", "*.github.com", "api.github.com", "gitlab.com", "*"] | index($d) | not)' \
+    "${out}" > /dev/null || fail "a write-capable host is in the sandbox allowlist"
   # git is excluded in both spellings, or commits in a worktree fail.
   jq -e '.sandbox.excludedCommands | index("git *") != null and index("rtk git *") != null' \
     "${out}" > /dev/null

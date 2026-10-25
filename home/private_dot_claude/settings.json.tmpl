@@ -10,6 +10,12 @@
   that write all over $HOME or the system. The rtk spelling of git is listed
   because rtk rewrites git before the sandbox sees it; rtk as a whole is not,
   since `cat` becomes `rtk read` and must stay sandboxed.
+
+  Sandboxed commands run without a prompt, so what they may write must never
+  hold something that later runs outside it: only package caches are
+  writable, never a directory on PATH, a tool's trust state, or plugin code.
+  The network allowlist holds download hosts only; anything that can take a
+  write (the GitHub API, gitlab.com) still prompts.
 */ -}}
 {{- $d := fromYaml (includeTemplate "ai/dyai-data.yaml.tmpl" .) -}}
 {{- $enabled := dict -}}
@@ -42,28 +48,36 @@
     ],
     "filesystem": {
       "allowWrite": [
-        "~/.cache",
-        "~/.local/share/rtk",
-        "~/.local/state",
-        "~/.bun",
-        "~/.npm",
+        "~/.cache/.bun/install/cache",
+        "~/.cache/go-build",
+        "~/.cache/pip",
+        "~/.cache/uv",
         "~/.cargo/registry",
-        "~/go/pkg"
+        "~/.local/share/rtk"
+      ],
+      "denyWrite": [
+        "~/.local/bin",
+        "~/.cache/.bun/bin",
+        "~/.local/share/mise",
+        "~/.local/state/mise",
+        "~/.local/share/nvim/mason",
+        "~/.claude/plugins",
+        "~/.krew/bin",
+        "~/.hunk/bin"
       ]
     },
     "network": {
       "allowedDomains": [
-        "github.com",
-        "*.github.com",
-        "*.githubusercontent.com",
-        "gitlab.com",
+        "codeload.github.com",
+        "objects.githubusercontent.com",
+        "raw.githubusercontent.com",
         "registry.npmjs.org",
         "pypi.org",
         "files.pythonhosted.org",
         "proxy.golang.org",
         "sum.golang.org",
-        "crates.io",
-        "*.crates.io"
+        "index.crates.io",
+        "static.crates.io"
       ]
     }
   },
@@ -87,6 +101,11 @@
             "type": "command",
             "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Task finished!' --icon=dialog-information; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ] && paplay /usr/share/sounds/freedesktop/stereo/complete.oga; } 2>/dev/null; true",
             "async": true
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/verify-on-stop.sh",
+            "timeout": 30
           }
         ]
       }
@@ -120,6 +139,16 @@
           {
             "type": "command",
             "command": "rtk hook claude"
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/log-skill.sh",
+            "async": true
           }
         ]
       }

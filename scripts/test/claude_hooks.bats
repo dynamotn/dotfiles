@@ -3,6 +3,7 @@
 setup() {
   load test_helper
   HOOK="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_lint-shell.sh"
+  STOP_HOOK="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_verify-on-stop.sh"
   WORK="${BATS_TEST_TMPDIR}/work"
   mkdir -p "${WORK}"
 }
@@ -121,6 +122,116 @@ function _legacy_repo {
   printf 'echo $1\n' > "${WORK}/bad.sh"
   PATH="/usr/bin:/bin" _run_hook "${WORK}/bad.sh"
   assert_success
+}
+
+# Transcript lines, in Claude Code's JSONL shape.
+function _prompt { jq -cn --arg t "${1}" '{type: "user", message: {content: $t}}'; }
+function _edit {
+  jq -cn --arg f "${1}" '{type: "assistant", message: {content: [
+    {type: "tool_use", name: "Edit", input: {file_path: $f}}]}}'
+}
+function _bash {
+  jq -cn --arg c "${1}" '{type: "assistant", message: {content: [
+    {type: "tool_use", name: "Bash", input: {command: $c}}]}}'
+}
+function _result { printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result"}]}}'; }
+
+# Run the Stop hook against the transcript $1, with stop_hook_active $2.
+function _run_stop {
+  local input
+  input="$(jq -cn --arg t "${1}" --argjson a "${2:-false}" '{transcript_path: $t, stop_hook_active: $a}')"
+  run --separate-stderr bash "${STOP_HOOK}" <<< "${input}"
+}
+
+@test "verify-on-stop blocks once when an edit follows the last check" {
+  local t="${WORK}/t.jsonl"
+  {
+    _prompt "fix it"
+    _bash "./scripts/test.sh --all"
+    _result
+    _edit "/r/lib.sh"
+    _result
+  } > "${t}"
+  _run_stop "${t}"
+  assert_success
+  jq -e '.decision == "block" and (.reason | contains("/r/lib.sh"))' <<< "${output}" > /dev/null \
+    || fail "expected a block naming the file, got: ${output}"
+  # The continued stop always passes, so the hook cannot loop.
+  _run_stop "${t}" true
+  assert_success
+  assert_output ""
+}
+
+@test "verify-on-stop passes when a check ran after the last edit" {
+  local t="${WORK}/t.jsonl"
+  {
+    _prompt "fix it"
+    _edit "/r/lib.sh"
+    _result
+    _bash "dyshellint /r/lib.sh"
+    _result
+  } > "${t}"
+  _run_stop "${t}"
+  assert_success
+  assert_output ""
+}
+
+@test "verify-on-stop ignores prose edits and edits of an earlier turn" {
+  local t="${WORK}/t.jsonl"
+  {
+    _prompt "docs"
+    _edit "/r/README.md"
+    _result
+  } > "${t}"
+  _run_stop "${t}"
+  assert_output ""
+  {
+    _prompt "fix"
+    _edit "/r/lib.sh"
+    _result
+    _prompt "thanks, what next?"
+  } > "${t}"
+  _run_stop "${t}"
+  assert_output ""
+}
+
+@test "verify-on-stop passes on a missing or unreadable transcript" {
+  _run_stop "${WORK}/none.jsonl"
+  assert_success
+  assert_output ""
+  printf 'not json\n' > "${WORK}/bad.jsonl"
+  _run_stop "${WORK}/bad.jsonl"
+  assert_success
+  assert_output ""
+}
+
+@test "verify-on-stop hook is itself clean under dyshellint" {
+  _require_dyshellint
+  run dyshellint -warnings-as-errors -exclude-rules BSG037 "${STOP_HOOK}"
+  assert_success
+}
+
+@test "log-skill appends one line per Skill call and never blocks" {
+  local skill_hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_log-skill.sh"
+  local state="${WORK}/state" input
+  input='{"tool_name":"Skill","tool_input":{"skill":"dybatpho"},"cwd":"/r","session_id":"s1"}'
+  XDG_STATE_HOME="${state}" run bash "${skill_hook}" <<< "${input}"
+  assert_success
+  assert_output ""
+  jq -e '.skill == "dybatpho" and .cwd == "/r" and .session == "s1"' \
+    "${state}/claude/skill-usage.jsonl" > /dev/null
+  # Garbage in, nothing written, still exit 0.
+  XDG_STATE_HOME="${state}" run bash "${skill_hook}" <<< "not json"
+  assert_success
+  local lines
+  mapfile -t lines < "${state}/claude/skill-usage.jsonl"
+  [[ "${#lines[@]}" -eq 1 ]]
+}
+
+@test "settings.json wires the stop and skill hooks" {
+  local tmpl="${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
+  grep -q 'verify-on-stop.sh' "${tmpl}"
+  grep -q 'log-skill.sh' "${tmpl}"
 }
 
 @test "settings.json wires the lint-shell hook on Edit and Write" {
