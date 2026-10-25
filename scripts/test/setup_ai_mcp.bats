@@ -123,3 +123,33 @@ EOF
   [ ! -f "${HOME}/.codex/config.toml" ]
   [ ! -f "${HOME}/.hermes/config.yaml" ]
 }
+
+@test "codex: a second run is a no-op even with a pre-existing section-style server" {
+  _stub_agent codex
+  dybatpho::ensure_dir "${HOME}/.codex" > /dev/null
+  # Section-style table, as `codex mcp add` itself writes it.
+  printf '[mcp_servers.other]\ncommand = "o"\n' > "${HOME}/.codex/config.toml"
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  local f="${HOME}/.codex/config.toml"
+  # Second run must reach the no-op branch, not rewrite (a rewrite strips the
+  # user's TOML comments and churns the file on every apply).
+  run bash "${HOOK}"
+  assert_success
+  refute_output --partial "Registered MCP laya in ${f}"
+  # The pre-existing server survived.
+  [[ "$(yq -p=toml -r '.mcp_servers.other.command' "${f}")" == "o" ]]
+}
+
+@test "a malformed pre-existing agent config warns and the hook still processes the rest" {
+  _stub_agent gemini
+  _stub_agent codex
+  dybatpho::ensure_dir "${HOME}/.gemini" > /dev/null
+  printf '{ this is not json' > "${HOME}/.gemini/settings.json"
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  # codex, processed after gemini, still got laya — the hook did not abort.
+  [[ "$(yq -p=toml -r '.mcp_servers.laya.command' "${HOME}/.codex/config.toml")" == "${LAYA}" ]]
+}
