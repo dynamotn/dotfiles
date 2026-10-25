@@ -63,6 +63,21 @@ function _partials {
   done < "${all}.headings"
 }
 
+@test "Codex gets the shell-scripts section as a skill, every other agent inline" {
+  _require_chezmoi
+  local codex="${BATS_TEST_TMPDIR}/codex.md" other="${BATS_TEST_TMPDIR}/other.md"
+  local skill="${BATS_TEST_TMPDIR}/SKILL.md"
+  _render "${DOTFILES_DIR}/home/private_dot_codex/AGENTS.md.tmpl" "${codex}"
+  _render "${DOTFILES_DIR}/home/private_dot_config/AGENTS.md.tmpl" "${other}"
+  _render "${DOTFILES_DIR}/home/dot_agents/skills/shell-scripts/SKILL.md.tmpl" "${skill}"
+  run grep -qx '## Writing scripts' "${codex}"
+  assert_failure
+  grep -qF "load the \`shell-scripts\` skill" "${codex}"
+  grep -qx '## Writing scripts' "${other}"
+  grep -qx 'name: shell-scripts' "${skill}"
+  grep -qx '## Writing scripts' "${skill}"
+}
+
 @test "the shell-scripts rule is scoped to shell files" {
   _require_chezmoi
   local out="${BATS_TEST_TMPDIR}/shell-scripts.md"

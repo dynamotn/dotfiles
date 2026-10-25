@@ -1,1 +1,3 @@
-{{- template "ai/all.md.tmpl" . -}}
+{{- /* Codex loads skills on demand, so the shell-scripts section ships as the
+       shared shell-scripts skill to keep this file short. */ -}}
+{{- template "ai/all.md.tmpl" (merge (dict "aiShellScriptsSkill" true) .) -}}
