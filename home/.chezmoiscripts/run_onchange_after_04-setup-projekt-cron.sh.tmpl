@@ -1,0 +1,33 @@
+#!{{ .bash }}
+# @file 04-setup-projekt-cron.sh
+# @brief Schedule projekt to sync and update the project folders
+# @description Add a block to the user crontab that runs every day at noon:
+# `projekt folder sync` clones the repositories missing from disk, then
+# `git fetch` updates the remote branches of every project folder. Fetching
+# leaves the working trees alone, so a project being worked on is never
+# changed under the user. A container has no cron daemon, so it skips this.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/cron.sh"
+
+{{- if ne .kind "container" }}
+
+if ! dybatpho::is command crontab; then
+  dybatpho::warn "crontab is not installed, skip scheduling projekt"
+  exit 0
+fi
+
+dybatpho::header "Schedule projekt"
+log_dir="$(dybatpho::xdg_state_dir projekt)"
+dybatpho::ensure_dir "${log_dir}" > /dev/null
+log="$(printf '%q' "${log_dir}/cron.log")"
+# cron runs with a bare PATH, which has neither projekt nor the git of this
+# machine; the one of the apply is the PATH the user works with.
+path="$(printf '%q' "${PATH}")"
+sync="projekt folder sync"
+fetch="projekt folder exec --quiet -- git fetch --all --prune --quiet"
+cron::set_block projekt << EOF
+0 12 * * * export PATH=${path}; ${sync} > ${log} 2>&1; ${fetch} >> ${log} 2>&1
+EOF
+dybatpho::success "Schedule projekt"
+{{- end }}
