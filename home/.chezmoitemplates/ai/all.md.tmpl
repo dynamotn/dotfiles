@@ -3,7 +3,8 @@
        is added here once rather than in each of their wrappers. Claude reads
        the same partials split between CLAUDE.md.tmpl and ~/.claude/rules/,
        so a new partial also gets a rule file there (claude_rules.bats
-       fails until it does). */ -}}
+       fails until it does). A wrapper that passes the key aiShellScriptsSkill
+       gets a pointer to the shell-scripts skill instead of that section. */ -}}
 {{- template "ai/credentials.md.tmpl" . }}
 
 {{ template "ai/destructive-commands.md.tmpl" . }}
@@ -11,7 +12,11 @@
 {{ template "ai/intent.md.tmpl" . }}
 
 {{ template "ai/shell.md.tmpl" . }}
+{{ if hasKey . "aiShellScriptsSkill" -}}
+- Before writing or changing a shell script, load the `shell-scripts` skill.
+{{ else -}}
 {{ template "ai/shell-scripts.md.tmpl" . }}
+{{- end }}
 
 {{ template "ai/tool-preferences.md.tmpl" . }}
 
