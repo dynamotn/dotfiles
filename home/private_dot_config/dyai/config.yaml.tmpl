@@ -8,43 +8,13 @@
 {{- $d := fromYaml (includeTemplate "ai/dyai-data.yaml.tmpl" .) -}}
 global:
   # Community skills from https://skills.sh, installed for every agent with the
-  # skills CLI. Keep each entry generic to a role, never to one project.
+  # skills CLI. Only cross-cutting skills every project benefits from live here;
+  # everything tied to a language, tool or domain moved to a registry preset
+  # (`dyai use <name>`) so this baseline stays lean.
   skills:
     - vercel-labs/skills@find-skills
-    - affaan-m/ecc@docker-patterns
-    - jeffallan/claude-skills@kubernetes-specialist
-    - wshobson/agents@helm-chart-scaffolding
-    - wshobson/agents@github-actions-templates
-    - wshobson/agents@gitlab-ci-patterns
-    - wshobson/agents@gitops-workflow
-    - aws/agent-toolkit-for-aws@aws-iam
-    - aws/agent-toolkit-for-aws@aws-observability
-    - vercel-labs/agent-skills@vercel-react-best-practices
-    - leonxlnx/taste-skill@design-taste-frontend
-    - addyosmani/web-quality-skills@accessibility
-    - currents-dev/playwright-best-practices-skill@playwright-best-practices
-    - wshobson/agents@e2e-testing-patterns
     - wshobson/agents@api-design-principles
     - addyosmani/agent-skills@api-and-interface-design
-    - supabase/agent-skills@supabase-postgres-best-practices
-    - samber/cc-skills-golang@golang-code-style
-    - samber/cc-skills-golang@golang-testing
-    - samber/cc-skills-golang@golang-error-handling
-    - samber/cc-skills-golang@golang-grpc
-    - mindrally/skills@fastapi-python
-    - mcollina/skills@fastify-best-practices
-    - apollographql/skills@rust-best-practices
-    - wshobson/agents@sql-optimization-patterns
-    - samber/cc-skills-golang@golang-security
-    - wshobson/agents@stride-analysis-patterns
-    - openai/skills@security-threat-model
-    - Eyadkelleh/awesome-skills-security@llm-testing
-    - Eyadkelleh/awesome-skills-security@security-fuzzing
-    - Eyadkelleh/awesome-skills-security@security-passwords
-    - Eyadkelleh/awesome-skills-security@security-patterns
-    - Eyadkelleh/awesome-skills-security@security-payloads
-    - Eyadkelleh/awesome-skills-security@security-usernames
-    - Eyadkelleh/awesome-skills-security@security-webshells
     - spillwavesolutions/design-doc-mermaid@design-doc-mermaid
     - softaworks/agent-toolkit@c4-architecture
     - addyosmani/agent-skills@documentation-and-adrs
