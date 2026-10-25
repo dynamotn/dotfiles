@@ -134,3 +134,24 @@ agents:
 {{- range $d.plugins }}
       - {{ . }}
 {{- end }}
+# Opt-in presets pulled per project by `dyai use <name>`; kept out of the
+# global baseline so the discovery index stays lean. Phase 4 populates these.
+registry:
+  languages:
+    go:
+      subagents: [golang-pro]
+      skills: [samber/cc-skills-golang@golang-code-style]
+    python:
+      subagents: [python-pro]
+      skills: [mindrally/skills@fastapi-python]
+    rust:
+      subagents: [rust-engineer]
+      skills: [apollographql/skills@rust-best-practices]
+    typescript:
+      subagents: [typescript-pro]
+  infra:
+    terraform:
+      subagents: [terraform-engineer]
+    kubernetes:
+      subagents: [kubernetes-specialist]
+      skills: [jeffallan/claude-skills@kubernetes-specialist]
