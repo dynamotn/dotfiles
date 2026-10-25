@@ -62,6 +62,14 @@ global:
       args: []
       env:
         HF_HUB_DISABLE_TELEMETRY: "1"
+  # Abstract event automation, translated to each hook-capable agent's format.
+  hooks:
+    stop:
+      event: stop
+      run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Task finished!' --icon=dialog-information; true"
+    input:
+      event: input
+      run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Waiting for your input!' --icon=dialog-information; true"
   # Shared settings translated into each agent's settings file.
   policy:
 {{ $d.policy | toYaml | indent 4 }}
