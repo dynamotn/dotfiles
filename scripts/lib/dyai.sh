@@ -883,6 +883,42 @@ function dyai::rm {
 }
 
 #######################################
+# @description Run each global installer once, per installed agent it targets
+# @noargs
+#######################################
+function dyai::setup_installers {
+  local installers dir name agent cmd hash marker
+  installers="$(dyai::config_json '.global.installers // {}')"
+  dir="$(dybatpho::path_join "${HOME}" ".cache" "dyai" "installers")"
+  # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
+  while IFS= read -r name; do
+    [[ -n "${name}" ]] || continue
+    # One command per agent id; run only when that agent's launcher is present.
+    # shellcheck disable=SC2312 # a bad entry yields no rows, a safe no-op
+    while IFS=$'\t' read -r agent cmd; do
+      [[ -n "${agent}" && -n "${cmd}" ]] || continue
+      dybatpho::is command "${agent}" || continue
+      # Marker keyed on the command, so a changed command re-runs but a repeat
+      # apply does not. The command is a trusted config string, run like a hook.
+      # shellcheck disable=SC2312 # sha of the command string; a stable key
+      hash="$(printf '%s' "${cmd}" | sha256sum | cut -d' ' -f1)"
+      marker="$(dybatpho::path_join "${dir}" "${name}.${agent}.${hash}")"
+      if dybatpho::is file "${marker}"; then
+        dybatpho::debug "installer ${name} for ${agent} already run"
+        continue
+      fi
+      dybatpho::info "Run installer ${name} for ${agent}"
+      if bash -c "${cmd}"; then
+        dybatpho::ensure_dir "${dir}" > /dev/null
+        : > "${marker}"
+      else
+        dybatpho::warn "installer ${name} for ${agent} failed"
+      fi
+    done < <(jq -r --arg n "${name}" '.[$n].commands | to_entries[] | [.key, .value] | @tsv' <<< "${installers}")
+  done < <(jq -r 'keys[]?' <<< "${installers}")
+}
+
+#######################################
 # @description Run the global AI-agent setup from ~/.config/dyai/config.yaml
 # @noargs
 #######################################
@@ -915,4 +951,5 @@ function dyai::install {
   else
     dybatpho::warn "bunx is not installed, skip skills"
   fi
+  dyai::setup_installers
 }

@@ -138,6 +138,28 @@ CFG
   [ ! -f "${HOME}/.claude/agents/graphql-architect.md" ]
 }
 
+@test "dyai::setup_installers runs a per-agent installer once, only for present agents" {
+  _stub opencode
+  # codex is intentionally NOT stubbed (its launcher is absent)
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  installers:
+    memtool:
+      commands:
+        opencode: "echo ran-opencode >> $HOME/inst.log"
+        codex: "echo ran-codex >> $HOME/inst.log"
+CFG
+  dyai::setup_installers
+  grep -qx 'ran-opencode' "${HOME}/inst.log"
+  run grep -qx 'ran-codex' "${HOME}/inst.log"
+  assert_failure
+  # idempotent: a second run does not re-run (marker guards it)
+  dyai::setup_installers
+  [[ "$(grep -c 'ran-opencode' "${HOME}/inst.log")" == "1" ]]
+}
+
 @test "dyai::use materializes a preset's commands into ./.claude/commands; rm prunes" {
   _stub bunx
   local src="${BATS_TEST_TMPDIR}/cmds"

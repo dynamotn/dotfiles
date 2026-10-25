@@ -121,6 +121,22 @@ properties:
       hooks:
         type: object
         additionalProperties: { $ref: "#/definitions/hook" }
+      installers:
+        type: object
+        description: >
+          Per-agent install commands run once by `dyai install` (for a tool with
+          its own installer, e.g. a memory plugin). Keyed by installer name.
+        additionalProperties:
+          type: object
+          additionalProperties: false
+          required: [commands]
+          properties:
+            commands:
+              type: object
+              description: >
+                Shell command to run for each agent id, run once when that
+                agent's launcher is present. Keyed by agent id.
+              additionalProperties: { type: string }
       policy: { $ref: "#/definitions/policy" }
 
   agents:
