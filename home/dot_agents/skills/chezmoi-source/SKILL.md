@@ -76,6 +76,27 @@ chezmoi diff            # show what apply would change
 Show the diff and stop. `chezmoi apply`, `chezmoi destroy`, and
 `chezmoi forget` write over the real `$HOME` and need the user's yes.
 
+## Gotchas
+
+- In `mode: symlink`, a plain source file is linked into `$HOME`, but a
+  `.tmpl` is rendered into a real copy. Editing that copy looks like it
+  works until the next apply silently reverts it.
+- `chezmoi execute-template` renders partials from the source it is pointed
+  at. In a worktree under `.worktrees/<name>`, pass
+  `--source <that worktree>`, or it renders the main checkout's
+  `.chezmoitemplates` and the check proves nothing.
+- A partial in `home/.chezmoitemplates/ai/` feeds the instruction file of
+  every agent. Claude reads it through `home/private_dot_claude/rules/`, so
+  a new partial needs a rule file too; `scripts/test/claude_rules.bats`
+  catches a missing one. Byte-compare a rendered wrapper before and after a
+  refactor with `/usr/bin/cmp`, since the agent shell may wrap `diff`.
+- A `symlink_<name>` source holds the link *target* as its content (often a
+  template, e.g. the enterprise `symlink_settings.json.tmpl` pointing at
+  `~/.claude/settings.json`). Change the target's source, not the link.
+- `~/.claude/settings.json` is rendered from `ai/dyai-data.yaml.tmpl` plus
+  literals; `scripts/test/fixtures/claude-settings.expected.json` pins the
+  result, so a deliberate settings change updates that fixture too.
+
 ## Off limits
 
 `secrets/data/`, `*.age`, and anything under `~/.ssh`, `~/.gnupg`, `~/.aws`
