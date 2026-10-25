@@ -237,3 +237,68 @@ CFG
   assert_success
   refute_output --partial "Registered MCP sequential-thinking in ${f}"
 }
+
+# A claude stub logging every call, and a config whose context7 server is
+# also bundled by the enabled Claude plugin of the same name.
+function _plugin_bundled_setup {
+  cat > "${HOME}/.local/bin/claude" << CL
+#!/usr/bin/env bash
+printf '%s|%s\n' "\${CLAUDE_CONFIG_DIR:-DEFAULT}" "\$*" >> "${HOME}/claude.log"
+exit 0
+CL
+  chmod +x "${HOME}/.local/bin/claude"
+  _stub_agent gemini
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << CFG
+global:
+  skills: []
+  mcp:
+    context7:
+      command: ${LAYA}
+      args: ["--x"]
+      env: {}
+    laya:
+      command: ${LAYA}
+      args: []
+      env: {}
+agents:
+  claude:
+    plugins:
+      - context7@claude-plugins-official
+CFG
+}
+
+@test "an MCP server bundled by a same-named Claude plugin is not registered into Claude" {
+  _plugin_bundled_setup
+  run bash "${HOOK}"
+  assert_success
+  run grep 'mcp add-json --scope user context7' "${HOME}/claude.log"
+  assert_failure
+  # A server no plugin provides is still registered, and the other agents
+  # still get the bundled one, since they have no such plugin.
+  grep 'mcp add-json --scope user laya' "${HOME}/claude.log" > /dev/null
+  local gemini_cmd
+  gemini_cmd="$(jq -r '.mcpServers.context7.command' "${HOME}/.gemini/settings.json")"
+  [[ "${gemini_cmd}" == "${LAYA}" ]]
+}
+
+@test "a dyai-registered duplicate of a plugin's MCP server is removed from Claude" {
+  _plugin_bundled_setup
+  # Exactly the definition dyai itself would have written earlier.
+  jq -n --arg c "${LAYA}" \
+    '{mcpServers: {context7: {type: "stdio", command: $c, args: ["--x"], env: {}}}}' \
+    > "${HOME}/.claude.json"
+  run bash "${HOOK}"
+  assert_success
+  grep '^DEFAULT|mcp remove --scope user context7$' "${HOME}/claude.log" > /dev/null
+}
+
+@test "a user-customized registration of a plugin's MCP server is left alone" {
+  _plugin_bundled_setup
+  jq -n '{mcpServers: {context7: {type: "stdio", command: "mine", args: [], env: {}}}}' \
+    > "${HOME}/.claude.json"
+  run bash "${HOOK}"
+  assert_success
+  run grep 'mcp remove --scope user context7' "${HOME}/claude.log"
+  assert_failure
+}
