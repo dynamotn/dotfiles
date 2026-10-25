@@ -245,3 +245,158 @@ MANIFEST
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
   [[ "$(cat "${lsp}")" == "{}" ]]
 }
+
+# ---------------------------------------------------------------------------
+# Task 4: dyai_lsp::setup_copilot / setup_opencode / setup_hermes
+# ---------------------------------------------------------------------------
+
+function _lsp_agent_file {
+  case "$1" in
+    copilot) printf '%s\n' "${HOME}/.copilot/lsp-config.json" ;;
+    opencode) printf '%s\n' "${HOME}/.config/opencode/opencode.json" ;;
+    hermes) printf '%s\n' "${HOME}/.hermes/config.yaml" ;;
+    *)
+      printf 'unknown agent %s\n' "$1" >&2
+      return 1
+      ;;
+  esac
+}
+
+function _lsp_seed_foreign {
+  local agent file
+  agent="$1"
+  file="$(_lsp_agent_file "${agent}")"
+  dybatpho::ensure_dir "$(dirname "${file}")" > /dev/null
+  case "${agent}" in
+    copilot) printf '{"lspServers":{"mine":{"command":"foreign"}}}' > "${file}" ;;
+    opencode) printf '{"lsp":{"mine":{"command":["foreign"]}}}' > "${file}" ;;
+    hermes) printf 'lsp:\n  servers:\n    mine:\n      command: ["foreign"]\n' > "${file}" ;;
+    *)
+      printf 'unknown agent %s\n' "${agent}" >&2
+      return 1
+      ;;
+  esac
+}
+
+function _lsp_entries_json {
+  local agent file
+  agent="$1"
+  file="$(_lsp_agent_file "${agent}")"
+  case "${agent}" in
+    copilot) jq -c '.lspServers // {}' "${file}" ;;
+    opencode) jq -c '.lsp // {}' "${file}" ;;
+    hermes) yq -o=json '.lsp.servers // {}' "${file}" ;;
+    *)
+      printf 'unknown agent %s\n' "${agent}" >&2
+      return 1
+      ;;
+  esac
+}
+
+function _lsp_has_entry {
+  local agent server
+  agent="$1"
+  server="$2"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(_lsp_entries_json "${agent}" | jq -r --arg s "${server}" 'has($s)')" == "true" ]]
+}
+
+function _lsp_command0 {
+  local agent server entries filter
+  agent="$1"
+  server="$2"
+  entries="$(_lsp_entries_json "${agent}")"
+  # shellcheck disable=SC2016 # $s is a jq variable, not a shell one
+  case "${agent}" in
+    copilot) filter='.[$s].command' ;;
+    *) filter='.[$s].command[0]' ;;
+  esac
+  jq -r --arg s "${server}" "${filter}" <<< "${entries}"
+}
+
+function _lsp_setup {
+  dyai_lsp::"setup_$1"
+}
+
+@test "dyai_lsp::setup_<agent> writes launcher-wrapped entries and keeps foreign ones" {
+  for agent in copilot opencode hermes; do
+    _write_manifest
+    _stub "${agent}"
+    _lsp_seed_foreign "${agent}"
+    _lsp_setup "${agent}"
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(_lsp_command0 "${agent}" pyls)" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
+    _lsp_has_entry "${agent}" mine
+  done
+}
+
+@test "dyai_lsp::setup_<agent> prunes a server removed from the manifest, never a foreign one" {
+  for agent in copilot opencode hermes; do
+    _write_manifest
+    _stub "${agent}"
+    _lsp_seed_foreign "${agent}"
+    _lsp_setup "${agent}"
+    _lsp_has_entry "${agent}" fakels
+    jq 'del(.servers[] | select(.name == "fakels"))' "${M}" > "${M}.tmp" && mv "${M}.tmp" "${M}"
+    _lsp_setup "${agent}"
+    ! _lsp_has_entry "${agent}" fakels
+    _lsp_has_entry "${agent}" pyls
+    _lsp_has_entry "${agent}" mine
+  done
+}
+
+@test "dyai_lsp::setup_<agent> is a no-op on the second run (mtime unchanged)" {
+  for agent in copilot opencode hermes; do
+    _write_manifest
+    _stub "${agent}"
+    _lsp_seed_foreign "${agent}"
+    _lsp_setup "${agent}"
+    local file before after
+    file="$(_lsp_agent_file "${agent}")"
+    before="$(stat -c %Y "${file}")"
+    sleep 1
+    _lsp_setup "${agent}"
+    after="$(stat -c %Y "${file}")"
+    [[ "${before}" == "${after}" ]]
+  done
+}
+
+@test "dyai_lsp::setup_hermes uses the Hermes built-in id for pyright" {
+  dybatpho::ensure_dir "${XDG_CACHE_HOME}/dyai" > /dev/null
+  M="${XDG_CACHE_HOME}/dyai/lsp.json"
+  cat > "${M}" << 'MANIFEST'
+{
+  "version": 1,
+  "untrusted_regexes": [],
+  "servers": [
+    {
+      "name": "pyright",
+      "command": "/opt/pyright-bin",
+      "args": ["--stdio"],
+      "filetypes": ["python"],
+      "extensions": {".py": "python"},
+      "settings": {},
+      "init_options": {}
+    }
+  ]
+}
+MANIFEST
+  _stub hermes
+  dyai_lsp::setup_hermes
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.lsp.servers.pyright.command[0]' "${HOME}/.hermes/config.yaml")" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
+}
+
+@test "dyai_lsp writers leave agent files untouched when the manifest is missing" {
+  for agent in copilot opencode hermes; do
+    _stub "${agent}"
+    _lsp_seed_foreign "${agent}"
+    local file before after
+    file="$(_lsp_agent_file "${agent}")"
+    before="$(cat "${file}")"
+    run _lsp_setup "${agent}"
+    assert_output --partial "manifest"
+    after="$(cat "${file}")"
+    [[ "${before}" == "${after}" ]]
+  done
+}

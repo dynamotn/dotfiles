@@ -178,6 +178,261 @@ function __dyai_lsp_entry {
 }
 
 #######################################
+# @description Map a Neovim server name to the Hermes built-in id it matches,
+#   when one exists. Confirmed against
+#   ~/.hermes/hermes-agent/agent/lsp/servers.py: lua_ls, bashls and yamlls
+#   have no matching built-in id there (the real ids are lua-language-server,
+#   bash-language-server and yaml-language-server), so those fall through to
+#   the Neovim name unchanged.
+# @arg $1 string Neovim server name
+# @stdout The Hermes built-in id, or the Neovim name when there is no match
+#######################################
+function __dyai_lsp_hermes_id {
+  local name
+  dybatpho::expect_args name -- "$@"
+  case "${name}" in
+    pyright) printf 'pyright\n' ;;
+    gopls) printf 'gopls\n' ;;
+    rust_analyzer) printf 'rust-analyzer\n' ;;
+    clangd) printf 'clangd\n' ;;
+    *) printf '%s\n' "${name}" ;;
+  esac
+}
+
+#######################################
+# @description Merge a map of entries into a top-level object key of a JSON
+#   file, pruning stale dyai-owned keys first, idempotently (jq -S compare)
+# @arg $1 string Path of the JSON config file (created as {} when missing)
+# @arg $2 string Top-level key that holds the entries (e.g. lspServers, lsp)
+# @arg $3 string Entries to merge in, as a JSON object {name: entry}
+# @arg $4 string JSON array of keys to delete from the block before merging
+#######################################
+function __dyai_lsp_write_json_block {
+  local file block_key entries_json prune_json
+  dybatpho::expect_args file block_key entries_json prune_json -- "$@"
+  local dir current_norm new_content new_norm tmp
+  dir="$(dirname "${file}")"
+  dybatpho::ensure_dir "${dir}" > /dev/null
+  dybatpho::is file "${file}" || printf '{}\n' > "${file}"
+  # shellcheck disable=SC2312 # a malformed file falls back to {}, forcing a rewrite attempt
+  current_norm="$(jq -S . "${file}" 2> /dev/null || printf '{}')"
+  new_content="$(
+    jq --arg b "${block_key}" --argjson entries "${entries_json}" --argjson prune "${prune_json}" '
+      .[$b] = (.[$b] // {})
+      | reduce $prune[] as $k (.; .[$b] |= del(.[$k]))
+      | reduce ($entries | keys_unsorted[]) as $k (.; .[$b][$k] = $entries[$k])
+    ' "${file}" 2> /dev/null
+  )"
+  if [[ -z "${new_content}" ]]; then
+    dybatpho::warn "Could not read ${file} as JSON, skip dyai-lsp update"
+    return 1
+  fi
+  new_norm="$(jq -S . <<< "${new_content}")"
+  if [[ "${current_norm}" == "${new_norm}" ]]; then
+    dybatpho::debug "dyai-lsp entries already up to date in ${file}"
+    return 0
+  fi
+  dybatpho::create_temp tmp "json" "dyai-lsp" "${dir}"
+  printf '%s' "${new_content}" > "${tmp}" && mv "${tmp}" "${file}"
+  dybatpho::info "Updated dyai-lsp entries in ${file}"
+}
+
+#######################################
+# @description Merge a map of entries into Hermes' `.lsp.servers`, pruning
+#   stale dyai-owned keys first, idempotently (jq -S compare on that subtree)
+# @arg $1 string Path of the YAML config file (created empty when missing)
+# @arg $2 string Entries to merge in, as a JSON object {id: entry}
+# @arg $3 string JSON array of ids to delete from `.lsp.servers` before merging
+#######################################
+function __dyai_lsp_write_yaml_block {
+  local file entries_json prune_json
+  dybatpho::expect_args file entries_json prune_json -- "$@"
+  local dir current_json cur_norm new_servers new_norm
+  dir="$(dirname "${file}")"
+  dybatpho::ensure_dir "${dir}" > /dev/null
+  dybatpho::is file "${file}" || : > "${file}"
+  # shellcheck disable=SC2312 # a malformed file or missing path yields {}, a safe no-op default
+  current_json="$(yq -o=json '.lsp.servers // {}' "${file}" 2> /dev/null || printf '{}')"
+  cur_norm="$(jq -cS . <<< "${current_json}" 2> /dev/null || printf '{}')"
+  new_servers="$(
+    jq --argjson entries "${entries_json}" --argjson prune "${prune_json}" '
+      reduce $prune[] as $k (.; del(.[$k]))
+      | reduce ($entries | keys_unsorted[]) as $k (.; .[$k] = $entries[$k])
+    ' <<< "${current_json}"
+  )"
+  new_norm="$(jq -cS . <<< "${new_servers}")"
+  if [[ "${cur_norm}" == "${new_norm}" ]]; then
+    dybatpho::debug "dyai-lsp entries already up to date in ${file}"
+    return 0
+  fi
+  if E="${new_servers}" yq -i '.lsp.servers = (strenv(E) | fromjson)' "${file}"; then
+    dybatpho::info "Updated dyai-lsp entries in ${file}"
+  else
+    dybatpho::warn "Could not update dyai-lsp entries in ${file}"
+  fi
+}
+
+#######################################
+# @description Write the Neovim language servers' primary extensions into
+#   Copilot's `lsp-config.json`, launcher-wrapped, pruning servers dyai wrote
+#   before that are no longer in the manifest. Runs only if `copilot` is on
+#   PATH; leaves the file untouched (with a warning) when the manifest is
+#   missing or invalid.
+# @noargs
+# @env COPILOT_HOME string [default: ~/.copilot] Base directory of Copilot's config
+# @env XDG_CACHE_HOME string Base of the manifest and owned-state files
+#######################################
+function dyai_lsp::setup_copilot {
+  dybatpho::is command copilot || return 0
+  local manifest
+  # shellcheck disable=SC2312 # xdg_cache_dir only builds a path string, it cannot fail here
+  manifest="$(dybatpho::path_join "$(dybatpho::xdg_cache_dir dyai)" "lsp.json")"
+  if ! dybatpho::is file "${manifest}"; then
+    dybatpho::warn "No dyai-lsp manifest at ${manifest}, skip Copilot"
+    return 1
+  fi
+  local ext_map
+  # shellcheck disable=SC2312 # a malformed manifest yields no output, caught below
+  ext_map="$(dyai_lsp::primary_extensions "${manifest}" 2> /dev/null)"
+  if ! jq -e . <<< "${ext_map}" &> /dev/null; then
+    dybatpho::warn "Invalid dyai-lsp manifest ${manifest}, skip Copilot"
+    return 1
+  fi
+  local entries name server_json ext_json argv entry
+  entries="{}"
+  # shellcheck disable=SC2312 # a malformed ext_map yields no keys, a safe no-op loop
+  while IFS= read -r name; do
+    [[ -n "${name}" ]] || continue
+    server_json="$(jq -c --arg n "${name}" '.servers[] | select(.name == $n)' "${manifest}")"
+    # shellcheck disable=SC2312 # a name read from ext_map's own keys always has an entry
+    ext_json="$(jq -c --arg n "${name}" '.[$n]' <<< "${ext_map}")"
+    argv="$(dyai_lsp::launch_argv "${server_json}")"
+    entry="$(
+      jq -n --argjson argv "${argv}" --argjson ext "${ext_json}" '
+        {command: $argv[0], args: $argv[1:], fileExtensions: $ext}
+      '
+    )"
+    entries="$(jq -c --arg n "${name}" --argjson e "${entry}" '.[$n] = $e' <<< "${entries}")"
+  done < <(jq -r 'keys[]' <<< "${ext_map}")
+
+  local owned_names prune file
+  owned_names="$(jq -c 'keys' <<< "${entries}")"
+  # shellcheck disable=SC2312 # owned_get on an absent key yields null, defaulted to []
+  prune="$(dyai_lsp::owned_get copilot | jq -c --argjson keep "${owned_names}" '(. // []) - $keep')"
+  # shellcheck disable=SC2312 # path_join only builds a path string, it cannot fail here
+  file="$(dybatpho::path_join "${COPILOT_HOME:-$(dybatpho::path_join "${HOME}" ".copilot")}" "lsp-config.json")"
+  __dyai_lsp_write_json_block "${file}" "lspServers" "${entries}" "${prune}"
+  dyai_lsp::owned_set copilot "${owned_names}"
+}
+
+#######################################
+# @description Write every Neovim language server into opencode's config,
+#   launcher-wrapped, pruning servers dyai wrote before that are no longer in
+#   the manifest. Runs only if `opencode` is on PATH; leaves the file
+#   untouched (with a warning) when the manifest is missing or invalid.
+# @noargs
+# @env OPENCODE_CONFIG string [default: ~/.config/opencode/opencode.json]
+# @env XDG_CACHE_HOME string Base of the manifest and owned-state files
+#######################################
+function dyai_lsp::setup_opencode {
+  dybatpho::is command opencode || return 0
+  local manifest
+  # shellcheck disable=SC2312 # xdg_cache_dir only builds a path string, it cannot fail here
+  manifest="$(dybatpho::path_join "$(dybatpho::xdg_cache_dir dyai)" "lsp.json")"
+  if ! dybatpho::is file "${manifest}"; then
+    dybatpho::warn "No dyai-lsp manifest at ${manifest}, skip opencode"
+    return 1
+  fi
+  if ! jq -e . "${manifest}" &> /dev/null; then
+    dybatpho::warn "Invalid dyai-lsp manifest ${manifest}, skip opencode"
+    return 1
+  fi
+  local entries name server_json argv init_opts entry
+  entries="{}"
+  # shellcheck disable=SC2312 # a malformed manifest yields no names, a safe no-op loop
+  while IFS= read -r name; do
+    [[ -n "${name}" ]] || continue
+    server_json="$(jq -c --arg n "${name}" '.servers[] | select(.name == $n)' "${manifest}")"
+    argv="$(dyai_lsp::launch_argv "${server_json}")"
+    # shellcheck disable=SC2312 # a bad server entry yields {}, a safe no-op default
+    init_opts="$(jq -c '.init_options // {}' <<< "${server_json}")"
+    entry="$(
+      jq -n --argjson argv "${argv}" --argjson server "${server_json}" --argjson init "${init_opts}" '
+        {command: $argv, extensions: (($server.extensions // {}) | keys_unsorted)}
+        + (if ($init | length) > 0 then {initialization: $init} else {} end)
+      '
+    )"
+    entries="$(jq -c --arg n "${name}" --argjson e "${entry}" '.[$n] = $e' <<< "${entries}")"
+  done < <(jq -r '.servers[].name' "${manifest}")
+
+  local owned_names prune file
+  owned_names="$(jq -c 'keys' <<< "${entries}")"
+  # shellcheck disable=SC2312 # owned_get on an absent key yields null, defaulted to []
+  prune="$(dyai_lsp::owned_get opencode | jq -c --argjson keep "${owned_names}" '(. // []) - $keep')"
+  file="${OPENCODE_CONFIG:-$(dybatpho::path_join "${HOME}" ".config" "opencode" "opencode.json")}"
+  __dyai_lsp_write_json_block "${file}" "lsp" "${entries}" "${prune}"
+  dyai_lsp::owned_set opencode "${owned_names}"
+}
+
+#######################################
+# @description Write the Neovim language servers' primary extensions into
+#   Hermes' `~/.hermes/config.yaml` (`.lsp.servers`), launcher-wrapped, keyed
+#   by the Hermes built-in id when the server name maps to one, pruning
+#   servers dyai wrote before that are no longer in the manifest. Runs only
+#   if `hermes` is on PATH; leaves the file untouched (with a warning) when
+#   the manifest is missing or invalid.
+# @noargs
+# @env XDG_CACHE_HOME string Base of the manifest and owned-state files
+# @env HOME string Used to locate ~/.hermes/config.yaml
+#######################################
+function dyai_lsp::setup_hermes {
+  dybatpho::is command hermes || return 0
+  local manifest
+  # shellcheck disable=SC2312 # xdg_cache_dir only builds a path string, it cannot fail here
+  manifest="$(dybatpho::path_join "$(dybatpho::xdg_cache_dir dyai)" "lsp.json")"
+  if ! dybatpho::is file "${manifest}"; then
+    dybatpho::warn "No dyai-lsp manifest at ${manifest}, skip Hermes"
+    return 1
+  fi
+  local ext_map
+  # shellcheck disable=SC2312 # a malformed manifest yields no output, caught below
+  ext_map="$(dyai_lsp::primary_extensions "${manifest}" 2> /dev/null)"
+  if ! jq -e . <<< "${ext_map}" &> /dev/null; then
+    dybatpho::warn "Invalid dyai-lsp manifest ${manifest}, skip Hermes"
+    return 1
+  fi
+  local entries name server_json ext_json argv exts init_opts entry id
+  entries="{}"
+  # shellcheck disable=SC2312 # a malformed ext_map yields no keys, a safe no-op loop
+  while IFS= read -r name; do
+    [[ -n "${name}" ]] || continue
+    server_json="$(jq -c --arg n "${name}" '.servers[] | select(.name == $n)' "${manifest}")"
+    # shellcheck disable=SC2312 # a name read from ext_map's own keys always has an entry
+    ext_json="$(jq -c --arg n "${name}" '.[$n]' <<< "${ext_map}")"
+    argv="$(dyai_lsp::launch_argv "${server_json}")"
+    exts="$(jq -c 'keys_unsorted' <<< "${ext_json}")"
+    # shellcheck disable=SC2312 # a bad server entry yields {}, a safe no-op default
+    init_opts="$(jq -c '.init_options // {}' <<< "${server_json}")"
+    entry="$(
+      jq -n --argjson argv "${argv}" --argjson exts "${exts}" --argjson init "${init_opts}" '
+        {command: $argv, extensions: $exts}
+        + (if ($init | length) > 0 then {initialization_options: $init} else {} end)
+      '
+    )"
+    id="$(__dyai_lsp_hermes_id "${name}")"
+    entries="$(jq -c --arg k "${id}" --argjson e "${entry}" '.[$k] = $e' <<< "${entries}")"
+  done < <(jq -r 'keys[]' <<< "${ext_map}")
+
+  local owned_names prune file
+  owned_names="$(jq -c 'keys' <<< "${entries}")"
+  # shellcheck disable=SC2312 # owned_get on an absent key yields null, defaulted to []
+  prune="$(dyai_lsp::owned_get hermes | jq -c --argjson keep "${owned_names}" '(. // []) - $keep')"
+  file="$(dybatpho::path_join "${HOME}" ".hermes" "config.yaml")"
+  __dyai_lsp_write_yaml_block "${file}" "${entries}" "${prune}"
+  dyai_lsp::owned_set hermes "${owned_names}"
+}
+
+#######################################
 # @description Write the dyai-lsp marketplace and plugin for Claude, from the
 #   lsp.json manifest, and register/update it with `claude` when needed
 # @noargs
