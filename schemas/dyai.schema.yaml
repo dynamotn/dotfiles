@@ -35,6 +35,25 @@ definitions:
       timeout: { type: integer }
       connect_timeout: { type: integer }
 
+  preset:
+    type: object
+    additionalProperties: false
+    description: A registry preset — the extensions `dyai use <name>` pulls into a project.
+    properties:
+      subagents:
+        type: array
+        items: { type: string }
+        description: Subagent leaf names, installed from the global.subagents source.
+      skills:
+        type: array
+        items: { type: string }
+      mcp:
+        type: object
+        additionalProperties: { $ref: "#/definitions/mcpServer" }
+      commands:
+        type: array
+        items: { type: string }
+
   subagentSource:
     type: object
     additionalProperties: false
@@ -141,3 +160,18 @@ properties:
           type: object
           additionalProperties: { $ref: "#/definitions/hook" }
         policy: { $ref: "#/definitions/policy" }
+
+  registry:
+    type: object
+    additionalProperties: false
+    description: Opt-in presets pulled per project by `dyai use <name>`.
+    properties:
+      languages:
+        type: object
+        additionalProperties: { $ref: "#/definitions/preset" }
+      infra:
+        type: object
+        additionalProperties: { $ref: "#/definitions/preset" }
+      presets:
+        type: object
+        additionalProperties: { $ref: "#/definitions/preset" }

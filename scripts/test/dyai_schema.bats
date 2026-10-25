@@ -196,3 +196,15 @@ function _render_config {
   yq '.global.subagents[0].include[]' "${out}" | grep -q '01-core-development'
   yq '.global.subagents[0].include[]' "${out}" | grep -q '04-quality-security'
 }
+
+@test "config declares a registry of language and infra presets" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.reg.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  [[ "$(yq '.registry.languages.go.subagents[0]' "${out}")" == "golang-pro" ]]
+  [[ "$(yq '.registry.infra.terraform.subagents[0]' "${out}")" == "terraform-engineer" ]]
+  yq '.registry.languages.go.skills[]' "${out}" | grep -q 'golang-code-style'
+}
