@@ -256,6 +256,21 @@ function _render_config {
   yq '.global.mcp.filesystem.args[]' "${out}" | grep 'Working/community' > /dev/null
 }
 
+@test "dybrain MCP runs the vault's script only on kinds with Obsidian" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/laptop.yaml" out="${BATS_TEST_TMPDIR}/laptop.mcp.yaml"
+  _write_profile_config "${cfg}" "darwin" "laptop" "launchd" "M" "M" "A"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  [[ "$(yq '.global.mcp.dybrain.command' "${out}")" == "uv" ]]
+  yq '.global.mcp.dybrain.args[-1]' "${out}" \
+    | grep '/Documents/Notes/99_System/99.03_Scripts/dev/vault-mcp.py$' > /dev/null
+  cfg="${BATS_TEST_TMPDIR}/server.yaml" out="${BATS_TEST_TMPDIR}/server.mcp.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "server" "openrc" "N" "N" "N"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  [[ "$(yq '.global.mcp | has("dybrain")' "${out}")" == "false" ]]
+}
+
 @test "MCP pins clear the 7-day uv/bun release cooldown" {
   _require_chezmoi
   _require_yq

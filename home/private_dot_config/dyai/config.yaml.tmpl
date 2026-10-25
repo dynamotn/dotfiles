@@ -113,6 +113,18 @@ global:
       command: bunx
       args: ["@playwright/mcp@0.0.83"]
       env: {}
+{{- if eq .kind "pc" "laptop" "tablet" }}
+    # The Dybrain vault's own server (search, read, capture_fleeting,
+    # append_daily): it refuses `ai: sensitive` notes, which no community
+    # Obsidian server does. Only where Obsidian is installed.
+    dybrain:
+      command: uv
+      args:
+        - run
+        - --script
+        - {{ printf "%s/Documents/Notes/99_System/99.03_Scripts/dev/vault-mcp.py" .chezmoi.homeDir | quote }}
+      env: {}
+{{- end }}
     # github needs Docker and a GITHUB_PERSONAL_ACCESS_TOKEN in the agent's
     # runtime environment; only the variable name is stored here, never a value.
     github:
