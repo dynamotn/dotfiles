@@ -312,7 +312,7 @@ function _setup_mcp {
   while IFS= read -r name; do
     [[ -n "${name}" ]] || continue
     command="$(jq -r --arg n "${name}" '.[$n].command // ""' <<< "${servers}")"
-    if [[ -n "${command}" ]] && ! dybatpho::is executable "${command}"; then
+    if [[ -n "${command}" ]] && ! dybatpho::is command "${command}"; then
       dybatpho::warn "MCP server ${name} command not found (${command}), skip"
       continue
     fi

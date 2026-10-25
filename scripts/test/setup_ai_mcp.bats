@@ -153,3 +153,23 @@ EOF
   # codex, processed after gemini, still got laya — the hook did not abort.
   [[ "$(yq -p=toml -r '.mcp_servers.laya.command' "${HOME}/.codex/config.toml")" == "${LAYA}" ]]
 }
+
+@test "a bunx-launched MCP server is registered (PATH-aware command gate)" {
+  _stub_agent gemini
+  _stub_agent bunx
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << 'CFG'
+global:
+  skills: []
+  mcp:
+    seqthink:
+      command: bunx
+      args: ["@modelcontextprotocol/server-sequential-thinking@2.0.0"]
+      env: {}
+agents:
+  claude: {}
+CFG
+  run bash "${HOOK}"
+  assert_success
+  [[ "$(jq -r '.mcpServers.seqthink.command' "${HOME}/.gemini/settings.json")" == "bunx" ]]
+}
