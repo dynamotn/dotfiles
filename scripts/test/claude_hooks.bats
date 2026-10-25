@@ -42,7 +42,7 @@ function _run_hook {
   printf 'x=$1\necho $x\n' > "${WORK}/bad.sh"
   _run_hook "${WORK}/bad.sh"
   [[ "${status}" -eq 2 ]] || fail "expected exit 2, got ${status}"
-  [[ "${stderr}" == *"dyshellint reported findings"* ]]
+  [[ "${stderr}" == *"dyshellint reported new findings"* ]]
   [[ "${stderr}" == *"SC2086"* ]]
 }
 
@@ -69,6 +69,36 @@ function _run_hook {
     _run_hook "${f}"
     assert_success
   done
+}
+
+# A git repo whose committed legacy.sh already carries an unquoted $1.
+# dyshellint disable=BSG062 test_helper unsets GIT_DIR and its kin for the whole suite
+function _legacy_repo {
+  local repo="${WORK}/repo"
+  mkdir -p "${repo}"
+  git -C "${repo}" init -q
+  printf '#!/usr/bin/env bash\necho $1\n' > "${repo}/legacy.sh"
+  git -C "${repo}" add legacy.sh
+  git -C "${repo}" -c user.name=t -c user.email=t@t commit -qm init
+}
+
+@test "lint-shell hook ignores findings the committed version already had" {
+  _require_dyshellint
+  _legacy_repo
+  # The edit moves the old finding down a line and adds nothing new.
+  printf '#!/usr/bin/env bash\ntrue\necho $1\n' > "${WORK}/repo/legacy.sh"
+  _run_hook "${WORK}/repo/legacy.sh"
+  assert_success
+}
+
+@test "lint-shell hook reports only the findings an edit introduced" {
+  _require_dyshellint
+  _legacy_repo
+  printf '#!/usr/bin/env bash\necho $1\ncd /tmp\n' > "${WORK}/repo/legacy.sh"
+  _run_hook "${WORK}/repo/legacy.sh"
+  [[ "${status}" -eq 2 ]] || fail "expected exit 2, got ${status}"
+  [[ "${stderr}" == *"legacy.sh:3:"* ]] || fail "new finding missing: ${stderr}"
+  [[ "${stderr}" != *"legacy.sh:2:"* ]] || fail "old finding reported: ${stderr}"
 }
 
 @test "lint-shell hook is a no-op without dyshellint on PATH" {
