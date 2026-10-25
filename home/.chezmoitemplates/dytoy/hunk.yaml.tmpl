@@ -14,11 +14,11 @@ github:
   {{- end }}
   release_asset: hunkdiff-{{ $os }}-{{ $arch }}.tar.gz
 archive:
-  - path: hunkdiff-linux-x64/hunk
+  - path: hunkdiff-{{ $os }}-{{ $arch }}/hunk
     strip: 1
-  - path: hunkdiff-linux-x64/metadata.json
+  - path: hunkdiff-{{ $os }}-{{ $arch }}/metadata.json
     location: {{ .chezmoi.homeDir }}/.hunk
     strip: 1
-  - path: hunkdiff-linux-x64/skills
+  - path: hunkdiff-{{ $os }}-{{ $arch }}/skills
     location: {{ .chezmoi.homeDir }}/.hunk
     strip: 1
