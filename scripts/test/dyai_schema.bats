@@ -268,9 +268,9 @@ function _render_config {
   [[ "$(yq '.registry.infra.docker.subagents[0]' "${out}")" == "docker-expert" ]]
   yq '.registry.infra.aws.skills[]' "${out}" | grep -q 'aws-iam'
   [[ "$(yq '.registry.infra.cicd.skills | length' "${out}")" == "3" ]]
-  [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "2" ]]
-  [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "2" ]]
-  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "9" ]]
+  [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "5" ]]
+  [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "3" ]]
+  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "11" ]]
   # Registry-expansion presets (nvim-supported languages/tools)
   [[ "$(yq '.registry.languages.vue.subagents[0]' "${out}")" == "vue-expert" ]]
   [[ "$(yq '.registry.languages.swift.subagents[0]' "${out}")" == "swift-expert" ]]

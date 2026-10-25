@@ -141,25 +141,37 @@ registry:
         - samber/cc-skills-golang@golang-security
     python:
       subagents: [python-pro]
-      skills: [mindrally/skills@fastapi-python]
+      skills:
+        - mindrally/skills@fastapi-python
+        - affaan-m/ecc@python-patterns
+        - affaan-m/ecc@python-testing
     rust:
       subagents: [rust-engineer]
-      skills: [apollographql/skills@rust-best-practices]
+      skills:
+        - apollographql/skills@rust-best-practices
+        - affaan-m/ecc@rust-patterns
+        - affaan-m/ecc@rust-testing
     typescript:
       subagents: [typescript-pro]
-      skills: [mcollina/skills@fastify-best-practices]
+      skills:
+        - mcollina/skills@fastify-best-practices
+        - affaan-m/ecc@nestjs-patterns
+        - affaan-m/ecc@vite-patterns
     frontend:
       subagents: [react-specialist]
       skills:
         - vercel-labs/agent-skills@vercel-react-best-practices
         - leonxlnx/taste-skill@design-taste-frontend
         - addyosmani/web-quality-skills@accessibility
+        - affaan-m/ecc@react-testing
+        - affaan-m/ecc@react-performance
     vue:
       subagents: [vue-expert]
       skills:
         - vuejs-ai/skills@vue-best-practices
         - vuejs-ai/skills@vue-pinia-best-practices
         - vuejs-ai/skills@vue-router-best-practices
+        - affaan-m/ecc@nuxt4-patterns
     angular:
       subagents: [angular-architect]
       skills:
@@ -170,12 +182,15 @@ registry:
       skills:
         - github/awesome-copilot@java-springboot
         - affaan-m/ecc@java-coding-standards
+        - affaan-m/ecc@springboot-security
+        - affaan-m/ecc@jpa-patterns
     csharp:
       subagents: [csharp-developer, dotnet-core-expert]
       skills:
         - github/awesome-copilot@csharp-async
         - github/awesome-copilot@csharp-xunit
         - github/awesome-copilot@csharp-docs
+        - affaan-m/ecc@dotnet-patterns
     cpp:
       subagents: [cpp-pro]
       skills:
@@ -187,21 +202,25 @@ registry:
         - jeffallan/claude-skills@laravel-specialist
         - jeffallan/claude-skills@php-pro
         - affaan-m/ecc@laravel-tdd
+        - affaan-m/ecc@laravel-security
     ruby:
       subagents: [rails-expert]
       skills:
         - jeffallan/claude-skills@rails-expert
+        - affaan-m/ecc@rails-patterns
     swift:
       subagents: [swift-expert]
       skills:
         - emilkowalski/skills@write-swift
         - avdlee/swiftui-agent-skill@swiftui-expert-skill
         - avdlee/swift-concurrency-agent-skill@swift-concurrency
+        - affaan-m/ecc@swift-protocol-di-testing
     dart:
       subagents: [flutter-expert]
       skills:
         - flutter/agent-plugins@flutter-apply-architecture-best-practices
         - dart-lang/skills@dart-add-unit-test
+        - affaan-m/ecc@dart-flutter-patterns
   infra:
     terraform:
       subagents: [terraform-engineer]
@@ -210,6 +229,7 @@ registry:
       skills:
         - jeffallan/claude-skills@kubernetes-specialist
         - wshobson/agents@helm-chart-scaffolding
+        - affaan-m/ecc@kubernetes-patterns
     docker:
       subagents: [docker-expert]
       skills: [affaan-m/ecc@docker-patterns]
@@ -229,6 +249,9 @@ registry:
       skills:
         - supabase/agent-skills@supabase-postgres-best-practices
         - wshobson/agents@sql-optimization-patterns
+        - affaan-m/ecc@postgres-patterns
+        - affaan-m/ecc@prisma-patterns
+        - affaan-m/ecc@redis-patterns
       # Registered per project in Claude's local scope; connection inherited
       # from the runtime env (postgres: DATABASE_URI; mysql: MYSQL_*), so no
       # credential is stored. SQLite is omitted — it needs a per-project path.
@@ -257,6 +280,7 @@ registry:
       skills:
         - currents-dev/playwright-best-practices-skill@playwright-best-practices
         - wshobson/agents@e2e-testing-patterns
+        - affaan-m/ecc@tdd-workflow
     # Skills-only: the 04-quality-security subagents stay in the global
     # baseline, so this opt-in collection does not duplicate them.
     security:
@@ -270,6 +294,8 @@ registry:
         - Eyadkelleh/awesome-skills-security@security-payloads
         - Eyadkelleh/awesome-skills-security@security-usernames
         - Eyadkelleh/awesome-skills-security@security-webshells
+        - affaan-m/ecc@security-review
+        - affaan-m/ecc@security-scan
     # Notebooks, R and Quarto — the data-science filetypes nvim supports.
     datascience:
       subagents: [data-scientist]
@@ -290,6 +316,12 @@ registry:
         - wshobson/agents@bash-defensive-patterns
         - wshobson/agents@shellcheck-configuration
         - wshobson/agents@bats-testing-patterns
+    # Perl (nvim supports it; no VoltAgent subagent, so skills-only).
+    perl:
+      skills:
+        - affaan-m/ecc@perl-patterns
+        - affaan-m/ecc@perl-security
+        - affaan-m/ecc@perl-testing
     # Domain subagents split out of the global baseline (see global.subagents
     # exclude); opt in per project when the work needs them.
     desktop:
