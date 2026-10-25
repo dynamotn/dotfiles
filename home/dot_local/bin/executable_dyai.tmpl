@@ -79,19 +79,19 @@ function _use {
 }
 
 #######################################
-# @description List presets (coming in a later phase)
+# @description List the global baseline and this project's presets
 # @noargs
 #######################################
 function _ls {
-  dybatpho::die "dyai ls is not implemented yet"
+  dyai::ls
 }
 
 #######################################
-# @description Remove a preset (coming in a later phase)
+# @description Remove a preset from this project
 # @noargs
 #######################################
 function _rm {
-  dybatpho::die "dyai rm is not implemented yet"
+  dyai::rm "${PRESET}"
 }
 
 dybatpho::generate_from_spec _spec_main "$@"

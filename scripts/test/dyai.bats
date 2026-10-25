@@ -98,7 +98,8 @@ CFG
   [ -f "${HOME}/.claude/agents/backend-developer.md" ]
   [ ! -f "${HOME}/.claude/agents/README.md" ]
   [ -f "${HOME}/.claude/agents/mine.md" ]
-  local before; before="$(cat "${HOME}/.claude/agents/backend-developer.md")"
+  local before
+  before="$(cat "${HOME}/.claude/agents/backend-developer.md")"
   dyai::setup_subagents
   [[ "$(cat "${HOME}/.claude/agents/backend-developer.md")" == "${before}" ]]
 }
@@ -111,12 +112,14 @@ registry:
   languages:
     go: { subagents: [golang-pro], skills: [] }
 CFG
-  local proj="${BATS_TEST_TMPDIR}/proj"; mkdir -p "${proj}"; git -C "${proj}" init -q
-  ( cd "${proj}" && dyai::use go )
+  local proj="${BATS_TEST_TMPDIR}/proj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use go)
   yq -p=toml '.use[]' "${proj}/.dyai.toml" | grep -qx 'go'
   grep -qxF '.dyai.toml' "${proj}/.git/info/exclude"
   # idempotent: using again does not duplicate
-  ( cd "${proj}" && dyai::use go )
+  (cd "${proj}" && dyai::use go)
   [[ "$(yq -p=toml '.use | length' "${proj}/.dyai.toml")" == "1" ]]
 }
 
@@ -124,7 +127,9 @@ CFG
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
   printf 'registry:\n  languages:\n    go: {subagents: [golang-pro]}\n' > "${CONFIG_FILE}"
-  local proj="${BATS_TEST_TMPDIR}/proj2"; mkdir -p "${proj}"; git -C "${proj}" init -q
+  local proj="${BATS_TEST_TMPDIR}/proj2"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
   cd "${proj}"
   run dyai::use nope
   assert_failure
@@ -134,7 +139,8 @@ CFG
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
   printf 'registry:\n  languages:\n    go: {subagents: [golang-pro]}\n' > "${CONFIG_FILE}"
-  local nonrepo="${BATS_TEST_TMPDIR}/plain"; mkdir -p "${nonrepo}"
+  local nonrepo="${BATS_TEST_TMPDIR}/plain"
+  mkdir -p "${nonrepo}"
   cd "${nonrepo}"
   run dyai::use go
   assert_failure
@@ -159,13 +165,114 @@ registry:
   languages:
     go: { subagents: [golang-pro], skills: [owner/repo@golang-code-style] }
 CFG
-  local proj="${BATS_TEST_TMPDIR}/mproj"; mkdir -p "${proj}"; git -C "${proj}" init -q
-  ( cd "${proj}" && dyai::use go )
+  local proj="${BATS_TEST_TMPDIR}/mproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use go)
   [ -f "${proj}/.claude/agents/golang-pro.md" ]
   grep -q 'STUB bunx .* add owner/repo@golang-code-style' "${HOME}/calls.log"
   yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'golang-pro.md'
   # idempotent: second run leaves the subagent unchanged
-  local before; before="$(cat "${proj}/.claude/agents/golang-pro.md")"
-  ( cd "${proj}" && dyai::materialize )
+  local before
+  before="$(cat "${proj}/.claude/agents/golang-pro.md")"
+  (cd "${proj}" && dyai::materialize)
   [[ "$(cat "${proj}/.claude/agents/golang-pro.md")" == "${before}" ]]
+}
+
+@test "dyai::ls shows the global baseline and this project's presets" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << EOF
+global:
+  skills:
+    - owner/repo@alpha
+  mcp:
+    laya:
+      command: ${LAYA}
+registry:
+  languages:
+    go: { subagents: [golang-pro] }
+EOF
+  local proj="${BATS_TEST_TMPDIR}/lsproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  : > "${proj}/.dyai.toml"
+  N=go yq -p=toml -o=toml -i '.use = [strenv(N)]' "${proj}/.dyai.toml"
+  cd "${proj}"
+  run dyai::ls
+  assert_success
+  assert_output --partial "skills: 1"
+  assert_output --partial "laya"
+  assert_output --partial "go"
+}
+
+@test "dyai::rm drops a preset and prunes the files it materialized" {
+  _stub claude
+  _stub bunx
+  local src="${BATS_TEST_TMPDIR}/rmvolt"
+  mkdir -p "${src}/categories/02-language-specialists"
+  printf -- '---\nname: golang-pro\n---\nx\n' > "${src}/categories/02-language-specialists/golang-pro.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: deadbeef
+      include: [categories/02-language-specialists]
+registry:
+  languages:
+    go: { subagents: [golang-pro] }
+CFG
+  local proj="${BATS_TEST_TMPDIR}/rmproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use go)
+  [ -f "${proj}/.claude/agents/golang-pro.md" ]
+  (cd "${proj}" && dyai::rm go)
+  [ ! -f "${proj}/.claude/agents/golang-pro.md" ]
+  [[ "$(yq -p=toml '.use | length' "${proj}/.dyai.toml")" == "0" ]]
+}
+
+@test "dyai::rm errors on a preset the project does not use" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  printf 'registry:\n  languages:\n    go: {subagents: [golang-pro]}\n' > "${CONFIG_FILE}"
+  local proj="${BATS_TEST_TMPDIR}/rmempty"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  : > "${proj}/.dyai.toml"
+  cd "${proj}"
+  run dyai::rm go
+  assert_failure
+}
+
+@test "dyai::rm keeps a file another active preset still materializes" {
+  _stub claude
+  _stub bunx
+  local src="${BATS_TEST_TMPDIR}/shvolt"
+  mkdir -p "${src}/categories/02-language-specialists"
+  printf -- '---\nname: golang-pro\n---\nx\n' > "${src}/categories/02-language-specialists/golang-pro.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: deadbeef
+      include: [categories/02-language-specialists]
+registry:
+  languages:
+    go:   { subagents: [golang-pro] }
+  presets:
+    svc:  { subagents: [golang-pro] }
+CFG
+  local proj="${BATS_TEST_TMPDIR}/shproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use go && dyai::use svc)
+  (cd "${proj}" && dyai::rm go)
+  [ -f "${proj}/.claude/agents/golang-pro.md" ]
 }

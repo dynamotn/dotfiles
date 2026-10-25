@@ -661,6 +661,62 @@ function dyai::materialize {
 }
 
 #######################################
+# @description List the global baseline and this project's selected presets
+# @noargs
+# @stdout The baseline (skills, subagents, mcp), the registry, and the project use list
+#######################################
+function dyai::ls {
+  CONFIG_FILE="${CONFIG_FILE:-$(dybatpho::path_join "${HOME}" ".config" "dyai" "config.yaml")}"
+  dybatpho::is file "${CONFIG_FILE}" || dybatpho::die "dyai config not found: ${CONFIG_FILE}"
+  local skills_n subagents mcp_names section names
+  skills_n="$(dyai::config_json '.global.skills // [] | length')"
+  subagents="$(dyai::config_json '.global.subagents // [] | map(.repo) | join(" ")')"
+  # shellcheck disable=SC2312 # the names join to a single line; a bad read is empty
+  mcp_names="$(dyai::config_json '.global.mcp // {} | keys | join(" ")')"
+  printf 'Global baseline:\n'
+  printf '  skills: %s\n' "${skills_n}"
+  printf '  subagents: %s\n' "${subagents:-none}"
+  printf '  mcp: %s\n' "${mcp_names:-none}"
+  printf 'Registry presets:\n'
+  for section in languages infra presets; do
+    names="$(dyai::config_json ".registry.${section} // {} | keys | join(\" \")")"
+    [[ -n "${names}" ]] && printf '  %s: %s\n' "${section}" "${names}"
+  done
+  local root toml used
+  root="$(git rev-parse --show-toplevel 2> /dev/null)" || return 0
+  toml="${root}/.dyai.toml"
+  if dybatpho::is file "${toml}"; then
+    # shellcheck disable=SC2312 # a missing use list joins to empty
+    used="$(yq -p=toml -o=json -I=0 '.use // []' "${toml}" 2> /dev/null | jq -r 'join(" ")')"
+  fi
+  printf 'Project %s:\n' "${root}"
+  printf '  use: %s\n' "${used:-none}"
+}
+
+#######################################
+# @description Drop a preset from this project, prune the files it owned, re-materialize
+# @arg $1 string Preset name to remove
+#######################################
+function dyai::rm {
+  local name
+  dybatpho::expect_args name -- "$@"
+  local root toml
+  root="$(git rev-parse --show-toplevel 2> /dev/null)" \
+    || dybatpho::die "dyai rm must run inside a git repository"
+  toml="${root}/.dyai.toml"
+  dybatpho::is file "${toml}" || dybatpho::die "this project uses no presets"
+  # shellcheck disable=SC2312 # a missing use list greps to nothing, which is "not used"
+  if ! yq -p=toml '.use[]' "${toml}" 2> /dev/null | grep -qxF -- "${name}"; then
+    dybatpho::die "preset ${name} is not used by this project"
+  fi
+  N="${name}" yq -p=toml -o=toml -i '.use = ((.use // []) | map(select(. != strenv(N))))' "${toml}"
+  dybatpho::info "Project no longer uses preset ${name}"
+  # Re-materialize from the remaining presets; prune_and_record removes the
+  # files the dropped preset owned that no surviving preset still wants.
+  dyai::materialize
+}
+
+#######################################
 # @description Run the global AI-agent setup from ~/.config/dyai/config.yaml
 # @noargs
 #######################################
