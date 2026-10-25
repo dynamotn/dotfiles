@@ -336,6 +336,7 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[opencode](https://github.com/anomalyco/opencode)|AI coding agent|
 |[rtk](https://github.com/rtk-ai/rtk)|Proxy that reduces LLM token consumption|
 |[laya](https://github.com/NandhaKishorM/laya)|Typed decision model, served to agents over MCP|
+|[harness2](https://github.com/google-research/harness2)|Research framework that optimises the harness around an LLM agent|
 
 ## Android tools
 
