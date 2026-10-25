@@ -125,8 +125,9 @@ function _render_config {
   [[ "$(yq '.marketplaces | length' "${out}")" == "10" ]]
   [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
   [[ "$(yq '.marketplaces["agent-sec-ops-kit-skills"].source.source' "${out}")" == "git" ]]
-  # 43 plugins on globally and 13 optional ones, including known entries
-  [[ "$(yq '.plugins | length' "${out}")" == "43" ]]
+  # 39 plugins on globally (official LSP plugins replaced by dyai-lsp) and
+  # 13 optional ones, including known entries
+  [[ "$(yq '.plugins | length' "${out}")" == "39" ]]
   [[ "$(yq '.optional_plugins | length' "${out}")" == "13" ]]
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
@@ -134,6 +135,10 @@ function _render_config {
   yq -e '.plugins[] | select(. == "caveman@caveman")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "ponytail@ponytail")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "context-mode@context-mode")' "${out}" > /dev/null
+  # dyai-lsp replaces the official LSP plugins (registered at runtime, not here)
+  yq -e '.plugins[] | select(. == "dyai-lsp@dyai-lsp")' "${out}" > /dev/null
+  run yq -e '.plugins[] | select(. == "pyright-lsp@claude-plugins-official")' "${out}"
+  assert_failure
   # policy
   [[ "$(yq '.policy.permissions.defaultMode' "${out}")" == "acceptEdits" ]]
   [[ "$(yq '.policy.theme' "${out}")" == "auto" ]]
@@ -160,7 +165,7 @@ function _render_config {
   assert_failure
   [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp-server ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
-  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "43" ]]
+  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "39" ]]
   [[ "$(yq '.agents.claude.optional_plugins | length' "${out}")" == "13" ]]
   [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "10" ]]
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]

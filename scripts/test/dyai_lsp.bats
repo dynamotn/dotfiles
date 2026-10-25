@@ -4,6 +4,7 @@ setup() {
   # shellcheck disable=SC2154 # DOTFILES_DIR is set by test_helper.bash
   . "${DOTFILES_DIR}/scripts/lib/dyai.sh"
   export XDG_CACHE_HOME="${HOME}/.cache"
+  export XDG_DATA_HOME="${HOME}/.local/share"
   FIXTURES="${DOTFILES_DIR}/scripts/test/fixtures/dyai-lsp"
   export DYAI_NVIM_CONFIG="${FIXTURES}/nvim"
   export DYAI_LSPCONFIG_DIR="${FIXTURES}/lspconfig"
@@ -27,6 +28,13 @@ CFG
 
 function _skip_unless_nvim_available {
   command -v nvim &> /dev/null || skip "nvim not found"
+}
+
+function _stub {
+  # shellcheck disable=SC2016 # the single quotes are deliberate: $0/$* expand in the stub, not here
+  printf '#!/usr/bin/env bash\necho "STUB $(basename "$0") $*" >> "%s"\nexit 0\n' \
+    "${HOME}/calls.log" > "${HOME}/.local/bin/${1}"
+  chmod +x "${HOME}/.local/bin/${1}"
 }
 
 @test "dyai_lsp::export writes servers in languages.lua order with resolved commands" {
@@ -92,4 +100,148 @@ function _skip_unless_nvim_available {
   assert_failure
   # shellcheck disable=SC2312 # a missing file would fail cat, and the comparison with it
   [[ "$(cat "${XDG_CACHE_HOME}/dyai/lsp.json")" == '{"version":1,"servers":[]}' ]]
+}
+
+# ---------------------------------------------------------------------------
+# Ruling 1: generic owned-state helpers (Task 4 reuses these)
+# ---------------------------------------------------------------------------
+
+@test "dyai_lsp::owned_get reports null when the owned-state file is absent" {
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get claude_version)" == "null" ]]
+}
+
+@test "dyai_lsp::owned_set writes a key atomically, keeping other keys, owned_get reads it back" {
+  dyai_lsp::owned_set claude_version '"1.2.3"'
+  dyai_lsp::owned_set other_key '{"a":1}'
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get claude_version)" == '"1.2.3"' ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get other_key)" == '{"a":1}' ]]
+  dyai_lsp::owned_set claude_version '"4.5.6"'
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get claude_version)" == '"4.5.6"' ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get other_key)" == '{"a":1}' ]]
+}
+
+# ---------------------------------------------------------------------------
+# dyai_lsp::primary_extensions / dyai_lsp::launch_argv / dyai_lsp::setup_claude
+# These write the manifest fixture directly as JSON; no nvim needed.
+# ---------------------------------------------------------------------------
+
+function _write_manifest {
+  dybatpho::ensure_dir "${XDG_CACHE_HOME}/dyai" > /dev/null
+  M="${XDG_CACHE_HOME}/dyai/lsp.json"
+  cat > "${M}" << 'MANIFEST'
+{
+  "version": 1,
+  "untrusted_regexes": [],
+  "servers": [
+    {
+      "name": "pyls",
+      "command": "/opt/pyls-bin",
+      "args": ["--stdio"],
+      "filetypes": ["python"],
+      "extensions": {".py": "python", ".pyi": "python"},
+      "settings": {},
+      "init_options": {}
+    },
+    {
+      "name": "ruffls",
+      "command": "/opt/ruff-bin",
+      "args": [],
+      "filetypes": ["python"],
+      "extensions": {".py": "python"},
+      "settings": {},
+      "init_options": {}
+    },
+    {
+      "name": "fakels",
+      "command": "/opt/fakels-bin",
+      "args": ["--stdio"],
+      "filetypes": ["fake"],
+      "extensions": {".fk": "fake"},
+      "settings": {"fake": {"on": true}},
+      "init_options": {}
+    }
+  ]
+}
+MANIFEST
+}
+
+@test "dyai_lsp::primary_extensions gives each extension to the first server only" {
+  _write_manifest
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::primary_extensions "${M}" | jq -c 'keys')" == '["fakels","pyls"]' ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::primary_extensions "${M}" | jq -c '.pyls')" == '{".py":"python",".pyi":"python"}' ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::primary_extensions "${M}" | jq -c '.fakels')" == '{".fk":"fake"}' ]]
+}
+
+@test "dyai_lsp::launch_argv wraps a server's command behind the launcher" {
+  _write_manifest
+  local server argv expected
+  server="$(jq -c '.servers[] | select(.name=="pyls")' "${M}")"
+  argv="$(dyai_lsp::launch_argv "${server}")"
+  expected="[\"${HOME}/.local/bin/dyai-lsp-exec\",\"pyls\",\"--\",\"/opt/pyls-bin\",\"--stdio\"]"
+  [[ "${argv}" == "${expected}" ]]
+}
+
+@test "dyai_lsp::setup_claude writes a launcher-wrapped .lsp.json and adds the marketplace once" {
+  _write_manifest
+  _stub claude
+  dyai_lsp::setup_claude
+  lsp="${XDG_DATA_HOME}/dyai/claude-marketplace/plugins/dyai-lsp/.lsp.json"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.pyls.command' "${lsp}")" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -c '.pyls.args[0:3]' "${lsp}")" == '["pyls","--","/opt/pyls-bin"]' ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.pyls | keys | join(",")' "${lsp}")" == "args,command,extensionToLanguage,maxRestarts" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.fakels | keys | join(",")' "${lsp}")" == "args,command,extensionToLanguage,maxRestarts,settings" ]]
+  marketplace="${XDG_DATA_HOME}/dyai/claude-marketplace/.claude-plugin/marketplace.json"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.name' "${marketplace}")" == "dyai-lsp" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.plugins[0].source' "${marketplace}")" == "./plugins/dyai-lsp" ]]
+  plugin="${XDG_DATA_HOME}/dyai/claude-marketplace/plugins/dyai-lsp/.claude-plugin/plugin.json"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.name' "${plugin}")" == "dyai-lsp" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.version' "${plugin}")" =~ ^0\.0\.0-[0-9a-f]{12}$ ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  grep -q 'STUB claude plugin marketplace add' "${HOME}/calls.log"
+
+  dybatpho::ensure_dir "${HOME}/.claude/plugins" > /dev/null
+  printf '{"dyai-lsp":{}}' > "${HOME}/.claude/plugins/known_marketplaces.json"
+  : > "${HOME}/calls.log"
+  dyai_lsp::setup_claude
+  [[ ! -s "${HOME}/calls.log" ]] # unchanged manifest: no add, no update
+}
+
+@test "dyai_lsp::setup_claude updates the plugin when the manifest changes" {
+  _write_manifest
+  _stub claude
+  dybatpho::ensure_dir "${HOME}/.claude/plugins" > /dev/null
+  printf '{"dyai-lsp":{}}' > "${HOME}/.claude/plugins/known_marketplaces.json"
+  dyai_lsp::setup_claude
+  : > "${HOME}/calls.log"
+  # Change a server's args, which changes the generated .lsp.json and its hash.
+  jq '.servers[0].args = ["--stdio", "--verbose"]' "${M}" > "${M}.tmp" && mv "${M}.tmp" "${M}"
+  dyai_lsp::setup_claude
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  grep -q 'STUB claude plugin marketplace update dyai-lsp' "${HOME}/calls.log"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  grep -q 'STUB claude plugin update dyai-lsp@dyai-lsp' "${HOME}/calls.log"
+}
+
+@test "dyai_lsp::setup_claude writes an empty plugin when there is no manifest" {
+  _stub claude
+  dyai_lsp::setup_claude
+  lsp="${XDG_DATA_HOME}/dyai/claude-marketplace/plugins/dyai-lsp/.lsp.json"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(cat "${lsp}")" == "{}" ]]
 }
