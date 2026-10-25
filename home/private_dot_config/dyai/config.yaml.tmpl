@@ -135,12 +135,19 @@ agents:
       - {{ . }}
 {{- end }}
 # Opt-in presets pulled per project by `dyai use <name>`; kept out of the
-# global baseline so the discovery index stays lean. Phase 4 populates these.
+# global baseline so the discovery index stays lean. One preset per tool, so a
+# project pulls only what it uses. Subagent names resolve against the pinned
+# global.subagents repo (materialize finds a <name>.md anywhere in the tree).
 registry:
   languages:
     go:
       subagents: [golang-pro]
-      skills: [samber/cc-skills-golang@golang-code-style]
+      skills:
+        - samber/cc-skills-golang@golang-code-style
+        - samber/cc-skills-golang@golang-testing
+        - samber/cc-skills-golang@golang-error-handling
+        - samber/cc-skills-golang@golang-grpc
+        - samber/cc-skills-golang@golang-security
     python:
       subagents: [python-pro]
       skills: [mindrally/skills@fastapi-python]
@@ -149,9 +156,56 @@ registry:
       skills: [apollographql/skills@rust-best-practices]
     typescript:
       subagents: [typescript-pro]
+      skills: [mcollina/skills@fastify-best-practices]
+    frontend:
+      subagents: [react-specialist]
+      skills:
+        - vercel-labs/agent-skills@vercel-react-best-practices
+        - leonxlnx/taste-skill@design-taste-frontend
+        - addyosmani/web-quality-skills@accessibility
   infra:
     terraform:
       subagents: [terraform-engineer]
     kubernetes:
       subagents: [kubernetes-specialist]
-      skills: [jeffallan/claude-skills@kubernetes-specialist]
+      skills:
+        - jeffallan/claude-skills@kubernetes-specialist
+        - wshobson/agents@helm-chart-scaffolding
+    docker:
+      subagents: [docker-expert]
+      skills: [affaan-m/ecc@docker-patterns]
+    aws:
+      subagents: [cloud-architect]
+      skills:
+        - aws/agent-toolkit-for-aws@aws-iam
+        - aws/agent-toolkit-for-aws@aws-observability
+    cicd:
+      subagents: [deployment-engineer]
+      skills:
+        - wshobson/agents@github-actions-templates
+        - wshobson/agents@gitlab-ci-patterns
+        - wshobson/agents@gitops-workflow
+    database:
+      subagents: [postgres-pro]
+      skills:
+        - supabase/agent-skills@supabase-postgres-best-practices
+        - wshobson/agents@sql-optimization-patterns
+  presets:
+    # Cross-language domains with no single language/tool owner.
+    testing:
+      skills:
+        - currents-dev/playwright-best-practices-skill@playwright-best-practices
+        - wshobson/agents@e2e-testing-patterns
+    # Skills-only: the 04-quality-security subagents stay in the global
+    # baseline, so this opt-in collection does not duplicate them.
+    security:
+      skills:
+        - openai/skills@security-threat-model
+        - wshobson/agents@stride-analysis-patterns
+        - Eyadkelleh/awesome-skills-security@llm-testing
+        - Eyadkelleh/awesome-skills-security@security-fuzzing
+        - Eyadkelleh/awesome-skills-security@security-passwords
+        - Eyadkelleh/awesome-skills-security@security-patterns
+        - Eyadkelleh/awesome-skills-security@security-payloads
+        - Eyadkelleh/awesome-skills-security@security-usernames
+        - Eyadkelleh/awesome-skills-security@security-webshells
