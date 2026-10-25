@@ -454,6 +454,26 @@ function dyai::json_set {
 }
 
 #######################################
+# @description Set Gemini CLI's baseline settings: schema, shared AGENTS.md, checkpoints, privacy
+# @noargs
+#######################################
+function dyai::setup_gemini {
+  dybatpho::is command gemini || return 0
+  local file expr
+  file="$(dybatpho::path_join "${HOME}" ".gemini" "settings.json")"
+  # dyshellint disable=SC2016 "$schema" is a literal JSON key, not a variable
+  expr='.["$schema"] = "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json"'
+  # AGENTS.md first, so a project written for every agent is read like Claude reads it.
+  expr+=' | .context.fileName = ["AGENTS.md", "GEMINI.md"]'
+  # Checkpoints make every edit undoable with /restore.
+  expr+=' | .general.checkpointing.enabled = true'
+  expr+=' | .privacy.usageStatisticsEnabled = false | .telemetry.enabled = false'
+  # Even a stray --yolo cannot get past the dyai policy prompts.
+  expr+=' | .security.disableYoloMode = true'
+  dyai::json_set "${file}" "${expr}"
+}
+
+#######################################
 # @description Translate global.policy.approval into each agent that has a clean edits-only preset
 # @noargs
 #######################################
@@ -694,7 +714,11 @@ function dyai::hooks_gemini {
   dybatpho::expect_args stop input -- "$@"
   local file expr
   file="$(dybatpho::path_join "${HOME}" ".gemini" "settings.json")"
-  expr='.hooks.SessionEnd = (((.hooks.SessionEnd // []) | map(select(.hooks[0].name != "dyai-notify")))'
+  # AfterAgent fires once per turn, like Claude's Stop; SessionEnd, which
+  # earlier versions used, only fires on exit, so drop the old entry there.
+  expr='.hooks.SessionEnd |= ((. // []) | map(select(.hooks[0].name != "dyai-notify")))'
+  expr+=' | if .hooks.SessionEnd == [] then del(.hooks.SessionEnd) else . end'
+  expr+=' | .hooks.AfterAgent = (((.hooks.AfterAgent // []) | map(select(.hooks[0].name != "dyai-notify")))'
   # shellcheck disable=SC2016 # $s is a jq --arg variable, expanded by jq, not the shell
   expr+=' + [{hooks: [{type: "command", command: $s, name: "dyai-notify"}]}])'
   expr+=' | .hooks.Notification = (((.hooks.Notification // []) | map(select(.hooks[0].name != "dyai-notify")))'
@@ -1277,6 +1301,7 @@ function dyai::install {
     dybatpho::warn "claude is not installed, skip marketplaces and plugins"
   fi
   dyai::setup_mcp
+  dyai::setup_gemini
   dyai::setup_policy
   dyai::setup_permissions
   dyai::setup_hooks

@@ -148,7 +148,12 @@ each installed agent in line, skipping any agent whose launcher is absent:
 - **Claude** — marketplaces, plugins, skills, MCP (`claude mcp add-json`),
   hooks and policy, across the default and every enterprise config directory.
 - **Gemini / Antigravity / Copilot / opencode** — MCP merged into each one's
-  JSON config in its own shape; hooks where supported.
+  JSON config in its own shape; hooks where supported. Gemini's `stop` hook
+  is `AfterAgent`, which fires once per turn.
+- **Gemini baseline** — `~/.gemini/settings.json` also gets its `$schema`,
+  `context.fileName` `["AGENTS.md", "GEMINI.md"]`, checkpointing (`/restore`),
+  usage statistics and telemetry off, and `security.disableYoloMode`. These
+  are fixed, not read from the config.
 - **Codex / Hermes** — MCP merged into their TOML / YAML config.
 
 The `filesystem` MCP server is scoped per config context: personal and
