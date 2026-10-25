@@ -102,3 +102,40 @@ CFG
   dyai::setup_subagents
   [[ "$(cat "${HOME}/.claude/agents/backend-developer.md")" == "${before}" ]]
 }
+
+@test "dyai::use records a preset in .dyai.toml and personal-ignores it" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+registry:
+  languages:
+    go: { subagents: [golang-pro], skills: [] }
+CFG
+  local proj="${BATS_TEST_TMPDIR}/proj"; mkdir -p "${proj}"; git -C "${proj}" init -q
+  ( cd "${proj}" && dyai::use go )
+  yq -p=toml '.use[]' "${proj}/.dyai.toml" | grep -qx 'go'
+  grep -qxF '.dyai.toml' "${proj}/.git/info/exclude"
+  # idempotent: using again does not duplicate
+  ( cd "${proj}" && dyai::use go )
+  [[ "$(yq -p=toml '.use | length' "${proj}/.dyai.toml")" == "1" ]]
+}
+
+@test "dyai::use errors on an unknown preset" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  printf 'registry:\n  languages:\n    go: {subagents: [golang-pro]}\n' > "${CONFIG_FILE}"
+  local proj="${BATS_TEST_TMPDIR}/proj2"; mkdir -p "${proj}"; git -C "${proj}" init -q
+  cd "${proj}"
+  run dyai::use nope
+  assert_failure
+}
+
+@test "dyai::use errors outside a git repository" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  printf 'registry:\n  languages:\n    go: {subagents: [golang-pro]}\n' > "${CONFIG_FILE}"
+  local nonrepo="${BATS_TEST_TMPDIR}/plain"; mkdir -p "${nonrepo}"
+  cd "${nonrepo}"
+  run dyai::use go
+  assert_failure
+}

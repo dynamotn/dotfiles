@@ -533,6 +533,50 @@ function dyai::setup_subagents {
 }
 
 #######################################
+# @description Resolve a preset name to its registry section, or die
+# @arg $1 string Preset name
+# @stdout The section (languages|infra|presets)
+#######################################
+function dyai::resolve_preset {
+  local name
+  dybatpho::expect_args name -- "$@"
+  local section found=""
+  for section in languages infra presets; do
+    # shellcheck disable=SC2312 # config_json yields true/false; a missing section is false
+    if dyai::config_json ".registry.${section} // {} | has(\"${name}\")" | grep -qx true; then
+      [[ -z "${found}" ]] || dybatpho::die "preset ${name} is ambiguous (in ${found} and ${section})"
+      found="${section}"
+    fi
+  done
+  [[ -n "${found}" ]] || dybatpho::die "unknown preset: ${name}"
+  printf '%s' "${found}"
+}
+
+#######################################
+# @description Opt the current project into a registry preset (records only; see materialize)
+# @arg $1 string Preset name
+#######################################
+function dyai::use {
+  local name
+  dybatpho::expect_args name -- "$@"
+  CONFIG_FILE="${CONFIG_FILE:-$(dybatpho::path_join "${HOME}" ".config" "dyai" "config.yaml")}"
+  local root
+  root="$(git rev-parse --show-toplevel 2> /dev/null)" \
+    || dybatpho::die "dyai use must run inside a git repository"
+  # shellcheck disable=SC2310 # resolve_preset dies on unknown/ambiguous, which is what we want
+  dyai::resolve_preset "${name}" > /dev/null
+  local toml="${root}/.dyai.toml"
+  dybatpho::is file "${toml}" || : > "${toml}"
+  # shellcheck disable=SC2312 # a missing use list greps to nothing, so we add it
+  if ! yq -p=toml '.use[]' "${toml}" 2> /dev/null | grep -qxF -- "${name}"; then
+    N="${name}" yq -p=toml -o=toml -i '.use = ((.use // []) + [strenv(N)])' "${toml}"
+  fi
+  local exclude="${root}/.git/info/exclude"
+  grep -qxF '.dyai.toml' "${exclude}" 2> /dev/null || printf '.dyai.toml\n' >> "${exclude}"
+  dybatpho::info "Project uses preset ${name}"
+}
+
+#######################################
 # @description Run the global AI-agent setup from ~/.config/dyai/config.yaml
 # @noargs
 #######################################
