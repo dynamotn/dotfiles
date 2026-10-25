@@ -9,6 +9,33 @@
 # The skills CLI is pinned, so an apply never runs a release nobody looked at.
 SKILLS_CLI="skills@1.7.2"
 
+# jq definitions shared by the permission translators. The input is
+# global.policy.permissions, in Claude's syntax: `Bash(<command pattern>)`,
+# `Read(<glob>)`, `Edit(<glob>)`.
+# - cmds($kind): the Bash rules of ask or deny as {p, glued}, where p is the
+#   command prefix and glued is true for `p*` (no word boundary, as in
+#   `chezmoi-dycrypt*`). The rtk spellings exist only for Claude's rtk hook and
+#   are dropped. An ask prefix that deny also lists is dropped: deny wins.
+# - paths($kind; $tool): the globs of the Read or Edit rules of ask or deny.
+# dyshellint disable=SC2016 a jq program; its $names are jq variables, not shell ones
+DYAI_PERM_JQ='
+def bash_rules($kind): (.[$kind] // [])
+  | map(select(type == "string" and startswith("Bash(") and endswith(")")) | .[5:-1]
+    | select(startswith("rtk ") | not)
+    | if endswith(":*") or endswith(" *") then {p: .[:-2], glued: false}
+      elif endswith("*") then {p: .[:-1], glued: true}
+      else {p: ., glued: false} end)
+  | unique_by(.p);
+def cmds($kind):
+  if $kind == "ask" then
+    (bash_rules("deny") | map(.p)) as $deny
+    | bash_rules("ask") | map(select(.p as $p | $deny | index($p) | not))
+  else bash_rules("deny") end;
+def paths($kind; $tool): (.[$kind] // [])
+  | map(select(type == "string" and startswith($tool + "(") and endswith(")"))
+    | .[($tool | length) + 1:-1]);
+'
+
 #######################################
 # @description True when this machine has an AMD GPU (ROCm) for laya's torch build
 # @noargs
@@ -438,9 +465,195 @@ function dyai::setup_policy {
   fi
   if dybatpho::is command opencode; then
     file="${OPENCODE_CONFIG:-$(dybatpho::path_join "${HOME}" ".config" "opencode" "opencode.json")}"
-    dyai::json_set "${file}" '.permission.edit = "allow"'
+    # Once setup_permissions turns edit into a glob map, the default is its "*".
+    dyai::json_set "${file}" '.permission.edit |=
+      if type == "object" then .["*"] = "allow" else "allow" end'
   fi
   # codex, copilot and agy have no edits-only approval preset; left to the user.
+}
+
+#######################################
+# @description Translate the shell and path rules of global.policy.permissions into every other agent
+# @noargs
+#######################################
+function dyai::setup_permissions {
+  local perms file
+  perms="$(dyai::config_json '.global.policy.permissions // {}')"
+  # shellcheck disable=SC2312 # a bad config read is treated as no rule at all
+  jq -e 'type == "object" and ((.ask // []) + (.deny // []) | length) > 0' <<< "${perms}" > /dev/null \
+    || return 0
+  if dybatpho::is command opencode; then
+    file="${OPENCODE_CONFIG:-$(dybatpho::path_join "${HOME}" ".config" "opencode" "opencode.json")}"
+    dyai::permissions_opencode "${file}" "${perms}"
+  fi
+  if dybatpho::is command agy; then
+    file="$(dybatpho::path_join "${HOME}" ".gemini" "antigravity-cli" "settings.json")"
+    dyai::permissions_agy "${file}" "${perms}"
+  fi
+  if dybatpho::is command gemini; then
+    file="$(dybatpho::path_join "${HOME}" ".gemini" "policies" "dyai.toml")"
+    dyai::permissions_gemini "${file}" "${perms}"
+  fi
+  if dybatpho::is command codex; then
+    local chome
+    chome="${CODEX_HOME:-$(dybatpho::path_join "${HOME}" ".codex")}"
+    file="$(dybatpho::path_join "${chome}" "rules" "dyai.rules")"
+    dyai::permissions_codex "${file}" "${perms}"
+  fi
+  if dybatpho::is command hermes; then
+    file="$(dybatpho::path_join "${HOME}" ".hermes" "config.yaml")"
+    dyai::permissions_hermes "${file}" "${perms}"
+  fi
+  # Copilot CLI has no user-level config key for denied tools, only the
+  # --deny-tool flag and preToolUse hooks; left to the user.
+}
+
+#######################################
+# @description Merge the permission rules into opencode's permission block
+# @arg $1 string Path of opencode.json
+# @arg $2 string global.policy.permissions as JSON
+#######################################
+function dyai::permissions_opencode {
+  local file perms
+  dybatpho::expect_args file perms -- "$@"
+  # opencode matches globs where `*` spans any characters, `/` included, and
+  # the last matching key wins. A scalar value becomes the "*" default and is
+  # kept first, so these narrower keys still override it.
+  # dyshellint disable=SC2016 a jq program; its $names are jq variables
+  dyai::json_set "${file}" "${DYAI_PERM_JQ}"'
+    def glob: sub("^\\*\\*/"; "*") | sub("/\\*\\*$"; "/*") | gsub("\\*\\*"; "*");
+    def keys_of: if .glued then [.p + "*"] else [.p, .p + " *"] end;
+    def base: if type == "object" then . elif type == "string" then {"*": .} else {} end;
+    def put($rules): reduce $rules[] as [$k, $v] (base; .[$k] = $v);
+    ($perms | [(cmds("ask")[] | keys_of[] | [., "ask"]), (cmds("deny")[] | keys_of[] | [., "deny"])]) as $bash
+    | ($perms | [(paths("ask"; "Read")[] | [glob, "ask"]), (paths("deny"; "Read")[] | [glob, "deny"])]) as $read
+    | ($perms | [(paths("ask"; "Edit")[] | [glob, "ask"]), (paths("deny"; "Edit")[] | [glob, "deny"])]) as $edit
+    | .permission = (.permission // {})
+    | if ($bash | length) > 0 then .permission.bash |= put($bash) else . end
+    | if ($read | length) > 0 then .permission.read |= put($read) else . end
+    | if ($edit | length) > 0 then .permission.edit |= put($edit) else . end' \
+    --argjson perms "${perms}"
+}
+
+#######################################
+# @description Merge the shell rules into Antigravity's global permissions
+# @arg $1 string Path of ~/.gemini/antigravity-cli/settings.json
+# @arg $2 string global.policy.permissions as JSON
+#######################################
+function dyai::permissions_agy {
+  local file perms
+  dybatpho::expect_args file perms -- "$@"
+  # `command(<prefix>)` matches whole words, so it already covers both the
+  # bare command and any arguments after it. read_file rules take absolute
+  # paths, with no documented glob support, so the path rules stay out.
+  # dyshellint disable=SC2016 a jq program; its $names are jq variables
+  dyai::json_set "${file}" "${DYAI_PERM_JQ}"'
+    def rules($kind): $perms | cmds($kind) | map("command(" + .p + ")");
+    rules("ask") as $ask | rules("deny") as $deny
+    | .permissions = (.permissions // {})
+    | if ($ask | length) > 0 then .permissions.ask = ((.permissions.ask // []) + $ask | unique) else . end
+    | if ($deny | length) > 0 then .permissions.deny = ((.permissions.deny // []) + $deny | unique) else . end' \
+    --argjson perms "${perms}"
+}
+
+#######################################
+# @description Write a file dyai owns whole, only when its content changed
+# @arg $1 string Path of the file
+# @arg $2 string Wanted content
+#######################################
+function dyai::write_owned {
+  local file content
+  dybatpho::expect_args file content -- "$@"
+  local dir tmp
+  if dybatpho::is file "${file}" && [[ "$(< "${file}")" == "${content}" ]]; then
+    dybatpho::debug "${file} already up to date"
+    return 0
+  fi
+  dir="$(dirname "${file}")"
+  dybatpho::is dir "${dir}" || mkdir -p "${dir}"
+  dybatpho::create_temp tmp "txt" "dyai" "${dir}"
+  if printf '%s\n' "${content}" > "${tmp}" && mv "${tmp}" "${file}"; then
+    dybatpho::info "Wrote ${file}"
+  else
+    dybatpho::warn "Could not write ${file}"
+  fi
+}
+
+#######################################
+# @description Write the shell rules as a Gemini CLI policy file owned by dyai
+# @arg $1 string Path of ~/.gemini/policies/dyai.toml
+# @arg $2 string global.policy.permissions as JSON
+#######################################
+function dyai::permissions_gemini {
+  local file perms
+  dybatpho::expect_args file perms -- "$@"
+  local content
+  # commandPrefix is a plain starts-with test, so `git push` also covers
+  # `git push origin main`. Deny outranks ask by priority. A JSON string is a
+  # valid TOML basic string, so tojson quotes each prefix.
+  content="$(jq -r "${DYAI_PERM_JQ}"'
+    def rule($kind; $decision; $priority):
+      cmds($kind) | map(.p) as $p
+      | if ($p | length) == 0 then empty else
+          "[[rule]]\ntoolName = \"run_shell_command\"\ncommandPrefix = ["
+          + ($p | map(tojson) | join(", ")) + "]\ndecision = \"" + $decision
+          + "\"\npriority = " + ($priority | tostring) + "\n"
+        end;
+    "# Managed by dyai from global.policy.permissions; local edits are overwritten.\n"
+    + ([rule("deny"; "deny"; 900), rule("ask"; "ask_user"; 800)] | join("\n"))' <<< "${perms}")"
+  dyai::write_owned "${file}" "${content}"
+}
+
+#######################################
+# @description Write the shell rules as a Codex execpolicy rules file owned by dyai
+# @arg $1 string Path of ~/.codex/rules/dyai.rules
+# @arg $2 string global.policy.permissions as JSON
+#######################################
+function dyai::permissions_codex {
+  local file perms
+  dybatpho::expect_args file perms -- "$@"
+  local content
+  # A pattern is a token prefix of the command's argv, so the prefix is split
+  # on spaces. Codex applies the strictest matching decision.
+  content="$(jq -r "${DYAI_PERM_JQ}"'
+    def rules($kind; $decision):
+      cmds($kind)[] | "prefix_rule(pattern = " + (.p | split(" ") | map(select(. != "")) | tojson)
+        + ", decision = \"" + $decision + "\", justification = \"dyai global.policy.permissions\")";
+    "# Managed by dyai from global.policy.permissions; local edits are overwritten.\n"
+    + ([rules("deny"; "forbidden"), rules("ask"; "prompt")] | join("\n"))' <<< "${perms}")"
+  dyai::write_owned "${file}" "${content}"
+}
+
+#######################################
+# @description Merge the deny shell rules into Hermes' approvals.deny list
+# @arg $1 string Path of ~/.hermes/config.yaml
+# @arg $2 string global.policy.permissions as JSON
+#######################################
+function dyai::permissions_hermes {
+  local file perms
+  dybatpho::expect_args file perms -- "$@"
+  local globs current want dir
+  # Hermes matches fnmatch globs and has no per-command ask list (its approval
+  # mode decides what prompts), so only the deny rules translate.
+  globs="$(jq -c "${DYAI_PERM_JQ}"'
+    [cmds("deny")[] | if .glued then .p + "*" else (.p, .p + " *") end]' <<< "${perms}")"
+  [[ "${globs}" != "[]" ]] || return 0
+  dir="$(dirname "${file}")"
+  dybatpho::is dir "${dir}" || mkdir -p "${dir}"
+  dybatpho::is file "${file}" || : > "${file}"
+  # shellcheck disable=SC2312 # a malformed file reads as no rule, forcing a rewrite attempt
+  current="$(yq -o=json -I=0 '.approvals.deny // []' "${file}" 2> /dev/null || echo '[]')"
+  current="$(jq -c 'unique' <<< "${current}")"
+  want="$(jq -c --argjson g "${globs}" '. + $g | unique' <<< "${current}")"
+  if [[ "${current}" == "${want}" ]]; then
+    dybatpho::debug "Hermes deny rules already set in ${file}"
+    return 0
+  fi
+  if W="${want}" yq -i '.approvals.deny = (strenv(W) | fromjson)' "${file}"; then
+    dybatpho::info "Wrote deny rules into ${file}"
+  else
+    dybatpho::warn "Could not write deny rules into ${file}"
+  fi
 }
 
 #######################################
@@ -1037,6 +1250,7 @@ function dyai::install {
   fi
   dyai::setup_mcp
   dyai::setup_policy
+  dyai::setup_permissions
   dyai::setup_hooks
   dyai::setup_subagents
   if dybatpho::is command bunx; then

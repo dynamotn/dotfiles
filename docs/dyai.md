@@ -17,6 +17,7 @@ plus a registry of opt-in presets a project pulls in on demand.
   - [`.dyai.toml`](#dyaitoml)
   - [What materialization writes](#what-materialization-writes)
 - [How it installs](#how-it-installs)
+  - [Permissions in other agents](#permissions-in-other-agents)
 - [Adding to the registry](#adding-to-the-registry)
 - [Keeping the baseline lean](#keeping-the-baseline-lean)
 
@@ -64,9 +65,10 @@ Installed for every agent, every project:
   (keyed by its hash under `~/.cache/dyai/installers/`) for a tool whose own
   installer does what the declarative arms cannot.
 - `policy` — shared settings (permissions, theme, effort, approval mode).
-  For Claude, `permissions` carries the harness-enforced half of the
-  machine-wide agent rules: `deny` for credential stores and decrypting
-  commands, `ask` for destructive ones.
+  `permissions` carries the harness-enforced half of the machine-wide agent
+  rules, in Claude's syntax: `deny` for credential stores and decrypting
+  commands, `ask` for destructive ones. Claude reads it as is; the other
+  agents get a translation (see [Permissions in other agents](#permissions-in-other-agents)).
 
 ### `agents.<name>` — agent-specific
 
@@ -160,6 +162,27 @@ every tool definition twice. If dyai registered it earlier, the registration
 is removed, but only when it is still exactly dyai's definition; a server
 you customized under that name stays. Other agents, which have no plugins,
 still get it from `global.mcp`.
+
+### Permissions in other agents
+
+`dyai install` translates the `Bash(...)`, `Read(...)` and `Edit(...)` rules of
+`global.policy.permissions` into each installed agent's own mechanism. The
+`rtk git ...` spellings exist only for Claude's rtk hook and are dropped, and
+a prefix in both lists is denied.
+
+| Agent | Where | Shell `deny` / `ask` | Path rules |
+|-------|-------|----------------------|------------|
+| opencode | `permission` in `opencode.json` | `deny` / `ask` globs under `bash` | `read` / `edit` globs |
+| Antigravity | `permissions` in `~/.gemini/antigravity-cli/settings.json` | `command(<prefix>)` in `deny` / `ask` | none (no documented glob form) |
+| Gemini CLI | `~/.gemini/policies/dyai.toml`, owned by dyai | `commandPrefix`, `deny` / `ask_user` | none |
+| Codex | `~/.codex/rules/dyai.rules`, owned by dyai | `prefix_rule`, `forbidden` / `prompt` | none |
+| Hermes | `approvals.deny` in `~/.hermes/config.yaml` | deny globs only; no ask list | none |
+| Copilot | — | no user-level config key | none |
+
+The JSON and YAML targets are merged: your own rules stay, and a rule dropped
+from the policy later is not removed. The two files dyai owns are rewritten
+whole. The path rules reach only Claude and opencode, so for the other agents
+the credential-store rules still rest on the instructions text alone.
 
 ## Adding to the registry
 
