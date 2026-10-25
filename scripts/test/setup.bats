@@ -123,6 +123,14 @@ function render_config_for {
     --file "${SANDBOX}/home/.chezmoi.yaml.tmpl" < /dev/null
 }
 
+# Skips a test of the default kind where the config template detects a
+# container, by the same markers, and so defaults the kind to "container".
+function skip_in_container {
+  if [[ -n "${container-}" || -e /run/.containerenv || -e /.dockerenv ]]; then
+    skip "in a container the kind defaults to container"
+  fi
+}
+
 @test "the config template takes the answers of a machine from machines.yaml" {
   dybatpho::is command chezmoi || skip "chezmoi is not installed"
   write_machines_yaml << 'EOF'
@@ -180,6 +188,7 @@ EOF
 
 @test "the config template falls back to the questions for an unlisted machine" {
   dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  skip_in_container
   write_machines_yaml << 'EOF'
 machines:
   test0:
@@ -208,6 +217,7 @@ EOF
 
 @test "the config template offers the options of choices.yaml" {
   dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  skip_in_container
   yq -i '.choices.place.options = ["moon", "home"] | .choices.kind.default = "laptop"' \
     "${SANDBOX}/home/.chezmoidata/choices.yaml"
   write_machines_yaml << 'EOF'

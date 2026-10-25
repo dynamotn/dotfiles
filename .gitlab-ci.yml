@@ -6,6 +6,8 @@ variables:
   SHFMT_SHA256: d9fbb2a9c33d13f47e7618cf362a914d029d02a6df124064fff04fd688a745ea
   CHEZMOI_VERSION: v2.72.2
   YAML_SCHEMA_VERSION: 0.9.1
+  YQ_VERSION: v4.53.6
+  YQ_SHA256: c5f056448f973ae7d39b5401949648a78f2dc1947d6a8eb65be60d5c504b9385
 
 stages:
   - lint
@@ -39,7 +41,15 @@ test:bats:
     # Only the test library, so the private secrets submodule stays out.
     - git submodule update --init --recursive scripts/lib/dybatpho
     - sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin -t "${CHEZMOI_VERSION}"
-    - apt-get install -y -qq --no-install-recommends cargo
+    # The template tests render against the chezmoi config of the home.
+    - install -D -m 600 scripts/test/fixtures/chezmoi.yaml ~/.config/chezmoi/chezmoi.yaml
+    # The tools the suite drives that a GitHub runner already has, and age
+    # for the dycrypt round trips. Debian's yq is not the Go one.
+    - apt-get install -y -qq --no-install-recommends cargo age jq make python3 unzip
+    - curl -fsSL -o /usr/local/bin/yq
+      "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+    - echo "${YQ_SHA256}  /usr/local/bin/yq" | sha256sum -c -
+    - chmod +x /usr/local/bin/yq
     - export PATH="$HOME/.cargo/bin:$PATH"
     - command -v ys > /dev/null || cargo install yaml-schema --version "${YAML_SCHEMA_VERSION}" --locked
     - ./scripts/test.sh --all

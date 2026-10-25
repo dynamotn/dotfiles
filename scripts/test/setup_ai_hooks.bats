@@ -41,7 +41,8 @@ EOF
   jq -e '.hooks.AfterAgent[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
   jq -e '.hooks.Notification[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
   [[ "$(jq -r '.hooks.SessionStart[0].hooks[0].command' "${f}")" == "echo hi" ]]
-  local before; before="$(cat "${f}")"
+  local before
+  before="$(cat "${f}")"
   run bash "${HOOK}"
   assert_success
   [[ "$(cat "${f}")" == "${before}" ]]

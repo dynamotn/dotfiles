@@ -144,9 +144,9 @@ machines:
     kind: "vm"
     company: "F1"
     decryptPersonal: false
-    decryptEnterprise:
+    decryptEnterprise: []
     guiServer: "0"
-    languages:
+    languages: []
     browser: ""
     browserEnterpriseProfiles: []
     mailClient: ""

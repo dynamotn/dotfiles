@@ -1,4 +1,6 @@
 #!/bin/sh
+# Checked as dash, the strictest target sh that has `local` (see below).
+# shellcheck shell=dash
 # dyshellint disable=BSG030,BSG031,BSG001,SC2292 POSIX sh bootstrap: it installs bash, so cannot need it or dybatpho
 # @file prerequisite.sh
 # @brief Install prerequisite packages for chezmoi and dotfiles setup

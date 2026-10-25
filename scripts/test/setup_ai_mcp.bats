@@ -43,7 +43,8 @@ EOF
   [[ "$(jq -r '.mcpServers.laya.env.HF_HUB_DISABLE_TELEMETRY' "${f}")" == "1" ]]
   [[ "$(jq -r '.theme' "${f}")" == "x" ]]
   [[ "$(jq -r '.mcpServers.other.command' "${f}")" == "o" ]]
-  local before; before="$(cat "${f}")"
+  local before
+  before="$(cat "${f}")"
   run bash "${HOOK}"
   assert_success
   [[ "$(cat "${f}")" == "${before}" ]]

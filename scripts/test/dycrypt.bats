@@ -6,6 +6,10 @@ setup() {
 
   export DYCRYPT_DOTFILES_DIR="${BATS_TEST_TMPDIR}/dotfiles"
   dybatpho::ensure_dir "${DYCRYPT_DOTFILES_DIR}/secrets/data/test" > /dev/null
+  # Private whatever the umask, as dybatpho warns about a shared key folder.
+  local key_dir
+  key_dir="$(dybatpho::xdg_config_dir chezmoi)"
+  chmod 700 "${key_dir}"
   age-keygen -o "$(dybatpho::xdg_config_dir chezmoi)/test.key" 2> /dev/null
   chmod 600 "$(dybatpho::xdg_config_dir chezmoi)/test.key"
 }

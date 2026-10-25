@@ -8,7 +8,7 @@ description: >
 type: object
 additionalProperties: false
 
-definitions:
+$defs:
   mcpServer:
     type: object
     additionalProperties: false
@@ -54,7 +54,7 @@ definitions:
         items: { type: string }
       mcp:
         type: object
-        additionalProperties: { $ref: "#/definitions/mcpServer" }
+        additionalProperties: { $ref: "#/$defs/mcpServer" }
       commands:
         type: array
         items: { type: string }
@@ -122,17 +122,17 @@ properties:
         description: skills.sh entries installed for every agent.
       subagents:
         type: array
-        items: { $ref: "#/definitions/mdSource" }
+        items: { $ref: "#/$defs/mdSource" }
       commands:
         type: array
-        items: { $ref: "#/definitions/mdSource" }
+        items: { $ref: "#/$defs/mdSource" }
         description: Pinned repos of command .md files, installed to project command dirs by presets.
       mcp:
         type: object
-        additionalProperties: { $ref: "#/definitions/mcpServer" }
+        additionalProperties: { $ref: "#/$defs/mcpServer" }
       hooks:
         type: object
-        additionalProperties: { $ref: "#/definitions/hook" }
+        additionalProperties: { $ref: "#/$defs/hook" }
       lsp:
         type: object
         additionalProperties: false
@@ -172,7 +172,7 @@ properties:
                 Shell command to run for each agent id, run once when that
                 agent's launcher is present. Keyed by agent id.
               additionalProperties: { type: string }
-      policy: { $ref: "#/definitions/policy" }
+      policy: { $ref: "#/$defs/policy" }
 
   agents:
     type: object
@@ -207,11 +207,11 @@ properties:
             preset's `plugins` switches them on per project.
         mcp:
           type: object
-          additionalProperties: { $ref: "#/definitions/mcpServer" }
+          additionalProperties: { $ref: "#/$defs/mcpServer" }
         hooks:
           type: object
-          additionalProperties: { $ref: "#/definitions/hook" }
-        policy: { $ref: "#/definitions/policy" }
+          additionalProperties: { $ref: "#/$defs/hook" }
+        policy: { $ref: "#/$defs/policy" }
 
   registry:
     type: object
@@ -220,10 +220,10 @@ properties:
     properties:
       languages:
         type: object
-        additionalProperties: { $ref: "#/definitions/preset" }
+        additionalProperties: { $ref: "#/$defs/preset" }
       infra:
         type: object
-        additionalProperties: { $ref: "#/definitions/preset" }
+        additionalProperties: { $ref: "#/$defs/preset" }
       presets:
         type: object
-        additionalProperties: { $ref: "#/definitions/preset" }
+        additionalProperties: { $ref: "#/$defs/preset" }

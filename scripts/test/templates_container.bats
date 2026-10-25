@@ -68,7 +68,7 @@ function _render_linux {
     cd "${DOTFILES_DIR}" || exit 1
     env HOME="${home}" XDG_CONFIG_HOME="${home}/.config" \
       chezmoi --config "${cfg}" execute-template --source "${DOTFILES_DIR}" \
-      --override-data '{"chezmoi":{"os":"linux"}}' \
+      --override-data '{"chezmoi":{"os":"linux","osRelease":{"idLike":""}}}' \
       < "${DOTFILES_DIR}/${template}" > "${output_path}"
   )
 }
