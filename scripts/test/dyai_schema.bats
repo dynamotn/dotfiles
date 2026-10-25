@@ -134,3 +134,22 @@ function _render_config {
   [[ "$(yq '.policy.theme' "${out}")" == "auto" ]]
   [[ "$(yq '.policy.effortLevel' "${out}")" == "medium" ]]
 }
+
+@test "rendered dyai config carries skills, laya mcp and claude plugins" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.full.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  if ! _render_config "${cfg}" "${out}"; then
+    fail "chezmoi could not render config.yaml.tmpl: $(cat "${out}.err")"
+  fi
+  [[ "$(yq '.global.skills | length' "${out}")" == "42" ]]
+  yq -e '.global.skills[] | select(. == "vercel-labs/skills@find-skills")' "${out}" > /dev/null
+  yq -e '.global.skills[] | select(. == "Eyadkelleh/awesome-skills-security@llm-testing")' "${out}" > /dev/null
+  [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp-server ]]
+  [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
+  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "54" ]]
+  [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "6" ]]
+  [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
+}
