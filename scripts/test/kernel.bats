@@ -27,6 +27,7 @@ EOF
 }
 
 @test "kernel::run_in_tree elevates in a tree the user cannot write" {
+  ((EUID != 0)) || skip "root writes any tree, so nothing elevates"
   _fake_sudo
   local tree="${BATS_TEST_TMPDIR}/linux"
   dybatpho::ensure_dir "${tree}" > /dev/null
@@ -250,6 +251,7 @@ make -C ${tree} savedefconfig"
 }
 
 @test "kernel::save_defconfig copies into a root-owned folder with privilege" {
+  ((EUID != 0)) || skip "root writes any folder, so nothing elevates"
   local tree="${BATS_TEST_TMPDIR}/tree" base_dir="${BATS_TEST_TMPDIR}/etc-kernel"
   mkdir -p "${tree}" "${base_dir}"
   chmod 555 "${base_dir}"

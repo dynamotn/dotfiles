@@ -5,6 +5,8 @@ setup() {
   CALL_LOG="${BATS_TEST_TMPDIR}/calls.log"
   # By absolute path: the Linux tests run it with a PATH of fakes only.
   SH_BIN="$(command -v sh)"
+  # The fakes log the DEBIAN_FRONTEND they see; GitHub runners export one.
+  unset DEBIAN_FRONTEND
   : > "${CALL_LOG}"
 }
 

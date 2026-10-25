@@ -63,6 +63,14 @@ jobs:
       - name: Install chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin -t "${CHEZMOI_VERSION}"
 
+      # The template tests render against the chezmoi config of the home.
+      - name: Write chezmoi config
+        run: install -D -m 600 scripts/test/fixtures/chezmoi.yaml ~/.config/chezmoi/chezmoi.yaml
+
+      # dycrypt tests round trip a throwaway key.
+      - name: Install age
+        run: sudo apt-get update && sudo apt-get install -y age
+
       - name: Cache cargo binaries
         uses: actions/cache@v4
         with:

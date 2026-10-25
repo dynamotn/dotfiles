@@ -39,7 +39,8 @@ EOF
   local f="${HOME}/.gemini/settings.json"
   [[ "$(jq -r '.general.defaultApprovalMode' "${f}")" == "auto_edit" ]]
   [[ "$(jq -r '.ui.theme' "${f}")" == "x" ]]
-  local before; before="$(cat "${f}")"
+  local before
+  before="$(cat "${f}")"
   run bash "${HOOK}"
   assert_success
   [[ "$(cat "${f}")" == "${before}" ]]

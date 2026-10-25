@@ -1,0 +1,29 @@
+# The chezmoi config CI renders the templates against, in place of the one
+# `chezmoi init` writes on a real machine: a Linux desktop with a browser and
+# a mail client, so every entrypoint renders, that decrypts nothing.
+data:
+  osid: "linux-ubuntu"
+  inContainer: false
+  initSystem: "systemd"
+  bash: "/usr/bin/env bash"
+  code: "ci"
+  place: "home"
+  kind: "pc"
+  company:
+  decryptPersonal: false
+  decryptEnterprise: []
+  guiServer: "W"
+  guiDriver: "A"
+  guiWinManager: "H"
+  languages: ["vi"]
+  browser: "F"
+  browserEnterpriseProfiles: []
+  mailClient: "T"
+  mailEnterpriseProfiles: []
+  terminalMultiplexer: "Z"
+  hasSound: true
+  hasBluetooth: true
+  hasWifi: true
+  preferGitSSH: false
+  blockedGitlab: false
+  darkMode: true
