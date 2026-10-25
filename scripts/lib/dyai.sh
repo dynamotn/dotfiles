@@ -466,6 +466,73 @@ function dyai::setup_hooks {
 # @noargs
 
 #######################################
+# @description Fetch a GitHub repo at a pinned ref into an XDG cache, reusing it
+# @arg $1 string owner/repo
+# @arg $2 string commit SHA or tag (never a moving branch)
+# @stdout The path of the extracted checkout
+# @exitcode 1 The download failed
+#######################################
+function dyai::fetch_repo {
+  local repo ref
+  dybatpho::expect_args repo ref -- "$@"
+  local cache tmp extracted
+  cache="$(dybatpho::path_join "${HOME}" ".cache" "dyai" "${repo//\//-}-${ref}")"
+  if ! dybatpho::is dir "${cache}"; then
+    dybatpho::create_temp tmp "/" "dyai-fetch"
+    # shellcheck disable=SC2312 # a failed download warns and returns, not aborts
+    if ! curl -fsSL --connect-timeout 30 --max-time 300 \
+      "https://github.com/${repo}/archive/${ref}.tar.gz" | tar -xz -C "${tmp}"; then
+      dybatpho::warn "Could not fetch ${repo}@${ref}"
+      return 1
+    fi
+    # The tarball extracts to a single <reponame>-<ref> directory.
+    # shellcheck disable=SC2312 # the find yields exactly the one extracted dir
+    extracted="$(find "${tmp}" -mindepth 1 -maxdepth 1 -type d | head -1)"
+    dybatpho::ensure_dir "$(dirname "${cache}")" > /dev/null
+    mv "${extracted}" "${cache}"
+  fi
+  printf '%s' "${cache}"
+}
+
+#######################################
+# @description Install the subagents in global.subagents into Claude's agents dir
+# @noargs
+#######################################
+function dyai::setup_subagents {
+  # The VoltAgent subagents are Claude-format; other agents' formats differ.
+  dybatpho::is command claude || return 0
+  local sources agents_dir
+  sources="$(dyai::config_json '.global.subagents // []')"
+  agents_dir="$(dybatpho::path_join "${HOME}" ".claude" "agents")"
+  local count i repo ref src incl md name dest
+  count="$(jq 'length' <<< "${sources}")"
+  for ((i = 0; i < count; i++)); do
+    repo="$(jq -r --argjson i "${i}" '.[$i].repo' <<< "${sources}")"
+    ref="$(jq -r --argjson i "${i}" '.[$i].ref' <<< "${sources}")"
+    # shellcheck disable=SC2310 # a failed fetch warns inside and we skip this source
+    src="$(dyai::fetch_repo "${repo}" "${ref}")" || continue
+    dybatpho::ensure_dir "${agents_dir}" > /dev/null
+    # shellcheck disable=SC2312 # the include list comes from the config we just read
+    while IFS= read -r incl; do
+      [[ -n "${incl}" ]] || continue
+      # shellcheck disable=SC2312 # find lists the category's .md files, a bad path lists none
+      while IFS= read -r md; do
+        name="$(basename "${md}")"
+        [[ "${name}" == "README.md" ]] && continue
+        dest="$(dybatpho::path_join "${agents_dir}" "${name}")"
+        if ! dybatpho::is file "${dest}" || ! cmp -s "${md}" "${dest}"; then
+          if cp -- "${md}" "${dest}"; then
+            dybatpho::info "Installed subagent ${name%.md}"
+          else
+            dybatpho::warn "Could not install subagent ${name}"
+          fi
+        fi
+      done < <(find "${src}/${incl}" -mindepth 1 -maxdepth 1 -name '*.md' 2> /dev/null)
+    done < <(jq -r --argjson i "${i}" '.[$i].include[]' <<< "${sources}")
+  done
+}
+
+#######################################
 # @description Run the global AI-agent setup from ~/.config/dyai/config.yaml
 # @noargs
 #######################################
@@ -492,6 +559,7 @@ function dyai::install {
   dyai::setup_mcp
   dyai::setup_policy
   dyai::setup_hooks
+  dyai::setup_subagents
   if dybatpho::is command bunx; then
     dyai::setup_skills
   else

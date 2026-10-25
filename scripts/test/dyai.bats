@@ -70,3 +70,35 @@ EOF
   assert_success
   grep -q 'STUB claude mcp add-json --scope user laya' "${HOME}/calls.log"
 }
+
+@test "dyai::setup_subagents copies category .md into ~/.claude/agents, skips README, idempotent" {
+  _stub claude
+  local src="${BATS_TEST_TMPDIR}/voltsrc"
+  mkdir -p "${src}/categories/01-core-development"
+  printf -- '---\nname: backend-developer\n---\nbody\n' > "${src}/categories/01-core-development/backend-developer.md"
+  printf '# readme\n' > "${src}/categories/01-core-development/README.md"
+  # stub the network fetch to return the fixture
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << 'CFG'
+global:
+  skills: []
+  mcp: {}
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: deadbeef
+      include: [categories/01-core-development]
+agents:
+  claude: {}
+CFG
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.claude/agents" > /dev/null
+  printf 'mine\n' > "${HOME}/.claude/agents/mine.md"
+  dyai::setup_subagents
+  [ -f "${HOME}/.claude/agents/backend-developer.md" ]
+  [ ! -f "${HOME}/.claude/agents/README.md" ]
+  [ -f "${HOME}/.claude/agents/mine.md" ]
+  local before; before="$(cat "${HOME}/.claude/agents/backend-developer.md")"
+  dyai::setup_subagents
+  [[ "$(cat "${HOME}/.claude/agents/backend-developer.md")" == "${before}" ]]
+}
