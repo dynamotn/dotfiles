@@ -231,6 +231,21 @@ CFG
   assert_success
 }
 
+@test "dyai::use works when .git/info does not exist yet" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  printf 'registry:\n  languages:\n    go: {subagents: [], skills: []}\n' > "${CONFIG_FILE}"
+  local proj="${BATS_TEST_TMPDIR}/noinfo"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  # Some git versions / templates do not create .git/info on init.
+  rm -rf "${proj}/.git/info"
+  (cd "${proj}" && dyai::use go)
+  [ -f "${proj}/.dyai.toml" ]
+  run git -C "${proj}" check-ignore .dyai.toml
+  assert_success
+}
+
 @test "dyai::use excludes .dyai.toml correctly inside a git worktree" {
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null

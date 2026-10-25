@@ -576,6 +576,9 @@ function dyai::git_exclude {
 function dyai::exclude_add {
   local exclude pattern
   dybatpho::expect_args exclude pattern -- "$@"
+  # Some git versions do not create .git/info on init, so the append target's
+  # parent may be missing; create it before writing.
+  dybatpho::ensure_dir "$(dirname "${exclude}")" > /dev/null
   grep -qxF -- "${pattern}" "${exclude}" 2> /dev/null && return 0
   printf '%s\n' "${pattern}" >> "${exclude}" || dybatpho::die "cannot write ${exclude}"
 }
