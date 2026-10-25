@@ -28,6 +28,11 @@ bats_require_minimum_version 1.5.0
 function setup_dotfiles_test_env {
   export HOME="${BATS_TEST_TMPDIR}/home"
   export XDG_CONFIG_HOME="${HOME}/.config"
+  # The desktop session exports the other XDG dirs too; left pointing at the
+  # real home, fish reads (and history_scrub deletes from) the real history.
+  export XDG_DATA_HOME="${HOME}/.local/share"
+  export XDG_STATE_HOME="${HOME}/.local/state"
+  export XDG_CACHE_HOME="${HOME}/.cache"
   dybatpho::ensure_dir "$(dybatpho::xdg_config_dir dytoy)" > /dev/null
   dybatpho::ensure_dir "$(dybatpho::xdg_config_dir chezmoi)" > /dev/null
   dybatpho::ensure_dir "${HOME}/.local/bin" > /dev/null
