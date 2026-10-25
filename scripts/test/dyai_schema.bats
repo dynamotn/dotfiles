@@ -153,3 +153,16 @@ function _render_config {
   [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "6" ]]
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
 }
+
+@test "config declares shared notify hooks and the approval default" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.hooks.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  [[ "$(yq '.global.hooks.stop.event' "${out}")" == "stop" ]]
+  [[ "$(yq '.global.hooks.input.event' "${out}")" == "input" ]]
+  yq -e '.global.hooks.stop.run | test("notify-send")' "${out}" > /dev/null
+  [[ "$(yq '.global.policy.approval' "${out}")" == "accept-edits" ]]
+}
