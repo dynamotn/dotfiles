@@ -18,6 +18,7 @@ plus a registry of opt-in presets a project pulls in on demand.
   - [What materialization writes](#what-materialization-writes)
 - [How it installs](#how-it-installs)
 - [Adding to the registry](#adding-to-the-registry)
+- [Keeping the baseline lean](#keeping-the-baseline-lean)
 
 <!-- tocstop -->
 
@@ -47,14 +48,25 @@ Installed for every agent, every project:
   cross-cutting skills every project benefits from (API design, architecture,
   documentation, prompt engineering, …). Anything tied to a language, tool or
   domain lives in a preset instead.
-- `subagents` — a pinned repo (VoltAgent) and the category directories whose
-  `*.md` agents install into every agent's agents directory.
+- `subagents` — a pinned repo (VoltAgent) and the category directories (or
+  single `.md` files) whose agents install into every agent's agents
+  directory. `exclude` drops named leaves from the baseline; a preset can
+  still pull one per project.
+- `commands` — pinned repos of command `.md` files, same shape as
+  `subagents`. Nothing installs them globally; presets name them.
 - `mcp` — MCP servers, each written into every MCP-capable agent in that
   agent's own format. An `env` map holds variable **names** only, never a
-  secret value.
+  secret value. Claude skips a server that an enabled Claude plugin of the
+  same name already bundles (see [How it installs](#how-it-installs)).
 - `hooks` — abstract events (`stop`, `input`) translated into each
   hook-capable agent's format.
+- `installers` — a shell command per agent id, run once by `dyai install`
+  (keyed by its hash under `~/.cache/dyai/installers/`) for a tool whose own
+  installer does what the declarative arms cannot.
 - `policy` — shared settings (permissions, theme, effort, approval mode).
+  For Claude, `permissions` carries the harness-enforced half of the
+  machine-wide agent rules: `deny` for credential stores and decrypting
+  commands, `ask` for destructive ones.
 
 ### `agents.<name>` — agent-specific
 
@@ -65,9 +77,15 @@ Things only one agent understands, e.g. `agents.claude.marketplaces` and
 
 Grouped by tool boundary so a project pulls in only what it uses:
 
-- `languages` — `go`, `python`, `rust`, `typescript`, `frontend`
-- `infra` — `terraform`, `kubernetes`, `docker`, `aws`, `cicd`, `database`
-- `presets` — cross-language domains: `testing`, `security`
+- `languages` — one per language the Neovim config supports (`go`, `python`,
+  `rust`, `typescript`, `frontend`, `vue`, `angular`, `java`, …)
+- `infra` — `terraform`, `terragrunt`, `kubernetes`, `docker`, `aws`, `cicd`,
+  `database`, `ansible`
+- `presets` — cross-language domains: `testing`, `security`, `datascience`,
+  `docs`, `shell`, and the domain agents kept out of the baseline (`desktop`,
+  `mobile`, `graphql`, `realtime`)
+
+`dyai ls` prints the full, current list.
 
 Each preset is `{subagents?, skills?, mcp?, commands?}`. Subagent names resolve
 against the pinned `global.subagents` repo (materialize finds `<name>.md`
@@ -103,12 +121,18 @@ team, and are never committed.
 
 - **subagents** → `./.claude/agents/<name>.md`, copied from the pinned repo
   (idempotent; unchanged files are left alone).
+- **commands** → `./.claude/commands/<name>.md`, copied from the pinned
+  `global.commands` repo the same way.
 - **skills** → `./.agents/skills/` via `skills add` run in the project (no
   `-g`), so they are project-local, not global.
+- **mcp** → Claude's project-**local** scope (`claude mcp add-json --scope
+  local`, kept in `~/.claude.json`, not the shared `./.mcp.json`), tracked
+  as `materialized_mcp` in `.dyai.toml`.
 
 `dyai rm` (or re-running after editing the registry) prunes exactly the files a
 dropped preset owned, and keeps a file another active preset still wants.
-Pruning is confined to the `./.claude/agents/` and `./.agents/skills/` subtrees
+Pruning is confined to the `./.claude/agents/`, `./.claude/commands/` and
+`./.agents/skills/` subtrees
 and refuses any path with a traversal segment, so a crafted `.dyai.toml` cannot
 turn it into an arbitrary delete. If a configured subagent source cannot be
 fetched (e.g. offline), materialize refuses to prune rather than delete files
@@ -129,9 +153,32 @@ The `filesystem` MCP server is scoped per config context: personal and
 community trees by default, the enterprise tree inside an enterprise config
 directory.
 
+A `global.mcp` server named like an entry of `agents.claude.plugins`
+(`context7` and `context7@claude-plugins-official`) is left to that plugin
+in Claude, since the plugin bundles the same server and a second copy loads
+every tool definition twice. If dyai registered it earlier, the registration
+is removed, but only when it is still exactly dyai's definition; a server
+you customized under that name stays. Other agents, which have no plugins,
+still get it from `global.mcp`.
+
 ## Adding to the registry
 
 Add a preset under the matching `registry` group in `config.yaml.tmpl`, listing
 its `subagents` (leaf names present in the pinned repo) and `skills`
 (`owner/repo@skill`). Keep a skill out of `global` if it is specific to that
 tool. Then `chezmoi apply` and `dyai use <name>` in a project.
+
+## Keeping the baseline lean
+
+Everything in `global` is loaded into every session of every agent, so it
+costs context whether a project uses it or not:
+
+- An MCP server spends context on its tool definitions as soon as it
+  connects. Add one to `global.mcp` only when nearly every project needs
+  it; otherwise give it to a preset (as `database` does for postgres and
+  mysql).
+- A skill's description is read in every session to decide when to fire.
+  Write it as a trigger ("Use when …"), and keep a domain skill in a
+  preset.
+- Prefer a focused, preset-scoped subagent over another generalist one in
+  the baseline.
