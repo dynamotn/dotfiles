@@ -305,6 +305,10 @@ registry:
       skills:
         - aws/agent-toolkit-for-aws@aws-iam
         - aws/agent-toolkit-for-aws@aws-observability
+        - aws/agent-toolkit-for-aws@creating-secrets-using-best-practices
+        - aws/agent-toolkit-for-aws@aws-secrets-manager
+        - aws/agent-toolkit-for-aws@investigating-incidents-with-aws-devops-agent
+        - aws/agent-toolkit-for-aws@amazon-bedrock
       # Docs, list prices and architecture diagrams; none reads the account.
       mcp:
         aws-docs:
@@ -327,14 +331,21 @@ registry:
         - hashicorp/agent-skills@azure-verified-modules
         - akin-ozer/cc-devops-skills@azure-pipelines-generator
         - akin-ozer/cc-devops-skills@azure-pipelines-validator
+        - microsoft/azure-skills@azure-observability
       # Signs in through the az CLI session; no credential stored here.
       mcp:
         azure:
           command: bunx
           args: ["@azure/mcp@3.0.0", "server", "start"]
           env: {}
-    # Uses the gcloud CLI's active account; no credential stored here.
+    # Well-Architected pillars and landing-zone recipes from Google's own
+    # skills. The MCP servers use the gcloud CLI's active account; no
+    # credential is stored here.
     gcp:
+      skills:
+{{- range list "waf-security" "waf-cost-optimization" "waf-reliability" "waf-operational-excellence" "waf-performance-optimization" "waf-sustainability" "recipe-auth" "recipe-foundation-builder" "networking-observability" }}
+        - google/skills@google-cloud-{{ . }}
+{{- end }}
       mcp:
         gcloud:
           command: bunx
@@ -344,14 +355,63 @@ registry:
           command: bunx
           args: ["@google-cloud/observability-mcp@0.2.3"]
           env: {}
-    # GitOps on top of the cicd preset's gitops-workflow skill. Reads
-    # ARGOCD_BASE_URL and ARGOCD_API_TOKEN from the runtime env.
-    argocd:
+    # GitOps with Flux and Argo CD, on top of the cicd preset's
+    # gitops-workflow skill. The argocd server reads ARGOCD_BASE_URL and
+    # ARGOCD_API_TOKEN from the runtime env.
+    gitops:
+      skills:
+        - fluxcd/agent-skills@gitops-knowledge
+        - fluxcd/agent-skills@gitops-cluster-debug
       mcp:
         argocd:
           command: bunx
           args: ["argocd-mcp@0.9.0", "stdio"]
           env: {}
+    # Infrastructure as code in general-purpose languages, and migrations
+    # into it from Terraform, CDK, CloudFormation and ARM.
+    pulumi:
+      skills:
+        - pulumi/agent-skills@pulumi-best-practices
+        - pulumi/agent-skills@pulumi-component
+        - pulumi/agent-skills@pulumi-esc
+        - pulumi/agent-skills@pulumi-automation-api
+        - pulumi/agent-skills@pulumi-terraform-to-pulumi
+        - pulumi/agent-skills@pulumi-cdk-to-pulumi
+        - pulumi/agent-skills@cloudformation-to-pulumi
+        - pulumi/agent-skills@pulumi-arm-to-pulumi
+    # Data platform, one preset per tool; the data-engineering subagents
+    # ride with dbt, the transformation layer most stacks share.
+    dbt:
+      subagents: [data-engineer, data-analyst, database-optimizer]
+      skills:
+        - dbt-labs/dbt-agent-skills@using-dbt-for-analytics-engineering
+        - dbt-labs/dbt-agent-skills@adding-dbt-unit-test
+        - dbt-labs/dbt-agent-skills@building-dbt-semantic-layer
+        - dbt-labs/dbt-agent-skills@working-with-dbt-mesh
+        - dbt-labs/dbt-agent-skills@troubleshooting-dbt-job-errors
+        - wshobson/agents@dbt-transformation-patterns
+    airflow:
+      skills:
+        - astronomer/agents@airflow
+        - astronomer/agents@migrating-airflow-2-to-3
+        - wshobson/agents@airflow-dag-patterns
+    dagster:
+      skills: [dagster-io/skills@dagster-expert]
+    clickhouse:
+      skills:
+        - clickhouse/agent-skills@clickhouse-best-practices
+        - clickhouse/agent-skills@clickhouse-architecture-advisor
+    databricks:
+      skills:
+        - databricks/databricks-agent-skills@databricks-core
+        - databricks/databricks-agent-skills@databricks-pipelines
+        - databricks/databricks-agent-skills@databricks-jobs
+        - databricks/databricks-agent-skills@databricks-dabs
+    # Durable workflows.
+    temporal:
+      skills:
+        - temporalio/skill-temporal-developer@temporal-developer
+        - wshobson/agents@temporal-python-testing
     cicd:
       subagents: [deployment-engineer]
       skills:
@@ -456,6 +516,16 @@ registry:
         - wshobson/agents@sast-configuration
         - wshobson/agents@pci-compliance
         - wshobson/agents@gdpr-data-handling
+        - ghostsecurity/skills@ghost-scan-secrets
+        - github/awesome-copilot@agent-supply-chain
+        - samber/cc-skills@snyk-agent-scan-compliance
+        # Claude already has these through the trailofbits plugins; listed so
+        # the other agents get them too.
+        - trailofbits/skills@codeql
+        - trailofbits/skills@supply-chain-risk-auditor
+    # Regulated domains and licensing, apart from the security tooling.
+    compliance:
+      subagents: [hipaa-compliance, risk-manager, license-engineer, legal-advisor]
     # Notebooks, R and Quarto — the data-science filetypes nvim supports.
     datascience:
       subagents: [data-scientist]
@@ -524,9 +594,8 @@ registry:
         - ollygarden/opentelemetry-agent-skills@otel-collector
         - ollygarden/opentelemetry-agent-skills@otel-semantic-conventions
         - ollygarden/opentelemetry-agent-skills@otel-ottl
-    # SLOs, incidents, on-call and the Prometheus/Grafana/Loki stack.
-    # prometheus reads PROMETHEUS_URL; grafana reads GRAFANA_URL and
-    # GRAFANA_SERVICE_ACCOUNT_TOKEN, all from the runtime env.
+    # SLOs, incidents, on-call and the Prometheus/Loki stack; Grafana itself
+    # has its own preset. prometheus reads PROMETHEUS_URL from the runtime env.
     sre:
       subagents: [sre-engineer, incident-responder, devops-incident-responder]
       skills:
@@ -541,16 +610,45 @@ registry:
         - akin-ozer/cc-devops-skills@promql-validator
         - akin-ozer/cc-devops-skills@logql-generator
         - akin-ozer/cc-devops-skills@loki-config-generator
+        - anthropics/knowledge-work-plugins@incident-response
       mcp:
         prometheus:
           command: uvx
           args: ["prometheus-mcp-server@1.6.2"]
           env: {}
           readonly: true
+    # Observability vendors, one preset per tool. grafana reads GRAFANA_URL
+    # and GRAFANA_SERVICE_ACCOUNT_TOKEN from the runtime env.
+    grafana:
+      skills:
+        - grafana/skills@dashboarding
+        - grafana/skills@promql
+        - grafana/skills@loki
+        - grafana/skills@alerting-irm
+        - grafana/skills@alloy
+        - grafana/skills@opentelemetry
+      mcp:
         grafana:
           command: docker
           args: ["run", "-i", "--rm", "-e", "GRAFANA_URL", "-e", "GRAFANA_SERVICE_ACCOUNT_TOKEN", "grafana/mcp-grafana:2.1.1", "-t", "stdio"]
           env: {}
+    # The repo's root SKILL.md (a collection index) hides the nested skills
+    # from the skills CLI, so each is pinned by tree URL. No MCP: Datadog's
+    # server needs per-region API keys sent as headers.
+    datadog:
+      skills:
+{{- range list "dd-apm" "dd-logs" "dd-monitors" "dd-docs" "dd-pup" }}
+        - https://github.com/datadog-labs/agent-skills/tree/ef022309cc6b6296e7574589ac332699b1c9a092/{{ . }}
+{{- end }}
+    elastic:
+      skills:
+        - elastic/agent-skills@elasticsearch-esql
+        - elastic/agent-skills@elasticsearch-index-design
+        - elastic/agent-skills@elasticsearch-query-optimization
+        - elastic/agent-skills@elasticsearch-authz
+        - elastic/agent-skills@elasticsearch-audit
+        - elastic/agent-skills@elasticsearch-security-troubleshooting
+        - elastic/agent-skills@observability-llm-obs
     # Internal platform: service mesh, delivery pipelines, secrets, DX.
     platform:
       subagents: [platform-engineer, network-engineer, dx-optimizer, build-engineer]
@@ -581,8 +679,8 @@ registry:
         - wshobson/agents@cqrs-implementation
         - wshobson/agents@event-store-design
         - wshobson/agents@projection-patterns
-    # Business analysis and product ownership: PRDs, stories, roadmaps.
-    # atlassian reads JIRA_* and CONFLUENCE_* from the runtime env.
+    # Business analysis and product ownership: PRDs, stories, roadmaps, and
+    # BPMN/UML process models. The trackers have their own presets.
     product:
       subagents:
         - business-analyst
@@ -611,11 +709,84 @@ registry:
         - deanpeters/Product-Manager-Skills@problem-statement
         - wshobson/agents@kpi-dashboard-design
         - wshobson/agents@data-storytelling
+        - mattpocock/skills@to-prd
+        - refoundai/lenny-skills@writing-prds
+        - refoundai/lenny-skills@setting-okrs-goals
+        - github/awesome-copilot@breakdown-feature-prd
+        - github/awesome-copilot@create-github-issues-for-unmet-specification-requirements
+        - jwynia/agent-skills@requirements-analysis
+        - markdown-viewer/skills@bpmn
+        - markdown-viewer/skills@uml
+    # Office deliverables (Word, PowerPoint, Excel, PDF) from Anthropic.
+    office:
+      skills:
+        - anthropics/skills@docx
+        - anthropics/skills@pptx
+        - anthropics/skills@xlsx
+        - anthropics/skills@pdf
+    # Issue trackers and wikis, one preset per tool. Hosted servers go through
+    # mcp-remote, which runs the OAuth sign-in and keeps the token itself.
+    jira:
+      skills: [affaan-m/ecc@jira-integration]
+      # Reads JIRA_* and CONFLUENCE_* from the runtime env.
       mcp:
         atlassian:
           command: uvx
           args: ["mcp-atlassian@0.23.1"]
           env: {}
+    linear:
+      skills: [openai/skills@linear]
+      mcp:
+        linear:
+          command: bunx
+          args: ["mcp-remote@0.15.1", "https://mcp.linear.app/mcp"]
+          env: {}
+    notion:
+      skills:
+        - makenotion/skills@notion-cli
+        - openai/skills@notion-spec-to-implementation
+        - openai/skills@notion-meeting-intelligence
+      mcp:
+        notion:
+          command: bunx
+          args: ["mcp-remote@0.15.1", "https://mcp.notion.com/mcp"]
+          env: {}
+    # Payments.
+    stripe:
+      subagents: [payment-integration, fintech-engineer]
+      skills:
+        - stripe/ai@stripe-best-practices
+        - stripe/ai@upgrade-stripe
+      mcp:
+        stripe:
+          command: bunx
+          args: ["mcp-remote@0.15.1", "https://mcp.stripe.com"]
+          env: {}
+    # Building on LLMs: RAG, evals, and the agent frameworks.
+    llm:
+      subagents: [ai-engineer, llm-architect, mlops-engineer, prompt-engineer]
+      skills:
+        - wshobson/agents@rag-implementation
+        - wshobson/agents@llm-evaluation
+        - axiomhq/skills@writing-evals
+        - arize-ai/phoenix@phoenix-evals
+        - anthropics/skills@claude-api
+    langchain:
+      skills:
+        - langchain-ai/langchain-skills@langgraph-fundamentals
+        - langchain-ai/langchain-skills@langgraph-persistence
+        - langchain-ai/langchain-skills@langgraph-human-in-the-loop
+        - langchain-ai/langchain-skills@langchain-rag
+    huggingface:
+      skills:
+        - huggingface/skills@huggingface-datasets
+        - huggingface/skills@huggingface-llm-trainer
+        - huggingface/skills@huggingface-community-evals
+    # Leftover VoltAgent developer-experience agents, opt in per project.
+    modernization:
+      subagents: [legacy-modernizer, refactoring-specialist, dependency-manager, git-workflow-manager]
+    apidocs:
+      subagents: [api-documenter, documentation-engineer, docs-drift-editor]
     # Context engineering for building agents, from
     # muratcankoylan/Agent-Skills-for-Context-Engineering pinned to a commit.
     # Its root SKILL.md (a collection index) hides the nested skills from the
