@@ -2,6 +2,23 @@ setup() {
   load test_helper
   SCHEMA_FILE="${DOTFILES_DIR}/schemas/dyai.schema.yaml"
   CONFIG_TMPL="${DOTFILES_DIR}/home/private_dot_config/dyai/config.yaml.tmpl"
+  DATA_PARTIAL="${DOTFILES_DIR}/home/.chezmoitemplates/ai/dyai-data.yaml.tmpl"
+}
+
+function _require_yq {
+  command -v yq &> /dev/null || skip "yq not found"
+}
+
+# Render a .chezmoitemplates partial by name through chezmoi.
+function _render_named {
+  local name="${1}" out="${2}"
+  (
+    cd "${DOTFILES_DIR}" || exit 1
+    env HOME="${DOTFILES_REAL_HOME}" \
+      XDG_CONFIG_HOME="${DOTFILES_REAL_XDG_CONFIG_HOME:-${DOTFILES_REAL_HOME}/.config}" \
+      chezmoi execute-template --source "${DOTFILES_DIR}" \
+      <<< "{{ includeTemplate \"${name}\" . }}" > "${out}" 2> "${out}.err"
+  )
 }
 
 # ---------------------------------------------------------------------------
@@ -95,4 +112,25 @@ function _render_config {
   fi
   "${YS}" -f "${SCHEMA_FILE}" "${out}" > "${BATS_TEST_TMPDIR}/err" 2>&1 \
     || fail "schema validation failed: $(cat "${BATS_TEST_TMPDIR}/err")"
+}
+
+@test "shared data partial carries Claude marketplaces, plugins and policy" {
+  _require_chezmoi
+  _require_yq
+  local out="${BATS_TEST_TMPDIR}/dyai-data.yaml"
+  if ! _render_named "ai/dyai-data.yaml.tmpl" "${out}"; then
+    fail "chezmoi could not render the data partial: $(cat "${out}.err")"
+  fi
+  # 6 marketplaces, including a github and the git one
+  [[ "$(yq '.marketplaces | length' "${out}")" == "6" ]]
+  [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
+  [[ "$(yq '.marketplaces["agent-sec-ops-kit-skills"].source.source' "${out}")" == "git" ]]
+  # 54 plugins, including known entries
+  [[ "$(yq '.plugins | length' "${out}")" == "54" ]]
+  yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
+  yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
+  # policy
+  [[ "$(yq '.policy.permissions.defaultMode' "${out}")" == "acceptEdits" ]]
+  [[ "$(yq '.policy.theme' "${out}")" == "auto" ]]
+  [[ "$(yq '.policy.effortLevel' "${out}")" == "medium" ]]
 }
