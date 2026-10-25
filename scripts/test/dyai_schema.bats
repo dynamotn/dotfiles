@@ -339,6 +339,39 @@ function _render_config {
   yq '.global.subagents[0].include[]' "${out}" | grep '04-quality-security' > /dev/null
 }
 
+@test "config declares the LSP sharing settings: exclude list and serena pin" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.lsp.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.global.lsp.serena.ref' "${out}")" == "abb0a0f01b94bc8050086f0fb860077d17730324" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.global.lsp.exclude | length' "${out}")" == "6" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.global.lsp.serena.contexts.codex' "${out}")" == "codex" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.global.lsp.serena.contexts.gemini' "${out}")" == "ide" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.global.lsp.serena.contexts.agy' "${out}")" == "antigravity" ]]
+}
+
+@test "schema rejects global.lsp.exclude as a scalar instead of an array" {
+  _require_ys
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/lsp-bad.yaml"
+  cat > "${out}" << 'EOF'
+global:
+  lsp:
+    exclude: "x"
+agents: {}
+EOF
+  run "${YS}" -f "${SCHEMA_FILE}" "${out}"
+  assert_failure
+}
+
 @test "config declares a registry of language and infra presets" {
   _require_chezmoi
   _require_yq
@@ -380,6 +413,7 @@ function _render_config {
   yq '.registry.presets.lifeos.skills[]' "${out}" \
     | grep -x 'https://github.com/danielmiessler/LifeOS/tree/[0-9a-f]\{40\}/LifeOS/install/skills/RedTeam' > /dev/null
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'electron-pro' > /dev/null
+  # shellcheck disable=SC2312 # a bad read yields no match, which grep's own exit code catches
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'graphql-architect' > /dev/null
   # Vendor skills picked from VoltAgent/awesome-agent-skills
   [[ "$(yq '.registry.infra.terraform.skills | length' "${out}")" == "4" ]]
