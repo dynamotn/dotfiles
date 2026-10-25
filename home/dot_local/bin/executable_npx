@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# @file npx
+# @brief Stand-in for npx that runs packages through bunx
+# @description
+#   No Node.js toolchain is installed; MCP servers and scripts that call
+#   `npx` get `bunx --bun` instead. bunx accepts and ignores `-y`/`--yes`.
+set -euo pipefail
+exec bunx --bun "$@"

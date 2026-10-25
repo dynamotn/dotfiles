@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# @file npm
+# @brief Stand-in for npm that maps its common subcommands onto bun
+# @description
+#   No Node.js toolchain is installed. bun already understands install, i,
+#   add, run, test, link, publish and `-g`; only the verbs whose name
+#   differs are translated here.
+set -euo pipefail
+case "${1-}" in
+  ci) shift && exec bun install --frozen-lockfile "$@" ;;
+  uninstall | un | rm | remove) shift && exec bun remove "$@" ;;
+  exec | x) shift && exec bunx --bun "$@" ;;
+  *) exec bun "$@" ;;
+esac
