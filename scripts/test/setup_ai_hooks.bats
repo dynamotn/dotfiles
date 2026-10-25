@@ -29,7 +29,7 @@ agents:
 EOF
 }
 
-@test "gemini: notify hooks land in SessionEnd/Notification, unrelated hook survives, idempotent" {
+@test "gemini: notify hooks land in AfterAgent/Notification, unrelated hook survives, idempotent" {
   _stub_agent gemini
   dybatpho::ensure_dir "${HOME}/.gemini" > /dev/null
   printf '{"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"echo hi"}]}]}}' \
@@ -38,13 +38,34 @@ EOF
   run bash "${HOOK}"
   assert_success
   local f="${HOME}/.gemini/settings.json"
-  jq -e '.hooks.SessionEnd[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
+  jq -e '.hooks.AfterAgent[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
   jq -e '.hooks.Notification[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
   [[ "$(jq -r '.hooks.SessionStart[0].hooks[0].command' "${f}")" == "echo hi" ]]
   local before; before="$(cat "${f}")"
   run bash "${HOOK}"
   assert_success
   [[ "$(cat "${f}")" == "${before}" ]]
+}
+
+@test "gemini: an old dyai notify hook in SessionEnd moves to AfterAgent, others stay" {
+  _stub_agent gemini
+  dybatpho::ensure_dir "${HOME}/.gemini" > /dev/null
+  cat > "${HOME}/.gemini/settings.json" << 'EOF'
+{"hooks":{"SessionEnd":[
+  {"hooks":[{"type":"command","command":"old","name":"dyai-notify"}]},
+  {"hooks":[{"type":"command","command":"mine"}]}]}}
+EOF
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  local f="${HOME}/.gemini/settings.json"
+  jq -e '[.hooks.SessionEnd[].hooks[0].command] == ["mine"]' "${f}" > /dev/null
+  jq -e '.hooks.AfterAgent | length == 1' "${f}" > /dev/null
+  printf '{"hooks":{"SessionEnd":[{"hooks":[{"type":"command","command":"old","name":"dyai-notify"}]}]}}' \
+    > "${f}"
+  run bash "${HOOK}"
+  assert_success
+  jq -e '.hooks | has("SessionEnd") | not' "${f}" > /dev/null
 }
 
 @test "copilot: notify hooks written to its dedicated hooks file" {
