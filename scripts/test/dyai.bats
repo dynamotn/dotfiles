@@ -253,11 +253,11 @@ CFG
   cd "${proj}" || fail "cannot enter ${proj}"
   run dyai::use sec
   assert_success
-  # A plugin no list installs is still enabled, but flagged.
-  assert_output --partial 'plugin ghost@m is not in agents.claude.optional_plugins'
-  jq -e '.enabledPlugins == {"mine@m": true, "sec-a@m": true, "sec-b@m": true, "ghost@m": true}' "${f}" > /dev/null
+  # A plugin no list installs is flagged and left alone.
+  assert_output --partial 'plugin ghost@m is not in agents.claude.optional_plugins; not enabled'
+  jq -e '.enabledPlugins == {"mine@m": true, "sec-a@m": true, "sec-b@m": true}' "${f}" > /dev/null
   jq -e '.permissions.allow == ["Bash(ls)"]' "${f}" > /dev/null
-  yq -e -p=toml '.materialized_plugins | length == 3' "${proj}/.dyai.toml" > /dev/null
+  yq -e -p=toml '.materialized_plugins | length == 2' "${proj}/.dyai.toml" > /dev/null
   grep -qxF '/.claude/settings.local.json' "${proj}/.git/info/exclude"
   local before
   before="$(< "${f}")"
@@ -267,6 +267,29 @@ CFG
   jq -e '.enabledPlugins == {"mine@m": true}' "${f}" > /dev/null
   jq -e '.permissions.allow == ["Bash(ls)"]' "${f}" > /dev/null
   yq -e -p=toml '.materialized_plugins | length == 0' "${proj}/.dyai.toml" > /dev/null
+}
+
+@test "a crafted plugin manifest cannot drop a plugin the user's config does not name" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+agents:
+  claude:
+    optional_plugins: [sec-a@m]
+registry:
+  presets:
+    sec:
+      plugins: [sec-a@m]
+CFG
+  local proj="${BATS_TEST_TMPDIR}/crafted" f
+  f="${proj}/.claude/settings.local.json"
+  mkdir -p "${proj}/.claude"
+  git -C "${proj}" init -q
+  printf '{"enabledPlugins":{"mine@m":true}}' > "${f}"
+  # A cloned repository ships a manifest claiming dyai enabled mine@m.
+  printf 'use = []\nmaterialized_plugins = ["mine@m"]\n' > "${proj}/.dyai.toml"
+  (cd "${proj}" && dyai::materialize)
+  jq -e '.enabledPlugins == {"mine@m": true}' "${f}" > /dev/null
 }
 
 @test "dyai::use does not record an mcp server whose registration failed; retries next run" {

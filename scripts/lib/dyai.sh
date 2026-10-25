@@ -1191,21 +1191,28 @@ function dyai::reconcile_plugins {
   old_json="$(yq -p=toml -o=json -I=0 '.materialized_plugins // []' "${toml}" 2> /dev/null || echo '[]')"
   # Nothing wanted now and nothing enabled before: leave the project untouched.
   [[ "${desired_json}" != "[]" || "${old_json}" != "[]" ]] || return 0
-  # A plugin must be installed for the project switch to have any effect.
+  # dyai only ever touches plugins your config names: those are the ones it
+  # installs, and the only ones it may later switch back off.
   known_json="$(dyai::config_json \
     '(.agents.claude.plugins // []) + (.agents.claude.optional_plugins // [])')"
   # shellcheck disable=SC2312 # jq lists the wanted plugins that are not installed
   while IFS= read -r p; do
-    [[ -n "${p}" ]] && dybatpho::warn "plugin ${p} is not in agents.claude.optional_plugins, so it is not installed"
+    [[ -n "${p}" ]] && dybatpho::warn "plugin ${p} is not in agents.claude.optional_plugins; not enabled"
   done < <(jq -r --argjson k "${known_json}" '.[] | select(. as $p | $k | index($p) | not)' <<< "${desired_json}")
+  desired_json="$(jq -c --argjson k "${known_json}" 'map(select(. as $p | $k | index($p) != null))' \
+    <<< "${desired_json}")"
   # Only keys dyai set before are removed; a plugin you toggled yourself stays.
+  # .dyai.toml sits in the repository, so a cloned one may carry a crafted
+  # manifest: a key is dropped only for a plugin your own config names, and
+  # only while it is still switched on.
   # dyshellint disable=SC2016 a jq program; its $names are jq variables
   dyai::json_set "${file}" '
-    .enabledPlugins = ((.enabledPlugins // {})
-      | reduce ($old - $want)[] as $p (.; del(.[$p]))
+    ([$old[] | select(type == "string" and (. as $p | $known | index($p) != null))] - $want) as $drop
+    | .enabledPlugins = ((.enabledPlugins // {})
+      | reduce $drop[] as $p (.; if .[$p] == true then del(.[$p]) else . end)
       | reduce $want[] as $p (.; .[$p] = true))
     | if .enabledPlugins == {} then del(.enabledPlugins) else . end' \
-    --argjson old "${old_json}" --argjson want "${desired_json}"
+    --argjson old "${old_json}" --argjson want "${desired_json}" --argjson known "${known_json}"
   local list
   list="$(jq -cS 'unique' <<< "${desired_json}")"
   LIST="${list}" yq -p=toml -o=toml -i '.materialized_plugins = (strenv(LIST) | fromjson)' "${toml}"
