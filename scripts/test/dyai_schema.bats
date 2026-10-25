@@ -229,10 +229,9 @@ function _render_config {
   [[ "$(yq '.global.mcp.fetch.command' "${out}")" == "uvx" ]]
   [[ "$(yq '.global.mcp."sequential-thinking".command' "${out}")" == "bunx" ]]
   [[ "$(yq '.global.mcp.github.command' "${out}")" == "docker" ]]
-  # SQL database servers; connection inherited from runtime env, no secret here.
-  [[ "$(yq '.global.mcp.postgres.command' "${out}")" == "uvx" ]]
-  [[ "$(yq '.global.mcp.mysql.command' "${out}")" == "bunx" ]]
-  [[ "$(yq '.global.mcp.postgres.env | length' "${out}")" == "0" ]]
+  # SQL database servers live in the database preset now, not the global baseline.
+  [[ "$(yq '.global.mcp | has("postgres")' "${out}")" == "false" ]]
+  [[ "$(yq '.global.mcp | has("mysql")' "${out}")" == "false" ]]
   # github carries only the env var NAME, never a value.
   yq '.global.mcp.github.args[]' "${out}" | grep -qx 'GITHUB_PERSONAL_ACCESS_TOKEN'
   # filesystem default scope is personal + community.
@@ -281,4 +280,14 @@ function _render_config {
   [[ "$(yq '.registry.presets.datascience.subagents[0]' "${out}")" == "data-scientist" ]]
   [[ "$(yq '.registry.presets.docs.subagents[0]' "${out}")" == "technical-writer" ]]
   [[ "$(yq '.registry.presets.shell.skills | length' "${out}")" == "3" ]]
+  # SQL MCP moved into the database preset (per-project, not global)
+  [[ "$(yq '.registry.infra.database.mcp.postgres.command' "${out}")" == "uvx" ]]
+  [[ "$(yq '.registry.infra.database.mcp.mysql.command' "${out}")" == "bunx" ]]
+  # Domain subagents split out of the global baseline into presets
+  [[ "$(yq '.registry.presets.graphql.subagents[0]' "${out}")" == "graphql-architect" ]]
+  [[ "$(yq '.registry.presets.mobile.subagents[0]' "${out}")" == "mobile-developer" ]]
+  [[ "$(yq '.registry.presets.desktop.subagents[0]' "${out}")" == "electron-pro" ]]
+  [[ "$(yq '.registry.presets.realtime.subagents | length' "${out}")" == "2" ]]
+  yq '.global.subagents[0].exclude[]' "${out}" | grep -qx 'electron-pro'
+  yq '.global.subagents[0].exclude[]' "${out}" | grep -qx 'graphql-architect'
 }
