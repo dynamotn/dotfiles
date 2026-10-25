@@ -6,6 +6,9 @@
 # the caller sources dybatpho first and owns strict mode.
 # shellcheck shell=bash
 
+# shellcheck source=scripts/lib/dyai_lsp.sh
+. "${BASH_SOURCE[0]%/*}/dyai_lsp.sh"
+
 # The skills CLI is pinned, so an apply never runs a release nobody looked at.
 SKILLS_CLI="skills@1.7.2"
 
