@@ -2,6 +2,14 @@
   Claude Code settings. The plugin, marketplace and policy data is rendered
   from the shared dyai partial so this file and ~/.config/dyai/config.yaml
   never drift; the hooks and UI scalars below are Claude-specific literals.
+
+  The Bash sandbox is what makes the Read deny rules hold for shell commands
+  too (they merge into its denyRead), so `cat ~/.ssh/x` is blocked like the
+  Read tool is. Excluded commands run outside it: git (a worktree's git dir
+  sits outside the worktree, and push needs the ssh agent), and the tools
+  that write all over $HOME or the system. The rtk spelling of git is listed
+  because rtk rewrites git before the sandbox sees it; rtk as a whole is not,
+  since `cat` becomes `rtk read` and must stay sandboxed.
 */ -}}
 {{- $d := fromYaml (includeTemplate "ai/dyai-data.yaml.tmpl" .) -}}
 {{- $enabled := dict -}}
@@ -16,6 +24,49 @@
     "pr": ""
   },
   "cleanupPeriodDays": 20,
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": true,
+    "excludedCommands": [
+      "git *",
+      "rtk git *",
+      "docker *",
+      "podman *",
+      "chezmoi *",
+      "dyai *",
+      "mise *",
+      "sudo *",
+      "emerge *",
+      "systemctl *"
+    ],
+    "filesystem": {
+      "allowWrite": [
+        "~/.cache",
+        "~/.local/share/rtk",
+        "~/.local/state",
+        "~/.bun",
+        "~/.npm",
+        "~/.cargo/registry",
+        "~/go/pkg"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "github.com",
+        "*.github.com",
+        "*.githubusercontent.com",
+        "gitlab.com",
+        "registry.npmjs.org",
+        "pypi.org",
+        "files.pythonhosted.org",
+        "proxy.golang.org",
+        "sum.golang.org",
+        "crates.io",
+        "*.crates.io"
+      ]
+    }
+  },
   "hooks": {
     "SessionStart": [
       {

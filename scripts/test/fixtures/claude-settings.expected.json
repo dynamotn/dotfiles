@@ -275,10 +275,54 @@
       "Bash(vault read *)",
       "Bash(op read *)",
       "Bash(aws configure get *)"
-    ]
+    ],
+    "disableBypassPermissionsMode": "disable"
   },
   "preferredNotifChannel": "auto",
   "remoteControlAtStartup": false,
+  "sandbox": {
+    "allowUnsandboxedCommands": true,
+    "autoAllowBashIfSandboxed": true,
+    "enabled": true,
+    "excludedCommands": [
+      "git *",
+      "rtk git *",
+      "docker *",
+      "podman *",
+      "chezmoi *",
+      "dyai *",
+      "mise *",
+      "sudo *",
+      "emerge *",
+      "systemctl *"
+    ],
+    "filesystem": {
+      "allowWrite": [
+        "~/.cache",
+        "~/.local/share/rtk",
+        "~/.local/state",
+        "~/.bun",
+        "~/.npm",
+        "~/.cargo/registry",
+        "~/go/pkg"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "github.com",
+        "*.github.com",
+        "*.githubusercontent.com",
+        "gitlab.com",
+        "registry.npmjs.org",
+        "pypi.org",
+        "files.pythonhosted.org",
+        "proxy.golang.org",
+        "sum.golang.org",
+        "crates.io",
+        "*.crates.io"
+      ]
+    }
+  },
   "statusLine": {
     "command": "bash ~/.claude/statusline.sh",
     "type": "command"
