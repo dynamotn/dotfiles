@@ -140,7 +140,14 @@ CFG
 
 @test "dyai::setup_installers runs a per-agent installer once, only for present agents" {
   _stub opencode
-  # codex is intentionally NOT stubbed (its launcher is absent)
+  # codex is intentionally NOT stubbed (its launcher is absent). Drop every
+  # PATH entry holding a real codex too, or the test depends on the host.
+  local dir keep="" parts
+  IFS=: read -ra parts <<< "${PATH}"
+  for dir in "${parts[@]}"; do
+    [[ -x "${dir}/codex" ]] || keep+="${dir}:"
+  done
+  PATH="${keep%:}"
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
   cat > "${CONFIG_FILE}" << 'CFG'
