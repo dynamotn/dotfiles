@@ -25,7 +25,12 @@ CFG
   export CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
 }
 
+function _skip_unless_nvim_available {
+  command -v nvim &> /dev/null || skip "nvim not found"
+}
+
 @test "dyai_lsp::export writes servers in languages.lua order with resolved commands" {
+  _skip_unless_nvim_available
   # python = {pyls, ruffls}; fake = {fakels}; generic = {genericls}
   # genericls is in the exclude list; fnls has a function cmd
   dyai_lsp::export
@@ -39,6 +44,7 @@ CFG
 }
 
 @test "dyai_lsp::export applies lsp/*.lua and plugins/lang cmd and settings overrides" {
+  _skip_unless_nvim_available
   # fixture lsp/fakels.lua sets cmd {'fakels-bin','--stdio'};
   # lang/fake.lua sets opts.servers.fakels.settings = { fake = { on = true } }
   dyai_lsp::export
@@ -50,9 +56,33 @@ CFG
 }
 
 @test "dyai_lsp::export converts review.lua hold patterns to ERE" {
+  _skip_unless_nvim_available
   dyai_lsp::export
   # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
   [[ "$(jq -r '.untrusted_regexes[0]' "${XDG_CACHE_HOME}/dyai/lsp.json")" == '^(.*/\.worktrees/dyreview-[^/]+)(/|$)' ]]
+}
+
+@test "dyai_lsp::export applies overrides from a lang/*.lua returning a list of specs" {
+  _skip_unless_nvim_available
+  # fixture lang/listspec.lua returns a *list* of plugin specs (the real
+  # config's cpp.lua shape), with the nvim-lspconfig entry among them.
+  dyai_lsp::export
+  m="${XDG_CACHE_HOME}/dyai/lsp.json"
+  # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
+  [[ "$(jq -c '.servers[] | select(.name=="pyls") | .settings' "${m}")" == '{"listspec":true}' ]]
+}
+
+@test "dyai_lsp::export logs and keeps going when config.globals or a lang file fails to load" {
+  _skip_unless_nvim_available
+  # fixture lua/config/globals.lua and lua/plugins/lang/broken.lua both
+  # `error()` on load; the export must still succeed, with both logged.
+  run dyai_lsp::export
+  assert_success
+  assert_output --partial "config.globals"
+  assert_output --partial "broken.lua"
+  m="${XDG_CACHE_HOME}/dyai/lsp.json"
+  # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
+  [[ "$(jq -r '.servers | length' "${m}")" -gt 0 ]]
 }
 
 @test "dyai_lsp::export keeps the old manifest when nvim is missing" {

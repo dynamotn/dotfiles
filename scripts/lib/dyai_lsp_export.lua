@@ -232,10 +232,19 @@ local function collect_servers()
     os.exit(1)
   end
   -- Best effort: a config.globals (or similar) that sets up globals like
-  -- `DyNeo.enabled_languages` the lang/*.lua specs gate on. Its absence, or
-  -- any error in it, is not fatal — the per-file `pcall` in
-  -- collect_overrides() already copes with a spec that cannot load.
-  pcall(require, 'config.globals')
+  -- `DyNeo.enabled_languages` the lang/*.lua specs gate on. A config
+  -- without one is normal and stays silent; one that has it but fails to
+  -- load is logged, since collect_overrides()'s per-file `pcall` then
+  -- loses every override that gates on those globals.
+  local globals_file = nvim_cfg .. '/lua/config/globals.lua'
+  if vim.fn.filereadable(globals_file) == 1 then
+    local globals_ok, globals_err = pcall(require, 'config.globals')
+    if not globals_ok then
+      io.stderr:write(
+        string.format('dyai_lsp_export: could not load config.globals: %s\n', tostring(globals_err))
+      )
+    end
+  end
 
   local order = {}
   local filetype_sets = {}
@@ -321,6 +330,8 @@ local function collect_overrides()
           end
         end
       end
+    else
+      io.stderr:write(string.format('dyai_lsp_export: could not load %s: %s\n', file, tostring(spec)))
     end
   end
   return overrides
