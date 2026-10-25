@@ -11,7 +11,7 @@ setup() {
   # shellcheck disable=SC2154 # BATS_TEST_TMPDIR is set by bats itself
   export DYAI_MASON_BIN="${BATS_TEST_TMPDIR}/mason_bin"
   mkdir -p "${DYAI_MASON_BIN}"
-  for bin in pyls-bin ruff-bin fakels-bin; do
+  for bin in pyls-bin ruff-bin fakels-bin cls-bin; do
     printf '#!/usr/bin/env bash\n' > "${DYAI_MASON_BIN}/${bin}"
     chmod +x "${DYAI_MASON_BIN}/${bin}"
   done
@@ -24,6 +24,18 @@ global:
     exclude: [genericls]
 CFG
   export CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  # The real machine has codex, gemini, agy, uvx, copilot, opencode, hermes
+  # and claude on PATH outside the sandbox (bun bin, mise, ~/.local/bin).
+  # Pin PATH to the sandbox bin plus the system dirs, with only the tools the
+  # tests run linked in, so each test sees exactly the agents it stubs.
+  local tool real
+  for tool in jq yq nvim; do
+    real="$(command -v "${tool}" || true)"
+    if [[ -n "${real}" ]]; then
+      ln -sf "${real}" "${HOME}/.local/bin/${tool}"
+    fi
+  done
+  export PATH="${HOME}/.local/bin:/usr/bin:/bin"
 }
 
 function _skip_unless_nvim_available {
@@ -39,12 +51,12 @@ function _stub {
 
 @test "dyai_lsp::export writes servers in languages.lua order with resolved commands" {
   _skip_unless_nvim_available
-  # python = {pyls, ruffls}; fake = {fakels}; generic = {genericls}
+  # python = {pyls, ruffls}; fake = {fakels}; generic = {genericls}; clike = {cls}
   # genericls is in the exclude list; fnls has a function cmd
   dyai_lsp::export
   m="${XDG_CACHE_HOME}/dyai/lsp.json"
   # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
-  [[ "$(jq -r '[.servers[].name] | join(",")' "${m}")" == "pyls,ruffls,fakels" ]]
+  [[ "$(jq -r '[.servers[].name] | join(",")' "${m}")" == "pyls,ruffls,fakels,cls" ]]
   # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
   [[ "$(jq -r '.servers[0].command' "${m}")" == "${DYAI_MASON_BIN}/pyls-bin" ]]
   # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
@@ -91,6 +103,64 @@ function _stub {
   m="${XDG_CACHE_HOME}/dyai/lsp.json"
   # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
   [[ "$(jq -r '.servers | length' "${m}")" -gt 0 ]]
+}
+
+@test "dyai_lsp::export lets after/lsp/*.lua beat the lsp/<name>.lua nvim-lspconfig ships" {
+  _skip_unless_nvim_available
+  # fixture lspconfig/lsp/pyls.lua has cmd {'pyls-bin'}; the config's
+  # after/lsp/pyls.lua overrides it with {'pyls-bin', '--from-after'}
+  dyai_lsp::export
+  m="${XDG_CACHE_HOME}/dyai/lsp.json"
+  # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
+  [[ "$(jq -c '.servers[] | select(.name=="pyls") | .args' "${m}")" == '["--from-after"]' ]]
+}
+
+@test "dyai_lsp::export logs a lang file that cannot load on exactly one line" {
+  _skip_unless_nvim_available
+  # lang/needslazy.lua requires lazy.core.util, which is not on the --clean
+  # runtimepath unless DYAI_LAZY_DIR points at a lazy.nvim checkout; the
+  # multi-line `module not found` error must shrink to one line.
+  DYAI_LAZY_DIR="${BATS_TEST_TMPDIR}/no-lazy" run --separate-stderr dyai_lsp::export
+  assert_success
+  local count
+  # shellcheck disable=SC2154 # stderr is set by bats' run --separate-stderr
+  count="$(grep -c 'needslazy' <<< "${stderr}")"
+  [[ "${count}" == "1" ]]
+  # no continuation line of the multi-line error survives
+  [[ "${stderr}" != $'\t'* && "${stderr}" != *$'\n\t'* ]]
+  grep -q "could not load .*needslazy.lua: .*module 'lazy.core.util' not found" <<< "${stderr}"
+}
+
+@test "dyai_lsp::export puts DYAI_LAZY_DIR on the runtimepath for lang files that need lazy.nvim" {
+  _skip_unless_nvim_available
+  DYAI_LAZY_DIR="${FIXTURES}/lazy" run --separate-stderr dyai_lsp::export
+  assert_success
+  [[ "${stderr}" != *needslazy* ]]
+  m="${XDG_CACHE_HOME}/dyai/lsp.json"
+  # shellcheck disable=SC2312 # a bad export left the manifest absent; jq fails and so does the comparison
+  [[ "$(jq -c '.servers[] | select(.name=="ruffls") | .settings' "${m}")" == '{"lazy":true}' ]]
+}
+
+@test "dyai_lsp::export maps filetypes to LSP languageIds and resolves per-buffer extensions" {
+  _skip_unless_nvim_available
+  # cls handles c, cs, make, sh and tex. `.h`, `.sh` and `.mk` are detected
+  # per buffer in vim.filetype (function values); `.cs` and `.ltx` are plain.
+  dyai_lsp::export
+  m="${XDG_CACHE_HOME}/dyai/lsp.json"
+  local exts
+  exts="$(jq -c '.servers[] | select(.name=="cls") | .extensions' "${m}")"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.[".h"]' <<< "${exts}")" == "c" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.[".c"]' <<< "${exts}")" == "c" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.[".cs"]' <<< "${exts}")" == "csharp" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.[".sh"]' <<< "${exts}")" == "shellscript" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.[".mk"]' <<< "${exts}")" == "makefile" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.[".ltx"]' <<< "${exts}")" == "latex" ]]
 }
 
 @test "dyai_lsp::export keeps the old manifest when nvim is missing" {
@@ -236,6 +306,73 @@ MANIFEST
   grep -q 'STUB claude plugin marketplace update dyai-lsp' "${HOME}/calls.log"
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
   grep -q 'STUB claude plugin update dyai-lsp@dyai-lsp' "${HOME}/calls.log"
+}
+
+@test "dyai_lsp::setup_claude touches no file on a second run (mtime unchanged)" {
+  _write_manifest
+  _stub claude
+  dybatpho::ensure_dir "${HOME}/.claude/plugins" > /dev/null
+  printf '{"dyai-lsp":{}}' > "${HOME}/.claude/plugins/known_marketplaces.json"
+  dyai_lsp::setup_claude
+  local market f
+  market="${XDG_DATA_HOME}/dyai/claude-marketplace"
+  local -a files=(
+    "${market}/plugins/dyai-lsp/.lsp.json"
+    "${market}/.claude-plugin/marketplace.json"
+    "${market}/plugins/dyai-lsp/.claude-plugin/plugin.json"
+    "${XDG_CACHE_HOME}/dyai/lsp-owned.json"
+  )
+  local -A before=()
+  for f in "${files[@]}"; do
+    before["${f}"]="$(stat -c %Y "${f}")"
+  done
+  sleep 1
+  dyai_lsp::setup_claude
+  for f in "${files[@]}"; do
+    # shellcheck disable=SC2312 # a missing file fails stat, and the comparison with it
+    [[ "$(stat -c %Y "${f}")" == "${before[${f}]}" ]] || fail "${f} was rewritten"
+  done
+}
+
+function _stub_failing {
+  # shellcheck disable=SC2016 # the single quotes are deliberate: $0/$* expand in the stub, not here
+  printf '#!/usr/bin/env bash\necho "STUB $(basename "$0") $*" >> "%s"\nexit 1\n' \
+    "${HOME}/calls.log" > "${HOME}/.local/bin/${1}"
+  chmod +x "${HOME}/.local/bin/${1}"
+}
+
+@test "dyai_lsp::setup_claude records claude_version only after a successful update" {
+  _write_manifest
+  _stub claude
+  dybatpho::ensure_dir "${HOME}/.claude/plugins" > /dev/null
+  printf '{"dyai-lsp":{}}' > "${HOME}/.claude/plugins/known_marketplaces.json"
+  dyai_lsp::setup_claude
+  local recorded
+  recorded="$(dyai_lsp::owned_get claude_version)"
+  jq '.servers[0].args = ["--stdio", "--verbose"]' "${M}" > "${M}.tmp" && mv "${M}.tmp" "${M}"
+  _stub_failing claude
+  dyai_lsp::setup_claude
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get claude_version)" == "${recorded}" ]]
+  # the next run with a working claude retries the update and records it
+  _stub claude
+  : > "${HOME}/calls.log"
+  dyai_lsp::setup_claude
+  grep -q 'STUB claude plugin update dyai-lsp@dyai-lsp' "${HOME}/calls.log"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get claude_version)" != "${recorded}" ]]
+}
+
+@test "dyai_lsp::setup_claude records no claude_version when adding the marketplace fails" {
+  _write_manifest
+  _stub_failing claude
+  dyai_lsp::setup_claude
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get claude_version)" == "null" ]]
+  _stub claude
+  dyai_lsp::setup_claude
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get claude_version)" =~ ^\"0\.0\.0-[0-9a-f]{12}\"$ ]]
 }
 
 @test "dyai_lsp::setup_claude writes an empty plugin when there is no manifest" {
@@ -426,6 +563,173 @@ MANIFEST
   [[ "$(yq '.lsp.servers.pyright.command[0]' "${HOME}/.hermes/config.yaml")" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
 }
 
+function _write_opencode_manifest {
+  dybatpho::ensure_dir "${XDG_CACHE_HOME}/dyai" > /dev/null
+  M="${XDG_CACHE_HOME}/dyai/lsp.json"
+  cat > "${M}" << 'MANIFEST'
+{
+  "version": 1,
+  "untrusted_regexes": [],
+  "servers": [
+    {
+      "name": "rust_analyzer",
+      "command": "/opt/rust-analyzer",
+      "args": [],
+      "filetypes": ["rust"],
+      "extensions": {".rs": "rust"},
+      "settings": {},
+      "init_options": {}
+    },
+    {
+      "name": "vtsls",
+      "command": "/opt/vtsls",
+      "args": ["--stdio"],
+      "filetypes": ["typescript"],
+      "extensions": {".ts": "typescript", ".js": "javascript"},
+      "settings": {},
+      "init_options": {}
+    }
+  ]
+}
+MANIFEST
+}
+
+@test "__dyai_lsp_opencode_id maps Neovim names to opencode's same-server built-in ids" {
+  local name want
+  while read -r name want; do
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(__dyai_lsp_opencode_id "${name}")" == "${want}" ]]
+  done << 'ROWS'
+rust_analyzer rust
+lua_ls lua-ls
+yamlls yaml-ls
+bashls bash
+clojure_lsp clojure-lsp
+dockerls dockerfile
+ts_ls typescript
+pyright pyright
+gopls gopls
+vtsls vtsls
+ROWS
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(__dyai_lsp_opencode_id intelephense)" == "php intelephense" ]]
+}
+
+@test "dyai_lsp::setup_opencode overrides a same-server built-in and disables a different one" {
+  _write_opencode_manifest
+  _stub opencode
+  dyai_lsp::setup_opencode
+  local entries want
+  entries="$(_lsp_entries_json opencode)"
+  # rust_analyzer is keyed by opencode's own `rust` id, so it replaces it
+  want="[\"${HOME}/.local/bin/dyai-lsp-exec\",\"rust_analyzer\",\"--\",\"/opt/rust-analyzer\"]"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -c '.rust.command[0:4]' <<< "${entries}")" == "${want}" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq 'has("rust_analyzer")' <<< "${entries}")" == "false" ]]
+  # vtsls is a different server from the `typescript`/`deno` built-ins on .ts
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.vtsls.command[1]' <<< "${entries}")" == "vtsls" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -c '.typescript' <<< "${entries}")" == '{"disabled":true}' ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -c '.deno' <<< "${entries}")" == '{"disabled":true}' ]]
+  # a built-in no dyai server overlaps stays enabled (no key written)
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq 'has("gopls") or has("pyright")' <<< "${entries}")" == "false" ]]
+  # every key dyai wrote, the disabled ones included, is dyai-owned
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get opencode | jq '[index("rust", "typescript", "vtsls")] | map(. != null) | all')" == "true" ]]
+
+  # once vtsls leaves the manifest, its disabled built-ins are pruned again
+  jq 'del(.servers[] | select(.name == "vtsls"))' "${M}" > "${M}.tmp" && mv "${M}.tmp" "${M}"
+  dyai_lsp::setup_opencode
+  entries="$(_lsp_entries_json opencode)"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq 'has("typescript") or has("deno") or has("vtsls")' <<< "${entries}")" == "false" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq 'has("rust")' <<< "${entries}")" == "true" ]]
+}
+
+@test "dyai_lsp::setup_opencode leaves a hand-written built-in key untouched" {
+  _write_opencode_manifest
+  _stub opencode
+  _lsp_seed_named opencode typescript
+  local file
+  file="$(_lsp_agent_file opencode)"
+  jq '.lsp.rust = {command: ["my-rust"]}' "${file}" > "${BATS_TEST_TMPDIR}/oc.json"
+  mv "${BATS_TEST_TMPDIR}/oc.json" "${file}"
+  run dyai_lsp::setup_opencode
+  assert_success
+  assert_output --partial "lsp.typescript untouched"
+  assert_output --partial "lsp.rust untouched"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(_lsp_command0 opencode typescript)" == "foreign" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(_lsp_command0 opencode rust)" == "my-rust" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get opencode | jq -c '[index("typescript"), index("rust")] | unique')" == "[null]" ]]
+}
+
+@test "dyai_lsp::setup_<agent> keeps owned-state when the agent file is invalid JSON, and recovers once fixed" {
+  local agent file owned_before good entries last
+  for agent in copilot opencode; do
+    _write_manifest
+    _stub "${agent}"
+    _lsp_setup "${agent}"
+    file="$(_lsp_agent_file "${agent}")"
+    good="$(cat "${file}")"
+    owned_before="$(dyai_lsp::owned_get "${agent}")"
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(jq 'index("pyls") != null' <<< "${owned_before}")" == "true" ]]
+    printf '%s\n{not json' "${good}" > "${file}"
+    run _lsp_setup "${agent}"
+    assert_failure
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(dyai_lsp::owned_get "${agent}")" == "${owned_before}" ]]
+    # Repaired by hand back to the earlier content, with dyai's (now stale)
+    # pyls entry still in it: the next run must still treat it as dyai's own.
+    printf '%s' "${good}" > "${file}"
+    jq '.servers[0].args = ["--repaired"]' "${M}" > "${M}.tmp" && mv "${M}.tmp" "${M}"
+    _lsp_setup "${agent}"
+    entries="$(_lsp_entries_json "${agent}")"
+    case "${agent}" in
+      copilot) last="$(jq -r '.pyls.args[-1]' <<< "${entries}")" ;;
+      *) last="$(jq -r '.pyls.command[-1]' <<< "${entries}")" ;;
+    esac
+    [[ "${last}" == "--repaired" ]]
+  done
+}
+
+@test "dyai_lsp::setup_hermes keeps owned-state when yq cannot update the file" {
+  _write_manifest
+  _stub hermes
+  dyai_lsp::setup_hermes
+  local file owned_before
+  file="$(_lsp_agent_file hermes)"
+  owned_before="$(dyai_lsp::owned_get hermes)"
+  jq '.servers[0].args = ["--changed"]' "${M}" > "${M}.tmp" && mv "${M}.tmp" "${M}"
+  printf 'lsp: [unclosed\n' > "${file}"
+  run dyai_lsp::setup_hermes
+  assert_failure
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get hermes)" == "${owned_before}" ]]
+}
+
+@test "dyai_lsp::owned_set leaves the file untouched when the value is unchanged" {
+  dyai_lsp::owned_set copilot '["a","b"]'
+  local file before after
+  file="$(dyai_lsp::owned_file)"
+  before="$(stat -c %Y "${file}")"
+  sleep 1
+  dyai_lsp::owned_set copilot '[ "a", "b" ]'
+  after="$(stat -c %Y "${file}")"
+  [[ "${before}" == "${after}" ]]
+  dyai_lsp::owned_set copilot '["a"]'
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(dyai_lsp::owned_get copilot)" == '["a"]' ]]
+}
+
 @test "dyai_lsp writers leave agent files untouched when the manifest is missing" {
   for agent in copilot opencode hermes; do
     _stub "${agent}"
@@ -521,10 +825,15 @@ model = "gpt-5"
 command = "other-cmd"
 TOML
   dyai_lsp::setup_serena
+  # the uvx launch itself sits behind the trust gate
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
-  [[ "$(yq -p=toml '.mcp_servers.serena.args[7]' "${file}")" == "--context" ]]
+  [[ "$(yq -p=toml -oy '.mcp_servers.serena.command' "${file}")" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
-  [[ "$(yq -p=toml '.mcp_servers.serena.args[8]' "${file}")" == "codex" ]]
+  [[ "$(yq -p=toml -o=json -I=0 '.mcp_servers.serena.args' "${file}" | jq -c '.[0:3]')" == '["serena","--","uvx"]' ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq -p=toml -oy '.mcp_servers.serena.args[10]' "${file}")" == "--context" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq -p=toml -oy '.mcp_servers.serena.args[11]' "${file}")" == "codex" ]]
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
   [[ "$(yq -p=toml '.mcp_servers.serena.startup_timeout_sec' "${file}")" == "60" ]]
   # a pre-existing table and the other top-level key are untouched
@@ -541,10 +850,18 @@ TOML
   _stub agy
   _configure_serena
   dyai_lsp::setup_serena
+  local f
+  for f in "${HOME}/.gemini/settings.json" "${HOME}/.gemini/config/mcp_config.json"; do
+    # the uvx launch itself sits behind the trust gate
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(jq -r '.mcpServers.serena.command' "${f}")" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(jq -c '.mcpServers.serena.args[0:3]' "${f}")" == '["serena","--","uvx"]' ]]
+  done
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
-  [[ "$(jq -r '.mcpServers.serena.args[8]' "${HOME}/.gemini/settings.json")" == "ide" ]]
+  [[ "$(jq -r '.mcpServers.serena.args[11]' "${HOME}/.gemini/settings.json")" == "ide" ]]
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
-  [[ "$(jq -r '.mcpServers.serena.args[8]' "${HOME}/.gemini/config/mcp_config.json")" == "antigravity" ]]
+  [[ "$(jq -r '.mcpServers.serena.args[11]' "${HOME}/.gemini/config/mcp_config.json")" == "antigravity" ]]
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
   [[ "$(jq -r '.mcpServers.serena.env.SERENA_USAGE_REPORTING' "${HOME}/.gemini/settings.json")" == "false" ]]
 }
@@ -621,6 +938,37 @@ YML
   [[ "$(yq '.ls_specific_settings | has("python")' "${file}")" == "false" ]]
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
   [[ "$(yq '.ls_specific_settings.rust.ls_path' "${file}")" == "/opt/foreign-rust" ]]
+}
+
+@test "dyai_lsp::setup_serena keeps dyai's ls_base_cmd and shims when the manifest is missing" {
+  _write_serena_manifest
+  _stub uvx
+  _stub gemini
+  _configure_serena
+  # shellcheck disable=SC2030,SC2031 # a bats @test body runs in a single process, not a subshell
+  export SERENA_HOME="${HOME}/.serena"
+  dyai_lsp::setup_serena
+  local file shim before path_env
+  file="${SERENA_HOME}/serena_config.yml"
+  shim="${XDG_DATA_HOME}/dyai/serena-shims/gopls"
+  [[ -x "${shim}" ]]
+  before="$(cat "${file}")"
+  rm -f "${M}"
+  rm -f "${HOME}/.gemini/settings.json"
+  run dyai_lsp::setup_serena
+  assert_failure
+  assert_output --partial "skip serena's ls_specific_settings"
+  # serena_config.yml and the shim are exactly as the last good run left them
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(cat "${file}")" == "${before}" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.ls_specific_settings.python.ls_base_cmd[0]' "${file}")" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
+  [[ -x "${shim}" ]]
+  # the MCP registration still ran, with the kept shim dir on its PATH
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.mcpServers.serena.command' "${HOME}/.gemini/settings.json")" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
+  path_env="$(jq -r '.mcpServers.serena.env.PATH' "${HOME}/.gemini/settings.json")"
+  [[ "${path_env}" == "${XDG_DATA_HOME}/dyai/serena-shims:"* ]]
 }
 
 @test "dyai_lsp::setup_serena_config is a no-op on a second run (mtime unchanged)" {

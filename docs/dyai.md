@@ -221,9 +221,19 @@ other agent (`dyai_lsp::setup`, run before marketplaces/plugins):
   `typos_lsp`, `sonarlint`, `copilot`, `ast_grep`, `tailwindcss`), into a
   manifest at `${XDG_CACHE_HOME:-~/.cache}/dyai/lsp.json`.
 - **Claude** gets its own `dyai-lsp` plugin (registered via a local
-  marketplace), built from that manifest.
+  marketplace), built from that manifest. The official `*-lsp` plugins it
+  replaces (`pyright-lsp`, `lua-lsp`, `typescript-lsp`, `gopls-lsp`,
+  `rust-analyzer-lsp`) are set to `false` in `enabledPlugins`, so a copy
+  still installed from before never runs next to it; dyai does not
+  uninstall them.
 - **Copilot, opencode and Hermes** get the same servers merged into each
-  one's own LSP config format.
+  one's own LSP config format. In opencode a server is keyed by opencode's
+  own built-in id when that built-in is the same server (`rust_analyzer` is
+  written as `rust`, `lua_ls` as `lua-ls`, ...), so it replaces the
+  built-in; a built-in that is a different server for the same extensions
+  (opencode's `typescript` next to Neovim's `vtsls`) gets
+  `{"disabled": true}`. Built-ins for languages Neovim has no server for are
+  left alone.
 - **Codex, Gemini and agy** have no native LSP integration, so they get the
   servers bridged through a `serena` MCP server instead
   (`global.lsp.serena.ref` pins the commit; `global.lsp.serena.contexts`
@@ -236,10 +246,29 @@ other agent (`dyai_lsp::setup`, run before marketplaces/plugins):
 Every server command is wrapped by `dyai-lsp-exec`, a trust gate: inside a
 directory Neovim holds untrusted (`.worktrees/dyreview-*`, released only by
 `:DyReview trust` in that Neovim session), the language server is refused
-rather than started. Everywhere else it `exec`s straight through.
+rather than started. Everywhere else it `exec`s straight through. The
+serena MCP server itself is launched through the same gate, since it reads
+the project's `.serena/project.yml` and starts servers for every language
+it finds.
+
+**Limit of the gate.** It checks only the directory a server *starts* in,
+i.e. the agent's working directory. An agent started outside a held
+directory that then opens files inside one gets no protection: the server
+is already running and is never asked again.
 
 Any step here failing (no `nvim`, no `uvx`, `global.lsp.serena.ref` unset,
-...) only warns; `dyai install` still finishes and installs plugins.
+...) only warns; `dyai install` still finishes and installs plugins. With no
+manifest (the export failed and none was left from an earlier run), the
+Copilot, opencode and Hermes configs, serena's `ls_specific_settings` and
+its shims are left as the last good run wrote them rather than emptied.
+
+**Claude warns about `dyai-lsp@dyai-lsp` on a fresh machine.** The
+`dyai-lsp` marketplace is a local directory dyai generates, so it is
+registered at runtime by `dyai install` (`claude plugin marketplace add`),
+not through `extraKnownMarketplaces` in `settings.json`. Until the first
+`dyai install`, Claude sees `dyai-lsp@dyai-lsp` enabled but cannot find its
+marketplace, and may warn about it; the warning goes away once
+`dyai install` has run.
 
 **Refreshing.** Re-run `dyai install` whenever Neovim gains or loses a
 language server (e.g. after `:Mason` installs one) to update every agent.

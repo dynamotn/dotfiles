@@ -39,17 +39,22 @@ function dyai_lsp::exclude_csv {
 # @env DYAI_NVIM_CONFIG string [default: ${XDG_CONFIG_HOME:-~/.config}/nvim] Neovim config directory
 # @env DYAI_LSPCONFIG_DIR string [default: ${XDG_DATA_HOME:-~/.local/share}/nvim/lazy/nvim-lspconfig]
 # @env DYAI_MASON_BIN string [default: ${XDG_DATA_HOME:-~/.local/share}/nvim/mason/bin]
+# @env DYAI_LAZY_DIR string [default: ${XDG_DATA_HOME:-~/.local/share}/nvim/lazy/lazy.nvim]
+#   lazy.nvim checkout put on the runtimepath (skipped when missing), for the
+#   config helpers that require `lazy.core.*`
 # @env CONFIG_FILE string The dyai config read for global.lsp.exclude
 # @exitcode 1 nvim is missing or the export failed; the old manifest, if any, is left in place
 #######################################
 function dyai_lsp::export {
-  local nvim_bin nvim_cfg lspconfig_dir mason_bin exclude_csv
+  local nvim_bin nvim_cfg lspconfig_dir mason_bin lazy_dir exclude_csv
   nvim_bin="${DYAI_NVIM:-nvim}"
   nvim_cfg="${DYAI_NVIM_CONFIG:-$(dybatpho::xdg_config_dir nvim)}"
   # shellcheck disable=SC2312 # xdg_data_dir only builds a path string, it cannot fail here
   lspconfig_dir="${DYAI_LSPCONFIG_DIR:-$(dybatpho::path_join "$(dybatpho::xdg_data_dir nvim)" "lazy" "nvim-lspconfig")}"
   # shellcheck disable=SC2312 # xdg_data_dir only builds a path string, it cannot fail here
   mason_bin="${DYAI_MASON_BIN:-$(dybatpho::path_join "$(dybatpho::xdg_data_dir nvim)" "mason" "bin")}"
+  # shellcheck disable=SC2312 # xdg_data_dir only builds a path string, it cannot fail here
+  lazy_dir="${DYAI_LAZY_DIR:-$(dybatpho::path_join "$(dybatpho::xdg_data_dir nvim)" "lazy" "lazy.nvim")}"
   if ! dybatpho::is command "${nvim_bin}"; then
     dybatpho::warn "nvim (${nvim_bin}) is not installed, skip exporting language servers"
     return 1
@@ -62,7 +67,7 @@ function dyai_lsp::export {
   dybatpho::ensure_dir "${cache_dir}" > /dev/null
   dybatpho::create_temp tmp "json" "dyai-lsp" "${cache_dir}"
   if "${nvim_bin}" --clean --headless -l "${exporter}" \
-    "${nvim_cfg}" "${lspconfig_dir}" "${mason_bin}" "${tmp}" "${exclude_csv}"; then
+    "${nvim_cfg}" "${lspconfig_dir}" "${mason_bin}" "${tmp}" "${exclude_csv}" "${lazy_dir}"; then
     mv "${tmp}" "${manifest}"
     dybatpho::info "Exported language servers to ${manifest}"
   else
@@ -100,24 +105,47 @@ function dyai_lsp::owned_get {
 
 #######################################
 # @description Store a JSON value under a key in the dyai-lsp owned-state file,
-#   atomically, keeping every other key
+#   atomically, keeping every other key. A value equal to the stored one
+#   (jq -S compare) leaves the file untouched, so its mtime does not change.
 # @arg $1 string Key to write
 # @arg $2 string JSON value to store (any valid JSON, e.g. `"1.2.3"` or `{}`)
 #######################################
 function dyai_lsp::owned_set {
-  local key value dir file tmp current
+  local key value dir file tmp current stored wanted
   dybatpho::expect_args key value -- "$@"
   dir="$(dybatpho::xdg_cache_dir dyai)"
   dybatpho::ensure_dir "${dir}" > /dev/null
   file="$(dyai_lsp::owned_file)"
   if dybatpho::is file "${file}"; then
     current="$(< "${file}")"
+    # shellcheck disable=SC2312 # a malformed state file reads as a mismatch, forcing the rewrite below
+    stored="$(jq -cS --arg k "${key}" 'if has($k) then .[$k] else empty end' <<< "${current}" 2> /dev/null)"
+    wanted="$(jq -cS . <<< "${value}")"
+    [[ -n "${stored}" && "${stored}" == "${wanted}" ]] && return 0
   else
     current="{}"
   fi
   dybatpho::create_temp tmp "json" "dyai-lsp-owned" "${dir}"
   jq --arg k "${key}" --argjson v "${value}" '.[$k] = $v' <<< "${current}" > "${tmp}" \
     && mv "${tmp}" "${file}"
+}
+
+#######################################
+# @description Write content to a file through a temp file and `mv`, but only
+#   when it differs from what the file already holds, so an unchanged file
+#   keeps its mtime
+# @arg $1 string Destination path (its directory must exist)
+# @arg $2 string Content to write, byte for byte
+# @exitcode 1 The temp file could not be written or moved into place
+#######################################
+function __dyai_lsp_write_if_changed {
+  local dest content tmp
+  dybatpho::expect_args dest content -- "$@"
+  if dybatpho::is file "${dest}" && [[ "$(< "${dest}")" == "${content}" ]]; then
+    return 0
+  fi
+  dybatpho::create_temp tmp "tmp" "dyai-lsp" "$(dirname "${dest}")"
+  printf '%s' "${content}" > "${tmp}" && mv "${tmp}" "${dest}"
 }
 
 #######################################
@@ -215,6 +243,100 @@ function __dyai_lsp_hermes_id {
 }
 
 #######################################
+# @description Map a Neovim server name to the id of the opencode built-in
+#   that runs the same server, when there is one, so dyai's entry overrides
+#   the built-in instead of opencode running its own unwrapped copy next to
+#   it. Confirmed against opencode v1.18.31
+#   (packages/opencode/src/lsp/server.ts, the binary each built-in spawns).
+#   Same-named built-ins (pyright, gopls, clangd, texlab, tinymist, zls,
+#   gleam, nixd, julials, jdtls, svelte, astro, eslint, biome, oxlint, ty)
+#   fall through unchanged, as does any name with no same-server built-in.
+# @arg $1 string Neovim server name
+# @stdout The opencode built-in id, or the Neovim name when there is none
+#######################################
+function __dyai_lsp_opencode_id {
+  local name
+  dybatpho::expect_args name -- "$@"
+  case "${name}" in
+    rust_analyzer) printf 'rust\n' ;;
+    lua_ls) printf 'lua-ls\n' ;;
+    yamlls) printf 'yaml-ls\n' ;;
+    bashls) printf 'bash\n' ;;
+    clojure_lsp) printf 'clojure-lsp\n' ;;
+    dockerls) printf 'dockerfile\n' ;;
+    ts_ls) printf 'typescript\n' ;;
+    denols) printf 'deno\n' ;;
+    vue_ls) printf 'vue\n' ;;
+    elixirls) printf 'elixir-ls\n' ;;
+    ocamllsp) printf 'ocaml-lsp\n' ;;
+    intelephense) printf 'php intelephense\n' ;;
+    terraformls) printf 'terraform\n' ;;
+    hls) printf 'haskell-language-server\n' ;;
+    sourcekit) printf 'sourcekit-lsp\n' ;;
+    dartls) printf 'dart\n' ;;
+    fsautocomplete) printf 'fsharp\n' ;;
+    roslyn_ls) printf 'csharp\n' ;;
+    kotlin_lsp) printf 'kotlin-ls\n' ;;
+    rubocop) printf 'ruby-lsp\n' ;;
+    *) printf '%s\n' "${name}" ;;
+  esac
+}
+
+#######################################
+# @description Print every opencode built-in LSP server with the file
+#   extensions it claims by default, copied from opencode v1.18.31
+#   (packages/opencode/src/lsp/server.ts). A built-in whose extensions a
+#   dyai server also covers, but that runs a different server (vtsls vs the
+#   `typescript` built-in), is disabled so opencode does not start it
+#   unwrapped next to dyai's.
+# @noargs
+# @stdout JSON `{<builtin id>: [".ext", ...]}`
+#######################################
+function __dyai_lsp_opencode_builtins {
+  jq -cn '{
+    "deno": [".ts", ".tsx", ".js", ".jsx", ".mjs"],
+    "typescript": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"],
+    "vue": [".vue"],
+    "eslint": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts", ".vue"],
+    "oxlint": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts", ".vue", ".astro", ".svelte"],
+    "biome": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts", ".json", ".jsonc", ".vue",
+              ".astro", ".svelte", ".css", ".graphql", ".gql", ".html"],
+    "gopls": [".go"],
+    "ruby-lsp": [".rb", ".rake", ".gemspec", ".ru"],
+    "ty": [".py", ".pyi"],
+    "pyright": [".py", ".pyi"],
+    "elixir-ls": [".ex", ".exs"],
+    "zls": [".zig", ".zon"],
+    "csharp": [".cs", ".csx"],
+    "razor": [".razor", ".cshtml"],
+    "fsharp": [".fs", ".fsi", ".fsx", ".fsscript"],
+    "sourcekit-lsp": [".swift", ".objc", "objcpp"],
+    "rust": [".rs"],
+    "clangd": [".c", ".cpp", ".cc", ".cxx", ".c++", ".h", ".hpp", ".hh", ".hxx", ".h++"],
+    "svelte": [".svelte"],
+    "astro": [".astro"],
+    "jdtls": [".java"],
+    "kotlin-ls": [".kt", ".kts"],
+    "yaml-ls": [".yaml", ".yml"],
+    "lua-ls": [".lua"],
+    "php intelephense": [".php"],
+    "prisma": [".prisma"],
+    "dart": [".dart"],
+    "ocaml-lsp": [".ml", ".mli"],
+    "bash": [".sh", ".bash", ".zsh", ".ksh"],
+    "terraform": [".tf", ".tfvars"],
+    "texlab": [".tex", ".bib"],
+    "dockerfile": [".dockerfile", "Dockerfile"],
+    "gleam": [".gleam"],
+    "clojure-lsp": [".clj", ".cljs", ".cljc", ".edn"],
+    "nixd": [".nix"],
+    "tinymist": [".typ", ".typc"],
+    "haskell-language-server": [".hs", ".lhs"],
+    "julials": [".jl"]
+  }'
+}
+
+#######################################
 # @description Merge a map of entries into a top-level object key of a JSON
 #   file, pruning stale dyai-owned keys first, idempotently (jq -S compare).
 #   A key that already exists in the block and is not in the caller's
@@ -228,6 +350,8 @@ function __dyai_lsp_hermes_id {
 # @arg $6 string JSON array of keys dyai owned before this run
 # @stdout JSON array of the keys dyai actually wrote (excludes any left
 #   untouched because a foreign entry already claimed that name)
+# @exitcode 1 The file is not valid JSON or could not be written; nothing is
+#   printed, so the caller must leave its owned-state as it was
 #######################################
 function __dyai_lsp_write_json_block {
   local agent file block_key entries_json prune_json owned_before_json
@@ -268,7 +392,6 @@ function __dyai_lsp_write_json_block {
   )"
   if [[ -z "${new_content}" ]]; then
     dybatpho::warn "Could not read ${file} as JSON, skip dyai-lsp update"
-    printf '[]\n'
     return 1
   fi
   new_norm="$(jq -S . <<< "${new_content}")"
@@ -278,7 +401,10 @@ function __dyai_lsp_write_json_block {
     return 0
   fi
   dybatpho::create_temp tmp "json" "dyai-lsp" "${dir}"
-  printf '%s' "${new_content}" > "${tmp}" && mv "${tmp}" "${file}"
+  if ! { printf '%s' "${new_content}" > "${tmp}" && mv "${tmp}" "${file}"; }; then
+    dybatpho::warn "Could not write dyai-lsp entries to ${file}"
+    return 1
+  fi
   dybatpho::info "Updated dyai-lsp entries in ${file}"
   printf '%s\n' "${applied_names}"
 }
@@ -296,6 +422,8 @@ function __dyai_lsp_write_json_block {
 # @arg $5 string JSON array of ids dyai owned before this run
 # @stdout JSON array of the ids dyai actually wrote (excludes any left
 #   untouched because a foreign entry already claimed that id)
+# @exitcode 1 `yq` could not update the file; nothing is printed, so the
+#   caller must leave its owned-state as it was
 #######################################
 function __dyai_lsp_write_yaml_block {
   local agent file entries_json prune_json owned_before_json
@@ -338,11 +466,11 @@ function __dyai_lsp_write_yaml_block {
     printf '%s\n' "${applied_names}"
     return 0
   fi
-  if E="${new_servers}" yq -i '.lsp.servers = (strenv(E) | fromjson)' "${file}"; then
-    dybatpho::info "Updated dyai-lsp entries in ${file}"
-  else
+  if ! E="${new_servers}" yq -i '.lsp.servers = (strenv(E) | fromjson)' "${file}"; then
     dybatpho::warn "Could not update dyai-lsp entries in ${file}"
+    return 1
   fi
+  dybatpho::info "Updated dyai-lsp entries in ${file}"
   printf '%s\n' "${applied_names}"
 }
 
@@ -395,17 +523,27 @@ function dyai_lsp::setup_copilot {
   prune="$(jq -c --argjson keep "${owned_names}" '(. // []) - $keep' <<< "${owned_before}")"
   # shellcheck disable=SC2312 # path_join only builds a path string, it cannot fail here
   file="$(dybatpho::path_join "${COPILOT_HOME:-$(dybatpho::path_join "${HOME}" ".copilot")}" "lsp-config.json")"
-  applied_names="$(
+  # A failed write leaves the owned-state as it was, so the next run after the
+  # file is fixed still recognises dyai's own entries.
+  if ! applied_names="$(
     __dyai_lsp_write_json_block copilot "${file}" "lspServers" "${entries}" "${prune}" "${owned_before}"
-  )"
+  )"; then
+    return 1
+  fi
   dyai_lsp::owned_set copilot "${applied_names}"
 }
 
 #######################################
 # @description Write every Neovim language server into opencode's config,
 #   launcher-wrapped, pruning servers dyai wrote before that are no longer in
-#   the manifest. Runs only if `opencode` is on PATH; leaves the file
-#   untouched (with a warning) when the manifest is missing or invalid.
+#   the manifest. An entry is keyed by the opencode built-in id of the same
+#   server when there is one (`__dyai_lsp_opencode_id`), so it overrides the
+#   built-in; every other built-in whose extensions a dyai server covers gets
+#   a dyai-owned `{disabled: true}` entry, so opencode never runs an
+#   unwrapped copy of a server next to dyai's. A hand-written key under
+#   either name is left untouched with a warning. Runs only if `opencode` is
+#   on PATH; leaves the file untouched (with a warning) when the manifest is
+#   missing or invalid.
 # @noargs
 # @env OPENCODE_CONFIG string [default: ~/.config/opencode/opencode.json]
 # @env XDG_CACHE_HOME string Base of the manifest and owned-state files
@@ -423,7 +561,7 @@ function dyai_lsp::setup_opencode {
     dybatpho::warn "Invalid dyai-lsp manifest ${manifest}, skip opencode"
     return 1
   fi
-  local entries name server_json argv init_opts entry
+  local entries name server_json argv init_opts entry id
   entries="{}"
   # shellcheck disable=SC2312 # a malformed manifest yields no names, a safe no-op loop
   while IFS= read -r name; do
@@ -438,15 +576,36 @@ function dyai_lsp::setup_opencode {
         + (if ($init | length) > 0 then {initialization: $init} else {} end)
       '
     )"
-    entries="$(jq -c --arg n "${name}" --argjson e "${entry}" '.[$n] = $e' <<< "${entries}")"
+    id="$(__dyai_lsp_opencode_id "${name}")"
+    # Two Neovim servers for one built-in id: the first in manifest order wins.
+    entries="$(jq -c --arg k "${id}" --argjson e "${entry}" 'if has($k) then . else .[$k] = $e end' <<< "${entries}")"
   done < <(jq -r '.servers[].name' "${manifest}")
+
+  local builtins
+  builtins="$(__dyai_lsp_opencode_builtins)"
+  entries="$(
+    jq -c --argjson builtins "${builtins}" '
+      ([.[] | .extensions? // [] | .[]] | unique) as $covered
+      | reduce ($builtins | to_entries[]) as $b (.;
+          if has($b.key) then .
+          elif ($b.value | any(. as $x | $covered | index($x) != null)) then .[$b.key] = {disabled: true}
+          else . end
+        )
+    ' <<< "${entries}"
+  )"
 
   local owned_names owned_before prune file applied_names
   owned_names="$(jq -c 'keys' <<< "${entries}")"
   owned_before="$(dyai_lsp::owned_get opencode)"
   prune="$(jq -c --argjson keep "${owned_names}" '(. // []) - $keep' <<< "${owned_before}")"
   file="${OPENCODE_CONFIG:-$(dybatpho::path_join "${HOME}" ".config" "opencode" "opencode.json")}"
-  applied_names="$(__dyai_lsp_write_json_block opencode "${file}" "lsp" "${entries}" "${prune}" "${owned_before}")"
+  # A failed write leaves the owned-state as it was, so the next run after the
+  # file is fixed still recognises dyai's own entries.
+  if ! applied_names="$(
+    __dyai_lsp_write_json_block opencode "${file}" "lsp" "${entries}" "${prune}" "${owned_before}"
+  )"; then
+    return 1
+  fi
   dyai_lsp::owned_set opencode "${applied_names}"
 }
 
@@ -504,7 +663,9 @@ function dyai_lsp::setup_hermes {
   owned_before="$(dyai_lsp::owned_get hermes)"
   prune="$(jq -c --argjson keep "${owned_names}" '(. // []) - $keep' <<< "${owned_before}")"
   file="$(dybatpho::path_join "${HOME}" ".hermes" "config.yaml")"
-  applied_names="$(__dyai_lsp_write_yaml_block hermes "${file}" "${entries}" "${prune}" "${owned_before}")"
+  if ! applied_names="$(__dyai_lsp_write_yaml_block hermes "${file}" "${entries}" "${prune}" "${owned_before}")"; then
+    return 1
+  fi
   dyai_lsp::owned_set hermes "${applied_names}"
 }
 
@@ -544,58 +705,82 @@ function dyai_lsp::setup_claude {
     done < <(jq -r 'keys[]' <<< "${ext_map}")
   fi
 
-  local lsp_path market_json_path plugin_json_path tmp
+  local lsp_path market_json_path plugin_json_path
   lsp_path="$(dybatpho::path_join "${lsp_plugin_dir}" ".lsp.json")"
   market_json_path="$(dybatpho::path_join "${market_meta_dir}" "marketplace.json")"
   plugin_json_path="$(dybatpho::path_join "${lsp_meta_dir}" "plugin.json")"
-  dybatpho::create_temp tmp "json" "dyai-lsp" "${lsp_plugin_dir}"
-  printf '%s' "${lsp_json}" > "${tmp}"
-  mv "${tmp}" "${lsp_path}"
+  # Each file is rewritten only when its content changes, so a repeat run
+  # with the same manifest touches nothing.
+  __dyai_lsp_write_if_changed "${lsp_path}" "${lsp_json}" || return 1
 
   local version marketplace_json plugin_json
-  # shellcheck disable=SC2312 # a just-written file always hashes; sha256sum cannot fail here
-  version="0.0.0-$(sha256sum "${lsp_path}" | cut -c1-12)"
+  # shellcheck disable=SC2312 # hashing an in-memory string; sha256sum cannot fail here
+  version="0.0.0-$(printf '%s' "${lsp_json}" | sha256sum | cut -c1-12)"
   marketplace_json="$(
     jq -n '{name: "dyai-lsp", owner: {name: "dyai"},
       plugins: [{name: "dyai-lsp", source: "./plugins/dyai-lsp"}]}'
   )"
-  printf '%s' "${marketplace_json}" > "${market_json_path}"
+  __dyai_lsp_write_if_changed "${market_json_path}" "${marketplace_json}" || return 1
   plugin_json="$(jq -n --arg v "${version}" '{name: "dyai-lsp", version: $v}')"
-  printf '%s' "${plugin_json}" > "${plugin_json_path}"
+  __dyai_lsp_write_if_changed "${plugin_json_path}" "${plugin_json}" || return 1
 
-  local known_file version_json prev_version
+  # claude_version records the version Claude has actually loaded, so it is
+  # stored only once the add, or both updates, succeeded; a failure retries
+  # on the next run.
+  local known_file version_json prev_version registered
   known_file="$(dybatpho::path_join "${HOME}" ".claude" "plugins" "known_marketplaces.json")"
   version_json="$(jq -n --arg v "${version}" '$v')"
+  registered="false"
   # shellcheck disable=SC2310 # a missing or non-matching file is a plain no
   if ! dyai::in_json_file "${known_file}" 'has("dyai-lsp")'; then
     dybatpho::info "Add dyai-lsp marketplace"
-    claude plugin marketplace add "${market_dir}" || dybatpho::warn "Could not add dyai-lsp marketplace"
+    if claude plugin marketplace add "${market_dir}"; then
+      registered="true"
+    else
+      dybatpho::warn "Could not add dyai-lsp marketplace"
+    fi
   else
     prev_version="$(dyai_lsp::owned_get claude_version)"
-    if [[ "${prev_version}" != "${version_json}" ]]; then
+    if [[ "${prev_version}" == "${version_json}" ]]; then
+      registered="true"
+    else
       dybatpho::info "Update dyai-lsp marketplace and plugin to ${version}"
-      claude plugin marketplace update dyai-lsp || dybatpho::warn "Could not update dyai-lsp marketplace"
-      claude plugin update dyai-lsp@dyai-lsp || dybatpho::warn "Could not update dyai-lsp plugin"
+      if ! claude plugin marketplace update dyai-lsp; then
+        dybatpho::warn "Could not update dyai-lsp marketplace"
+      elif ! claude plugin update dyai-lsp@dyai-lsp; then
+        dybatpho::warn "Could not update dyai-lsp plugin"
+      else
+        registered="true"
+      fi
     fi
   fi
-  dyai_lsp::owned_set claude_version "${version_json}"
+  if [[ "${registered}" == "true" ]]; then
+    dyai_lsp::owned_set claude_version "${version_json}"
+  fi
 }
 
 #######################################
-# @description Print the serena MCP server definition for one context
+# @description Print the serena MCP server definition for one context. The
+#   `uvx` launch itself is wrapped by `dyai-lsp-exec`, like every language
+#   server: serena reads the project's own `.serena/project.yml` and starts
+#   (and may download) servers for any language it finds, so inside a
+#   directory Neovim holds untrusted it must not start at all.
 # @arg $1 string serena context (codex, ide, antigravity, ...)
 # @env CONFIG_FILE string Read for global.lsp.serena.ref
-# @stdout JSON `{command, args, env}`
+# @stdout JSON `{command, args, env}`, command being
+#   `<HOME>/.local/bin/dyai-lsp-exec` and args `["serena", "--", "uvx", ...]`
 #######################################
 function dyai_lsp::serena_entry {
-  local context ref
+  local context ref launcher
   dybatpho::expect_args context -- "$@"
   # shellcheck disable=SC2312 # a bad config read yields "", caught by the caller
   ref="$(dyai::config_json '.global.lsp.serena.ref // ""' | jq -r .)"
-  jq -n --arg ref "${ref}" --arg context "${context}" '
+  launcher="$(dybatpho::path_join "${HOME}" ".local" "bin" "dyai-lsp-exec")"
+  jq -n --arg ref "${ref}" --arg context "${context}" --arg launcher "${launcher}" '
     {
-      command: "uvx",
-      args: ["-p", "3.13", "--from", ("git+https://github.com/oraios/serena@" + $ref),
+      command: $launcher,
+      args: ["serena", "--", "uvx",
+             "-p", "3.13", "--from", ("git+https://github.com/oraios/serena@" + $ref),
              "serena", "start-mcp-server", "--project-from-cwd",
              "--context", $context, "--open-web-dashboard", "false"],
       env: {SERENA_USAGE_REPORTING: "false"}
@@ -689,25 +874,30 @@ function __dyai_lsp_serena_config_file {
 #   pruning stale dyai-owned languages first, idempotently, and ensuring a
 #   top-level `projects` key exists. A language that already exists there and
 #   is not in the caller's owned-state list is left untouched (a user's own
-#   hand-written entry), with one warning.
+#   hand-written entry), with one warning. Without a manifest the file is
+#   left untouched (with a warning): an empty server list would otherwise
+#   prune every `ls_base_cmd` override dyai wrote.
 # @noargs
 # @env XDG_CACHE_HOME string Base of the manifest and owned-state files
+# @exitcode 1 No manifest, or `yq` could not update the file
 #######################################
 function dyai_lsp::setup_serena_config {
   local manifest name server_json argv lang entries
   # shellcheck disable=SC2312 # xdg_cache_dir only builds a path string, it cannot fail here
   manifest="$(dybatpho::path_join "$(dybatpho::xdg_cache_dir dyai)" "lsp.json")"
-  entries="{}"
-  if dybatpho::is file "${manifest}"; then
-    for name in "${!DYAI_LSP_SERENA_LANG[@]}"; do
-      # shellcheck disable=SC2312 # no match yields empty, the guard below skips it
-      server_json="$(jq -c --arg n "${name}" '.servers[] | select(.name == $n)' "${manifest}" 2> /dev/null)"
-      [[ -n "${server_json}" ]] || continue
-      argv="$(dyai_lsp::launch_argv "${server_json}")"
-      lang="${DYAI_LSP_SERENA_LANG[${name}]}"
-      entries="$(jq -c --arg l "${lang}" --argjson a "${argv}" '.[$l] = {ls_base_cmd: $a}' <<< "${entries}")"
-    done
+  if ! dybatpho::is file "${manifest}"; then
+    dybatpho::warn "No dyai-lsp manifest at ${manifest}, skip serena's ls_specific_settings"
+    return 1
   fi
+  entries="{}"
+  for name in "${!DYAI_LSP_SERENA_LANG[@]}"; do
+    # shellcheck disable=SC2312 # no match yields empty, the guard below skips it
+    server_json="$(jq -c --arg n "${name}" '.servers[] | select(.name == $n)' "${manifest}" 2> /dev/null)"
+    [[ -n "${server_json}" ]] || continue
+    argv="$(dyai_lsp::launch_argv "${server_json}")"
+    lang="${DYAI_LSP_SERENA_LANG[${name}]}"
+    entries="$(jq -c --arg l "${lang}" --argjson a "${argv}" '.[$l] = {ls_base_cmd: $a}' <<< "${entries}")"
+  done
 
   local file dir
   file="$(__dyai_lsp_serena_config_file)"
@@ -758,11 +948,11 @@ function dyai_lsp::setup_serena_config {
   fi
   local yq_expr
   yq_expr='.ls_specific_settings = (strenv(E) | fromjson) | .projects = (.projects // [])'
-  if E="${new_block}" yq -i "${yq_expr}" "${file}"; then
-    dybatpho::info "Updated serena ls_specific_settings in ${file}"
-  else
+  if ! E="${new_block}" yq -i "${yq_expr}" "${file}"; then
     dybatpho::warn "Could not update serena ls_specific_settings in ${file}"
+    return 1
   fi
+  dybatpho::info "Updated serena ls_specific_settings in ${file}"
   dyai_lsp::owned_set serena "${applied_names}"
 }
 
@@ -771,7 +961,9 @@ function dyai_lsp::setup_serena_config {
 #   through serena: registers the serena MCP server (Codex gets an extra
 #   startup_timeout_sec, the first `uvx` fetch is slow), writes PATH shims for
 #   gopls/lua_ls, and merges the launcher-wrapped `ls_base_cmd` overrides into
-#   serena_config.yml. Skips with a warning when `uvx` is missing.
+#   serena_config.yml. Skips with a warning when `uvx` is missing. Without a
+#   manifest it still registers the MCP server, but leaves the shims and
+#   serena_config.yml as a previous run wrote them (and returns 1).
 # @noargs
 # @env CONFIG_FILE string Read for global.lsp.serena.{ref,contexts}
 # @env XDG_CACHE_HOME string Base of the manifest and owned-state files
@@ -791,10 +983,23 @@ function dyai_lsp::setup_serena {
     return 1
   fi
 
-  local shim_dir shim_count
+  local shim_dir shim_count manifest shim_file
   # shellcheck disable=SC2312 # xdg_data_dir only builds a path string, it cannot fail here
   shim_dir="$(dybatpho::path_join "$(dybatpho::xdg_data_dir dyai)" "serena-shims")"
-  shim_count="$(__dyai_lsp_write_serena_shims "${shim_dir}")"
+  # shellcheck disable=SC2312 # xdg_cache_dir only builds a path string, it cannot fail here
+  manifest="$(dybatpho::path_join "$(dybatpho::xdg_cache_dir dyai)" "lsp.json")"
+  if dybatpho::is file "${manifest}"; then
+    shim_count="$(__dyai_lsp_write_serena_shims "${shim_dir}")"
+  else
+    # Without a manifest, keep the shims a previous run wrote rather than
+    # pruning them all; the MCP registration below still uses them.
+    shim_count=0
+    for shim_file in "${shim_dir}"/*; do
+      if [[ -e "${shim_file}" ]]; then
+        shim_count=$((shim_count + 1))
+      fi
+    done
+  fi
 
   local contexts_json agent context base
   contexts_json="$(dyai::config_json '.global.lsp.serena.contexts // {}')"

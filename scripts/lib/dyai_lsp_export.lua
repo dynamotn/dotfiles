@@ -2,16 +2,16 @@
 -- neutral JSON manifest other AI agents can read. Run headless:
 --
 --   nvim --clean --headless -l dyai_lsp_export.lua \
---     <nvim_cfg> <lspconfig_dir> <mason_bin> <out_json> <exclude_csv>
+--     <nvim_cfg> <lspconfig_dir> <mason_bin> <out_json> <exclude_csv> [<lazy_dir>]
 --
 -- Exits 0 and writes <out_json>, or exits non-zero and writes nothing.
 -- See docs/superpowers/specs/2026-10-25-dyai-lsp-design.md §1 for the design.
 
-local nvim_cfg, lspconfig_dir, mason_bin, out_json, exclude_csv = unpack(_G.arg)
+local nvim_cfg, lspconfig_dir, mason_bin, out_json, exclude_csv, lazy_dir = unpack(_G.arg)
 
 if not (nvim_cfg and lspconfig_dir and mason_bin and out_json) then
   io.stderr:write(
-    'dyai_lsp_export: usage: <nvim_cfg> <lspconfig_dir> <mason_bin> <out_json> <exclude_csv>\n'
+    'dyai_lsp_export: usage: <nvim_cfg> <lspconfig_dir> <mason_bin> <out_json> <exclude_csv> [<lazy_dir>]\n'
   )
   os.exit(1)
 end
@@ -21,13 +21,42 @@ for name in (exclude_csv or ''):gmatch('[^,]+') do
   exclude[name] = true
 end
 
--- Put the nvim config and nvim-lspconfig on the runtimepath, exactly as a
--- live Neovim would, so `vim.lsp.config[name]` resolves each server's
--- shipped lsp/<name>.lua and the config's own lsp/*.lua / after/lsp/*.lua
--- overrides through Neovim's own lazy-loading.
+-- Put the nvim config and nvim-lspconfig on the runtimepath in the order a
+-- live Neovim has them: [cfg, lspconfig, ..., cfg/after]. `vim.lsp.config`
+-- merges every lsp/<name>.lua on the runtimepath in that order, later files
+-- winning, so the config's after/lsp/*.lua overrides beat the lsp/<name>.lua
+-- nvim-lspconfig ships, exactly as they do when Neovim itself starts.
 vim.opt.runtimepath:prepend(lspconfig_dir)
-vim.opt.runtimepath:prepend(nvim_cfg .. '/after')
 vim.opt.runtimepath:prepend(nvim_cfg)
+vim.opt.runtimepath:append(nvim_cfg .. '/after')
+-- lazy.nvim is not on the `--clean` runtimepath, but the config's helpers
+-- (`util/plugin.lua` and everything requiring it) load `lazy.core.util` at
+-- require time, so every lang/*.lua using them fails to load without it.
+-- Neovim's Lua loader searches the runtimepath, so adding it is enough.
+if lazy_dir and lazy_dir ~= '' and vim.fn.isdirectory(lazy_dir) == 1 then
+  vim.opt.runtimepath:prepend(lazy_dir)
+end
+
+--- Reduces a load error to its first line, so one failing file costs one
+--- line of stderr rather than a multi-line `module not found` search list.
+--- @param err unknown
+--- @return string
+local function first_line(err)
+  return (tostring(err):match('^[^\n]*'))
+end
+
+-- Neovim filetype -> LSP languageId, for the filetypes whose name differs
+-- from the id the LSP specification lists. Any other filetype is passed on
+-- unchanged, which is also what Neovim's own client sends.
+local LANGUAGE_ID = {
+  sh = 'shellscript',
+  objc = 'objective-c',
+  objcpp = 'objective-cpp',
+  cs = 'csharp',
+  tex = 'latex',
+  plaintex = 'tex',
+  make = 'makefile',
+}
 
 -- The ERE metacharacters: a `%x` escape only needs a backslash in the
 -- output when `x` is one of these; any other punctuation has no special
@@ -228,7 +257,7 @@ local function collect_servers()
   package.path = nvim_cfg .. '/lua/?.lua;' .. nvim_cfg .. '/lua/?/init.lua;' .. package.path
   local ok, languages = pcall(require, 'config.languages')
   if not ok then
-    io.stderr:write('dyai_lsp_export: could not load config.languages: ' .. tostring(languages) .. '\n')
+    io.stderr:write('dyai_lsp_export: could not load config.languages: ' .. first_line(languages) .. '\n')
     os.exit(1)
   end
   -- Best effort: a config.globals (or similar) that sets up globals like
@@ -241,7 +270,7 @@ local function collect_servers()
     local globals_ok, globals_err = pcall(require, 'config.globals')
     if not globals_ok then
       io.stderr:write(
-        string.format('dyai_lsp_export: could not load config.globals: %s\n', tostring(globals_err))
+        string.format('dyai_lsp_export: could not load config.globals: %s\n', first_line(globals_err))
       )
     end
   end
@@ -331,7 +360,7 @@ local function collect_overrides()
         end
       end
     else
-      io.stderr:write(string.format('dyai_lsp_export: could not load %s: %s\n', file, tostring(spec)))
+      io.stderr:write(string.format('dyai_lsp_export: could not load %s: %s\n', file, first_line(spec)))
     end
   end
   return overrides
@@ -354,18 +383,27 @@ local function resolve_executable(bin)
 end
 
 --- Builds the extensions map for one server: `vim.filetype.inspect().extension`
---- entries whose (string) filetype is one of the server's filetypes, as
---- `"." .. ext"` -> language id. `sh` maps to `shellscript`; function values
---- (per-buffer detection) are ignored.
+--- entries whose filetype is one of the server's filetypes, as
+--- `"." .. ext` -> LSP languageId (see LANGUAGE_ID). An extension Neovim
+--- detects per buffer (a function value) is resolved by matching a bare
+--- file name, which gives its content-free default; `.h` always goes to `c`
+--- when the server handles C (else `cpp`), whatever that default is.
 --- @param filetype_set table<string, boolean>
 --- @return table<string, string>
 local function build_extensions(filetype_set)
   local extensions = {}
   local by_extension = vim.filetype.inspect().extension or {}
   for ext, ft in pairs(by_extension) do
+    if type(ft) == 'function' then
+      if ext == 'h' then
+        ft = (filetype_set.c and 'c') or (filetype_set.cpp and 'cpp') or nil
+      else
+        local ok, matched = pcall(vim.filetype.match, { filename = 'dyai.' .. ext })
+        ft = ok and matched or nil
+      end
+    end
     if type(ft) == 'string' and filetype_set[ft] then
-      local lang_id = ft == 'sh' and 'shellscript' or ft
-      extensions['.' .. ext] = lang_id
+      extensions['.' .. ext] = LANGUAGE_ID[ft] or ft
     end
   end
   return extensions
