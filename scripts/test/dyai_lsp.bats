@@ -30,12 +30,32 @@ CFG
   # tests run linked in, so each test sees exactly the agents it stubs.
   local tool real
   for tool in jq yq nvim; do
-    real="$(command -v "${tool}" || true)"
+    real="$(_real_tool_path "${tool}")"
     if [[ -n "${real}" ]]; then
       ln -sf "${real}" "${HOME}/.local/bin/${tool}"
     fi
   done
   export PATH="${HOME}/.local/bin:/usr/bin:/bin"
+}
+
+#######################################
+# @description Print the real executable behind a tool on the outer PATH
+# A mise shim stops working once the sandbox moves the XDG dirs (mise no longer
+# finds its trust store), so resolve shims through mise with the real home.
+# @arg $1 string Tool name
+# @stdout Absolute path, or nothing when the tool is missing
+#######################################
+function _real_tool_path {
+  local tool="${1}" found
+  found="$(command -v "${tool}" || true)"
+  if [[ "${found}" == */mise/shims/* ]]; then
+    # shellcheck disable=SC2154 # DOTFILES_REAL_* are set by test_helper.bash
+    env -u XDG_DATA_HOME -u XDG_STATE_HOME -u XDG_CACHE_HOME \
+      HOME="${DOTFILES_REAL_HOME}" XDG_CONFIG_HOME="${DOTFILES_REAL_XDG_CONFIG_HOME}" \
+      mise which "${tool}" 2> /dev/null || true
+    return 0
+  fi
+  printf '%s' "${found}"
 }
 
 function _skip_unless_nvim_available {
