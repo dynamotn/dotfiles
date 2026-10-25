@@ -1,0 +1,107 @@
+{{- /*
+  Claude Code settings. The plugin, marketplace and policy data is rendered
+  from the shared dyai partial so this file and ~/.config/dyai/config.yaml
+  never drift; the hooks and UI scalars below are Claude-specific literals.
+*/ -}}
+{{- $d := fromYaml (includeTemplate "ai/dyai-data.yaml.tmpl" .) -}}
+{{- $enabled := dict -}}
+{{- range $d.plugins }}{{ $_ := set $enabled . true }}{{ end -}}
+{{- $static := `
+{
+  "cleanupPeriodDays": 20,
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR:-$PWD}/AGENTS.md\"; if [ -f \"$f\" ] && ! [ -f \"${f%AGENTS.md}CLAUDE.md\" ]; then echo '=== AGENTS.md (project rules) ==='; cat \"$f\"; else true; fi",
+            "statusMessage": "Loading AGENTS.md..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Task finished!' --icon=dialog-information; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ] && paplay /usr/share/sounds/freedesktop/stereo/complete.oga; } 2>/dev/null; true",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Prompt waiting for your input!' --icon=dialog-information; true",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Permission requested' --icon=dialog-question; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/window-question.oga ] && paplay /usr/share/sounds/freedesktop/stereo/window-question.oga; } 2>/dev/null; true",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/worktree-create.sh"
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/worktree-remove.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline.sh"
+  },
+  "tui": "fullscreen",
+  "preferredNotifChannel": "auto",
+  "remoteControlAtStartup": false,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true
+}
+` | fromJson -}}
+{{- $derived := dict
+      "permissions" $d.policy.permissions
+      "theme" $d.policy.theme
+      "effortLevel" $d.policy.effortLevel
+      "enabledPlugins" $enabled
+      "extraKnownMarketplaces" $d.marketplaces -}}
+{{ mergeOverwrite $static $derived | toPrettyJson }}

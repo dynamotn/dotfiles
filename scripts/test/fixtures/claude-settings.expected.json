@@ -1,0 +1,193 @@
+{
+  "agentPushNotifEnabled": true,
+  "cleanupPeriodDays": 20,
+  "effortLevel": "medium",
+  "enabledPlugins": {
+    "agent-sdk-dev@claude-plugins-official": true,
+    "appsec-skills@agent-sec-ops-kit-skills": true,
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "claude-security@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "compliance-skills@agent-sec-ops-kit-skills": true,
+    "context7@claude-plugins-official": true,
+    "devsecops-skills@agent-sec-ops-kit-skills": true,
+    "differential-review@trailofbits": true,
+    "duckdb-skills@claude-plugins-official": true,
+    "elements-of-style@superpowers-marketplace": true,
+    "episodic-memory@superpowers-marketplace": true,
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "gitlab@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "i-have-adhd@i-have-adhd": true,
+    "incident-response-skills@agent-sec-ops-kit-skills": true,
+    "insecure-defaults@trailofbits": true,
+    "lua-lsp@claude-plugins-official": true,
+    "mattpocock-skills@claude-plugins-official": true,
+    "mcp-server-dev@claude-plugins-official": true,
+    "modern-python@trailofbits": true,
+    "obsidian@obsidian-skills": true,
+    "offsec-skills@agent-sec-ops-kit-skills": true,
+    "playwright@claude-plugins-official": true,
+    "posty-social-media-scheduler@anthropic-plugin-directory": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "redis-development@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "second-opinion@trailofbits": true,
+    "secsdlc-skills@agent-sec-ops-kit-skills": true,
+    "secskills-core@secskills-marketplace": true,
+    "secskills-defense@secskills-marketplace": true,
+    "secskills-offense@secskills-marketplace": true,
+    "secskills@secskills-marketplace": true,
+    "security-guidance@claude-plugins-official": true,
+    "semgrep@claude-plugins-official": true,
+    "sharp-edges@trailofbits": true,
+    "skill-creator@claude-plugins-official": true,
+    "static-analysis@trailofbits": true,
+    "superpowers@claude-plugins-official": true,
+    "supply-chain-risk-auditor@trailofbits": true,
+    "telegram@claude-plugins-official": true,
+    "testing-handbook-skills@trailofbits": true,
+    "threatmodel-skills@agent-sec-ops-kit-skills": true,
+    "trailmark@trailofbits": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "agent-sec-ops-kit-skills": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/AgentSecOps/SecOpsAgentKit.git"
+      }
+    },
+    "i-have-adhd": {
+      "source": {
+        "repo": "ayghri/i-have-adhd",
+        "source": "github"
+      }
+    },
+    "obsidian-skills": {
+      "source": {
+        "repo": "kepano/obsidian-skills",
+        "source": "github"
+      }
+    },
+    "secskills-marketplace": {
+      "source": {
+        "repo": "trilwu/secskills",
+        "source": "github"
+      }
+    },
+    "superpowers-marketplace": {
+      "source": {
+        "repo": "obra/superpowers-marketplace",
+        "source": "github"
+      }
+    },
+    "trailofbits": {
+      "source": {
+        "repo": "trailofbits/skills",
+        "source": "github"
+      }
+    }
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Prompt waiting for your input!' --icon=dialog-information; true",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Permission requested' --icon=dialog-question; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/window-question.oga ] && paplay /usr/share/sounds/freedesktop/stereo/window-question.oga; } 2>/dev/null; true",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "rtk hook claude",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "f=\"${CLAUDE_PROJECT_DIR:-$PWD}/AGENTS.md\"; if [ -f \"$f\" ] && ! [ -f \"${f%AGENTS.md}CLAUDE.md\" ]; then echo '=== AGENTS.md (project rules) ==='; cat \"$f\"; else true; fi",
+            "statusMessage": "Loading AGENTS.md...",
+            "type": "command"
+          }
+        ],
+        "matcher": "startup|resume|clear|compact"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Task finished!' --icon=dialog-information; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ] && paplay /usr/share/sounds/freedesktop/stereo/complete.oga; } 2>/dev/null; true",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "command": "bash ~/.claude/hooks/worktree-create.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "command": "bash ~/.claude/hooks/worktree-remove.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  },
+  "inputNeededNotifEnabled": true,
+  "permissions": {
+    "ask": [
+      "Bash(git push)",
+      "Bash(git push:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "preferredNotifChannel": "auto",
+  "remoteControlAtStartup": false,
+  "statusLine": {
+    "command": "bash ~/.claude/statusline.sh",
+    "type": "command"
+  },
+  "theme": "auto",
+  "tui": "fullscreen"
+}
