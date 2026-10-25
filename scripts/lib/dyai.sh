@@ -695,7 +695,7 @@ function dyai::materialize {
   csrc=""
   # shellcheck disable=SC2310 # a failed fetch leaves csrc empty and commands are skipped
   [[ -z "${crepo}" ]] || csrc="$(dyai::fetch_repo "${crepo}" "${cref}")" || csrc=""
-  local -a desired=() desired_mcp=()
+  local -a desired=() desired_mcp=() registered_mcp=()
   local preset section pj sa_count sa md dest sk leaf incomplete="" mcpname mdef cmd_count cmdname
   # Servers already registered project-local, so a re-run does not re-add them.
   local existing_mcp
@@ -780,49 +780,73 @@ function dyai::materialize {
     # shellcheck disable=SC2312 # jq lists the preset's mcp server names
     while IFS= read -r mcpname; do
       [[ -n "${mcpname}" ]] || continue
+      # `desired_mcp` is what the project wants (drives pruning); `registered_mcp`
+      # is what is actually registered now (becomes the manifest), so a failed or
+      # claude-absent registration is NOT recorded and is retried next run.
       desired_mcp+=("${mcpname}")
       dybatpho::is command claude || continue
-      # shellcheck disable=SC2312 # already registered (in the manifest) → skip, no churn
+      # shellcheck disable=SC2312 # already registered (in the manifest) → keep, no churn
       if jq -e --arg n "${mcpname}" 'index($n) != null' <<< "${existing_mcp}" > /dev/null; then
         dybatpho::debug "MCP ${mcpname} already registered for this project"
+        registered_mcp+=("${mcpname}")
         continue
       fi
       mdef="$(jq -c --arg n "${mcpname}" \
         '.mcp[$n] | {type: "stdio", command: .command, args: (.args // []), env: (.env // {})}' <<< "${pj}")"
-      (cd "${root}" && claude mcp add-json --scope local "${mcpname}" "${mdef}" > /dev/null) \
-        || dybatpho::warn "Could not register MCP ${mcpname} for this project"
+      if (cd "${root}" && claude mcp add-json --scope local "${mcpname}" "${mdef}" > /dev/null); then
+        registered_mcp+=("${mcpname}")
+      else
+        dybatpho::warn "Could not register MCP ${mcpname} for this project"
+      fi
     done < <(jq -r '.mcp // {} | keys[]?' <<< "${pj}")
   done < <(yq -p=toml '.use[]' "${toml}" 2> /dev/null)
   if [[ -n "${incomplete}" ]]; then
     dybatpho::die "could not fetch a subagent/command source; project left unchanged"
   fi
   dyai::prune_and_record "${toml}" "${desired[@]+"${desired[@]}"}"
-  dyai::reconcile_mcp "${toml}" "${root}" "${desired_mcp[@]+"${desired_mcp[@]}"}"
+  local desired_mcp_json registered_mcp_json
+  desired_mcp_json="$(dyai::names_to_json "${desired_mcp[@]+"${desired_mcp[@]}"}")"
+  registered_mcp_json="$(dyai::names_to_json "${registered_mcp[@]+"${registered_mcp[@]}"}")"
+  dyai::reconcile_mcp "${toml}" "${root}" "${desired_mcp_json}" "${registered_mcp_json}"
 }
 
 #######################################
-# @description Prune project-local MCP servers no longer wanted, then record the manifest
+# @description Encode the given names as a compact JSON array of unique non-empty strings
+# @arg $@ string Names (may be none)
+# @stdout A JSON array
+#######################################
+function dyai::names_to_json {
+  # shellcheck disable=SC2312 # printf cannot meaningfully fail; jq is the gate
+  printf '%s\n' "$@" | jq -R . | jq -cs 'map(select(. != ""))'
+}
+
+#######################################
+# @description Unregister project-local MCP servers no longer wanted, then record what is registered
 # @arg $1 string Path of the project .dyai.toml
 # @arg $2 string The project root
-# @arg $@ string The desired MCP server names
+# @arg $3 string JSON array of DESIRED server names (what the project wants) — drives pruning
+# @arg $4 string JSON array of REGISTERED server names (what is actually registered) — the manifest
 #######################################
 function dyai::reconcile_mcp {
-  local toml root
-  dybatpho::expect_args toml root -- "$@"
-  shift 2
-  local desired_nl old list
-  desired_nl="$(printf '%s\n' "$@")"
+  local toml root desired_json registered_json
+  dybatpho::expect_args toml root desired_json registered_json -- "$@"
+  local old
   if dybatpho::is command claude; then
+    # Remove a previously-registered server only when it is no longer desired —
+    # never because a (still-wanted) registration failed this run.
     # shellcheck disable=SC2312 # a missing manifest lists nothing, so nothing is pruned
     while IFS= read -r old; do
       [[ -n "${old}" ]] || continue
-      grep -qxF -- "${old}" <<< "${desired_nl}" && continue
+      # shellcheck disable=SC2312 # membership test; a still-desired server is kept
+      jq -e --arg n "${old}" 'index($n) != null' <<< "${desired_json}" > /dev/null && continue
       (cd "${root}" && claude mcp remove --scope local "${old}" &> /dev/null) \
         || dybatpho::debug "MCP ${old} was not registered, nothing to remove"
     done < <(yq -p=toml '.materialized_mcp[]?' "${toml}" 2> /dev/null)
   fi
-  # shellcheck disable=SC2312 # the desired list is dyai-built server names
-  list="$(printf '%s\n' "$@" | sort -u | jq -R . | jq -cs 'map(select(. != ""))')"
+  # The manifest records what is actually registered, so a failed/absent-claude
+  # registration is retried on the next run rather than assumed done.
+  local list
+  list="$(jq -cS 'unique' <<< "${registered_json}")"
   LIST="${list}" yq -p=toml -o=toml -i '.materialized_mcp = (strenv(LIST) | fromjson)' "${toml}"
 }
 

@@ -223,6 +223,39 @@ CFG
   [[ "$(yq -p=toml '.materialized_mcp | length' "${proj}/.dyai.toml")" == "0" ]]
 }
 
+@test "dyai::use does not record an mcp server whose registration failed; retries next run" {
+  _stub bunx
+  # a claude stub that FAILS `mcp add-json` but succeeds otherwise
+  printf '#!/usr/bin/env bash\necho "STUB claude $*" >> "%s"\ncase "$*" in *add-json*) exit 1 ;; esac\nexit 0\n' \
+    "${HOME}/calls.log" > "${HOME}/.local/bin/claude"
+  chmod +x "${HOME}/.local/bin/claude"
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+registry:
+  presets:
+    db:
+      mcp:
+        pg:
+          command: uvx
+          args: [postgres-mcp@0.3.0]
+          env: {}
+CFG
+  local proj="${BATS_TEST_TMPDIR}/mcpfail"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use db)
+  # the add was attempted but failed, so it is NOT recorded as registered
+  grep -q 'STUB claude mcp add-json --scope local pg' "${HOME}/calls.log"
+  [[ "$(yq -p=toml '.materialized_mcp | length' "${proj}/.dyai.toml")" == "0" ]]
+  # with a working claude, a re-materialize retries and now records it
+  _stub claude
+  : > "${HOME}/calls.log"
+  (cd "${proj}" && dyai::materialize)
+  grep -q 'STUB claude mcp add-json --scope local pg' "${HOME}/calls.log"
+  yq -p=toml '.materialized_mcp[]' "${proj}/.dyai.toml" | grep -qx 'pg'
+}
+
 @test "dyai::use records a preset in .dyai.toml and personal-ignores it" {
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
