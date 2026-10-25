@@ -85,6 +85,18 @@ global:
       command: docker
       args: ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"]
       env: {}
+    # SQL databases. Each reads its connection from the agent's runtime
+    # environment (postgres: DATABASE_URI; mysql: MYSQL_HOST/USER/PASS/DB), so
+    # no credential is stored here — the server just inherits it, like github.
+    # SQLite is deliberately absent: it needs a per-project --db-path, not env.
+    postgres:
+      command: uvx
+      args: ["postgres-mcp@0.3.0"]
+      env: {}
+    mysql:
+      command: bunx
+      args: ["@benborla29/mcp-server-mysql@2.0.9"]
+      env: {}
   # Abstract event automation, translated to each hook-capable agent's format.
   hooks:
     stop:
@@ -137,6 +149,54 @@ registry:
         - vercel-labs/agent-skills@vercel-react-best-practices
         - leonxlnx/taste-skill@design-taste-frontend
         - addyosmani/web-quality-skills@accessibility
+    vue:
+      subagents: [vue-expert]
+      skills:
+        - vuejs-ai/skills@vue-best-practices
+        - vuejs-ai/skills@vue-pinia-best-practices
+        - vuejs-ai/skills@vue-router-best-practices
+    angular:
+      subagents: [angular-architect]
+      skills:
+        - angular/skills@angular-developer
+        - angular/skills@angular-new-app
+    java:
+      subagents: [java-architect, spring-boot-engineer]
+      skills:
+        - github/awesome-copilot@java-springboot
+        - affaan-m/ecc@java-coding-standards
+    csharp:
+      subagents: [csharp-developer, dotnet-core-expert]
+      skills:
+        - github/awesome-copilot@csharp-async
+        - github/awesome-copilot@csharp-xunit
+        - github/awesome-copilot@csharp-docs
+    cpp:
+      subagents: [cpp-pro]
+      skills:
+        - affaan-m/ecc@cpp-coding-standards
+        - affaan-m/ecc@cpp-testing
+    php:
+      subagents: [php-pro, laravel-specialist]
+      skills:
+        - jeffallan/claude-skills@laravel-specialist
+        - jeffallan/claude-skills@php-pro
+        - affaan-m/ecc@laravel-tdd
+    ruby:
+      subagents: [rails-expert]
+      skills:
+        - jeffallan/claude-skills@rails-expert
+    swift:
+      subagents: [swift-expert]
+      skills:
+        - emilkowalski/skills@write-swift
+        - avdlee/swiftui-agent-skill@swiftui-expert-skill
+        - avdlee/swift-concurrency-agent-skill@swift-concurrency
+    dart:
+      subagents: [flutter-expert]
+      skills:
+        - flutter/agent-plugins@flutter-apply-architecture-best-practices
+        - dart-lang/skills@dart-add-unit-test
   infra:
     terraform:
       subagents: [terraform-engineer]
@@ -164,6 +224,16 @@ registry:
       skills:
         - supabase/agent-skills@supabase-postgres-best-practices
         - wshobson/agents@sql-optimization-patterns
+    terragrunt:
+      subagents: [terragrunt-expert]
+      skills:
+        - akin-ozer/cc-devops-skills@terragrunt-generator
+        - akin-ozer/cc-devops-skills@terragrunt-validator
+    ansible:
+      subagents: [devops-engineer]
+      skills:
+        - akin-ozer/cc-devops-skills@ansible-validator
+        - akin-ozer/cc-devops-skills@ansible-generator
   presets:
     # Cross-language domains with no single language/tool owner.
     testing:
@@ -183,3 +253,23 @@ registry:
         - Eyadkelleh/awesome-skills-security@security-payloads
         - Eyadkelleh/awesome-skills-security@security-usernames
         - Eyadkelleh/awesome-skills-security@security-webshells
+    # Notebooks, R and Quarto — the data-science filetypes nvim supports.
+    datascience:
+      subagents: [data-scientist]
+      skills:
+        - openai/skills@jupyter-notebook
+        - posit-dev/skills@quarto-authoring
+        - posit-dev/skills@r-tidyverse-style
+    # Authoring: LaTeX, Typst, academic writing.
+    docs:
+      subagents: [technical-writer]
+      skills:
+        - bahayonghang/academic-writing-skills@latex-paper-en
+        - lucifer1004/claude-skill-typst@typst
+    # Shell scripting (bash, fish): defensive patterns, shellcheck, bats.
+    shell:
+      subagents: [cli-developer]
+      skills:
+        - wshobson/agents@bash-defensive-patterns
+        - wshobson/agents@shellcheck-configuration
+        - wshobson/agents@bats-testing-patterns

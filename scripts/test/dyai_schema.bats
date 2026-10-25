@@ -160,23 +160,28 @@ function _render_config {
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
 }
 
-@test "every original skill is in global or exactly one preset, none dropped or duplicated" {
+@test "global stays lean and never overlaps a preset; presets never duplicate a skill" {
   _require_chezmoi
   _require_yq
   local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
   local out="${BATS_TEST_TMPDIR}/gentoo-pc.union.yaml"
   _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
   _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
-  # global skills + every preset's skills, together, are the original 42 unique.
-  local gjson pjson total uniq overlap
+  local gjson pjson pcount puniq overlap unioncount
   gjson="$(yq -o=json -I=0 '.global.skills' "${out}")"
   pjson="$(yq -o=json -I=0 '[.registry.languages[].skills // [], .registry.infra[].skills // [], .registry.presets[].skills // []] | flatten' "${out}")"
-  total="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '($g + $p) | length')"
-  uniq="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '($g + $p) | unique | length')"
+  # The baseline stays the 10 cross-cutting skills.
+  [[ "$(jq -n --argjson g "${gjson}" '$g | length')" == "10" ]]
+  # A skill is either global or in a preset, never both.
   overlap="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '[$g[] | select([.] | inside($p))] | length')"
-  [[ "${total}" == "42" ]]
-  [[ "${uniq}" == "42" ]]
   [[ "${overlap}" == "0" ]]
+  # No skill appears in two presets.
+  pcount="$(jq -n --argjson p "${pjson}" '$p | length')"
+  puniq="$(jq -n --argjson p "${pjson}" '$p | unique | length')"
+  [[ "${pcount}" == "${puniq}" ]]
+  # Nothing from the Phase-4 redistribution was dropped (baseline of 42, now grown).
+  unioncount="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '($g + $p) | unique | length')"
+  [[ "${unioncount}" -ge 42 ]]
 }
 
 @test "every registry subagent name exists in the pinned subagent repo" {
@@ -224,6 +229,10 @@ function _render_config {
   [[ "$(yq '.global.mcp.fetch.command' "${out}")" == "uvx" ]]
   [[ "$(yq '.global.mcp."sequential-thinking".command' "${out}")" == "bunx" ]]
   [[ "$(yq '.global.mcp.github.command' "${out}")" == "docker" ]]
+  # SQL database servers; connection inherited from runtime env, no secret here.
+  [[ "$(yq '.global.mcp.postgres.command' "${out}")" == "uvx" ]]
+  [[ "$(yq '.global.mcp.mysql.command' "${out}")" == "bunx" ]]
+  [[ "$(yq '.global.mcp.postgres.env | length' "${out}")" == "0" ]]
   # github carries only the env var NAME, never a value.
   yq '.global.mcp.github.args[]' "${out}" | grep -qx 'GITHUB_PERSONAL_ACCESS_TOKEN'
   # filesystem default scope is personal + community.
@@ -263,4 +272,13 @@ function _render_config {
   [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "2" ]]
   [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "2" ]]
   [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "9" ]]
+  # Registry-expansion presets (nvim-supported languages/tools)
+  [[ "$(yq '.registry.languages.vue.subagents[0]' "${out}")" == "vue-expert" ]]
+  [[ "$(yq '.registry.languages.swift.subagents[0]' "${out}")" == "swift-expert" ]]
+  [[ "$(yq '.registry.languages.java.subagents | length' "${out}")" == "2" ]]
+  [[ "$(yq '.registry.infra.ansible.subagents[0]' "${out}")" == "devops-engineer" ]]
+  [[ "$(yq '.registry.infra.terragrunt.subagents[0]' "${out}")" == "terragrunt-expert" ]]
+  [[ "$(yq '.registry.presets.datascience.subagents[0]' "${out}")" == "data-scientist" ]]
+  [[ "$(yq '.registry.presets.docs.subagents[0]' "${out}")" == "technical-writer" ]]
+  [[ "$(yq '.registry.presets.shell.skills | length' "${out}")" == "3" ]]
 }
