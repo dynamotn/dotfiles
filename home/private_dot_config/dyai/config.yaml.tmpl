@@ -73,6 +73,8 @@ global:
     # uv (exclude-newer) and bun (minimum-release-age) refuse any release
     # younger than 7 days, so a pin must be at least that old or the server
     # never starts; the "MCP pins clear the cooldown" bats test checks it.
+    # readonly marks a server with no side effects or call-to-call state, whose
+    # tools Codex may then call in parallel.
     sequential-thinking:
       command: bunx
       args: ["@modelcontextprotocol/server-sequential-thinking@1.0.0"]
@@ -81,10 +83,12 @@ global:
       command: uvx
       args: ["mcp-server-fetch@2026.10.10"]
       env: {}
+      readonly: true
     time:
       command: uvx
       args: ["mcp-server-time@2026.10.10"]
       env: {}
+      readonly: true
     git:
       command: uvx
       args: ["mcp-server-git@2026.10.10"]
@@ -97,6 +101,7 @@ global:
       command: bunx
       args: ["@upstash/context7-mcp@4.4.2"]
       env: {}
+      readonly: true
     filesystem:
       command: bunx
       args:

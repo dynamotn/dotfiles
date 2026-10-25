@@ -50,15 +50,18 @@ Installed for every agent, every project:
   documentation, prompt engineering, …). Anything tied to a language, tool or
   domain lives in a preset instead.
 - `subagents` — a pinned repo (VoltAgent) and the category directories (or
-  single `.md` files) whose agents install into every agent's agents
-  directory. `exclude` drops named leaves from the baseline; a preset can
-  still pull one per project.
+  single `.md` files) whose agents install into Claude's `~/.claude/agents`
+  and, converted to TOML, Codex's `~/.codex/agents` (an agent granted no
+  writing tool runs there in a `read-only` sandbox). `exclude` drops named
+  leaves from the baseline; a preset can still pull one per project.
 - `commands` — pinned repos of command `.md` files, same shape as
   `subagents`. Nothing installs them globally; presets name them.
 - `mcp` — MCP servers, each written into every MCP-capable agent in that
   agent's own format. An `env` map holds variable **names** only, never a
   secret value. Claude skips a server that an enabled Claude plugin of the
   same name already bundles (see [How it installs](#how-it-installs)).
+  `readonly: true` marks a server with no side effects or state between
+  calls; Codex then gets `supports_parallel_tool_calls = true` for it.
 - `hooks` — abstract events (`stop`, `input`) translated into each
   hook-capable agent's format.
 - `installers` — a shell command per agent id, run once by `dyai install`
@@ -164,7 +167,10 @@ each installed agent in line, skipping any agent whose launcher is absent:
   `context.fileName` `["AGENTS.md", "GEMINI.md"]`, checkpointing (`/restore`),
   usage statistics and telemetry off, and `security.disableYoloMode`. These
   are fixed, not read from the config.
-- **Codex / Hermes** — MCP merged into their TOML / YAML config.
+- **Codex / Hermes** — MCP merged into their TOML / YAML config. Codex also
+  gets hooks, the baseline subagents as `~/.codex/agents/*.toml`, and the
+  shell-scripts rules as the `shell-scripts` skill rather than inline in its
+  `AGENTS.md`.
 
 The `filesystem` MCP server is scoped per config context: personal and
 community trees by default, the enterprise tree inside an enterprise config

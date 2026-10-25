@@ -26,6 +26,11 @@ definitions:
           Environment for the subprocess. Holds key names and non-secret
           values only; never a credential value.
         additionalProperties: { type: string }
+      readonly:
+        type: boolean
+        description: >
+          The server has no side effects and keeps no state between calls, so
+          agents that support it may call its tools in parallel (Codex only).
       url:
         type: string
         description: Endpoint for an HTTP server (mutually exclusive with command).

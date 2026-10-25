@@ -144,6 +144,32 @@ CFG
   grep -qx 'mine' "${HOME}/.claude/agents/electron-pro.md"
 }
 
+@test "dyai::setup_subagents converts each subagent into a Codex agent .toml, idempotent" {
+  _stub codex
+  local src="${BATS_TEST_TMPDIR}/volt3" dir="${BATS_TEST_TMPDIR}/volt3/categories/04"
+  mkdir -p "${dir}"
+  printf -- '---\nname: auditor\ndescription: "Audits: code"\ntools: Read, Grep, Glob\n---\nLine "one"\nline two\n' \
+    > "${dir}/auditor.md"
+  printf -- '---\nname: builder\ndescription: Builds\ntools: Read, Write, Bash\n---\nbuild\n' > "${dir}/builder.md"
+  printf 'no frontmatter\n' > "${dir}/plain.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  printf 'global:\n  subagents:\n    - {repo: o/r, ref: deadbeef, include: [categories/04]}\n' \
+    > "${HOME}/.config/dyai/config.yaml"
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dyai::setup_subagents
+  local a="${HOME}/.codex/agents/auditor.toml" b="${HOME}/.codex/agents/builder.toml"
+  yq -p=toml -e '.name == "auditor" and .description == "Audits: code"' "${a}" > /dev/null
+  yq -p=toml -e '.developer_instructions == "Line \"one\"\nline two"' "${a}" > /dev/null
+  # No tool that writes, so the agent runs in a read-only sandbox.
+  yq -p=toml -e '.sandbox_mode == "read-only"' "${a}" > /dev/null
+  yq -p=toml -e 'has("sandbox_mode") | not' "${b}" > /dev/null
+  [[ ! -e "${HOME}/.codex/agents/plain.toml" ]]
+  cp "${a}" "${a}.before"
+  dyai::setup_subagents
+  cmp -s "${a}" "${a}.before"
+}
+
 @test "dyai::setup_installers runs a per-agent installer once, only for present agents" {
   _stub opencode
   # codex is intentionally NOT stubbed (its launcher is absent). Drop every

@@ -348,10 +348,11 @@ function dyai::mcp_merge_yq {
 # @description Register an MCP server into every non-Claude agent that is installed
 # @arg $1 string Server name
 # @arg $2 string Base definition as JSON: {command, args, env}
+# @arg $3 string true when the server is read-only and safe to call in parallel
 #######################################
 function dyai::setup_mcp_agents {
-  local name base
-  dybatpho::expect_args name base -- "$@"
+  local name base readonly_server
+  dybatpho::expect_args name base readonly_server -- "$@"
   # Each writer ends in an if/else that warns, so it returns 0 even on failure
   # and a bad write for one agent never aborts the others.
   local file centry chome oentry
@@ -379,7 +380,11 @@ function dyai::setup_mcp_agents {
   if dybatpho::is command codex; then
     chome="${CODEX_HOME:-$(dybatpho::path_join "${HOME}" ".codex")}"
     file="$(dybatpho::path_join "${chome}" "config.toml")"
-    dyai::mcp_merge_yq "${file}" toml "${name}" "${base}"
+    centry="${base}"
+    if [[ "${readonly_server}" == "true" ]]; then
+      centry="$(jq -c '. + {supports_parallel_tool_calls: true}' <<< "${base}")"
+    fi
+    dyai::mcp_merge_yq "${file}" toml "${name}" "${centry}"
   fi
   if dybatpho::is command hermes; then
     file="$(dybatpho::path_join "${HOME}" ".hermes" "config.yaml")"
@@ -392,7 +397,7 @@ function dyai::setup_mcp_agents {
 # @noargs
 #######################################
 function dyai::setup_mcp {
-  local servers name command base
+  local servers name command base readonly_server
   servers="$(dyai::config_json '.global.mcp // {}')"
   # A scalar or otherwise malformed section yields no keys and is skipped.
   # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
@@ -427,7 +432,8 @@ function dyai::setup_mcp {
         dyai::setup_mcp_server "${name}" "${definition}"
       fi
     fi
-    dyai::setup_mcp_agents "${name}" "${base}"
+    readonly_server="$(jq -r --arg n "${name}" '.[$n].readonly // false' <<< "${servers}")"
+    dyai::setup_mcp_agents "${name}" "${base}" "${readonly_server}"
   done < <(jq -r 'if type == "object" then keys[] else empty end' <<< "${servers}")
 }
 
@@ -848,15 +854,63 @@ function dyai::fetch_repo {
 }
 
 #######################################
-# @description Install the subagents in global.subagents into Claude's agents dir
+# @description Convert a Claude-format subagent .md into a Codex agent .toml, rewriting it only on change
+# @arg $1 string Path to the subagent .md
+# @arg $2 string Path of the .toml to write
+#######################################
+function dyai::subagent_codex {
+  local md dest
+  dybatpho::expect_args md dest -- "$@"
+  local first leaf name description tools body readonly_agent=0
+  IFS= read -r first < "${md}" || first=""
+  leaf="$(basename "${md}" .md)"
+  if [[ "${first}" != "---" ]]; then
+    dybatpho::warn "subagent ${leaf} has no frontmatter, skip for Codex"
+    return 0
+  fi
+  name="$(yq --front-matter=extract '.name // ""' "${md}" 2> /dev/null || true)"
+  description="$(yq --front-matter=extract '.description // ""' "${md}" 2> /dev/null || true)"
+  tools="$(yq --front-matter=extract '.tools // ""' "${md}" 2> /dev/null || true)"
+  # Everything after the closing --- of the frontmatter.
+  body="$(sed '1,/^---$/d' "${md}")"
+  # Codex has no tool list; an agent granted no tool that writes runs read-only.
+  if [[ -n "${tools}" && ! "${tools}" =~ (Write|Edit|Bash|NotebookEdit) ]]; then
+    readonly_agent=1
+  fi
+  local tmp="${dest}.dyai-tmp"
+  if ! N="${name:-${leaf}}" D="${description:-${leaf}}" B="${body}" R="${readonly_agent}" \
+    yq -n -o=toml '.name = strenv(N) | .description = strenv(D)
+      | .developer_instructions = strenv(B)
+      | (select(strenv(R) == "1") | .sandbox_mode) = "read-only"' > "${tmp}"; then
+    rm -f -- "${tmp}"
+    dybatpho::warn "Could not convert subagent ${leaf} for Codex"
+    return 0
+  fi
+  if dybatpho::is file "${dest}" && cmp -s "${tmp}" "${dest}"; then
+    rm -f -- "${tmp}"
+    return 0
+  fi
+  mv -- "${tmp}" "${dest}"
+  dybatpho::info "Installed Codex subagent ${leaf}"
+}
+
+#######################################
+# @description Install the subagents in global.subagents into Claude's agents dir, and converted into Codex's
 # @noargs
 #######################################
 function dyai::setup_subagents {
-  # The VoltAgent subagents are Claude-format; other agents' formats differ.
-  dybatpho::is command claude || return 0
-  local sources agents_dir
+  # The VoltAgent subagents are Claude-format; Codex gets a TOML conversion.
+  local agents_dir="" codex_dir="" chome
+  if dybatpho::is command claude; then
+    agents_dir="$(dybatpho::path_join "${HOME}" ".claude" "agents")"
+  fi
+  if dybatpho::is command codex; then
+    chome="${CODEX_HOME:-$(dybatpho::path_join "${HOME}" ".codex")}"
+    codex_dir="$(dybatpho::path_join "${chome}" "agents")"
+  fi
+  [[ -n "${agents_dir}${codex_dir}" ]] || return 0
+  local sources
   sources="$(dyai::config_json '.global.subagents // []')"
-  agents_dir="$(dybatpho::path_join "${HOME}" ".claude" "agents")"
   local count i repo ref src incl excl md name dest leaf
   local -a mds
   count="$(jq 'length' <<< "${sources}")"
@@ -868,7 +922,8 @@ function dyai::setup_subagents {
     # Leaf names kept out of the global install (they can still be pulled per
     # project by a preset, which resolves subagents across the whole tree).
     excl="$(jq -c --argjson i "${i}" '.[$i].exclude // []' <<< "${sources}")"
-    dybatpho::ensure_dir "${agents_dir}" > /dev/null
+    [[ -z "${agents_dir}" ]] || dybatpho::ensure_dir "${agents_dir}" > /dev/null
+    [[ -z "${codex_dir}" ]] || dybatpho::ensure_dir "${codex_dir}" > /dev/null
     # shellcheck disable=SC2312 # the include list comes from the config we just read
     while IFS= read -r incl; do
       [[ -n "${incl}" ]] || continue
@@ -886,12 +941,15 @@ function dyai::setup_subagents {
         name="$(basename "${md}")"
         [[ "${name}" == "README.md" ]] && continue
         leaf="${name%.md}"
+        # Empty without Claude, so nothing below can touch a path under /.
+        dest=""
+        [[ -z "${agents_dir}" ]] || dest="$(dybatpho::path_join "${agents_dir}" "${name}")"
+        # shortcut: an excluded agent's Codex .toml is left in place, prune it once Codex users hit it
         # shellcheck disable=SC2312 # jq membership test; a bad read is false
-        dest="$(dybatpho::path_join "${agents_dir}" "${name}")"
         if jq -e --arg n "${leaf}" 'index($n) != null' <<< "${excl}" > /dev/null; then
           # An earlier baseline may have installed it. Remove it only while
           # it is still the pinned copy; one you edited is yours to keep.
-          if dybatpho::is file "${dest}" && cmp -s "${md}" "${dest}"; then
+          if [[ -n "${dest}" ]] && dybatpho::is file "${dest}" && cmp -s "${md}" "${dest}"; then
             rm -f -- "${dest}"
             dybatpho::info "Removed subagent ${leaf}, now excluded from the baseline"
           else
@@ -899,6 +957,10 @@ function dyai::setup_subagents {
           fi
           continue
         fi
+        if [[ -n "${codex_dir}" ]]; then
+          dyai::subagent_codex "${md}" "$(dybatpho::path_join "${codex_dir}" "${leaf}.toml")"
+        fi
+        [[ -n "${dest}" ]] || continue
         if ! dybatpho::is file "${dest}" || ! cmp -s "${md}" "${dest}"; then
           if cp -- "${md}" "${dest}"; then
             dybatpho::info "Installed subagent ${leaf}"
