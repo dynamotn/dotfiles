@@ -138,6 +138,83 @@ function dyai::claude_in {
 }
 
 #######################################
+# @description Print the MCP server definition one Claude configuration should hold
+# @arg $1 string Configuration directory
+# @arg $2 string Name of the server
+# @arg $3 string Server definition as JSON
+# @stdout The definition, scoped to that configuration
+#######################################
+function dyai::claude_mcp_definition {
+  local dir name definition
+  dybatpho::expect_args dir name definition -- "$@"
+  # filesystem is scoped to the enterprise tree in an enterprise config dir,
+  # so an enterprise-context agent never sees personal or community files.
+  if [[ "${name}" == "filesystem" && "${dir}" == "${ENTERPRISE_DIR}"/* ]]; then
+    jq -c --arg d "${ENTERPRISE_DIR}" '.args = [.args[0], $d]' <<< "${definition}"
+  else
+    printf '%s\n' "${definition}"
+  fi
+}
+
+#######################################
+# @description Print the user-scope registration of an MCP server in one Claude configuration
+# @arg $1 string Configuration directory
+# @arg $2 string Name of the server
+# @stdout The registered definition as sorted compact JSON, or nothing when absent
+#######################################
+function dyai::claude_mcp_current {
+  local dir name
+  dybatpho::expect_args dir name -- "$@"
+  local state_file
+  # The default configuration keeps its state next to the directory, not in it.
+  if [[ "${dir}" == "${DEFAULT_CONFIG_DIR}" ]]; then
+    state_file="$(dybatpho::path_join "${HOME}" ".claude.json")"
+  else
+    state_file="$(dybatpho::path_join "${dir}" ".claude.json")"
+  fi
+  dybatpho::is file "${state_file}" || return 0
+  # A corrupt state file reads as absent, not an abort.
+  jq -cS --arg name "${name}" '.mcpServers[$name] // empty' "${state_file}" 2> /dev/null || true
+}
+
+#######################################
+# @description Tell whether an enabled Claude plugin of the same name already bundles an MCP server
+# @arg $1 string Name of the server
+# @exitcode 0 A `<name>@<marketplace>` entry is in agents.claude.plugins
+# @exitcode 1 No such plugin
+#######################################
+function dyai::claude_plugin_bundles {
+  local name
+  dybatpho::expect_args name -- "$@"
+  # shellcheck disable=SC2312 # a bad config read lists no plugin, so the server is registered
+  dyai::config_json '.agents.claude.plugins // []' \
+    | jq -e --arg n "${name}" 'map(split("@")[0]) | index($n) != null' > /dev/null
+}
+
+#######################################
+# @description Remove an MCP server from every Claude configuration where dyai registered it
+# @arg $1 string Name of the server
+# @arg $2 string The definition dyai would register, as JSON
+#######################################
+function dyai::drop_mcp_server {
+  local name definition
+  dybatpho::expect_args name definition -- "$@"
+  local dir current wanted
+  # shellcheck disable=SC2312 # the directories are globbed, the loop cannot fail on them
+  while IFS= read -r dir; do
+    # Only a registration that is exactly dyai's own is removed; a server the
+    # user registered or customized under that name is theirs to keep.
+    wanted="$(dyai::claude_mcp_definition "${dir}" "${name}" "${definition}" | jq -cS .)"
+    current="$(dyai::claude_mcp_current "${dir}" "${name}")"
+    [[ -n "${current}" && "${current}" == "${wanted}" ]] || continue
+    dybatpho::info "Remove MCP server ${name} from ${dir}, its Claude plugin provides it"
+    # dyshellint disable=SC2310 a failure only warns, the other configurations still run
+    dyai::claude_in "${dir}" mcp remove --scope user "${name}" > /dev/null \
+      || dybatpho::warn "Could not remove the duplicate MCP server ${name} from ${dir}"
+  done < <(dyai::claude_config_dirs)
+}
+
+#######################################
 # @description Register an MCP server in every Claude configuration where it is missing or differs
 # @arg $1 string Name of the server
 # @arg $2 string Server definition as JSON, as `claude mcp add-json` takes it
@@ -145,27 +222,12 @@ function dyai::claude_in {
 function dyai::setup_mcp_server {
   local name definition
   dybatpho::expect_args name definition -- "$@"
-  local dir state_file current wanted def_dir
+  local dir current wanted def_dir
   # shellcheck disable=SC2312 # the directories are globbed, the loop cannot fail on them
   while IFS= read -r dir; do
-    # filesystem is scoped to the enterprise tree in an enterprise config dir,
-    # so an enterprise-context agent never sees personal or community files.
-    def_dir="${definition}"
-    if [[ "${name}" == "filesystem" && "${dir}" == "${ENTERPRISE_DIR}"/* ]]; then
-      def_dir="$(jq -c --arg d "${ENTERPRISE_DIR}" '.args = [.args[0], $d]' <<< "${definition}")"
-    fi
+    def_dir="$(dyai::claude_mcp_definition "${dir}" "${name}" "${definition}")"
     wanted="$(jq -cS . <<< "${def_dir}")"
-    # The default configuration keeps its state next to the directory, not in it.
-    if [[ "${dir}" == "${DEFAULT_CONFIG_DIR}" ]]; then
-      state_file="$(dybatpho::path_join "${HOME}" ".claude.json")"
-    else
-      state_file="$(dybatpho::path_join "${dir}" ".claude.json")"
-    fi
-    current=""
-    if dybatpho::is file "${state_file}"; then
-      # shellcheck disable=SC2312 # a corrupt state file falls back to empty, not an abort
-      current="$(jq -cS --arg name "${name}" '.mcpServers[$name] // empty' "${state_file}" 2> /dev/null || printf '')"
-    fi
+    current="$(dyai::claude_mcp_current "${dir}" "${name}")"
     if [[ "${current}" == "${wanted}" ]]; then
       dybatpho::debug "MCP server ${name} already registered in ${dir}"
       continue
@@ -322,8 +384,15 @@ function dyai::setup_mcp {
     if dybatpho::is command claude; then
       local definition
       definition="$(jq -c '{type: "stdio"} + .' <<< "${base}")"
-      # shellcheck disable=SC2310 # a failure only warns, the other agents still run
-      dyai::setup_mcp_server "${name}" "${definition}"
+      # A Claude plugin of the same name already bundles this server; a
+      # second registration would load every tool definition twice.
+      if dyai::claude_plugin_bundles "${name}"; then
+        dybatpho::debug "MCP server ${name} comes with its Claude plugin, skip for Claude"
+        dyai::drop_mcp_server "${name}" "${definition}"
+      else
+        # shellcheck disable=SC2310 # a failure only warns, the other agents still run
+        dyai::setup_mcp_server "${name}" "${definition}"
+      fi
     fi
     dyai::setup_mcp_agents "${name}" "${base}"
   done < <(jq -r 'if type == "object" then keys[] else empty end' <<< "${servers}")
