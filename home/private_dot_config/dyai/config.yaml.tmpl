@@ -33,6 +33,15 @@ global:
         - categories/04-quality-security
         - categories/09-meta-orchestration
         - categories/10-research-analysis
+      # Domain-specific agents kept out of the always-installed baseline; each
+      # is pulled per project by the matching preset below (desktop, mobile,
+      # graphql, realtime), which resolves it from the same pinned repo.
+      exclude:
+        - electron-pro
+        - mobile-developer
+        - graphql-architect
+        - websocket-engineer
+        - webhook-engineer
   commands: []
   # MCP servers registered into every MCP-capable agent, in its own format.
   mcp:
@@ -84,18 +93,6 @@ global:
     github:
       command: docker
       args: ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"]
-      env: {}
-    # SQL databases. Each reads its connection from the agent's runtime
-    # environment (postgres: DATABASE_URI; mysql: MYSQL_HOST/USER/PASS/DB), so
-    # no credential is stored here — the server just inherits it, like github.
-    # SQLite is deliberately absent: it needs a per-project --db-path, not env.
-    postgres:
-      command: uvx
-      args: ["postgres-mcp@0.3.0"]
-      env: {}
-    mysql:
-      command: bunx
-      args: ["@benborla29/mcp-server-mysql@2.0.9"]
       env: {}
   # Abstract event automation, translated to each hook-capable agent's format.
   hooks:
@@ -224,6 +221,18 @@ registry:
       skills:
         - supabase/agent-skills@supabase-postgres-best-practices
         - wshobson/agents@sql-optimization-patterns
+      # Registered per project in Claude's local scope; connection inherited
+      # from the runtime env (postgres: DATABASE_URI; mysql: MYSQL_*), so no
+      # credential is stored. SQLite is omitted — it needs a per-project path.
+      mcp:
+        postgres:
+          command: uvx
+          args: ["postgres-mcp@0.3.0"]
+          env: {}
+        mysql:
+          command: bunx
+          args: ["@benborla29/mcp-server-mysql@2.0.9"]
+          env: {}
     terragrunt:
       subagents: [terragrunt-expert]
       skills:
@@ -273,3 +282,13 @@ registry:
         - wshobson/agents@bash-defensive-patterns
         - wshobson/agents@shellcheck-configuration
         - wshobson/agents@bats-testing-patterns
+    # Domain subagents split out of the global baseline (see global.subagents
+    # exclude); opt in per project when the work needs them.
+    desktop:
+      subagents: [electron-pro]
+    mobile:
+      subagents: [mobile-developer]
+    graphql:
+      subagents: [graphql-architect]
+    realtime:
+      subagents: [websocket-engineer, webhook-engineer]
