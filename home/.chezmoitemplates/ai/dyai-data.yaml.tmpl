@@ -74,10 +74,65 @@ plugins:
   - duckdb-skills@claude-plugins-official
   - ralph-loop@claude-plugins-official
 policy:
+  # Harness-enforced versions of the credentials and destructive-commands rules
+  # in ai/: a rule here holds even when the prose is lost from context. The rtk
+  # PreToolUse hook rewrites some git commands to `rtk git ...` before they are
+  # matched, so every git rule is listed in both spellings.
   permissions:
     ask:
       - "Bash(git push)"
       - "Bash(git push:*)"
+      - "Bash(rtk git push)"
+      - "Bash(rtk git push *)"
+      - "Bash(git reset --hard*)"
+      - "Bash(rtk git reset --hard*)"
+      - "Bash(git clean *)"
+      - "Bash(rtk git clean *)"
+      - "Bash(git branch -D *)"
+      - "Bash(rtk git branch -D *)"
+      - "Bash(git tag -d *)"
+      - "Bash(rtk git tag -d *)"
+      - "Bash(git stash drop*)"
+      - "Bash(rtk git stash drop*)"
+      - "Bash(git stash clear*)"
+      - "Bash(rtk git stash clear*)"
+      - "Bash(rm -rf *)"
+      - "Bash(rm -fr *)"
+      - "Bash(shred *)"
+      - "Bash(sudo *)"
+      - "Bash(emerge *)"
+      - "Bash(pacman *)"
+      - "Bash(paru *)"
+      - "Bash(chezmoi apply*)"
+      - "Bash(chezmoi destroy*)"
+      - "Bash(chezmoi forget*)"
+    deny:
+      - "Read(**/secrets/data/**)"
+      - "Edit(**/secrets/data/**)"
+      - "Read(**/*.age)"
+      - "Edit(**/*.age)"
+      - "Read(**/.env)"
+      - "Read(**/.env.*)"
+      - "Read(**/.envrc)"
+      - "Read(~/.ssh/**)"
+      - "Read(~/.gnupg/**)"
+      - "Read(~/.aws/**)"
+      - "Read(~/.kube/**)"
+      - "Read(~/.docker/config.json)"
+      - "Read(~/.netrc)"
+      - "Read(~/.password-store/**)"
+      - "Read(~/.local/share/keyrings/**)"
+      - "Bash(chezmoi-dycrypt*)"
+      - "Bash(age -d *)"
+      - "Bash(age --decrypt *)"
+      - "Bash(sops -d *)"
+      - "Bash(sops --decrypt *)"
+      - "Bash(gpg -d *)"
+      - "Bash(gpg --decrypt *)"
+      - "Bash(pass show *)"
+      - "Bash(vault read *)"
+      - "Bash(op read *)"
+      - "Bash(aws configure get *)"
     defaultMode: acceptEdits
   theme: auto
   effortLevel: medium
