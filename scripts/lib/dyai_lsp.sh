@@ -7,6 +7,21 @@
 # mode. See docs/superpowers/specs/2026-10-25-dyai-lsp-design.md §1.
 # shellcheck shell=bash
 
+# Neovim server name -> serena ls_specific_settings language key, for the
+# rows the Task 0 spike confirmed `ls_base_cmd` is honored by (Ruling 5).
+# gopls/lua_ls (Ruling 6) and terraformls/dartls (Ruling 7) are handled
+# elsewhere / not at all; they are deliberately absent from this map.
+declare -gA DYAI_LSP_SERENA_LANG=(
+  [pyright]=python
+  [rust_analyzer]=rust
+  [clangd]=cpp
+  [bashls]=bash
+  [yamlls]=yaml
+  [taplo]=toml
+  [marksman]=markdown
+  [intelephense]=php
+)
+
 #######################################
 # @description Read global.lsp.exclude from the dyai config as a comma-separated list
 # @noargs
@@ -564,4 +579,244 @@ function dyai_lsp::setup_claude {
     fi
   fi
   dyai_lsp::owned_set claude_version "${version_json}"
+}
+
+#######################################
+# @description Print the serena MCP server definition for one context
+# @arg $1 string serena context (codex, ide, antigravity, ...)
+# @env CONFIG_FILE string Read for global.lsp.serena.ref
+# @stdout JSON `{command, args, env}`
+#######################################
+function dyai_lsp::serena_entry {
+  local context ref
+  dybatpho::expect_args context -- "$@"
+  # shellcheck disable=SC2312 # a bad config read yields "", caught by the caller
+  ref="$(dyai::config_json '.global.lsp.serena.ref // ""' | jq -r .)"
+  jq -n --arg ref "${ref}" --arg context "${context}" '
+    {
+      command: "uvx",
+      args: ["-p", "3.13", "--from", ("git+https://github.com/oraios/serena@" + $ref),
+             "serena", "start-mcp-server", "--project-from-cwd",
+             "--context", $context, "--open-web-dashboard", "false"],
+      env: {SERENA_USAGE_REPORTING: "false"}
+    }
+  '
+}
+
+#######################################
+# @description Build {basename, argv} for every PATH-only serena language
+#   (gopls, lua_ls — Ruling 6) that is present in the manifest
+# @noargs
+# @env XDG_CACHE_HOME string Base of the manifest file
+# @stdout JSON array of `{basename, argv}`
+#######################################
+function __dyai_lsp_serena_shim_targets {
+  local manifest name server_json cmd base argv out
+  # shellcheck disable=SC2312 # xdg_cache_dir only builds a path string, it cannot fail here
+  manifest="$(dybatpho::path_join "$(dybatpho::xdg_cache_dir dyai)" "lsp.json")"
+  out="[]"
+  if dybatpho::is file "${manifest}"; then
+    for name in gopls lua_ls; do
+      # shellcheck disable=SC2312 # no match yields empty, the guard below skips it
+      server_json="$(jq -c --arg n "${name}" '.servers[] | select(.name == $n)' "${manifest}" 2> /dev/null)"
+      [[ -n "${server_json}" ]] || continue
+      cmd="$(jq -r '.command' <<< "${server_json}")"
+      base="${cmd##*/}"
+      argv="$(dyai_lsp::launch_argv "${server_json}")"
+      out="$(jq -c --arg b "${base}" --argjson a "${argv}" '. + [{basename: $b, argv: $a}]' <<< "${out}")"
+    done
+  fi
+  printf '%s\n' "${out}"
+}
+
+#######################################
+# @description Regenerate the serena PATH shims for gopls/lua_ls, removing any
+#   shim no longer wanted (the shim dir is entirely dyai-owned)
+# @arg $1 string Shim directory
+# @stdout The number of shims now present (0, 1 or 2)
+#######################################
+function __dyai_lsp_write_serena_shims {
+  local shim_dir targets wanted shim_file base n i quoted tmp dest
+  dybatpho::expect_args shim_dir -- "$@"
+  dybatpho::ensure_dir "${shim_dir}" > /dev/null
+  targets="$(__dyai_lsp_serena_shim_targets)"
+  wanted="$(jq -c '[.[].basename]' <<< "${targets}")"
+  for shim_file in "${shim_dir}"/*; do
+    [[ -e "${shim_file}" ]] || continue
+    base="$(basename "${shim_file}")"
+    # shellcheck disable=SC2312 # a bad wanted list yields false, which just removes the file
+    if ! jq -e --arg b "${base}" 'index($b) != null' <<< "${wanted}" > /dev/null; then
+      rm -f "${shim_file}"
+    fi
+  done
+  n="$(jq 'length' <<< "${targets}")"
+  for ((i = 0; i < n; i++)); do
+    base="$(jq -r ".[${i}].basename" <<< "${targets}")"
+    quoted="$(jq -r ".[${i}].argv | map(@sh) | join(\" \")" <<< "${targets}")"
+    dybatpho::create_temp tmp "sh" "dyai-lsp-shim" "${shim_dir}"
+    printf '#!/usr/bin/env bash\nexec %s "$@"\n' "${quoted}" > "${tmp}"
+    chmod +x "${tmp}"
+    dest="$(dybatpho::path_join "${shim_dir}" "${base}")"
+    mv "${tmp}" "${dest}"
+  done
+  printf '%s\n' "${n}"
+}
+
+#######################################
+# @description Print the path serena reads for ls_specific_settings/projects
+# @noargs
+# @stdout Path to ${SERENA_HOME:-~/.serena}/serena_config.yml
+#######################################
+function __dyai_lsp_serena_config_file {
+  local serena_home
+  # shellcheck disable=SC2312 # path_join only builds a path string, it cannot fail here
+  serena_home="${SERENA_HOME:-$(dybatpho::path_join "${HOME}" ".serena")}"
+  dybatpho::path_join "${serena_home}" "serena_config.yml"
+}
+
+#######################################
+# @description Merge the manifest's `ls_base_cmd` overrides into
+#   `${SERENA_HOME:-~/.serena}/serena_config.yml`'s `ls_specific_settings`,
+#   pruning stale dyai-owned languages first, idempotently, and ensuring a
+#   top-level `projects` key exists. A language that already exists there and
+#   is not in the caller's owned-state list is left untouched (a user's own
+#   hand-written entry), with one warning.
+# @noargs
+# @env XDG_CACHE_HOME string Base of the manifest and owned-state files
+#######################################
+function dyai_lsp::setup_serena_config {
+  local manifest name server_json argv lang entries
+  # shellcheck disable=SC2312 # xdg_cache_dir only builds a path string, it cannot fail here
+  manifest="$(dybatpho::path_join "$(dybatpho::xdg_cache_dir dyai)" "lsp.json")"
+  entries="{}"
+  if dybatpho::is file "${manifest}"; then
+    for name in "${!DYAI_LSP_SERENA_LANG[@]}"; do
+      # shellcheck disable=SC2312 # no match yields empty, the guard below skips it
+      server_json="$(jq -c --arg n "${name}" '.servers[] | select(.name == $n)' "${manifest}" 2> /dev/null)"
+      [[ -n "${server_json}" ]] || continue
+      argv="$(dyai_lsp::launch_argv "${server_json}")"
+      lang="${DYAI_LSP_SERENA_LANG[${name}]}"
+      entries="$(jq -c --arg l "${lang}" --argjson a "${argv}" '.[$l] = {ls_base_cmd: $a}' <<< "${entries}")"
+    done
+  fi
+
+  local file dir
+  file="$(__dyai_lsp_serena_config_file)"
+  dir="$(dirname "${file}")"
+  dybatpho::ensure_dir "${dir}" > /dev/null
+  dybatpho::is file "${file}" || : > "${file}"
+
+  local current_json cur_norm owned_before collided filtered_entries applied_names key
+  # shellcheck disable=SC2312 # a malformed file falls back to {}, forcing a rewrite attempt
+  current_json="$(yq -o=json '.ls_specific_settings // {}' "${file}" 2> /dev/null || printf '{}')"
+  cur_norm="$(jq -cS . <<< "${current_json}" 2> /dev/null || printf '{}')"
+  owned_before="$(dyai_lsp::owned_get serena)"
+  collided="$(
+    jq -cn --argjson entries "${entries}" --argjson owned "${owned_before}" --argjson cur "${current_json}" '
+      [ ($entries | keys_unsorted[]) as $k
+        | select(($cur | has($k)) and (($owned // []) | index($k) | not))
+        | $k
+      ]
+    '
+  )"
+  # shellcheck disable=SC2312 # a malformed collided list yields no rows, a safe no-op loop
+  while IFS= read -r key; do
+    [[ -n "${key}" ]] || continue
+    dybatpho::warn \
+      "Leaving serena's hand-written ls_specific_settings.${key} untouched in ${file}: dyai does not own it"
+  done < <(jq -r '.[]' <<< "${collided}")
+  filtered_entries="$(
+    jq -c --argjson collided "${collided}" 'with_entries(select(.key as $k | ($collided | index($k)) | not))' \
+      <<< "${entries}"
+  )"
+  applied_names="$(jq -c 'keys' <<< "${filtered_entries}")"
+
+  local prune new_block new_norm projects_present
+  prune="$(jq -c --argjson keep "${applied_names}" '(. // []) - $keep' <<< "${owned_before}")"
+  new_block="$(
+    jq --argjson entries "${filtered_entries}" --argjson prune "${prune}" '
+      reduce $prune[] as $k (.; del(.[$k]))
+      | reduce ($entries | keys_unsorted[]) as $k (.; .[$k] = $entries[$k])
+    ' <<< "${current_json}"
+  )"
+  new_norm="$(jq -cS . <<< "${new_block}")"
+  # shellcheck disable=SC2312 # a malformed/empty file reads as absent, which forces the write below
+  projects_present="$(yq -o=json '(.projects != null)' "${file}" 2> /dev/null || printf 'false')"
+  if [[ "${cur_norm}" == "${new_norm}" && "${projects_present}" == "true" ]]; then
+    dybatpho::debug "serena ls_specific_settings already up to date in ${file}"
+    dyai_lsp::owned_set serena "${applied_names}"
+    return 0
+  fi
+  local yq_expr
+  yq_expr='.ls_specific_settings = (strenv(E) | fromjson) | .projects = (.projects // [])'
+  if E="${new_block}" yq -i "${yq_expr}" "${file}"; then
+    dybatpho::info "Updated serena ls_specific_settings in ${file}"
+  else
+    dybatpho::warn "Could not update serena ls_specific_settings in ${file}"
+  fi
+  dyai_lsp::owned_set serena "${applied_names}"
+}
+
+#######################################
+# @description Bridge Neovim's language servers to Codex, Gemini and agy
+#   through serena: registers the serena MCP server (Codex gets an extra
+#   startup_timeout_sec, the first `uvx` fetch is slow), writes PATH shims for
+#   gopls/lua_ls, and merges the launcher-wrapped `ls_base_cmd` overrides into
+#   serena_config.yml. Skips with a warning when `uvx` is missing.
+# @noargs
+# @env CONFIG_FILE string Read for global.lsp.serena.{ref,contexts}
+# @env XDG_CACHE_HOME string Base of the manifest and owned-state files
+# @env XDG_DATA_HOME string Base of the serena-shims directory
+# @exitcode 1 uvx is missing, or global.lsp.serena.ref is unset
+#######################################
+function dyai_lsp::setup_serena {
+  if ! dybatpho::is command uvx; then
+    dybatpho::warn "uvx is not installed, skip serena"
+    return 1
+  fi
+  local ref
+  # shellcheck disable=SC2312 # a bad config read yields "", caught below
+  ref="$(dyai::config_json '.global.lsp.serena.ref // ""' | jq -r .)"
+  if [[ -z "${ref}" || "${ref}" == "null" ]]; then
+    dybatpho::warn "global.lsp.serena.ref is not set in the dyai config, skip serena"
+    return 1
+  fi
+
+  local shim_dir shim_count
+  # shellcheck disable=SC2312 # xdg_data_dir only builds a path string, it cannot fail here
+  shim_dir="$(dybatpho::path_join "$(dybatpho::xdg_data_dir dyai)" "serena-shims")"
+  shim_count="$(__dyai_lsp_write_serena_shims "${shim_dir}")"
+
+  local contexts_json agent context base
+  contexts_json="$(dyai::config_json '.global.lsp.serena.contexts // {}')"
+  for agent in gemini agy codex; do
+    context="$(jq -r --arg a "${agent}" '.[$a] // ""' <<< "${contexts_json}")"
+    [[ -n "${context}" ]] || continue
+    dybatpho::is command "${agent}" || continue
+    base="$(dyai_lsp::serena_entry "${context}")"
+    if [[ "${shim_count}" -gt 0 ]]; then
+      base="$(jq --arg p "${shim_dir}:${PATH}" '.env.PATH = $p' <<< "${base}")"
+    fi
+    local file
+    case "${agent}" in
+      gemini)
+        file="$(dybatpho::path_join "${HOME}" ".gemini" "settings.json")"
+        dyai::mcp_merge_json "${file}" mcpServers serena "${base}"
+        ;;
+      agy)
+        file="$(dybatpho::path_join "${HOME}" ".gemini" "config" "mcp_config.json")"
+        dyai::mcp_merge_json "${file}" mcpServers serena "${base}"
+        ;;
+      codex)
+        local centry chome
+        centry="$(jq '. + {startup_timeout_sec: 60}' <<< "${base}")"
+        chome="${CODEX_HOME:-$(dybatpho::path_join "${HOME}" ".codex")}"
+        file="$(dybatpho::path_join "${chome}" "config.toml")"
+        dyai::mcp_merge_yq "${file}" toml serena "${centry}"
+        ;;
+      *) ;;
+    esac
+  done
+
+  dyai_lsp::setup_serena_config
 }

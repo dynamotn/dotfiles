@@ -439,3 +439,200 @@ MANIFEST
     [[ "${before}" == "${after}" ]]
   done
 }
+
+# ---------------------------------------------------------------------------
+# Task 5: dyai_lsp::setup_serena (Codex, Gemini, agy bridge)
+# ---------------------------------------------------------------------------
+
+function _write_serena_manifest {
+  dybatpho::ensure_dir "${XDG_CACHE_HOME}/dyai" > /dev/null
+  M="${XDG_CACHE_HOME}/dyai/lsp.json"
+  cat > "${M}" << 'MANIFEST'
+{
+  "version": 1,
+  "untrusted_regexes": [],
+  "servers": [
+    {
+      "name": "pyright",
+      "command": "/opt/pyright-bin",
+      "args": ["--stdio"],
+      "filetypes": ["python"],
+      "extensions": {".py": "python"},
+      "settings": {},
+      "init_options": {}
+    },
+    {
+      "name": "gopls",
+      "command": "/opt/mason/bin/gopls",
+      "args": [],
+      "filetypes": ["go"],
+      "extensions": {".go": "go"},
+      "settings": {},
+      "init_options": {}
+    }
+  ]
+}
+MANIFEST
+}
+
+function _configure_serena {
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  lsp:
+    exclude: [genericls]
+    serena:
+      ref: abc123def
+      contexts:
+        codex: codex
+        gemini: ide
+        agy: antigravity
+CFG
+}
+
+@test "dyai_lsp::setup_serena skips with a warning when uvx is missing" {
+  _configure_serena
+  # the real machine may have uvx installed elsewhere on PATH; restrict to
+  # the sandbox bin dir only, where no stub was written for this test
+  PATH="${HOME}/.local/bin" run dyai_lsp::setup_serena
+  assert_failure
+  assert_output --partial "uvx"
+}
+
+@test "dyai_lsp::setup_serena skips with a warning when global.lsp.serena.ref is unset" {
+  _stub uvx
+  run dyai_lsp::setup_serena
+  assert_failure
+  assert_output --partial "ref"
+}
+
+@test "dyai_lsp::setup_serena registers codex with --context codex and startup_timeout_sec inside mcp_servers.serena" {
+  _write_serena_manifest
+  _stub uvx
+  _stub codex
+  _configure_serena
+  local chome file
+  chome="${HOME}/.codex"
+  dybatpho::ensure_dir "${chome}" > /dev/null
+  file="${chome}/config.toml"
+  cat > "${file}" << 'TOML'
+model = "gpt-5"
+
+[mcp_servers.other]
+command = "other-cmd"
+TOML
+  dyai_lsp::setup_serena
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq -p=toml '.mcp_servers.serena.args[7]' "${file}")" == "--context" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq -p=toml '.mcp_servers.serena.args[8]' "${file}")" == "codex" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq -p=toml '.mcp_servers.serena.startup_timeout_sec' "${file}")" == "60" ]]
+  # a pre-existing table and the other top-level key are untouched
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq -p=toml '.model' "${file}")" == "gpt-5" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq -p=toml '.mcp_servers.other.command' "${file}")" == "other-cmd" ]]
+}
+
+@test "dyai_lsp::setup_serena uses --context ide for gemini and antigravity for agy" {
+  _write_serena_manifest
+  _stub uvx
+  _stub gemini
+  _stub agy
+  _configure_serena
+  dyai_lsp::setup_serena
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.mcpServers.serena.args[8]' "${HOME}/.gemini/settings.json")" == "ide" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.mcpServers.serena.args[8]' "${HOME}/.gemini/config/mcp_config.json")" == "antigravity" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(jq -r '.mcpServers.serena.env.SERENA_USAGE_REPORTING' "${HOME}/.gemini/settings.json")" == "false" ]]
+}
+
+@test "dyai_lsp::setup_serena never writes claude, copilot or opencode configuration" {
+  _write_serena_manifest
+  _stub uvx
+  _stub gemini
+  _configure_serena
+  dyai_lsp::setup_serena
+  [[ ! -e "${HOME}/.claude.json" ]]
+  [[ ! -e "${HOME}/.copilot/lsp-config.json" ]]
+  [[ ! -e "${HOME}/.copilot/mcp-config.json" ]]
+  [[ ! -e "${HOME}/.config/opencode/opencode.json" ]]
+}
+
+@test "dyai_lsp::setup_serena writes a gopls PATH shim and sets PATH on the serena entry" {
+  _write_serena_manifest
+  _stub uvx
+  _stub gemini
+  _configure_serena
+  dyai_lsp::setup_serena
+  local shim
+  shim="${XDG_DATA_HOME}/dyai/serena-shims/gopls"
+  [[ -x "${shim}" ]]
+  grep -q "${HOME}/.local/bin/dyai-lsp-exec" "${shim}"
+  grep -q '/opt/mason/bin/gopls' "${shim}"
+  local path_env
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  path_env="$(jq -r '.mcpServers.serena.env.PATH' "${HOME}/.gemini/settings.json")"
+  [[ "${path_env}" == "${XDG_DATA_HOME}/dyai/serena-shims:"* ]]
+}
+
+@test "dyai_lsp::setup_serena removes the gopls shim once it leaves the manifest" {
+  _write_serena_manifest
+  _stub uvx
+  _stub gemini
+  _configure_serena
+  dyai_lsp::setup_serena
+  local shim
+  shim="${XDG_DATA_HOME}/dyai/serena-shims/gopls"
+  [[ -e "${shim}" ]]
+  jq 'del(.servers[] | select(.name == "gopls"))' "${M}" > "${M}.tmp" && mv "${M}.tmp" "${M}"
+  dyai_lsp::setup_serena
+  [[ ! -e "${shim}" ]]
+}
+
+@test "dyai_lsp::setup_serena_config keeps a foreign key, writes python's ls_base_cmd, prunes a removed language" {
+  _write_serena_manifest
+  _configure_serena
+  # shellcheck disable=SC2030 # a bats @test body runs in a single process, not a subshell
+  export SERENA_HOME="${HOME}/.serena"
+  dybatpho::ensure_dir "${SERENA_HOME}" > /dev/null
+  cat > "${SERENA_HOME}/serena_config.yml" << 'YML'
+ls_specific_settings:
+  rust:
+    ls_path: /opt/foreign-rust
+YML
+  dyai_lsp::setup_serena_config
+  local file
+  file="${SERENA_HOME}/serena_config.yml"
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.ls_specific_settings.rust.ls_path' "${file}")" == "/opt/foreign-rust" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.ls_specific_settings.python.ls_base_cmd[0]' "${file}")" == "${HOME}/.local/bin/dyai-lsp-exec" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.ls_specific_settings.python.ls_base_cmd[3]' "${file}")" == "/opt/pyright-bin" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq -o=json '.projects' "${file}")" == "[]" ]]
+
+  jq 'del(.servers[] | select(.name == "pyright"))' "${M}" > "${M}.tmp" && mv "${M}.tmp" "${M}"
+  dyai_lsp::setup_serena_config
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.ls_specific_settings | has("python")' "${file}")" == "false" ]]
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.ls_specific_settings.rust.ls_path' "${file}")" == "/opt/foreign-rust" ]]
+}
+
+@test "dyai_lsp::setup_serena_config is a no-op on a second run (mtime unchanged)" {
+  _write_serena_manifest
+  # shellcheck disable=SC2031 # a bats @test body runs in a single process, not a subshell
+  export SERENA_HOME="${HOME}/.serena"
+  dyai_lsp::setup_serena_config
+  local file before after
+  file="${SERENA_HOME}/serena_config.yml"
+  before="$(stat -c %Y "${file}")"
+  sleep 1
+  dyai_lsp::setup_serena_config
+  after="$(stat -c %Y "${file}")"
+  [[ "${before}" == "${after}" ]]
+}
