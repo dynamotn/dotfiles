@@ -504,30 +504,49 @@ function dyai::setup_subagents {
   local sources agents_dir
   sources="$(dyai::config_json '.global.subagents // []')"
   agents_dir="$(dybatpho::path_join "${HOME}" ".claude" "agents")"
-  local count i repo ref src incl md name dest
+  local count i repo ref src incl excl md name dest leaf
+  local -a mds
   count="$(jq 'length' <<< "${sources}")"
   for ((i = 0; i < count; i++)); do
     repo="$(jq -r --argjson i "${i}" '.[$i].repo' <<< "${sources}")"
     ref="$(jq -r --argjson i "${i}" '.[$i].ref' <<< "${sources}")"
     # shellcheck disable=SC2310 # a failed fetch warns inside and we skip this source
     src="$(dyai::fetch_repo "${repo}" "${ref}")" || continue
+    # Leaf names kept out of the global install (they can still be pulled per
+    # project by a preset, which resolves subagents across the whole tree).
+    excl="$(jq -c --argjson i "${i}" '.[$i].exclude // []' <<< "${sources}")"
     dybatpho::ensure_dir "${agents_dir}" > /dev/null
     # shellcheck disable=SC2312 # the include list comes from the config we just read
     while IFS= read -r incl; do
       [[ -n "${incl}" ]] || continue
-      # shellcheck disable=SC2312 # find lists the category's .md files, a bad path lists none
-      while IFS= read -r md; do
+      # An include entry is a single .md file, or a directory of them.
+      if [[ "${incl}" == *.md ]]; then
+        mds=("${src}/${incl}")
+      else
+        mds=()
+        # shellcheck disable=SC2312 # find lists the dir's .md files, a bad path lists none
+        while IFS= read -r md; do mds+=("${md}"); done \
+          < <(find "${src}/${incl}" -mindepth 1 -maxdepth 1 -name '*.md' 2> /dev/null)
+      fi
+      for md in "${mds[@]+"${mds[@]}"}"; do
+        dybatpho::is file "${md}" || continue
         name="$(basename "${md}")"
         [[ "${name}" == "README.md" ]] && continue
+        leaf="${name%.md}"
+        # shellcheck disable=SC2312 # jq membership test; a bad read is false
+        if jq -e --arg n "${leaf}" 'index($n) != null' <<< "${excl}" > /dev/null; then
+          dybatpho::debug "subagent ${leaf} excluded from the global baseline"
+          continue
+        fi
         dest="$(dybatpho::path_join "${agents_dir}" "${name}")"
         if ! dybatpho::is file "${dest}" || ! cmp -s "${md}" "${dest}"; then
           if cp -- "${md}" "${dest}"; then
-            dybatpho::info "Installed subagent ${name%.md}"
+            dybatpho::info "Installed subagent ${leaf}"
           else
             dybatpho::warn "Could not install subagent ${name}"
           fi
         fi
-      done < <(find "${src}/${incl}" -mindepth 1 -maxdepth 1 -name '*.md' 2> /dev/null)
+      done
     done < <(jq -r --argjson i "${i}" '.[$i].include[]' <<< "${sources}")
   done
 }
@@ -669,8 +688,12 @@ function dyai::materialize {
   src=""
   # shellcheck disable=SC2310 # a failed fetch leaves src empty and subagents are skipped
   [[ -z "${repo}" ]] || src="$(dyai::fetch_repo "${repo}" "${ref}")" || src=""
-  local -a desired=()
-  local preset section pj sa_count sa md dest sk leaf incomplete=""
+  local -a desired=() desired_mcp=()
+  local preset section pj sa_count sa md dest sk leaf incomplete="" mcpname mdef
+  # Servers already registered project-local, so a re-run does not re-add them.
+  local existing_mcp
+  # shellcheck disable=SC2312 # a missing manifest reads as an empty list
+  existing_mcp="$(yq -p=toml -o=json -I=0 '.materialized_mcp // []' "${toml}" 2> /dev/null || echo '[]')"
   # shellcheck disable=SC2312 # the use list comes from the project .dyai.toml
   while IFS= read -r preset; do
     [[ -n "${preset}" ]] || continue
@@ -721,11 +744,56 @@ function dyai::materialize {
       fi
       desired+=("${root}/.agents/skills/${leaf}")
     done < <(jq -r '.skills[]?' <<< "${pj}")
+    # MCP servers register in Claude's project-LOCAL scope (private to this
+    # project, kept in ~/.claude.json, not in the shared ./.mcp.json), so a
+    # teammate never inherits a personal preset choice.
+    # shellcheck disable=SC2312 # jq lists the preset's mcp server names
+    while IFS= read -r mcpname; do
+      [[ -n "${mcpname}" ]] || continue
+      desired_mcp+=("${mcpname}")
+      dybatpho::is command claude || continue
+      # shellcheck disable=SC2312 # already registered (in the manifest) → skip, no churn
+      if jq -e --arg n "${mcpname}" 'index($n) != null' <<< "${existing_mcp}" > /dev/null; then
+        dybatpho::debug "MCP ${mcpname} already registered for this project"
+        continue
+      fi
+      mdef="$(jq -c --arg n "${mcpname}" \
+        '.mcp[$n] | {type: "stdio", command: .command, args: (.args // []), env: (.env // {})}' <<< "${pj}")"
+      (cd "${root}" && claude mcp add-json --scope local "${mcpname}" "${mdef}" > /dev/null) \
+        || dybatpho::warn "Could not register MCP ${mcpname} for this project"
+    done < <(jq -r '.mcp // {} | keys[]?' <<< "${pj}")
   done < <(yq -p=toml '.use[]' "${toml}" 2> /dev/null)
   if [[ -n "${incomplete}" ]]; then
     dybatpho::die "could not fetch subagents from ${repo}; project left unchanged"
   fi
   dyai::prune_and_record "${toml}" "${desired[@]+"${desired[@]}"}"
+  dyai::reconcile_mcp "${toml}" "${root}" "${desired_mcp[@]+"${desired_mcp[@]}"}"
+}
+
+#######################################
+# @description Prune project-local MCP servers no longer wanted, then record the manifest
+# @arg $1 string Path of the project .dyai.toml
+# @arg $2 string The project root
+# @arg $@ string The desired MCP server names
+#######################################
+function dyai::reconcile_mcp {
+  local toml root
+  dybatpho::expect_args toml root -- "$@"
+  shift 2
+  local desired_nl old list
+  desired_nl="$(printf '%s\n' "$@")"
+  if dybatpho::is command claude; then
+    # shellcheck disable=SC2312 # a missing manifest lists nothing, so nothing is pruned
+    while IFS= read -r old; do
+      [[ -n "${old}" ]] || continue
+      grep -qxF -- "${old}" <<< "${desired_nl}" && continue
+      (cd "${root}" && claude mcp remove --scope local "${old}" &> /dev/null) \
+        || dybatpho::debug "MCP ${old} was not registered, nothing to remove"
+    done < <(yq -p=toml '.materialized_mcp[]?' "${toml}" 2> /dev/null)
+  fi
+  # shellcheck disable=SC2312 # the desired list is dyai-built server names
+  list="$(printf '%s\n' "$@" | sort -u | jq -R . | jq -cs 'map(select(. != ""))')"
+  LIST="${list}" yq -p=toml -o=toml -i '.materialized_mcp = (strenv(LIST) | fromjson)' "${toml}"
 }
 
 #######################################

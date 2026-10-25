@@ -65,7 +65,15 @@ definitions:
       include:
         type: array
         items: { type: string }
-        description: Directories in the repo whose *.md (except README) are installed.
+        description: >
+          Entries to install from: a directory (its *.md except README) or a
+          single *.md file.
+      exclude:
+        type: array
+        items: { type: string }
+        description: >
+          Subagent leaf names to skip in the global install (a preset can still
+          pull them per project).
 
   extensionRef:
     type: object

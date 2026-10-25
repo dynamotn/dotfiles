@@ -104,6 +104,72 @@ CFG
   [[ "$(cat "${HOME}/.claude/agents/backend-developer.md")" == "${before}" ]]
 }
 
+@test "dyai::setup_subagents honors a per-file include and an exclude list" {
+  _stub claude
+  local src="${BATS_TEST_TMPDIR}/volt2"
+  mkdir -p "${src}/categories/01-core-development"
+  for n in backend-developer electron-pro graphql-architect; do
+    printf -- '---\nname: %s\n---\nx\n' "${n}" > "${src}/categories/01-core-development/${n}.md"
+  done
+  mkdir -p "${src}/categories/02-language-specialists"
+  printf -- '---\nname: golang-pro\n---\nx\n' > "${src}/categories/02-language-specialists/golang-pro.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << 'CFG'
+global:
+  skills: []
+  mcp: {}
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: deadbeef
+      include:
+        - categories/01-core-development
+        - categories/02-language-specialists/golang-pro.md
+      exclude: [electron-pro, graphql-architect]
+agents:
+  claude: {}
+CFG
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dyai::setup_subagents
+  # category install minus the two excluded, plus the one file-include
+  [ -f "${HOME}/.claude/agents/backend-developer.md" ]
+  [ -f "${HOME}/.claude/agents/golang-pro.md" ]
+  [ ! -f "${HOME}/.claude/agents/electron-pro.md" ]
+  [ ! -f "${HOME}/.claude/agents/graphql-architect.md" ]
+}
+
+@test "dyai::use registers a preset's mcp as Claude project-local; rm removes it" {
+  _stub claude
+  _stub bunx
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+registry:
+  presets:
+    db:
+      mcp:
+        pg:
+          command: uvx
+          args: [postgres-mcp@0.3.0]
+          env: {}
+CFG
+  local proj="${BATS_TEST_TMPDIR}/mcpproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use db)
+  grep -q 'STUB claude mcp add-json --scope local pg' "${HOME}/calls.log"
+  yq -p=toml '.materialized_mcp[]' "${proj}/.dyai.toml" | grep -qx 'pg'
+  # idempotent: re-materialize does not re-add
+  : > "${HOME}/calls.log"
+  (cd "${proj}" && dyai::materialize)
+  run grep -q 'add-json --scope local pg' "${HOME}/calls.log"
+  assert_failure
+  # rm removes the project-local server and clears the manifest
+  (cd "${proj}" && dyai::rm db)
+  grep -q 'STUB claude mcp remove --scope local pg' "${HOME}/calls.log"
+  [[ "$(yq -p=toml '.materialized_mcp | length' "${proj}/.dyai.toml")" == "0" ]]
+}
+
 @test "dyai::use records a preset in .dyai.toml and personal-ignores it" {
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
