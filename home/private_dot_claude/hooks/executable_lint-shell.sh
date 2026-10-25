@@ -4,8 +4,11 @@
 # @description Read the Edit/Write hook input on stdin and, when the file is a
 # bash script, lint it with dyshellint. Findings go to stderr with exit code 2,
 # which Claude Code feeds back to the model so it fixes them in the same turn.
-# Anything that is not a lintable shell script, or a machine without
-# dyshellint, passes silently: a hook must never block an unrelated edit.
+# In a file git already tracks, only the findings the committed version did
+# not have are reported, so an edit to legacy code is not pushed into
+# rewriting the rest of the file. Anything that is not a lintable shell
+# script, or a machine without dyshellint, passes silently: a hook must never
+# block an unrelated edit.
 set -euo pipefail
 
 command -v dyshellint &> /dev/null || exit 0
@@ -18,18 +21,47 @@ case "${file}" in
   *.sh | *.bash | *.bats) ;;
   *)
     # An extensionless script is recognized by its shebang.
-    head -n 1 -- "${file}" | grep -qE '^#!.*\b(ba)?sh\b' || exit 0
+    first=""
+    IFS= read -r first < "${file}" || true
+    [[ "${first}" =~ ^#!.*[/[:space:]](ba)?sh([[:space:]]|$) ]] || exit 0
     ;;
 esac
 
 # Warnings count too: the machine rules say to fix whatever dyshellint reports.
 args=(-warnings-as-errors)
+name="$(basename -- "${file}")"
 # A chezmoi `executable_` source is stored without the bit; apply sets it.
-[[ "$(basename -- "${file}")" != executable_* ]] || args+=(-exclude-rules BSG037)
+[[ "${name}" != executable_* ]] || args+=(-exclude-rules BSG037)
 
 if output="$(dyshellint "${args[@]}" "${file}" 2>&1)"; then
   exit 0
 fi
-printf 'dyshellint reported findings in %s; fix them before reporting done:\n%s\n' \
-  "${file}" "${output}" >&2
+
+# The committed version is the baseline. A finding is keyed by its text after
+# `path:line:col: `, so a finding that only moved lines still matches, and
+# each key is numbered by occurrence, so a second copy of an old finding
+# counts as new.
+dir="$(dirname -- "${file}")"
+baseline=""
+if rel="$(git -C "${dir}" ls-files --full-name --error-unmatch -- "${name}" 2> /dev/null)"; then
+  if blob="$(git -C "${dir}" show "HEAD:${rel}" 2> /dev/null)"; then
+    baseline="$(dyshellint "${args[@]}" --stdin-filename "${name}" - <<< "${blob}" 2>&1 || true)"
+    # Text on stdin has no mode, so the executable-bit rule never fires on the
+    # baseline. A file committed without the bit already had that finding.
+    mode="$(git -C "${dir}" ls-files --stage -- "${name}")"
+    if [[ "${mode}" != 100755* ]]; then
+      baseline+=$'\n'"$(dyshellint "${args[@]}" -rules BSG037 "${file}" 2>&1 || true)"
+    fi
+  fi
+fi
+# shellcheck disable=SC2016 # an awk program, its $0 is awk's
+new="$(awk '
+  function key(line) { return sub(/^[^:]*:[0-9]+:[0-9]+: /, "", line) ? line : "" }
+  FNR == NR { k = key($0); if (k != "") base[k "\t" ++seen[k]] = 1; next }
+  { k = key($0); if (k != "" && !((k "\t" ++cur[k]) in base)) print }
+' <(printf '%s\n' "${baseline}") <(printf '%s\n' "${output}"))"
+[[ -n "${new}" ]] || exit 0
+
+printf 'dyshellint reported new findings in %s; fix them before reporting done:\n%s\n' \
+  "${file}" "${new}" >&2
 exit 2
