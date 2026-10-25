@@ -106,9 +106,27 @@ the same commit.
 ## Before reporting done
 
 ```bash
-dyshellint <changed scripts>     # shellcheck + shfmt + its own rules
-./scripts/test.sh --related <changed files>   # or --all
+dyshellint -warnings-as-errors <changed scripts>   # shellcheck + shfmt + its own rules
+./scripts/test.sh scripts/test/<area>.bats         # one file; or --all
 ```
 
 Fix what `dyshellint` reports. Silence a rule only on purpose, with
 `# dyshellint disable=<CODE> <reason>` on the line above.
+
+## Gotchas
+
+- `dyshellint` exits 0 when it finds only warnings. Pass
+  `-warnings-as-errors` when its exit status decides anything, or a clean
+  run and a run full of warnings look the same.
+- A chezmoi source named `executable_*` is stored without the executable
+  bit (apply sets it), so `BSG037` fires on it. Exclude that rule for such
+  files (`-exclude-rules BSG037`) rather than `chmod +x` the source.
+- `cmd | grep -q pattern` under `pipefail` can fail with status 141: `grep`
+  exits at the first match and the writer dies of SIGPIPE. Capture the
+  output first, or drop `-q` and redirect to `/dev/null`.
+- The bats `test_helper` loads dybatpho once with a fixed `--modules` list,
+  since a module registry cannot cross into each test's process. A library
+  that starts using a new module also needs it added there, or its tests
+  fail with an undefined function.
+- `scripts/test.sh` has no `--related` flag. Pass bats files as arguments,
+  or use `--all`, `--dyai`, `--dytoy`, `--secrets`.
