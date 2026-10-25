@@ -206,8 +206,8 @@ function _mcp_merge_json {
   dir="$(dirname "${file}")"
   dybatpho::is dir "${dir}" || mkdir -p "${dir}"
   dybatpho::is file "${file}" || printf '{}\n' > "${file}"
-  # shellcheck disable=SC2312 # the file is JSON we created or the agent's own; a read error just forces a rewrite
-  current="$(jq -cS --arg b "${block}" --arg n "${name}" '.[$b][$n] // empty' "${file}")"
+  # shellcheck disable=SC2312 # a malformed file falls back to {}, forcing a rewrite attempt rather than aborting
+  current="$(jq -cS --arg b "${block}" --arg n "${name}" '.[$b][$n] // empty' "${file}" 2> /dev/null || printf '{}')"
   want="$(jq -cS . <<< "${entry}")"
   if [[ "${current}" == "${want}" ]]; then
     dybatpho::debug "MCP ${name} already registered in ${file}"
@@ -238,9 +238,15 @@ function _mcp_merge_yq {
   dybatpho::is file "${file}" || : > "${file}"
   # shellcheck disable=SC2312 # a read error on a malformed file just forces a rewrite
   current="$(yq -p="${fmt}" -o=json -I=0 ".mcp_servers.${name} // {}" "${file}" 2> /dev/null || echo '{}')"
-  want="$(jq -cS . <<< "${entry}")"
+  # yq drops an empty `args`/`env` when it re-emits section-style TOML, so the
+  # read-back would never equal a `want` that still carries them. Normalise both
+  # by dropping empty args/env before comparing, or the file churns every run.
+  local norm
+  norm='if ((.args? // []) | length) == 0 then del(.args) else . end'
+  norm+=' | if ((.env? // {}) | length) == 0 then del(.env) else . end'
+  want="$(jq -cS "${norm}" <<< "${entry}")"
   # shellcheck disable=SC2312 # normalizing the current entry; a read error forces a rewrite
-  if [[ "$(jq -cS . <<< "${current}")" == "${want}" ]]; then
+  if [[ "$(jq -cS "${norm}" <<< "${current}")" == "${want}" ]]; then
     dybatpho::debug "MCP ${name} already registered in ${file}"
     return 0
   fi
