@@ -182,6 +182,13 @@ The `filesystem` MCP server is scoped per config context: personal and
 community trees by default, the enterprise tree inside an enterprise config
 directory.
 
+The `dybrain` MCP server is the Obsidian vault's own script
+(`~/Documents/Notes/99_System/99.03_Scripts/dev/vault-mcp.py`, run with
+`uv run --script`), declared only on the `pc`, `laptop` and `tablet` kinds
+that install Obsidian. It refuses `ai: sensitive` notes. The `second-brain`
+agent rule tells every agent when to call its `capture_fleeting` and
+`append_daily` tools.
+
 A `global.mcp` server named like an entry of `agents.claude.plugins`
 (`context7` and `context7@claude-plugins-official`) is left to that plugin
 in Claude, since the plugin bundles the same server and a second copy loads
