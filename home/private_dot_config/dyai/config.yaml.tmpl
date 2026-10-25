@@ -62,6 +62,50 @@ global:
       args: []
       env:
         HF_HUB_DISABLE_TELEMETRY: "1"
+    # Community servers from the official modelcontextprotocol registry (and
+    # Upstash's context7), pinned. Node servers run via bunx, Python via uvx,
+    # github via docker. An agent missing the launcher is skipped by the hook.
+    sequential-thinking:
+      command: bunx
+      args: ["@modelcontextprotocol/server-sequential-thinking@2.0.0"]
+      env: {}
+    fetch:
+      command: uvx
+      args: ["mcp-server-fetch@2026.10.19"]
+      env: {}
+    time:
+      command: uvx
+      args: ["mcp-server-time@2026.10.19"]
+      env: {}
+    git:
+      command: uvx
+      args: ["mcp-server-git@2026.10.19"]
+      env: {}
+    memory:
+      command: bunx
+      args: ["@modelcontextprotocol/server-memory@2.0.0"]
+      env: {}
+    context7:
+      command: bunx
+      args: ["@upstash/context7-mcp@4.4.4"]
+      env: {}
+    filesystem:
+      command: bunx
+      args:
+        - "@modelcontextprotocol/server-filesystem@2.0.0"
+        - {{ printf "%s/Working/personal" .chezmoi.homeDir | quote }}
+        - {{ printf "%s/Working/community" .chezmoi.homeDir | quote }}
+      env: {}
+    playwright:
+      command: bunx
+      args: ["@playwright/mcp@0.0.83"]
+      env: {}
+    # github needs Docker and a GITHUB_PERSONAL_ACCESS_TOKEN in the agent's
+    # runtime environment; only the variable name is stored here, never a value.
+    github:
+      command: docker
+      args: ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"]
+      env: {}
   # Abstract event automation, translated to each hook-capable agent's format.
   hooks:
     stop:

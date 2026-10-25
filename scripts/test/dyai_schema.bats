@@ -166,3 +166,20 @@ function _render_config {
   yq -e '.global.hooks.stop.run | test("notify-send")' "${out}" > /dev/null
   [[ "$(yq '.global.policy.approval' "${out}")" == "accept-edits" ]]
 }
+
+@test "config carries the pinned community MCP servers" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.mcp.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  [[ "$(yq '.global.mcp.fetch.command' "${out}")" == "uvx" ]]
+  [[ "$(yq '.global.mcp."sequential-thinking".command' "${out}")" == "bunx" ]]
+  [[ "$(yq '.global.mcp.github.command' "${out}")" == "docker" ]]
+  # github carries only the env var NAME, never a value.
+  yq '.global.mcp.github.args[]' "${out}" | grep -qx 'GITHUB_PERSONAL_ACCESS_TOKEN'
+  # filesystem default scope is personal + community.
+  yq '.global.mcp.filesystem.args[]' "${out}" | grep -q 'Working/personal'
+  yq '.global.mcp.filesystem.args[]' "${out}" | grep -q 'Working/community'
+}
