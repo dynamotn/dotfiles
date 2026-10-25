@@ -338,6 +338,50 @@ function _setup_mcp {
 }
 
 #######################################
+# @description Apply a jq expression to a JSON config file, idempotently and merge-safe
+# @arg $1 string Path of the JSON file (created as {} when missing)
+# @arg $2 string jq expression that sets the wanted keys, leaving the rest intact
+#######################################
+function _json_set {
+  local file expr
+  dybatpho::expect_args file expr -- "$@"
+  local dir before after tmp
+  dir="$(dirname "${file}")"
+  dybatpho::is dir "${dir}" || mkdir -p "${dir}"
+  dybatpho::is file "${file}" || printf '{}\n' > "${file}"
+  # shellcheck disable=SC2312 # a malformed file falls back to {}, forcing a rewrite attempt rather than aborting
+  before="$(jq -cS . "${file}" 2> /dev/null || printf '{}')"
+  after="$(jq -cS "${expr}" <<< "${before}")"
+  [[ "${before}" == "${after}" ]] && return 0
+  dybatpho::create_temp tmp "json" "dyai" "${dir}"
+  if jq "${expr}" "${file}" > "${tmp}" && mv "${tmp}" "${file}"; then
+    dybatpho::info "Updated ${file}"
+  else
+    dybatpho::warn "Could not update ${file}"
+  fi
+}
+
+#######################################
+# @description Translate global.policy.approval into each agent that has a clean edits-only preset
+# @noargs
+#######################################
+function _setup_policy {
+  local approval file
+  # shellcheck disable=SC2312 # a bad config read yields an empty string, a safe no-op
+  approval="$(_config_json '.global.policy.approval // ""' | jq -r .)"
+  [[ "${approval}" == "accept-edits" ]] || return 0
+  if dybatpho::is command gemini; then
+    file="$(dybatpho::path_join "${HOME}" ".gemini" "settings.json")"
+    _json_set "${file}" '.general.defaultApprovalMode = "auto_edit"'
+  fi
+  if dybatpho::is command opencode; then
+    file="${OPENCODE_CONFIG:-$(dybatpho::path_join "${HOME}" ".config" "opencode" "opencode.json")}"
+    _json_set "${file}" '.permission.edit = "allow"'
+  fi
+  # codex, copilot and agy have no edits-only approval preset; left to the user.
+}
+
+#######################################
 # @description Entrypoint
 # @noargs
 #######################################
@@ -354,6 +398,7 @@ function _main {
     dybatpho::warn "claude is not installed, skip marketplaces and plugins"
   fi
   _setup_mcp
+  _setup_policy
   if dybatpho::is command bunx; then
     _setup_skills
   else
