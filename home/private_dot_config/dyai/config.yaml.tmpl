@@ -53,7 +53,16 @@ global:
     - anthropics/skills@mcp-builder
     - wshobson/agents@prompt-engineering-patterns
   # Agent role definitions and commands/prompts (populated in a later phase).
-  subagents: []
+  # Baseline subagents: VoltAgent categories installed into every agent's
+  # agents dir (Claude-format today). Pinned to a commit, never a branch.
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: 408d3c9eee2d
+      include:
+        - categories/01-core-development
+        - categories/04-quality-security
+        - categories/09-meta-orchestration
+        - categories/10-research-analysis
   commands: []
   # MCP servers registered into every MCP-capable agent, in its own format.
   mcp:

@@ -183,3 +183,16 @@ function _render_config {
   yq '.global.mcp.filesystem.args[]' "${out}" | grep -q 'Working/personal'
   yq '.global.mcp.filesystem.args[]' "${out}" | grep -q 'Working/community'
 }
+
+@test "config declares the baseline subagents from VoltAgent at a pinned ref" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.sa.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  [[ "$(yq '.global.subagents[0].repo' "${out}")" == "VoltAgent/awesome-claude-code-subagents" ]]
+  [[ "$(yq '.global.subagents[0].ref' "${out}")" == "408d3c9eee2d" ]]
+  yq '.global.subagents[0].include[]' "${out}" | grep -q '01-core-development'
+  yq '.global.subagents[0].include[]' "${out}" | grep -q '04-quality-security'
+}

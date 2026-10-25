@@ -35,6 +35,19 @@ definitions:
       timeout: { type: integer }
       connect_timeout: { type: integer }
 
+  subagentSource:
+    type: object
+    additionalProperties: false
+    description: A repo of subagent .md files, pinned by ref, with the dirs to install from.
+    required: [repo, ref, include]
+    properties:
+      repo: { type: string, description: "owner/repo on GitHub" }
+      ref: { type: string, description: "a commit SHA or tag, never a moving branch" }
+      include:
+        type: array
+        items: { type: string }
+        description: Directories in the repo whose *.md (except README) are installed.
+
   extensionRef:
     type: object
     additionalProperties: false
@@ -84,7 +97,7 @@ properties:
         description: skills.sh entries installed for every agent.
       subagents:
         type: array
-        items: { $ref: "#/definitions/extensionRef" }
+        items: { $ref: "#/definitions/subagentSource" }
       commands:
         type: array
         items: { $ref: "#/definitions/extensionRef" }
