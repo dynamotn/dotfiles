@@ -9,7 +9,6 @@ gentoo:
       repo: hyproverlay
       url: https://codeberg.org/hyproverlay/hyproverlay.git
     - name: x11-libs/xcb-util
-    - name: x11-base/xwayland
     - name: gui-libs/xdg-desktop-portal-wlr
 arch:
   packages:
@@ -24,7 +23,6 @@ arch:
     - name: cpio
     - name: cmake
     - name: meson
-    - name: xorg-xwayland
 ubuntu: # Not have package on LTS version
 {{- else if eq .guiWinManager "N" }}
 name: niri
@@ -36,15 +34,10 @@ gentoo:
     - name: gui-wm/niri
       repo: guru
       url: https://github.com/gentoo-mirror/guru.git
-    # X11 applications, started by niri on its own
-    - name: gui-apps/xwayland-satellite
-      repo: guru
-      url: https://github.com/gentoo-mirror/guru.git
     - name: sys-apps/xdg-desktop-portal-gnome
 arch:
   packages:
     - name: niri
-    - name: xwayland-satellite
     - name: xdg-desktop-portal-gnome
     - name: xdg-desktop-portal-gtk
 ubuntu: # Not have package on LTS version
