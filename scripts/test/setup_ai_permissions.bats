@@ -31,6 +31,7 @@ global:
         - "Bash(chezmoi-dycrypt*)"
         - "Bash(age -d *)"
         - "Bash(rm -rf *)"
+        - "Bash(git * --force)"
         - "Read(**/secrets/data/**)"
         - "Read(**/.env)"
         - "Read(~/.ssh/**)"
@@ -70,6 +71,8 @@ function _assert_idempotent {
   # Deny wins over ask for the same prefix; rtk spellings are Claude-only.
   jq -e --arg v "deny" '.permission.bash["rm -rf *"] == $v' "${f}" > /dev/null
   [[ "${got}" != *"rtk"* ]] || fail "rtk rule leaked: ${got}"
+  # opencode matches globs, so a rule with an inner * carries over as is.
+  jq -e --arg v "deny" '.permission.bash["git * --force"] == $v' "${f}" > /dev/null
   jq -e --arg v "deny" '.permission.read["*secrets/data/*"] == $v' "${f}" > /dev/null
   jq -e --arg v "deny" '.permission.read["*.env"] == $v' "${f}" > /dev/null
   jq -e --arg v "deny" '.permission.read["~/.ssh/*"] == $v' "${f}" > /dev/null
@@ -108,6 +111,10 @@ function _assert_idempotent {
   jq -e '.permissions.allow == ["command(ls)"]' "${f}" > /dev/null
   # Path rules have no documented glob form in agy, so none is written.
   jq -e '[.permissions[][] | select(startswith("read_file"))] | length == 0' "${f}" > /dev/null
+  # A rule agy cannot match is dropped loudly, and a glued one is flagged.
+  jq -e '[.permissions[][] | select(contains("*"))] | length == 0' "${f}" > /dev/null
+  assert_output --partial 'agy: deny rule "git * --force" has an inner *'
+  assert_output --partial 'agy: deny rule "chezmoi-dycrypt*" matches whole words'
   _assert_idempotent "${f}"
 }
 
@@ -125,6 +132,10 @@ function _assert_idempotent {
   jq -e '([.rule[] | select(.decision == "deny")][0].priority)
     > ([.rule[] | select(.decision == "ask_user")][0].priority)' <<< "${j}" > /dev/null
   jq -e '[.rule[].toolName] | unique == ["run_shell_command"]' <<< "${j}" > /dev/null
+  jq -e '[.rule[].commandPrefix[] | select(contains("*"))] | length == 0' <<< "${j}" > /dev/null
+  assert_output --partial 'gemini: deny rule "git * --force" has an inner *'
+  # commandPrefix is a plain starts-with, so a glued rule loses nothing.
+  refute_output --partial 'gemini: deny rule "chezmoi-dycrypt*"'
   _assert_idempotent "${f}"
 }
 
@@ -139,6 +150,11 @@ function _assert_idempotent {
   grep -F 'prefix_rule(pattern = ["git","push"], decision = "prompt"' "${f}" > /dev/null
   run grep -F '["rm","-rf"], decision = "prompt"' "${f}"
   assert_failure
+  run grep -F '"*"' "${f}"
+  assert_failure
+  run bash "${HOOK}"
+  assert_output --partial 'codex: deny rule "git * --force" has an inner *'
+  assert_output --partial 'codex: deny rule "chezmoi-dycrypt*" matches whole words'
   _assert_idempotent "${f}"
 }
 
@@ -156,6 +172,7 @@ function _assert_idempotent {
   yq -e '.approvals.deny[] | select(. == "chezmoi-dycrypt*")' "${f}" > /dev/null
   yq -e '.approvals.deny[] | select(. == "age -d *")' "${f}" > /dev/null
   yq -e '.approvals.deny[] | select(. == "rm -rf")' "${f}" > /dev/null
+  yq -e '.approvals.deny[] | select(. == "git * --force")' "${f}" > /dev/null
   # Hermes has no ask list, so git push (ask only) is not denied.
   run yq -e '.approvals.deny[] | select(. == "git push *")' "${f}"
   assert_failure
