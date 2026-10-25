@@ -349,10 +349,10 @@ function _render_config {
   [[ "$(yq '.registry.languages.go.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.infra.docker.subagents[0]' "${out}")" == "docker-expert" ]]
   yq '.registry.infra.aws.skills[]' "${out}" | grep 'aws-iam' > /dev/null
-  [[ "$(yq '.registry.infra.cicd.skills | length' "${out}")" == "3" ]]
+  [[ "$(yq '.registry.infra.cicd.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "5" ]]
-  [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "3" ]]
-  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "11" ]]
+  [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "4" ]]
+  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "12" ]]
   # Registry-expansion presets (nvim-supported languages/tools)
   [[ "$(yq '.registry.languages.vue.subagents[0]' "${out}")" == "vue-expert" ]]
   [[ "$(yq '.registry.languages.swift.subagents[0]' "${out}")" == "swift-expert" ]]
@@ -376,4 +376,15 @@ function _render_config {
     | grep -x 'https://github.com/danielmiessler/LifeOS/tree/[0-9a-f]\{40\}/LifeOS/install/skills/RedTeam' > /dev/null
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'electron-pro' > /dev/null
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'graphql-architect' > /dev/null
+  # Vendor skills picked from VoltAgent/awesome-agent-skills
+  [[ "$(yq '.registry.infra.terraform.skills | length' "${out}")" == "4" ]]
+  [[ "$(yq '.registry.infra.cloudflare.skills | length' "${out}")" == "4" ]]
+  [[ "$(yq '.registry.infra.mongodb.skills | length' "${out}")" == "3" ]]
+  [[ "$(yq '.registry.presets.graphql.skills | length' "${out}")" == "4" ]]
+  [[ "$(yq '.registry.presets.mobile.skills | length' "${out}")" == "5" ]]
+  [[ "$(yq '.registry.presets.sentry.skills | length' "${out}")" == "3" ]]
+  [[ "$(yq '.registry.presets.opentelemetry.skills | length' "${out}")" == "3" ]]
+  [[ "$(yq '.registry.presets.context.skills | length' "${out}")" == "8" ]]
+  yq '.registry.presets.context.skills[]' "${out}" \
+    | grep -x 'https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/[0-9a-f]\{40\}/skills/tool-design' > /dev/null
 }
