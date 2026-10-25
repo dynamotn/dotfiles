@@ -117,7 +117,7 @@ CFG
   git -C "${proj}" init -q
   (cd "${proj}" && dyai::use go)
   yq -p=toml '.use[]' "${proj}/.dyai.toml" | grep -qx 'go'
-  grep -qxF '.dyai.toml' "${proj}/.git/info/exclude"
+  grep -qxF '/.dyai.toml' "${proj}/.git/info/exclude"
   # idempotent: using again does not duplicate
   (cd "${proj}" && dyai::use go)
   [[ "$(yq -p=toml '.use | length' "${proj}/.dyai.toml")" == "1" ]]
@@ -177,6 +177,84 @@ CFG
   before="$(cat "${proj}/.claude/agents/golang-pro.md")"
   (cd "${proj}" && dyai::materialize)
   [[ "$(cat "${proj}/.claude/agents/golang-pro.md")" == "${before}" ]]
+}
+
+@test "dyai::use personal-ignores the materialized subagent, not only .dyai.toml" {
+  _stub claude
+  _stub bunx
+  local src="${BATS_TEST_TMPDIR}/igvolt"
+  mkdir -p "${src}/categories/02-language-specialists"
+  printf -- '---\nname: golang-pro\n---\nx\n' > "${src}/categories/02-language-specialists/golang-pro.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: deadbeef
+      include: [categories/02-language-specialists]
+registry:
+  languages:
+    go: { subagents: [golang-pro] }
+CFG
+  local proj="${BATS_TEST_TMPDIR}/igproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use go)
+  run git -C "${proj}" check-ignore .claude/agents/golang-pro.md
+  assert_success
+}
+
+@test "dyai::use excludes .dyai.toml correctly inside a git worktree" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  # a preset with nothing to materialize, so no fetch is needed
+  printf 'registry:\n  languages:\n    go: {subagents: [], skills: []}\n' > "${CONFIG_FILE}"
+  local proj="${BATS_TEST_TMPDIR}/wtmain"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  git -C "${proj}" -c user.email=t@t -c user.name=t commit -q --allow-empty -m init
+  local wt="${BATS_TEST_TMPDIR}/wtlinked"
+  git -C "${proj}" worktree add -q "${wt}" -b wt
+  (cd "${wt}" && dyai::use go)
+  [ -f "${wt}/.dyai.toml" ]
+  run git -C "${wt}" check-ignore .dyai.toml
+  assert_success
+}
+
+@test "dyai::materialize leaves still-wanted subagents when a required fetch fails" {
+  _stub claude
+  _stub bunx
+  local src="${BATS_TEST_TMPDIR}/okvolt"
+  mkdir -p "${src}/categories/02-language-specialists"
+  printf -- '---\nname: golang-pro\n---\nx\n' > "${src}/categories/02-language-specialists/golang-pro.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: deadbeef
+      include: [categories/02-language-specialists]
+registry:
+  languages:
+    go:     { subagents: [golang-pro] }
+    python: { subagents: [python-pro] }
+CFG
+  local proj="${BATS_TEST_TMPDIR}/failproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use go)
+  [ -f "${proj}/.claude/agents/golang-pro.md" ]
+  # now the source is unreachable; opting into python must NOT delete golang-pro
+  eval 'dyai::fetch_repo() { return 1; }'
+  cd "${proj}"
+  run dyai::use python
+  assert_failure
+  [ -f "${proj}/.claude/agents/golang-pro.md" ]
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'golang-pro.md'
 }
 
 @test "dyai::ls shows the global baseline and this project's presets" {

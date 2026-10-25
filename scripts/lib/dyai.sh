@@ -553,6 +553,34 @@ function dyai::resolve_preset {
 }
 
 #######################################
+# @description Resolve this repo's personal ignore file (works in a worktree, where .git is a file)
+# @arg $1 string The project root
+# @stdout Absolute path of info/exclude
+# @exitcode 1 Not a git repository
+#######################################
+function dyai::git_exclude {
+  local root gp
+  dybatpho::expect_args root -- "$@"
+  gp="$(git -C "${root}" rev-parse --git-path info/exclude 2> /dev/null)" || return 1
+  case "${gp}" in
+    /*) printf '%s' "${gp}" ;;
+    *) printf '%s/%s' "${root}" "${gp}" ;;
+  esac
+}
+
+#######################################
+# @description Add a repo-root-anchored pattern to the personal ignore if absent
+# @arg $1 string info/exclude path
+# @arg $2 string Pattern, already anchored as the caller wants it
+#######################################
+function dyai::exclude_add {
+  local exclude pattern
+  dybatpho::expect_args exclude pattern -- "$@"
+  grep -qxF -- "${pattern}" "${exclude}" 2> /dev/null && return 0
+  printf '%s\n' "${pattern}" >> "${exclude}" || dybatpho::die "cannot write ${exclude}"
+}
+
+#######################################
 # @description Opt the current project into a registry preset (records only; see materialize)
 # @arg $1 string Preset name
 #######################################
@@ -571,8 +599,10 @@ function dyai::use {
   if ! yq -p=toml '.use[]' "${toml}" 2> /dev/null | grep -qxF -- "${name}"; then
     N="${name}" yq -p=toml -o=toml -i '.use = ((.use // []) + [strenv(N)])' "${toml}"
   fi
-  local exclude="${root}/.git/info/exclude"
-  grep -qxF '.dyai.toml' "${exclude}" 2> /dev/null || printf '.dyai.toml\n' >> "${exclude}"
+  local exclude
+  # .git is a file in a linked worktree, so the exclude path is resolved, not built.
+  exclude="$(dyai::git_exclude "${root}")" || dybatpho::die "cannot locate the git exclude file"
+  dyai::exclude_add "${exclude}" '/.dyai.toml'
   dybatpho::info "Project uses preset ${name}"
   dyai::materialize
 }
@@ -607,6 +637,15 @@ function dyai::prune_and_record {
   # shellcheck disable=SC2312 # the desired list is dyai-built project paths
   list="$(printf '%s\n' "$@" | sort -u | jq -R . | jq -cs 'map(select(. != ""))')"
   LIST="${list}" yq -p=toml -o=toml -i '.materialized = (strenv(LIST) | fromjson)' "${toml}"
+  # Every materialized file is PERSONAL too, so anchor each into the personal
+  # ignore. Stale entries for removed files are harmless, so we only ever add.
+  local exclude p
+  # shellcheck disable=SC2310 # outside a repo there is nothing to personal-ignore
+  exclude="$(dyai::git_exclude "${root}")" || return 0
+  for p in "$@"; do
+    [[ -n "${p}" && "${p}" == "${root}"/* ]] || continue
+    dyai::exclude_add "${exclude}" "/${p#"${root}/"}"
+  done
 }
 
 #######################################
@@ -628,7 +667,7 @@ function dyai::materialize {
   # shellcheck disable=SC2310 # a failed fetch leaves src empty and subagents are skipped
   [[ -z "${repo}" ]] || src="$(dyai::fetch_repo "${repo}" "${ref}")" || src=""
   local -a desired=()
-  local preset section pj sa md dest sk leaf
+  local preset section pj sa_count sa md dest sk leaf incomplete=""
   # shellcheck disable=SC2312 # the use list comes from the project .dyai.toml
   while IFS= read -r preset; do
     [[ -n "${preset}" ]] || continue
@@ -639,6 +678,8 @@ function dyai::materialize {
         continue
       }
     pj="$(dyai::config_json ".registry.${section}.\"${preset}\"")"
+    # shellcheck disable=SC2312 # jq yields a count; a bad read is 0, which is safe
+    sa_count="$(jq -r '.subagents // [] | length' <<< "${pj}")"
     if [[ -n "${src}" ]]; then
       # shellcheck disable=SC2312 # jq lists the preset's subagent names
       while IFS= read -r sa; do
@@ -657,16 +698,30 @@ function dyai::materialize {
         fi
         desired+=("${dest}")
       done < <(jq -r '.subagents[]?' <<< "${pj}")
+    # A configured source whose fetch failed leaves src empty. If this preset
+    # wants subagents, the desired set is now incomplete — pruning against it
+    # would delete the subagents of presets we never got to. Flag it and refuse
+    # to prune. An empty repo means no source is configured at all, not a
+    # transient failure, so it does not block the prune.
+    elif [[ -n "${repo}" && "${sa_count}" != "0" ]]; then
+      incomplete=1
     fi
     # shellcheck disable=SC2312 # jq lists the preset's skills
     while IFS= read -r sk; do
       [[ -n "${sk}" ]] || continue
       leaf="${sk##*@}"
-      (cd "${root}" && bunx "${SKILLS_CLI}" add "${sk}" -y &> /dev/null) \
-        || dybatpho::warn "Could not install skill ${sk}"
+      if dybatpho::is dir "${root}/.agents/skills/${leaf}"; then
+        dybatpho::debug "skill ${leaf} already installed in project"
+      else
+        (cd "${root}" && bunx "${SKILLS_CLI}" add "${sk}" -y &> /dev/null) \
+          || dybatpho::warn "Could not install skill ${sk}"
+      fi
       desired+=("${root}/.agents/skills/${leaf}")
     done < <(jq -r '.skills[]?' <<< "${pj}")
   done < <(yq -p=toml '.use[]' "${toml}" 2> /dev/null)
+  if [[ -n "${incomplete}" ]]; then
+    dybatpho::die "could not fetch subagents from ${repo}; project left unchanged"
+  fi
   dyai::prune_and_record "${toml}" "${desired[@]+"${desired[@]}"}"
 }
 
