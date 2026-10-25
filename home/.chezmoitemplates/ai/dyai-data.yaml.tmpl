@@ -19,9 +19,18 @@ marketplaces:
     source: { source: git, url: "https://github.com/AgentSecOps/SecOpsAgentKit.git" }
   thedotmack:
     source: { source: github, repo: thedotmack/claude-mem }
+  caveman:
+    source: { source: github, repo: JuliusBrussee/caveman }
+  ponytail:
+    source: { source: github, repo: DietrichGebert/ponytail }
+  context-mode:
+    source: { source: github, repo: mksglu/context-mode }
 plugins:
   - i-have-adhd@i-have-adhd
   - claude-mem@thedotmack
+  - caveman@caveman
+  - ponytail@ponytail
+  - context-mode@context-mode
   - pyright-lsp@claude-plugins-official
   - superpowers@claude-plugins-official
   - telegram@claude-plugins-official
