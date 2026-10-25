@@ -148,6 +148,9 @@ policy:
       - "Bash(op read *)"
       - "Bash(aws configure get *)"
     defaultMode: acceptEdits
+    # --dangerously-skip-permissions would skip every ask rule above; auto
+    # mode and the sandbox cover the same need without that hole.
+    disableBypassPermissionsMode: disable
   theme: auto
   effortLevel: medium
   # Shared approval stance, translated per agent where an edits-only preset exists.

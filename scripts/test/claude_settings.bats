@@ -57,6 +57,22 @@ function _render_settings {
   done
 }
 
+@test "settings.json sandboxes bash, so Read denies hold for shell commands too" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json"
+  _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
+  jq -e '.sandbox.enabled == true' "${out}" > /dev/null
+  jq -e '.permissions.disableBypassPermissionsMode == "disable"' "${out}" > /dev/null
+  # rtk turns `cat` into `rtk read`; excluding rtk wholesale would let a
+  # shell read of a denied path out of the sandbox again.
+  jq -e '.sandbox.excludedCommands | all(test("^rtk( \\*)?$") | not)' "${out}" > /dev/null \
+    || fail "rtk is excluded from the sandbox as a whole"
+  jq -e '.sandbox.excludedCommands | all(test("^(cat|rtk read)") | not)' "${out}" > /dev/null
+  # git is excluded in both spellings, or commits in a worktree fail.
+  jq -e '.sandbox.excludedCommands | index("git *") != null and index("rtk git *") != null' \
+    "${out}" > /dev/null
+}
+
 @test "every git ask rule also covers its rtk rewrite" {
   _require_chezmoi
   local out="${BATS_TEST_TMPDIR}/settings.json"
