@@ -10,6 +10,7 @@
   "enabledPlugins": {
     "agent-sdk-dev@claude-plugins-official": true,
     "appsec-skills@agent-sec-ops-kit-skills": true,
+    "caveman@caveman": true,
     "chrome-devtools-mcp@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
@@ -18,6 +19,7 @@
     "code-simplifier@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
     "compliance-skills@agent-sec-ops-kit-skills": true,
+    "context-mode@context-mode": true,
     "context7@claude-plugins-official": true,
     "devsecops-skills@agent-sec-ops-kit-skills": true,
     "differential-review@trailofbits": true,
@@ -39,6 +41,7 @@
     "obsidian@obsidian-skills": true,
     "offsec-skills@agent-sec-ops-kit-skills": true,
     "playwright@claude-plugins-official": true,
+    "ponytail@ponytail": true,
     "pr-review-toolkit@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": true,
@@ -69,6 +72,18 @@
         "url": "https://github.com/AgentSecOps/SecOpsAgentKit.git"
       }
     },
+    "caveman": {
+      "source": {
+        "repo": "JuliusBrussee/caveman",
+        "source": "github"
+      }
+    },
+    "context-mode": {
+      "source": {
+        "repo": "mksglu/context-mode",
+        "source": "github"
+      }
+    },
     "i-have-adhd": {
       "source": {
         "repo": "ayghri/i-have-adhd",
@@ -78,6 +93,12 @@
     "obsidian-skills": {
       "source": {
         "repo": "kepano/obsidian-skills",
+        "source": "github"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "repo": "DietrichGebert/ponytail",
         "source": "github"
       }
     },

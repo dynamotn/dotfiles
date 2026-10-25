@@ -121,14 +121,18 @@ function _render_config {
   if ! _render_named "ai/dyai-data.yaml.tmpl" "${out}"; then
     fail "chezmoi could not render the data partial: $(cat "${out}.err")"
   fi
-  # 7 marketplaces, including a github and the git one
-  [[ "$(yq '.marketplaces | length' "${out}")" == "7" ]]
+  # 10 marketplaces, including a github and the git one
+  [[ "$(yq '.marketplaces | length' "${out}")" == "10" ]]
   [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
   [[ "$(yq '.marketplaces["agent-sec-ops-kit-skills"].source.source' "${out}")" == "git" ]]
-  # 53 plugins, including known entries
-  [[ "$(yq '.plugins | length' "${out}")" == "53" ]]
+  # 56 plugins, including known entries
+  [[ "$(yq '.plugins | length' "${out}")" == "56" ]]
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
+  # agent-mode plugins, each its own single-plugin marketplace
+  yq -e '.plugins[] | select(. == "caveman@caveman")' "${out}" > /dev/null
+  yq -e '.plugins[] | select(. == "ponytail@ponytail")' "${out}" > /dev/null
+  yq -e '.plugins[] | select(. == "context-mode@context-mode")' "${out}" > /dev/null
   # policy
   [[ "$(yq '.policy.permissions.defaultMode' "${out}")" == "acceptEdits" ]]
   [[ "$(yq '.policy.theme' "${out}")" == "auto" ]]
@@ -155,8 +159,8 @@ function _render_config {
   assert_failure
   [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp-server ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
-  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "53" ]]
-  [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "7" ]]
+  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "56" ]]
+  [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "10" ]]
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
 }
 
