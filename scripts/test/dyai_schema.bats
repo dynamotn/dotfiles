@@ -207,4 +207,13 @@ function _render_config {
   [[ "$(yq '.registry.languages.go.subagents[0]' "${out}")" == "golang-pro" ]]
   [[ "$(yq '.registry.infra.terraform.subagents[0]' "${out}")" == "terraform-engineer" ]]
   yq '.registry.languages.go.skills[]' "${out}" | grep -q 'golang-code-style'
+  # Phase 4: the full tool-boundary taxonomy
+  [[ "$(yq '.registry.languages.frontend.subagents[0]' "${out}")" == "react-specialist" ]]
+  [[ "$(yq '.registry.languages.go.skills | length' "${out}")" == "5" ]]
+  [[ "$(yq '.registry.infra.docker.subagents[0]' "${out}")" == "docker-expert" ]]
+  yq '.registry.infra.aws.skills[]' "${out}" | grep -q 'aws-iam'
+  [[ "$(yq '.registry.infra.cicd.skills | length' "${out}")" == "3" ]]
+  [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "2" ]]
+  [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "2" ]]
+  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "9" ]]
 }
