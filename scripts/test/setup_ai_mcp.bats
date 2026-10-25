@@ -204,3 +204,36 @@ CFG
   run grep 'enterprise/U3T/.claude|' "${HOME}/claude.log"
   refute_output --partial 'Working/personal'
 }
+
+@test "a corrupt ~/.claude.json warns and the hook still processes other agents" {
+  _stub_agent claude
+  _stub_agent gemini
+  printf 'not valid json{' > "${HOME}/.claude.json"
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  [[ "$(jq -r '.mcpServers.laya.command' "${HOME}/.gemini/settings.json")" == "${LAYA}" ]]
+}
+
+@test "a hyphenated MCP name registers into codex via the yq path, idempotently" {
+  _stub_agent codex
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << CFG
+global:
+  skills: []
+  mcp:
+    sequential-thinking:
+      command: ${LAYA}
+      args: []
+      env: {}
+agents:
+  claude: {}
+CFG
+  run bash "${HOOK}"
+  assert_success
+  local f="${HOME}/.codex/config.toml"
+  [[ "$(yq -p=toml -r '.mcp_servers."sequential-thinking".command' "${f}")" == "${LAYA}" ]]
+  run bash "${HOOK}"
+  assert_success
+  refute_output --partial "Registered MCP sequential-thinking in ${f}"
+}

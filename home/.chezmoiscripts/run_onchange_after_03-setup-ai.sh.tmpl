@@ -180,7 +180,8 @@ function _setup_mcp_server {
     fi
     current=""
     if dybatpho::is file "${state_file}"; then
-      current="$(jq -cS --arg name "${name}" '.mcpServers[$name] // empty' "${state_file}")"
+      # shellcheck disable=SC2312 # a corrupt state file falls back to empty, not an abort
+      current="$(jq -cS --arg name "${name}" '.mcpServers[$name] // empty' "${state_file}" 2> /dev/null || printf '')"
     fi
     if [[ "${current}" == "${wanted}" ]]; then
       dybatpho::debug "MCP server ${name} already registered in ${dir}"
@@ -243,7 +244,8 @@ function _mcp_merge_yq {
   dybatpho::is dir "${dir}" || mkdir -p "${dir}"
   dybatpho::is file "${file}" || : > "${file}"
   # shellcheck disable=SC2312 # a read error on a malformed file just forces a rewrite
-  current="$(yq -p="${fmt}" -o=json -I=0 ".mcp_servers.${name} // {}" "${file}" 2> /dev/null || echo '{}')"
+  current="$(N="${name}" \
+    yq -p="${fmt}" -o=json -I=0 '.mcp_servers[strenv(N)] // {}' "${file}" 2> /dev/null || echo '{}')"
   # yq drops an empty `args`/`env` when it re-emits section-style TOML, so the
   # read-back would never equal a `want` that still carries them. Normalise both
   # by dropping empty args/env before comparing, or the file churns every run.
@@ -256,7 +258,8 @@ function _mcp_merge_yq {
     dybatpho::debug "MCP ${name} already registered in ${file}"
     return 0
   fi
-  if E="${entry}" yq -p="${fmt}" -o="${fmt}" -i ".mcp_servers.${name} = (strenv(E) | fromjson)" "${file}"; then
+  if E="${entry}" N="${name}" \
+    yq -p="${fmt}" -o="${fmt}" -i '.mcp_servers[strenv(N)] = (strenv(E) | fromjson)' "${file}"; then
     dybatpho::info "Registered MCP ${name} in ${file}"
   else
     dybatpho::warn "Could not register MCP ${name} in ${file}"
