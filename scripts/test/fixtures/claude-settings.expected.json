@@ -171,6 +171,16 @@
           }
         ],
         "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "bash ~/.claude/hooks/log-skill.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "Skill"
       }
     ],
     "SessionStart": [
@@ -191,6 +201,11 @@
           {
             "async": true,
             "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Task finished!' --icon=dialog-information; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ] && paplay /usr/share/sounds/freedesktop/stereo/complete.oga; } 2>/dev/null; true",
+            "type": "command"
+          },
+          {
+            "command": "bash ~/.claude/hooks/verify-on-stop.sh",
+            "timeout": 30,
             "type": "command"
           }
         ]
@@ -298,28 +313,36 @@
     ],
     "filesystem": {
       "allowWrite": [
-        "~/.cache",
-        "~/.local/share/rtk",
-        "~/.local/state",
-        "~/.bun",
-        "~/.npm",
+        "~/.cache/.bun/install/cache",
+        "~/.cache/go-build",
+        "~/.cache/pip",
+        "~/.cache/uv",
         "~/.cargo/registry",
-        "~/go/pkg"
+        "~/.local/share/rtk"
+      ],
+      "denyWrite": [
+        "~/.local/bin",
+        "~/.cache/.bun/bin",
+        "~/.local/share/mise",
+        "~/.local/state/mise",
+        "~/.local/share/nvim/mason",
+        "~/.claude/plugins",
+        "~/.krew/bin",
+        "~/.hunk/bin"
       ]
     },
     "network": {
       "allowedDomains": [
-        "github.com",
-        "*.github.com",
-        "*.githubusercontent.com",
-        "gitlab.com",
+        "codeload.github.com",
+        "objects.githubusercontent.com",
+        "raw.githubusercontent.com",
         "registry.npmjs.org",
         "pypi.org",
         "files.pythonhosted.org",
         "proxy.golang.org",
         "sum.golang.org",
-        "crates.io",
-        "*.crates.io"
+        "index.crates.io",
+        "static.crates.io"
       ]
     }
   },
