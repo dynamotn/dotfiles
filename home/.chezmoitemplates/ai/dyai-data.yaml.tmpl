@@ -1,0 +1,82 @@
+{{- /*
+  dyai shared data: the AI-agent extension and settings data that both
+  ~/.config/dyai/config.yaml and Claude's settings.json render from, so the
+  two never drift. Data only — no install logic. See
+  docs/superpowers/specs/2026-10-24-dyai-shared-ai-config-design.md
+*/ -}}
+marketplaces:
+  i-have-adhd:
+    source: { source: github, repo: ayghri/i-have-adhd }
+  superpowers-marketplace:
+    source: { source: github, repo: obra/superpowers-marketplace }
+  obsidian-skills:
+    source: { source: github, repo: kepano/obsidian-skills }
+  secskills-marketplace:
+    source: { source: github, repo: trilwu/secskills }
+  trailofbits:
+    source: { source: github, repo: trailofbits/skills }
+  agent-sec-ops-kit-skills:
+    source: { source: git, url: "https://github.com/AgentSecOps/SecOpsAgentKit.git" }
+plugins:
+  - i-have-adhd@i-have-adhd
+  - pyright-lsp@claude-plugins-official
+  - superpowers@claude-plugins-official
+  - posty-social-media-scheduler@anthropic-plugin-directory
+  - telegram@claude-plugins-official
+  - lua-lsp@claude-plugins-official
+  - context7@claude-plugins-official
+  - github@claude-plugins-official
+  - gitlab@claude-plugins-official
+  - claude-md-management@claude-plugins-official
+  - hookify@claude-plugins-official
+  - security-guidance@claude-plugins-official
+  - claude-code-setup@claude-plugins-official
+  - obsidian@obsidian-skills
+  - playwright@claude-plugins-official
+  - chrome-devtools-mcp@claude-plugins-official
+  - typescript-lsp@claude-plugins-official
+  - gopls-lsp@claude-plugins-official
+  - semgrep@claude-plugins-official
+  - claude-security@claude-plugins-official
+  - frontend-design@claude-plugins-official
+  - appsec-skills@agent-sec-ops-kit-skills
+  - code-simplifier@claude-plugins-official
+  - commit-commands@claude-plugins-official
+  - compliance-skills@agent-sec-ops-kit-skills
+  - devsecops-skills@agent-sec-ops-kit-skills
+  - differential-review@trailofbits
+  - elements-of-style@superpowers-marketplace
+  - episodic-memory@superpowers-marketplace
+  - incident-response-skills@agent-sec-ops-kit-skills
+  - insecure-defaults@trailofbits
+  - mattpocock-skills@claude-plugins-official
+  - modern-python@trailofbits
+  - offsec-skills@agent-sec-ops-kit-skills
+  - pr-review-toolkit@claude-plugins-official
+  - rust-analyzer-lsp@claude-plugins-official
+  - second-opinion@trailofbits
+  - secsdlc-skills@agent-sec-ops-kit-skills
+  - secskills-core@secskills-marketplace
+  - secskills-defense@secskills-marketplace
+  - secskills-offense@secskills-marketplace
+  - secskills@secskills-marketplace
+  - sharp-edges@trailofbits
+  - skill-creator@claude-plugins-official
+  - static-analysis@trailofbits
+  - supply-chain-risk-auditor@trailofbits
+  - testing-handbook-skills@trailofbits
+  - threatmodel-skills@agent-sec-ops-kit-skills
+  - trailmark@trailofbits
+  - mcp-server-dev@claude-plugins-official
+  - agent-sdk-dev@claude-plugins-official
+  - redis-development@claude-plugins-official
+  - duckdb-skills@claude-plugins-official
+  - ralph-loop@claude-plugins-official
+policy:
+  permissions:
+    ask:
+      - "Bash(git push)"
+      - "Bash(git push:*)"
+    defaultMode: acceptEdits
+  theme: auto
+  effortLevel: medium
