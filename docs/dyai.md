@@ -87,11 +87,13 @@ Grouped by tool boundary so a project pulls in only what it uses:
 
 - `languages` — one per language the Neovim config supports (`go`, `python`,
   `rust`, `typescript`, `frontend`, `vue`, `angular`, `java`, …)
-- `infra` — `terraform`, `terragrunt`, `kubernetes`, `docker`, `aws`, `cicd`,
-  `database`, `ansible`, `cloudflare`, `mongodb`
+- `infra` — `terraform`, `kubernetes`, `docker`, `aws`, `azure`, `gcp`,
+  `argocd`, `cicd`, `database`, `terragrunt`, `ansible`, `cloudflare`,
+  `mongodb`
 - `presets` — cross-language domains: `testing`, `security`, `research`, `datascience`,
   `docs`, `shell`, and the domain agents kept out of the baseline (`desktop`,
-  `mobile`, `graphql`, `realtime`), `sentry`, `opentelemetry`, `context`
+  `mobile`, `graphql`, `realtime`), `sentry`, `opentelemetry`, `sre`,
+  `platform`, `finops`, `architecture`, `product`, `context`
   (context engineering for building agents), and `lifeos` (the thinking
   skills of [LifeOS](https://github.com/danielmiessler/LifeOS) that run
   without its runtime)

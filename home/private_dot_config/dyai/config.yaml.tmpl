@@ -272,12 +272,31 @@ registry:
         - hashicorp/agent-skills@terraform-test
         - hashicorp/agent-skills@refactor-module
         - hashicorp/agent-skills@terraform-search-import
+        - hashicorp/agent-skills@terraform-stacks
+        - hashicorp/agent-skills@terraform-policy
+        - wshobson/agents@terraform-module-library
+      # Registry and provider docs lookup; needs Docker, no credential.
+      mcp:
+        terraform:
+          command: docker
+          args: ["run", "-i", "--rm", "hashicorp/terraform-mcp-server:1.4.1"]
+          env: {}
     kubernetes:
       subagents: [kubernetes-specialist]
       skills:
         - jeffallan/claude-skills@kubernetes-specialist
         - wshobson/agents@helm-chart-scaffolding
         - affaan-m/ecc@kubernetes-patterns
+        - wshobson/agents@k8s-security-policies
+        - akin-ozer/cc-devops-skills@k8s-yaml-validator
+        - akin-ozer/cc-devops-skills@helm-validator
+        - akin-ozer/cc-devops-skills@k8s-debug
+      # Talks to the cluster of the current kubeconfig context.
+      mcp:
+        kubernetes:
+          command: bunx
+          args: ["kubernetes-mcp-server@0.0.67"]
+          env: {}
     docker:
       subagents: [docker-expert]
       skills: [affaan-m/ecc@docker-patterns]
@@ -286,6 +305,53 @@ registry:
       skills:
         - aws/agent-toolkit-for-aws@aws-iam
         - aws/agent-toolkit-for-aws@aws-observability
+      # Docs, list prices and architecture diagrams; none reads the account.
+      mcp:
+        aws-docs:
+          command: uvx
+          args: ["awslabs.aws-documentation-mcp-server@1.2.3"]
+          env: {}
+          readonly: true
+        aws-pricing:
+          command: uvx
+          args: ["awslabs.aws-pricing-mcp-server@1.1.1"]
+          env: {}
+          readonly: true
+        aws-diagram:
+          command: uvx
+          args: ["awslabs.aws-diagram-mcp-server@1.0.23"]
+          env: {}
+    azure:
+      subagents: [azure-infra-engineer]
+      skills:
+        - hashicorp/agent-skills@azure-verified-modules
+        - akin-ozer/cc-devops-skills@azure-pipelines-generator
+        - akin-ozer/cc-devops-skills@azure-pipelines-validator
+      # Signs in through the az CLI session; no credential stored here.
+      mcp:
+        azure:
+          command: bunx
+          args: ["@azure/mcp@3.0.0", "server", "start"]
+          env: {}
+    # Uses the gcloud CLI's active account; no credential stored here.
+    gcp:
+      mcp:
+        gcloud:
+          command: bunx
+          args: ["@google-cloud/gcloud-mcp@0.5.3"]
+          env: {}
+        gcp-observability:
+          command: bunx
+          args: ["@google-cloud/observability-mcp@0.2.3"]
+          env: {}
+    # GitOps on top of the cicd preset's gitops-workflow skill. Reads
+    # ARGOCD_BASE_URL and ARGOCD_API_TOKEN from the runtime env.
+    argocd:
+      mcp:
+        argocd:
+          command: bunx
+          args: ["argocd-mcp@0.9.0", "stdio"]
+          env: {}
     cicd:
       subagents: [deployment-engineer]
       skills:
@@ -352,6 +418,7 @@ registry:
     # baseline, so this opt-in collection does not duplicate them.
     security:
       subagents:
+        - security-engineer
         - penetration-tester
         - compliance-auditor
         - gdpr-ccpa-compliance
@@ -383,6 +450,12 @@ registry:
         - Eyadkelleh/awesome-skills-security@security-webshells
         - affaan-m/ecc@security-review
         - affaan-m/ecc@security-scan
+        - wshobson/agents@attack-tree-construction
+        - wshobson/agents@threat-mitigation-mapping
+        - wshobson/agents@security-requirement-extraction
+        - wshobson/agents@sast-configuration
+        - wshobson/agents@pci-compliance
+        - wshobson/agents@gdpr-data-handling
     # Notebooks, R and Quarto — the data-science filetypes nvim supports.
     datascience:
       subagents: [data-scientist]
@@ -451,6 +524,98 @@ registry:
         - ollygarden/opentelemetry-agent-skills@otel-collector
         - ollygarden/opentelemetry-agent-skills@otel-semantic-conventions
         - ollygarden/opentelemetry-agent-skills@otel-ottl
+    # SLOs, incidents, on-call and the Prometheus/Grafana/Loki stack.
+    # prometheus reads PROMETHEUS_URL; grafana reads GRAFANA_URL and
+    # GRAFANA_SERVICE_ACCOUNT_TOKEN, all from the runtime env.
+    sre:
+      subagents: [sre-engineer, incident-responder, devops-incident-responder]
+      skills:
+        - wshobson/agents@slo-implementation
+        - wshobson/agents@incident-runbook-templates
+        - wshobson/agents@postmortem-writing
+        - wshobson/agents@on-call-handoff-patterns
+        - wshobson/agents@prometheus-configuration
+        - wshobson/agents@grafana-dashboards
+        - wshobson/agents@distributed-tracing
+        - akin-ozer/cc-devops-skills@promql-generator
+        - akin-ozer/cc-devops-skills@promql-validator
+        - akin-ozer/cc-devops-skills@logql-generator
+        - akin-ozer/cc-devops-skills@loki-config-generator
+      mcp:
+        prometheus:
+          command: uvx
+          args: ["prometheus-mcp-server@1.6.2"]
+          env: {}
+          readonly: true
+        grafana:
+          command: docker
+          args: ["run", "-i", "--rm", "-e", "GRAFANA_URL", "-e", "GRAFANA_SERVICE_ACCOUNT_TOKEN", "grafana/mcp-grafana:2.1.1", "-t", "stdio"]
+          env: {}
+    # Internal platform: service mesh, delivery pipelines, secrets, DX.
+    platform:
+      subagents: [platform-engineer, network-engineer, dx-optimizer, build-engineer]
+      skills:
+        - wshobson/agents@istio-traffic-management
+        - wshobson/agents@linkerd-patterns
+        - wshobson/agents@mtls-configuration
+        - wshobson/agents@service-mesh-observability
+        - wshobson/agents@deployment-pipeline-design
+        - wshobson/agents@secrets-management
+    # Cloud cost and multi-cloud placement. cost-explorer queries the billing
+    # API with the AWS credentials of the runtime env, and is billed per call.
+    finops:
+      skills:
+        - wshobson/agents@cost-optimization
+        - wshobson/agents@multi-cloud-architecture
+        - wshobson/agents@hybrid-cloud-networking
+      mcp:
+        aws-cost-explorer:
+          command: uvx
+          args: ["awslabs.cost-explorer-mcp-server@0.0.21"]
+          env: {}
+    # Distributed-system patterns beyond the baseline architecture skills.
+    architecture:
+      skills:
+        - wshobson/agents@microservices-patterns
+        - wshobson/agents@saga-orchestration
+        - wshobson/agents@cqrs-implementation
+        - wshobson/agents@event-store-design
+        - wshobson/agents@projection-patterns
+    # Business analysis and product ownership: PRDs, stories, roadmaps.
+    # atlassian reads JIRA_* and CONFLUENCE_* from the runtime env.
+    product:
+      subagents:
+        - business-analyst
+        - product-manager
+        - project-manager
+        - scrum-master
+        - ux-researcher
+        - backlog-grooming
+        - assumption-mapping
+      skills:
+        - phuryn/pm-skills@create-prd
+        - phuryn/pm-skills@user-stories
+        - phuryn/pm-skills@job-stories
+        - phuryn/pm-skills@prioritize-features
+        - phuryn/pm-skills@outcome-roadmap
+        - phuryn/pm-skills@stakeholder-map
+        - phuryn/pm-skills@pre-mortem
+        - phuryn/pm-skills@north-star-metric
+        - phuryn/pm-skills@opportunity-solution-tree
+        - phuryn/pm-skills@sprint-plan
+        - phuryn/pm-skills@test-scenarios
+        - deanpeters/Product-Manager-Skills@user-story-splitting
+        - deanpeters/Product-Manager-Skills@user-story-mapping
+        - deanpeters/Product-Manager-Skills@epic-breakdown-advisor
+        - deanpeters/Product-Manager-Skills@prd-development
+        - deanpeters/Product-Manager-Skills@problem-statement
+        - wshobson/agents@kpi-dashboard-design
+        - wshobson/agents@data-storytelling
+      mcp:
+        atlassian:
+          command: uvx
+          args: ["mcp-atlassian@0.23.1"]
+          env: {}
     # Context engineering for building agents, from
     # muratcankoylan/Agent-Skills-for-Context-Engineering pinned to a commit.
     # Its root SKILL.md (a collection index) hides the nested skills from the
