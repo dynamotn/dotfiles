@@ -1,0 +1,14 @@
+#!{{ .bash }}
+# @file dyai-lsp-exec
+# @brief Trust-gated launcher for every agent-facing language-server command
+# @description Every agent config points its LSP `command` at
+# `dyai-lsp-exec <name> -- <real command> [args...]` instead of the server
+# binary directly. When the current directory is not held untrusted by
+# Neovim, it `exec`s straight into the real command, so stdio (carrying the
+# LSP protocol) passes through untouched. The logic lives in
+# `scripts/lib/dyai_lsp_exec.sh`, shared with the bats tests.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai_lsp_exec.sh"
+
+dyai_lsp_exec::main "$@"
