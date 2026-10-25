@@ -179,6 +179,12 @@ a prefix in both lists is denied.
 | Hermes | `approvals.deny` in `~/.hermes/config.yaml` | deny globs only; no ask list | none |
 | Copilot | — | no user-level config key | none |
 
+Gemini, Codex and Antigravity match literal prefixes, not globs. A rule with a
+`*` inside it (`git * main`) is not translated for them, and `dyai install`
+warns. Codex and Antigravity also match whole words, so a rule without a word
+boundary (`foo*`) would only cover `foo`; it is still translated, with a
+warning. Write rules as `p:*` or `p *` to keep them exact everywhere.
+
 The JSON and YAML targets are merged: your own rules stay, and a rule dropped
 from the policy later is not removed. The two files dyai owns are rewritten
 whole. The path rules reach only Claude and opencode, so for the other agents

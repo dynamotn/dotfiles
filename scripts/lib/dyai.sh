@@ -16,6 +16,8 @@ SKILLS_CLI="skills@1.7.2"
 #   command prefix and glued is true for `p*` (no word boundary, as in
 #   `chezmoi-dycrypt*`). The rtk spellings exist only for Claude's rtk hook and
 #   are dropped. An ask prefix that deny also lists is dropped: deny wins.
+# - literal: true for a rule with no `*` left inside its prefix (`git * main`
+#   has one); only a glob-matching agent can express the others.
 # - paths($kind; $tool): the globs of the Read or Edit rules of ask or deny.
 # dyshellint disable=SC2016 a jq program; its $names are jq variables, not shell ones
 DYAI_PERM_JQ='
@@ -31,6 +33,7 @@ def cmds($kind):
     (bash_rules("deny") | map(.p)) as $deny
     | bash_rules("ask") | map(select(.p as $p | $deny | index($p) | not))
   else bash_rules("deny") end;
+def literal: .p | contains("*") | not;
 def paths($kind; $tool): (.[$kind] // [])
   | map(select(type == "string" and startswith($tool + "(") and endswith(")"))
     | .[($tool | length) + 1:-1]);
@@ -536,6 +539,28 @@ function dyai::permissions_opencode {
 }
 
 #######################################
+# @description Warn about the shell rules an agent's matcher cannot carry over faithfully
+# @arg $1 string Agent name, for the message
+# @arg $2 string global.policy.permissions as JSON
+# @arg $3 bool true when the agent matches whole words, so a glued `p*` narrows to `p`
+#######################################
+function dyai::permission_caveats {
+  local agent perms whole_words
+  dybatpho::expect_args agent perms whole_words -- "$@"
+  local kind p glued
+  # shellcheck disable=SC2312 # jq lists the rules; a bad read lists none
+  while IFS=$'\t' read -r kind p glued; do
+    [[ -n "${p}" ]] || continue
+    if [[ "${p}" == *'*'* ]]; then
+      dybatpho::warn "${agent}: ${kind} rule \"${p}\" has an inner *, which ${agent} cannot match; not translated"
+    elif [[ "${glued}" == "true" && "${whole_words}" == "true" ]]; then
+      dybatpho::warn "${agent}: ${kind} rule \"${p}*\" matches whole words there, so it no longer covers \"${p}<more>\""
+    fi
+  done < <(jq -r "${DYAI_PERM_JQ}"'
+    (cmds("deny")[] | ["deny", .p, .glued]), (cmds("ask")[] | ["ask", .p, .glued]) | @tsv' <<< "${perms}")
+}
+
+#######################################
 # @description Merge the shell rules into Antigravity's global permissions
 # @arg $1 string Path of ~/.gemini/antigravity-cli/settings.json
 # @arg $2 string global.policy.permissions as JSON
@@ -546,9 +571,10 @@ function dyai::permissions_agy {
   # `command(<prefix>)` matches whole words, so it already covers both the
   # bare command and any arguments after it. read_file rules take absolute
   # paths, with no documented glob support, so the path rules stay out.
+  dyai::permission_caveats agy "${perms}" true
   # dyshellint disable=SC2016 a jq program; its $names are jq variables
   dyai::json_set "${file}" "${DYAI_PERM_JQ}"'
-    def rules($kind): $perms | cmds($kind) | map("command(" + .p + ")");
+    def rules($kind): $perms | cmds($kind) | map(select(literal) | "command(" + .p + ")");
     rules("ask") as $ask | rules("deny") as $deny
     | .permissions = (.permissions // {})
     | if ($ask | length) > 0 then .permissions.ask = ((.permissions.ask // []) + $ask | unique) else . end
@@ -591,9 +617,10 @@ function dyai::permissions_gemini {
   # commandPrefix is a plain starts-with test, so `git push` also covers
   # `git push origin main`. Deny outranks ask by priority. A JSON string is a
   # valid TOML basic string, so tojson quotes each prefix.
+  dyai::permission_caveats gemini "${perms}" false
   content="$(jq -r "${DYAI_PERM_JQ}"'
     def rule($kind; $decision; $priority):
-      cmds($kind) | map(.p) as $p
+      cmds($kind) | map(select(literal) | .p) as $p
       | if ($p | length) == 0 then empty else
           "[[rule]]\ntoolName = \"run_shell_command\"\ncommandPrefix = ["
           + ($p | map(tojson) | join(", ")) + "]\ndecision = \"" + $decision
@@ -615,9 +642,10 @@ function dyai::permissions_codex {
   local content
   # A pattern is a token prefix of the command's argv, so the prefix is split
   # on spaces. Codex applies the strictest matching decision.
+  dyai::permission_caveats codex "${perms}" true
   content="$(jq -r "${DYAI_PERM_JQ}"'
     def rules($kind; $decision):
-      cmds($kind)[] | "prefix_rule(pattern = " + (.p | split(" ") | map(select(. != "")) | tojson)
+      cmds($kind)[] | select(literal) | "prefix_rule(pattern = " + (.p | split(" ") | map(select(. != "")) | tojson)
         + ", decision = \"" + $decision + "\", justification = \"dyai global.policy.permissions\")";
     "# Managed by dyai from global.policy.permissions; local edits are overwritten.\n"
     + ([rules("deny"; "forbidden"), rules("ask"; "prompt")] | join("\n"))' <<< "${perms}")"
