@@ -144,14 +144,39 @@ function _render_config {
   if ! _render_config "${cfg}" "${out}"; then
     fail "chezmoi could not render config.yaml.tmpl: $(cat "${out}.err")"
   fi
-  [[ "$(yq '.global.skills | length' "${out}")" == "42" ]]
+  # Phase 4: global.skills is trimmed to the cross-cutting baseline.
+  [[ "$(yq '.global.skills | length' "${out}")" == "10" ]]
   yq -e '.global.skills[] | select(. == "vercel-labs/skills@find-skills")' "${out}" > /dev/null
-  yq -e '.global.skills[] | select(. == "Eyadkelleh/awesome-skills-security@llm-testing")' "${out}" > /dev/null
+  yq -e '.global.skills[] | select(. == "anthropics/skills@mcp-builder")' "${out}" > /dev/null
+  # moved into presets, so no longer global
+  run yq -e '.global.skills[] | select(. == "Eyadkelleh/awesome-skills-security@llm-testing")' "${out}"
+  assert_failure
+  run yq -e '.global.skills[] | select(. == "samber/cc-skills-golang@golang-code-style")' "${out}"
+  assert_failure
   [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp-server ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
   [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "52" ]]
   [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "6" ]]
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
+}
+
+@test "every original skill is in global or exactly one preset, none dropped or duplicated" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.union.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  # global skills + every preset's skills, together, are the original 42 unique.
+  local gjson pjson total uniq overlap
+  gjson="$(yq -o=json -I=0 '.global.skills' "${out}")"
+  pjson="$(yq -o=json -I=0 '[.registry.languages[].skills // [], .registry.infra[].skills // [], .registry.presets[].skills // []] | flatten' "${out}")"
+  total="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '($g + $p) | length')"
+  uniq="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '($g + $p) | unique | length')"
+  overlap="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '[$g[] | select([.] | inside($p))] | length')"
+  [[ "${total}" == "42" ]]
+  [[ "${uniq}" == "42" ]]
+  [[ "${overlap}" == "0" ]]
 }
 
 @test "config declares shared notify hooks and the approval default" {
