@@ -574,6 +574,90 @@ function dyai::use {
   local exclude="${root}/.git/info/exclude"
   grep -qxF '.dyai.toml' "${exclude}" 2> /dev/null || printf '.dyai.toml\n' >> "${exclude}"
   dybatpho::info "Project uses preset ${name}"
+  dyai::materialize
+}
+
+#######################################
+# @description Prune manifest paths no longer wanted, then record the new manifest
+# @arg $1 string Path of the project .dyai.toml
+# @arg $@ string The desired materialized paths
+#######################################
+function dyai::prune_and_record {
+  local toml
+  dybatpho::expect_args toml -- "$@"
+  shift
+  local root desired_nl old list
+  root="$(dirname "${toml}")"
+  desired_nl="$(printf '%s\n' "$@")"
+  # shellcheck disable=SC2312 # a missing manifest lists nothing, so nothing is pruned
+  while IFS= read -r old; do
+    [[ -n "${old}" && "${old}" == "${root}"/* ]] || continue
+    grep -qxF -- "${old}" <<< "${desired_nl}" || rm -rf -- "${old}"
+  done < <(yq -p=toml '.materialized[]?' "${toml}" 2> /dev/null)
+  # shellcheck disable=SC2312 # the desired list is dyai-built project paths
+  list="$(printf '%s\n' "$@" | sort -u | jq -R . | jq -cs 'map(select(. != ""))')"
+  LIST="${list}" yq -p=toml -o=toml -i '.materialized = (strenv(LIST) | fromjson)' "${toml}"
+}
+
+#######################################
+# @description Materialize every preset in ./.dyai.toml into the project-scope config
+# @noargs
+#######################################
+function dyai::materialize {
+  local root toml
+  root="$(git rev-parse --show-toplevel 2> /dev/null)" || return 0
+  toml="${root}/.dyai.toml"
+  dybatpho::is file "${toml}" || return 0
+  CONFIG_FILE="${CONFIG_FILE:-$(dybatpho::path_join "${HOME}" ".config" "dyai" "config.yaml")}"
+  local agents_dir="${root}/.claude/agents"
+  local sa_json repo ref src
+  sa_json="$(dyai::config_json '.global.subagents[0] // {}')"
+  repo="$(jq -r '.repo // ""' <<< "${sa_json}")"
+  ref="$(jq -r '.ref // ""' <<< "${sa_json}")"
+  src=""
+  # shellcheck disable=SC2310 # a failed fetch leaves src empty and subagents are skipped
+  [[ -z "${repo}" ]] || src="$(dyai::fetch_repo "${repo}" "${ref}")" || src=""
+  local -a desired=()
+  local preset section pj sa md dest sk leaf
+  # shellcheck disable=SC2312 # the use list comes from the project .dyai.toml
+  while IFS= read -r preset; do
+    [[ -n "${preset}" ]] || continue
+    # shellcheck disable=SC2312 # a stale/unknown entry warns and is skipped, not fatal
+    section="$(dyai::resolve_preset "${preset}" 2> /dev/null)" \
+      || {
+        dybatpho::warn "unknown preset ${preset} in .dyai.toml, skip"
+        continue
+      }
+    pj="$(dyai::config_json ".registry.${section}.\"${preset}\"")"
+    if [[ -n "${src}" ]]; then
+      # shellcheck disable=SC2312 # jq lists the preset's subagent names
+      while IFS= read -r sa; do
+        [[ -n "${sa}" ]] || continue
+        # The subagent name is unique in the source; find it anywhere under it.
+        # shellcheck disable=SC2312 # find locates the one named subagent .md
+        md="$(find "${src}" -type f -name "${sa}.md" 2> /dev/null | head -1)"
+        if [[ -z "${md}" ]]; then
+          dybatpho::warn "subagent ${sa} not found in ${repo}"
+          continue
+        fi
+        dybatpho::ensure_dir "${agents_dir}" > /dev/null
+        dest="${agents_dir}/${sa}.md"
+        if ! { dybatpho::is file "${dest}" && cmp -s "${md}" "${dest}"; }; then
+          cp -- "${md}" "${dest}"
+        fi
+        desired+=("${dest}")
+      done < <(jq -r '.subagents[]?' <<< "${pj}")
+    fi
+    # shellcheck disable=SC2312 # jq lists the preset's skills
+    while IFS= read -r sk; do
+      [[ -n "${sk}" ]] || continue
+      leaf="${sk##*@}"
+      (cd "${root}" && bunx "${SKILLS_CLI}" add "${sk}" -y &> /dev/null) \
+        || dybatpho::warn "Could not install skill ${sk}"
+      desired+=("${root}/.agents/skills/${leaf}")
+    done < <(jq -r '.skills[]?' <<< "${pj}")
+  done < <(yq -p=toml '.use[]' "${toml}" 2> /dev/null)
+  dyai::prune_and_record "${toml}" "${desired[@]+"${desired[@]}"}"
 }
 
 #######################################

@@ -139,3 +139,33 @@ CFG
   run dyai::use go
   assert_failure
 }
+
+@test "dyai::use materializes a preset's subagents and skills into the project" {
+  _stub claude
+  _stub bunx
+  local src="${BATS_TEST_TMPDIR}/volt"
+  mkdir -p "${src}/categories/02-language-specialists"
+  printf -- '---\nname: golang-pro\n---\nx\n' > "${src}/categories/02-language-specialists/golang-pro.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: deadbeef
+      include: [categories/02-language-specialists]
+registry:
+  languages:
+    go: { subagents: [golang-pro], skills: [owner/repo@golang-code-style] }
+CFG
+  local proj="${BATS_TEST_TMPDIR}/mproj"; mkdir -p "${proj}"; git -C "${proj}" init -q
+  ( cd "${proj}" && dyai::use go )
+  [ -f "${proj}/.claude/agents/golang-pro.md" ]
+  grep -q 'STUB bunx .* add owner/repo@golang-code-style' "${HOME}/calls.log"
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'golang-pro.md'
+  # idempotent: second run leaves the subagent unchanged
+  local before; before="$(cat "${proj}/.claude/agents/golang-pro.md")"
+  ( cd "${proj}" && dyai::materialize )
+  [[ "$(cat "${proj}/.claude/agents/golang-pro.md")" == "${before}" ]]
+}
