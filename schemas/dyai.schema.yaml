@@ -1,0 +1,130 @@
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema
+title: dyai Shared AI-agent Config
+description: >
+  Schema for ~/.config/dyai/config.yaml, the single declarative source the
+  AI setup hook reads to install AI-agent extensions and settings. `global`
+  holds what is shared across agents; `agents.<name>` holds what is specific
+  to one agent.
+type: object
+additionalProperties: false
+
+definitions:
+  mcpServer:
+    type: object
+    additionalProperties: false
+    description: One MCP server, translated into each agent's own config format.
+    properties:
+      command:
+        type: string
+        description: Executable for a stdio server.
+      args:
+        type: array
+        items: { type: string }
+      env:
+        type: object
+        description: >
+          Environment for the subprocess. Holds key names and non-secret
+          values only; never a credential value.
+        additionalProperties: { type: string }
+      url:
+        type: string
+        description: Endpoint for an HTTP server (mutually exclusive with command).
+      headers:
+        type: object
+        additionalProperties: { type: string }
+      timeout: { type: integer }
+      connect_timeout: { type: integer }
+
+  extensionRef:
+    type: object
+    additionalProperties: false
+    description: A subagent or command, either a local source dir or a community ref.
+    required: [source]
+    properties:
+      source:
+        type: string
+        enum: [local, skills.sh, github]
+      path:
+        type: string
+        description: Directory name under the chezmoi source, for source=local.
+      ref:
+        type: string
+        description: owner/repo@name, for a community source.
+
+  hook:
+    type: object
+    additionalProperties: false
+    required: [event, run]
+    properties:
+      event:
+        type: string
+        description: Abstract event name, translated to each agent's hook model.
+      run:
+        type: string
+        description: Command to run on the event.
+
+  policy:
+    type: object
+    additionalProperties: true
+    description: Shared settings translated into each agent's settings file.
+    properties:
+      permissions: { type: object }
+      model: { type: [string, "null"] }
+      theme: { type: string }
+      effortLevel: { type: string }
+
+properties:
+  global:
+    type: object
+    additionalProperties: false
+    properties:
+      skills:
+        type: array
+        items: { type: string }
+        description: skills.sh entries installed for every agent.
+      subagents:
+        type: array
+        items: { $ref: "#/definitions/extensionRef" }
+      commands:
+        type: array
+        items: { $ref: "#/definitions/extensionRef" }
+      mcp:
+        type: object
+        additionalProperties: { $ref: "#/definitions/mcpServer" }
+      hooks:
+        type: object
+        additionalProperties: { $ref: "#/definitions/hook" }
+      policy: { $ref: "#/definitions/policy" }
+
+  agents:
+    type: object
+    description: Per-agent specifics, keyed by agent name.
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      properties:
+        marketplaces:
+          type: object
+          description: Claude plugin marketplaces (Claude only).
+          additionalProperties:
+            type: object
+            required: [source]
+            properties:
+              source:
+                type: object
+                required: [source]
+                properties:
+                  source: { type: string, enum: [github, git] }
+                  repo: { type: string }
+                  url: { type: string }
+        plugins:
+          type: array
+          items: { type: string }
+          description: Enabled plugins, as plugin@marketplace (Claude only).
+        mcp:
+          type: object
+          additionalProperties: { $ref: "#/definitions/mcpServer" }
+        hooks:
+          type: object
+          additionalProperties: { $ref: "#/definitions/hook" }
+        policy: { $ref: "#/definitions/policy" }

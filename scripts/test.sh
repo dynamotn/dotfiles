@@ -32,6 +32,8 @@ function _spec_main {
     DYTOY --dytoy -d on:true off:false init:="false"
   dybatpho::opts::flag "Run only the secrets YAML schema validation tests" \
     SECRETS --secrets -s on:true off:false init:="false"
+  dybatpho::opts::flag "Run only the dyai YAML schema validation tests" \
+    DYAI --dyai on:true off:false init:="false"
   dybatpho::opts::param "Test files to run at once with --all, 0 for one per CPU" \
     JOBS --jobs -j init:="0" type:uint
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
@@ -75,6 +77,10 @@ function _main {
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run \
       "${SCRIPT_DIR}/test/secrets_schema.bats"
   fi
+  if [[ "${DYAI}" == "true" ]]; then
+    exec "${BATS_CMD}" --print-output-on-failure --verbose-run \
+      "${SCRIPT_DIR}/test/dyai_schema.bats"
+  fi
   if [[ "${ALL}" == "true" ]]; then
     if ((JOBS == 1)); then
       exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${SCRIPT_DIR}/test"
@@ -94,7 +100,7 @@ function _main {
     exec "${BATS_CMD}" --print-output-on-failure --verbose-run "${MAIN_ARGS[@]}"
   fi
 
-  dybatpho::die "No test specified. Use --all, --dytoy, --secrets, or specify a test file."
+  dybatpho::die "No test specified. Use --all, --dytoy, --secrets, --dyai, or specify a test file."
 }
 
 dybatpho::generate_from_spec _spec_main "$@"

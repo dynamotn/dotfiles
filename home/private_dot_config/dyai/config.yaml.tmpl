@@ -1,0 +1,11 @@
+# dyai: single declarative source for AI-agent extensions and settings.
+# The AI setup hook (run_onchange_after_03-setup-ai.sh) reads this to install.
+# `global` is shared across agents; `agents.<name>` is agent-specific.
+# Expanded from the shared data partial in a later task.
+global:
+  skills: []
+  subagents: []
+  commands: []
+  mcp: {}
+agents:
+  claude: {}
