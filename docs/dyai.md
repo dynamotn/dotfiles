@@ -187,7 +187,8 @@ The `dybrain` MCP server is the Obsidian vault's own script
 `uv run --script`), declared only on the `pc`, `laptop` and `tablet` kinds
 that install Obsidian. It refuses `ai: sensitive` notes. The `second-brain`
 agent rule tells every agent when to call its `capture_fleeting` and
-`append_daily` tools.
+`append_daily` tools, and when a finished note (`create_permanent`,
+`create_literature`, `create_reference`) is due instead.
 
 A `global.mcp` server named like an entry of `agents.claude.plugins`
 (`context7` and `context7@claude-plugins-official`) is left to that plugin

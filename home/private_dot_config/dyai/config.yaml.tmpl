@@ -115,8 +115,9 @@ global:
       env: {}
 {{- if eq .kind "pc" "laptop" "tablet" }}
     # The Dybrain vault's own server (search, read, capture_fleeting,
-    # append_daily): it refuses `ai: sensitive` notes, which no community
-    # Obsidian server does. Only where Obsidian is installed.
+    # append_daily, create_permanent, create_literature, create_reference):
+    # it refuses `ai: sensitive` notes, which no community Obsidian server
+    # does. Only where Obsidian is installed.
     dybrain:
       command: uv
       args:
