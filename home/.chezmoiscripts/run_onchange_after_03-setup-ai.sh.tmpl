@@ -193,11 +193,113 @@ function _setup_mcp_server {
 }
 
 #######################################
-# @description Register every server in global.mcp into the Claude configurations
+# @description Merge one MCP server entry into a JSON config under a block key, idempotently
+# @arg $1 string Path of the JSON config file (created as {} when missing)
+# @arg $2 string Block key that holds the servers (mcpServers or mcp)
+# @arg $3 string Server name
+# @arg $4 string Entry as JSON, in that agent's own shape
+#######################################
+function _mcp_merge_json {
+  local file block name entry
+  dybatpho::expect_args file block name entry -- "$@"
+  local dir current want tmp
+  dir="$(dirname "${file}")"
+  dybatpho::is dir "${dir}" || mkdir -p "${dir}"
+  dybatpho::is file "${file}" || printf '{}\n' > "${file}"
+  # shellcheck disable=SC2312 # the file is JSON we created or the agent's own; a read error just forces a rewrite
+  current="$(jq -cS --arg b "${block}" --arg n "${name}" '.[$b][$n] // empty' "${file}")"
+  want="$(jq -cS . <<< "${entry}")"
+  if [[ "${current}" == "${want}" ]]; then
+    dybatpho::debug "MCP ${name} already registered in ${file}"
+    return 0
+  fi
+  dybatpho::create_temp tmp "json" "dyai" "${dir}"
+  if jq --arg b "${block}" --arg n "${name}" --argjson e "${entry}" \
+    '.[$b] = (.[$b] // {}) | .[$b][$n] = $e' "${file}" > "${tmp}" && mv "${tmp}" "${file}"; then
+    dybatpho::info "Registered MCP ${name} in ${file}"
+  else
+    dybatpho::warn "Could not register MCP ${name} in ${file}"
+  fi
+}
+
+#######################################
+# @description Merge one MCP server into a TOML or YAML config under `mcp_servers`, idempotently
+# @arg $1 string Path of the config file (created empty when missing)
+# @arg $2 string yq format: toml or yaml
+# @arg $3 string Server name
+# @arg $4 string Entry as JSON (yq converts it to the file's format)
+#######################################
+function _mcp_merge_yq {
+  local file fmt name entry
+  dybatpho::expect_args file fmt name entry -- "$@"
+  local dir current want
+  dir="$(dirname "${file}")"
+  dybatpho::is dir "${dir}" || mkdir -p "${dir}"
+  dybatpho::is file "${file}" || : > "${file}"
+  # shellcheck disable=SC2312 # a read error on a malformed file just forces a rewrite
+  current="$(yq -p="${fmt}" -o=json -I=0 ".mcp_servers.${name} // {}" "${file}" 2> /dev/null || echo '{}')"
+  want="$(jq -cS . <<< "${entry}")"
+  # shellcheck disable=SC2312 # normalizing the current entry; a read error forces a rewrite
+  if [[ "$(jq -cS . <<< "${current}")" == "${want}" ]]; then
+    dybatpho::debug "MCP ${name} already registered in ${file}"
+    return 0
+  fi
+  if E="${entry}" yq -p="${fmt}" -o="${fmt}" -i ".mcp_servers.${name} = (strenv(E) | fromjson)" "${file}"; then
+    dybatpho::info "Registered MCP ${name} in ${file}"
+  else
+    dybatpho::warn "Could not register MCP ${name} in ${file}"
+  fi
+}
+
+#######################################
+# @description Register an MCP server into every non-Claude agent that is installed
+# @arg $1 string Server name
+# @arg $2 string Base definition as JSON: {command, args, env}
+#######################################
+function _setup_mcp_agents {
+  local name base
+  dybatpho::expect_args name base -- "$@"
+  # Each writer ends in an if/else that warns, so it returns 0 even on failure
+  # and a bad write for one agent never aborts the others.
+  local file centry chome oentry
+  if dybatpho::is command gemini; then
+    file="$(dybatpho::path_join "${HOME}" ".gemini" "settings.json")"
+    _mcp_merge_json "${file}" mcpServers "${name}" "${base}"
+  fi
+  if dybatpho::is command agy; then
+    file="$(dybatpho::path_join "${HOME}" ".gemini" "config" "mcp_config.json")"
+    _mcp_merge_json "${file}" mcpServers "${name}" "${base}"
+  fi
+  if dybatpho::is command copilot; then
+    centry="$(jq -c '. + {type: "local", tools: ["*"]}' <<< "${base}")"
+    chome="${COPILOT_HOME:-$(dybatpho::path_join "${HOME}" ".copilot")}"
+    file="$(dybatpho::path_join "${chome}" "mcp-config.json")"
+    _mcp_merge_json "${file}" mcpServers "${name}" "${centry}"
+  fi
+  if dybatpho::is command opencode; then
+    oentry="$(jq -c \
+      '{type: "local", command: ([.command] + (.args // [])), environment: (.env // {}), enabled: true}' \
+      <<< "${base}")"
+    file="${OPENCODE_CONFIG:-$(dybatpho::path_join "${HOME}" ".config" "opencode" "opencode.json")}"
+    _mcp_merge_json "${file}" mcp "${name}" "${oentry}"
+  fi
+  if dybatpho::is command codex; then
+    chome="${CODEX_HOME:-$(dybatpho::path_join "${HOME}" ".codex")}"
+    file="$(dybatpho::path_join "${chome}" "config.toml")"
+    _mcp_merge_yq "${file}" toml "${name}" "${base}"
+  fi
+  if dybatpho::is command hermes; then
+    file="$(dybatpho::path_join "${HOME}" ".hermes" "config.yaml")"
+    _mcp_merge_yq "${file}" yaml "${name}" "${base}"
+  fi
+}
+
+#######################################
+# @description Register every server in global.mcp into every installed MCP-capable agent
 # @noargs
 #######################################
 function _setup_mcp {
-  local servers name command definition
+  local servers name command base
   servers="$(_config_json '.global.mcp // {}')"
   # A scalar or otherwise malformed section yields no keys and is skipped.
   # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
@@ -208,19 +310,24 @@ function _setup_mcp {
       dybatpho::warn "MCP server ${name} command not found (${command}), skip"
       continue
     fi
-    definition="$(jq -c --arg n "${name}" \
-      '.[$n] | {type: "stdio", command: .command, args: (.args // []), env: (.env // {})}' <<< "${servers}")"
+    base="$(jq -c --arg n "${name}" \
+      '.[$n] | {command: .command, args: (.args // []), env: (.env // {})}' <<< "${servers}")"
     # The ROCm build of torch ships no kernels for the RDNA2 chips other than
     # gfx1030 (Radeon 680M, RX 6600, ...); they run the gfx1030 ones instead.
     if [[ "${name}" == "laya" ]] && dybatpho::is true "${HAS_AMD_GPU}"; then
       local agents
       agents="$(PATH="${PATH}:/opt/rocm/bin" rocminfo 2> /dev/null || true)"
       if [[ "${agents}" =~ gfx103[1-6] ]]; then
-        definition="$(jq -c '.env += {HSA_OVERRIDE_GFX_VERSION: "10.3.0"}' <<< "${definition}")"
+        base="$(jq -c '.env += {HSA_OVERRIDE_GFX_VERSION: "10.3.0"}' <<< "${base}")"
       fi
     fi
-    # shellcheck disable=SC2310 # a failure only warns, the other servers still run
-    _setup_mcp_server "${name}" "${definition}"
+    if dybatpho::is command claude; then
+      local definition
+      definition="$(jq -c '{type: "stdio"} + .' <<< "${base}")"
+      # shellcheck disable=SC2310 # a failure only warns, the other agents still run
+      _setup_mcp_server "${name}" "${definition}"
+    fi
+    _setup_mcp_agents "${name}" "${base}"
   done < <(jq -r 'if type == "object" then keys[] else empty end' <<< "${servers}")
 }
 
@@ -237,10 +344,10 @@ function _main {
   if dybatpho::is command claude; then
     _setup_marketplaces
     _setup_plugins
-    _setup_mcp
   else
-    dybatpho::warn "claude is not installed, skip marketplaces, plugins and MCP"
+    dybatpho::warn "claude is not installed, skip marketplaces and plugins"
   fi
+  _setup_mcp
   if dybatpho::is command bunx; then
     _setup_skills
   else
