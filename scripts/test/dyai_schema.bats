@@ -264,7 +264,7 @@ function _render_config {
   _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
   [[ "$(yq '.global.mcp.dybrain.command' "${out}")" == "uv" ]]
   yq '.global.mcp.dybrain.args[-1]' "${out}" \
-    | grep '/Documents/Notes/99_System/99.03_Scripts/dev/vault-mcp.py$' > /dev/null
+    | grep '/Documents/DyBrain/99_System/99.03_Scripts/dev/vault-mcp.py$' > /dev/null
   cfg="${BATS_TEST_TMPDIR}/server.yaml" out="${BATS_TEST_TMPDIR}/server.mcp.yaml"
   _write_profile_config "${cfg}" "linux-gentoo" "server" "openrc" "N" "N" "N"
   _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"

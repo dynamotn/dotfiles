@@ -114,16 +114,16 @@ global:
       args: ["@playwright/mcp@0.0.83"]
       env: {}
 {{- if eq .kind "pc" "laptop" "tablet" }}
-    # The Dybrain vault's own server (search, read, capture_fleeting,
-    # append_daily, create_permanent, create_literature, create_reference):
-    # it refuses `ai: sensitive` notes, which no community Obsidian server
-    # does. Only where Obsidian is installed.
+    # The Dybrain vault's own server (search, read, capture, create_*,
+    # link and health checks, edits, move/rename through Obsidian): it
+    # refuses `ai: sensitive` notes, which no community Obsidian server
+    # does. Only where Obsidian is installed; create_* also needs `node`.
     dybrain:
       command: uv
       args:
         - run
         - --script
-        - {{ printf "%s/Documents/Notes/99_System/99.03_Scripts/dev/vault-mcp.py" .chezmoi.homeDir | quote }}
+        - {{ printf "%s/Documents/DyBrain/99_System/99.03_Scripts/dev/vault-mcp.py" .chezmoi.homeDir | quote }}
       env: {}
 {{- end }}
     # github needs Docker and a GITHUB_PERSONAL_ACCESS_TOKEN in the agent's

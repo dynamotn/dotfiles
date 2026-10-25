@@ -183,12 +183,25 @@ community trees by default, the enterprise tree inside an enterprise config
 directory.
 
 The `dybrain` MCP server is the Obsidian vault's own script
-(`~/Documents/Notes/99_System/99.03_Scripts/dev/vault-mcp.py`, run with
+(`~/Documents/DyBrain/99_System/99.03_Scripts/dev/vault-mcp.py`, run with
 `uv run --script`), declared only on the `pc`, `laptop` and `tablet` kinds
-that install Obsidian. It refuses `ai: sensitive` notes. The `second-brain`
-agent rule tells every agent when to call its `capture_fleeting` and
-`append_daily` tools, and when a finished note (`create_permanent`,
-`create_literature`, `create_reference`) is due instead.
+that install Obsidian. It never reads, lists or writes `ai: sensitive`
+notes, and refuses writes to `ai: readonly` notes and templates. Its tools:
+
+| Group   | Tools |
+|---------|-------|
+| Read    | `search`, `read`, `lookup`, `links`, `backlinks`, `list_notes`, `inbox`, `daily_tasks` |
+| Health  | `check`, `wiki_kinds`, `wiki_health`, `frontmatter_summary` |
+| Capture | `capture_fleeting`, `append_daily` |
+| Create  | `create_permanent`, `create_literature`, `create_reference`, `create_note`, `create_person`, `create_asset` |
+| Edit    | `append_note`, `set_properties`, `move`, `rename` |
+
+The `create_*` tools render the vault's templates with `node`, and refuse a
+note that would become `ai: sensitive` (a private decision, an ancestor, a
+contact with personal data, a document or insurance asset). `move` and
+`rename` go through the running Obsidian app so links are updated, and
+refuse when Obsidian is closed, its CLI is off, or its window is hidden. The `second-brain`
+agent rule tells every agent when to call these tools.
 
 A `global.mcp` server named like an entry of `agents.claude.plugins`
 (`context7` and `context7@claude-plugins-official`) is left to that plugin
