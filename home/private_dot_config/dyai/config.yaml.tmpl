@@ -107,7 +107,11 @@ agents:
 # Opt-in presets pulled per project by `dyai use <name>`; kept out of the
 # global baseline so the discovery index stays lean. One preset per tool, so a
 # project pulls only what it uses. Subagent names resolve against the pinned
-# global.subagents repo (materialize finds a <name>.md anywhere in the tree).
+# global.subagents repo (materialize finds a <name>.md anywhere in the tree) —
+# so every name below is coupled to global.subagents[0].ref. A missing name
+# only warns at install time, never fails; re-verify these whenever that ref is
+# bumped. The "registry subagent names exist" bats test guards this when the
+# pinned repo is cached.
 registry:
   languages:
     go:

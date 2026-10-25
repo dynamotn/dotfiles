@@ -179,6 +179,28 @@ function _render_config {
   [[ "${overlap}" == "0" ]]
 }
 
+@test "every registry subagent name exists in the pinned subagent repo" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.sacheck.yaml"
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
+  local repo ref cache
+  repo="$(yq '.global.subagents[0].repo' "${out}")"
+  ref="$(yq '.global.subagents[0].ref' "${out}")"
+  # Match dyai::fetch_repo's cache layout (~/.cache/dyai/<repo|/=->-<ref>).
+  cache="${DOTFILES_REAL_HOME}/.cache/dyai/${repo//\//-}-${ref}"
+  [[ -d "${cache}" ]] || skip "pinned subagent repo not cached at ${cache}; run 'dyai use <preset>' once to populate"
+  local name
+  while IFS= read -r name; do
+    [[ -n "${name}" ]] || continue
+    # shellcheck disable=SC2312 # find yields the match or nothing; grep is the gate
+    find "${cache}" -type f -name "${name}.md" | grep -q . \
+      || fail "registry subagent '${name}' has no ${name}.md in ${repo}@${ref}"
+  done < <(yq '[.registry.languages[].subagents // [], .registry.infra[].subagents // [], .registry.presets[].subagents // []] | flatten | .[]' "${out}")
+}
+
 @test "config declares shared notify hooks and the approval default" {
   _require_chezmoi
   _require_yq
