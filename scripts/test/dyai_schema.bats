@@ -125,8 +125,8 @@ function _render_config {
   [[ "$(yq '.marketplaces | length' "${out}")" == "6" ]]
   [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
   [[ "$(yq '.marketplaces["agent-sec-ops-kit-skills"].source.source' "${out}")" == "git" ]]
-  # 54 plugins, including known entries
-  [[ "$(yq '.plugins | length' "${out}")" == "54" ]]
+  # 52 plugins, including known entries
+  [[ "$(yq '.plugins | length' "${out}")" == "52" ]]
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
   # policy
@@ -149,7 +149,7 @@ function _render_config {
   yq -e '.global.skills[] | select(. == "Eyadkelleh/awesome-skills-security@llm-testing")' "${out}" > /dev/null
   [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp-server ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
-  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "54" ]]
+  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "52" ]]
   [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "6" ]]
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
 }
