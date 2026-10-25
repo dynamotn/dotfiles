@@ -201,7 +201,7 @@ function _render_config {
   while IFS= read -r name; do
     [[ -n "${name}" ]] || continue
     # shellcheck disable=SC2312 # find yields the match or nothing; grep is the gate
-    find "${cache}" -type f -name "${name}.md" | grep -q . \
+    find "${cache}" -type f -name "${name}.md" | grep . > /dev/null \
       || fail "registry subagent '${name}' has no ${name}.md in ${repo}@${ref}"
   done < <(yq '[.registry.languages[].subagents // [], .registry.infra[].subagents // [], .registry.presets[].subagents // []] | flatten | .[]' "${out}")
 }
@@ -233,10 +233,10 @@ function _render_config {
   [[ "$(yq '.global.mcp | has("postgres")' "${out}")" == "false" ]]
   [[ "$(yq '.global.mcp | has("mysql")' "${out}")" == "false" ]]
   # github carries only the env var NAME, never a value.
-  yq '.global.mcp.github.args[]' "${out}" | grep -qx 'GITHUB_PERSONAL_ACCESS_TOKEN'
+  yq '.global.mcp.github.args[]' "${out}" | grep -x 'GITHUB_PERSONAL_ACCESS_TOKEN' > /dev/null
   # filesystem default scope is personal + community.
-  yq '.global.mcp.filesystem.args[]' "${out}" | grep -q 'Working/personal'
-  yq '.global.mcp.filesystem.args[]' "${out}" | grep -q 'Working/community'
+  yq '.global.mcp.filesystem.args[]' "${out}" | grep 'Working/personal' > /dev/null
+  yq '.global.mcp.filesystem.args[]' "${out}" | grep 'Working/community' > /dev/null
 }
 
 @test "config declares the baseline subagents from VoltAgent at a pinned ref" {
@@ -248,8 +248,8 @@ function _render_config {
   _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
   [[ "$(yq '.global.subagents[0].repo' "${out}")" == "VoltAgent/awesome-claude-code-subagents" ]]
   [[ "$(yq '.global.subagents[0].ref' "${out}")" == "408d3c9eee2d" ]]
-  yq '.global.subagents[0].include[]' "${out}" | grep -q '01-core-development'
-  yq '.global.subagents[0].include[]' "${out}" | grep -q '04-quality-security'
+  yq '.global.subagents[0].include[]' "${out}" | grep '01-core-development' > /dev/null
+  yq '.global.subagents[0].include[]' "${out}" | grep '04-quality-security' > /dev/null
 }
 
 @test "config declares a registry of language and infra presets" {
@@ -261,12 +261,12 @@ function _render_config {
   _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
   [[ "$(yq '.registry.languages.go.subagents[0]' "${out}")" == "golang-pro" ]]
   [[ "$(yq '.registry.infra.terraform.subagents[0]' "${out}")" == "terraform-engineer" ]]
-  yq '.registry.languages.go.skills[]' "${out}" | grep -q 'golang-code-style'
+  yq '.registry.languages.go.skills[]' "${out}" | grep 'golang-code-style' > /dev/null
   # Phase 4: the full tool-boundary taxonomy
   [[ "$(yq '.registry.languages.frontend.subagents[0]' "${out}")" == "react-specialist" ]]
   [[ "$(yq '.registry.languages.go.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.infra.docker.subagents[0]' "${out}")" == "docker-expert" ]]
-  yq '.registry.infra.aws.skills[]' "${out}" | grep -q 'aws-iam'
+  yq '.registry.infra.aws.skills[]' "${out}" | grep 'aws-iam' > /dev/null
   [[ "$(yq '.registry.infra.cicd.skills | length' "${out}")" == "3" ]]
   [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "3" ]]
@@ -288,6 +288,6 @@ function _render_config {
   [[ "$(yq '.registry.presets.mobile.subagents[0]' "${out}")" == "mobile-developer" ]]
   [[ "$(yq '.registry.presets.desktop.subagents[0]' "${out}")" == "electron-pro" ]]
   [[ "$(yq '.registry.presets.realtime.subagents | length' "${out}")" == "2" ]]
-  yq '.global.subagents[0].exclude[]' "${out}" | grep -qx 'electron-pro'
-  yq '.global.subagents[0].exclude[]' "${out}" | grep -qx 'graphql-architect'
+  yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'electron-pro' > /dev/null
+  yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'graphql-architect' > /dev/null
 }

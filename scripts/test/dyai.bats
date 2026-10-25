@@ -184,7 +184,7 @@ CFG
   git -C "${proj}" init -q
   (cd "${proj}" && dyai::use ops)
   [ -f "${proj}/.claude/commands/deploy.md" ]
-  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'commands/deploy.md'
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep 'commands/deploy.md' > /dev/null
   run git -C "${proj}" check-ignore .claude/commands/deploy.md
   assert_success
   (cd "${proj}" && dyai::rm ops)
@@ -211,7 +211,7 @@ CFG
   git -C "${proj}" init -q
   (cd "${proj}" && dyai::use db)
   grep -q 'STUB claude mcp add-json --scope local pg' "${HOME}/calls.log"
-  yq -p=toml '.materialized_mcp[]' "${proj}/.dyai.toml" | grep -qx 'pg'
+  yq -p=toml '.materialized_mcp[]' "${proj}/.dyai.toml" | grep -x 'pg' > /dev/null
   # idempotent: re-materialize does not re-add
   : > "${HOME}/calls.log"
   (cd "${proj}" && dyai::materialize)
@@ -268,7 +268,7 @@ CFG
   mkdir -p "${proj}"
   git -C "${proj}" init -q
   (cd "${proj}" && dyai::use go)
-  yq -p=toml '.use[]' "${proj}/.dyai.toml" | grep -qx 'go'
+  yq -p=toml '.use[]' "${proj}/.dyai.toml" | grep -x 'go' > /dev/null
   grep -qxF '/.dyai.toml' "${proj}/.git/info/exclude"
   # idempotent: using again does not duplicate
   (cd "${proj}" && dyai::use go)
@@ -323,7 +323,7 @@ CFG
   (cd "${proj}" && dyai::use go)
   [ -f "${proj}/.claude/agents/golang-pro.md" ]
   grep -q 'STUB bunx .* add owner/repo@golang-code-style' "${HOME}/calls.log"
-  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'golang-pro.md'
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep 'golang-pro.md' > /dev/null
   # idempotent: second run leaves the subagent unchanged
   local before
   before="$(cat "${proj}/.claude/agents/golang-pro.md")"
@@ -349,7 +349,7 @@ CFG
   (cd "${proj}" && dyai::use security)
   grep -q 'STUB bunx .* add owner/repo@threat-model' "${HOME}/calls.log"
   grep -q 'STUB bunx .* add owner/repo@fuzzing' "${HOME}/calls.log"
-  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'threat-model'
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep 'threat-model' > /dev/null
   run git -C "${proj}" check-ignore .agents/skills/threat-model
   assert_success
   # a skills-only preset creates no subagents dir
@@ -446,7 +446,7 @@ CFG
   run dyai::use python
   assert_failure
   [ -f "${proj}/.claude/agents/golang-pro.md" ]
-  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'golang-pro.md'
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep 'golang-pro.md' > /dev/null
 }
 
 @test "dyai::ls shows the global baseline and this project's presets" {

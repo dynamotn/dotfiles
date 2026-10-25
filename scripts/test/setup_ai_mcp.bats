@@ -198,9 +198,9 @@ CFG
   run bash "${HOOK}"
   assert_success
   # Default config: personal + community.
-  grep '^DEFAULT|' "${HOME}/claude.log" | grep -q 'Working/personal'
+  grep '^DEFAULT|' "${HOME}/claude.log" | grep 'Working/personal' > /dev/null
   # Enterprise config dir: scoped to the enterprise tree, not personal/community.
-  grep 'enterprise/U3T/.claude|' "${HOME}/claude.log" | grep -q 'Working/enterprise'
+  grep 'enterprise/U3T/.claude|' "${HOME}/claude.log" | grep 'Working/enterprise' > /dev/null
   run grep 'enterprise/U3T/.claude|' "${HOME}/claude.log"
   refute_output --partial 'Working/personal'
 }
