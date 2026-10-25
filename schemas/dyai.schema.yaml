@@ -133,6 +133,29 @@ properties:
       hooks:
         type: object
         additionalProperties: { $ref: "#/definitions/hook" }
+      lsp:
+        type: object
+        additionalProperties: false
+        description: >
+          Neovim's configured language servers, shared with every agent
+          (dyai-lsp).
+        properties:
+          exclude:
+            type: array
+            items: { type: string }
+            description: Server names never shared with any agent.
+          serena:
+            type: object
+            additionalProperties: false
+            description: >
+              The serena MCP bridge Codex, Gemini and agy use for the
+              languages Claude's LSP plugin covers natively.
+            properties:
+              ref: { type: string, description: "serena commit SHA, never a moving branch" }
+              contexts:
+                type: object
+                description: serena --context value, keyed by agent id.
+                additionalProperties: { type: string }
       installers:
         type: object
         description: >

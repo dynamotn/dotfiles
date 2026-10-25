@@ -631,12 +631,14 @@ function __dyai_lsp_serena_shim_targets {
 
 #######################################
 # @description Regenerate the serena PATH shims for gopls/lua_ls, removing any
-#   shim no longer wanted (the shim dir is entirely dyai-owned)
+#   shim no longer wanted (the shim dir is entirely dyai-owned). A shim whose
+#   content already matches is left untouched, so a repeat run changes no
+#   file's mtime (Ruling 12).
 # @arg $1 string Shim directory
 # @stdout The number of shims now present (0, 1 or 2)
 #######################################
 function __dyai_lsp_write_serena_shims {
-  local shim_dir targets wanted shim_file base n i quoted tmp dest
+  local shim_dir targets wanted shim_file base n i quoted wanted_content dest current tmp
   dybatpho::expect_args shim_dir -- "$@"
   dybatpho::ensure_dir "${shim_dir}" > /dev/null
   targets="$(__dyai_lsp_serena_shim_targets)"
@@ -653,10 +655,17 @@ function __dyai_lsp_write_serena_shims {
   for ((i = 0; i < n; i++)); do
     base="$(jq -r ".[${i}].basename" <<< "${targets}")"
     quoted="$(jq -r ".[${i}].argv | map(@sh) | join(\" \")" <<< "${targets}")"
-    dybatpho::create_temp tmp "sh" "dyai-lsp-shim" "${shim_dir}"
-    printf '#!/usr/bin/env bash\nexec %s "$@"\n' "${quoted}" > "${tmp}"
-    chmod +x "${tmp}"
+    wanted_content="$(printf '#!/usr/bin/env bash\nexec %s "$@"\n' "${quoted}")"
     dest="$(dybatpho::path_join "${shim_dir}" "${base}")"
+    if dybatpho::is file "${dest}"; then
+      current="$(< "${dest}")"
+      if [[ "${current}" == "${wanted_content}" ]]; then
+        continue
+      fi
+    fi
+    dybatpho::create_temp tmp "sh" "dyai-lsp-shim" "${shim_dir}"
+    printf '%s' "${wanted_content}" > "${tmp}"
+    chmod +x "${tmp}"
     mv "${tmp}" "${dest}"
   done
   printf '%s\n' "${n}"
@@ -819,4 +828,25 @@ function dyai_lsp::setup_serena {
   done
 
   dyai_lsp::setup_serena_config
+}
+
+#######################################
+# @description Run every LSP-sharing step: export Neovim's language servers,
+#   then write them into every agent that is on PATH (Claude, Copilot,
+#   opencode, Hermes, serena/Codex/Gemini/agy). Each step warns and continues
+#   on its own failure, so one missing tool (nvim, claude, uvx, ...) or a
+#   serena skip never aborts the caller; `dyai::install` relies on this to
+#   still finish and install plugins. Callers may run under `set -e`, so
+#   every sub-call is individually guarded.
+# @noargs
+#######################################
+function dyai_lsp::setup {
+  dyai_lsp::export || dybatpho::warn "Could not export Neovim's language servers, continuing"
+  if dybatpho::is command claude; then
+    dyai_lsp::setup_claude || dybatpho::warn "Could not set up Claude's LSP plugin, continuing"
+  fi
+  dyai_lsp::setup_copilot || dybatpho::warn "Could not set up Copilot's LSP config, continuing"
+  dyai_lsp::setup_opencode || dybatpho::warn "Could not set up opencode's LSP config, continuing"
+  dyai_lsp::setup_hermes || dybatpho::warn "Could not set up Hermes' LSP config, continuing"
+  dyai_lsp::setup_serena || dybatpho::warn "Could not set up serena's LSP bridge, continuing"
 }

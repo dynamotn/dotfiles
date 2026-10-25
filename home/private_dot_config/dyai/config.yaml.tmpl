@@ -135,6 +135,15 @@ global:
     claude-mem:
       commands:
         opencode: "npx -y claude-mem install --ide opencode"
+  # Neovim's configured language servers, shared with every agent (dyai-lsp).
+  # exclude keeps noisy/non-code-intelligence servers out of every agent;
+  # serena.ref pins the MCP bridge Codex, Gemini and agy use for the
+  # languages Claude's LSP plugin covers natively (ls_base_cmd override).
+  lsp:
+    exclude: [harper_ls, typos_lsp, sonarlint, copilot, ast_grep, tailwindcss]
+    serena:
+      ref: abb0a0f01b94bc8050086f0fb860077d17730324
+      contexts: { codex: codex, gemini: ide, agy: antigravity }
   # Shared settings translated into each agent's settings file.
   policy:
 {{ $d.policy | toYaml | indent 4 }}

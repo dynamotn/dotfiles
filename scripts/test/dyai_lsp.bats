@@ -636,3 +636,19 @@ YML
   after="$(stat -c %Y "${file}")"
   [[ "${before}" == "${after}" ]]
 }
+
+@test "dyai_lsp::setup_serena is a no-op on a second run (gopls shim mtime unchanged)" {
+  _write_serena_manifest
+  _stub uvx
+  _stub gemini
+  _configure_serena
+  dyai_lsp::setup_serena
+  local shim before after
+  shim="${XDG_DATA_HOME}/dyai/serena-shims/gopls"
+  [[ -x "${shim}" ]]
+  before="$(stat -c %Y "${shim}")"
+  sleep 1
+  dyai_lsp::setup_serena
+  after="$(stat -c %Y "${shim}")"
+  [[ "${before}" == "${after}" ]]
+}

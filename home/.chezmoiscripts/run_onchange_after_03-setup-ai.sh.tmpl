@@ -12,6 +12,9 @@ dybatpho::register_common_handlers
 # dyai config hash: {{ include (joinPath .chezmoi.sourceDir "private_dot_config/dyai/config.yaml.tmpl") | sha256sum }}
 # dyai data hash: {{ include (joinPath .chezmoi.sourceDir ".chezmoitemplates/ai/dyai-data.yaml.tmpl") | sha256sum }}
 # dyai lib hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai.sh") | sha256sum }}
+# dyai lsp lib hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai_lsp.sh") | sha256sum }}
+# dyai lsp export hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai_lsp_export.lua") | sha256sum }}
+# dyai lsp exec hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai_lsp_exec.sh") | sha256sum }}
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai.sh"
 dybatpho::header "Setup AI"
 dyai::install

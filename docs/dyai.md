@@ -211,6 +211,44 @@ from the policy later is not removed. The two files dyai owns are rewritten
 whole. The path rules reach only Claude and opencode, so for the other agents
 the credential-store rules still rest on the instructions text alone.
 
+## LSP
+
+`dyai install` also shares Neovim's configured language servers with every
+other agent (`dyai_lsp::setup`, run before marketplaces/plugins):
+
+- **Export.** Headless Neovim is asked for its configured servers, minus
+  `global.lsp.exclude` (noisy or non-code-intelligence ones: `harper_ls`,
+  `typos_lsp`, `sonarlint`, `copilot`, `ast_grep`, `tailwindcss`), into a
+  manifest at `${XDG_CACHE_HOME:-~/.cache}/dyai/lsp.json`.
+- **Claude** gets its own `dyai-lsp` plugin (registered via a local
+  marketplace), built from that manifest.
+- **Copilot, opencode and Hermes** get the same servers merged into each
+  one's own LSP config format.
+- **Codex, Gemini and agy** have no native LSP integration, so they get the
+  servers bridged through a `serena` MCP server instead
+  (`global.lsp.serena.ref` pins the commit; `global.lsp.serena.contexts`
+  sets each agent's `--context`). Two languages (`gopls`, `lua_ls`) are
+  PATH-only in serena, so dyai also writes small shims for them.
+- A hand-written entry you already have in any of these configs is left
+  alone — dyai tracks only the keys it wrote itself and never overwrites one
+  it does not own, warning instead.
+
+Every server command is wrapped by `dyai-lsp-exec`, a trust gate: inside a
+directory Neovim holds untrusted (`.worktrees/dyreview-*`, released only by
+`:DyReview trust` in that Neovim session), the language server is refused
+rather than started. Everywhere else it `exec`s straight through.
+
+Any step here failing (no `nvim`, no `uvx`, `global.lsp.serena.ref` unset,
+...) only warns; `dyai install` still finishes and installs plugins.
+
+**Refreshing.** Re-run `dyai install` whenever Neovim gains or loses a
+language server (e.g. after `:Mason` installs one) to update every agent.
+
+**Fresh machine.** The apply-time hook runs before Neovim's own setup, so it
+cannot see servers Neovim has not installed yet. Run `dyai install` once by
+hand after Neovim's first start on a new machine, so every agent picks up
+the servers it just installed.
+
 ## Adding to the registry
 
 Add a preset under the matching `registry` group in `config.yaml.tmpl`, listing

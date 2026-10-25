@@ -715,3 +715,42 @@ CFG
   (cd "${proj}" && dyai::rm go)
   [ -f "${proj}/.claude/agents/golang-pro.md" ]
 }
+
+@test "dyai::install runs the LSP step before marketplaces/plugins and tolerates a failing nvim export" {
+  _stub claude
+  _stub bunx
+  _stub gemini
+  # a failing nvim stub exercises dyai_lsp::export's failure path; it must not
+  # abort dyai::install or the plugin install that follows
+  printf '#!/usr/bin/env bash\nexit 1\n' > "${HOME}/.local/bin/nvim"
+  chmod +x "${HOME}/.local/bin/nvim"
+  # The real machine has uvx/codex/gemini/agy on PATH outside the sandbox bin
+  # (mise shims, bun bin, ~/.local/bin); restrict PATH to the sandbox bin plus
+  # the system dirs jq/yq/coreutils actually live in, so serena's setup finds
+  # none of those real launchers and skips instead of touching the network or
+  # the real user's agent configs.
+  # shellcheck disable=SC2312 # jq/yq are always on this test runner's real PATH
+  ln -s "$(command -v jq)" "${HOME}/.local/bin/jq"
+  # shellcheck disable=SC2312 # jq/yq are always on this test runner's real PATH
+  ln -s "$(command -v yq)" "${HOME}/.local/bin/yq"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << 'CFG'
+global:
+  skills: []
+  mcp: {}
+agents:
+  claude:
+    plugins:
+      - dyai-lsp@dyai-lsp
+CFG
+  PATH="${HOME}/.local/bin:/usr/bin:/bin" run dyai::install
+  assert_success
+  grep -q 'STUB claude plugin marketplace add' "${HOME}/calls.log"
+  grep -q 'STUB claude plugin install dyai-lsp@dyai-lsp' "${HOME}/calls.log"
+  local market_line plugin_line
+  # shellcheck disable=SC2312 # a missing match yields an empty line number, which fails the final compare
+  market_line="$(grep -n 'STUB claude plugin marketplace add' "${HOME}/calls.log" | head -1 | cut -d: -f1)"
+  # shellcheck disable=SC2312 # a missing match yields an empty line number, which fails the final compare
+  plugin_line="$(grep -n 'STUB claude plugin install dyai-lsp@dyai-lsp' "${HOME}/calls.log" | head -1 | cut -d: -f1)"
+  [[ "${market_line}" -lt "${plugin_line}" ]]
+}

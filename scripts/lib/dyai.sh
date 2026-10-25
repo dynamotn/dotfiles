@@ -1444,6 +1444,10 @@ function dyai::install {
     dybatpho::warn "dyai config not found at ${CONFIG_FILE}, skip setting up AI agents"
     return 0
   fi
+  # Run before marketplaces/plugins: setup_claude registers the dyai-lsp
+  # marketplace that `claude plugin install dyai-lsp@dyai-lsp` (run by
+  # setup_plugins) needs to find.
+  dyai_lsp::setup
   if dybatpho::is command claude; then
     dyai::setup_marketplaces
     dyai::setup_plugins
