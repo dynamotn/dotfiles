@@ -83,6 +83,16 @@ optional_plugins:
   - redis-development@claude-plugins-official
   - duckdb-skills@claude-plugins-official
 
+# Plugins still installed on machines set up before dyai-lsp replaced them,
+# turned off explicitly (`enabledPlugins: false`) so Claude never runs them
+# next to dyai-lsp's servers for the same files. Not uninstalled.
+disabled_plugins:
+  - pyright-lsp@claude-plugins-official
+  - lua-lsp@claude-plugins-official
+  - typescript-lsp@claude-plugins-official
+  - gopls-lsp@claude-plugins-official
+  - rust-analyzer-lsp@claude-plugins-official
+
 policy:
   # Harness-enforced versions of the credentials and destructive-commands rules
   # in ai/: a rule here holds even when the prose is lost from context. The rtk

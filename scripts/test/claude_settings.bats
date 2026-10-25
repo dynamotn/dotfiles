@@ -45,6 +45,21 @@ function _render_settings {
   jq -e '.attribution.pr == ""' "${out}" > /dev/null
 }
 
+@test "settings.json turns off the official LSP plugins dyai-lsp replaces" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json"
+  if ! _render_settings "${out}"; then
+    fail "render failed: $(< "${out}.err")"
+  fi
+  local plugin
+  for plugin in pyright-lsp lua-lsp typescript-lsp gopls-lsp rust-analyzer-lsp; do
+    jq -e --arg p "${plugin}@claude-plugins-official" '.enabledPlugins[$p] == false' "${out}" > /dev/null \
+      || fail "${plugin}@claude-plugins-official is not disabled"
+  done
+  jq -e '.enabledPlugins["dyai-lsp@dyai-lsp"] == true' "${out}" > /dev/null \
+    || fail "dyai-lsp@dyai-lsp is not enabled"
+}
+
 @test "settings.json denies the credential stores to Read and Edit" {
   _require_chezmoi
   local out="${BATS_TEST_TMPDIR}/settings.json"

@@ -139,6 +139,12 @@ function _render_config {
   yq -e '.plugins[] | select(. == "dyai-lsp@dyai-lsp")' "${out}" > /dev/null
   run yq -e '.plugins[] | select(. == "pyright-lsp@claude-plugins-official")' "${out}"
   assert_failure
+  # ...and still-installed copies of them are switched off, never enabled
+  # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+  [[ "$(yq '.disabled_plugins | length' "${out}")" == "5" ]]
+  yq -e '.disabled_plugins[] | select(. == "rust-analyzer-lsp@claude-plugins-official")' "${out}" > /dev/null
+  # shellcheck disable=SC2016,SC2312 # $p is a yq variable; a bad read fails the comparison
+  [[ "$(yq '[.disabled_plugins[] as $p | .plugins[] | select(. == $p)] | length' "${out}")" == "0" ]]
   # policy
   [[ "$(yq '.policy.permissions.defaultMode' "${out}")" == "acceptEdits" ]]
   [[ "$(yq '.policy.theme' "${out}")" == "auto" ]]
