@@ -492,7 +492,20 @@ function dyai::setup_policy {
     dyai::json_set "${file}" '.permission.edit |=
       if type == "object" then .["*"] = "allow" else "allow" end'
   fi
-  # codex, copilot and agy have no edits-only approval preset; left to the user.
+  if dybatpho::is command codex; then
+    # Nearest Codex match: edits inside the workspace, asking before escalation.
+    # Values the user already set win. The keys go first: yq writes keys in
+    # order, and a scalar after a [[table]] header would land inside it.
+    local chome
+    chome="${CODEX_HOME:-$(dybatpho::path_join "${HOME}" ".codex")}"
+    file="$(dybatpho::path_join "${chome}" "config.toml")"
+    dybatpho::is dir "${chome}" || mkdir -p "${chome}"
+    dybatpho::is file "${file}" || : > "${file}"
+    yq -p=toml -o=toml -i '{"sandbox_mode": "workspace-write",
+      "approval_policy": "on-request"} * .' "${file}" \
+      || dybatpho::warn "Could not write approval policy into ${file}"
+  fi
+  # copilot and agy have no edits-only approval preset; left to the user.
 }
 
 #######################################
@@ -760,18 +773,21 @@ function dyai::hooks_codex {
   dybatpho::is dir "${chome}" || mkdir -p "${chome}"
   dybatpho::is file "${file}" || : > "${file}"
   # shellcheck disable=SC2312 # a read error on a malformed file just forces a rewrite
-  cur_stop="$(yq -p=toml -o=json -I=0 '.hooks.Stop.hooks[0].command // ""' \
+  cur_stop="$(yq -p=toml -o=json -I=0 '.hooks.Stop[0].hooks[0].command // ""' \
     "${file}" 2> /dev/null || echo '""')"
   # shellcheck disable=SC2312 # a read error on a malformed file just forces a rewrite
-  cur_input="$(yq -p=toml -o=json -I=0 '.hooks.Notification.hooks[0].command // ""' \
+  cur_input="$(yq -p=toml -o=json -I=0 '.hooks.PermissionRequest[0].hooks[0].command // ""' \
     "${file}" 2> /dev/null || echo '""')"
   if [[ "${cur_stop}" == "\"${stop}\"" && "${cur_input}" == "\"${input}\"" ]]; then
     dybatpho::debug "Codex notify hooks already set in ${file}"
     return 0
   fi
+  # Each event is a list of matcher groups whose handlers need a type; Codex has
+  # no Notification event, so waiting for input is its PermissionRequest.
   if S="${stop}" I="${input}" yq -p=toml -o=toml -i \
-    '.hooks.Stop.hooks = [{"command": strenv(S)}]
-     | .hooks.Notification.hooks = [{"command": strenv(I)}]' "${file}"; then
+    '.hooks.Stop = [{"hooks": [{"type": "command", "command": strenv(S)}]}]
+     | .hooks.PermissionRequest = [{"hooks": [{"type": "command", "command": strenv(I)}]}]
+     | del(.hooks.Notification)' "${file}"; then
     dybatpho::info "Wrote notify hooks into ${file}"
   else
     dybatpho::warn "Could not write notify hooks into ${file}"
