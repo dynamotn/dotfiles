@@ -67,6 +67,12 @@ global:
       args: []
       env:
         HF_HUB_DISABLE_TELEMETRY: "1"
+    # dyai itself: lets an agent list the registry presets and opt the
+    # project it works in into one (`dyai mcp`, scripts/lib/dyai_mcp.sh).
+    dyai:
+      command: {{ printf "%s/.local/bin/dyai" .chezmoi.homeDir | quote }}
+      args: ["mcp"]
+      env: {}
     # Community servers from the official modelcontextprotocol registry (and
     # Upstash's context7), pinned. Node servers run via bunx, Python via uvx,
     # github via docker. An agent missing the launcher is skipped by the hook.

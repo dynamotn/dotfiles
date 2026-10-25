@@ -31,9 +31,17 @@ plus a registry of opt-in presets a project pulls in on demand.
 | `dyai use <name>` | Opt the current project into a registry preset: record it and materialize its extensions into the project. |
 | `dyai ls` | Print the global baseline, the registry, and this project's selected presets. |
 | `dyai rm <name>` | Drop a preset from this project and remove the files it added. |
+| `dyai mcp` | Serve `ls`, `use` and `rm` as MCP tools on stdio, so an agent can pull in a preset itself. |
 
 `dyai use`, `ls` and `rm` operate on the git repository you run them in
 (`dyai use` errors outside one).
+
+`dyai mcp` is registered in `global.mcp` as the `dyai` server, so every agent
+gets it. Its tools run in the agent's working directory, the same as the
+commands, with stdin closed. A failed command comes back as a tool error, not a
+protocol error, and the server keeps running. A preset name that is not plain
+`[A-Za-z0-9._-]` is refused. What a preset adds, MCP servers and plugins at
+least, may only load on the agent's next session.
 
 ## Configuration
 

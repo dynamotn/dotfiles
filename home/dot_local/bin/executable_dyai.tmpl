@@ -19,6 +19,7 @@ function _spec_main {
   dybatpho::opts::cmd use _spec_use
   dybatpho::opts::cmd ls _spec_ls
   dybatpho::opts::cmd rm _spec_rm
+  dybatpho::opts::cmd mcp _spec_mcp
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
@@ -61,6 +62,15 @@ function _spec_rm {
 }
 
 #######################################
+# @description Spec of mcp command
+# @noargs
+#######################################
+function _spec_mcp {
+  dybatpho::opts::setup "Serve ls, use and rm to agents as an MCP server on stdio" MCP_ARGS action:"_mcp"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_mcp"
+}
+
+#######################################
 # @description Run the global install
 # @noargs
 #######################################
@@ -92,6 +102,14 @@ function _ls {
 #######################################
 function _rm {
   dyai::rm "${PRESET}"
+}
+
+#######################################
+# @description Serve the preset commands over MCP until stdin closes
+# @noargs
+#######################################
+function _mcp {
+  dyai_mcp::serve
 }
 
 dybatpho::generate_from_spec _spec_main "$@"
