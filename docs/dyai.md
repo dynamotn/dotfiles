@@ -86,7 +86,7 @@ Grouped by tool boundary so a project pulls in only what it uses:
   `rust`, `typescript`, `frontend`, `vue`, `angular`, `java`, …)
 - `infra` — `terraform`, `terragrunt`, `kubernetes`, `docker`, `aws`, `cicd`,
   `database`, `ansible`
-- `presets` — cross-language domains: `testing`, `security`, `datascience`,
+- `presets` — cross-language domains: `testing`, `security`, `research`, `datascience`,
   `docs`, `shell`, and the domain agents kept out of the baseline (`desktop`,
   `mobile`, `graphql`, `realtime`), and `lifeos` (the thinking skills of
   [LifeOS](https://github.com/danielmiessler/LifeOS) that run without its

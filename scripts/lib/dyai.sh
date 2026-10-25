@@ -887,11 +887,18 @@ function dyai::setup_subagents {
         [[ "${name}" == "README.md" ]] && continue
         leaf="${name%.md}"
         # shellcheck disable=SC2312 # jq membership test; a bad read is false
+        dest="$(dybatpho::path_join "${agents_dir}" "${name}")"
         if jq -e --arg n "${leaf}" 'index($n) != null' <<< "${excl}" > /dev/null; then
-          dybatpho::debug "subagent ${leaf} excluded from the global baseline"
+          # An earlier baseline may have installed it. Remove it only while
+          # it is still the pinned copy; one you edited is yours to keep.
+          if dybatpho::is file "${dest}" && cmp -s "${md}" "${dest}"; then
+            rm -f -- "${dest}"
+            dybatpho::info "Removed subagent ${leaf}, now excluded from the baseline"
+          else
+            dybatpho::debug "subagent ${leaf} excluded from the global baseline"
+          fi
           continue
         fi
-        dest="$(dybatpho::path_join "${agents_dir}" "${name}")"
         if ! dybatpho::is file "${dest}" || ! cmp -s "${md}" "${dest}"; then
           if cp -- "${md}" "${dest}"; then
             dybatpho::info "Installed subagent ${leaf}"

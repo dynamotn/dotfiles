@@ -130,12 +130,18 @@ agents:
   claude: {}
 CFG
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  # An earlier baseline installed both: graphql-architect untouched, and
+  # electron-pro edited by the user afterwards.
+  mkdir -p "${HOME}/.claude/agents"
+  cp -- "${src}/categories/01-core-development/graphql-architect.md" "${HOME}/.claude/agents/"
+  printf -- '---\nname: electron-pro\n---\nmine\n' > "${HOME}/.claude/agents/electron-pro.md"
   dyai::setup_subagents
   # category install minus the two excluded, plus the one file-include
   [ -f "${HOME}/.claude/agents/backend-developer.md" ]
   [ -f "${HOME}/.claude/agents/golang-pro.md" ]
-  [ ! -f "${HOME}/.claude/agents/electron-pro.md" ]
+  # The pinned copy of a now-excluded agent goes; the edited one stays.
   [ ! -f "${HOME}/.claude/agents/graphql-architect.md" ]
+  grep -qx 'mine' "${HOME}/.claude/agents/electron-pro.md"
 }
 
 @test "dyai::setup_installers runs a per-agent installer once, only for present agents" {
