@@ -1,0 +1,97 @@
+#!{{ .bash }}
+# @file dyai
+# @brief Manage AI-agent extensions (skills, MCP, subagents, plugins) like mise does tools
+# @description `dyai install` brings every supported AI agent in line with the
+# global config `~/.config/dyai/config.yaml`; `dyai use <name>` (later) opts a
+# project into a registry preset. The global install logic lives in
+# `scripts/lib/dyai.sh`, shared with the setup hook.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules cli
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai.sh"
+
+#######################################
+# @description Spec of dyai
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Manage AI-agent extensions across every agent" MAIN_ARGS
+  dybatpho::opts::cmd install _spec_install
+  dybatpho::opts::cmd use _spec_use
+  dybatpho::opts::cmd ls _spec_ls
+  dybatpho::opts::cmd rm _spec_rm
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Spec of install command
+# @noargs
+#######################################
+function _spec_install {
+  dybatpho::opts::setup "Apply the global config to every installed agent" INSTALL_ARGS action:"_install"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_install"
+}
+
+#######################################
+# @description Spec of use command
+# @noargs
+#######################################
+function _spec_use {
+  dybatpho::opts::setup "Opt this project into a registry preset" USE_ARGS action:"_use"
+  dybatpho::opts::arg "Preset name (language, infra, or preset)" PRESET required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_use"
+}
+
+#######################################
+# @description Spec of ls command
+# @noargs
+#######################################
+function _spec_ls {
+  dybatpho::opts::setup "List the global baseline and this project's presets" LS_ARGS action:"_ls"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_ls"
+}
+
+#######################################
+# @description Spec of rm command
+# @noargs
+#######################################
+function _spec_rm {
+  dybatpho::opts::setup "Remove a preset from this project" RM_ARGS action:"_rm"
+  dybatpho::opts::arg "Preset name" PRESET required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_rm"
+}
+
+#######################################
+# @description Run the global install
+# @noargs
+#######################################
+function _install {
+  dybatpho::header "Setup AI"
+  dyai::install
+  dybatpho::success "Setup AI"
+}
+
+#######################################
+# @description Per-project preset selection (coming in a later phase)
+# @noargs
+#######################################
+function _use {
+  dybatpho::die "dyai use is not implemented yet"
+}
+
+#######################################
+# @description List presets (coming in a later phase)
+# @noargs
+#######################################
+function _ls {
+  dybatpho::die "dyai ls is not implemented yet"
+}
+
+#######################################
+# @description Remove a preset (coming in a later phase)
+# @noargs
+#######################################
+function _rm {
+  dybatpho::die "dyai rm is not implemented yet"
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

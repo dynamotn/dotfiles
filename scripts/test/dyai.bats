@@ -52,3 +52,21 @@ EOF
   assert_success
   assert_output --partial "dyai config not found"
 }
+
+@test "dyai --help lists the install subcommand" {
+  render_template "home/dot_local/bin/executable_dyai.tmpl" "${BATS_TEST_TMPDIR}/dyai"
+  run bash "${BATS_TEST_TMPDIR}/dyai" --help
+  assert_success
+  assert_output --partial "install"
+}
+
+@test "dyai install runs the global setup" {
+  _stub claude
+  _stub bunx
+  _stub gemini
+  _write_config
+  render_template "home/dot_local/bin/executable_dyai.tmpl" "${BATS_TEST_TMPDIR}/dyai"
+  run bash "${BATS_TEST_TMPDIR}/dyai" install
+  assert_success
+  grep -q 'STUB claude mcp add-json --scope user laya' "${HOME}/calls.log"
+}
