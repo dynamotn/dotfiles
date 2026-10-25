@@ -8,6 +8,7 @@
     "chrome-devtools-mcp@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
+    "claude-mem@thedotmack": true,
     "claude-security@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
@@ -84,6 +85,12 @@
     "superpowers-marketplace": {
       "source": {
         "repo": "obra/superpowers-marketplace",
+        "source": "github"
+      }
+    },
+    "thedotmack": {
+      "source": {
+        "repo": "thedotmack/claude-mem",
         "source": "github"
       }
     },

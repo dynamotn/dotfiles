@@ -102,6 +102,14 @@ global:
     input:
       event: input
       run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Waiting for your input!' --icon=dialog-information; true"
+  # Tools with their own per-agent installer, run once by `dyai install`.
+  installers:
+    # claude-mem (memory across sessions). Claude gets it via the plugin above
+    # (claude-mem@thedotmack); other agents use its own installer. Only opencode
+    # has a documented --ide flag today; add others once their flag is known.
+    claude-mem:
+      commands:
+        opencode: "npx -y claude-mem install --ide opencode"
   # Shared settings translated into each agent's settings file.
   policy:
 {{ $d.policy | toYaml | indent 4 }}

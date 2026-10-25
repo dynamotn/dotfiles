@@ -121,12 +121,12 @@ function _render_config {
   if ! _render_named "ai/dyai-data.yaml.tmpl" "${out}"; then
     fail "chezmoi could not render the data partial: $(cat "${out}.err")"
   fi
-  # 6 marketplaces, including a github and the git one
-  [[ "$(yq '.marketplaces | length' "${out}")" == "6" ]]
+  # 7 marketplaces, including a github and the git one
+  [[ "$(yq '.marketplaces | length' "${out}")" == "7" ]]
   [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
   [[ "$(yq '.marketplaces["agent-sec-ops-kit-skills"].source.source' "${out}")" == "git" ]]
-  # 52 plugins, including known entries
-  [[ "$(yq '.plugins | length' "${out}")" == "52" ]]
+  # 53 plugins, including known entries
+  [[ "$(yq '.plugins | length' "${out}")" == "53" ]]
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
   # policy
@@ -155,8 +155,8 @@ function _render_config {
   assert_failure
   [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp-server ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
-  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "52" ]]
-  [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "6" ]]
+  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "53" ]]
+  [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "7" ]]
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
 }
 
