@@ -188,6 +188,8 @@ registry:
         - vercel-labs/agent-skills@vercel-react-best-practices
         - leonxlnx/taste-skill@design-taste-frontend
         - addyosmani/web-quality-skills@accessibility
+        - addyosmani/web-quality-skills@core-web-vitals
+        - addyosmani/web-quality-skills@performance
         - affaan-m/ecc@react-testing
         - affaan-m/ecc@react-performance
     vue:
@@ -246,9 +248,16 @@ registry:
         - flutter/agent-plugins@flutter-apply-architecture-best-practices
         - dart-lang/skills@dart-add-unit-test
         - affaan-m/ecc@dart-flutter-patterns
+        - flutter/skills@flutter-add-widget-test
+        - flutter/skills@flutter-fix-layout-issues
   infra:
     terraform:
       subagents: [terraform-engineer]
+      skills:
+        - hashicorp/agent-skills@terraform-style-guide
+        - hashicorp/agent-skills@terraform-test
+        - hashicorp/agent-skills@refactor-module
+        - hashicorp/agent-skills@terraform-search-import
     kubernetes:
       subagents: [kubernetes-specialist]
       skills:
@@ -269,6 +278,8 @@ registry:
         - wshobson/agents@github-actions-templates
         - wshobson/agents@gitlab-ci-patterns
         - wshobson/agents@gitops-workflow
+        - openai/skills@gh-fix-ci
+        - openai/skills@gh-address-comments
     database:
       subagents: [postgres-pro]
       plugins:
@@ -302,6 +313,19 @@ registry:
       skills:
         - akin-ozer/cc-devops-skills@ansible-validator
         - akin-ozer/cc-devops-skills@ansible-generator
+    # Workers, Wrangler and Durable Objects, from Cloudflare's own skills repo.
+    cloudflare:
+      skills:
+        - cloudflare/skills@cloudflare
+        - cloudflare/skills@workers-best-practices
+        - cloudflare/skills@wrangler
+        - cloudflare/skills@durable-objects
+    # Document databases sit apart from the SQL-focused database preset.
+    mongodb:
+      skills:
+        - mongodb/agent-skills@mongodb-schema-design
+        - mongodb/agent-skills@mongodb-query-optimizer
+        - mongodb/agent-skills@mongodb-connection
   presets:
     # Cross-language domains with no single language/tool owner.
     testing:
@@ -309,6 +333,7 @@ registry:
         - currents-dev/playwright-best-practices-skill@playwright-best-practices
         - wshobson/agents@e2e-testing-patterns
         - affaan-m/ecc@tdd-workflow
+        - cypress-io/ai-toolkit@cypress-author
     # Skills-only: the 04-quality-security subagents stay in the global
     # baseline, so this opt-in collection does not duplicate them.
     security:
@@ -333,6 +358,7 @@ registry:
         - testing-handbook-skills@trailofbits
       skills:
         - openai/skills@security-threat-model
+        - openai/skills@security-best-practices
         - wshobson/agents@stride-analysis-patterns
         - Eyadkelleh/awesome-skills-security@llm-testing
         - Eyadkelleh/awesome-skills-security@security-fuzzing
@@ -385,10 +411,41 @@ registry:
       subagents: [electron-pro]
     mobile:
       subagents: [mobile-developer]
+      skills:
+        - expo/skills@expo-native-ui
+        - expo/skills@expo-router
+        - expo/skills@expo-data-fetching
+        - expo/skills@expo-upgrade
+        - callstackincubator/agent-skills@react-native-best-practices
     graphql:
       subagents: [graphql-architect]
+      skills:
+        - apollographql/skills@graphql-schema
+        - apollographql/skills@graphql-operations
+        - apollographql/skills@apollo-server
+        - apollographql/skills@apollo-client
     realtime:
       subagents: [websocket-engineer, webhook-engineer]
+    # Error tracking and vendor-neutral telemetry, one preset per tool.
+    sentry:
+      skills:
+        - getsentry/sentry-for-ai@sentry-sdk-setup
+        - getsentry/sentry-for-ai@sentry-fix-issues
+        - getsentry/sentry-for-ai@sentry-sdk-upgrade
+    opentelemetry:
+      skills:
+        - ollygarden/opentelemetry-agent-skills@otel-collector
+        - ollygarden/opentelemetry-agent-skills@otel-semantic-conventions
+        - ollygarden/opentelemetry-agent-skills@otel-ottl
+    # Context engineering for building agents, from
+    # muratcankoylan/Agent-Skills-for-Context-Engineering pinned to a commit.
+    # Its root SKILL.md (a collection index) hides the nested skills from the
+    # skills CLI, so each is pinned by tree URL.
+    context:
+      skills:
+{{- range list "context-fundamentals" "context-degradation" "context-compression" "context-optimization" "multi-agent-patterns" "memory-systems" "tool-design" "evaluation" }}
+        - https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/9ff0c99108b36d3b886defd825d8ac1f47dba374/skills/{{ . }}
+{{- end }}
     # Thinking/analysis skills cherry-picked from danielmiessler/LifeOS, pinned
     # to a commit. Only the ones that run without the LifeOS runtime
     # (~/.claude/LIFEOS tools, hooks, .env keys) — its agents, commands and
