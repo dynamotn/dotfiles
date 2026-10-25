@@ -1,11 +1,75 @@
-# dyai: single declarative source for AI-agent extensions and settings.
-# The AI setup hook (run_onchange_after_03-setup-ai.sh) reads this to install.
-# `global` is shared across agents; `agents.<name>` is agent-specific.
-# Expanded from the shared data partial in a later task.
+{{- /*
+  dyai: single declarative source for AI-agent extensions and settings.
+  The AI setup hook (run_onchange_after_03-setup-ai.sh) reads this to install.
+  `global` is shared across agents; `agents.<name>` is agent-specific.
+  Claude's marketplaces, plugins and policy come from the shared data partial
+  so this file and ~/.claude/settings.json never drift.
+*/ -}}
+{{- $d := fromYaml (includeTemplate "ai/dyai-data.yaml.tmpl" .) -}}
 global:
-  skills: []
+  # Community skills from https://skills.sh, installed for every agent with the
+  # skills CLI. Keep each entry generic to a role, never to one project.
+  skills:
+    - vercel-labs/skills@find-skills
+    - affaan-m/ecc@docker-patterns
+    - jeffallan/claude-skills@kubernetes-specialist
+    - wshobson/agents@helm-chart-scaffolding
+    - wshobson/agents@github-actions-templates
+    - wshobson/agents@gitlab-ci-patterns
+    - wshobson/agents@gitops-workflow
+    - aws/agent-toolkit-for-aws@aws-iam
+    - aws/agent-toolkit-for-aws@aws-observability
+    - vercel-labs/agent-skills@vercel-react-best-practices
+    - leonxlnx/taste-skill@design-taste-frontend
+    - addyosmani/web-quality-skills@accessibility
+    - currents-dev/playwright-best-practices-skill@playwright-best-practices
+    - wshobson/agents@e2e-testing-patterns
+    - wshobson/agents@api-design-principles
+    - addyosmani/agent-skills@api-and-interface-design
+    - supabase/agent-skills@supabase-postgres-best-practices
+    - samber/cc-skills-golang@golang-code-style
+    - samber/cc-skills-golang@golang-testing
+    - samber/cc-skills-golang@golang-error-handling
+    - samber/cc-skills-golang@golang-grpc
+    - mindrally/skills@fastapi-python
+    - mcollina/skills@fastify-best-practices
+    - apollographql/skills@rust-best-practices
+    - wshobson/agents@sql-optimization-patterns
+    - samber/cc-skills-golang@golang-security
+    - wshobson/agents@stride-analysis-patterns
+    - openai/skills@security-threat-model
+    - Eyadkelleh/awesome-skills-security@llm-testing
+    - Eyadkelleh/awesome-skills-security@security-fuzzing
+    - Eyadkelleh/awesome-skills-security@security-passwords
+    - Eyadkelleh/awesome-skills-security@security-patterns
+    - Eyadkelleh/awesome-skills-security@security-payloads
+    - Eyadkelleh/awesome-skills-security@security-usernames
+    - Eyadkelleh/awesome-skills-security@security-webshells
+    - spillwavesolutions/design-doc-mermaid@design-doc-mermaid
+    - softaworks/agent-toolkit@c4-architecture
+    - addyosmani/agent-skills@documentation-and-adrs
+    - wshobson/agents@architecture-patterns
+    - wondelai/skills@domain-driven-design
+    - anthropics/skills@mcp-builder
+    - wshobson/agents@prompt-engineering-patterns
+  # Agent role definitions and commands/prompts (populated in a later phase).
   subagents: []
   commands: []
-  mcp: {}
+  # MCP servers registered into every MCP-capable agent, in its own format.
+  mcp:
+    laya:
+      command: {{ printf "%s/.local/bin/laya-mcp-server" .chezmoi.homeDir | quote }}
+      args: []
+      env:
+        HF_HUB_DISABLE_TELEMETRY: "1"
+  # Shared settings translated into each agent's settings file.
+  policy:
+{{ $d.policy | toYaml | indent 4 }}
 agents:
-  claude: {}
+  claude:
+    marketplaces:
+{{ $d.marketplaces | toYaml | indent 6 }}
+    plugins:
+{{- range $d.plugins }}
+      - {{ . }}
+{{- end }}
