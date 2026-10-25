@@ -651,7 +651,7 @@ function dyai::prune_and_record {
     # match, so the allow-list is on the literal subtree paths.
     case "${old}" in
       *'/../'* | *'/./'* | */.. | */.) continue ;;
-      "${root}/.claude/agents/"* | "${root}/.agents/skills/"*) ;;
+      "${root}/.claude/agents/"* | "${root}/.claude/commands/"* | "${root}/.agents/skills/"*) ;;
       *) continue ;;
     esac
     grep -qxF -- "${old}" <<< "${desired_nl}" || rm -rf -- "${old}"
@@ -680,16 +680,23 @@ function dyai::materialize {
   toml="${root}/.dyai.toml"
   dybatpho::is file "${toml}" || return 0
   CONFIG_FILE="${CONFIG_FILE:-$(dybatpho::path_join "${HOME}" ".config" "dyai" "config.yaml")}"
-  local agents_dir="${root}/.claude/agents"
-  local sa_json repo ref src
+  local agents_dir="${root}/.claude/agents" commands_dir="${root}/.claude/commands"
+  local sa_json repo ref src cmd_json crepo cref csrc
   sa_json="$(dyai::config_json '.global.subagents[0] // {}')"
   repo="$(jq -r '.repo // ""' <<< "${sa_json}")"
   ref="$(jq -r '.ref // ""' <<< "${sa_json}")"
   src=""
   # shellcheck disable=SC2310 # a failed fetch leaves src empty and subagents are skipped
   [[ -z "${repo}" ]] || src="$(dyai::fetch_repo "${repo}" "${ref}")" || src=""
+  # Commands resolve from their own pinned source, the same way subagents do.
+  cmd_json="$(dyai::config_json '.global.commands[0] // {}')"
+  crepo="$(jq -r '.repo // ""' <<< "${cmd_json}")"
+  cref="$(jq -r '.ref // ""' <<< "${cmd_json}")"
+  csrc=""
+  # shellcheck disable=SC2310 # a failed fetch leaves csrc empty and commands are skipped
+  [[ -z "${crepo}" ]] || csrc="$(dyai::fetch_repo "${crepo}" "${cref}")" || csrc=""
   local -a desired=() desired_mcp=()
-  local preset section pj sa_count sa md dest sk leaf incomplete="" mcpname mdef
+  local preset section pj sa_count sa md dest sk leaf incomplete="" mcpname mdef cmd_count cmdname
   # Servers already registered project-local, so a re-run does not re-add them.
   local existing_mcp
   # shellcheck disable=SC2312 # a missing manifest reads as an empty list
@@ -732,6 +739,29 @@ function dyai::materialize {
     elif [[ -n "${repo}" && "${sa_count}" != "0" ]]; then
       incomplete=1
     fi
+    # Commands → ./.claude/commands/<name>.md, resolved from the commands source.
+    # shellcheck disable=SC2312 # jq yields a count; a bad read is 0, which is safe
+    cmd_count="$(jq -r '.commands // [] | length' <<< "${pj}")"
+    if [[ -n "${csrc}" ]]; then
+      # shellcheck disable=SC2312 # jq lists the preset's command names
+      while IFS= read -r cmdname; do
+        [[ -n "${cmdname}" ]] || continue
+        # shellcheck disable=SC2312 # find locates the one named command .md
+        md="$(find "${csrc}" -type f -name "${cmdname}.md" 2> /dev/null | head -1)"
+        if [[ -z "${md}" ]]; then
+          dybatpho::warn "command ${cmdname} not found in ${crepo}"
+          continue
+        fi
+        dybatpho::ensure_dir "${commands_dir}" > /dev/null
+        dest="${commands_dir}/${cmdname}.md"
+        if ! { dybatpho::is file "${dest}" && cmp -s "${md}" "${dest}"; }; then
+          cp -- "${md}" "${dest}"
+        fi
+        desired+=("${dest}")
+      done < <(jq -r '.commands[]?' <<< "${pj}")
+    elif [[ -n "${crepo}" && "${cmd_count}" != "0" ]]; then
+      incomplete=1
+    fi
     # shellcheck disable=SC2312 # jq lists the preset's skills
     while IFS= read -r sk; do
       [[ -n "${sk}" ]] || continue
@@ -764,7 +794,7 @@ function dyai::materialize {
     done < <(jq -r '.mcp // {} | keys[]?' <<< "${pj}")
   done < <(yq -p=toml '.use[]' "${toml}" 2> /dev/null)
   if [[ -n "${incomplete}" ]]; then
-    dybatpho::die "could not fetch subagents from ${repo}; project left unchanged"
+    dybatpho::die "could not fetch a subagent/command source; project left unchanged"
   fi
   dyai::prune_and_record "${toml}" "${desired[@]+"${desired[@]}"}"
   dyai::reconcile_mcp "${toml}" "${root}" "${desired_mcp[@]+"${desired_mcp[@]}"}"

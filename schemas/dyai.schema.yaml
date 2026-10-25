@@ -54,10 +54,12 @@ definitions:
         type: array
         items: { type: string }
 
-  subagentSource:
+  mdSource:
     type: object
     additionalProperties: false
-    description: A repo of subagent .md files, pinned by ref, with the dirs to install from.
+    description: >
+      A repo of .md files (subagents or commands), pinned by ref, with the
+      directories or files to install from.
     required: [repo, ref, include]
     properties:
       repo: { type: string, description: "owner/repo on GitHub" }
@@ -74,22 +76,6 @@ definitions:
         description: >
           Subagent leaf names to skip in the global install (a preset can still
           pull them per project).
-
-  extensionRef:
-    type: object
-    additionalProperties: false
-    description: A subagent or command, either a local source dir or a community ref.
-    required: [source]
-    properties:
-      source:
-        type: string
-        enum: [local, skills.sh, github]
-      path:
-        type: string
-        description: Directory name under the chezmoi source, for source=local.
-      ref:
-        type: string
-        description: owner/repo@name, for a community source.
 
   hook:
     type: object
@@ -124,10 +110,11 @@ properties:
         description: skills.sh entries installed for every agent.
       subagents:
         type: array
-        items: { $ref: "#/definitions/subagentSource" }
+        items: { $ref: "#/definitions/mdSource" }
       commands:
         type: array
-        items: { $ref: "#/definitions/extensionRef" }
+        items: { $ref: "#/definitions/mdSource" }
+        description: Pinned repos of command .md files, installed to project command dirs by presets.
       mcp:
         type: object
         additionalProperties: { $ref: "#/definitions/mcpServer" }

@@ -138,6 +138,37 @@ CFG
   [ ! -f "${HOME}/.claude/agents/graphql-architect.md" ]
 }
 
+@test "dyai::use materializes a preset's commands into ./.claude/commands; rm prunes" {
+  _stub bunx
+  local src="${BATS_TEST_TMPDIR}/cmds"
+  mkdir -p "${src}/commands"
+  printf -- '---\nname: deploy\n---\nrun deploy\n' > "${src}/commands/deploy.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  commands:
+    - repo: owner/commands
+      ref: deadbeef
+      include: [commands]
+registry:
+  presets:
+    ops:
+      commands: [deploy]
+CFG
+  local proj="${BATS_TEST_TMPDIR}/cmdproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use ops)
+  [ -f "${proj}/.claude/commands/deploy.md" ]
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'commands/deploy.md'
+  run git -C "${proj}" check-ignore .claude/commands/deploy.md
+  assert_success
+  (cd "${proj}" && dyai::rm ops)
+  [ ! -f "${proj}/.claude/commands/deploy.md" ]
+}
+
 @test "dyai::use registers a preset's mcp as Claude project-local; rm removes it" {
   _stub claude
   _stub bunx
