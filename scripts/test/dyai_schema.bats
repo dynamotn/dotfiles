@@ -283,6 +283,23 @@ function _render_config {
   [[ -z "${bad}" ]] || fail "pinned younger than the 7-day cooldown, so they never start:${bad}"
 }
 
+@test "every subagent excluded from the baseline is reachable from a preset" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.excl.yaml" j
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(< "${out}.err")"
+  j="$(yq -o=json -I=0 '.' "${out}")"
+  # Only these two are dropped on purpose: one installs agents behind dyai's
+  # back, the other targets Windows/Azure operations.
+  jq -e '["agent-installer", "it-ops-orchestrator"] as $dropped
+    | [.registry[][] | .subagents // [] | .[]] as $preset
+    | .global.subagents[0].exclude
+    | all(. as $a | ($preset | index($a) != null) or ($dropped | index($a) != null))' \
+    <<< "${j}" > /dev/null || fail "an excluded subagent is in no preset"
+}
+
 @test "every preset plugin is an optional plugin, off globally and installed" {
   _require_chezmoi
   _require_yq

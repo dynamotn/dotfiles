@@ -36,12 +36,29 @@ global:
       # Domain-specific agents kept out of the always-installed baseline; each
       # is pulled per project by the matching preset below (desktop, mobile,
       # graphql, realtime), which resolves it from the same pinned repo.
+      # Every agent here is listed in every session's context, so the business
+      # analysis and niche security agents go behind `research` / `security`,
+      # and the two that fight dyai or target Windows/Azure ops are dropped.
       exclude:
         - electron-pro
         - mobile-developer
         - graphql-architect
         - websocket-engineer
         - webhook-engineer
+        - ad-security-reviewer
+        - powershell-security-hardening
+        - gdpr-ccpa-compliance
+        - compliance-auditor
+        - penetration-tester
+        - ab-test-analysis
+        - cohort-analysis
+        - competitive-analyst
+        - market-researcher
+        - project-idea-validator
+        - trend-analyst
+        - scientific-literature-researcher
+        - agent-installer
+        - it-ops-orchestrator
   commands: []
   # MCP servers registered into every MCP-capable agent, in its own format.
   mcp:
@@ -295,6 +312,12 @@ registry:
     # Skills-only: the 04-quality-security subagents stay in the global
     # baseline, so this opt-in collection does not duplicate them.
     security:
+      subagents:
+        - penetration-tester
+        - compliance-auditor
+        - gdpr-ccpa-compliance
+        - ad-security-reviewer
+        - powershell-security-hardening
       # Switched on in .claude/settings.local.json; off everywhere else.
       plugins:
         - appsec-skills@agent-sec-ops-kit-skills
@@ -333,6 +356,16 @@ registry:
       skills:
         - bahayonghang/academic-writing-skills@latex-paper-en
         - lucifer1004/claude-skill-typst@typst
+    # Product and market analysis: experiments, cohorts, competitors, trends.
+    research:
+      subagents:
+        - ab-test-analysis
+        - cohort-analysis
+        - competitive-analyst
+        - market-researcher
+        - project-idea-validator
+        - trend-analyst
+        - scientific-literature-researcher
     # Shell scripting (bash, fish): defensive patterns, shellcheck, bats.
     shell:
       subagents: [cli-developer]
