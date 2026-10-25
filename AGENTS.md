@@ -39,7 +39,10 @@ apply here.
 - Factor text shared between several files into `home/.chezmoitemplates/` and
   include it with `{{ template "dir/name.md.tmpl" . }}`, rather than copying
   it. The AI instruction files (`CLAUDE.md.tmpl`, `AGENTS.md.tmpl`) are all
-  thin wrappers around the partials in `home/.chezmoitemplates/ai/`.
+  thin wrappers around the partials in `home/.chezmoitemplates/ai/`. Claude
+  gets them split: the absolute rules in `CLAUDE.md.tmpl`, one partial per
+  file in `home/private_dot_claude/rules/`. A new partial goes into
+  `ai/all.md.tmpl` and a matching rule file (`claude_rules.bats` checks).
 
 ## Shell code
 

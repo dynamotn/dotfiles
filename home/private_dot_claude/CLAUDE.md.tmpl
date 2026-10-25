@@ -1,1 +1,16 @@
-{{- template "ai/all.md.tmpl" . -}}
+{{- /* Claude's machine-wide instructions. The absolute rules stay here, at
+       the top of every session; the working conventions are split one topic
+       per file into ~/.claude/rules/ (rules/*.md.tmpl), which Claude Code
+       loads with this file, so each stays well under the 200-line mark the
+       memory docs recommend. Other agents read the same partials whole from
+       ai/all.md.tmpl. */ -}}
+{{- template "ai/credentials.md.tmpl" . }}
+
+{{ template "ai/destructive-commands.md.tmpl" . }}
+
+# Working conventions
+
+The rest of the machine-wide rules live one topic per file in
+`~/.claude/rules/` and load with this file: shell, CLI tool preferences,
+chezmoi, git conventions, verification, and language. The rules for writing
+shell scripts load once a shell script is in play.
