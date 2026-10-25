@@ -1,0 +1,82 @@
+setup() {
+  load test_helper
+  setup_dotfiles_test_env
+  HOOK="${BATS_TEST_TMPDIR}/setup-ai.sh"
+  render_template "home/.chezmoiscripts/run_onchange_after_03-setup-ai.sh.tmpl" "${HOOK}"
+}
+
+function _stub_agent {
+  printf '#!/usr/bin/env bash\nexit 0\n' > "${HOME}/.local/bin/${1}"
+  chmod +x "${HOME}/.local/bin/${1}"
+}
+
+# Config with notify hooks but no MCP server, to isolate hook behavior.
+function _write_config {
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << 'EOF'
+global:
+  skills: []
+  mcp: {}
+  hooks:
+    stop:
+      event: stop
+      run: "notify-send 'AI agent' 'Task finished!'; true"
+    input:
+      event: input
+      run: "notify-send 'AI agent' 'Waiting for your input!'; true"
+agents:
+  claude: {}
+EOF
+}
+
+@test "gemini: notify hooks land in SessionEnd/Notification, unrelated hook survives, idempotent" {
+  _stub_agent gemini
+  dybatpho::ensure_dir "${HOME}/.gemini" > /dev/null
+  printf '{"hooks":{"SessionStart":[{"hooks":[{"type":"command","command":"echo hi"}]}]}}' \
+    > "${HOME}/.gemini/settings.json"
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  local f="${HOME}/.gemini/settings.json"
+  jq -e '.hooks.SessionEnd[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
+  jq -e '.hooks.Notification[0].hooks[0].command | test("notify-send")' "${f}" > /dev/null
+  [[ "$(jq -r '.hooks.SessionStart[0].hooks[0].command' "${f}")" == "echo hi" ]]
+  local before; before="$(cat "${f}")"
+  run bash "${HOOK}"
+  assert_success
+  [[ "$(cat "${f}")" == "${before}" ]]
+}
+
+@test "copilot: notify hooks written to its dedicated hooks file" {
+  _stub_agent copilot
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  local f="${HOME}/.copilot/hooks/dyai.json"
+  [[ "$(jq -r '.version' "${f}")" == "1" ]]
+  jq -e '.hooks.agentStop[0].bash | test("notify-send")' "${f}" > /dev/null
+  jq -e '.hooks.notification[0].bash | test("notify-send")' "${f}" > /dev/null
+}
+
+@test "codex: notify hooks written to config.toml hooks tables" {
+  _stub_agent codex
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  local f="${HOME}/.codex/config.toml"
+  yq -p=toml -e '.hooks.Stop.hooks[0].command | test("notify-send")' "${f}" > /dev/null
+  yq -p=toml -e '.hooks.Notification.hooks[0].command | test("notify-send")' "${f}" > /dev/null
+}
+
+@test "no hook config is written for agy or opencode" {
+  _stub_agent agy
+  _stub_agent opencode
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  [ ! -f "${HOME}/.gemini/config/hooks.json" ]
+  # opencode.json, if present, carries no hooks key.
+  if [ -f "${HOME}/.config/opencode/opencode.json" ]; then
+    [[ "$(jq -r '.hooks // "none"' "${HOME}/.config/opencode/opencode.json")" == "none" ]]
+  fi
+}

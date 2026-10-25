@@ -345,16 +345,17 @@ function _setup_mcp {
 function _json_set {
   local file expr
   dybatpho::expect_args file expr -- "$@"
+  shift 2
   local dir before after tmp
   dir="$(dirname "${file}")"
   dybatpho::is dir "${dir}" || mkdir -p "${dir}"
   dybatpho::is file "${file}" || printf '{}\n' > "${file}"
   # shellcheck disable=SC2312 # a malformed file falls back to {}, forcing a rewrite attempt rather than aborting
   before="$(jq -cS . "${file}" 2> /dev/null || printf '{}')"
-  after="$(jq -cS "${expr}" <<< "${before}")"
+  after="$(jq -cS "$@" "${expr}" <<< "${before}")"
   [[ "${before}" == "${after}" ]] && return 0
   dybatpho::create_temp tmp "json" "dyai" "${dir}"
-  if jq "${expr}" "${file}" > "${tmp}" && mv "${tmp}" "${file}"; then
+  if jq "$@" "${expr}" "${file}" > "${tmp}" && mv "${tmp}" "${file}"; then
     dybatpho::info "Updated ${file}"
   else
     dybatpho::warn "Could not update ${file}"
@@ -382,6 +383,93 @@ function _setup_policy {
 }
 
 #######################################
+# @description Write the notify hooks into gemini's settings.json (merge-safe, name-tagged)
+# @arg $1 string Command to run on stop
+# @arg $2 string Command to run when waiting for input
+#######################################
+function _hooks_gemini {
+  local stop input
+  dybatpho::expect_args stop input -- "$@"
+  local file expr
+  file="$(dybatpho::path_join "${HOME}" ".gemini" "settings.json")"
+  expr='.hooks.SessionEnd = (((.hooks.SessionEnd // []) | map(select(.hooks[0].name != "dyai-notify")))'
+  # shellcheck disable=SC2016 # $s is a jq --arg variable, expanded by jq, not the shell
+  expr+=' + [{hooks: [{type: "command", command: $s, name: "dyai-notify"}]}])'
+  expr+=' | .hooks.Notification = (((.hooks.Notification // []) | map(select(.hooks[0].name != "dyai-notify")))'
+  # shellcheck disable=SC2016 # $i is a jq --arg variable, expanded by jq, not the shell
+  expr+=' + [{hooks: [{type: "command", command: $i, name: "dyai-notify"}]}])'
+  _json_set "${file}" "${expr}" --arg s "${stop}" --arg i "${input}"
+}
+
+#######################################
+# @description Write the notify hooks into Copilot's own dyai hooks file
+# @arg $1 string Command to run on stop
+# @arg $2 string Command to run when waiting for input
+#######################################
+function _hooks_copilot {
+  local stop input
+  dybatpho::expect_args stop input -- "$@"
+  local chome file expr
+  chome="${COPILOT_HOME:-$(dybatpho::path_join "${HOME}" ".copilot")}"
+  file="$(dybatpho::path_join "${chome}" "hooks" "dyai.json")"
+  expr='.version = 1'
+  # shellcheck disable=SC2016 # $s is a jq --arg variable, expanded by jq, not the shell
+  expr+=' | .hooks.agentStop = [{type: "command", bash: $s}]'
+  # shellcheck disable=SC2016 # $i is a jq --arg variable, expanded by jq, not the shell
+  expr+=' | .hooks.notification = [{type: "command", bash: $i}]'
+  _json_set "${file}" "${expr}" --arg s "${stop}" --arg i "${input}"
+}
+
+#######################################
+# @description Write the notify hooks into Codex's config.toml, idempotently
+# @arg $1 string Command to run on stop
+# @arg $2 string Command to run when waiting for input
+#######################################
+function _hooks_codex {
+  local stop input
+  dybatpho::expect_args stop input -- "$@"
+  local chome file cur_stop cur_input
+  chome="${CODEX_HOME:-$(dybatpho::path_join "${HOME}" ".codex")}"
+  file="$(dybatpho::path_join "${chome}" "config.toml")"
+  dybatpho::is dir "${chome}" || mkdir -p "${chome}"
+  dybatpho::is file "${file}" || : > "${file}"
+  # shellcheck disable=SC2312 # a read error on a malformed file just forces a rewrite
+  cur_stop="$(yq -p=toml -o=json -I=0 '.hooks.Stop.hooks[0].command // ""' \
+    "${file}" 2> /dev/null || echo '""')"
+  # shellcheck disable=SC2312 # a read error on a malformed file just forces a rewrite
+  cur_input="$(yq -p=toml -o=json -I=0 '.hooks.Notification.hooks[0].command // ""' \
+    "${file}" 2> /dev/null || echo '""')"
+  if [[ "${cur_stop}" == "\"${stop}\"" && "${cur_input}" == "\"${input}\"" ]]; then
+    dybatpho::debug "Codex notify hooks already set in ${file}"
+    return 0
+  fi
+  if S="${stop}" I="${input}" yq -p=toml -o=toml -i \
+    '.hooks.Stop.hooks = [{"command": strenv(S)}]
+     | .hooks.Notification.hooks = [{"command": strenv(I)}]' "${file}"; then
+    dybatpho::info "Wrote notify hooks into ${file}"
+  else
+    dybatpho::warn "Could not write notify hooks into ${file}"
+  fi
+}
+
+#######################################
+# @description Translate global.hooks (stop/input) into each hook-capable agent
+# @noargs
+#######################################
+function _setup_hooks {
+  local stop input
+  # shellcheck disable=SC2312 # a bad config read yields an empty string, a safe no-op
+  stop="$(_config_json '.global.hooks.stop.run // ""' | jq -r .)"
+  # shellcheck disable=SC2312 # a bad config read yields an empty string, a safe no-op
+  input="$(_config_json '.global.hooks.input.run // ""' | jq -r .)"
+  [[ -n "${stop}" || -n "${input}" ]] || return 0
+  if dybatpho::is command gemini; then _hooks_gemini "${stop}" "${input}"; fi
+  if dybatpho::is command copilot; then _hooks_copilot "${stop}" "${input}"; fi
+  if dybatpho::is command codex; then _hooks_codex "${stop}" "${input}"; fi
+  # agy's hooks.json schema is undocumented and opencode has no config hooks; both skipped.
+}
+
+#######################################
 # @description Entrypoint
 # @noargs
 #######################################
@@ -399,6 +487,7 @@ function _main {
   fi
   _setup_mcp
   _setup_policy
+  _setup_hooks
   if dybatpho::is command bunx; then
     _setup_skills
   else
