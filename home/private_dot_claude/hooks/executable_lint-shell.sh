@@ -10,6 +10,10 @@
 # script, or a machine without dyshellint, passes silently: a hook must never
 # block an unrelated edit.
 set -euo pipefail
+# inherit_errexit needs Bash 4.4; on an older Bash the hook passes rather than
+# fail every edit with a confusing error.
+((BASH_VERSINFO[0] * 100 + BASH_VERSINFO[1] >= 404)) || exit 0
+shopt -s inherit_errexit
 
 command -v dyshellint &> /dev/null || exit 0
 file="$(jq -r '.tool_input.file_path // ""')"
@@ -42,16 +46,19 @@ fi
 # each key is numbered by occurrence, so a second copy of an old finding
 # counts as new.
 dir="$(dirname -- "${file}")"
+# The edited file may sit in a repository nobody vetted, whose own config
+# could name a program for git to run. Read only objects (no index, so no
+# fsmonitor), with the config hooks that execute turned off.
+git_safe=(git -c core.fsmonitor=false -c core.hooksPath=/dev/null -C "${dir}")
 baseline=""
-if rel="$(git -C "${dir}" ls-files --full-name --error-unmatch -- "${name}" 2> /dev/null)"; then
-  if blob="$(git -C "${dir}" show "HEAD:${rel}" 2> /dev/null)"; then
-    baseline="$(dyshellint "${args[@]}" --stdin-filename "${name}" - <<< "${blob}" 2>&1 || true)"
-    # Text on stdin has no mode, so the executable-bit rule never fires on the
-    # baseline. A file committed without the bit already had that finding.
-    mode="$(git -C "${dir}" ls-files --stage -- "${name}")"
-    if [[ "${mode}" != 100755* ]]; then
-      baseline+=$'\n'"$(dyshellint "${args[@]}" -rules BSG037 "${file}" 2>&1 || true)"
-    fi
+if prefix="$("${git_safe[@]}" rev-parse --show-prefix 2> /dev/null)" \
+  && blob="$("${git_safe[@]}" cat-file blob "HEAD:${prefix}${name}" 2> /dev/null)"; then
+  baseline="$(dyshellint "${args[@]}" --stdin-filename "${name}" - <<< "${blob}" 2>&1 || true)"
+  # Text on stdin has no mode, so the executable-bit rule never fires on the
+  # baseline. A file committed without the bit already had that finding.
+  mode="$("${git_safe[@]}" ls-tree HEAD -- "${name}" 2> /dev/null || true)"
+  if [[ "${mode}" != 100755* ]]; then
+    baseline+=$'\n'"$(dyshellint "${args[@]}" -rules BSG037 "${file}" 2>&1 || true)"
   fi
 fi
 # shellcheck disable=SC2016 # an awk program, its $0 is awk's
