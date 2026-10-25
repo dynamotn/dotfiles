@@ -9,10 +9,10 @@ layout {
     }
   }
 
-  tab name="notes" cwd="~/Documents/Notes" split_direction="vertical" {
+  tab name="notes" cwd="~/Documents/DyBrain" split_direction="vertical" {
     pane focus=true
     pane {
-      cwd "~/Documents/Notes/.publish"
+      cwd "~/Documents/DyBrain/.publish"
     }
     floating_panes {
       pane {

@@ -1,24 +1,29 @@
 # Second brain
 
-The user keeps an Obsidian vault at `~/Documents/Notes`. When the `dybrain`
+The user keeps an Obsidian vault at `~/Documents/DyBrain`. When the `dybrain`
 MCP server is connected, feed it while working, in any repository.
 
 - Call `capture_fleeting` when something is worth keeping beyond the session:
   a lesson learned the hard way, a decision and its reason, a non-obvious fix,
   a tool or idea worth coming back to. One idea per note: a short first line
   that names it, then the context and the repository or URL it came from.
-- Reach for a finished note only when it is clearly due, and `search` first so
-  it is not a duplicate: `create_permanent` for one settled idea in your own
-  words, `create_literature` for a source the work leaned on (docs, article,
-  paper, talk), `create_reference` for a tool, organization or term worth a
-  wiki page. Give a Vietnamese `title` and an English `title_en`. When unsure,
-  capture a fleeting note instead; the user promotes it at the weekly review.
+- Reach for a finished note only when it is clearly due, and `search` or
+  `lookup` first so it is not a duplicate: `create_permanent` for one settled
+  idea in your own words, `create_literature` for a source the work leaned on
+  (docs, article, paper, talk), `create_reference` for a tool, organization or
+  term worth a wiki page, `create_person` for a person, `create_note` for a
+  question, decision, meeting, MOC or output. Give a Vietnamese `title` and an
+  English `title_en`. When unsure, capture a fleeting note instead; the user
+  promotes it at the weekly review.
 - Call `append_daily` at most once per finished task, with one line on what
-  was done and where it lives.
+  was done and where it lives. `daily_tasks` shows today's open tasks.
+- Edit an existing note (`append_note`, `set_properties`, `move`, `rename`)
+  only when the user asks for it. Run `check` on a note after writing it.
 - Skip routine work and anything a commit message already records. Never
   capture a credential, customer data, or text from a file the credentials
   rules cover.
 - Write note text without hard wrapping: one line per paragraph or bullet.
   Use the language of the conversation.
-- Reach the vault only through the server's `search` and `read`; from another
-  repository, never open its files directly.
+- Reach the vault only through the server's tools (`search`, `read`,
+  `lookup`, `links`, `backlinks`, `list_notes`, …); from another repository,
+  never open its files directly.
