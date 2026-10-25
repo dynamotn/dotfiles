@@ -363,6 +363,55 @@ CFG
   [ ! -d "${proj}/.claude/agents" ]
 }
 
+@test "dyai::materialize installs every skill even when the skills CLI reads stdin" {
+  # The real skills CLI drains stdin; it must not swallow the rest of the list.
+  printf '#!/usr/bin/env bash\ncat > /dev/null\necho "STUB bunx $*" >> "%s"\n' "${HOME}/calls.log" \
+    > "${HOME}/.local/bin/bunx"
+  chmod +x "${HOME}/.local/bin/bunx"
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+registry:
+  presets:
+    security:
+      skills:
+        - owner/repo@threat-model
+        - owner/repo@fuzzing
+CFG
+  local proj="${BATS_TEST_TMPDIR}/stdinproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use security)
+  grep -q 'STUB bunx .* add owner/repo@threat-model' "${HOME}/calls.log"
+  grep -q 'STUB bunx .* add owner/repo@fuzzing' "${HOME}/calls.log"
+}
+
+@test "dyai::materialize tracks a skill given as a pinned GitHub tree URL" {
+  _stub bunx
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+registry:
+  presets:
+    thinking:
+      skills:
+        - https://github.com/owner/repo/tree/deadbeef/skills/FirstPrinciples
+CFG
+  local proj="${BATS_TEST_TMPDIR}/urlproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use thinking)
+  grep -q 'STUB bunx .* add https://github.com/owner/repo/tree/deadbeef/skills/FirstPrinciples' "${HOME}/calls.log"
+  # The skills CLI installs a URL skill under its lowercased last path segment.
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -x "${proj}/.agents/skills/firstprinciples" > /dev/null
+  # Once that dir exists, a re-run does not reinstall it.
+  mkdir -p "${proj}/.agents/skills/firstprinciples"
+  : > "${HOME}/calls.log"
+  (cd "${proj}" && dyai::materialize)
+  run grep -q 'STUB bunx' "${HOME}/calls.log"
+  assert_failure
+}
+
 @test "dyai::use personal-ignores the materialized subagent, not only .dyai.toml" {
   _stub claude
   _stub bunx

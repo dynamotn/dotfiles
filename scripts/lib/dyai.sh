@@ -91,7 +91,8 @@ function dyai::setup_marketplaces {
       continue
     fi
     dybatpho::info "Add marketplace ${name}"
-    claude plugin marketplace add "${source}" || dybatpho::warn "Could not add marketplace ${name}"
+    # stdin is the loop's list; a command that reads it would swallow the rest.
+    claude plugin marketplace add "${source}" < /dev/null || dybatpho::warn "Could not add marketplace ${name}"
   done < <(jq -r 'to_entries[] | [.key, (.value.source.repo // .value.source.url // "")] | @tsv' <<< "${marketplaces}")
 }
 
@@ -111,7 +112,7 @@ function dyai::setup_plugins {
       continue
     fi
     dybatpho::info "Install plugin ${plugin}"
-    claude plugin install "${plugin}" || dybatpho::warn "Could not install plugin ${plugin}"
+    claude plugin install "${plugin}" < /dev/null || dybatpho::warn "Could not install plugin ${plugin}"
   done < <(dyai::config_json '.agents.claude.plugins // []' | jq -r '.[]')
 }
 
@@ -131,7 +132,7 @@ function dyai::setup_skills {
       continue
     fi
     dybatpho::info "Install skill ${skill}"
-    bunx "${SKILLS_CLI}" add "${skill}" -g -y || dybatpho::warn "Could not install skill ${skill}"
+    bunx "${SKILLS_CLI}" add "${skill}" -g -y < /dev/null || dybatpho::warn "Could not install skill ${skill}"
   done < <(dyai::config_json '.global.skills // []' | jq -r '.[]')
 }
 
@@ -1115,11 +1116,16 @@ function dyai::materialize {
     # shellcheck disable=SC2312 # jq lists the preset's skills
     while IFS= read -r sk; do
       [[ -n "${sk}" ]] || continue
+      # owner/repo@name, or a pinned GitHub tree URL ending in the skill dir;
+      # the skills CLI installs either under its lowercased name.
       leaf="${sk##*@}"
+      leaf="${leaf##*/}"
+      leaf="${leaf,,}"
       if dybatpho::is dir "${root}/.agents/skills/${leaf}"; then
         dybatpho::debug "skill ${leaf} already installed in project"
       else
-        (cd "${root}" && bunx "${SKILLS_CLI}" add "${sk}" -y &> /dev/null) \
+        # The skills CLI drains stdin, which here is the rest of the skill list.
+        (cd "${root}" && bunx "${SKILLS_CLI}" add "${sk}" -y &> /dev/null < /dev/null) \
           || dybatpho::warn "Could not install skill ${sk}"
       fi
       desired+=("${root}/.agents/skills/${leaf}")
@@ -1143,7 +1149,7 @@ function dyai::materialize {
       fi
       mdef="$(jq -c --arg n "${mcpname}" \
         '.mcp[$n] | {type: "stdio", command: .command, args: (.args // []), env: (.env // {})}' <<< "${pj}")"
-      if (cd "${root}" && claude mcp add-json --scope local "${mcpname}" "${mdef}" > /dev/null); then
+      if (cd "${root}" && claude mcp add-json --scope local "${mcpname}" "${mdef}" > /dev/null < /dev/null); then
         registered_mcp+=("${mcpname}")
       else
         dybatpho::warn "Could not register MCP ${mcpname} for this project"
@@ -1189,7 +1195,7 @@ function dyai::reconcile_mcp {
       [[ -n "${old}" ]] || continue
       # shellcheck disable=SC2312 # membership test; a still-desired server is kept
       jq -e --arg n "${old}" 'index($n) != null' <<< "${desired_json}" > /dev/null && continue
-      (cd "${root}" && claude mcp remove --scope local "${old}" &> /dev/null) \
+      (cd "${root}" && claude mcp remove --scope local "${old}" &> /dev/null < /dev/null) \
         || dybatpho::debug "MCP ${old} was not registered, nothing to remove"
     done < <(yq -p=toml '.materialized_mcp[]?' "${toml}" 2> /dev/null)
   fi
@@ -1282,7 +1288,7 @@ function dyai::setup_installers {
         continue
       fi
       dybatpho::info "Run installer ${name} for ${agent}"
-      if bash -c "${cmd}"; then
+      if bash -c "${cmd}" < /dev/null; then
         dybatpho::ensure_dir "${dir}" > /dev/null
         : > "${marker}"
       else

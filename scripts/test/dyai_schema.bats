@@ -292,6 +292,10 @@ function _render_config {
   [[ "$(yq '.registry.presets.mobile.subagents[0]' "${out}")" == "mobile-developer" ]]
   [[ "$(yq '.registry.presets.desktop.subagents[0]' "${out}")" == "electron-pro" ]]
   [[ "$(yq '.registry.presets.realtime.subagents | length' "${out}")" == "2" ]]
+  # LifeOS skills, pinned to a commit by tree URL
+  [[ "$(yq '.registry.presets.lifeos.skills | length' "${out}")" == "11" ]]
+  yq '.registry.presets.lifeos.skills[]' "${out}" \
+    | grep -x 'https://github.com/danielmiessler/LifeOS/tree/[0-9a-f]\{40\}/LifeOS/install/skills/RedTeam' > /dev/null
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'electron-pro' > /dev/null
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'graphql-architect' > /dev/null
 }

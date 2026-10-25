@@ -85,7 +85,9 @@ Grouped by tool boundary so a project pulls in only what it uses:
   `database`, `ansible`
 - `presets` — cross-language domains: `testing`, `security`, `datascience`,
   `docs`, `shell`, and the domain agents kept out of the baseline (`desktop`,
-  `mobile`, `graphql`, `realtime`)
+  `mobile`, `graphql`, `realtime`), and `lifeos` (the thinking skills of
+  [LifeOS](https://github.com/danielmiessler/LifeOS) that run without its
+  runtime)
 
 `dyai ls` prints the full, current list.
 
@@ -199,7 +201,9 @@ the credential-store rules still rest on the instructions text alone.
 
 Add a preset under the matching `registry` group in `config.yaml.tmpl`, listing
 its `subagents` (leaf names present in the pinned repo) and `skills`
-(`owner/repo@skill`). Keep a skill out of `global` if it is specific to that
+(`owner/repo@skill`, or a GitHub tree URL pinned to a commit and ending in the
+skill's directory, for a skill nested where the skills CLI does not look).
+Keep a skill out of `global` if it is specific to that
 tool. Then `chezmoi apply` and `dyai use <name>` in a project.
 
 ## Keeping the baseline lean

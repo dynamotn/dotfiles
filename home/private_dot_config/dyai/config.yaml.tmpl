@@ -332,3 +332,12 @@ registry:
       subagents: [graphql-architect]
     realtime:
       subagents: [websocket-engineer, webhook-engineer]
+    # Thinking/analysis skills cherry-picked from danielmiessler/LifeOS, pinned
+    # to a commit. Only the ones that run without the LifeOS runtime
+    # (~/.claude/LIFEOS tools, hooks, .env keys) — its agents, commands and
+    # hooks all need that runtime, so they are deliberately left out.
+    lifeos:
+      skills:
+{{- range list "ArXiv" "BiasCheck" "Council" "ExtractWisdom" "FirstPrinciples" "IterativeDepth" "Novelty" "RedTeam" "RootCauseAnalysis" "Teach" "WorldThreatModel" }}
+        - https://github.com/danielmiessler/LifeOS/tree/5e2f2e8c0abde612da0e99c16c0d07d4ec21b88c/LifeOS/install/skills/{{ . }}
+{{- end }}
