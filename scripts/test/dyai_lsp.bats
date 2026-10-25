@@ -314,6 +314,23 @@ function _lsp_command0 {
   jq -r --arg s "${server}" "${filter}" <<< "${entries}"
 }
 
+function _lsp_seed_named {
+  local agent name file
+  agent="$1"
+  name="$2"
+  file="$(_lsp_agent_file "${agent}")"
+  dybatpho::ensure_dir "$(dirname "${file}")" > /dev/null
+  case "${agent}" in
+    copilot) jq -n --arg n "${name}" '{lspServers: {($n): {command: "foreign"}}}' > "${file}" ;;
+    opencode) jq -n --arg n "${name}" '{lsp: {($n): {command: ["foreign"]}}}' > "${file}" ;;
+    hermes) printf 'lsp:\n  servers:\n    %s:\n      command: ["foreign"]\n' "${name}" > "${file}" ;;
+    *)
+      printf 'unknown agent %s\n' "${agent}" >&2
+      return 1
+      ;;
+  esac
+}
+
 function _lsp_setup {
   dyai_lsp::"setup_$1"
 }
@@ -358,6 +375,28 @@ function _lsp_setup {
     _lsp_setup "${agent}"
     after="$(stat -c %Y "${file}")"
     [[ "${before}" == "${after}" ]]
+  done
+}
+
+@test "dyai_lsp::setup_<agent> leaves a foreign entry colliding with a manifest server untouched" {
+  for agent in copilot opencode hermes; do
+    _write_manifest
+    _stub "${agent}"
+    _lsp_seed_named "${agent}" pyls
+    _lsp_setup "${agent}"
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(_lsp_command0 "${agent}" pyls)" == "foreign" ]]
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(dyai_lsp::owned_get "${agent}" | jq 'index("pyls")')" == "null" ]]
+    local file before after
+    file="$(_lsp_agent_file "${agent}")"
+    before="$(stat -c %Y "${file}")"
+    sleep 1
+    _lsp_setup "${agent}"
+    after="$(stat -c %Y "${file}")"
+    [[ "${before}" == "${after}" ]]
+    # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
+    [[ "$(_lsp_command0 "${agent}" pyls)" == "foreign" ]]
   done
 }
 

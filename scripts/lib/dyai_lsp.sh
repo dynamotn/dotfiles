@@ -201,23 +201,51 @@ function __dyai_lsp_hermes_id {
 
 #######################################
 # @description Merge a map of entries into a top-level object key of a JSON
-#   file, pruning stale dyai-owned keys first, idempotently (jq -S compare)
-# @arg $1 string Path of the JSON config file (created as {} when missing)
-# @arg $2 string Top-level key that holds the entries (e.g. lspServers, lsp)
-# @arg $3 string Entries to merge in, as a JSON object {name: entry}
-# @arg $4 string JSON array of keys to delete from the block before merging
+#   file, pruning stale dyai-owned keys first, idempotently (jq -S compare).
+#   A key that already exists in the block and is not in the caller's
+#   owned-state list is left untouched (a user's own hand-written entry),
+#   with one warning, and is left out of the printed owned-key list.
+# @arg $1 string Agent name, for the warning message only (e.g. copilot)
+# @arg $2 string Path of the JSON config file (created as {} when missing)
+# @arg $3 string Top-level key that holds the entries (e.g. lspServers, lsp)
+# @arg $4 string Entries to merge in, as a JSON object {name: entry}
+# @arg $5 string JSON array of keys to delete from the block before merging
+# @arg $6 string JSON array of keys dyai owned before this run
+# @stdout JSON array of the keys dyai actually wrote (excludes any left
+#   untouched because a foreign entry already claimed that name)
 #######################################
 function __dyai_lsp_write_json_block {
-  local file block_key entries_json prune_json
-  dybatpho::expect_args file block_key entries_json prune_json -- "$@"
-  local dir current_norm new_content new_norm tmp
+  local agent file block_key entries_json prune_json owned_before_json
+  dybatpho::expect_args agent file block_key entries_json prune_json owned_before_json -- "$@"
+  local dir current_norm current_block collided filtered_entries applied_names key
+  local new_content new_norm tmp
   dir="$(dirname "${file}")"
   dybatpho::ensure_dir "${dir}" > /dev/null
   dybatpho::is file "${file}" || printf '{}\n' > "${file}"
   # shellcheck disable=SC2312 # a malformed file falls back to {}, forcing a rewrite attempt
   current_norm="$(jq -S . "${file}" 2> /dev/null || printf '{}')"
+  # shellcheck disable=SC2312 # a malformed file falls back to {}, a safe no-op default
+  current_block="$(jq -c --arg b "${block_key}" '.[$b] // {}' "${file}" 2> /dev/null || printf '{}')"
+  collided="$(
+    jq -cn --argjson entries "${entries_json}" --argjson owned "${owned_before_json}" --argjson cur "${current_block}" '
+      [ ($entries | keys_unsorted[]) as $k
+        | select(($cur | has($k)) and (($owned // []) | index($k) | not))
+        | $k
+      ]
+    '
+  )"
+  # shellcheck disable=SC2312 # a malformed collided list yields no rows, a safe no-op loop
+  while IFS= read -r key; do
+    [[ -n "${key}" ]] || continue
+    dybatpho::warn "Leaving ${agent}'s hand-written ${block_key}.${key} untouched in ${file}: dyai does not own it"
+  done < <(jq -r '.[]' <<< "${collided}")
+  filtered_entries="$(
+    jq -c --argjson collided "${collided}" 'with_entries(select(.key as $k | ($collided | index($k)) | not))' \
+      <<< "${entries_json}"
+  )"
+  applied_names="$(jq -c 'keys' <<< "${filtered_entries}")"
   new_content="$(
-    jq --arg b "${block_key}" --argjson entries "${entries_json}" --argjson prune "${prune_json}" '
+    jq --arg b "${block_key}" --argjson entries "${filtered_entries}" --argjson prune "${prune_json}" '
       .[$b] = (.[$b] // {})
       | reduce $prune[] as $k (.; .[$b] |= del(.[$k]))
       | reduce ($entries | keys_unsorted[]) as $k (.; .[$b][$k] = $entries[$k])
@@ -225,37 +253,66 @@ function __dyai_lsp_write_json_block {
   )"
   if [[ -z "${new_content}" ]]; then
     dybatpho::warn "Could not read ${file} as JSON, skip dyai-lsp update"
+    printf '[]\n'
     return 1
   fi
   new_norm="$(jq -S . <<< "${new_content}")"
   if [[ "${current_norm}" == "${new_norm}" ]]; then
     dybatpho::debug "dyai-lsp entries already up to date in ${file}"
+    printf '%s\n' "${applied_names}"
     return 0
   fi
   dybatpho::create_temp tmp "json" "dyai-lsp" "${dir}"
   printf '%s' "${new_content}" > "${tmp}" && mv "${tmp}" "${file}"
   dybatpho::info "Updated dyai-lsp entries in ${file}"
+  printf '%s\n' "${applied_names}"
 }
 
 #######################################
 # @description Merge a map of entries into Hermes' `.lsp.servers`, pruning
-#   stale dyai-owned keys first, idempotently (jq -S compare on that subtree)
-# @arg $1 string Path of the YAML config file (created empty when missing)
-# @arg $2 string Entries to merge in, as a JSON object {id: entry}
-# @arg $3 string JSON array of ids to delete from `.lsp.servers` before merging
+#   stale dyai-owned keys first, idempotently (jq -S compare on that subtree).
+#   A key that already exists there and is not in the caller's owned-state
+#   list is left untouched (a user's own hand-written entry), with one
+#   warning, and is left out of the printed owned-key list.
+# @arg $1 string Agent name, for the warning message only (hermes)
+# @arg $2 string Path of the YAML config file (created empty when missing)
+# @arg $3 string Entries to merge in, as a JSON object {id: entry}
+# @arg $4 string JSON array of ids to delete from `.lsp.servers` before merging
+# @arg $5 string JSON array of ids dyai owned before this run
+# @stdout JSON array of the ids dyai actually wrote (excludes any left
+#   untouched because a foreign entry already claimed that id)
 #######################################
 function __dyai_lsp_write_yaml_block {
-  local file entries_json prune_json
-  dybatpho::expect_args file entries_json prune_json -- "$@"
-  local dir current_json cur_norm new_servers new_norm
+  local agent file entries_json prune_json owned_before_json
+  dybatpho::expect_args agent file entries_json prune_json owned_before_json -- "$@"
+  local dir current_json cur_norm collided filtered_entries applied_names key
+  local new_servers new_norm
   dir="$(dirname "${file}")"
   dybatpho::ensure_dir "${dir}" > /dev/null
   dybatpho::is file "${file}" || : > "${file}"
   # shellcheck disable=SC2312 # a malformed file or missing path yields {}, a safe no-op default
   current_json="$(yq -o=json '.lsp.servers // {}' "${file}" 2> /dev/null || printf '{}')"
   cur_norm="$(jq -cS . <<< "${current_json}" 2> /dev/null || printf '{}')"
+  collided="$(
+    jq -cn --argjson entries "${entries_json}" --argjson owned "${owned_before_json}" --argjson cur "${current_json}" '
+      [ ($entries | keys_unsorted[]) as $k
+        | select(($cur | has($k)) and (($owned // []) | index($k) | not))
+        | $k
+      ]
+    '
+  )"
+  # shellcheck disable=SC2312 # a malformed collided list yields no rows, a safe no-op loop
+  while IFS= read -r key; do
+    [[ -n "${key}" ]] || continue
+    dybatpho::warn "Leaving ${agent}'s hand-written lsp.servers.${key} untouched in ${file}: dyai does not own it"
+  done < <(jq -r '.[]' <<< "${collided}")
+  filtered_entries="$(
+    jq -c --argjson collided "${collided}" 'with_entries(select(.key as $k | ($collided | index($k)) | not))' \
+      <<< "${entries_json}"
+  )"
+  applied_names="$(jq -c 'keys' <<< "${filtered_entries}")"
   new_servers="$(
-    jq --argjson entries "${entries_json}" --argjson prune "${prune_json}" '
+    jq --argjson entries "${filtered_entries}" --argjson prune "${prune_json}" '
       reduce $prune[] as $k (.; del(.[$k]))
       | reduce ($entries | keys_unsorted[]) as $k (.; .[$k] = $entries[$k])
     ' <<< "${current_json}"
@@ -263,6 +320,7 @@ function __dyai_lsp_write_yaml_block {
   new_norm="$(jq -cS . <<< "${new_servers}")"
   if [[ "${cur_norm}" == "${new_norm}" ]]; then
     dybatpho::debug "dyai-lsp entries already up to date in ${file}"
+    printf '%s\n' "${applied_names}"
     return 0
   fi
   if E="${new_servers}" yq -i '.lsp.servers = (strenv(E) | fromjson)' "${file}"; then
@@ -270,6 +328,7 @@ function __dyai_lsp_write_yaml_block {
   else
     dybatpho::warn "Could not update dyai-lsp entries in ${file}"
   fi
+  printf '%s\n' "${applied_names}"
 }
 
 #######################################
@@ -315,14 +374,16 @@ function dyai_lsp::setup_copilot {
     entries="$(jq -c --arg n "${name}" --argjson e "${entry}" '.[$n] = $e' <<< "${entries}")"
   done < <(jq -r 'keys[]' <<< "${ext_map}")
 
-  local owned_names prune file
+  local owned_names owned_before prune file applied_names
   owned_names="$(jq -c 'keys' <<< "${entries}")"
-  # shellcheck disable=SC2312 # owned_get on an absent key yields null, defaulted to []
-  prune="$(dyai_lsp::owned_get copilot | jq -c --argjson keep "${owned_names}" '(. // []) - $keep')"
+  owned_before="$(dyai_lsp::owned_get copilot)"
+  prune="$(jq -c --argjson keep "${owned_names}" '(. // []) - $keep' <<< "${owned_before}")"
   # shellcheck disable=SC2312 # path_join only builds a path string, it cannot fail here
   file="$(dybatpho::path_join "${COPILOT_HOME:-$(dybatpho::path_join "${HOME}" ".copilot")}" "lsp-config.json")"
-  __dyai_lsp_write_json_block "${file}" "lspServers" "${entries}" "${prune}"
-  dyai_lsp::owned_set copilot "${owned_names}"
+  applied_names="$(
+    __dyai_lsp_write_json_block copilot "${file}" "lspServers" "${entries}" "${prune}" "${owned_before}"
+  )"
+  dyai_lsp::owned_set copilot "${applied_names}"
 }
 
 #######################################
@@ -365,13 +426,13 @@ function dyai_lsp::setup_opencode {
     entries="$(jq -c --arg n "${name}" --argjson e "${entry}" '.[$n] = $e' <<< "${entries}")"
   done < <(jq -r '.servers[].name' "${manifest}")
 
-  local owned_names prune file
+  local owned_names owned_before prune file applied_names
   owned_names="$(jq -c 'keys' <<< "${entries}")"
-  # shellcheck disable=SC2312 # owned_get on an absent key yields null, defaulted to []
-  prune="$(dyai_lsp::owned_get opencode | jq -c --argjson keep "${owned_names}" '(. // []) - $keep')"
+  owned_before="$(dyai_lsp::owned_get opencode)"
+  prune="$(jq -c --argjson keep "${owned_names}" '(. // []) - $keep' <<< "${owned_before}")"
   file="${OPENCODE_CONFIG:-$(dybatpho::path_join "${HOME}" ".config" "opencode" "opencode.json")}"
-  __dyai_lsp_write_json_block "${file}" "lsp" "${entries}" "${prune}"
-  dyai_lsp::owned_set opencode "${owned_names}"
+  applied_names="$(__dyai_lsp_write_json_block opencode "${file}" "lsp" "${entries}" "${prune}" "${owned_before}")"
+  dyai_lsp::owned_set opencode "${applied_names}"
 }
 
 #######################################
@@ -423,13 +484,13 @@ function dyai_lsp::setup_hermes {
     entries="$(jq -c --arg k "${id}" --argjson e "${entry}" '.[$k] = $e' <<< "${entries}")"
   done < <(jq -r 'keys[]' <<< "${ext_map}")
 
-  local owned_names prune file
+  local owned_names owned_before prune file applied_names
   owned_names="$(jq -c 'keys' <<< "${entries}")"
-  # shellcheck disable=SC2312 # owned_get on an absent key yields null, defaulted to []
-  prune="$(dyai_lsp::owned_get hermes | jq -c --argjson keep "${owned_names}" '(. // []) - $keep')"
+  owned_before="$(dyai_lsp::owned_get hermes)"
+  prune="$(jq -c --argjson keep "${owned_names}" '(. // []) - $keep' <<< "${owned_before}")"
   file="$(dybatpho::path_join "${HOME}" ".hermes" "config.yaml")"
-  __dyai_lsp_write_yaml_block "${file}" "${entries}" "${prune}"
-  dyai_lsp::owned_set hermes "${owned_names}"
+  applied_names="$(__dyai_lsp_write_yaml_block hermes "${file}" "${entries}" "${prune}" "${owned_before}")"
+  dyai_lsp::owned_set hermes "${applied_names}"
 }
 
 #######################################
