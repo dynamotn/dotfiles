@@ -179,6 +179,31 @@ CFG
   [[ "$(cat "${proj}/.claude/agents/golang-pro.md")" == "${before}" ]]
 }
 
+@test "dyai::use materializes a skills-only preset with no subagent source" {
+  _stub bunx
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+registry:
+  presets:
+    security:
+      skills:
+        - owner/repo@threat-model
+        - owner/repo@fuzzing
+CFG
+  local proj="${BATS_TEST_TMPDIR}/secproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  (cd "${proj}" && dyai::use security)
+  grep -q 'STUB bunx .* add owner/repo@threat-model' "${HOME}/calls.log"
+  grep -q 'STUB bunx .* add owner/repo@fuzzing' "${HOME}/calls.log"
+  yq -p=toml '.materialized[]' "${proj}/.dyai.toml" | grep -q 'threat-model'
+  run git -C "${proj}" check-ignore .agents/skills/threat-model
+  assert_success
+  # a skills-only preset creates no subagents dir
+  [ ! -d "${proj}/.claude/agents" ]
+}
+
 @test "dyai::use personal-ignores the materialized subagent, not only .dyai.toml" {
   _stub claude
   _stub bunx
