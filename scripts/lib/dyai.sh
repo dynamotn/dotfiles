@@ -103,6 +103,8 @@ function dyai::setup_marketplaces {
 function dyai::setup_plugins {
   local installed_file plugin
   installed_file="$(dybatpho::path_join "${PLUGINS_DIR}" "installed_plugins.json")"
+  # Optional plugins install too, so a project preset only has to switch one on.
+  local all='(.agents.claude.plugins // []) + (.agents.claude.optional_plugins // [])'
   # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
   while IFS= read -r plugin; do
     [[ -n "${plugin}" ]] || continue
@@ -113,7 +115,7 @@ function dyai::setup_plugins {
     fi
     dybatpho::info "Install plugin ${plugin}"
     claude plugin install "${plugin}" < /dev/null || dybatpho::warn "Could not install plugin ${plugin}"
-  done < <(dyai::config_json '.agents.claude.plugins // []' | jq -r '.[]')
+  done < <(dyai::config_json "${all}" | jq -r '.[]')
 }
 
 #######################################
@@ -1046,7 +1048,8 @@ function dyai::materialize {
   csrc=""
   # shellcheck disable=SC2310 # a failed fetch leaves csrc empty and commands are skipped
   [[ -z "${crepo}" ]] || csrc="$(dyai::fetch_repo "${crepo}" "${cref}")" || csrc=""
-  local -a desired=() desired_mcp=() registered_mcp=()
+  local -a desired=() desired_mcp=() registered_mcp=() desired_plugins=()
+  local plugin
   local preset section pj sa_count sa md dest sk leaf incomplete="" mcpname mdef cmd_count cmdname
   # Servers already registered project-local, so a re-run does not re-add them.
   local existing_mcp
@@ -1155,15 +1158,61 @@ function dyai::materialize {
         dybatpho::warn "Could not register MCP ${mcpname} for this project"
       fi
     done < <(jq -r '.mcp // {} | keys[]?' <<< "${pj}")
+    # Claude plugins: installed globally but kept off there, switched on here.
+    # shellcheck disable=SC2312 # jq lists the preset's plugins
+    while IFS= read -r plugin; do
+      [[ -n "${plugin}" ]] && desired_plugins+=("${plugin}")
+    done < <(jq -r '.plugins[]?' <<< "${pj}")
   done < <(yq -p=toml '.use[]' "${toml}" 2> /dev/null)
   if [[ -n "${incomplete}" ]]; then
     dybatpho::die "could not fetch a subagent/command source; project left unchanged"
   fi
   dyai::prune_and_record "${toml}" "${desired[@]+"${desired[@]}"}"
-  local desired_mcp_json registered_mcp_json
+  local desired_mcp_json registered_mcp_json desired_plugins_json
   desired_mcp_json="$(dyai::names_to_json "${desired_mcp[@]+"${desired_mcp[@]}"}")"
   registered_mcp_json="$(dyai::names_to_json "${registered_mcp[@]+"${registered_mcp[@]}"}")"
   dyai::reconcile_mcp "${toml}" "${root}" "${desired_mcp_json}" "${registered_mcp_json}"
+  desired_plugins_json="$(dyai::names_to_json "${desired_plugins[@]+"${desired_plugins[@]}"}")"
+  dyai::reconcile_plugins "${toml}" "${root}" "${desired_plugins_json}"
+}
+
+#######################################
+# @description Enable the presets' Claude plugins in the project's personal settings, drop the stale ones
+# @arg $1 string Path of the project .dyai.toml
+# @arg $2 string The project root
+# @arg $3 string JSON array of the plugin@marketplace names the presets want
+#######################################
+function dyai::reconcile_plugins {
+  local toml root desired_json
+  dybatpho::expect_args toml root desired_json -- "$@"
+  local file old_json known_json p
+  file="${root}/.claude/settings.local.json"
+  # shellcheck disable=SC2312 # a missing manifest reads as an empty list
+  old_json="$(yq -p=toml -o=json -I=0 '.materialized_plugins // []' "${toml}" 2> /dev/null || echo '[]')"
+  # Nothing wanted now and nothing enabled before: leave the project untouched.
+  [[ "${desired_json}" != "[]" || "${old_json}" != "[]" ]] || return 0
+  # A plugin must be installed for the project switch to have any effect.
+  known_json="$(dyai::config_json \
+    '(.agents.claude.plugins // []) + (.agents.claude.optional_plugins // [])')"
+  # shellcheck disable=SC2312 # jq lists the wanted plugins that are not installed
+  while IFS= read -r p; do
+    [[ -n "${p}" ]] && dybatpho::warn "plugin ${p} is not in agents.claude.optional_plugins, so it is not installed"
+  done < <(jq -r --argjson k "${known_json}" '.[] | select(. as $p | $k | index($p) | not)' <<< "${desired_json}")
+  # Only keys dyai set before are removed; a plugin you toggled yourself stays.
+  # dyshellint disable=SC2016 a jq program; its $names are jq variables
+  dyai::json_set "${file}" '
+    .enabledPlugins = ((.enabledPlugins // {})
+      | reduce ($old - $want)[] as $p (.; del(.[$p]))
+      | reduce $want[] as $p (.; .[$p] = true))
+    | if .enabledPlugins == {} then del(.enabledPlugins) else . end' \
+    --argjson old "${old_json}" --argjson want "${desired_json}"
+  local list
+  list="$(jq -cS 'unique' <<< "${desired_json}")"
+  LIST="${list}" yq -p=toml -o=toml -i '.materialized_plugins = (strenv(LIST) | fromjson)' "${toml}"
+  local exclude
+  # shellcheck disable=SC2310 # outside a repo there is nothing to personal-ignore
+  exclude="$(dyai::git_exclude "${root}")" || return 0
+  dyai::exclude_add "${exclude}" "/.claude/settings.local.json"
 }
 
 #######################################

@@ -121,6 +121,11 @@ agents:
 {{- range $d.plugins }}
       - {{ . }}
 {{- end }}
+    # Installed but off globally; a preset's `plugins` switches them on.
+    optional_plugins:
+{{- range $d.optional_plugins }}
+      - {{ . }}
+{{- end }}
 # Opt-in presets pulled per project by `dyai use <name>`; kept out of the
 # global baseline so the discovery index stays lean. One preset per tool, so a
 # project pulls only what it uses. Subagent names resolve against the pinned
@@ -246,6 +251,9 @@ registry:
         - wshobson/agents@gitops-workflow
     database:
       subagents: [postgres-pro]
+      plugins:
+        - redis-development@claude-plugins-official
+        - duckdb-skills@claude-plugins-official
       skills:
         - supabase/agent-skills@supabase-postgres-best-practices
         - wshobson/agents@sql-optimization-patterns
@@ -284,6 +292,19 @@ registry:
     # Skills-only: the 04-quality-security subagents stay in the global
     # baseline, so this opt-in collection does not duplicate them.
     security:
+      # Switched on in .claude/settings.local.json; off everywhere else.
+      plugins:
+        - appsec-skills@agent-sec-ops-kit-skills
+        - compliance-skills@agent-sec-ops-kit-skills
+        - devsecops-skills@agent-sec-ops-kit-skills
+        - incident-response-skills@agent-sec-ops-kit-skills
+        - offsec-skills@agent-sec-ops-kit-skills
+        - secsdlc-skills@agent-sec-ops-kit-skills
+        - threatmodel-skills@agent-sec-ops-kit-skills
+        - secskills-core@secskills-marketplace
+        - secskills-defense@secskills-marketplace
+        - secskills-offense@secskills-marketplace
+        - testing-handbook-skills@trailofbits
       skills:
         - openai/skills@security-threat-model
         - wshobson/agents@stride-analysis-patterns

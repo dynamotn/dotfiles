@@ -53,6 +53,13 @@ definitions:
       commands:
         type: array
         items: { type: string }
+      plugins:
+        type: array
+        items: { type: string, pattern: "^[^@\\s]+@[^@\\s]+$" }
+        description: >
+          Claude plugins (plugin@marketplace) enabled in the project's
+          .claude/settings.local.json; list them in agents.claude.optional_plugins
+          so they are installed but off everywhere else.
 
   mdSource:
     type: object
@@ -164,6 +171,12 @@ properties:
           type: array
           items: { type: string }
           description: Enabled plugins, as plugin@marketplace (Claude only).
+        optional_plugins:
+          type: array
+          items: { type: string }
+          description: >
+            Plugins installed but disabled globally (Claude only); a registry
+            preset's `plugins` switches them on per project.
         mcp:
           type: object
           additionalProperties: { $ref: "#/definitions/mcpServer" }

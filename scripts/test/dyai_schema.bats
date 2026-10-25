@@ -125,8 +125,9 @@ function _render_config {
   [[ "$(yq '.marketplaces | length' "${out}")" == "10" ]]
   [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
   [[ "$(yq '.marketplaces["agent-sec-ops-kit-skills"].source.source' "${out}")" == "git" ]]
-  # 56 plugins, including known entries
-  [[ "$(yq '.plugins | length' "${out}")" == "56" ]]
+  # 43 plugins on globally and 13 optional ones, including known entries
+  [[ "$(yq '.plugins | length' "${out}")" == "43" ]]
+  [[ "$(yq '.optional_plugins | length' "${out}")" == "13" ]]
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
   # agent-mode plugins, each its own single-plugin marketplace
@@ -159,7 +160,8 @@ function _render_config {
   assert_failure
   [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp-server ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
-  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "56" ]]
+  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "43" ]]
+  [[ "$(yq '.agents.claude.optional_plugins | length' "${out}")" == "13" ]]
   [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "10" ]]
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
 }
@@ -241,6 +243,27 @@ function _render_config {
   # filesystem default scope is personal + community.
   yq '.global.mcp.filesystem.args[]' "${out}" | grep 'Working/personal' > /dev/null
   yq '.global.mcp.filesystem.args[]' "${out}" | grep 'Working/community' > /dev/null
+}
+
+@test "every preset plugin is an optional plugin, off globally and installed" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
+  local out="${BATS_TEST_TMPDIR}/gentoo-pc.plugins.yaml" j
+  _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "render failed: $(< "${out}.err")"
+  j="$(yq -o=json -I=0 '.' "${out}")"
+  # A preset may only switch on a plugin that is installed but off globally.
+  jq -e '(.agents.claude.optional_plugins // []) as $opt
+    | [.registry[][] | .plugins // [] | .[]] | all(. as $p | $opt | index($p) != null)' \
+    <<< "${j}" > /dev/null || fail "a preset plugin is not in agents.claude.optional_plugins"
+  # A plugin is either on globally or optional, never both.
+  jq -e '(.agents.claude.plugins // []) - ((.agents.claude.plugins // []) - (.agents.claude.optional_plugins // []))
+    | length == 0' <<< "${j}" > /dev/null || fail "a plugin is both global and optional"
+  # Every optional plugin is reachable from at least one preset.
+  jq -e '[.registry[][] | .plugins // [] | .[]] as $used
+    | (.agents.claude.optional_plugins // []) | all(. as $p | $used | index($p) != null)' \
+    <<< "${j}" > /dev/null || fail "an optional plugin no preset enables"
 }
 
 @test "config declares the baseline subagents from VoltAgent at a pinned ref" {

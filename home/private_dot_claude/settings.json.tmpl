@@ -6,6 +6,8 @@
 {{- $d := fromYaml (includeTemplate "ai/dyai-data.yaml.tmpl" .) -}}
 {{- $enabled := dict -}}
 {{- range $d.plugins }}{{ $_ := set $enabled . true }}{{ end -}}
+{{- /* Installed but off; a dyai preset turns one on per project. */ -}}
+{{- range $d.optional_plugins }}{{ $_ := set $enabled . false }}{{ end -}}
 {{- $static := `
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",

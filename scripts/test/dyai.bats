@@ -230,6 +230,45 @@ CFG
   [[ "$(yq -p=toml '.materialized_mcp | length' "${proj}/.dyai.toml")" == "0" ]]
 }
 
+@test "dyai::use enables a preset's plugins in settings.local.json; rm drops only those" {
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+agents:
+  claude:
+    plugins: [base@m]
+    optional_plugins: [sec-a@m, sec-b@m]
+registry:
+  presets:
+    sec:
+      plugins: [sec-a@m, sec-b@m, ghost@m]
+CFG
+  local proj="${BATS_TEST_TMPDIR}/plugproj" f
+  f="${proj}/.claude/settings.local.json"
+  mkdir -p "${proj}/.claude"
+  git -C "${proj}" init -q
+  # The user's own local settings stay: a permission and a plugin they enabled.
+  printf '{"permissions":{"allow":["Bash(ls)"]},"enabledPlugins":{"mine@m":true}}' > "${f}"
+  # `run` must stay in this shell to capture output; every later path is absolute.
+  cd "${proj}" || fail "cannot enter ${proj}"
+  run dyai::use sec
+  assert_success
+  # A plugin no list installs is still enabled, but flagged.
+  assert_output --partial 'plugin ghost@m is not in agents.claude.optional_plugins'
+  jq -e '.enabledPlugins == {"mine@m": true, "sec-a@m": true, "sec-b@m": true, "ghost@m": true}' "${f}" > /dev/null
+  jq -e '.permissions.allow == ["Bash(ls)"]' "${f}" > /dev/null
+  yq -e -p=toml '.materialized_plugins | length == 3' "${proj}/.dyai.toml" > /dev/null
+  grep -qxF '/.claude/settings.local.json' "${proj}/.git/info/exclude"
+  local before
+  before="$(< "${f}")"
+  (cd "${proj}" && dyai::materialize)
+  [[ "$(< "${f}")" == "${before}" ]] || fail "re-materialize changed ${f}"
+  (cd "${proj}" && dyai::rm sec)
+  jq -e '.enabledPlugins == {"mine@m": true}' "${f}" > /dev/null
+  jq -e '.permissions.allow == ["Bash(ls)"]' "${f}" > /dev/null
+  yq -e -p=toml '.materialized_plugins | length == 0' "${proj}/.dyai.toml" > /dev/null
+}
+
 @test "dyai::use does not record an mcp server whose registration failed; retries next run" {
   _stub bunx
   # a claude stub that FAILS `mcp add-json` but succeeds otherwise

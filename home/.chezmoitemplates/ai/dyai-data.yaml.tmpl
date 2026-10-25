@@ -50,38 +50,43 @@ plugins:
   - semgrep@claude-plugins-official
   - claude-security@claude-plugins-official
   - frontend-design@claude-plugins-official
-  - appsec-skills@agent-sec-ops-kit-skills
   - code-simplifier@claude-plugins-official
   - commit-commands@claude-plugins-official
-  - compliance-skills@agent-sec-ops-kit-skills
-  - devsecops-skills@agent-sec-ops-kit-skills
   - differential-review@trailofbits
   - elements-of-style@superpowers-marketplace
   - episodic-memory@superpowers-marketplace
-  - incident-response-skills@agent-sec-ops-kit-skills
   - insecure-defaults@trailofbits
   - mattpocock-skills@claude-plugins-official
   - modern-python@trailofbits
-  - offsec-skills@agent-sec-ops-kit-skills
   - pr-review-toolkit@claude-plugins-official
   - rust-analyzer-lsp@claude-plugins-official
   - second-opinion@trailofbits
-  - secsdlc-skills@agent-sec-ops-kit-skills
-  - secskills-core@secskills-marketplace
-  - secskills-defense@secskills-marketplace
-  - secskills-offense@secskills-marketplace
   - sharp-edges@trailofbits
   - skill-creator@claude-plugins-official
   - static-analysis@trailofbits
   - supply-chain-risk-auditor@trailofbits
-  - testing-handbook-skills@trailofbits
-  - threatmodel-skills@agent-sec-ops-kit-skills
   - trailmark@trailofbits
   - mcp-server-dev@claude-plugins-official
   - agent-sdk-dev@claude-plugins-official
+  - ralph-loop@claude-plugins-official
+# Installed but off globally: each one loads its skills into every session,
+# so these domain plugins are switched on per project by the registry preset
+# that lists them (`dyai use security`, `dyai use database`).
+optional_plugins:
+  - appsec-skills@agent-sec-ops-kit-skills
+  - compliance-skills@agent-sec-ops-kit-skills
+  - devsecops-skills@agent-sec-ops-kit-skills
+  - incident-response-skills@agent-sec-ops-kit-skills
+  - offsec-skills@agent-sec-ops-kit-skills
+  - secsdlc-skills@agent-sec-ops-kit-skills
+  - threatmodel-skills@agent-sec-ops-kit-skills
+  - secskills-core@secskills-marketplace
+  - secskills-defense@secskills-marketplace
+  - secskills-offense@secskills-marketplace
+  - testing-handbook-skills@trailofbits
   - redis-development@claude-plugins-official
   - duckdb-skills@claude-plugins-official
-  - ralph-loop@claude-plugins-official
+
 policy:
   # Harness-enforced versions of the credentials and destructive-commands rules
   # in ai/: a rule here holds even when the prose is lost from context. The rtk

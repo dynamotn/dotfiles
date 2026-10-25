@@ -73,7 +73,10 @@ Installed for every agent, every project:
 ### `agents.<name>` — agent-specific
 
 Things only one agent understands, e.g. `agents.claude.marketplaces` and
-`agents.claude.plugins`.
+`agents.claude.plugins`. `agents.claude.optional_plugins` are installed too
+but switched off in `settings.json`: a plugin loads every skill it ships into
+every session, so a domain plugin (the security research kits, redis, duckdb)
+stays off until a project turns it on through a preset.
 
 ### `registry` — opt-in presets
 
@@ -91,7 +94,7 @@ Grouped by tool boundary so a project pulls in only what it uses:
 
 `dyai ls` prints the full, current list.
 
-Each preset is `{subagents?, skills?, mcp?, commands?}`. Subagent names resolve
+Each preset is `{subagents?, skills?, mcp?, commands?, plugins?}`. Subagent names resolve
 against the pinned `global.subagents` repo (materialize finds `<name>.md`
 anywhere in the fetched tree), so a preset may reference any category — not
 only the ones the baseline installs. Because the names are coupled to that
@@ -132,6 +135,10 @@ team, and are never committed.
 - **mcp** → Claude's project-**local** scope (`claude mcp add-json --scope
   local`, kept in `~/.claude.json`, not the shared `./.mcp.json`), tracked
   as `materialized_mcp` in `.dyai.toml`.
+- **plugins** → `enabledPlugins` in `./.claude/settings.local.json` (Claude's
+  personal project settings, also personal-ignored), tracked as
+  `materialized_plugins`. Dropping the preset removes only the keys dyai set;
+  the rest of that file, and plugins you toggled yourself, stay.
 
 `dyai rm` (or re-running after editing the registry) prunes exactly the files a
 dropped preset owned, and keeps a file another active preset still wants.
