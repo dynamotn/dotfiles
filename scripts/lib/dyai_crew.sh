@@ -1090,6 +1090,10 @@ function dyai_crew::selftest {
     printf '%s\tBLOCKED: not installed\n' "${agent}"
     return 1
   fi
+  if ! dybatpho::is command dyai-selftest-probe; then
+    printf '%s\tBLOCKED: dyai-selftest-probe is not on PATH; apply the dotfiles first\n' "${agent}"
+    return 1
+  fi
   local scratch result rc=0
   # Removed with its contents when the shell exits.
   dybatpho::create_temp_dir scratch "dyai-selftest"

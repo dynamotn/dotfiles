@@ -1007,7 +1007,17 @@ function _probe_agent {
   assert_output --partial "BLOCKED: agent ran no command"
 }
 
+@test "selftest is blocked without calling the agent when the probe is not on PATH" {
+  _probe_agent claude allow
+  rm -f -- "${HOME}/.local/bin/dyai-selftest-probe"
+  run dyai_crew::selftest claude
+  assert_failure
+  assert_output --partial "BLOCKED: dyai-selftest-probe is not on PATH"
+  [[ ! -e "${BATS_TEST_TMPDIR}/claude.stdin" ]] || fail "the agent ran"
+}
+
 @test "selftest is blocked by a rate limit" {
+  _probe_agent claude none
   _agent claude "${RATE}"
   run dyai_crew::selftest claude
   assert_failure
