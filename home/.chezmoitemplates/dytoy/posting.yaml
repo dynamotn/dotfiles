@@ -1,3 +1,11 @@
+{{- /* doc
+name: posting
+url: "https://github.com/darrenburns/posting"
+description: Powerful HTTP client with TUI same as Postman
+category: Development tools
+subcategory: CLI tools
+order: 90
+*/ -}}
 name: posting
 method: shell
 dependencies:

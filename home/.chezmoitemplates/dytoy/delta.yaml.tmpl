@@ -1,3 +1,10 @@
+{{- /* doc
+name: delta
+description: "Syntax highlighting pager for git, diff, and grep output"
+category: Everyday terminal applications
+subcategory: Git and pagers
+order: 30
+*/ -}}
 name: delta
 is_essential: true
 {{- if or (eq .chezmoi.os "android") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}

@@ -1,0 +1,67 @@
+# Sections of docs/dytoy.md in order, and the subcategories that order
+# the rows inside each section. Subcategories are never rendered.
+- category: Prerequisite
+  subcategories:
+    - Core
+- category: System core tools
+  subcategories:
+    - Base
+- category: Everyday terminal applications
+  subcategories:
+    - Core
+    - Git and pagers
+    - Modern replacements
+    - Utilities
+- category: Cross platform GUI applications
+  subcategories:
+    - Drivers and terminal
+    - Applications
+    - Monitors
+- category: Wayland server applications
+  subcategories:
+    - Desktop
+    - Login and displays
+    - Input methods
+    - Services
+- category: MacOS GUI applications
+  subcategories:
+    - Desktop
+- category: Network tools
+  subcategories:
+    - Core
+    - Diagnostics
+    - Tunnels and remote access
+- category: Security tools
+  subcategories:
+    - System hardening
+    - Scanners
+    - Code and binaries
+- category: Development tools
+  subcategories:
+    - CLI tools
+    - Languages and runtimes
+    - Package managers
+    - Utilities
+    - Linters and formatters
+- category: DevOps tools
+  subcategories:
+    - Containers
+    - Kubernetes and GitOps
+    - Cloud and IaC
+    - Data
+    - Operations
+    - Cloud CLIs
+- category: AI tools
+  subcategories:
+    - Models and agents
+- category: Android tools
+  subcategories:
+    - Android
+- category: Miscellaneous applications
+  subcategories:
+    - Fun and helpers
+    - Media
+    - Utilities
+    - Cheatsheets and media
+    - Messaging
+    - Office and data

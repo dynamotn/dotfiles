@@ -1,2 +1,10 @@
+{{- /* doc
+name: foundry
+url: "https://github.com/foundry-rs/foundry"
+description: Toolkit for Solidity
+category: Development tools
+subcategory: Languages and runtimes
+order: 120
+*/ -}}
 name: foundry
 method: mise

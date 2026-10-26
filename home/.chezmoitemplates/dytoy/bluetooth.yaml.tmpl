@@ -1,3 +1,12 @@
+{{- /* doc
+name: bluetooth
+label: bluez
+url: "https://github.com/bluez/bluez"
+description: Bluetooth controller
+category: Miscellaneous applications
+subcategory: Media
+order: 60
+*/ -}}
 {{- if and (eq .chezmoi.os "linux") .hasBluetooth }}
 # Only on Linux
 name: bluetooth

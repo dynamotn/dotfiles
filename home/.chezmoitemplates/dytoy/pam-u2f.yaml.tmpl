@@ -1,3 +1,11 @@
+{{- /* doc
+name: pam-u2f
+url: "https://github.com/Yubico/pam-u2f"
+description: PAM U2F module
+category: Security tools
+subcategory: System hardening
+order: 20
+*/ -}}
 {{- if and (eq .chezmoi.os "linux") (eq .kind "pc" "laptop" "workstation" "sbc") }}
 name: pam-u2f
 method: os

@@ -1,3 +1,11 @@
+{{- /* doc
+name: zsh
+url: "https://github.com/zsh-users/zsh"
+description: Z shell
+category: Development tools
+subcategory: Languages and runtimes
+order: 150
+*/ -}}
 name: zsh
 method: os
 # https://repology.org/project/zsh/versions

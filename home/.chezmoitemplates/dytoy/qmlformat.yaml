@@ -1,3 +1,11 @@
+{{- /* doc
+name: qmlformat
+url: "https://github.com/qt/qtdeclarative"
+description: Formatter for QML
+category: Development tools
+subcategory: Linters and formatters
+order: 30
+*/ -}}
 name: qmlformat
 method: os
 # `qmlformat` comes with Qt Declarative but lives in Qt's own bin directory,

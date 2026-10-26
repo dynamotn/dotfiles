@@ -1,3 +1,11 @@
+{{- /* doc
+name: fish
+url: "https://github.com/fish-shell/fish-shell"
+description: Smart command line shell
+category: Everyday terminal applications
+subcategory: Core
+order: 40
+*/ -}}
 name: fish
 method: os
 # https://repology.org/project/fish/versions

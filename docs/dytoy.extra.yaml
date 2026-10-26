@@ -1,0 +1,104 @@
+# Tools listed in docs/dytoy.md that have no definition of their own.
+# Same fields as the doc blocks; see schemas/dytoy-doc.schema.yaml.
+- name: xwayland-satellite
+  url: "https://github.com/Supreeeme/xwayland-satellite"
+  description: Runs X11 applications on niri
+  category: Wayland server applications
+  subcategory: Desktop
+  order: 40
+- name: regreet
+  url: "https://github.com/rharish101/ReGreet"
+  description: "ReGreet, greeter for GreetD"
+  category: Wayland server applications
+  subcategory: Login and displays
+  order: 20
+- name: fcitx5-lotus
+  url: "https://fcitx5-lotus.pages.dev/"
+  description: Vietnamese input method for Fcitx5
+  category: Wayland server applications
+  subcategory: Input methods
+  order: 20
+- name: mozc
+  url: "https://github.com/google/mozc"
+  description: Japanese input method for Fcitx5
+  category: Wayland server applications
+  subcategory: Input methods
+  order: 30
+- name: fcitx5-chinese-addons
+  url: "https://github.com/fcitx/fcitx5-chinese-addons"
+  description: Chinese input method for Fcitx5
+  category: Wayland server applications
+  subcategory: Input methods
+  order: 40
+- name: lima
+  url: "https://github.com/lima-vm/lima"
+  description: Linux VM on MacOS
+  category: DevOps tools
+  subcategory: Containers
+  order: 20
+- name: bluestacks
+  url: "https://www.bluestacks.com/"
+  description: Android environment on MacOS
+  category: Android tools
+  subcategory: Android
+  order: 30
+- name: cht
+  url: "https://cht.sh"
+  description: Access to community cheat sheet
+  category: Miscellaneous applications
+  subcategory: Fun and helpers
+  order: 10
+- name: "color16, color256, colorful, truecolor"
+  url: text
+  description: Test CLI color
+  category: Miscellaneous applications
+  subcategory: Fun and helpers
+  order: 20
+- name: now
+  url: "https://github.com/apankrat/now.sh"
+  description: Prints current date/time while waiting for an input and echoing it to the stdout
+  category: Miscellaneous applications
+  subcategory: Fun and helpers
+  order: 30
+- name: screensaver
+  url: "https://github.com/pipeseroni/pipes.sh"
+  description: Show screensaver on CLI with pipes
+  category: Miscellaneous applications
+  subcategory: Fun and helpers
+  order: 50
+- name: qrify
+  url: "https://github.com/alexanderepstein/Bash-Snippets"
+  description: Show QR of text
+  category: Miscellaneous applications
+  subcategory: Fun and helpers
+  order: 60
+- name: tmpmail
+  url: "https://github.com/sdushantha/tmpmail"
+  description: Create temp mail address and receive emails
+  category: Miscellaneous applications
+  subcategory: Fun and helpers
+  order: 70
+- name: trans
+  url: "https://github.com/soimort/translate-shell"
+  description: Translate
+  category: Miscellaneous applications
+  subcategory: Fun and helpers
+  order: 80
+- name: xpanes
+  url: "https://github.com/greymd/tmux-xpanes"
+  description: Terminal divider with tmux
+  category: Miscellaneous applications
+  subcategory: Fun and helpers
+  order: 90
+- name: git-quick-stats
+  url: "https://github.com/arzzen/git-quick-stats"
+  description: Show statistics of Git repository
+  category: Miscellaneous applications
+  subcategory: Media
+  order: 20
+- name: pulsemixer
+  url: "https://github.com/GeorgeFilipkin/pulsemixer"
+  description: Alternative CLI tool for pavucontrol
+  category: Miscellaneous applications
+  subcategory: Media
+  order: 50

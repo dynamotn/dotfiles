@@ -1,3 +1,10 @@
+{{- /* doc
+name: k0sctl
+description: Bootstrap and manage k0s cluster
+category: DevOps tools
+subcategory: Kubernetes and GitOps
+order: 40
+*/ -}}
 {{- if eq .chezmoi.os "linux" "darwin" }}
 name: k0sctl
 method: binary

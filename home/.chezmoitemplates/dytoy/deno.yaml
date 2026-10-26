@@ -1,2 +1,10 @@
+{{- /* doc
+name: deno
+url: "https://github.com/denoland/deno"
+description: JavaScript runtime
+category: Development tools
+subcategory: Languages and runtimes
+order: 60
+*/ -}}
 name: deno
 method: mise

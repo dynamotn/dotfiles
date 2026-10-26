@@ -1,3 +1,11 @@
+{{- /* doc
+name: nix
+url: "https://github.com/NixOS/nix"
+description: Purely functional package manager
+category: Development tools
+subcategory: Package managers
+order: 20
+*/ -}}
 name: nix
 method: os
 # https://repology.org/project/nix/versions

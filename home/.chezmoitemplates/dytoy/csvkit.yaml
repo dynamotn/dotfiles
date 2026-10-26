@@ -1,3 +1,11 @@
+{{- /* doc
+name: csvkit
+url: "https://github.com/wireservice/csvkit"
+description: "Convert various data formats to CSV (`in2csv`, `csvlook`...)"
+category: Miscellaneous applications
+subcategory: Office and data
+order: 20
+*/ -}}
 name: csvkit
 method: shell
 dependencies:

@@ -1,3 +1,11 @@
+{{- /* doc
+name: copilot
+url: "https://github.com/github/copilot-cli"
+description: CLI tool for GitHub Copilot
+category: AI tools
+subcategory: Models and agents
+order: 50
+*/ -}}
 name: copilot
 method: shell
 dependencies:

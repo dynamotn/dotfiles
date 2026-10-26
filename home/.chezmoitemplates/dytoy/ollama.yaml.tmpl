@@ -1,3 +1,11 @@
+{{- /* doc
+name: ollama
+url: "https://github.com/ollama/ollama"
+description: Get up and running LLMs
+category: AI tools
+subcategory: Models and agents
+order: 10
+*/ -}}
 {{- if and (eq .guiDriver "N" "A" "M") (ne .osid "android") }}
 name: ollama
 {{-   if not (eq .osid "linux-alpine" "linux-ubuntu") }}

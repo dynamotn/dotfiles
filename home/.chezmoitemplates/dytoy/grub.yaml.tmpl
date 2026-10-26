@@ -1,3 +1,11 @@
+{{- /* doc
+name: grub
+url: "https://www.gnu.org/software/grub/"
+description: Bootloader for system
+category: System core tools
+subcategory: Base
+order: 50
+*/ -}}
 {{- if and (eq .chezmoi.os "linux") (ne .kind "container") }}
 name: grub
 method: os

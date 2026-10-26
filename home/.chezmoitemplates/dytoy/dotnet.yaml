@@ -1,2 +1,10 @@
+{{- /* doc
+name: dotnet
+url: "https://github.com/dotnet/runtime"
+description: Runtime for .NET
+category: Development tools
+subcategory: Languages and runtimes
+order: 90
+*/ -}}
 name: dotnet
 method: mise

@@ -1,3 +1,11 @@
+{{- /* doc
+name: xdg-user-dirs
+url: "https://www.freedesktop.org/wiki/Software/xdg-user-dirs/"
+description: Manage well-known user directories
+category: Wayland server applications
+subcategory: Desktop
+order: 10
+*/ -}}
 {{- if and (eq .chezmoi.os "linux") (ne .guiServer "0" ) }}
 name: xdg-user-dirs
 method: os

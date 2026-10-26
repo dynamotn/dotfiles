@@ -1,3 +1,10 @@
+{{- /* doc
+name: rbw
+description: Bitwarden CLI tool
+category: Everyday terminal applications
+subcategory: Core
+order: 20
+*/ -}}
 name: rbw
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}

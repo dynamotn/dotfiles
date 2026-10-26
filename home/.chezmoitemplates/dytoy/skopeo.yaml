@@ -1,3 +1,11 @@
+{{- /* doc
+name: skopeo
+url: "https://github.com/containers/skopeo"
+description: CLI tool for various operations with remote image repositories
+category: DevOps tools
+subcategory: Containers
+order: 80
+*/ -}}
 name: skopeo
 method: os
 # https://repology.org/project/skopeo/versions

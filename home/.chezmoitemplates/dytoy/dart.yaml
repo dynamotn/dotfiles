@@ -1,2 +1,10 @@
+{{- /* doc
+name: dart
+url: "https://github.com/dart-lang/sdk"
+description: SDK for Dart
+category: Development tools
+subcategory: Languages and runtimes
+order: 80
+*/ -}}
 name: dart
 method: mise

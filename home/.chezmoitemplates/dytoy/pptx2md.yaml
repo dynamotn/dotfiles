@@ -1,3 +1,11 @@
+{{- /* doc
+name: pptx2md
+url: "https://github.com/ssine/pptx2md"
+description: Convert PowerPoint presentations to Markdown
+category: Miscellaneous applications
+subcategory: Office and data
+order: 10
+*/ -}}
 name: pptx2md
 method: shell
 dependencies:

@@ -1,3 +1,11 @@
+{{- /* doc
+name: euporie
+url: "https://github.com/joouha/euporie"
+description: Jupyter notebooks in CLI
+category: Development tools
+subcategory: CLI tools
+order: 100
+*/ -}}
 name: euporie
 method: shell
 dependencies:

@@ -1,3 +1,11 @@
+{{- /* doc
+name: git-lfs
+url: "https://github.com/git-lfs/git-lfs"
+description: Git extension for large files
+category: Everyday terminal applications
+subcategory: Git and pagers
+order: 10
+*/ -}}
 name: git-lfs
 method: os
 # https://repology.org/project/git-lfs/versions

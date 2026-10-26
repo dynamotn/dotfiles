@@ -1,3 +1,11 @@
+{{- /* doc
+name: helm
+url: "https://github.com/helm/helm"
+description: Kubernetes package manager
+category: DevOps tools
+subcategory: Cloud CLIs
+order: 20
+*/ -}}
 name: helm
 method: mise
 hook:

@@ -1,2 +1,10 @@
+{{- /* doc
+name: opentofu
+url: "https://github.com/opentofu/opentofu"
+description: "IaC tool for building, changing, and versioning infrastructure (OSS fork from Terraform)"
+category: DevOps tools
+subcategory: Cloud and IaC
+order: 30
+*/ -}}
 name: opentofu
 method: mise

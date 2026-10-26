@@ -1,3 +1,12 @@
+{{- /* doc
+name: imagemagick
+label: ImageMagick
+url: "https://github.com/ImageMagick/ImageMagick"
+description: Image manipulation tool
+category: Miscellaneous applications
+subcategory: Media
+order: 100
+*/ -}}
 name: imagemagick
 method: os
 # https://repology.org/project/imagemagick/versions

@@ -1,3 +1,10 @@
+{{- /* doc
+name: docker-buildx
+description: Extended build capabilities for Docker
+category: DevOps tools
+subcategory: Containers
+order: 40
+*/ -}}
 {{- if ne .chezmoi.os "android" }}
 # Can't use docker and container on non-rooted Android
 name: docker-buildx

@@ -1,3 +1,10 @@
+{{- /* doc
+name: macos-defaults
+description: Apply macOS defaults from YAML files
+category: MacOS GUI applications
+subcategory: Desktop
+order: 60
+*/ -}}
 {{- if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") }}
 # The dsully/tap Homebrew tap fails to load on recent Homebrew, so install the
 # release binary directly. Upstream only ships Apple Silicon builds.

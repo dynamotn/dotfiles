@@ -1,3 +1,11 @@
+{{- /* doc
+name: elixir
+url: "https://github.com/elixir-lang/elixir"
+description: Language for Elixir
+category: Development tools
+subcategory: Languages and runtimes
+order: 110
+*/ -}}
 name: elixir
 method: os
 dependencies:

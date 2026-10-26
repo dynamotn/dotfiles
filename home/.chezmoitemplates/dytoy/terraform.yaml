@@ -1,2 +1,10 @@
+{{- /* doc
+name: terraform
+url: "https://github.com/hashicorp/terraform"
+description: "IaC tool for building, changing, and versioning infrastructure"
+category: DevOps tools
+subcategory: Cloud and IaC
+order: 20
+*/ -}}
 name: terraform
 method: mise

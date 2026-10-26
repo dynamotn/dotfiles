@@ -1,3 +1,11 @@
+{{- /* doc
+name: gawk
+url: "https://www.gnu.org/software/gawk/"
+description: "GNU implementation of `awk`"
+category: Development tools
+subcategory: Utilities
+order: 10
+*/ -}}
 name: gawk
 method: os
 # https://repology.org/project/gawk/versions

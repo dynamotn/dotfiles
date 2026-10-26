@@ -1,3 +1,11 @@
+{{- /* doc
+name: codex
+url: "https://github.com/openai/codex"
+description: CLI tool for OpenAI Codex coding agent
+category: AI tools
+subcategory: Models and agents
+order: 50
+*/ -}}
 name: codex
 method: shell
 dependencies:

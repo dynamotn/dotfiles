@@ -1,3 +1,11 @@
+{{- /* doc
+name: aws
+url: "https://github.com/aws/aws-cli"
+description: Libraries and tools for interacting with Amazon Web Services products and services
+category: DevOps tools
+subcategory: Cloud CLIs
+order: 40
+*/ -}}
 name: aws
 method: mise
 backend: awscli

@@ -1,3 +1,10 @@
+{{- /* doc
+name: sops
+description: Managing secrets in Git repositories
+category: DevOps tools
+subcategory: Kubernetes and GitOps
+order: 90
+*/ -}}
 {{- if eq .chezmoi.os "linux" "darwin" }}
 name: sops
 method: binary

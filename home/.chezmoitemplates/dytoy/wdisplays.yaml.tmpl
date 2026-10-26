@@ -1,3 +1,11 @@
+{{- /* doc
+name: wdisplays
+url: "https://github.com/cyclopsian/wdisplays"
+description: Configure display monitors manually with GUI
+category: Wayland server applications
+subcategory: Login and displays
+order: 40
+*/ -}}
 {{- if and (eq .guiServer "W") (eq .kind "laptop") }}
 # Use wdisplays only on my laptop (Gentoo and Arch)
 name: wdisplays

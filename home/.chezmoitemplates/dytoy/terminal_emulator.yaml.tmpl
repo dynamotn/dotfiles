@@ -1,3 +1,19 @@
+{{- /* doc
+name: kitty
+url: "https://github.com/kovidgoyal/kitty"
+description: "Terminal emulator, support ligature fonts and GPU"
+category: Cross platform GUI applications
+subcategory: Drivers and terminal
+order: 20
+*/ -}}
+{{- /* doc
+name: termux
+url: "https://github.com/termux/termux-app"
+description: Terminal emulator for Android
+category: Android tools
+subcategory: Android
+order: 10
+*/ -}}
 {{- if ne .guiServer "0" }}
 name: kitty
 method: os

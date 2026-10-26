@@ -1,3 +1,12 @@
+{{- /* doc
+name: wireshark
+label: tshark
+url: "https://www.wireshark.org/docs/man-pages/tshark.html"
+description: "CLI of Wireshark, network packet analysis"
+category: Network tools
+subcategory: Diagnostics
+order: 10
+*/ -}}
 name: wireshark
 method: os
 # https://repology.org/project/wireshark/versions

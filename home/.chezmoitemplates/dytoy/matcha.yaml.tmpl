@@ -1,3 +1,10 @@
+{{- /* doc
+name: matcha
+description: Daily digest generator for RSS feeds and Google News with LLM
+category: Miscellaneous applications
+subcategory: Utilities
+order: 40
+*/ -}}
 name: matcha
 {{- if or (eq .chezmoi.os "darwin") (and (eq .chezmoi.os "linux") (eq .chezmoi.arch "amd64")) }}
 # Only have release binary on macOS or Linux AMD64

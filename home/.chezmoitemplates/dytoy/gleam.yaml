@@ -1,2 +1,10 @@
+{{- /* doc
+name: gleam
+url: "https://github.com/gleam-lang/gleam"
+description: "Compiler, formatter and language server for Gleam"
+category: Development tools
+subcategory: Languages and runtimes
+order: 130
+*/ -}}
 name: gleam
 method: mise

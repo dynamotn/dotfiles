@@ -1,2 +1,10 @@
+{{- /* doc
+name: ruby
+url: "https://github.com/ruby/ruby"
+description: Interpreter and library for Ruby
+category: Development tools
+subcategory: Languages and runtimes
+order: 30
+*/ -}}
 name: ruby
 method: mise

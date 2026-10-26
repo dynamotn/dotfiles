@@ -1,3 +1,10 @@
+{{- /* doc
+name: jq
+description: JSON processor
+category: Everyday terminal applications
+subcategory: Git and pagers
+order: 20
+*/ -}}
 name: jq
 is_essential: true
 {{- if or (eq .chezmoi.os "darwin" "android") (eq .kind "container") }}

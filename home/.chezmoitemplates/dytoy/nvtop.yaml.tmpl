@@ -1,3 +1,11 @@
+{{- /* doc
+name: nvtop
+url: "https://github.com/Syllo/nvtop"
+description: Monitor resources of GPU
+category: Cross platform GUI applications
+subcategory: Applications
+order: 40
+*/ -}}
 {{- if and (eq .guiServer "W") (ne .osid "linux-alpine") }}
 name: nvtop
 method: os
