@@ -1,0 +1,13 @@
+#!{{ .bash }}
+# @file dybrain-mcp
+# @brief MCP launcher for dybrain that shares one backend between all sessions
+# @description Agents register `dybrain-mcp <vault-mcp.py>` instead of
+# `uv run --script <vault-mcp.py>`, so every session answers from one backend
+# on an owner-only Unix socket rather than running its own Python server. The
+# logic lives in `scripts/lib/dybrain_mcp.sh`, shared with the bats tests.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules lock
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/mcp_share.sh"
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybrain_mcp.sh"
+
+dybrain_mcp::main "$@"
