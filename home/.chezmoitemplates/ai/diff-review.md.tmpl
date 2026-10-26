@@ -12,6 +12,9 @@ changes, a commit, a branch, or two files.
   - inside kitty (`$KITTY_LISTEN_ON` is set):
     `kitty @ launch --type=tab --cwd=<repo> hunk diff`
   - anywhere else, give the user the command to run themselves.
+- Every agent's stop hook runs `dyai-hunk`, which opens `hunk diff --watch`
+  for a changed working tree, once per checkout. Do not open a second window
+  for the working tree; open one only for anything else.
 - Pick the subcommand that matches what is shown: `hunk diff` for the working
   tree, `hunk diff --staged`, `hunk show <rev>` for a commit,
   `hunk diff <from> <to>` for a range, `hunk diff --files <a> <b>` for two
