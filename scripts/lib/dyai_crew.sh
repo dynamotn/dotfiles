@@ -490,8 +490,9 @@ function __dyai_crew_exec {
     __dyai_crew_exec_fields="$(jq -cn --arg a "${__dyai_crew_exec_agent}" --argjson p "${__dyai_crew_exec_pid}" \
       --arg s "${__dyai_crew_exec_start}" '{status: "running", agent: $a, pid: $p, pid_start: $s}')"
     dyai_crew::record "${__dyai_crew_exec_id}" "${__dyai_crew_exec_fields}"
+    # Options go before the id: dyai stops reading options at the first argument.
     __dyai_crew_pane "crew-${__dyai_crew_exec_id}" "${__dyai_crew_exec_wt}" keep -- \
-      dyai logs "${__dyai_crew_exec_id}" --follow
+      dyai logs --follow "${__dyai_crew_exec_id}"
   fi
   wait "${__dyai_crew_exec_pid}" || __dyai_crew_exec_rc=$?
   # Anything the CLI left running in its group goes too.

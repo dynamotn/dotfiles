@@ -365,9 +365,9 @@ skills, MCP servers and policy `dyai install` gave it. The design is in
 |---------|--------------|
 | `dyai run [--agent A\|auto] [--plan FILE] [--detach] PROMPT` | Create `.worktrees/crew-<id>` on branch `crew/<id>` from `HEAD`, run the agent there, commit what it left. `auto` walks `global.crew.fallback`. `PROMPT` may be `-` (stdin). Prints the task id. |
 | `dyai tasks` | One line per task: `id`, status, agent, summary. A dead `running` task reads `lost`. |
-| `dyai logs ID [--follow] [--err]` | The agent's stdout (or stderr). |
-| `dyai review ID [--by A] [--detach]` | A read-only review by another agent; records `pass`, `fail` or `unknown`. |
-| `dyai fix ID [--detach]` | After a `fail`: the writer again, in the same worktree, with the review. Voids the verdict. |
+| `dyai logs [--follow] [--err] ID` | The agent's stdout (or stderr). Options always come before the id or the prompt: parsing stops at the first argument. |
+| `dyai review [--by A] [--detach] ID` | A read-only review by another agent; records `pass`, `fail` or `unknown`. |
+| `dyai fix [--detach] ID` | After a `fail`: the writer again, in the same worktree, with the review. Voids the verdict. |
 | `dyai merge ID` | Merge a reviewed task into the current branch (see below). |
 | `dyai drop ID... \| --finished` | Remove worktrees; delete branches only once merged (`git branch -d`). |
 | `dyai eval [--agent A] [CASE...]` | Spends quota. Runs the cases in `scripts/test/evals/` (a seeded scratch repo, a task, a `check.sh`) and prints `PASS`, `FAIL` or `BLOCKED` per case. Run it after changing an `ai/` partial, a hook or the policy; add a case after each incident. |

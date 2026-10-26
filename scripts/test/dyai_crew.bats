@@ -464,6 +464,30 @@ function _field {
   assert_output "${REPO}/.worktrees/crew-${id}"
 }
 
+@test "run opens a log pane whose dyai logs line parses: options before the id" {
+  _agent claude "${DONE}"
+  eval 'dyai_zellij::open() { printf "%s\n" "$*" > "${BATS_TEST_TMPDIR}/pane"; }'
+  run dyai_crew::run claude "x"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  run cat "${BATS_TEST_TMPDIR}/pane"
+  assert_output "crew-${id} ${REPO}/.worktrees/crew-${id} keep -- dyai logs --follow ${id}"
+}
+
+@test "dyai logs and review take their options before the task id" {
+  PATH="${FULL_PATH}" render_template "home/dot_local/bin/executable_dyai.tmpl" "${BATS_TEST_TMPDIR}/dyai"
+  local id=20261026-000000-claude-abcd
+  mkdir -p "${REPO}/.dyai/crew"
+  printf 'agent stderr\n' > "${REPO}/.dyai/crew/${id}.err"
+  run bash "${BATS_TEST_TMPDIR}/dyai" logs --err "${id}"
+  assert_success
+  assert_output --partial "agent stderr"
+  run bash "${BATS_TEST_TMPDIR}/dyai" review --by copilot "${id}"
+  assert_failure
+  assert_output --partial "unknown task ${id}"
+}
+
 @test "run with a plan passes it to the agent and records it" {
   _agent claude "${DONE}"
   printf '1. touch f.txt\n' > "${BATS_TEST_TMPDIR}/plan.md"
