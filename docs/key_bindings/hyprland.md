@@ -72,7 +72,7 @@ Workspaces are named, not numbered:
 | `Super+Alt+N` | Act on the latest notification |
 | `Super+V` | Clipboard history |
 | `Super+P` | Pick a Bitwarden entry and type its password |
-| `Super+O` | Pick a Bitwarden entry and type its TOTP code |
+| `Super+Shift+P` | Pick a Bitwarden entry and type its TOTP code |
 | `Super+Escape` | Lock session |
 | `Super+S` | Screenshot a selected region, then annotate it |
 | `Super+Z` | Drop-down `btop` in kitty |

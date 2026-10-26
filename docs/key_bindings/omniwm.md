@@ -71,6 +71,6 @@ OmniWM runs no commands, so Hammerspoon binds these:
 | `Super+Shift+M` | Mail client, the other profile |
 | `Super+F2` | Launcher (Vicinae) |
 | `Ctrl+Super+V` | Clipboard history |
-| `Super+P` / `Super+O` | Type a password / TOTP picked from Bitwarden |
+| `Super+P` / `Super+Shift+P` | Type a password / TOTP picked from Bitwarden |
 
 ---
