@@ -269,10 +269,11 @@ drift apart.
 | opencode | M | M | M | - | M | - |
 | copilot | - | S | S | M | M | - |
 | agy | - | M | - | - | M | - |
-| hermes | - | M | - | - | M | - |
+| hermes | - | M deny | - | - | M | - |
 
-M: written into the agent's own config, which enforces it.
+M: written into the agent's own config, which enforces it. M deny: deny rules only; ask rules are dropped.
 S: instructions only (AGENTS.md and kin), held while the agent cooperates. -: not carried over.
+A shell rule with an inner * is not written for gemini, codex or agy (literal prefixes only).
 <!-- dyai:enforcement:end -->
 
 ## LSP

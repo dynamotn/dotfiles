@@ -61,7 +61,7 @@ gemini	M	M	S	M	M	-
 opencode	M	M	M	-	M	-
 copilot	-	S	S	M	M	-
 agy	-	M	-	-	M	-
-hermes	-	M	-	-	M	-'
+hermes	-	M deny	-	-	M	-'
 
 #######################################
 # @description True when this machine has an AMD GPU (ROCm) for laya's torch build
@@ -171,10 +171,9 @@ function dyai::install_owned {
   local recorded hash
   recorded="$(dyai::installed_hash "${kind}" "${name}")"
   if dybatpho::is file "${dest}" && cmp -s "${src}" "${dest}"; then
-    # Installed before hashes were recorded: start tracking it now.
-    if [[ -z "${recorded}" ]]; then
-      hash="$(dyai::dir_hash "${dest}")" && dyai::installed_hash "${kind}" "${name}" "${hash}"
-    fi
+    # Track it from now on, or again after a local edit was undone by hand.
+    hash="$(dyai::dir_hash "${dest}")"
+    [[ -z "${hash}" || "${hash}" == "${recorded}" ]] || dyai::installed_hash "${kind}" "${name}" "${hash}"
     return 0
   fi
   # shellcheck disable=SC2310 # a plain yes/no; no hash recorded reads as no
@@ -182,12 +181,40 @@ function dyai::install_owned {
     dybatpho::warn "${label}: LOCAL EDITS kept; delete ${dest} to take the pinned copy"
     return 0
   fi
+  # No hash yet (the first run, or a wiped cache): an edit cannot be told from
+  # an old copy, so keep a backup instead of losing it.
+  if [[ -z "${recorded}" ]] && dybatpho::is file "${dest}"; then
+    if ! cp -- "${dest}" "${dest}.dyai-bak"; then
+      dybatpho::warn "Could not back up ${dest}; ${label} left as it is"
+      return 0
+    fi
+    dybatpho::warn "${label}: replaced an untracked copy; the old one is in ${dest}.dyai-bak"
+  fi
   if ! cp -- "${src}" "${dest}"; then
     dybatpho::warn "Could not install ${label}"
     return 0
   fi
   hash="$(dyai::dir_hash "${dest}")" && dyai::installed_hash "${kind}" "${name}" "${hash}"
   dybatpho::info "Installed ${label}"
+}
+
+#######################################
+# @description Tell whether an installed subagent is still the copy dyai wrote
+# @arg $1 string Leaf name of the subagent
+# @arg $2 string The pinned upstream .md
+# @arg $3 string Installed path
+# @exitcode 0 It exists and matches upstream, or matches the hash dyai recorded
+#######################################
+function dyai::subagent_is_pinned {
+  local leaf md dest
+  dybatpho::expect_args leaf md dest -- "$@"
+  dybatpho::is file "${dest}" || return 1
+  cmp -s "${md}" "${dest}" && return 0
+  local recorded
+  recorded="$(dyai::installed_hash subagents "${leaf}")"
+  [[ -n "${recorded}" ]] || return 1
+  # shellcheck disable=SC2310 # a plain yes/no
+  ! dyai::locally_edited subagents "${leaf}" "${dest}"
 }
 
 #######################################
@@ -676,9 +703,10 @@ function dyai::enforcement {
   while IFS= read -r line; do
     printf '| %s |\n' "${line//$'\t'/ | }"
   done <<< "${DYAI_ENFORCEMENT}"
-  printf '\n%s\n%s\n' \
-    "M: written into the agent's own config, which enforces it." \
-    "S: instructions only (AGENTS.md and kin), held while the agent cooperates. -: not carried over."
+  printf '\n%s\n%s\n%s\n' \
+    "M: written into the agent's own config, which enforces it. M deny: deny rules only; ask rules are dropped." \
+    "S: instructions only (AGENTS.md and kin), held while the agent cooperates. -: not carried over." \
+    "A shell rule with an inner * is not written for gemini, codex or agy (literal prefixes only)."
 }
 
 #######################################
@@ -1156,9 +1184,12 @@ function dyai::setup_subagents {
         # shellcheck disable=SC2312 # jq membership test; a bad read is false
         if jq -e --arg n "${leaf}" 'index($n) != null' <<< "${excl}" > /dev/null; then
           # An earlier baseline may have installed it. Remove it only while
-          # it is still the pinned copy; one you edited is yours to keep.
-          if [[ -n "${dest}" ]] && dybatpho::is file "${dest}" && cmp -s "${md}" "${dest}"; then
-            rm -f -- "${dest}"
+          # it is still dyai's copy (the upstream file, or the one dyai
+          # recorded, a model rewrite included); one you edited is yours to keep.
+          if [[ -n "${dest}" ]] && dyai::subagent_is_pinned "${leaf}" "${md}" "${dest}"; then
+            # Its hash goes too, or `dyai status` would report it missing forever.
+            rm -f -- "${dest}" \
+              "$(dybatpho::path_join "${HOME}" ".cache" "dyai" "installed" "subagents" "${leaf}.sha256")"
             dybatpho::info "Removed subagent ${leaf}, now excluded from the baseline"
           else
             dybatpho::debug "subagent ${leaf} excluded from the global baseline"
@@ -1185,7 +1216,8 @@ function dyai::setup_subagents {
           fi
         fi
         dyai::install_owned subagents "${leaf}" "${want}" "${dest}" "subagent ${leaf}"
-        [[ "${want}" == "${md}" ]] || rm -f -- "${want}"
+        # Also covers a rewrite that failed half-way and left a partial file.
+        rm -f -- "${dest}.dyai-model"
       done
     done < <(jq -r --argjson i "${i}" '.[$i].include[]' <<< "${sources}")
   done

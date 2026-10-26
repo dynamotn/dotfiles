@@ -876,8 +876,10 @@ CFG
   _subagent_fixture
   mkdir -p "${HOME}/.claude/agents"
   printf 'old copy\n' > "${dest}"
-  dyai::setup_subagents
+  run dyai::setup_subagents
+  assert_output --partial "the old one is in ${dest}.dyai-bak"
   cmp -s "${PINNED}" "${dest}"
+  grep -qx 'old copy' "${dest}.dyai-bak"
   [[ -s "${HOME}/.cache/dyai/installed/subagents/backend-developer.sha256" ]]
 }
 
@@ -945,6 +947,46 @@ CFG
     "${DOTFILES_DIR}/docs/dyai.md")"
   want="$(dyai::enforcement)"
   [[ "${docs}" == "${want}" ]] || fail "docs/dyai.md is stale; paste the output of dyai enforcement"
+}
+
+@test "a local edit undone by hand stops reading as edited" {
+  _stub claude
+  local dest="${HOME}/.claude/agents/backend-developer.md"
+  _subagent_fixture
+  dyai::setup_subagents
+  printf 'my note\n' >> "${dest}"
+  printf -- '---\nname: backend-developer\n---\nv2\n' > "${PINNED}"
+  dyai::setup_subagents
+  # The user takes the pinned text back by hand instead of deleting the file.
+  cp -- "${PINNED}" "${dest}"
+  dyai::setup_subagents
+  run dyai::locally_edited subagents backend-developer "${dest}"
+  assert_failure
+}
+
+@test "excluding a subagent removes dyai's copy and its hash, model rewrite included" {
+  _stub claude
+  local dest="${HOME}/.claude/agents/backend-developer.md"
+  local hash_file="${HOME}/.cache/dyai/installed/subagents/backend-developer.sha256"
+  _subagent_fixture
+  yq -i '.global.subagents[0].models = {"backend-developer": "strong"}
+    | .agents.claude.model_tiers = {"strong": "opus"}' "${CONFIG_FILE}"
+  dyai::setup_subagents
+  [[ -f "${dest}" && -f "${hash_file}" ]]
+  yq -i '.global.subagents[0].exclude = ["backend-developer"]' "${CONFIG_FILE}"
+  dyai::setup_subagents
+  [[ ! -e "${dest}" && ! -e "${hash_file}" ]]
+}
+
+@test "excluding a subagent keeps one the user edited" {
+  _stub claude
+  local dest="${HOME}/.claude/agents/backend-developer.md"
+  _subagent_fixture
+  dyai::setup_subagents
+  printf 'my note\n' >> "${dest}"
+  yq -i '.global.subagents[0].exclude = ["backend-developer"]' "${CONFIG_FILE}"
+  dyai::setup_subagents
+  grep -qx 'my note' "${dest}"
 }
 
 @test "dir_hash changes when a file is renamed" {
