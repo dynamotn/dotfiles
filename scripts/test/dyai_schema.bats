@@ -406,6 +406,14 @@ YAML
   assert_failure
 }
 
+@test "schema rejects an unknown crew profile" {
+  _require_ys
+  local bad="${BATS_TEST_TMPDIR}/bad.yaml"
+  printf 'global:\n  crew:\n    profile: tiny\n' > "${bad}"
+  run "${YS}" -f "${SCHEMA_FILE}" "${bad}"
+  assert_failure
+}
+
 @test "schema rejects an unknown crew panes mode" {
   _require_ys
   local bad="${BATS_TEST_TMPDIR}/bad.yaml"

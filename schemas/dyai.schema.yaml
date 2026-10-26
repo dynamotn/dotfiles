@@ -237,6 +237,13 @@ properties:
             description: Seconds an agent is skipped after a rate limit or an auth failure.
           gate: { type: string, description: "Shell command a merge must pass before it commits" }
           require_review: { type: boolean }
+          profile:
+            enum: [lean, full]
+            description: >
+              lean drops the plugins, MCP servers and skills a worker would
+              load, keeping the permission rules, the sandbox and the agent
+              rules (claude), or runs without external plugins (opencode) and
+              built-in MCP servers (copilot). full keeps everything.
           panes:
             enum: [auto, "off"]
             description: >

@@ -105,8 +105,9 @@ function _stub {
 }
 
 @test "cmd dies on an unknown agent" {
-  local -a c
-  run dyai_crew::cmd gpt rw /dev/null c
+  # dyshellint disable=SC2034 filled through dyai_crew::cmd's nameref
+  local -a unused
+  run dyai_crew::cmd gpt rw /dev/null unused
   assert_failure
 }
 
@@ -877,9 +878,9 @@ function _cli {
 @test "dyai lists every crew command" {
   _cli
   run bash "${DYAI_BIN}" --help
-  local c
-  for c in run tasks review fix merge drop logs; do
-    assert_output --partial "${c}"
+  local name
+  for name in run tasks review fix merge drop logs; do
+    assert_output --partial "${name}"
   done
 }
 
@@ -1089,4 +1090,75 @@ function _eval_case {
   _agent claude 'mkdir -p scripts/lib; echo "hi() { echo hi; }" > scripts/lib/demo.sh; '"${DONE}"
   run dyai_crew::eval claude shell-conventions
   assert_line --regexp $'^shell-conventions\tclaude\tFAIL'
+}
+
+# A Claude config dir with one deny rule and a CLAUDE.md.
+function _claude_home {
+  local dir="${BATS_TEST_TMPDIR}/claude-home"
+  mkdir -p "${dir}/rules"
+  printf '%s\n' '{"permissions":{"deny":["Read(**/secrets/data/**)"]},"sandbox":{"enabled":true},"hooks":{"Stop":[]}}' \
+    > "${dir}/settings.json"
+  printf 'NEVER READ SECRETS\n' > "${dir}/CLAUDE.md"
+  printf 'rule two\n' > "${dir}/rules/b.md"
+  printf 'rule one\n' > "${dir}/rules/a.md"
+  CLAUDE_CONFIG_DIR="${dir}"
+  export CLAUDE_CONFIG_DIR
+}
+
+@test "lean claude keeps the deny rules and the agent rules" {
+  _claude_home
+  _crew_config 'profile: lean'
+  local -a c
+  dyai_crew::cmd claude rw /dev/null c
+  [[ " ${c[*]} " == *" --setting-sources project,local "* ]] || fail "${c[*]}"
+  [[ " ${c[*]} " == *" --strict-mcp-config "* && " ${c[*]} " == *" --disable-slash-commands "* ]]
+  local lean="${REPO}/.dyai/crew/lean"
+  run jq -c '{deny: .permissions.deny, sandbox, hooks}' "${lean}/claude-settings.json"
+  assert_output '{"deny":["Read(**/secrets/data/**)"],"sandbox":{"enabled":true},"hooks":null}'
+  run cat "${lean}/claude-rules.md"
+  assert_output $'NEVER READ SECRETS\nrule one\nrule two'
+}
+
+@test "lean is the default profile" {
+  _claude_home
+  _crew_config 'timeout: 60'
+  local -a c
+  dyai_crew::cmd claude rw /dev/null c
+  [[ " ${c[*]} " == *" --setting-sources project,local "* ]] || fail "${c[*]}"
+}
+
+@test "lean falls back to full without deny rules" {
+  _claude_home
+  printf '{}\n' > "${CLAUDE_CONFIG_DIR}/settings.json"
+  _crew_config 'profile: lean'
+  local -a c
+  # dyshellint disable=SC2034 filled through dyai_crew::cmd's nameref
+  local -a unused
+  run dyai_crew::cmd claude rw /dev/null unused
+  assert_output --partial "no deny rules"
+  dyai_crew::cmd claude rw /dev/null c 2> /dev/null
+  [[ " ${c[*]} " != *" --setting-sources "* ]] || fail "${c[*]}"
+}
+
+@test "full profile adds no flag" {
+  _claude_home
+  _crew_config 'profile: full'
+  local -a c
+  dyai_crew::cmd claude rw /dev/null c
+  [[ " ${c[*]} " != *" --setting-sources "* ]]
+  dyai_crew::cmd opencode rw /dev/null c
+  [[ " ${c[*]} " != *" --pure "* ]]
+}
+
+@test "lean opencode and copilot flags, none for codex and gemini" {
+  _crew_config 'profile: lean'
+  local -a c
+  dyai_crew::cmd opencode rw /dev/null c
+  [[ " ${c[*]} " == *" --pure "* ]] || fail "${c[*]}"
+  dyai_crew::cmd copilot rw /dev/null c
+  [[ " ${c[*]} " == *" --disable-builtin-mcps "* ]] || fail "${c[*]}"
+  dyai_crew::cmd codex rw /dev/null c "${BATS_TEST_TMPDIR}/last"
+  [[ "${c[-1]}" == - ]] || fail "codex must keep - last: ${c[*]}"
+  dyai_crew::cmd gemini rw /dev/null c
+  [[ " ${c[*]} " != *" --pure "* ]]
 }

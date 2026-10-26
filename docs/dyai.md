@@ -408,6 +408,16 @@ Inside zellij these float; outside it they land in a background session named
 `dyai`, shown in a kitty tab when nothing is attached to it. Without zellij,
 a kitty tab. `dyai-hunk` opens through the same path.
 
+**Lean workers.** `global.crew.profile: lean` (the default) keeps each worker
+small. Claude gets `--setting-sources project,local` plus the permission
+rules, sandbox and attribution of your `settings.json`, your `CLAUDE.md` and
+`rules/*.md` as an appended system prompt, no MCP servers and no skills:
+measured on a one-line answer, about 30k input tokens instead of 57k. With no
+deny rule in `settings.json`, a worker falls back to the full profile rather
+than run without them. opencode runs `--pure` (no external plugins), copilot
+`--disable-builtin-mcps`; codex and gemini have no verified flag that keeps
+their policy, so they always run full. `profile: full` keeps everything.
+
 **Inside a worker** the env holds `DYAI_CREW=<id>`: the desktop hooks (notify,
 sound, `dyai-hunk`, the SessionStart drift report) stay quiet.
 

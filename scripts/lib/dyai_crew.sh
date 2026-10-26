@@ -115,6 +115,67 @@ function dyai_crew::cmd {
       ;;
     *) dybatpho::die "unknown agent: ${__dyai_crew_cmd_agent}" ;;
   esac
+  local -a __dyai_crew_cmd_lean=()
+  dyai_crew::lean_args "${__dyai_crew_cmd_agent}" __dyai_crew_cmd_lean
+  __dyai_crew_cmd+=(${__dyai_crew_cmd_lean[@]+"${__dyai_crew_cmd_lean[@]}"})
+}
+
+#######################################
+# @description Write the files Claude's lean profile loads instead of the user settings
+# @noargs
+# @stdout The directory holding claude-settings.json and claude-rules.md
+# @exitcode 1 The user settings carry no deny rule: a lean worker without them is not allowed
+#######################################
+function dyai_crew::lean_prepare {
+  local home="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}" dir
+  dir="$(dyai_crew::state_dir)/lean" || return 1
+  if ! jq -e '(.permissions.deny // []) | length > 0' "${home}/settings.json" &> /dev/null; then
+    dybatpho::warn "no deny rules in ${home}/settings.json; this worker runs on the full profile"
+    return 1
+  fi
+  dybatpho::ensure_dir "${dir}" > /dev/null
+  # The policy half of the settings only: plugins and their hooks are the bulk.
+  jq '{permissions, sandbox, attribution} | with_entries(select(.value != null))' \
+    "${home}/settings.json" > "${dir}/claude-settings.json"
+  local -a rules=()
+  ! dybatpho::is file "${home}/CLAUDE.md" || rules+=("${home}/CLAUDE.md")
+  local rule
+  for rule in "${home}"/rules/*.md; do
+    ! dybatpho::is file "${rule}" || rules+=("${rule}")
+  done
+  cat -- ${rules[@]+"${rules[@]}"} < /dev/null > "${dir}/claude-rules.md"
+  printf '%s\n' "${dir}"
+}
+
+#######################################
+# @description Fill an array with the extra flags of the lean worker profile for one agent
+# @arg $1 string Agent
+# @arg $2 string Name of the array to fill; empty for the full profile
+#######################################
+function dyai_crew::lean_args {
+  local __dyai_crew_lean_agent __dyai_crew_lean_outvar
+  dybatpho::expect_args __dyai_crew_lean_agent __dyai_crew_lean_outvar -- "$@"
+  local -n __dyai_crew_lean="${__dyai_crew_lean_outvar}"
+  __dyai_crew_lean=()
+  local __dyai_crew_lean_profile __dyai_crew_lean_dir
+  __dyai_crew_lean_profile="$(dyai_crew::conf '.global.crew.profile' lean)"
+  [[ "${__dyai_crew_lean_profile}" == lean ]] || return 0
+  case "${__dyai_crew_lean_agent}" in
+    claude)
+      # Measured 2026-10-26: 57k input tokens on a one-line answer with the
+      # full setup, 29.8k with this. --bare would also drop the OAuth login.
+      # shellcheck disable=SC2310 # no deny rules: stay on the full profile
+      __dyai_crew_lean_dir="$(dyai_crew::lean_prepare)" || return 0
+      __dyai_crew_lean=(--setting-sources "project,local"
+        --settings "${__dyai_crew_lean_dir}/claude-settings.json"
+        --append-system-prompt-file "${__dyai_crew_lean_dir}/claude-rules.md"
+        --strict-mcp-config --mcp-config '{"mcpServers":{}}' --disable-slash-commands)
+      ;;
+    opencode) __dyai_crew_lean=(--pure) ;;
+    copilot) __dyai_crew_lean=(--disable-builtin-mcps) ;;
+    # No verified flag drops their plugins or MCP servers but keeps the policy.
+    *) ;;
+  esac
 }
 
 #######################################
