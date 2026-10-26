@@ -13,12 +13,14 @@ apply here.
 | `home/.chezmoitemplates/` | shared template partials, included by name           |
 | `home/.chezmoiscripts/`   | `run_once_` / `run_onchange_` hooks run on apply     |
 | `root/`                   | source for system files applied to `/`               |
+| `cascadeur/`              | chezmoi source rendering this repo's `.gitmodules`   |
+| `docker/`                 | Dockerfiles and build script of the toolbox images   |
 | `silos/`                  | symlinks and large submodules, for quick navigation  |
 | `scripts/lib/`            | bash libraries                                       |
 | `scripts/test/`           | bats tests, one file per library                     |
 | `schemas/`                | YAML schemas for `dytoy` and for the secrets data    |
 | `secrets/`                | age-encrypted secrets; `secrets/data/` is a submodule |
-| `docs/`                   | notes on commands and key bindings                   |
+| `docs/`                   | guides (setup, secrets, dytoy, dyai, kernel), commands and key bindings |
 
 ## Chezmoi conventions
 
