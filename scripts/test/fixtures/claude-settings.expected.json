@@ -61,6 +61,16 @@
           }
         ],
         "matcher": "Skill"
+      },
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "bash ~/.claude/hooks/log-agent.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "Agent|Task"
       }
     ],
     "SessionStart": [
