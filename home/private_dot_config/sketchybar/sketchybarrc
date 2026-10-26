@@ -9,9 +9,17 @@ source "${CONFIG_DIR}/themes/catppuccin.sh"
 # Bar properties
 # https://felixkratz.github.io/SketchyBar/config/bar
 ################################################################################
+# Floating and rounded like the noctalia bar, but still on top. It stays
+# inside the 32px strip of the built-in display (y_offset + height), which
+# aerospace's outer.top gaps count on
 bar=(
   position=top
-  height=32
+  height=28
+  y_offset=4
+  margin=10
+  corner_radius=12
+  padding_left=14
+  padding_right=14
   color="$SKETCHY_MANTLE"
   shadow=on
 )
@@ -38,6 +46,11 @@ sketchybar --default "${default[@]}"
 ################################################################################
 # Items
 ################################################################################
+# Laid out as the noctalia bar: launcher and workspaces at the start, the
+# clock in the middle, the status widgets at the end
+"${CONFIG_DIR}/items/launcher.sh"
 "${CONFIG_DIR}/items/workspaces.sh"
+"${CONFIG_DIR}/items/clock.sh"
+"${CONFIG_DIR}/items/status.sh"
 "${CONFIG_DIR}/items/indicators.sh"
 sketchybar --update
