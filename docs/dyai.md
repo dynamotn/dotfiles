@@ -18,6 +18,7 @@ plus a registry of opt-in presets a project pulls in on demand.
   - [What materialization writes](#what-materialization-writes)
 - [How it installs](#how-it-installs)
   - [Permissions in other agents](#permissions-in-other-agents)
+- [Crew](#crew)
 - [Adding to the registry](#adding-to-the-registry)
 - [Keeping the baseline lean](#keeping-the-baseline-lean)
 
@@ -34,6 +35,7 @@ plus a registry of opt-in presets a project pulls in on demand.
 | `dyai mcp` | Serve `ls`, `use` and `rm` as MCP tools on stdio, so an agent can pull in a preset itself. |
 | `dyai status [--quiet]` | Report what drifted between the config and each installed agent: missing skills, plugins, MCP servers, hooks or policy files, and files you edited locally. Claude runs `dyai status --quiet` at every session start; it prints nothing when everything matches. |
 | `dyai enforcement` | Print what each agent actually enforces of the shared config (see [Permissions in other agents](#permissions-in-other-agents)). |
+| `dyai run`, `tasks`, `review`, `fix`, `merge`, `drop`, `logs` | Run a task on a headless agent in its own worktree, review it with another provider, and merge it (see [Crew](#crew)). |
 
 `dyai use`, `ls` and `rm` operate on the git repository you run them in
 (`dyai use` errors outside one).
@@ -342,6 +344,89 @@ language server (e.g. after `:Mason` installs one) to update every agent.
 cannot see servers Neovim has not installed yet. Run `dyai install` once by
 hand after Neovim's first start on a new machine, so every agent picks up
 the servers it just installed.
+
+## Crew
+
+`dyai run` hands a task to an agent CLI running headless in its own git
+worktree; `dyai review` has a different provider read the change; `dyai merge`
+takes it into the current branch once the review passed. dyai never calls a
+provider API and holds no model: each worker is the real CLI, so it keeps the
+skills, MCP servers and policy `dyai install` gave it. The design is in
+[`2026-10-26-dyai-crew.md`](superpowers/plans/2026-10-26-dyai-crew.md).
+
+| Command | What it does |
+|---------|--------------|
+| `dyai run [--agent A\|auto] [--plan FILE] [--detach] PROMPT` | Create `.worktrees/crew-<id>` on branch `crew/<id>` from `HEAD`, run the agent there, commit what it left. `auto` walks `global.crew.fallback`. `PROMPT` may be `-` (stdin). Prints the task id. |
+| `dyai tasks` | One line per task: `id`, status, agent, summary. A dead `running` task reads `lost`. |
+| `dyai logs ID [--follow] [--err]` | The agent's stdout (or stderr). |
+| `dyai review ID [--by A] [--detach]` | A read-only review by another agent; records `pass`, `fail` or `unknown`. |
+| `dyai fix ID [--detach]` | After a `fail`: the writer again, in the same worktree, with the review. Voids the verdict. |
+| `dyai merge ID` | Merge a reviewed task into the current branch (see below). |
+| `dyai drop ID... \| --finished` | Remove worktrees; delete branches only once merged (`git branch -d`). |
+
+A task id reads `<date>-<time>-<agent>-<4 hex>`. Task state is one
+append-only `tasks.jsonl` in `<main checkout>/.dyai/crew/`, next to each
+task's prompt, output, review and plan; `.dyai/`, `.worktrees/` and the result
+file are added to the personal ignore. A run from inside a worktree still
+creates its worktree under the main checkout.
+
+**How a task ends.** The prompt asks the agent to write
+`.dyai-result.json` (`{"status": "done|failed|partial", "summary": "..."}`)
+and to stay on its branch. dyai then decides, in this order: a timeout
+(`global.crew.timeout`, the whole process group is stopped); a rate limit or
+an auth failure read from the agent's error output (`rate_limited`,
+`blocked`: the agent cools down for `global.crew.cooldown` seconds and `auto`
+moves to the next one); an agent that left `crew/<id>` (`failed`); the result
+file. `done` also needs evidence: a task that claims done with no commit is
+`failed`. An attempt that ended with nothing in it gives its worktree back at
+once, since each registered worktree enlarges Claude Code's sandbox profile.
+
+**Reviews.** The reviewer runs read-only (claude `plan`, codex `read-only`,
+gemini `plan`, opencode `--agent plan`, copilot with shell and write denied)
+and gets the task, the summary, the plan if there was one, and the diff
+(inline up to 96 KB, else as `.dyai-review.diff` in the worktree). Its answer
+must hold a line `{"verdict":"pass|fail","findings":[...]}`; dyai reads it
+from each agent's own output envelope. Anything else is `unknown`, and
+`unknown` never passes. `global.crew.reviewer` maps each writer to its
+reviewer. Set `global.crew.model.copilot` to a non-Anthropic model when
+copilot reviews claude: its default model is Claude.
+
+**Merging.** `dyai merge` refuses unless the task is `done`, the current
+branch is not `main` or `master` (make an integration branch first), the
+working tree is clean, and, with `require_review` (the default), the verdict
+is `pass` on the branch head that was reviewed. A diff that touches a
+`global.crew.fences` pathspec (`.github/`, `.chezmoiscripts/`, `secrets/`,
+`*.age`, `.env*`) stops at `needs_human`. Then `git merge --no-ff --no-commit`;
+a conflict aborts (`conflict`), and `global.crew.gate` runs on the merged
+tree (`gate_failed` aborts). A clean merge commits and drops the task.
+
+**Views.** With `global.crew.panes: auto`, each started worker gets a zellij
+pane following its log, and each review opens `hunk diff <base> crew/<id>`.
+Inside zellij these float; outside it they land in a background session named
+`dyai`, shown in a kitty tab when nothing is attached to it. Without zellij,
+a kitty tab. `dyai-hunk` opens through the same path.
+
+**Inside a worker** the env holds `DYAI_CREW=<id>`: the desktop hooks (notify,
+sound, `dyai-hunk`, the SessionStart drift report) stay quiet.
+
+What each agent can do headless, checked on 2026-10-26:
+
+| | claude | codex | gemini | opencode | copilot |
+|---|---|---|---|---|---|
+| prompt | stdin | stdin (`-`) | stdin | attached file (`-f`) | stdin |
+| shell in edit mode | what settings allow | yes, sandboxed | no | yes | yes |
+| verified live here | yes | no (401) | no (not signed in) | no (no provider key) | yes |
+
+Example:
+
+```bash
+git switch -c integrate
+id=$(dyai run --agent claude "add a --dry-run flag to scripts/setup.sh" | tail -1)
+dyai review "$id"        # copilot reviews a claude task by default
+dyai fix "$id"           # only after a fail verdict; then review again
+dyai merge "$id"
+dyai drop --finished     # give back the worktrees of tasks that went nowhere
+```
 
 ## Adding to the registry
 

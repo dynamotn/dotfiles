@@ -15,6 +15,7 @@ setup() {
   mkdir -p "${tools}"
   ln -s "${jq_bin}" "${tools}/jq"
   ln -s "${yq_bin}" "${tools}/yq"
+  FULL_PATH="${PATH}"
   PATH="${HOME}/.local/bin:${tools}:/usr/bin:/bin"
   LOG="${BATS_TEST_TMPDIR}/calls"
   REPO="${BATS_TEST_TMPDIR}/repo"
@@ -856,4 +857,73 @@ function _passed_task {
   run _field "${done_id}" .status
   assert_output "done"
   [[ -d "${REPO}/.worktrees/crew-${done_id}" ]]
+}
+
+# Render the dyai CLI into DYAI_BIN.
+function _cli {
+  DYAI_BIN="${BATS_TEST_TMPDIR}/dyai"
+  [[ -f "${DYAI_BIN}" ]] || PATH="${FULL_PATH}" render_template "home/dot_local/bin/executable_dyai.tmpl" "${DYAI_BIN}"
+}
+
+@test "dyai run --help lists the agent, plan and detach options" {
+  _cli
+  run bash "${DYAI_BIN}" run --help
+  assert_success
+  assert_output --partial "--agent"
+  assert_output --partial "--plan"
+  assert_output --partial "--detach"
+}
+
+@test "dyai lists every crew command" {
+  _cli
+  run bash "${DYAI_BIN}" --help
+  local c
+  for c in run tasks review fix merge drop logs; do
+    assert_output --partial "${c}"
+  done
+}
+
+@test "dyai run, tasks and logs work end to end" {
+  _cli
+  _agent claude 'echo "agent says hi"; '"${DONE}"
+  run bash "${DYAI_BIN}" run --agent claude "add a line"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  run bash "${DYAI_BIN}" tasks
+  assert_output --partial "${id}"$'\t'"done"$'\t'"claude"
+  run bash "${DYAI_BIN}" logs "${id}"
+  assert_success
+  assert_output --partial "agent says hi"
+}
+
+@test "dyai run reads the prompt from stdin with -" {
+  _cli
+  _agent claude "${DONE}"
+  run bash -c "printf 'from stdin' | bash '${DYAI_BIN}' run --agent claude -"
+  assert_success
+  run cat "${BATS_TEST_TMPDIR}/claude.stdin"
+  assert_output --partial "from stdin"
+}
+
+@test "dyai logs dies when the task has no log" {
+  _cli
+  run bash "${DYAI_BIN}" logs 20261026-000000-claude-abcd
+  assert_failure
+}
+
+@test "dyai drop takes several ids" {
+  _cli
+  _agent claude 'printf %s "{\"status\":\"partial\",\"summary\":\"x\"}" > .dyai-result.json; echo w > w.txt'
+  run bash "${DYAI_BIN}" run --agent claude "a"
+  local a b
+  a="$(_last_id "${output}")"
+  run bash "${DYAI_BIN}" run --agent claude "b"
+  b="$(_last_id "${output}")"
+  run bash "${DYAI_BIN}" drop "${a}" "${b}"
+  assert_success
+  run _field "${a}" .status
+  assert_output "dropped"
+  run _field "${b}" .status
+  assert_output "dropped"
 }

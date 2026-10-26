@@ -12,6 +12,10 @@
 . "${BASH_SOURCE[0]%/*}/dyai_mcp.sh"
 # shellcheck source=scripts/lib/dyai_status.sh
 . "${BASH_SOURCE[0]%/*}/dyai_status.sh"
+# shellcheck source=scripts/lib/dyai_zellij.sh
+. "${BASH_SOURCE[0]%/*}/dyai_zellij.sh"
+# shellcheck source=scripts/lib/dyai_crew.sh
+. "${BASH_SOURCE[0]%/*}/dyai_crew.sh"
 
 # The skills CLI is pinned, so an apply never runs a release nobody looked at.
 SKILLS_CLI="skills@1.7.2"
