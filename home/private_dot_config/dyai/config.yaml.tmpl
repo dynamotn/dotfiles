@@ -153,11 +153,18 @@ global:
   # Tools with their own per-agent installer, run once by `dyai install`.
   installers:
     # claude-mem (memory across sessions). Claude gets it via the plugin above
-    # (claude-mem@thedotmack); other agents use its own installer. Only opencode
-    # has a documented --ide flag today; add others once their flag is known.
+    # (claude-mem@thedotmack); other agents use its own installer, and every
+    # agent shares one local worker and database, so one memory serves them all
+    # (CLAUDE_MEM_SESSION_START_INCLUDE_ALL_SOURCES in fish shares the context).
+    # --provider claude keeps the observer local and skips the hosted sign-in.
+    # Gemini has no integration; Copilot's is MCP-only and writes
+    # .github/copilot-instructions.md into the current directory, so it is left out.
     claude-mem:
       commands:
-        opencode: "npx -y claude-mem install --ide opencode"
+        opencode: "npx -y claude-mem install --ide opencode --provider claude"
+        codex: "npx -y claude-mem install --ide codex-cli --provider claude"
+        agy: "npx -y claude-mem install --ide antigravity --provider claude"
+        hermes: "npx -y claude-mem install --ide hermes --provider claude"
   # Neovim's configured language servers, shared with every agent (dyai-lsp).
   # exclude keeps noisy/non-code-intelligence servers out of every agent;
   # serena.ref pins the MCP bridge Codex, Gemini and agy use for the
