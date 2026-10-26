@@ -124,8 +124,11 @@
         excludesfile = ~/.config/git/ignore
         # Custom global attributes file
         attributesfile = ~/.config/git/attributes
-{{- /* A delta or ov that is not installed breaks every paging command and `add -p` */}}
-{{- if and (lookPath "delta") (lookPath "ov") }}
+{{- /* A pager that is not installed breaks every paging command and `add -p` */}}
+{{- if lookPath "hunk" }}
+        # Use hunk to review diff, it passes non-diff output through
+        pager = hunk pager
+{{- else if and (lookPath "delta") (lookPath "ov") }}
         # Use delta to prettier diff
         pager = delta --pager='ov -F'
 [pager]
@@ -141,7 +144,8 @@
 {{- end }}
 {{- if lookPath "delta" }}
 [interactive]
-        # Use delta to show diff when interactive each hunks
+        # Use delta to show diff when interactive each hunks, hunk has no
+        # --color-only filter yet (modem-dev/hunk#575)
         diffFilter = delta --color-only
 {{- end }}
 [delta]

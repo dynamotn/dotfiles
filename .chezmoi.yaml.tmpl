@@ -16,7 +16,10 @@ add:
   templateSymlinks: true
 
 # A pager that is not installed makes every `chezmoi diff` fail.
-{{- if lookPath "delta" }}
+{{- if lookPath "hunk" }}
+diff:
+  pager: hunk pager
+{{- else if lookPath "delta" }}
 diff:
 {{-   if lookPath "ov" }}
   pager: delta --pager="ov -F --section-delimiter '^(added:|removed:|renamed:|Δ)' --section-header --pattern '•'"
