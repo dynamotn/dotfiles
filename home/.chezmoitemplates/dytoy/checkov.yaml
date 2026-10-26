@@ -1,3 +1,11 @@
+{{- /* doc
+name: checkov
+url: "https://github.com/bridgecrewio/checkov"
+description: IaC security analyzer
+category: Security tools
+subcategory: Scanners
+order: 20
+*/ -}}
 name: checkov
 method: shell
 dependencies:

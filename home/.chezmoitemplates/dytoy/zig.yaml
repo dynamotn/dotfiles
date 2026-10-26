@@ -1,2 +1,10 @@
+{{- /* doc
+name: zig
+url: "https://github.com/ziglang/zig"
+description: Compiler and toolchain for Zig
+category: Development tools
+subcategory: Languages and runtimes
+order: 140
+*/ -}}
 name: zig
 method: mise

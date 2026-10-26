@@ -1,3 +1,10 @@
+{{- /* doc
+name: lz4
+url: "https://github.com/lz4/lz4"
+description: Extremely fast compression tool
+category: Miscellaneous applications
+subcategory: Office and data
+*/ -}}
 name: lz4
 method: os
 # https://repology.org/project/lz4/versions

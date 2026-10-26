@@ -1,3 +1,12 @@
+{{- /* doc
+name: android_emulator
+label: waydroid
+url: "https://github.com/waydroid/waydroid"
+description: Android environment on Linux with container-based approach
+category: Android tools
+subcategory: Android
+order: 20
+*/ -}}
 {{- if ne .chezmoi.os "android" }}
 # I don't need Android emulator on Android
 name: android_emulator

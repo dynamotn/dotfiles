@@ -1,3 +1,11 @@
+{{- /* doc
+name: clang
+url: "https://github.com/llvm/llvm-project"
+description: C family compiler
+category: Development tools
+subcategory: Languages and runtimes
+order: 70
+*/ -}}
 name: clang
 method: os
 # For `clang-tidy`, which comes with clang

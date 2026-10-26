@@ -1,3 +1,11 @@
+{{- /* doc
+name: fail2ban
+url: "https://github.com/fail2ban/fail2ban"
+description: Intrusion prevention software framework
+category: Security tools
+subcategory: System hardening
+order: 50
+*/ -}}
 {{- if ne .kind "container" }}
 # Not need in container
 name: fail2ban

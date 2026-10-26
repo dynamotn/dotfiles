@@ -1,3 +1,11 @@
+{{- /* doc
+name: uv
+url: "https://github.com/astral-sh/uv"
+description: Modern Python package and project manager
+category: Development tools
+subcategory: Package managers
+order: 10
+*/ -}}
 name: uv
 method: mise
 dependencies:

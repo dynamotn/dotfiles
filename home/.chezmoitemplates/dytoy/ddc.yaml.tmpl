@@ -1,3 +1,19 @@
+{{- /* doc
+name: ddcutil
+url: "https://www.ddcutil.com/"
+description: "Control external monitors over DDC/CI on Linux, behind `dymonitor`"
+category: Cross platform GUI applications
+subcategory: Monitors
+order: 10
+*/ -}}
+{{- /* doc
+name: m1ddc
+url: "https://github.com/waydabber/m1ddc"
+description: "Control external monitors over DDC/CI on Apple silicon, behind `dymonitor`"
+category: Cross platform GUI applications
+subcategory: Monitors
+order: 20
+*/ -}}
 {{- if ne .guiServer "0" }}
 {{-   if eq .chezmoi.os "linux" }}
 # DDC/CI client behind dymonitor, which the window manager hotkeys call to

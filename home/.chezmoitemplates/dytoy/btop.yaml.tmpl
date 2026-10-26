@@ -1,3 +1,10 @@
+{{- /* doc
+name: btop
+description: "Alternative to `htop` and `glances`"
+category: Everyday terminal applications
+subcategory: Utilities
+order: 50
+*/ -}}
 name: btop
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}
 # Use package manager for macOS, and container environments

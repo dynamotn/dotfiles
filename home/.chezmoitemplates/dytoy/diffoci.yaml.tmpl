@@ -1,3 +1,10 @@
+{{- /* doc
+name: diffoci
+description: Diff Docker and OCI container images
+category: DevOps tools
+subcategory: Containers
+order: 70
+*/ -}}
 {{- if ne .chezmoi.os "android" }}
 # Can't use docker and container on non-rooted Android
 name: diffoci

@@ -1,3 +1,11 @@
+{{- /* doc
+name: netcat
+url: none
+description: TCP/IP swiss army knife
+category: Network tools
+subcategory: Core
+order: 20
+*/ -}}
 name: netcat
 method: os
 # https://repology.org/project/netcat-openbsd-debian/versions

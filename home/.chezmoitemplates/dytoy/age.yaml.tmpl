@@ -1,3 +1,10 @@
+{{- /* doc
+name: age
+description: Simple file encryption
+category: Prerequisite
+subcategory: Core
+order: 40
+*/ -}}
 name: age
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}

@@ -1,2 +1,10 @@
+{{- /* doc
+name: gcloud
+url: "https://cloud.google.com/sdk"
+description: Libraries and tools for interacting with Google Cloud products and services
+category: DevOps tools
+subcategory: Cloud CLIs
+order: 30
+*/ -}}
 name: gcloud
 method: mise

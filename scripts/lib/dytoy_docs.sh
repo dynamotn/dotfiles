@@ -71,7 +71,7 @@ function dytoy_docs::definition_rows {
   repos="$(sed -nE 's/^[[:space:]]*repo:[[:space:]]*([^[:space:]#]+).*$/\1/p' <<< "${text}")"
   repos="$(sort -u <<< "${repos}")"
   [[ -z "${repos}" || "${repos}" == *$'\n'* ]] || url="https://github.com/${repos}"
-  names="$(yq ea '.name // ""' <<< "${body}")"
+  names="$(yq ea '[.name // ""] | .[]' <<< "${body}")"
   while read -r name; do
     awk -v name="${name}" '
       /^name:/ { value = $0; sub(/^name:[ \t]*/, "", value); sub(/[ \t]+$/, "", value); if (value == name) found = 1 }
@@ -123,13 +123,17 @@ EOT
 function dytoy_docs::collect {
   dybatpho::expect_args dir extra categories -- "$@"
   local dir="$1" extra="$2" file stream="" rows errors program
-  for file in "${dir}"/*.yaml "${dir}"/*.yaml.tmpl; do
+  for file in "${dir}"/*.yaml "${dir}"/*.yaml.tmpl "${extra}"; do
     [[ -f "${file}" ]] || continue
-    rows="$(dytoy_docs::definition_rows "${file}")" || return 1
-    [[ -z "${rows}" ]] || stream+="${rows}"$'\n---\n'
+    if [[ "${file}" == "${extra}" ]]; then
+      rows="$(BASE="$(basename "${extra}")" yq '.[] | .file = strenv(BASE) | split_doc' "${extra}")"
+    else
+      rows="$(dytoy_docs::definition_rows "${file}")" || return 1
+    fi
+    [[ -n "${rows}" ]] || continue
+    [[ -z "${stream}" ]] || stream+=$'\n---\n'
+    stream+="${rows}"
   done
-  rows="$(BASE="$(basename "${extra}")" yq '.[] | .file = strenv(BASE) | split_doc' "${extra}")"
-  stream+="${rows}"
   rows="$(yq ea -o json -I0 '[.]' <<< "${stream}")"
   errors="$(dytoy_docs::problems "$3" <<< "${rows}")"
   [[ -z "${errors}" ]] || dybatpho::die "${errors}"
@@ -166,11 +170,11 @@ function dytoy_docs::render {
   local rows categories category table program
   program="$(
     cat << 'EOT'
-.[] | select(.category == strenv(CAT))
-| (
-    (select(.url == "none") | "|`" + .label + "`|" + (.description | sub("\|"; "\\|")) + "|"),
-    (select(.url != "none") | "|[" + .label + "](" + .url + ")|" + (.description | sub("\|"; "\\|")) + "|")
-  )
+map(select(.category == strenv(CAT)))
+| map(.cell = "[" + .label + "](" + .url + ")")
+| map(with(select(.url == "none"); .cell = "`" + .label + "`"))
+| map(with(select(.url == "text"); .cell = .label))
+| .[] | "|" + .cell + "|" + (.description | sub("\|"; "\\|")) + "|"
 EOT
   )"
   rows="$(cat)"

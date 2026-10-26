@@ -1,3 +1,11 @@
+{{- /* doc
+name: audit
+url: "https://github.com/linux-audit/audit-userspace"
+description: "Keep the kernel audit events, SELinux denials included"
+category: Security tools
+subcategory: System hardening
+order: 60
+*/ -}}
 {{- if ne .kind "container" }}
 # Not need in container
 name: audit

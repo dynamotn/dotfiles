@@ -1,3 +1,11 @@
+{{- /* doc
+name: vectorcode
+url: "https://github.com/davidyz/vectorcode"
+description: Code repository indexing tool with LLMs
+category: AI tools
+subcategory: Models and agents
+order: 90
+*/ -}}
 name: vectorcode
 method: os
 dependencies:

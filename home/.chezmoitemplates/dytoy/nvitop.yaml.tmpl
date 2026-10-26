@@ -1,3 +1,11 @@
+{{- /* doc
+name: nvitop
+url: "https://github.com/XuehaiPan/nvitop"
+description: Monitor resources of GPU (NVIDIA only)
+category: Cross platform GUI applications
+subcategory: Applications
+order: 50
+*/ -}}
 {{- if and (eq .guiServer "W") (eq .guiDriver "N") }}
 name: nvitop
 method: shell

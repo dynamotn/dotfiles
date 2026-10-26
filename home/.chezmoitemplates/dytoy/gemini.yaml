@@ -1,3 +1,11 @@
+{{- /* doc
+name: gemini
+url: "https://github.com/google-gemini/gemini-cli"
+description: CLI tool for Google Gemini LLM
+category: AI tools
+subcategory: Models and agents
+order: 60
+*/ -}}
 name: gemini
 method: shell
 dependencies:

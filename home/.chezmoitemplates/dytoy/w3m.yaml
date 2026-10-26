@@ -1,3 +1,11 @@
+{{- /* doc
+name: w3m
+url: "https://github.com/acg/w3m"
+description: Text-based web browser
+category: Everyday terminal applications
+subcategory: Core
+order: 90
+*/ -}}
 name: w3m
 method: os
 # https://repology.org/project/w3m/versions

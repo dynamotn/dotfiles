@@ -1,3 +1,11 @@
+{{- /* doc
+name: perlcritic
+url: "https://github.com/Perl-Critic/Perl-Critic"
+description: Linter for Perl
+category: Development tools
+subcategory: Linters and formatters
+order: 10
+*/ -}}
 name: perlcritic
 method: os
 # https://repology.org/project/perl:perl-critic/versions

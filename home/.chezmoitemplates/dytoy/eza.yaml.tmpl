@@ -1,3 +1,10 @@
+{{- /* doc
+name: eza
+description: "Alternative to `ls` with colours, faster"
+category: Everyday terminal applications
+subcategory: Modern replacements
+order: 20
+*/ -}}
 name: eza
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (and (eq .kind "container") (ne .osid "linux-ubuntu")) }}

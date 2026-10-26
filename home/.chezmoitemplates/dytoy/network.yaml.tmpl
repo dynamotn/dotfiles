@@ -1,3 +1,12 @@
+{{- /* doc
+name: networkmanager
+label: NetworkManager
+url: "https://networkmanager.dev/"
+description: Linux network configuration tool suite
+category: Network tools
+subcategory: Core
+order: 30
+*/ -}}
 {{- if and (eq .chezmoi.os "linux") .hasWifi }}
 name: networkmanager
 method: os

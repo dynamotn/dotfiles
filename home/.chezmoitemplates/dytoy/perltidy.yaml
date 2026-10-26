@@ -1,3 +1,11 @@
+{{- /* doc
+name: perltidy
+url: "https://github.com/perltidy/perltidy"
+description: Formatter for Perl
+category: Development tools
+subcategory: Linters and formatters
+order: 20
+*/ -}}
 name: perltidy
 method: os
 # https://repology.org/project/perltidy/versions

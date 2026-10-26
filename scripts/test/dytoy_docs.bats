@@ -227,6 +227,97 @@ EOT
   assert_line '|`ssh`|SSH client|'
 }
 
+@test "a definition with two blocks documents both tools" {
+  _docs_fixture
+  cat > "${DEFS}/mux.yaml.tmpl" << 'EOT'
+{{- /* doc
+name: tmux
+url: none
+description: Multiplexer
+category: B
+subcategory: z
+*/ -}}
+{{- /* doc
+name: zellij
+url: none
+description: Another multiplexer
+category: B
+subcategory: z
+*/ -}}
+{{- if eq .mux "T" }}
+name: tmux
+{{- else }}
+name: zellij
+{{- end }}
+method: os
+EOT
+  run _generate
+  assert_success
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  assert_line '|`tmux`|Multiplexer|'
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  assert_line '|`zellij`|Another multiplexer|'
+}
+
+@test "rows of every cell kind keep their order" {
+  _docs_fixture
+  _def plain.yaml 'name: plain
+url: none
+description: Plain
+category: A
+subcategory: x
+order: 15' 'name: plain
+method: os'
+  _def words.yaml 'name: words
+label: Some words
+url: text
+description: Words
+category: A
+subcategory: x
+order: 12' 'name: words
+method: os'
+  run _generate
+  assert_success
+  local rows
+  rows="$(sed -n '/^## A$/,/^## B$/p' <<< "${output}")"
+  rows="$(grep -oE '^\|[^|]+\|' <<< "${rows}")"
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  assert_equal "${rows}" '|Tool|
+|----|
+|[fd](https://example.com/fd)|
+|Some words|
+|`plain`|
+|[ripgrep](https://github.com/BurntSushi/ripgrep)|
+|[aa](https://github.com/o/aa)|
+|[tool](https://github.com/o/tool)|'
+}
+
+@test "an empty extra file adds no rows" {
+  _docs_fixture
+  printf '[]\n' > "${EXTRA}"
+  run _generate
+  assert_success
+  refute_line --partial 'GPU drivers'
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  assert_line '|`ssh`|SSH client|'
+}
+
+@test "url text renders the label verbatim" {
+  _docs_fixture
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  _def gfx.yaml 'name: gfx
+label: NVIDIA/AMD drivers & `libs`
+url: text
+description: Graphics stack
+category: B
+subcategory: z' 'name: gfx
+method: os'
+  run _generate
+  assert_success
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  assert_line '|NVIDIA/AMD drivers & `libs`|Graphics stack|'
+}
+
 @test "rows sort by subcategory then order then label" {
   _docs_fixture
   _def bb.yaml 'name: bb

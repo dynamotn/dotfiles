@@ -1,3 +1,11 @@
+{{- /* doc
+name: goaccess
+url: "https://github.com/allinurl/goaccess"
+description: Real-time web log analyzer
+category: DevOps tools
+subcategory: Operations
+order: 30
+*/ -}}
 name: goaccess
 method: os
 # https://repology.org/project/goaccess/versions

@@ -1,3 +1,11 @@
+{{- /* doc
+name: pandoc
+url: "https://github.com/jgm/pandoc"
+description: Universal markup converter
+category: Miscellaneous applications
+subcategory: Media
+order: 80
+*/ -}}
 name: pandoc
 method: os
 # https://repology.org/project/pandoc/versions

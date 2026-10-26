@@ -1,3 +1,11 @@
+{{- /* doc
+name: dolphie
+url: "https://github.com/charles-001/dolphie"
+description: "Realtime analytics tool for MySQL/MariaDB, ProxySQL"
+category: DevOps tools
+subcategory: Data
+order: 40
+*/ -}}
 name: dolphie
 method: shell
 dependencies:

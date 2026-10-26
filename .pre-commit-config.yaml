@@ -34,3 +34,11 @@ repos:
         entry: bash -c 'for f in "$@"; do fish --no-execute "$f" || exit 1; done' --
         language: system
         files: \.fish$
+      - id: dytoy-docs
+        name: dytoy docs
+        # Rebuild the tool tables of docs/dytoy.md from the definitions; fails
+        # when the doc changed, so the regenerated file gets staged
+        entry: scripts/dytoy_docs.sh
+        language: system
+        pass_filenames: false
+        files: ^home/\.chezmoitemplates/dytoy/|^docs/dytoy\.(md|extra\.yaml|categories\.yaml)$|^scripts/(lib/)?dytoy_docs\.sh$|^schemas/dytoy

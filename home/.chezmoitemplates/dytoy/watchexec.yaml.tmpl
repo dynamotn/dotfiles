@@ -1,3 +1,10 @@
+{{- /* doc
+name: watchexec
+description: Detects modifications and run command
+category: Development tools
+subcategory: CLI tools
+order: 10
+*/ -}}
 name: watchexec
 is_essential: true
 {{- if or (eq .chezmoi.os "android" "darwin") (eq .kind "container") }}

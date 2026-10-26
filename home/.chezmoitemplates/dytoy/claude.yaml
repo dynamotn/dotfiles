@@ -1,3 +1,11 @@
+{{- /* doc
+name: claude
+url: "https://github.com/anthropics/claude-code"
+description: "CLI tool for Anthropic's Claude LLM"
+category: AI tools
+subcategory: Models and agents
+order: 40
+*/ -}}
 name: claude
 method: shell
 dependencies:

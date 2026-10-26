@@ -1,3 +1,11 @@
+{{- /* doc
+name: playerctl
+url: "https://github.com/altdesktop/playerctl"
+description: Control media players that implement the MPRIS
+category: Miscellaneous applications
+subcategory: Media
+order: 30
+*/ -}}
 {{- if and .hasSound (eq .chezmoi.os "linux") }}
 # Not needed on Android or MacOS
 name: playerctl

@@ -1,3 +1,11 @@
+{{- /* doc
+name: wol
+url: "https://github.com/sabhiram/go-wol"
+description: Wake-on-LAN utility
+category: Everyday terminal applications
+subcategory: Utilities
+order: 160
+*/ -}}
 name: wol
 method: shell
 dependencies:

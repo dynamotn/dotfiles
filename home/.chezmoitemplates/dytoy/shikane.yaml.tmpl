@@ -1,3 +1,11 @@
+{{- /* doc
+name: shikane
+url: "https://github.com/hw0lff/shikane"
+description: Automatically detects and configures connected monitors
+category: Wayland server applications
+subcategory: Login and displays
+order: 30
+*/ -}}
 {{- if and (eq .kind "laptop") (eq .chezmoi.os "linux") }}
 # Use shikane only on my laptop
 name: shikane

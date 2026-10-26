@@ -21,7 +21,8 @@ properties:
     type: string
     description: >
       Link target. Defaults to the GitHub page of the definition's only
-      `repo:`; `none` renders the label as plain code without a link.
+      `repo:`; `none` renders the label as plain code without a link, and
+      `text` renders the label as it is, markdown included.
 
   description:
     type: string
