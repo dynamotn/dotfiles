@@ -239,7 +239,9 @@ bindings:
   - {key: Mod+Shift+P, action: totp}
   - {key: Mod+Escape, action: lock}
   - {key: Mod+S, action: screenshot}
-  - {key: Mod+Z, action: system-monitor}
+  # Mod+Z undoes on macOS
+  - {key: Mod+Z, action: system-monitor, os: linux}
+  - {key: Mod+Ctrl+Z, action: system-monitor, os: darwin}
   - {key: Mod+Ctrl+Shift+Space, action: input-english}
   # External monitors over DDC/CI: each step takes the bus for a moment
   - {key: Mod+Alt+Equal, action: brightness-up, repeat: false}

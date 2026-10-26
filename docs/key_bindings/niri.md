@@ -83,7 +83,7 @@ Workspaces are named, not numbered, the same as on Hyprland:
 | `Super+Shift+P` | Pick a Bitwarden entry and type its TOTP code |
 | `Super+Escape` | Lock session |
 | `Super+S` | Screenshot a selected region, then annotate it |
-| `Super+Z` | Floating `btop` in kitty |
+| `Super+Z` | Drop-down `btop` in kitty |
 
 ## External monitors
 
