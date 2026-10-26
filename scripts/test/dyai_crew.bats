@@ -3,13 +3,26 @@ setup() {
   load test_helper
   setup_dotfiles_test_env
   . "${DOTFILES_DIR}/scripts/lib/dyai.sh"
+  . "${DOTFILES_DIR}/scripts/lib/dyai_zellij.sh"
   . "${DOTFILES_DIR}/scripts/lib/dyai_crew.sh"
   FIX="${DOTFILES_DIR}/scripts/test/fixtures/crew"
+  # Only the stubs and the system tools: a real agent CLI on the host must
+  # never run here. jq and yq are linked one by one, since their own directory
+  # (often ~/.local/bin) may hold real agent CLIs too.
+  local tools="${BATS_TEST_TMPDIR}/tools" jq_bin yq_bin
+  jq_bin="$(command -v jq)"
+  yq_bin="$(command -v yq)"
+  mkdir -p "${tools}"
+  ln -s "${jq_bin}" "${tools}/jq"
+  ln -s "${yq_bin}" "${tools}/yq"
+  PATH="${HOME}/.local/bin:${tools}:/usr/bin:/bin"
   LOG="${BATS_TEST_TMPDIR}/calls"
   REPO="${BATS_TEST_TMPDIR}/repo"
   # dyshellint disable=BSG062 test_helper, loaded above, unsets GIT_DIR and its kin
   git init -q "${REPO}"
-  git -C "${REPO}" -c user.email=t@t -c user.name=t commit -q --allow-empty -m init
+  git -C "${REPO}" config user.email t@t
+  git -C "${REPO}" config user.name t
+  git -C "${REPO}" commit -q --allow-empty -m init
   _crew_config 'profile: full'
   cd "${REPO}" || return 1
 }
@@ -212,4 +225,281 @@ function _stub {
   assert_success
   assert_line --index 0 $'t1\tlost\tclaude\t'
   assert_line --index 1 $'t2\tdone\tcopilot\tok'
+}
+
+# Write an agent stub $1 that logs its argv, saves its stdin, then runs $2 in
+# the worktree it was started in.
+function _agent {
+  {
+    printf '#!/usr/bin/env bash\n'
+    printf 'printf "%%s\\n" "%s $*" >> "%s"\n' "${1}" "${LOG}"
+    printf 'cat > "%s/%s.stdin"\n' "${BATS_TEST_TMPDIR}" "${1}"
+    # shellcheck disable=SC2016 # expands when the stub runs
+    printf 'printf "%%s\\n" "${DYAI_CREW-}" > "%s/%s.crew"\n' "${BATS_TEST_TMPDIR}" "${1}"
+    printf '%s\n' "${2}"
+  } > "${HOME}/.local/bin/${1}"
+  chmod +x "${HOME}/.local/bin/${1}"
+}
+
+# Agent bodies.
+DONE='echo work >> f.txt; printf %s "{\"status\":\"done\",\"summary\":\"added f\"}" > .dyai-result.json'
+RATE='echo "Error: rate limit exceeded" >&2; exit 1'
+
+# The first and the last task id in a `run` output, $1 (debug logging
+# shares it).
+ID_RE='^[0-9]{8}-[0-9]{6}-[a-z]+-[0-9a-f]{4}$'
+function _first_id {
+  local l
+  local -a got
+  mapfile -t got <<< "${1}"
+  for l in "${got[@]}"; do
+    if [[ "${l}" =~ ${ID_RE} ]]; then
+      printf '%s\n' "${l}"
+      return 0
+    fi
+  done
+}
+function _last_id {
+  local i
+  local -a got
+  mapfile -t got <<< "${1}"
+  for ((i = ${#got[@]} - 1; i >= 0; i--)); do
+    if [[ "${got[i]}" =~ ${ID_RE} ]]; then
+      printf '%s\n' "${got[i]}"
+      return 0
+    fi
+  done
+}
+
+# Print one field of a task's state.
+function _field {
+  local state
+  state="$(dyai_crew::get "${1}")" || return 1
+  jq -r "${2}" <<< "${state}"
+}
+
+@test "run marks done from the result file" {
+  _agent claude "${DONE}"
+  run dyai_crew::run claude "add a line"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  run _field "${id}" .status
+  assert_output "done"
+  run git log --format=%s -1 "crew/${id}"
+  assert_output "crew(claude): added f"
+  run git show "crew/${id}:f.txt"
+  assert_output "work"
+}
+
+@test "run sends the prompt and the contract on stdin and sets DYAI_CREW" {
+  _agent claude "${DONE}"
+  run dyai_crew::run claude "add a line"
+  local id
+  id="$(_last_id "${output}")"
+  run cat "${BATS_TEST_TMPDIR}/claude.stdin"
+  assert_output --partial "add a line"
+  assert_output --partial ".dyai-result.json"
+  run cat "${BATS_TEST_TMPDIR}/claude.crew"
+  assert_output "${id}"
+}
+
+@test "run keeps a commit the agent made itself" {
+  _agent claude 'echo a > a.txt; git add a.txt; git commit -qm "agent commit"; '"${DONE}"
+  run dyai_crew::run claude "x"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  run git log --format=%s "crew/${id}"
+  assert_line --index 0 "crew(claude): added f"
+  assert_line --index 1 "agent commit"
+}
+
+@test "run marks failed when the agent leaves the branch" {
+  _agent claude 'git checkout -q -b elsewhere; '"${DONE}"
+  run dyai_crew::run claude "x"
+  assert_failure
+  local id
+  id="$(_last_id "${output}")"
+  run _field "${id}" '.status + ": " + .summary'
+  assert_output "failed: agent left branch crew/${id}"
+}
+
+@test "run marks failed when exit 0 but no result file" {
+  _agent claude 'echo work >> f.txt'
+  run dyai_crew::run claude "x"
+  assert_failure
+  local last_id
+  last_id="$(_last_id "${output}")"
+  run _field "${last_id}" .status
+  assert_output "failed"
+}
+
+@test "run marks failed when done is claimed without changes" {
+  _agent claude 'printf %s "{\"status\":\"done\",\"summary\":\"nothing\"}" > .dyai-result.json'
+  run dyai_crew::run claude "x"
+  assert_failure
+  local last_id
+  last_id="$(_last_id "${output}")"
+  run _field "${last_id}" '.status + ": " + .summary'
+  assert_output "failed: claimed done without changes"
+}
+
+@test "a failing post_create hook stops the run" {
+  _crew_config "hooks: {post_create: 'exit 4'}"
+  _agent claude "${DONE}"
+  run dyai_crew::run claude "x"
+  assert_failure
+  local last_id
+  last_id="$(_last_id "${output}")"
+  run _field "${last_id}" '.status + ": " + .summary'
+  assert_output "failed: post_create hook failed"
+  [[ ! -e "${BATS_TEST_TMPDIR}/claude.stdin" ]]
+}
+
+@test "run records the agent pid while running" {
+  _agent claude 'sleep 3; '"${DONE}"
+  dyai_crew::run claude "x" > "${BATS_TEST_TMPDIR}/ids" &
+  local runner=$! id="" n
+  for n in $(seq 1 50); do
+    id="$(jq -r 'select(.status == "running") | .id' "${REPO}/.dyai/crew/tasks.jsonl" 2> /dev/null | tail -1 || true)"
+    [[ -z "${id}" ]] || break
+    sleep 0.1
+  done
+  [[ -n "${id}" ]] || fail "no running record"
+  local pid start
+  pid="$(_field "${id}" .pid)"
+  start="$(_field "${id}" .pid_start)"
+  dyai_crew::alive "${pid}" "${start}" || fail "recorded pid ${pid} is not alive"
+  wait "${runner}"
+}
+
+@test "run marks timeout and kills the process group" {
+  _crew_config 'timeout: 1'
+  _agent claude "sleep 30 & echo \$! > ${BATS_TEST_TMPDIR}/grandchild; sleep 5"
+  run dyai_crew::run claude "x"
+  assert_failure
+  local last_id
+  last_id="$(_last_id "${output}")"
+  run _field "${last_id}" .status
+  assert_output "timeout"
+  local gc
+  gc="$(cat "${BATS_TEST_TMPDIR}/grandchild")"
+  ! kill -0 "${gc}" 2> /dev/null || fail "grandchild ${gc} survived"
+}
+
+@test "auto falls back after a rate limit" {
+  _crew_config 'fallback: [claude, copilot]'
+  _agent claude "${RATE}"
+  _agent copilot "${DONE}"
+  run dyai_crew::run auto "x"
+  assert_success
+  local first last
+  first="$(_first_id "${output}")"
+  last="$(_last_id "${output}")"
+  [[ "${first}" != "${last}" ]]
+  run _field "${first}" '.agent + " " + .status + " " + (.worktree | tostring)'
+  assert_output "claude rate_limited null"
+  run _field "${last}" '.agent + " " + .status'
+  assert_output "copilot done"
+  [[ -s "${REPO}/.dyai/crew/cooldown/claude" ]]
+  [[ ! -d "${REPO}/.worktrees/crew-${first}" ]]
+  run git rev-parse --verify -q "crew/${first}"
+  assert_failure
+}
+
+@test "auto falls back after an auth failure" {
+  _crew_config 'fallback: [codex, copilot]'
+  _agent codex "cat ${FIX}/codex.blocked.err >&2; exit 1"
+  _agent copilot "${DONE}"
+  run dyai_crew::run auto "x"
+  assert_success
+  local first
+  first="$(_first_id "${output}")"
+  run _field "${first}" .status
+  assert_output "blocked"
+}
+
+@test "auto skips an agent in cooldown and one that is not installed" {
+  _crew_config 'fallback: [gemini, claude, copilot]'
+  _agent claude "${DONE}"
+  _agent copilot "${DONE}"
+  mkdir -p "${REPO}/.dyai/crew/cooldown"
+  local now
+  now="$(date +%s)"
+  echo $((now + 600)) > "${REPO}/.dyai/crew/cooldown/claude"
+  run dyai_crew::run auto "x"
+  assert_success
+  local last_id
+  last_id="$(_last_id "${output}")"
+  run _field "${last_id}" .agent
+  assert_output "copilot"
+  [[ ! -e "${BATS_TEST_TMPDIR}/claude.stdin" ]]
+}
+
+@test "run dies on an agent that is not installed" {
+  run dyai_crew::run gemini "x"
+  assert_failure
+  assert_output --partial "gemini is not installed"
+}
+
+@test "run from inside a worktree creates under the main checkout" {
+  _agent claude "${DONE}"
+  git worktree add -q "${REPO}/.worktrees/side" -b side
+  cd "${REPO}/.worktrees/side"
+  run dyai_crew::run claude "x"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  run _field "${id}" .worktree
+  assert_output "${REPO}/.worktrees/crew-${id}"
+}
+
+@test "run with a plan passes it to the agent and records it" {
+  _agent claude "${DONE}"
+  printf '1. touch f.txt\n' > "${BATS_TEST_TMPDIR}/plan.md"
+  run dyai_crew::run claude "x" "${BATS_TEST_TMPDIR}/plan.md"
+  local id
+  id="$(_last_id "${output}")"
+  run cat "${BATS_TEST_TMPDIR}/claude.stdin"
+  assert_output --partial "## Plan to follow"
+  assert_output --partial "1. touch f.txt"
+  run _field "${id}" .plan
+  assert_output "${REPO}/.dyai/crew/${id}.plan.md"
+}
+
+@test "run detach returns before the agent finishes" {
+  _agent claude 'sleep 2; '"${DONE}"
+  local start=${SECONDS}
+  run dyai_crew::run claude "x" "" detach
+  assert_success
+  ((SECONDS - start < 2)) || fail "detach waited"
+  local id n st
+  id="$(_last_id "${output}")"
+  for n in $(seq 1 60); do
+    st="$(_field "${id}" .status)"
+    [[ "${st}" != "done" ]] || break
+    sleep 0.1
+  done
+  run _field "${id}" .status
+  assert_output "done"
+}
+
+@test "two runs in the same second get different ids" {
+  _agent claude "${DONE}"
+  dyai_crew::run claude "a" > "${BATS_TEST_TMPDIR}/a" &
+  dyai_crew::run claude "b" > "${BATS_TEST_TMPDIR}/b" &
+  wait
+  local a b
+  a="$(tail -1 "${BATS_TEST_TMPDIR}/a")"
+  b="$(tail -1 "${BATS_TEST_TMPDIR}/b")"
+  [[ -n "${a}" && -n "${b}" && "${a}" != "${b}" ]] || fail "ids: ${a} ${b}"
+  [[ "${a}" =~ ^[0-9]{8}-[0-9]{6}-claude-[0-9a-f]{4}$ ]]
+}
+
+@test "run warns when the checkout has uncommitted changes" {
+  _agent claude "${DONE}"
+  echo dirty > dirty.txt
+  run dyai_crew::run claude "x"
+  assert_output --partial "uncommitted"
 }

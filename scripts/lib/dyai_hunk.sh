@@ -15,9 +15,12 @@
 #######################################
 # @description Open `hunk diff --watch` for the current checkout when it has changes
 # @noargs
+# @env DYAI_CREW string Set inside a crew task: open nothing
 # @exitcode 0 Always
 #######################################
 function dyai_hunk::main {
+  # A crew worker: dyai opens its own views for the task (dyai_crew).
+  [[ -z "${DYAI_CREW-}" ]] || return 0
   dybatpho::is command hunk || return 0
   local repo changes sidecar
   repo="$(git rev-parse --show-toplevel 2> /dev/null)" || return 0

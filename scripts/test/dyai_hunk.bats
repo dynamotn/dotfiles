@@ -91,3 +91,11 @@ function _launches {
   KITTY_LISTEN_ON=unix:/tmp/kitty-test run dyai_hunk::main
   assert_success
 }
+
+@test "dyai-hunk does nothing inside a crew task" {
+  touch "${REPO}/new"
+  cd "${REPO}" && ZELLIJ=0 DYAI_CREW=20261026-000000-claude-abcd run dyai_hunk::main
+  assert_success
+  run _launches
+  assert_output ""
+}

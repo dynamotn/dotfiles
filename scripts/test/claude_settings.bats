@@ -163,6 +163,26 @@ STUB
   jq -e '.hookSpecificOutput.additionalContext | contains("alpha")' <<< "${output}" > /dev/null
 }
 
+@test "desktop and drift hooks are silent inside a crew task" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json" bin="${BATS_TEST_TMPDIR}/bin" cmd
+  _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
+  mkdir -p "${bin}"
+  local tool
+  for tool in dyai dyai-hunk notify-send paplay; do
+    printf '#!/usr/bin/env bash\necho "%s ran" >> "%s/ran"\nprintf drift\n' "${tool}" "${BATS_TEST_TMPDIR}" \
+      > "${bin}/${tool}"
+    chmod +x "${bin}/${tool}"
+  done
+  # shellcheck disable=SC2312 # a bad render lists no hook, and the file check below still holds
+  while IFS= read -r cmd; do
+    env PATH="${bin}:${PATH}" DYAI_CREW=x sh -c "${cmd}" &> /dev/null || true
+  done < <(jq -r '[.hooks.SessionStart, .hooks.Stop, .hooks.Notification, .hooks.PermissionRequest]
+    | map(select(. != null)) | .[][] | .hooks[].command
+    | select(test("dyai|notify-send"))' "${out}")
+  [[ ! -e "${BATS_TEST_TMPDIR}/ran" ]] || fail "ran inside a crew task: $(< "${BATS_TEST_TMPDIR}/ran")"
+}
+
 @test "every git ask rule also covers its rtk rewrite" {
   _require_chezmoi
   local out="${BATS_TEST_TMPDIR}/settings.json"

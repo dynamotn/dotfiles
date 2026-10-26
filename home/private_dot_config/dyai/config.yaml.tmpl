@@ -154,10 +154,11 @@ global:
     stop:
       event: stop
       # dyai-hunk opens the changes side by side; Claude and opencode wire it on their own.
-      run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Task finished!' --icon=dialog-information; command -v dyai-hunk > /dev/null 2>&1 && dyai-hunk; true"
+      # A crew worker (DYAI_CREW set) stays quiet: nobody is at its desktop.
+      run: "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Task finished!' --icon=dialog-information; command -v dyai-hunk > /dev/null 2>&1 && dyai-hunk; true"
     input:
       event: input
-      run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Waiting for your input!' --icon=dialog-information; true"
+      run: "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Waiting for your input!' --icon=dialog-information; true"
   # Tools with their own per-agent installer, run once by `dyai install`.
   installers:
     # claude-mem (memory across sessions). Claude gets it via the plugin above
