@@ -32,5 +32,7 @@ done
 {{- if eq .osid "linux-gentoo" }}
 exec /opt/Obsidian/obsidian "${flags[@]}" "$@"
 {{- else if eq .osid "linux-arch" }}
-exec electron /usr/lib/obsidian/app.asar "${flags[@]}" "$@"
+# The package pins a versioned Electron (electron43, ...); follow its launcher
+electron_bin="$(sed -n 's/^exec \(electron[0-9]*\) .*/\1/p' /usr/bin/obsidian)"
+exec "${electron_bin:-electron}" /usr/lib/obsidian/app.asar "${flags[@]}" "$@"
 {{- end }}
