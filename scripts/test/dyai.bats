@@ -927,6 +927,26 @@ CFG
   [[ ! -e "${HOME}/.claude/agents/backend-developer.md.dyai-model" ]]
 }
 
+@test "enforcement marks copilot shell rules as instructions only" {
+  run dyai::enforcement
+  assert_success
+  assert_line "| copilot | - | S | S | M | M | - |"
+}
+
+@test "enforcement marks claude and codex subagents as mechanical" {
+  run dyai::enforcement
+  assert_line --regexp '^\| claude \|.* M \|$'
+  assert_line --regexp '^\| codex \|.* M \|$'
+}
+
+@test "docs enforcement block matches the command" {
+  local docs want
+  docs="$(sed -n '/<!-- dyai:enforcement:start -->/,/<!-- dyai:enforcement:end -->/{/<!-- dyai:enforcement/d;p}' \
+    "${DOTFILES_DIR}/docs/dyai.md")"
+  want="$(dyai::enforcement)"
+  [[ "${docs}" == "${want}" ]] || fail "docs/dyai.md is stale; paste the output of dyai enforcement"
+}
+
 @test "dir_hash changes when a file is renamed" {
   local d="${BATS_TEST_TMPDIR}/h"
   mkdir -p "${d}"

@@ -21,6 +21,7 @@ function _spec_main {
   dybatpho::opts::cmd rm _spec_rm
   dybatpho::opts::cmd mcp _spec_mcp
   dybatpho::opts::cmd status _spec_status
+  dybatpho::opts::cmd enforcement _spec_enforcement
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
@@ -88,6 +89,15 @@ function _spec_status {
 # dyshellint disable=SC2154 QUIET is assigned by dybatpho::opts from _spec_status
 function _status {
   dyai_status::main "${QUIET}"
+}
+
+#######################################
+# @description Spec of enforcement command
+# @noargs
+#######################################
+function _spec_enforcement {
+  dybatpho::opts::setup "Show what each agent actually enforces of the shared config" ENF_ARGS action:"dyai::enforcement"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_enforcement"
 }
 
 #######################################

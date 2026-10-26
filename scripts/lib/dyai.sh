@@ -46,6 +46,23 @@ def paths($kind; $tool): (.[$kind] // [])
     | .[($tool | length) + 1:-1]);
 '
 
+# What each agent actually enforces of the shared config, one row per agent:
+# M = written into the agent's own config, which enforces it; S = reaches the
+# agent only as instructions (AGENTS.md, GEMINI.md, copilot-instructions.md),
+# so it holds only while the agent cooperates; - = not carried over. Keep it in
+# step with setup_policy, setup_permissions (permissions_*), setup_hooks,
+# setup_mcp_agents and setup_subagents; docs/dyai.md embeds its table.
+# Path rules: only opencode matches Read/Edit globs; gemini, codex and hermes
+# get the shell rules only. Approval: copilot, agy and hermes have no
+# edits-only preset. agy and hermes read none of the instruction files.
+DYAI_ENFORCEMENT='claude	M	M	M	M	M	M
+codex	M	M	S	M	M	M
+gemini	M	M	S	M	M	-
+opencode	M	M	M	-	M	-
+copilot	-	S	S	M	M	-
+agy	-	M	-	-	M	-
+hermes	-	M	-	-	M	-'
+
 #######################################
 # @description True when this machine has an AMD GPU (ROCm) for laya's torch build
 # @noargs
@@ -645,6 +662,23 @@ function dyai::setup_gemini {
   # Even a stray --yolo cannot get past the dyai policy prompts.
   expr+=' | .security.disableYoloMode = true'
   dyai::json_set "${file}" "${expr}"
+}
+
+#######################################
+# @description Print what each agent actually enforces, as a Markdown table
+# @noargs
+# @stdout The table, then its legend
+#######################################
+function dyai::enforcement {
+  local line
+  printf '| agent | approval | shell rules | path rules | stop/input hooks | mcp | subagents |\n'
+  printf '|---|---|---|---|---|---|---|\n'
+  while IFS= read -r line; do
+    printf '| %s |\n' "${line//$'\t'/ | }"
+  done <<< "${DYAI_ENFORCEMENT}"
+  printf '\n%s\n%s\n' \
+    "M: written into the agent's own config, which enforces it." \
+    "S: instructions only (AGENTS.md and kin), held while the agent cooperates. -: not carried over."
 }
 
 #######################################

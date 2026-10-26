@@ -32,6 +32,8 @@ plus a registry of opt-in presets a project pulls in on demand.
 | `dyai ls` | Print the global baseline, the registry, and this project's selected presets. |
 | `dyai rm <name>` | Drop a preset from this project and remove the files it added. |
 | `dyai mcp` | Serve `ls`, `use` and `rm` as MCP tools on stdio, so an agent can pull in a preset itself. |
+| `dyai status [--quiet]` | Report what drifted between the config and each installed agent: missing skills, plugins, MCP servers, hooks or policy files, and files you edited locally. Claude runs `dyai status --quiet` at every session start; it prints nothing when everything matches. |
+| `dyai enforcement` | Print what each agent actually enforces of the shared config (see [Permissions in other agents](#permissions-in-other-agents)). |
 
 `dyai use`, `ls` and `rm` operate on the git repository you run them in
 (`dyai use` errors outside one).
@@ -253,6 +255,25 @@ The JSON and YAML targets are merged: your own rules stay, and a rule dropped
 from the policy later is not removed. The two files dyai owns are rewritten
 whole. The path rules reach only Claude and opencode, so for the other agents
 the credential-store rules still rest on the instructions text alone.
+
+`dyai enforcement` prints, for the whole shared config, what each agent
+actually enforces. The table below is its output; a test fails when the two
+drift apart.
+
+<!-- dyai:enforcement:start -->
+| agent | approval | shell rules | path rules | stop/input hooks | mcp | subagents |
+|---|---|---|---|---|---|---|
+| claude | M | M | M | M | M | M |
+| codex | M | M | S | M | M | M |
+| gemini | M | M | S | M | M | - |
+| opencode | M | M | M | - | M | - |
+| copilot | - | S | S | M | M | - |
+| agy | - | M | - | - | M | - |
+| hermes | - | M | - | - | M | - |
+
+M: written into the agent's own config, which enforces it.
+S: instructions only (AGENTS.md and kin), held while the agent cooperates. -: not carried over.
+<!-- dyai:enforcement:end -->
 
 ## LSP
 
