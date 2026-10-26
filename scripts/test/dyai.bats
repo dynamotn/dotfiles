@@ -754,3 +754,16 @@ CFG
   plugin_line="$(grep -n 'STUB claude plugin install dyai-lsp@dyai-lsp' "${HOME}/calls.log" | head -1 | cut -d: -f1)"
   [[ "${market_line}" -lt "${plugin_line}" ]]
 }
+
+@test "dyai::mcp_bunx_env gives bunx servers a persistent TMPDIR and leaves the rest alone" {
+  run dyai::mcp_bunx_env '{"command":"bunx","args":["pkg@1"],"env":{}}'
+  assert_success
+  run jq -r '.env.TMPDIR' <<< "${output}"
+  assert_output "${HOME}/.cache/bunx"
+  run dyai::mcp_bunx_env '{"command":"bunx","env":{"TMPDIR":"/keep"}}'
+  run jq -r '.env.TMPDIR' <<< "${output}"
+  assert_output /keep
+  run dyai::mcp_bunx_env '{"command":"uvx","args":[]}'
+  run jq -c '.env' <<< "${output}"
+  assert_output null
+}

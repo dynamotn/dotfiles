@@ -398,6 +398,24 @@ function dyai::setup_mcp_agents {
 }
 
 #######################################
+# @description Give an MCP server definition launched by bunx a persistent install directory
+# @arg $1 string Server definition as JSON ({command, args, env, ...})
+# @stdout The definition, with TMPDIR in its env when the command is bunx
+#######################################
+function dyai::mcp_bunx_env {
+  local definition dir
+  dybatpho::expect_args definition -- "$@"
+  # bunx installs a package under $TMPDIR/bunx-<uid>-<name>, and /tmp is a
+  # tmpfs on most Linux machines: every boot re-resolved each server over the
+  # network, past the agent's 30s MCP timeout when that was slow. An env set
+  # in the definition itself wins over this default.
+  dir="$(dybatpho::xdg_cache_dir bunx)"
+  jq -c --arg dir "${dir}" \
+    'if .command == "bunx" then .env = ({TMPDIR: $dir} + (.env // {})) else . end' \
+    <<< "${definition}"
+}
+
+#######################################
 # @description Register every server in global.mcp into every installed MCP-capable agent
 # @noargs
 #######################################
@@ -415,6 +433,7 @@ function dyai::setup_mcp {
     fi
     base="$(jq -c --arg n "${name}" \
       '.[$n] | {command: .command, args: (.args // []), env: (.env // {})}' <<< "${servers}")"
+    base="$(dyai::mcp_bunx_env "${base}")"
     # The ROCm build of torch ships no kernels for the RDNA2 chips other than
     # gfx1030 (Radeon 680M, RX 6600, ...); they run the gfx1030 ones instead.
     if [[ "${name}" == "laya" ]] && dyai::has_amd_gpu; then
@@ -1226,6 +1245,7 @@ function dyai::materialize {
       fi
       mdef="$(jq -c --arg n "${mcpname}" \
         '.mcp[$n] | {type: "stdio", command: .command, args: (.args // []), env: (.env // {})}' <<< "${pj}")"
+      mdef="$(dyai::mcp_bunx_env "${mdef}")"
       if (cd "${root}" && claude mcp add-json --scope local "${mcpname}" "${mdef}" > /dev/null < /dev/null); then
         registered_mcp+=("${mcpname}")
       else
