@@ -183,3 +183,46 @@ EOT
   done <<< "${categories}"
   printf '%s\n' '<!-- dytoy:end -->'
 }
+
+#######################################
+# @description Put a generated region and its table of contents into the doc
+# The region between the `dytoy:begin` and `dytoy:end` markers is replaced by
+# the generated file, and the list between `<!-- toc -->` and
+# `<!-- tocstop -->` becomes Usage plus one entry per generated category.
+# @arg $1 string The doc, rewritten in place
+# @arg $2 string The generated region, markers included
+# @exitcode 0 The doc was already up to date
+# @exitcode 1 The doc changed
+#######################################
+function dytoy_docs::update {
+  dybatpho::expect_args doc generated -- "$@"
+  local doc="$1" generated="$2" marker current updated
+  for marker in '<!-- toc -->' '<!-- tocstop -->' '<!-- dytoy:begin' '<!-- dytoy:end -->'; do
+    grep -qF -- "${marker}" "${doc}" || dybatpho::die "${doc}: marker ${marker} is missing"
+  done
+  current="$(< "${doc}")"
+  updated="$(
+    awk -v generated="${generated}" '
+      function slug(text) {
+        text = tolower(text)
+        gsub(/[^a-z0-9 -]/, "", text)
+        gsub(/ /, "-", text)
+        return text
+      }
+      BEGIN {
+        while ((getline line < generated) > 0) {
+          region = region line "\n"
+          if (line ~ /^## /) toc = toc "- [" substr(line, 4) "](#" slug(substr(line, 4)) ")\n"
+        }
+      }
+      /^<!-- toc -->$/ { print; printf "\n- [Usage](#usage)\n%s\n", toc; skip = 1; next }
+      /^<!-- tocstop -->$/ { skip = 0 }
+      /^<!-- dytoy:begin/ { printf "%s", region; skip = 1; next }
+      /^<!-- dytoy:end -->$/ { skip = 0; next }
+      !skip { print }
+    ' "${doc}"
+  )"
+  [[ "${updated}" != "${current}" ]] || return 0
+  printf '%s\n' "${updated}" > "${doc}"
+  return 1
+}
