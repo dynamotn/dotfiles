@@ -66,8 +66,37 @@ local function switchToEnglish()
   end
 end
 
+-- Drop-down window, the way hdrop does on Linux: the first press starts a
+-- kitty whose window title is pinned to `title`, later presses minimize it
+-- when it has focus and bring it to the current workspace otherwise
+local function dropDown(title, ...)
+  local args = { '-na', 'kitty', '--args', '--title', title, ... }
+  return function()
+    for _, app in ipairs(hs.application.applicationsForBundleID('net.kovidgoyal.kitty')) do
+      for _, win in ipairs(app:allWindows()) do
+        if win:title() == title then
+          if win == hs.window.focusedWindow() then
+            win:minimize()
+          else
+            win:unminimize()
+{{- if eq .guiWinManager "A" }}
+            local aerospace = '/opt/homebrew/bin/aerospace'
+            local workspace = hs.execute(aerospace .. ' list-workspaces --focused'):gsub('%s+$', '')
+            hs.execute(string.format('%s move-node-to-workspace --window-id %d %s', aerospace, win:id(), workspace))
+{{- end }}
+            win:focus()
+          end
+          return
+        end
+      end
+    end
+    hs.task.new('/usr/bin/open', nil, args):start()
+  end
+end
+
 -- Generated from the bindings in home/.chezmoitemplates/wm/rules.yaml.tmpl
 {{- template "hammerspoonBindings" (dict "rules" $rules "actions" (dict
+  "system-monitor" (printf "dropDown('btop', '--session', '%s/.config/kitty/sessions/monitor.conf')" .chezmoi.homeDir)
   "launcher" "deeplink('vicinae://toggle')"
   "clipboard" "deeplink('vicinae://launch/clipboard/history')"
   "password" "typeSecret('password')"

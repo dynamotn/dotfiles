@@ -81,6 +81,12 @@ automatically-unhide-macos-hidden-apps = false
 # check-further-callbacks = true
 # run = ['layout floating', 'move-node-to-workspace S']  # The callback itself
 
+# The drop-down btop of Hammerspoon floats on the workspace it was called to
+[[on-window-detected]]
+if.app-name-regex-substring = 'kitty'
+if.window-title-regex-substring = '^btop$'
+run = 'layout floating'
+
 [[on-window-detected]]
 if.app-name-regex-substring = 'kitty'
 run = 'move-node-to-workspace 1'

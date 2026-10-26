@@ -92,6 +92,7 @@ Bound by Hammerspoon, since Vicinae has no global hotkey of its own on macOS.
 | Keybind | Action |
 |---------|--------|
 | `Command+Ctrl+Shift+Space` | Reset keyboard input source to US |
+| `Ctrl+Command+Z` | Drop-down `btop` in kitty, minimized again by the next press |
 
 ## External monitors
 
