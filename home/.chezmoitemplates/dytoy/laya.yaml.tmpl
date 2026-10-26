@@ -26,5 +26,6 @@ content: |-
   if ((${#args[@]})); then
     args+=(--extra-index-url https://pypi.org/simple --index-strategy unsafe-best-match)
   fi
-  uv tool install ${args[@]+"${args[@]}"} 'laya[mcp]'
+  # serve: the one laya-serve that laya-mcp shares between agent sessions.
+  uv tool install ${args[@]+"${args[@]}"} 'laya[mcp,serve]'
 {{- end }}
