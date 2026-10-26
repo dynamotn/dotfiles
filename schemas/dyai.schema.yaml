@@ -97,6 +97,10 @@ $defs:
           upstream choice.
         additionalProperties: { $ref: "#/$defs/modelTier" }
 
+  crewAgent:
+    enum: [claude, codex, gemini, opencode, copilot]
+    description: An agent CLI dyai crew can drive headless.
+
   modelTier:
     enum: [fast, standard, strong, inherit]
     description: Abstract model tier, translated per agent by agents.<name>.model_tiers.
@@ -205,6 +209,46 @@ properties:
                 agent's launcher is present. Keyed by agent id.
               additionalProperties: { type: string }
       policy: { $ref: "#/$defs/policy" }
+      crew:
+        type: object
+        additionalProperties: false
+        description: >
+          `dyai run` / `review` / `merge`: headless agent CLIs working in their
+          own git worktrees, reviewed by another provider before a merge.
+        properties:
+          fallback:
+            type: array
+            items: { $ref: "#/$defs/crewAgent" }
+            description: Order `--agent auto` tries.
+          reviewer:
+            type: object
+            description: Reviewer agent for each writer agent.
+            propertyNames: { $ref: "#/$defs/crewAgent" }
+            additionalProperties: { $ref: "#/$defs/crewAgent" }
+          model:
+            type: object
+            description: Model string passed with each agent's model flag.
+            propertyNames: { $ref: "#/$defs/crewAgent" }
+            additionalProperties: { type: string }
+          timeout: { type: integer, minimum: 1, description: "Seconds per run" }
+          cooldown:
+            type: integer
+            minimum: 0
+            description: Seconds an agent is skipped after a rate limit or an auth failure.
+          gate: { type: string, description: "Shell command a merge must pass before it commits" }
+          require_review: { type: boolean }
+          fences:
+            type: array
+            items: { type: string }
+            description: >
+              Git pathspecs a merge never takes automatically. Glob entries
+              carry the :(glob) magic.
+          hooks:
+            type: object
+            additionalProperties: false
+            properties:
+              post_create: { type: string, description: "Run in a new task worktree" }
+              on_status: { type: string, description: "Run after every status change" }
 
   agents:
     type: object
