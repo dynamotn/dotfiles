@@ -95,7 +95,8 @@ Show the diff and stop. `chezmoi apply`, `chezmoi destroy`, and
   `~/.claude/settings.json`). Change the target's source, not the link.
 - `~/.claude/settings.json` is rendered from `ai/dyai-data.yaml.tmpl` plus
   literals; `scripts/test/fixtures/claude-settings.expected.json` pins the
-  result, so a deliberate settings change updates that fixture too.
+  result, so a deliberate settings change updates that fixture too. Plugins
+  and marketplaces are left out of it: they follow the data partial.
 
 ## Off limits
 

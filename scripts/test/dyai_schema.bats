@@ -120,13 +120,15 @@ function _render_config {
   if ! _render_named "ai/dyai-data.yaml.tmpl" "${out}"; then
     fail "chezmoi could not render the data partial: $(cat "${out}.err")"
   fi
-  # 9 marketplaces, including a github one
-  [[ "$(yq '.marketplaces | length' "${out}")" == "9" ]]
+  # No counts here: adding a community plugin must not need a test edit.
+  # Every plugin comes from a declared marketplace (or one Claude/dyai brings).
+  local data
+  data="$(yq -o=json -I=0 '.' "${out}")"
+  jq -e '([.plugins[], .optional_plugins[]] | map(split("@")[1]) | unique)
+    - ["claude-plugins-official", "dyai-lsp"] - (.marketplaces | keys)
+    | length == 0' <<< "${data}" > /dev/null || fail "a plugin names an undeclared marketplace"
   [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
-  # 39 plugins on globally (official LSP plugins replaced by dyai-lsp) and
-  # 6 optional ones, including known entries
-  [[ "$(yq '.plugins | length' "${out}")" == "39" ]]
-  [[ "$(yq '.optional_plugins | length' "${out}")" == "6" ]]
+  # Known entries, on globally and opt-in
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
   # agent-mode plugins, each its own single-plugin marketplace
@@ -159,7 +161,6 @@ function _render_config {
     fail "chezmoi could not render config.yaml.tmpl: $(cat "${out}.err")"
   fi
   # Phase 4: global.skills is trimmed to the cross-cutting baseline.
-  [[ "$(yq '.global.skills | length' "${out}")" == "10" ]]
   yq -e '.global.skills[] | select(. == "vercel-labs/skills@find-skills")' "${out}" > /dev/null
   yq -e '.global.skills[] | select(. == "anthropics/skills@mcp-builder")' "${out}" > /dev/null
   # moved into presets, so no longer global
@@ -169,9 +170,10 @@ function _render_config {
   assert_failure
   [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
-  [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "39" ]]
-  [[ "$(yq '.agents.claude.optional_plugins | length' "${out}")" == "6" ]]
-  [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "9" ]]
+  # The Claude lists come through from the shared data partial.
+  yq -e '.agents.claude.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
+  yq -e '.agents.claude.optional_plugins[] | select(. == "secskills-core@secskills-marketplace")' "${out}" > /dev/null
+  yq -e '.agents.claude.marketplaces | has("trailofbits")' "${out}" > /dev/null
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
 }
 
@@ -185,8 +187,14 @@ function _render_config {
   local gjson pjson pcount puniq overlap unioncount
   gjson="$(yq -o=json -I=0 '.global.skills' "${out}")"
   pjson="$(yq -o=json -I=0 '[.registry.languages[].skills // [], .registry.infra[].skills // [], .registry.presets[].skills // []] | flatten' "${out}")"
-  # The baseline stays the 10 cross-cutting skills.
-  [[ "$(jq -n --argjson g "${gjson}" '$g | length')" == "10" ]]
+  # The baseline stays a short cross-cutting list; a skill tied to a language,
+  # tool or domain belongs in a preset. Only crossing this cap needs a test edit.
+  [[ "$(jq -n --argjson g "${gjson}" '$g | length')" -le 15 ]]
+  # Every skill is a skills.sh id or a GitHub tree URL pinned to a commit.
+  jq -e -n --argjson g "${gjson}" --argjson p "${pjson}" '[$g[], $p[]]
+    | all(test("^[^/@[:space:]]+/[^/@[:space:]]+@[^@[:space:]]+$")
+      or test("^https://github\\.com/[^/]+/[^/]+/tree/[0-9a-f]{40}/"))' > /dev/null \
+    || fail "a skill entry is neither owner/repo@skill nor a pinned tree URL"
   # A skill is either global or in a preset, never both.
   overlap="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '[$g[] | select([.] | inside($p))] | length')"
   [[ "${overlap}" == "0" ]]
@@ -402,14 +410,25 @@ EOF
   [[ "$(yq '.registry.infra.terraform.subagents[0]' "${out}")" == "terraform-engineer" ]]
   yq '.registry.languages.go.skills[]' "${out}" | grep 'golang-code-style' > /dev/null
   # Phase 4: the full tool-boundary taxonomy
+  # No per-preset skill counts: adding a community skill must not need a test
+  # edit. Every preset carries something, and these name the ones that must.
+  local registry
+  registry="$(yq -o=json -I=0 '.registry' "${out}")"
+  jq -e '[.[][]] | all((.skills // []) + (.subagents // []) + (.plugins // [])
+    + (.commands // []) + ((.mcp // {}) | keys) | length > 0)' <<< "${registry}" > /dev/null \
+    || fail "a registry preset is empty"
+  jq -e '. as $r | {registry: $r} | [.registry.languages.go, .registry.infra.cicd, .registry.infra.database,
+    .registry.presets.testing, .registry.presets.security, .registry.presets.shell,
+    .registry.presets.lifeos, .registry.infra.terraform, .registry.infra.cloudflare,
+    .registry.infra.mongodb, .registry.presets.graphql, .registry.presets.mobile,
+    .registry.presets.sentry, .registry.presets.opentelemetry, .registry.presets.context,
+    .registry.presets.sre, .registry.presets.finops, .registry.presets.architecture,
+    .registry.presets.product, .registry.infra.gcp, .registry.presets.datadog,
+    .registry.infra.pulumi, .registry.presets.office]
+    | all((.skills // []) | length > 0)' <<< "${registry}" > /dev/null || fail "a skills preset lost its skills"
   [[ "$(yq '.registry.languages.frontend.subagents[0]' "${out}")" == "react-specialist" ]]
-  [[ "$(yq '.registry.languages.go.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.infra.docker.subagents[0]' "${out}")" == "docker-expert" ]]
   yq '.registry.infra.aws.skills[]' "${out}" | grep 'aws-iam' > /dev/null
-  [[ "$(yq '.registry.infra.cicd.skills | length' "${out}")" == "5" ]]
-  [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "5" ]]
-  [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "4" ]]
-  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "30" ]]
   # Registry-expansion presets (nvim-supported languages/tools)
   [[ "$(yq '.registry.languages.vue.subagents[0]' "${out}")" == "vue-expert" ]]
   [[ "$(yq '.registry.languages.swift.subagents[0]' "${out}")" == "swift-expert" ]]
@@ -418,7 +437,6 @@ EOF
   [[ "$(yq '.registry.infra.terragrunt.subagents[0]' "${out}")" == "terragrunt-expert" ]]
   [[ "$(yq '.registry.presets.datascience.subagents[0]' "${out}")" == "data-scientist" ]]
   [[ "$(yq '.registry.presets.docs.subagents[0]' "${out}")" == "technical-writer" ]]
-  [[ "$(yq '.registry.presets.shell.skills | length' "${out}")" == "3" ]]
   # SQL MCP moved into the database preset (per-project, not global)
   [[ "$(yq '.registry.infra.database.mcp.postgres.command' "${out}")" == "uvx" ]]
   [[ "$(yq '.registry.infra.database.mcp.mysql.command' "${out}")" == "bunx" ]]
@@ -428,48 +446,31 @@ EOF
   [[ "$(yq '.registry.presets.desktop.subagents[0]' "${out}")" == "electron-pro" ]]
   [[ "$(yq '.registry.presets.realtime.subagents | length' "${out}")" == "2" ]]
   # LifeOS skills, pinned to a commit by tree URL
-  [[ "$(yq '.registry.presets.lifeos.skills | length' "${out}")" == "11" ]]
   yq '.registry.presets.lifeos.skills[]' "${out}" \
     | grep -x 'https://github.com/danielmiessler/LifeOS/tree/[0-9a-f]\{40\}/LifeOS/install/skills/RedTeam' > /dev/null
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'electron-pro' > /dev/null
   # shellcheck disable=SC2312 # a bad read yields no match, which grep's own exit code catches
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'graphql-architect' > /dev/null
-  # Vendor skills picked from VoltAgent/awesome-agent-skills
-  [[ "$(yq '.registry.infra.terraform.skills | length' "${out}")" == "7" ]]
-  [[ "$(yq '.registry.infra.cloudflare.skills | length' "${out}")" == "4" ]]
-  [[ "$(yq '.registry.infra.mongodb.skills | length' "${out}")" == "3" ]]
-  [[ "$(yq '.registry.presets.graphql.skills | length' "${out}")" == "4" ]]
-  [[ "$(yq '.registry.presets.mobile.skills | length' "${out}")" == "5" ]]
-  [[ "$(yq '.registry.presets.sentry.skills | length' "${out}")" == "3" ]]
-  [[ "$(yq '.registry.presets.opentelemetry.skills | length' "${out}")" == "3" ]]
-  [[ "$(yq '.registry.presets.context.skills | length' "${out}")" == "8" ]]
+  # Context-engineering skills, pinned to a commit by tree URL
   yq '.registry.presets.context.skills[]' "${out}" \
     | grep -x 'https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/[0-9a-f]\{40\}/skills/tool-design' > /dev/null
   # Role presets: SRE, platform, FinOps, architecture, product, extra clouds
   yq -e '.registry.presets.sre.subagents[0] == "sre-engineer"
-    and (.registry.presets.sre.skills | length) == 12
     and .registry.presets.grafana.mcp.grafana.command == "docker"
     and .registry.presets.platform.subagents[0] == "platform-engineer"
-    and (.registry.presets.finops.skills | length) == 3
-    and (.registry.presets.architecture.skills | length) == 5
     and .registry.presets.product.subagents[0] == "business-analyst"
-    and (.registry.presets.product.skills | length) == 26
     and .registry.infra.kubernetes.mcp.kubernetes.command == "bunx"
     and .registry.infra.azure.subagents[0] == "azure-infra-engineer"
     and .registry.infra.gcp.mcp.gcloud.command == "bunx"
-    and (.registry.infra.gcp.skills | length) == 9
     and .registry.infra.gitops.mcp.argocd.args[1] == "stdio"' "${out}" > /dev/null
   # Community vendor presets: observability, data, trackers, LLM tooling
-  yq -e '(.registry.presets.datadog.skills | length) == 5
-    and (.registry.presets.datadog.skills[0]
+  yq -e '(.registry.presets.datadog.skills[0]
       | test("^https://github.com/datadog-labs/agent-skills/tree/[0-9a-f]{40}/dd-apm$"))
-    and (.registry.infra.pulumi.skills | length) == 8
     and .registry.infra.dbt.subagents[0] == "data-engineer"
     and .registry.presets.jira.mcp.atlassian.command == "uvx"
     and .registry.presets.linear.mcp.linear.args[1] == "https://mcp.linear.app/mcp"
     and .registry.presets.stripe.subagents[0] == "payment-integration"
     and .registry.presets.llm.subagents[0] == "ai-engineer"
-    and (.registry.presets.office.skills | length) == 4
     and .registry.presets.compliance.subagents[0] == "hipaa-compliance"
     and .registry.presets.modernization.subagents[0] == "legacy-modernizer"' "${out}" > /dev/null
 }

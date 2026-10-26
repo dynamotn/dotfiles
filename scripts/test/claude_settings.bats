@@ -32,9 +32,31 @@ function _render_settings {
   local out="${BATS_TEST_TMPDIR}/settings.json"
   _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
   # Order-independent full-document equality against the captured baseline.
-  jq -S . "${out}" > "${out}.sorted"
+  # The plugin and marketplace lists are left out: they follow the dyai data,
+  # which the next test checks, so adding a plugin needs no fixture edit.
+  jq -S 'del(.enabledPlugins, .extraKnownMarketplaces)' "${out}" > "${out}.sorted"
   diff "${out}.sorted" "${EXPECTED}" \
     || fail "rendered settings.json differs from the pre-dyai baseline"
+}
+
+@test "settings.json plugins and marketplaces follow the dyai data exactly" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json" data="${BATS_TEST_TMPDIR}/dyai-data.json"
+  _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
+  (
+    cd "${DOTFILES_DIR}" || exit 1
+    env HOME="${DOTFILES_REAL_HOME}" \
+      XDG_CONFIG_HOME="${DOTFILES_REAL_XDG_CONFIG_HOME:-${DOTFILES_REAL_HOME}/.config}" \
+      chezmoi execute-template --source "${DOTFILES_DIR}" \
+      <<< '{{ includeTemplate "ai/dyai-data.yaml.tmpl" . | fromYaml | toJson }}' > "${data}" 2> "${data}.err"
+  ) || fail "data render failed: $(< "${data}.err")"
+  # Global plugins on; optional and replaced ones installed but off.
+  jq -e --slurpfile d "${data}" '$d[0] as $d
+    | .enabledPlugins == ([$d.plugins[] | {(.): true}]
+      + [($d.optional_plugins + $d.disabled_plugins)[] | {(.): false}] | add)' "${out}" > /dev/null \
+    || fail "enabledPlugins does not match the dyai data"
+  jq -e --slurpfile d "${data}" '.extraKnownMarketplaces == $d[0].marketplaces' "${out}" > /dev/null \
+    || fail "extraKnownMarketplaces does not match the dyai data"
 }
 
 @test "settings.json enforces no commit or PR attribution" {
