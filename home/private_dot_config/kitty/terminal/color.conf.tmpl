@@ -39,36 +39,43 @@ mark2_background {{ $theme.mauve }}
 mark3_foreground {{ $theme.base }}
 mark3_background {{ $theme.sapphire }}
 
-# The 16 terminal colors
+# The 16 terminal colors, as the official Catppuccin kitty port sets them:
+# ANSI-coloured tools (zj-radar's status hues among them) read these slots.
+{{- $black := list $theme.surface1 $theme.surface2 }}
+{{- $white := list $theme.subtext1 $theme.subtext0 }}
+{{- if not .darkMode }}
+{{-   $black = list $theme.subtext1 $theme.subtext0 }}
+{{-   $white = list $theme.surface2 $theme.surface1 }}
+{{- end }}
 
 # black
-color0 {{ $theme.base }}
-color8 {{ $theme.surface2 }}
+color0 {{ index $black 0 }}
+color8 {{ index $black 1 }}
 
 # red
 color1 {{ $theme.red }}
-color9 {{ $theme.maroon }}
+color9 {{ $theme.red }}
 
 # green
 color2  {{ $theme.green }}
-color10 {{ $theme.teal }}
+color10 {{ $theme.green }}
 
 # yellow
-color3  {{ $theme.peach }}
+color3  {{ $theme.yellow }}
 color11 {{ $theme.yellow }}
 
 # blue
 color4  {{ $theme.blue }}
-color12 {{ $theme.lavender }}
+color12 {{ $theme.blue }}
 
 # magenta
 color5  {{ $theme.pink }}
-color13 {{ $theme.mauve }}
+color13 {{ $theme.pink }}
 
 # cyan
-color6  {{ $theme.sky }}
-color14 {{ $theme.sapphire }}
+color6  {{ $theme.teal }}
+color14 {{ $theme.teal }}
 
 # white
-color7  {{ $theme.text }}
-color15 {{ $theme.subtext0 }}
+color7  {{ index $white 0 }}
+color15 {{ index $white 1 }}
