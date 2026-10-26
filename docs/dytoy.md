@@ -307,6 +307,8 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[goaccess](https://github.com/allinurl/goaccess)|Real-time web log analyzer|
 |[hl](https://github.com/pamburus/hl)|Log viewer and processor that translates JSON or logfmt logs into a pretty human-readable format|
 |[otel-cli](https://github.com/equinix-labs/otel-cli)|CLI tool to send OpenTelemetry traces (`otel`)|
+|[otel-tui](https://github.com/ymtdzzz/otel-tui)|TUI viewer for OpenTelemetry traces, metrics and logs|
+|[eprofiler-tui](https://github.com/rogercoll/eprofiler-tui)|Live flamegraph viewer for OTLP gRPC profiling data|
 |[infracost](https://github.com/infracost/infracost)|Estimate cost of cloud infra via Terraform|
 |[k6](https://github.com/grafana/k6)|Load testing tool|
 |[venom](https://github.com/ovh/venom)|Integration testing tool|
