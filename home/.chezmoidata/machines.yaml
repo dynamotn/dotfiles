@@ -15,7 +15,7 @@ machines:
       - U3T
     guiServer: "W"
     guiDriver: "A"
-    guiWinManager: "H"
+    guiWinManager: "N"
     languages:
       - vi
       - zh
@@ -42,7 +42,7 @@ machines:
       - T1
     guiServer: "W"
     guiDriver: "N"
-    guiWinManager: "H"
+    guiWinManager: "N"
     languages:
       - vi
       - zh
