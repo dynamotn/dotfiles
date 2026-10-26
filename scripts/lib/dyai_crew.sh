@@ -1106,3 +1106,102 @@ function __dyai_crew_selftest_in {
     return 1
   fi
 }
+
+#######################################
+# @description Run the agent setup regression cases on an agent
+# @arg $1 string Agent, or `auto`
+# @arg $@ string Case names; every case when none is given
+# @env DYAI_EVALS string The cases directory (default scripts/test/evals)
+# @stdout `case<TAB>agent<TAB>PASS|FAIL|BLOCKED<TAB>reason` per case, then `<passed>/<total> passed`
+# @exitcode 1 A case failed
+#######################################
+function dyai_crew::eval {
+  local agent
+  dybatpho::expect_args agent -- "$@"
+  shift
+  local evals="${DYAI_EVALS:-${BASH_SOURCE[0]%/*}/../test/evals}"
+  dybatpho::is dir "${evals}" || dybatpho::die "no eval cases in ${evals}"
+  local -a cases=("$@")
+  if ((${#cases[@]} == 0)); then
+    local case_dir
+    for case_dir in "${evals}"/*/; do
+      [[ -f "${case_dir}prompt.md" ]] || continue
+      case_dir="${case_dir%/}"
+      cases+=("${case_dir##*/}")
+    done
+  fi
+  local name result passed=0 total=0 failed=0
+  for name in ${cases[@]+"${cases[@]}"}; do
+    dybatpho::is file "${evals}/${name}/prompt.md" || dybatpho::die "no eval case ${name}"
+    result="$(__dyai_crew_eval_case "${evals}/${name}" "${agent}")"
+    printf '%s\t%s\t%s\n' "${name}" "${agent}" "${result}"
+    total=$((total + 1))
+    case "${result}" in
+      PASS*) passed=$((passed + 1)) ;;
+      FAIL*) failed=1 ;;
+      *) ;;
+    esac
+  done
+  printf '%s/%s passed\n' "${passed}" "${total}"
+  [[ "${failed}" -eq 0 ]]
+}
+
+#######################################
+# @description Run one eval case in a scratch repository
+# @arg $1 string Case directory
+# @arg $2 string Agent, or `auto`
+# @stdout `PASS`, `FAIL<TAB>reason` or `BLOCKED<TAB>reason`
+#######################################
+function __dyai_crew_eval_case {
+  local case_dir agent
+  dybatpho::expect_args case_dir agent -- "$@"
+  if [[ "${agent}" != auto ]] && ! dybatpho::is command "${agent}"; then
+    printf 'BLOCKED\tnot installed\n'
+    return 0
+  fi
+  local scratch repo base prompt out id state status wt dir check rc=0
+  dybatpho::create_temp_dir scratch "dyai-eval"
+  repo="${scratch}/repo"
+  mkdir -p "${repo}"
+  ! dybatpho::is dir "${case_dir}/seed" || cp -R "${case_dir}/seed/." "${repo}/"
+  git init -q "${repo}"
+  git -C "${repo}" config user.email dyai@localhost
+  git -C "${repo}" config user.name dyai
+  if dybatpho::is file "${case_dir}/setup.sh"; then
+    if ! (cd "${repo}" && DYAI_EVAL_DIR="${scratch}" bash "${case_dir}/setup.sh") &> /dev/null; then
+      printf 'BLOCKED\tsetup.sh failed\n'
+      return 0
+    fi
+  fi
+  git -C "${repo}" add -A
+  git -C "${repo}" commit -q --allow-empty -m seed
+  base="$(git -C "${repo}" rev-parse HEAD)"
+  prompt="$(< "${case_dir}/prompt.md")"
+  out="$(cd "${repo}" && DYAI_VIEWS=off dyai_crew::run "${agent}" "${prompt}" 2>&1)" || rc=$?
+  id="$(grep -E '^[0-9]{8}-[0-9]{6}-[a-z]+-[0-9a-f]{4}$' <<< "${out}" | tail -n 1 || true)"
+  if [[ -z "${id}" ]]; then
+    local why
+    why="$(tail -n 1 <<< "${out}")"
+    printf 'BLOCKED\t%s\n' "${why}"
+    return 0
+  fi
+  state="$(cd "${repo}" && dyai_crew::get "${id}")" || state='{}'
+  status="$(jq -r '.status // ""' <<< "${state}")"
+  case "${status}" in
+    rate_limited | blocked | timeout)
+      printf 'BLOCKED\t%s\n' "${status}"
+      return 0
+      ;;
+    *) ;;
+  esac
+  wt="$(jq -r '.worktree // ""' <<< "${state}")"
+  dybatpho::is dir "${wt}" || wt="${repo}"
+  dir="${repo}/.dyai/crew"
+  if check="$(cd "${wt}" && DYAI_TASK_ID="${id}" DYAI_OUT="${dir}/${id}.out" DYAI_ERR="${dir}/${id}.err" \
+    DYAI_BASE="${base}" DYAI_EVAL_DIR="${scratch}" bash "${case_dir}/check.sh" < /dev/null 2>&1)"; then
+    printf 'PASS\t%s\n' "${status}"
+  else
+    check="$(tail -n 1 <<< "${check}")"
+    printf 'FAIL\t%s\n' "${check}"
+  fi
+}

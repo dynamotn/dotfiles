@@ -1013,3 +1013,80 @@ function _probe_agent {
   run bash "${BATS_TEST_TMPDIR}/probe" other "${BATS_TEST_TMPDIR}/m"
   assert_failure
 }
+
+# A tiny eval case dir: $1 case name, $2 check body.
+function _eval_case {
+  local dir="${BATS_TEST_TMPDIR}/evals/${1}"
+  mkdir -p "${dir}/seed"
+  echo "seed" > "${dir}/seed/README"
+  printf 'Do the %s task.\n' "${1}" > "${dir}/prompt.md"
+  printf '#!/usr/bin/env bash\n%s\n' "${2}" > "${dir}/check.sh"
+  DYAI_EVALS="${BATS_TEST_TMPDIR}/evals"
+  export DYAI_EVALS
+}
+
+@test "eval reports pass and fail per case" {
+  _eval_case good 'test -f f.txt'
+  _eval_case bad 'echo "f.txt is not allowed"; exit 1'
+  _agent claude "${DONE}"
+  run dyai_crew::eval claude
+  assert_failure
+  assert_line $'bad\tclaude\tFAIL\tf.txt is not allowed'
+  assert_line --regexp $'^good\tclaude\tPASS'
+  assert_line "1/2 passed"
+}
+
+@test "eval marks a rate-limited or unauthenticated run blocked, not passed" {
+  _eval_case good 'true'
+  _agent claude "${RATE}"
+  run dyai_crew::eval claude
+  assert_success
+  assert_line --regexp $'^good\tclaude\tBLOCKED\trate_limited'
+  assert_line "0/1 passed"
+  _agent claude "cat ${FIX}/codex.blocked.err >&2; exit 1"
+  run dyai_crew::eval claude
+  assert_line --regexp $'^good\tclaude\tBLOCKED\tblocked'
+}
+
+@test "eval marks an agent that is not installed blocked" {
+  _eval_case good 'true'
+  run dyai_crew::eval gemini
+  assert_line --regexp $'^good\tgemini\tBLOCKED\tnot installed'
+}
+
+@test "eval runs only the named cases" {
+  _eval_case one 'true'
+  _eval_case two 'true'
+  _agent claude "${DONE}"
+  run dyai_crew::eval claude two
+  refute_line --regexp '^one'
+  assert_line "1/1 passed"
+}
+
+@test "no-secret-read fails when the sentinel is only in a tool result" {
+  unset DYAI_EVALS
+  local leak='{ printf %s "{\"type\":\"user\",\"message\":{\"content\":[{\"type\":\"tool_result\",\"content\":\""; '
+  leak+='cat secrets/data/token; printf %s "\"}]}}"; echo; }; '
+  _agent claude "${leak}${DONE}"
+  run dyai_crew::eval claude no-secret-read
+  assert_line --regexp $'^no-secret-read\tclaude\tFAIL'
+}
+
+@test "no-secret-read passes when the agent leaves the secret alone" {
+  unset DYAI_EVALS
+  _agent claude "${DONE}"
+  run dyai_crew::eval claude no-secret-read
+  assert_line --regexp $'^no-secret-read\tclaude\tPASS'
+}
+
+@test "shell-conventions passes on a documented helper and fails without one" {
+  unset DYAI_EVALS
+  local good='mkdir -p scripts/lib; printf "%s\n" "# @file demo.sh" "# @description Say hi" '
+  good+='"function demo::hi { echo hi; }" > scripts/lib/demo.sh; '
+  _agent claude "${good}${DONE}"
+  run dyai_crew::eval claude shell-conventions
+  assert_line --regexp $'^shell-conventions\tclaude\tPASS'
+  _agent claude 'mkdir -p scripts/lib; echo "hi() { echo hi; }" > scripts/lib/demo.sh; '"${DONE}"
+  run dyai_crew::eval claude shell-conventions
+  assert_line --regexp $'^shell-conventions\tclaude\tFAIL'
+}
