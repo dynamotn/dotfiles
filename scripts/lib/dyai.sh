@@ -10,6 +10,8 @@
 . "${BASH_SOURCE[0]%/*}/dyai_lsp.sh"
 # shellcheck source=scripts/lib/dyai_mcp.sh
 . "${BASH_SOURCE[0]%/*}/dyai_mcp.sh"
+# shellcheck source=scripts/lib/dyai_status.sh
+. "${BASH_SOURCE[0]%/*}/dyai_status.sh"
 
 # The skills CLI is pinned, so an apply never runs a release nobody looked at.
 SKILLS_CLI="skills@1.7.2"
@@ -132,7 +134,8 @@ function dyai::locally_edited {
   local recorded current
   recorded="$(dyai::installed_hash "${kind}" "${name}")"
   [[ -n "${recorded}" ]] || return 1
-  dybatpho::is file "${dest}" || return 1
+  # A file (subagent) or a directory (skill).
+  [[ -e "${dest}" ]] || return 1
   current="$(dyai::dir_hash "${dest}")" || return 1
   [[ "${current}" != "${recorded}" ]]
 }
@@ -1606,15 +1609,23 @@ function dyai::setup_installers {
 }
 
 #######################################
-# @description Run the global AI-agent setup from ~/.config/dyai/config.yaml
+# @description Set the paths every dyai command reads, from the current HOME
 # @noargs
 #######################################
-function dyai::install {
+function dyai::paths {
   CONFIG_FILE="$(dybatpho::path_join "${HOME}" ".config" "dyai" "config.yaml")"
   PLUGINS_DIR="$(dybatpho::path_join "${HOME}" ".claude" "plugins")"
   SKILLS_DIR="$(dybatpho::path_join "${HOME}" ".agents" "skills")"
   DEFAULT_CONFIG_DIR="$(dybatpho::path_join "${HOME}" ".claude")"
   ENTERPRISE_DIR="$(dybatpho::path_join "${HOME}" "Working" "enterprise")"
+}
+
+#######################################
+# @description Run the global AI-agent setup from ~/.config/dyai/config.yaml
+# @noargs
+#######################################
+function dyai::install {
+  dyai::paths
   if ! dybatpho::is command jq || ! dybatpho::is command yq; then
     dybatpho::warn "jq or yq is not installed, skip setting up AI agents"
     return 0
