@@ -249,12 +249,12 @@ cmd-esc = 'mode apps'
 cmd-enter = 'exec-and-forget open -na kitty --args zellij'
 {{- if eq .place "home" }}
 cmd-e = 'exec-and-forget open -na {{ $browser }} --args -P Personal '
-cmd-q = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-F1 '
+cmd-shift-e = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-F1 '
 cmd-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal '
 cmd-shift-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-F1 '
 {{- else if eq .place "office" }}
 cmd-e = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-{{ .company }} '
-cmd-q = 'exec-and-forget open -na {{ $browser }} --args -P Personal '
+cmd-shift-e = 'exec-and-forget open -na {{ $browser }} --args -P Personal '
 cmd-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-{{ .company }} '
 cmd-shift-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal '
 {{- end }}

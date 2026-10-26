@@ -72,12 +72,12 @@ Workspaces are named, not numbered, the same as on Hyprland:
 |---------|--------|
 | `Super+Return` | Terminal (kitty + zellij) |
 | `Super+E` | Browser, personal profile at home / enterprise profile at the office |
-| `Super+Q` | Browser, the other profile |
+| `Super+Shift+E` | Browser, the other profile |
 | `Super+M` | Mail client, personal profile at home / enterprise profile at the office |
 | `Super+Shift+M` | Mail client, the other profile |
 | `Super+N` | Control center |
 | `Super+Shift+N` | Toggle do not disturb |
-| `Alt+N` | Act on the latest notification |
+| `Super+Alt+N` | Act on the latest notification |
 | `Super+V` | Clipboard history |
 | `Super+P` | Pick a Bitwarden entry and type its password |
 | `Super+O` | Pick a Bitwarden entry and type its TOTP code |
