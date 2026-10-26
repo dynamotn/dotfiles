@@ -271,6 +271,13 @@ function _last_id {
   done
 }
 
+# Print the last line of $1.
+function _last_line {
+  local -a got
+  mapfile -t got <<< "${1}"
+  printf '%s\n' "${got[-1]}"
+}
+
 # Print one field of a task's state.
 function _field {
   local state
@@ -497,9 +504,187 @@ function _field {
   [[ "${a}" =~ ^[0-9]{8}-[0-9]{6}-claude-[0-9a-f]{4}$ ]]
 }
 
+# shellcheck disable=SC2030 # bats run sets output in this shell
 @test "run warns when the checkout has uncommitted changes" {
   _agent claude "${DONE}"
   echo dirty > dirty.txt
   run dyai_crew::run claude "x"
   assert_output --partial "uncommitted"
+}
+
+# Reviewer stubs that answer with a verdict in each agent's own envelope.
+function _reviewers {
+  _agent copilot "cat ${FIX}/copilot.verdict.out"
+  _agent gemini "cat ${FIX}/gemini.verdict.out"
+  _agent opencode "cat ${FIX}/opencode.verdict.out"
+  # shellcheck disable=SC2016 # expands when the stub runs
+  _agent codex 'while (($# > 0)); do [[ "$1" != -o ]] || cp '"${FIX}"'/codex.verdict.last "$2"; shift; done'
+}
+
+# A copilot answer carrying verdict $1.
+function _copilot_says {
+  local line
+  line="$(jq -cn --arg v "${1}" '{type: "assistant.message", data: {content: ({verdict: $v, findings: []} | tojson)}}')"
+  _agent copilot "printf '%s\\n' '${line}'"
+}
+
+# Run a done claude task; its id lands in TASK_ID.
+function _done_task {
+  _agent claude "${DONE}"
+  run dyai_crew::run claude "add a line"
+  assert_success
+  # shellcheck disable=SC2031 # bats run sets output in this shell
+  TASK_ID="$(_last_id "${output}")"
+}
+
+@test "review uses the configured cross reviewer, read-only, with the diff on stdin" {
+  local id
+  _done_task
+  id="${TASK_ID}"
+  _crew_config 'reviewer: {claude: copilot}'
+  _copilot_says pass
+  run dyai_crew::review "${id}"
+  assert_success
+  run grep '^copilot' "${LOG}"
+  assert_output --partial "--deny-tool shell --deny-tool write"
+  run cat "${BATS_TEST_TMPDIR}/copilot.stdin"
+  assert_output --partial "+work"
+  assert_output --partial "add a line"
+}
+
+@test "review refuses the same agent" {
+  local id
+  _done_task
+  id="${TASK_ID}"
+  run dyai_crew::review "${id}" claude
+  assert_failure
+  assert_output --partial "the writer"
+}
+
+@test "review parses the verdict from each agent's envelope" {
+  local id head a
+  _done_task
+  id="${TASK_ID}"
+  head="$(git rev-parse "crew/${id}")"
+  _reviewers
+  for a in copilot gemini opencode codex; do
+    run dyai_crew::review "${id}" "${a}"
+    assert_success
+    run _field "${id}" '.verdict + " " + .reviewer + " " + .reviewed_sha'
+    assert_output "pass ${a} ${head}"
+  done
+  # And claude as the reviewer, through its stream-json envelope.
+  _agent copilot "${DONE}"
+  run dyai_crew::run copilot "x"
+  local other
+  other="$(_last_id "${output}")"
+  _agent claude "cat ${FIX}/claude.verdict.out"
+  run dyai_crew::review "${other}" claude
+  run _field "${other}" .verdict
+  assert_output "pass"
+}
+
+@test "review writes the answer to a review file and prints its path" {
+  local id
+  _done_task
+  id="${TASK_ID}"
+  _copilot_says pass
+  run dyai_crew::review "${id}" copilot
+  local path
+  path="$(_last_line "${output}")"
+  [[ "${path}" == "${REPO}/.dyai/crew/${id}.review.md" ]] || fail "${path}"
+  grep -q '"verdict":"pass"' "${path}"
+}
+
+@test "review records unknown for prose output" {
+  local id
+  _done_task
+  id="${TASK_ID}"
+  _agent copilot "printf '%s\\n' '{\"type\":\"assistant.message\",\"data\":{\"content\":\"LGTM\"}}'"
+  run dyai_crew::review "${id}" copilot
+  run _field "${id}" .verdict
+  assert_output "unknown"
+}
+
+@test "review records unknown when the reviewer is rate limited" {
+  local id
+  _done_task
+  id="${TASK_ID}"
+  _agent copilot "${RATE}"
+  run dyai_crew::review "${id}" copilot
+  run _field "${id}" '.verdict + ": " + .review_summary'
+  assert_output "unknown: rate_limited"
+}
+
+@test "review hands a large diff over as a file" {
+  _agent claude 'head -c 307200 /dev/zero | tr "\\0" a > big.txt; '"${DONE}"
+  run dyai_crew::run claude "big"
+  local id
+  id="$(_last_id "${output}")"
+  _copilot_says pass
+  run dyai_crew::review "${id}" copilot
+  assert_success
+  local size
+  size="$(wc -c < "${BATS_TEST_TMPDIR}/copilot.stdin")"
+  ((size < 102400)) || fail "prompt is ${size} bytes"
+  grep -q '.dyai-review.diff' "${BATS_TEST_TMPDIR}/copilot.stdin"
+  [[ -s "${REPO}/.worktrees/crew-${id}/.dyai-review.diff" ]]
+}
+
+@test "review sends the plan when the task has one" {
+  _agent claude "${DONE}"
+  printf '1. touch f.txt\n' > "${BATS_TEST_TMPDIR}/plan.md"
+  run dyai_crew::run claude "x" "${BATS_TEST_TMPDIR}/plan.md"
+  local id
+  id="$(_last_id "${output}")"
+  _copilot_says pass
+  run dyai_crew::review "${id}" copilot
+  run cat "${BATS_TEST_TMPDIR}/copilot.stdin"
+  assert_output --partial "1. touch f.txt"
+  assert_output --partial "plan_drift"
+}
+
+@test "fix reruns the writer with the review and clears the verdict" {
+  local id before
+  _done_task
+  id="${TASK_ID}"
+  _copilot_says fail
+  run dyai_crew::review "${id}" copilot
+  before="$(git rev-list --count "crew/${id}")"
+  _agent claude 'echo more >> f.txt; printf %s "{\"status\":\"done\",\"summary\":\"fixed\"}" > .dyai-result.json'
+  run dyai_crew::fix "${id}"
+  assert_success
+  run cat "${BATS_TEST_TMPDIR}/claude.stdin"
+  assert_output --partial '"verdict":"fail"'
+  run git rev-list --count "crew/${id}"
+  assert_output "$((before + 1))"
+  run _field "${id}" '(.verdict | tostring) + " " + (.reviewed_sha | tostring) + " " + .status'
+  assert_output "null null done"
+}
+
+@test "fix refuses unless the verdict is fail" {
+  local id
+  _done_task
+  id="${TASK_ID}"
+  run dyai_crew::fix "${id}"
+  assert_failure
+  _copilot_says pass
+  run dyai_crew::review "${id}" copilot
+  run dyai_crew::fix "${id}"
+  assert_failure
+}
+
+@test "review detach returns at once and records the verdict later" {
+  local id n st
+  _done_task
+  id="${TASK_ID}"
+  _agent copilot "sleep 1; cat ${FIX}/copilot.verdict.out"
+  run dyai_crew::review "${id}" copilot detach
+  assert_success
+  for n in $(seq 1 60); do
+    st="$(_field "${id}" '.verdict // ""')"
+    [[ -z "${st}" ]] || break
+    sleep 0.1
+  done
+  assert_equal "${st}" "pass"
 }

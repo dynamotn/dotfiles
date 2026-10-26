@@ -16,6 +16,8 @@ DYAI_CREW_BLOCKED_RE='\b401\b|unauthori[sz]ed|not authenticated|authentication p
 DYAI_CREW_BLOCKED_RE+='|api key is missing|ProviderAuthError|login required'
 # dyshellint disable=SC2034 set by dyai_crew::cmd, read by its callers
 DYAI_CREW_STDIN=/dev/null
+# A diff above this many bytes goes to the reviewer as a file, not inline.
+DYAI_CREW_INLINE_DIFF=96000
 # What every worker is told on top of its task.
 # shellcheck disable=SC2016 # Markdown backticks, not command substitution
 DYAI_CREW_CONTRACT='
@@ -380,6 +382,63 @@ function __dyai_crew_ahead {
 }
 
 #######################################
+# @description Open a crew view when global.crew.panes allows it; never fails
+# @arg $@ string The arguments of dyai_zellij::open
+#######################################
+function __dyai_crew_pane {
+  local panes
+  panes="$(dyai_crew::conf '.global.crew.panes' auto)"
+  [[ "${panes}" == auto ]] || return 0
+  # shellcheck disable=SC2310 # no terminal to show it in is fine
+  dyai_zellij::open "$@" || true
+}
+
+#######################################
+# @description Run an agent command line in a worktree, in its own process group, under a time limit
+# @arg $1 string Task id (exported to the agent as DYAI_CREW)
+# @arg $2 string Agent
+# @arg $3 string Worktree
+# @arg $4 string File for stdout
+# @arg $5 string File for stderr
+# @arg $6 string Seconds before the agent is stopped
+# @arg $7 string Name of the array holding the command line
+# @arg $8 string `task`: record the pid as running and open the log pane; `review`: neither
+# @exitcode The agent's exit code; 124 or 137 on a timeout
+#######################################
+function __dyai_crew_exec {
+  local __dyai_crew_exec_id __dyai_crew_exec_agent __dyai_crew_exec_wt __dyai_crew_exec_out
+  local __dyai_crew_exec_err __dyai_crew_exec_seconds __dyai_crew_exec_cmdvar __dyai_crew_exec_track
+  dybatpho::expect_args __dyai_crew_exec_id __dyai_crew_exec_agent __dyai_crew_exec_wt \
+    __dyai_crew_exec_out __dyai_crew_exec_err __dyai_crew_exec_seconds __dyai_crew_exec_cmdvar \
+    __dyai_crew_exec_track -- "$@"
+  local -n __dyai_crew_exec_cmd="${__dyai_crew_exec_cmdvar}"
+  local -a __dyai_crew_exec_group=()
+  # Its own process group, so a timeout can take the CLI's children with it.
+  # shortcut: no setsid (macOS) leaves grandchildren after a timeout; add a pgid-aware kill when needed.
+  ! dybatpho::is command setsid || __dyai_crew_exec_group=(setsid)
+  (
+    cd "${__dyai_crew_exec_wt}" || exit 1
+    DYAI_CREW="${__dyai_crew_exec_id}" exec ${__dyai_crew_exec_group[@]+"${__dyai_crew_exec_group[@]}"} \
+      timeout --kill-after=30 "${__dyai_crew_exec_seconds}" \
+      ${__dyai_crew_exec_cmd[@]+"${__dyai_crew_exec_cmd[@]}"} \
+      < "${DYAI_CREW_STDIN}" > "${__dyai_crew_exec_out}" 2> "${__dyai_crew_exec_err}"
+  ) &
+  local __dyai_crew_exec_pid=$! __dyai_crew_exec_start="" __dyai_crew_exec_fields __dyai_crew_exec_rc=0
+  if [[ "${__dyai_crew_exec_track}" == task ]]; then
+    __dyai_crew_exec_start="$(ps -o lstart= -p "${__dyai_crew_exec_pid}" 2> /dev/null)" || __dyai_crew_exec_start=""
+    __dyai_crew_exec_fields="$(jq -cn --arg a "${__dyai_crew_exec_agent}" --argjson p "${__dyai_crew_exec_pid}" \
+      --arg s "${__dyai_crew_exec_start}" '{status: "running", agent: $a, pid: $p, pid_start: $s}')"
+    dyai_crew::record "${__dyai_crew_exec_id}" "${__dyai_crew_exec_fields}"
+    __dyai_crew_pane "crew-${__dyai_crew_exec_id}" "${__dyai_crew_exec_wt}" keep -- \
+      dyai logs "${__dyai_crew_exec_id}" --follow
+  fi
+  wait "${__dyai_crew_exec_pid}" || __dyai_crew_exec_rc=$?
+  # Anything the CLI left running in its group goes too.
+  [[ "${#__dyai_crew_exec_group[@]}" -eq 0 ]] || kill -TERM -- "-${__dyai_crew_exec_pid}" 2> /dev/null || true
+  return "${__dyai_crew_exec_rc}"
+}
+
+#######################################
 # @description Run one attempt of a task in its existing worktree and record the outcome
 # @arg $1 string Task id
 # @arg $2 string Agent
@@ -395,33 +454,13 @@ function dyai_crew::attempt {
   wt="$(jq -r '.worktree // ""' <<< "${state}")"
   base="$(jq -r '.base // ""' <<< "${state}")"
   dybatpho::is dir "${wt}" || dybatpho::die "task ${id} has no worktree"
-  local out="${dir}/${id}.out" err="${dir}/${id}.err" last="${dir}/${id}.last" seconds panes
+  local out="${dir}/${id}.out" err="${dir}/${id}.err" last="${dir}/${id}.last" seconds
   local -a cmd=()
   dyai_crew::cmd "${agent}" rw "${prompt}" cmd "${last}"
   seconds="$(dyai_crew::conf '.global.crew.timeout' 1800)"
-  panes="$(dyai_crew::conf '.global.crew.panes' auto)"
   rm -f -- "${wt}/.dyai-result.json" "${last}"
-  local -a group=()
-  # Its own process group, so a timeout can take the CLI's children with it.
-  # shortcut: no setsid (macOS) leaves grandchildren after a timeout; add a pgid-aware kill when needed.
-  ! dybatpho::is command setsid || group=(setsid)
-  (
-    cd "${wt}" || exit 1
-    DYAI_CREW="${id}" exec ${group[@]+"${group[@]}"} timeout --kill-after=30 "${seconds}" \
-      ${cmd[@]+"${cmd[@]}"} < "${DYAI_CREW_STDIN}" > "${out}" 2> "${err}"
-  ) &
-  local pid=$! start="" fields rc=0
-  start="$(ps -o lstart= -p "${pid}" 2> /dev/null)" || start=""
-  fields="$(jq -cn --arg a "${agent}" --argjson p "${pid}" --arg s "${start}" \
-    '{status: "running", agent: $a, pid: $p, pid_start: $s}')"
-  dyai_crew::record "${id}" "${fields}"
-  if [[ "${panes}" == auto ]]; then
-    # shellcheck disable=SC2310 # no terminal to show the log in is fine
-    dyai_zellij::open "crew-${id}" "${wt}" keep -- dyai logs "${id}" --follow || true
-  fi
-  wait "${pid}" || rc=$?
-  # Anything the CLI left running in its group goes too.
-  [[ "${#group[@]}" -eq 0 ]] || kill -TERM -- "-${pid}" 2> /dev/null || true
+  local rc=0
+  __dyai_crew_exec "${id}" "${agent}" "${wt}" "${out}" "${err}" "${seconds}" cmd task || rc=$?
   local status="" summary=""
   if [[ "${rc}" -eq 124 || "${rc}" -eq 137 ]]; then
     status=timeout
@@ -458,6 +497,7 @@ function dyai_crew::attempt {
     status=failed
     summary="claimed done without changes"
   fi
+  local fields
   fields="$(jq -cn --arg s "${status}" --arg m "${summary}" '{status: $s, summary: $m, pid: null}')"
   if [[ "${status}" == rate_limited || "${status}" == blocked ]]; then
     local now cooldown
@@ -630,4 +670,194 @@ function dyai_crew::run {
     return 0
   fi
   __dyai_crew_loop "${agents}" "${prompt}" "${plan}" "${base}" ""
+}
+
+#######################################
+# @description Write a review prompt for a task
+# @arg $1 string Task state, as JSON
+# @arg $2 string Diff file
+# @arg $3 string Prompt file to write
+#######################################
+function __dyai_crew_review_prompt {
+  local state diff pfile
+  dybatpho::expect_args state diff pfile -- "$@"
+  local wt plan size writer summary
+  wt="$(jq -r .worktree <<< "${state}")"
+  plan="$(jq -r '.plan // ""' <<< "${state}")"
+  writer="$(jq -r .agent <<< "${state}")"
+  summary="$(jq -r '.summary // ""' <<< "${state}")"
+  size="$(wc -c < "${diff}")"
+  {
+    printf '# Review a change made by %s\n\n## The task it was given\n\n' "${writer}"
+    jq -r .prompt <<< "${state}"
+    printf '\n## The writer'"'"'s summary\n\n%s\n' "${summary}"
+    if [[ -n "${plan}" ]] && dybatpho::is file "${plan}"; then
+      printf '\n## Plan the change had to follow\n\n'
+      cat -- "${plan}"
+      printf '\nReport every place the diff departs from this plan as a finding with kind "plan_drift":\n'
+      printf 'files the plan did not name, and steps it named that the diff skipped.\n'
+      printf 'Drift alone does not make the verdict fail.\n'
+    fi
+    printf '\n## The change\n\n'
+    if ((size > DYAI_CREW_INLINE_DIFF)); then
+      cp -- "${diff}" "${wt}/.dyai-review.diff"
+      # shellcheck disable=SC2016 # Markdown backticks
+      printf 'The diff is in `.dyai-review.diff` at the root of this directory (%s bytes). Read it.\n' "${size}"
+    else
+      printf '```diff\n'
+      cat -- "${diff}"
+      printf '```\n'
+    fi
+    printf '\n## What to answer\n\n'
+    printf 'Do not edit any file. Put one JSON object on a line of its own, before any prose:\n\n'
+    printf '{"verdict":"pass|fail","findings":[{"path":"","line":0,"severity":"high|medium|low",'
+    printf '"kind":"defect|plan_drift","problem":""}]}\n\n'
+    # shellcheck disable=SC2016 # Markdown backticks
+    printf '`pass` only when the change does what the task asks and has no defect worth fixing.\n'
+  } > "${pfile}"
+}
+
+#######################################
+# @description Print the verdict an answer text carries
+# @arg $1 string Answer file
+# @stdout `pass`, `fail` or `unknown`
+#######################################
+function dyai_crew::verdict {
+  local file
+  dybatpho::expect_args file -- "$@"
+  local verdict
+  # The first line that is a JSON object with a verdict wins.
+  verdict="$(jq -rRn '[inputs | fromjson? | objects | select(has("verdict")) | .verdict] | first // ""' \
+    "${file}" 2> /dev/null)" || verdict=""
+  case "${verdict}" in
+    pass | fail) printf '%s\n' "${verdict}" ;;
+    *) printf 'unknown\n' ;;
+  esac
+}
+
+#######################################
+# @description Review a task's change with another provider, read-only
+# @arg $1 string Task id
+# @arg $2 string Reviewer agent, or empty for global.crew.reviewer of the writer
+# @arg $3 string `detach`: return at once and record the verdict when it comes
+# @stdout The review file
+#######################################
+function dyai_crew::review {
+  local id
+  dybatpho::expect_args id -- "$@"
+  local reviewer="${2:-}" detach="${3:-}"
+  local state writer dir
+  state="$(dyai_crew::get "${id}")" || dybatpho::die "unknown task ${id}"
+  writer="$(jq -r .agent <<< "${state}")"
+  [[ -n "${reviewer}" ]] || reviewer="$(dyai_crew::conf ".global.crew.reviewer.${writer}" "")"
+  [[ -n "${reviewer}" ]] || dybatpho::die "no reviewer for ${writer}; pass one or set global.crew.reviewer"
+  [[ "${reviewer}" != "${writer}" ]] || dybatpho::die "${reviewer} is the writer of ${id}; pick another provider"
+  [[ " claude codex gemini opencode copilot " == *" ${reviewer} "* ]] || dybatpho::die "unknown agent: ${reviewer}"
+  dybatpho::is command "${reviewer}" || dybatpho::die "${reviewer} is not installed"
+  local wt
+  wt="$(jq -r '.worktree // ""' <<< "${state}")"
+  dybatpho::is dir "${wt}" || dybatpho::die "task ${id} has no worktree to review"
+  dir="$(dyai_crew::state_dir)" || return 1
+  local review="${dir}/${id}.review.md"
+  if [[ "${detach}" == detach ]]; then
+    printf '%s\n' "${review}"
+    (__dyai_crew_review "${id}" "${reviewer}" > /dev/null) &>> "${dir}/detached.log" < /dev/null &
+    disown
+    return 0
+  fi
+  __dyai_crew_review "${id}" "${reviewer}"
+}
+
+#######################################
+# @description Run a review and record its verdict
+# @arg $1 string Task id
+# @arg $2 string Reviewer agent
+# @stdout The review file
+#######################################
+function __dyai_crew_review {
+  local id reviewer
+  dybatpho::expect_args id reviewer -- "$@"
+  local state dir wt base sha
+  state="$(dyai_crew::get "${id}")" || return 1
+  dir="$(dyai_crew::state_dir)" || return 1
+  wt="$(jq -r .worktree <<< "${state}")"
+  base="$(jq -r .base <<< "${state}")"
+  # Taken before the reviewer starts: a commit after this voids the verdict.
+  sha="$(git -C "${wt}" rev-parse "crew/${id}")" || return 1
+  local diff="${dir}/${id}.review.diff" pfile="${dir}/${id}.review-prompt.md"
+  local out="${dir}/${id}.review.out" err="${dir}/${id}.review.err" last="${dir}/${id}.review.last"
+  local review="${dir}/${id}.review.md" seconds rc=0
+  git -C "${wt}" diff "${base}..${sha}" > "${diff}"
+  __dyai_crew_review_prompt "${state}" "${diff}" "${pfile}"
+  # dyshellint disable=SC2034 filled and read through namerefs (cmd, __dyai_crew_exec)
+  local -a cmd=()
+  dyai_crew::cmd "${reviewer}" ro "${pfile}" cmd "${last}"
+  seconds="$(dyai_crew::conf '.global.crew.timeout' 1800)"
+  rm -f -- "${last}"
+  __dyai_crew_exec "${id}" "${reviewer}" "${wt}" "${out}" "${err}" "${seconds}" cmd review || rc=$?
+  dyai_crew::text "${reviewer}" "${out}" "${last}" > "${review}"
+  local verdict reason=""
+  verdict="$(dyai_crew::verdict "${review}")"
+  if [[ "${rc}" -ne 0 ]]; then
+    reason="$(dyai_crew::failure "${reviewer}" "${out}" "${err}")"
+    [[ -n "${reason}" ]] || reason="reviewer exited ${rc}"
+    [[ "${rc}" -ne 124 && "${rc}" -ne 137 ]] || reason=timeout
+    verdict=unknown
+  fi
+  local fields
+  fields="$(jq -cn --arg r "${review}" --arg a "${reviewer}" --arg v "${verdict}" --arg s "${sha}" \
+    --arg why "${reason}" '{review: $r, reviewer: $a, verdict: $v, reviewed_sha: $s, review_summary: $why}')"
+  dyai_crew::record "${id}" "${fields}"
+  __dyai_crew_pane "review-${id}" "${wt}" -- hunk diff "${base}" "crew/${id}"
+  printf '%s\n' "${review}"
+}
+
+#######################################
+# @description Run the writer again on a failed review, in the same worktree
+# @arg $1 string Task id
+# @arg $2 string `detach`: return at once
+# @exitcode 0 The fixed task is done (or started, with detach)
+#######################################
+function dyai_crew::fix {
+  local id
+  dybatpho::expect_args id -- "$@"
+  local detach="${2:-}"
+  local state verdict writer review dir pfile
+  state="$(dyai_crew::get "${id}")" || dybatpho::die "unknown task ${id}"
+  verdict="$(jq -r '.verdict // ""' <<< "${state}")"
+  [[ "${verdict}" == fail ]] || dybatpho::die "fix needs a fail verdict; ${id} has '${verdict:-none}'"
+  writer="$(jq -r .agent <<< "${state}")"
+  review="$(jq -r '.review // ""' <<< "${state}")"
+  dybatpho::is file "${review}" || dybatpho::die "the review of ${id} is gone: ${review}"
+  dybatpho::is command "${writer}" || dybatpho::die "${writer} is not installed"
+  dir="$(dyai_crew::state_dir)" || return 1
+  pfile="${dir}/${id}.fix.md"
+  {
+    jq -r .prompt <<< "${state}"
+    printf '\n## Review to address\n\nA reviewer found problems with your change. Fix them:\n\n'
+    cat -- "${review}"
+    printf '%s' "${DYAI_CREW_CONTRACT}"
+  } > "${pfile}"
+  if [[ "${detach}" == detach ]]; then
+    (__dyai_crew_fix "${id}" "${writer}" "${pfile}") &>> "${dir}/detached.log" < /dev/null &
+    disown
+    return 0
+  fi
+  __dyai_crew_fix "${id}" "${writer}" "${pfile}"
+}
+
+#######################################
+# @description Run a fix attempt, then void the old verdict: the branch head moved
+# @arg $1 string Task id
+# @arg $2 string Writer agent
+# @arg $3 string Prompt file
+# @exitcode 0 The task is done
+#######################################
+function __dyai_crew_fix {
+  local id writer pfile
+  dybatpho::expect_args id writer pfile -- "$@"
+  local rc=0
+  dyai_crew::attempt "${id}" "${writer}" "${pfile}" || rc=$?
+  dyai_crew::record "${id}" '{"verdict": null, "reviewed_sha": null}'
+  return "${rc}"
 }
