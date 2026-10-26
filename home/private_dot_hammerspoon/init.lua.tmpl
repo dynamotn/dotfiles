@@ -1,3 +1,21 @@
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- /* Bind the rules' bindings whose action is a key of $.actions, a Lua
+       function expression. Keys follow the niri spelling of the rules */}}
+{{- define "hammerspoonBindings" }}
+{{-   $modifiers := dict "Mod" "cmd" "Ctrl" "ctrl" "Alt" "alt" "Shift" "shift" }}
+{{-   range $.rules.bindings }}
+{{-     if and (hasKey $.actions .action) (ne (get . "os") "linux") }}
+{{-       $parts := splitList "+" .key }}
+{{-       $chord := list }}
+{{-       range $modifier := list "Mod" "Ctrl" "Alt" "Shift" }}
+{{-         if has $modifier (initial $parts) }}
+{{-           $chord = append $chord (printf "'%s'" (get $modifiers $modifier)) }}
+{{-         end }}
+{{-       end }}
+hs.hotkey.bind({ {{ join ", " $chord }} }, '{{ last $parts | lower }}', {{ get $.actions .action }})
+{{-     end }}
+{{-   end }}
+{{- end -}}
 -- The `hs` command line client talks to this instance through hs.ipc; the
 -- sketchybar click scripts and the chezmoi reload hook rely on it
 require('hs.ipc')
@@ -38,10 +56,23 @@ local function typeSecret(subcommand)
   end
 end
 
-hs.hotkey.bind({ 'cmd' }, 'f2', deeplink('vicinae://toggle'))
-hs.hotkey.bind({ 'cmd', 'ctrl' }, 'v', deeplink('vicinae://launch/clipboard/history'))
-hs.hotkey.bind({ 'cmd' }, 'p', typeSecret('password'))
-hs.hotkey.bind({ 'cmd' }, 'o', typeSecret('totp'))
+local function switchToEnglish()
+  local success = hs.keycodes.currentSourceID(inputSource.english)
+
+  if success then
+    hs.alert.show('Keyboard: English', 1)
+  else
+    hs.alert.show('Error: Could not switch', 1)
+  end
+end
+
+-- Generated from the bindings in home/.chezmoitemplates/wm/rules.yaml.tmpl
+{{- template "hammerspoonBindings" (dict "rules" $rules "actions" (dict
+  "launcher" "deeplink('vicinae://toggle')"
+  "clipboard" "deeplink('vicinae://launch/clipboard/history')"
+  "password" "typeSecret('password')"
+  "totp" "typeSecret('totp')"
+  "input-english" "switchToEnglish")) }}
 
 {{- if eq .guiWinManager "O" }}
 {{-   $browser := "" }}
@@ -56,15 +87,7 @@ hs.hotkey.bind({ 'cmd' }, 'o', typeSecret('totp'))
 {{-   else if eq .mailClient "B" }}
 {{-     $mailClient = "Betterbird" }}
 {{-   end }}
-{{-   $profile := "" }}
-{{-   $otherProfile := "" }}
-{{-   if eq .place "home" }}
-{{-     $profile = "Personal" }}
-{{-     $otherProfile = "Enterprise-F1" }}
-{{-   else if eq .place "office" }}
-{{-     $profile = printf "Enterprise-%s" .company }}
-{{-     $otherProfile = "Personal" }}
-{{-   end }}
+{{-   $profile := $rules.profiles.main }}
 
 -- OmniWM runs no command of its own, so the application keys and the
 -- applications started at login, which aerospace.toml owns, live here
@@ -74,14 +97,16 @@ local function open(...)
     hs.task.new('/usr/bin/open', nil, args):start()
   end
 end
-
-hs.hotkey.bind({ 'cmd' }, 'return', open('-na', 'kitty', '--args', 'zellij'))
-{{-   if $profile }}
-hs.hotkey.bind({ 'cmd' }, 'e', open('-na', '{{ $browser }}', '--args', '-P', '{{ $profile }}'))
-hs.hotkey.bind({ 'cmd', 'shift' }, 'e', open('-na', '{{ $browser }}', '--args', '-P', '{{ $otherProfile }}'))
-hs.hotkey.bind({ 'cmd' }, 'm', open('-na', '{{ $mailClient }}', '--args', '-P', '{{ $profile }}'))
-hs.hotkey.bind({ 'cmd', 'shift' }, 'm', open('-na', '{{ $mailClient }}', '--args', '-P', '{{ $otherProfile }}'))
+{{    $apps := dict "terminal" "open('-na', 'kitty', '--args', 'zellij')" }}
+{{-   with $rules.profiles.main }}
+{{-     $_ := set $apps "browser" (printf "open('-na', '%s', '--args', '-P', '%s')" $browser .) }}
+{{-     $_ := set $apps "mail" (printf "open('-na', '%s', '--args', '-P', '%s')" $mailClient .) }}
 {{-   end }}
+{{-   with $rules.profiles.other }}
+{{-     $_ := set $apps "browser-other" (printf "open('-na', '%s', '--args', '-P', '%s')" $browser .) }}
+{{-     $_ := set $apps "mail-other" (printf "open('-na', '%s', '--args', '-P', '%s')" $mailClient .) }}
+{{-   end }}
+{{-   template "hammerspoonBindings" (dict "rules" $rules "actions" $apps) }}
 
 -- At login, Hammerspoon starts OmniWM and the usual applications. Every
 -- config reload runs this file again, so only what is not running starts
@@ -101,13 +126,3 @@ for _, entry in ipairs(startup) do
   end
 end
 {{- end }}
-
-hs.hotkey.bind({ 'cmd', 'ctrl', 'shift' }, 'space', function()
-  local success = hs.keycodes.currentSourceID(inputSource.english)
-
-  if success then
-    hs.alert.show('Keyboard: English', 1)
-  else
-    hs.alert.show('Error: Could not switch', 1)
-  end
-end)

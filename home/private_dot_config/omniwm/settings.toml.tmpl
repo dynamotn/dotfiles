@@ -185,31 +185,62 @@ type = "main"
 {{- end }}
 
 # Hotkeys --
-# The aerospace keys: an action left out here has no key at all
+# Generated from the bindings in home/.chezmoitemplates/wm/rules.yaml.tmpl,
+# the aerospace keys (docs/key_bindings/omniwm.md); an action left out here has
+# no key at all. OmniWM rejects the file over an id listed twice and disables
+# both of two ids on one key, so an id takes only its first key in the rules
+# (the arrow, not hjkl), and a key already taken is skipped
+{{- $actions := dict
+  "focus-left" "focus.left"
+  "focus-down" "focus.down"
+  "focus-up" "focus.up"
+  "focus-right" "focus.right"
+  "move-left" "move.left"
+  "move-down" "move.down"
+  "move-up" "move.up"
+  "move-right" "move.right"
+  "join-left" "consumeWindowIntoColumn"
+  "join-right" "expelWindowFromColumn"
+  "join-up" "moveWindowUp"
+  "join-down" "moveWindowDown"
+  "layout" "toggleWorkspaceLayout"
+  "fullscreen" "toggleFullscreen"
+  "float" "toggleFocusedWindowFloating"
+  "resize-smaller" "setContainerPrimarySpan.decrease10Percent"
+  "resize-larger" "setContainerPrimarySpan.increase10Percent"
+  "workspace-back-and-forth" "workspaceBackAndForth"
+  "workspace-to-monitor-left" "moveWorkspaceToMonitor.left"
+  "workspace-to-monitor-right" "moveWorkspaceToMonitor.right" }}
+{{- $modifiers := dict "Ctrl" "Control" "Alt" "Option" "Shift" "Shift" "Mod" "Command" }}
+{{- $keys := dict "Left" "Left Arrow" "Right" "Right Arrow" "Up" "Up Arrow" "Down" "Down Arrow" }}
 {{- $hotkeys := list }}
-{{- range $direction := list "left" "down" "up" "right" }}
-{{-   $arrow := printf "%s Arrow" (title $direction) }}
-{{-   $hotkeys = append $hotkeys (list (printf "focus.%s" $direction) (printf "Command+%s" $arrow)) }}
-{{-   $hotkeys = append $hotkeys (list (printf "move.%s" $direction) (printf "Control+Command+%s" $arrow)) }}
+{{- $taken := dict }}
+{{- range $rules.bindings }}
+{{-   if and (hasKey $actions .action) (ne (get . "os") "linux") }}
+{{-     $id := get $actions .action }}
+{{-     $parts := splitList "+" .key }}
+{{-     $chord := list }}
+{{- /* OmniWM's own order: Control, Option, Shift, Command */}}
+{{-     range $modifier := list "Ctrl" "Alt" "Shift" "Mod" }}
+{{-       if has $modifier (initial $parts) }}
+{{-         $chord = append $chord (get $modifiers $modifier) }}
+{{-       end }}
+{{-     end }}
+{{-     $key := last $parts }}
+{{-     $chord = join "+" (append $chord (get $keys $key | default $key)) }}
+{{-     if not (or (hasKey $taken $id) (hasKey $taken $chord)) }}
+{{-       $hotkeys = append $hotkeys (list $id $chord) }}
+{{-       $_ := set $taken $id true }}
+{{-       $_ := set $taken $chord true }}
+{{-     end }}
+{{-   end }}
 {{- end }}
-{{- /* aerospace's join-with, as the column moves of the scrolling layout */}}
-{{- $hotkeys = append $hotkeys (list "consumeWindowIntoColumn" "Shift+Command+Left Arrow") }}
-{{- $hotkeys = append $hotkeys (list "expelWindowFromColumn" "Shift+Command+Right Arrow") }}
-{{- $hotkeys = append $hotkeys (list "moveWindowUp" "Shift+Command+Up Arrow") }}
-{{- $hotkeys = append $hotkeys (list "moveWindowDown" "Shift+Command+Down Arrow") }}
-{{- $hotkeys = append $hotkeys (list "toggleWorkspaceLayout" "Command+Comma") }}
-{{- $hotkeys = append $hotkeys (list "toggleFullscreen" "Command+Period") }}
-{{- $hotkeys = append $hotkeys (list "toggleFocusedWindowFloating" "Command+Slash") }}
-{{- $hotkeys = append $hotkeys (list "setContainerPrimarySpan.decrease10Percent" "Shift+Command+Minus") }}
-{{- $hotkeys = append $hotkeys (list "setContainerPrimarySpan.increase10Percent" "Shift+Command+Equal") }}
 {{- /* switchWorkspace and moveToWorkspace count from 0 */}}
 {{- range $index, $workspace := $rules.workspaces }}
 {{-   $key := mod (add $index 1) 10 }}
 {{-   $hotkeys = append $hotkeys (list (printf "switchWorkspace.%d" $index) (printf "Command+%d" $key)) }}
 {{-   $hotkeys = append $hotkeys (list (printf "moveToWorkspace.%d" $index) (printf "Shift+Command+%d" $key)) }}
 {{- end }}
-{{- $hotkeys = append $hotkeys (list "workspaceBackAndForth" "Command+Tab") }}
-{{- $hotkeys = append $hotkeys (list "moveWorkspaceToMonitor.right" "Shift+Command+Tab") }}
 {{- range $hotkeys }}
 
 [[hotkeys]]

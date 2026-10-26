@@ -137,3 +137,123 @@ monitorInputs:
   - hdmi1
   - hdmi2
   - usbc
+# Browser and mail profiles: `main` on Mod+E / Mod+M, `other` on the same keys
+# with Shift. Empty away from home and office, where those keys stay unbound
+profiles:
+{{- if eq .place "home" }}
+  main: Personal
+  other: Enterprise-F1
+{{- else if eq .place "office" }}
+  main: Enterprise-{{ .company }}
+  other: Personal
+{{- else }}
+  main: ""
+  other: ""
+{{- end }}
+# Key bindings of every window manager (niri, Hyprland, aerospace, OmniWM and
+# Hammerspoon). `key` is written the niri way: Mod (Super on Linux, Command on
+# macOS), Ctrl, Alt and Shift, then the key. Each window manager binds the
+# actions it knows and skips the others, so one key can mean one thing on the
+# scrolling Linux layouts and another on macOS. `os` keeps an entry to linux or
+# darwin; `repeat` turns key repeat on (true) or off (false) where the window
+# manager would do otherwise; `locked` keeps it working on the lock screen.
+# Mod+[0-9] and Mod+Shift+[0-9] (workspaces) and Mod+Alt+[1-9] (monitorInputs)
+# come from the lists above.
+bindings:
+  # Session
+  - {key: Ctrl+Alt+Delete, action: quit}
+  - {key: Mod+Shift+R, action: reload}
+  - {key: Mod+Shift+Slash, action: hotkey-overlay}
+  # Prompt
+  - {key: Mod+F2, action: launcher}
+  - {key: Alt+F2, action: launcher, os: linux}
+  # Workspaces and monitors
+  - {key: Mod+D, action: swap-monitors}
+  - {key: Mod+Ctrl+Left, action: workspace-to-monitor-left}
+  - {key: Mod+Ctrl+Right, action: workspace-to-monitor-right}
+  - {key: Mod+Ctrl+H, action: workspace-to-monitor-left}
+  - {key: Mod+Ctrl+L, action: workspace-to-monitor-right}
+  - {key: Mod+Shift+Tab, action: workspace-to-monitor-next}
+  - {key: Mod+Tab, action: overview}
+  - {key: Mod+Tab, action: workspace-back-and-forth}
+  # Focus, with the arrows or hjkl as in Neovim
+  - {key: Mod+Left, action: focus-left}
+  - {key: Mod+Down, action: focus-down}
+  - {key: Mod+Up, action: focus-up}
+  - {key: Mod+Right, action: focus-right}
+  - {key: Mod+H, action: focus-left}
+  - {key: Mod+J, action: focus-down}
+  - {key: Mod+K, action: focus-up}
+  - {key: Mod+L, action: focus-right}
+  - {key: Alt+Tab, action: cycle-next}
+  - {key: Alt+Shift+Tab, action: cycle-prev}
+  # Shift resizes on the Linux layouts and joins windows on macOS
+  - {key: Mod+Shift+Left, action: resize-left}
+  - {key: Mod+Shift+Down, action: resize-down}
+  - {key: Mod+Shift+Up, action: resize-up}
+  - {key: Mod+Shift+Right, action: resize-right}
+  - {key: Mod+Shift+H, action: resize-left}
+  - {key: Mod+Shift+J, action: resize-down}
+  - {key: Mod+Shift+K, action: resize-up}
+  - {key: Mod+Shift+L, action: resize-right}
+  - {key: Mod+Shift+Left, action: join-left}
+  - {key: Mod+Shift+Down, action: join-down}
+  - {key: Mod+Shift+Up, action: join-up}
+  - {key: Mod+Shift+Right, action: join-right}
+  - {key: Mod+Shift+H, action: join-left}
+  - {key: Mod+Shift+J, action: join-down}
+  - {key: Mod+Shift+K, action: join-up}
+  - {key: Mod+Shift+L, action: join-right}
+  - {key: Mod+Shift+Minus, action: resize-smaller}
+  - {key: Mod+Shift+Equal, action: resize-larger}
+  - {key: Mod+Alt+Left, action: move-left}
+  - {key: Mod+Alt+Down, action: move-down}
+  - {key: Mod+Alt+Up, action: move-up}
+  - {key: Mod+Alt+Right, action: move-right}
+  - {key: Mod+Alt+H, action: move-left}
+  - {key: Mod+Alt+J, action: move-down}
+  - {key: Mod+Alt+K, action: move-up}
+  - {key: Mod+Alt+L, action: move-right}
+  # Windows
+  - {key: Alt+F4, action: close}
+  - {key: Mod+Period, action: fullscreen}
+  - {key: Mod+Slash, action: float}
+  - {key: Mod+Comma, action: layout}
+  - {key: Mod+Semicolon, action: group}
+  - {key: Mod+Semicolon, action: mode-service}
+  - {key: Mod+Apostrophe, action: swap}
+  - {key: Mod+Escape, action: mode-apps}
+  # Applications
+  - {key: Mod+Return, action: terminal}
+  - {key: Mod+E, action: browser}
+  - {key: Mod+Shift+E, action: browser-other}
+  - {key: Mod+M, action: mail}
+  - {key: Mod+Shift+M, action: mail-other}
+  - {key: Mod+N, action: control-center}
+  - {key: Mod+Shift+N, action: notification-dnd}
+  - {key: Mod+Alt+N, action: notification-latest}
+  # Mod+V pastes on macOS
+  - {key: Mod+V, action: clipboard, os: linux}
+  - {key: Mod+Ctrl+V, action: clipboard, os: darwin}
+  - {key: Mod+P, action: password}
+  - {key: Mod+O, action: totp}
+  - {key: Mod+Escape, action: lock}
+  - {key: Mod+S, action: screenshot}
+  - {key: Mod+Z, action: system-monitor}
+  - {key: Mod+Ctrl+Shift+Space, action: input-english}
+  # External monitors over DDC/CI: each step takes the bus for a moment
+  - {key: Mod+Alt+Equal, action: brightness-up, repeat: false}
+  - {key: Mod+Alt+Minus, action: brightness-down, repeat: false}
+  - {key: Mod+Alt+Shift+Equal, action: contrast-up, repeat: false}
+  - {key: Mod+Alt+Shift+Minus, action: contrast-down, repeat: false}
+{{- if .hasSound }}
+  # Multimedia
+  - {key: XF86AudioRaiseVolume, action: volume-up, locked: true, repeat: true}
+  - {key: XF86AudioLowerVolume, action: volume-down, locked: true, repeat: true}
+  - {key: XF86AudioMute, action: mute, locked: true, repeat: false}
+  - {key: XF86AudioMicMute, action: mic-mute, locked: true, repeat: false}
+  - {key: XF86AudioPlay, action: play-pause, repeat: false}
+  - {key: XF86AudioPause, action: pause, repeat: false}
+  - {key: XF86AudioNext, action: next, repeat: false}
+  - {key: XF86AudioPrev, action: previous, repeat: false}
+{{- end }}

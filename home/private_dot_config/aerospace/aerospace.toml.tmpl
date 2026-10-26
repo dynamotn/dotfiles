@@ -1,3 +1,4 @@
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
 {{- $browser := "" }}
 {{- if eq .browser "F" }}
 {{-   $browser = "Firefox" }}
@@ -23,9 +24,9 @@ after-startup-command = [
   ## Kitty
   'exec-and-forget open -na kitty --args zellij',
   ## Firefox/Zen
-  'exec-and-forget open -na {{ $browser }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} ',
+  'exec-and-forget open -na {{ $browser }} --args -P {{ $rules.profiles.main }} ',
   ## Thunderbird/Betterbird
-  'exec-and-forget open -na {{ $mailClient }} --args -P {{ if eq .place "home" }}Personal{{ else if eq .place "office" }}Enterprise-{{ .company }}{{ end }} ',
+  'exec-and-forget open -na {{ $mailClient }} --args -P {{ $rules.profiles.main }} ',
   ## Obsidian
   'exec-and-forget open -a Obsidian',
   ## Hammerspoon
@@ -144,119 +145,73 @@ outer.right = 10
 # 'main' binding mode must be always presented
 # Fallback value (if you omit the key): mode.main.binding = {}
 [mode.main.binding]
+# Generated from the bindings in home/.chezmoitemplates/wm/rules.yaml.tmpl,
+# shared with niri, Hyprland and OmniWM (docs/key_bindings/aerospace.md); Mod
+# is cmd. Commands: https://nikitabobko.github.io/AeroSpace/commands
+{{- /* What each action does on aerospace, as a TOML value; an action left out
+       here is not bound. Moving a workspace to another monitor does not change
+       the focused workspace, so sketchybar is told explicitly */}}
+{{- $toMonitor := `['move-workspace-to-monitor --wrap-around %s', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']` }}
+{{- $actions := dict
+  "swap-monitors" `'exec-and-forget ~/.config/aerospace/swap-monitors.sh'`
+  "workspace-to-monitor-left" (printf $toMonitor "left")
+  "workspace-to-monitor-right" (printf $toMonitor "right")
+  "workspace-to-monitor-next" (printf $toMonitor "next")
+  "workspace-back-and-forth" `'workspace-back-and-forth'`
+  "focus-left" `'focus left'`
+  "focus-down" `'focus down'`
+  "focus-up" `'focus up'`
+  "focus-right" `'focus right'`
+  "cycle-next" `'focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-next'`
+  "cycle-prev" `'focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-prev'`
+  "join-left" `'join-with left'`
+  "join-down" `'join-with down'`
+  "join-up" `'join-with up'`
+  "join-right" `'join-with right'`
+  "move-left" `'move left'`
+  "move-down" `'move down'`
+  "move-up" `'move up'`
+  "move-right" `'move right'`
+  "resize-smaller" `'resize smart -50'`
+  "resize-larger" `'resize smart +50'`
+  "layout" `'layout tiles horizontal vertical'`
+  "fullscreen" `'fullscreen'`
+  "float" `'layout floating tiling'`
+  "mode-service" `'mode service'`
+  "mode-apps" `'mode apps'`
+  "terminal" `'exec-and-forget open -na kitty --args zellij'` }}
+{{- with $rules.profiles.main }}
+{{-   $_ := set $actions "browser" (printf `'exec-and-forget open -na %s --args -P %s '` $browser .) }}
+{{-   $_ := set $actions "mail" (printf `'exec-and-forget open -na %s --args -P %s '` $mailClient .) }}
+{{- end }}
+{{- with $rules.profiles.other }}
+{{-   $_ := set $actions "browser-other" (printf `'exec-and-forget open -na %s --args -P %s '` $browser .) }}
+{{-   $_ := set $actions "mail-other" (printf `'exec-and-forget open -na %s --args -P %s '` $mailClient .) }}
+{{- end }}
+{{- $modifiers := dict "Alt" "alt" "Ctrl" "ctrl" "Mod" "cmd" "Shift" "shift" }}
+{{- $keys := dict "Apostrophe" "quote" "Return" "enter" "Escape" "esc" }}
+{{- range $rules.bindings }}
+{{-   if and (hasKey $actions .action) (ne (get . "os") "linux") }}
+{{-     $parts := splitList "+" .key }}
+{{-     $chord := list }}
+{{- /* aerospace's own order: alt, ctrl, cmd, shift */}}
+{{-     range $modifier := list "Alt" "Ctrl" "Mod" "Shift" }}
+{{-       if has $modifier (initial $parts) }}
+{{-         $chord = append $chord (get $modifiers $modifier) }}
+{{-       end }}
+{{-     end }}
+{{-     $key := last $parts }}
+{{-     $chord = append $chord (get $keys $key | default (lower $key)) }}
+{{ join "-" $chord }} = {{ get $actions .action }}
+{{-   end }}
+{{- end }}
 
-# All possible keys:
-# - Letters.        a, b, c, ..., z
-# - Numbers.        0, 1, 2, ..., 9
-# - Keypad numbers. keypad0, keypad1, keypad2, ..., keypad9
-# - F-keys.         f1, f2, ..., f20
-# - Special keys.   minus, equal, period, comma, slash, backslash, quote, semicolon, backtick,
-#                   leftSquareBracket, rightSquareBracket, space, enter, esc, backspace, tab
-# - Keypad special. keypadClear, keypadDecimalMark, keypadDivide, keypadEnter, keypadEqual,
-#                   keypadMinus, keypadMultiply, keypadPlus
-# - Arrows.         left, down, up, right
-
-# All possible modifiers: cmd, alt, ctrl, shift
-# All possible commands: https://nikitabobko.github.io/AeroSpace/commands
-
-cmd-shift-left = 'join-with left'
-cmd-shift-down = 'join-with down'
-cmd-shift-up = 'join-with up'
-cmd-shift-right = 'join-with right'
-cmd-shift-h = 'join-with left'
-cmd-shift-j = 'join-with down'
-cmd-shift-k = 'join-with up'
-cmd-shift-l = 'join-with right'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#layout
-cmd-comma = 'layout tiles horizontal vertical'
-cmd-period = 'fullscreen'
-cmd-slash = 'layout floating tiling'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#focus
-cmd-left = 'focus left'
-cmd-down = 'focus down'
-cmd-up = 'focus up'
-cmd-right = 'focus right'
-# hjkl as in Neovim; cmd-h also stops macOS hiding the app
-cmd-h = 'focus left'
-cmd-j = 'focus down'
-cmd-k = 'focus up'
-cmd-l = 'focus right'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#move
-alt-cmd-left = 'move left'
-alt-cmd-down = 'move down'
-alt-cmd-up = 'move up'
-alt-cmd-right = 'move right'
-alt-cmd-h = 'move left'
-alt-cmd-j = 'move down'
-alt-cmd-k = 'move up'
-alt-cmd-l = 'move right'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#resize
-cmd-shift-minus = 'resize smart -50'
-cmd-shift-equal = 'resize smart +50'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-cmd-1 = 'workspace 1'
-cmd-2 = 'workspace 2'
-cmd-3 = 'workspace 3'
-cmd-4 = 'workspace 4'
-cmd-5 = 'workspace 5'
-cmd-6 = 'workspace 6'
-cmd-7 = 'workspace 7'
-cmd-8 = 'workspace 8'
-cmd-9 = 'workspace 9'
-cmd-0 = 'workspace 0'
-
-# Like Hyprland, the window moves and the focus stays on this workspace
-# See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
-cmd-shift-1 = 'move-node-to-workspace 1'
-cmd-shift-2 = 'move-node-to-workspace 2'
-cmd-shift-3 = 'move-node-to-workspace 3'
-cmd-shift-4 = 'move-node-to-workspace 4'
-cmd-shift-5 = 'move-node-to-workspace 5'
-cmd-shift-6 = 'move-node-to-workspace 6'
-cmd-shift-7 = 'move-node-to-workspace 7'
-cmd-shift-8 = 'move-node-to-workspace 8'
-cmd-shift-9 = 'move-node-to-workspace 9'
-cmd-shift-0 = 'move-node-to-workspace 0'
-
-cmd-tab = 'workspace-back-and-forth'
-# Cycle the windows of this workspace, as Alt+Tab does on Hyprland; this
-# replaces AltTab
-# See: https://nikitabobko.github.io/AeroSpace/commands#focus
-alt-tab = 'focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-next'
-alt-shift-tab = 'focus --boundaries workspace --boundaries-action wrap-around-the-workspace dfs-prev'
-
-# Each monitor keeps its own workspaces, as on Hyprland: the bindings below move
-# the whole workspace, and sketchybar shows each one on its monitor's bar. The
-# focused workspace does not change, so sketchybar is told explicitly
-# See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
-cmd-shift-tab = ['move-workspace-to-monitor --wrap-around next', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-ctrl-cmd-left = ['move-workspace-to-monitor --wrap-around left', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-ctrl-cmd-right = ['move-workspace-to-monitor --wrap-around right', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-ctrl-cmd-h = ['move-workspace-to-monitor --wrap-around left', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-ctrl-cmd-l = ['move-workspace-to-monitor --wrap-around right', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-# Swap the workspaces shown on the focused monitor and the next one
-cmd-d = 'exec-and-forget ~/.config/aerospace/swap-monitors.sh'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#mode
-cmd-semicolon = 'mode service'
-cmd-esc = 'mode apps'
-
-cmd-enter = 'exec-and-forget open -na kitty --args zellij'
-{{- if eq .place "home" }}
-cmd-e = 'exec-and-forget open -na {{ $browser }} --args -P Personal '
-cmd-shift-e = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-F1 '
-cmd-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal '
-cmd-shift-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-F1 '
-{{- else if eq .place "office" }}
-cmd-e = 'exec-and-forget open -na {{ $browser }} --args -P Enterprise-{{ .company }} '
-cmd-shift-e = 'exec-and-forget open -na {{ $browser }} --args -P Personal '
-cmd-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Enterprise-{{ .company }} '
-cmd-shift-m = 'exec-and-forget open -na {{ $mailClient }} --args -P Personal '
+# Like Hyprland, cmd + [0-9] switches workspace, and cmd + shift + [0-9] moves
+# the window there while the focus stays on this workspace
+{{- range $index, $workspace := $rules.workspaces }}
+{{-   $key := mod (add $index 1) 10 }}
+cmd-{{ $key }} = 'workspace {{ $key }}'
+cmd-shift-{{ $key }} = 'move-node-to-workspace {{ $key }}'
 {{- end }}
 
 # 'service' binding mode declaration.

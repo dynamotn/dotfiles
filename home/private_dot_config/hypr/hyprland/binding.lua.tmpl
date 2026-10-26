@@ -1,25 +1,96 @@
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- /* What each action of the rules' bindings does on Hyprland: a dispatcher,
+       or `exec <Lua string expression>` for a command. An action left out
+       here is not bound */}}
+{{- $actions := dict
+  "quit" `hl.dsp.exit()`
+  "reload" `exec "hyprctl reload"`
+  "launcher" `exec "noctalia msg panel-toggle launcher"`
+  "swap-monitors" `hl.dsp.workspace.swap_monitors({ monitor1 = 0, monitor2 = 1 })`
+  "workspace-to-monitor-left" `hl.dsp.workspace.move({ monitor = "-1" })`
+  "workspace-to-monitor-right" `hl.dsp.workspace.move({ monitor = "+1" })`
+  "focus-left" `hl.dsp.focus({ direction = "left" })`
+  "focus-right" `hl.dsp.focus({ direction = "right" })`
+  "focus-up" `hl.dsp.focus({ direction = "up" })`
+  "focus-down" `hl.dsp.focus({ direction = "down" })`
+  "cycle-next" `hl.dsp.window.cycle_next()`
+  "resize-left" `hl.dsp.window.resize({ x = -100, y = 0, relative = true })`
+  "resize-right" `hl.dsp.window.resize({ x = 100, y = 0, relative = true })`
+  "resize-up" `hl.dsp.window.resize({ x = 0, y = -100, relative = true })`
+  "resize-down" `hl.dsp.window.resize({ x = 0, y = 100, relative = true })`
+  "close" `hl.dsp.window.close()`
+  "fullscreen" `hl.dsp.window.fullscreen()`
+  "float" `hl.dsp.window.float({ action = "toggle" })`
+  "layout" `hl.dsp.layout("togglesplit")`
+  "group" `hl.dsp.group.toggle()`
+  "swap" `hl.dsp.layout("swapnext")`
+  "terminal" `exec app.terminal`
+  "control-center" `exec "noctalia msg panel-toggle control-center"`
+  "notification-dnd" `exec "noctalia msg notification-dnd-toggle"`
+  "notification-latest" `exec "noctalia msg notification-invoke-latest"`
+  "clipboard" `exec "noctalia msg panel-toggle clipboard"`
+  "password" `exec "rbw-pick password"`
+  "totp" `exec "rbw-pick totp"`
+  "lock" `exec "noctalia msg session lock"`
+  "screenshot" `exec "noctalia msg screenshot-region"`
+  "system-monitor" `hl.dsp.workspace.toggle_special("monitor")`
+  "brightness-up" `exec "dymonitor --notify brightness up"`
+  "brightness-down" `exec "dymonitor --notify brightness down"`
+  "contrast-up" `exec "dymonitor --notify contrast up"`
+  "contrast-down" `exec "dymonitor --notify contrast down"`
+  "volume-up" `exec "noctalia msg volume-up"`
+  "volume-down" `exec "noctalia msg volume-down"`
+  "mute" `exec "noctalia msg volume-mute"`
+  "mic-mute" `exec "noctalia msg mic-mute"`
+  "play-pause" `exec "playerctl play-pause"`
+  "pause" `exec "playerctl pause"`
+  "next" `exec "playerctl next"`
+  "previous" `exec "playerctl previous"` }}
+{{- with $rules.profiles.main }}
+{{-   $_ := set $actions "browser" (printf `exec app.browser .. " -P %s"` .) }}
+{{-   $_ := set $actions "mail" (printf `exec app.mail_client .. " -P %s"` .) }}
+{{- end }}
+{{- with $rules.profiles.other }}
+{{-   $_ := set $actions "browser-other" (printf `exec app.browser .. " -P %s"` .) }}
+{{-   $_ := set $actions "mail-other" (printf `exec app.mail_client .. " -P %s"` .) }}
+{{- end }}
+{{- $modifiers := dict "Mod" "SUPER" "Ctrl" "CTRL" "Alt" "ALT" "Shift" "SHIFT" }}
+{{- $keys := dict "Left" "left" "Right" "right" "Up" "up" "Down" "down"
+  "Period" "period" "Comma" "comma" "Slash" "slash" "Semicolon" "semicolon"
+  "Apostrophe" "apostrophe" "Equal" "equal" "Minus" "minus" -}}
+-- Generated from the bindings in home/.chezmoitemplates/wm/rules.yaml.tmpl,
+-- shared with niri, aerospace and OmniWM (docs/key_bindings/hyprland.md)
 local app = require("hyprland.app")
 
 local mainMod = "SUPER"
-local altMod = "ALT"
 
 local function exec(keys, cmd, opts)
   hl.bind(keys, hl.dsp.exec_cmd(cmd), opts)
 end
+{{  range $rules.bindings }}
+{{-   if and (hasKey $actions .action) (ne (get . "os") "darwin") }}
+{{-     $parts := splitList "+" .key }}
+{{-     $chord := list }}
+{{-     range initial $parts }}
+{{-       $chord = append $chord (get $modifiers .) }}
+{{-     end }}
+{{-     $key := last $parts }}
+{{-     $chord = append $chord (get $keys $key | default $key) }}
+{{-     $options := list }}
+{{-     if get . "locked" }}{{ $options = append $options "locked = true" }}{{ end }}
+{{-     if eq (toString (get . "repeat")) "true" }}{{ $options = append $options "repeating = true" }}{{ end }}
+{{-     $options := ternary "" (printf ", { %s }" (join ", " $options)) (empty $options) }}
+{{-     $action := get $actions .action }}
+{{-     if hasPrefix "exec " $action }}
+exec("{{ join " + " $chord }}", {{ trimPrefix "exec " $action }}{{ $options }})
+{{-     else }}
+hl.bind("{{ join " + " $chord }}", {{ $action }}{{ $options }})
+{{-     end }}
+{{-   end }}
+{{- end }}
 
--- Session --
-hl.bind("CTRL + ALT + Delete", hl.dsp.exit())
-exec(mainMod .. " + SHIFT + R", "hyprctl reload")
-
--- Prompt --
-exec(mainMod .. " + F2", "noctalia msg panel-toggle launcher")
-exec(altMod .. " + F2", "noctalia msg panel-toggle launcher")
-
--- Workspace --
 -- Switch workspaces with mainMod + [0-9], move the active window there
--- without following it with mainMod + SHIFT + [0-9]. The list comes from
--- home/.chezmoitemplates/wm/rules.yaml.tmpl, in order
-{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+-- without following it with mainMod + SHIFT + [0-9], in the order of the rules
 {{- $workspaces := list }}
 {{- range $rules.workspaces }}
 {{-   $workspaces = append $workspaces (printf "\"%s\"" (includeTemplate "wm/workspace-name.tmpl" .)) }}
@@ -31,100 +102,15 @@ for i, name in ipairs(workspaces) do
   hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = "name:" .. name, follow = false }))
 end
 
--- Move workspace to another monitor and swap monitors
-hl.bind(mainMod .. " + D", hl.dsp.workspace.swap_monitors({ monitor1 = 0, monitor2 = 1 }))
-hl.bind(mainMod .. " + CTRL + left", hl.dsp.workspace.move({ monitor = "-1" }))
-hl.bind(mainMod .. " + CTRL + right", hl.dsp.workspace.move({ monitor = "+1" }))
-hl.bind(mainMod .. " + CTRL + H", hl.dsp.workspace.move({ monitor = "-1" }))
-hl.bind(mainMod .. " + CTRL + L", hl.dsp.workspace.move({ monitor = "+1" }))
-
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 
--- Window --
--- Move focus with mainMod + arrow keys, or mainMod + hjkl as in Neovim
-hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + down", hl.dsp.focus({ direction = "down" }))
-hl.bind(mainMod .. " + H", hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + K", hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + J", hl.dsp.focus({ direction = "down" }))
-
--- Switch between windows in a workspace
-hl.bind(altMod .. " + Tab", hl.dsp.window.cycle_next())
-
 -- Move/resize windows with mainMod + LMB/RMB and dragging
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
--- Resize the active window with the keyboard
-hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.resize({ x = 100, y = 0, relative = true }))
-hl.bind(mainMod .. " + SHIFT + left", hl.dsp.window.resize({ x = -100, y = 0, relative = true }))
-hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.resize({ x = 0, y = 100, relative = true }))
-hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.resize({ x = 0, y = -100, relative = true }))
-hl.bind(mainMod .. " + SHIFT + L", hl.dsp.window.resize({ x = 100, y = 0, relative = true }))
-hl.bind(mainMod .. " + SHIFT + H", hl.dsp.window.resize({ x = -100, y = 0, relative = true }))
-hl.bind(mainMod .. " + SHIFT + J", hl.dsp.window.resize({ x = 0, y = 100, relative = true }))
-hl.bind(mainMod .. " + SHIFT + K", hl.dsp.window.resize({ x = 0, y = -100, relative = true }))
 
--- Windows
-hl.bind(altMod .. " + F4", hl.dsp.window.close())
-hl.bind(mainMod .. " + period", hl.dsp.window.fullscreen())
-hl.bind(mainMod .. " + slash", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + comma", hl.dsp.layout("togglesplit"))
-hl.bind(mainMod .. " + semicolon", hl.dsp.group.toggle())
-hl.bind(mainMod .. " + apostrophe", hl.dsp.layout("swapnext"))
-
--- 3rd apps --
-exec(mainMod .. " + Return", app.terminal)
-{{- if eq .place "home" }}
-exec(mainMod .. " + E", app.browser .. " -P Personal")
-exec(mainMod .. " + SHIFT + E", app.browser .. " -P Enterprise-F1")
-exec(mainMod .. " + M", app.mail_client .. " -P Personal")
-exec(mainMod .. " + SHIFT + M", app.mail_client .. " -P Enterprise-F1")
-{{- else if eq .place "office" }}
-exec(mainMod .. " + E", app.browser .. " -P Enterprise-{{ .company }}")
-exec(mainMod .. " + SHIFT + E", app.browser .. " -P Personal")
-exec(mainMod .. " + M", app.mail_client .. " -P Enterprise-{{ .company }}")
-exec(mainMod .. " + SHIFT + M", app.mail_client .. " -P Personal")
-{{- end }}
-exec(mainMod .. " + N", "noctalia msg panel-toggle control-center")
-exec(mainMod .. " + SHIFT + N", "noctalia msg notification-dnd-toggle")
-exec(mainMod .. " + ALT + N", "noctalia msg notification-invoke-latest")
-exec(mainMod .. " + V", "noctalia msg panel-toggle clipboard")
--- Bitwarden through noctalia's dmenu; rbw-pick types the pick into the window
-exec(mainMod .. " + P", "rbw-pick password")
-exec(mainMod .. " + O", "rbw-pick totp")
-exec(mainMod .. " + Escape", "noctalia msg session lock")
-exec(mainMod .. " + S", "noctalia msg screenshot-region")
--- Drop-down system monitor; the workspace rule starts btop on first use
-hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special("monitor"))
-
--- External monitors --
--- Over DDC/CI through dymonitor, on every monitor that answers. Not repeating:
--- each step takes the bus for a moment, and dymonitor queues the next one
-exec(mainMod .. " + ALT + equal", "dymonitor --notify brightness up")
-exec(mainMod .. " + ALT + minus", "dymonitor --notify brightness down")
-exec(mainMod .. " + ALT + SHIFT + equal", "dymonitor --notify contrast up")
-exec(mainMod .. " + ALT + SHIFT + minus", "dymonitor --notify contrast down")
--- Switch the input source with mainMod + ALT + [1-9]. The list comes from
--- home/.chezmoitemplates/wm/rules.yaml.tmpl, in order
+-- Switch the input source of the external monitors with mainMod + ALT + [1-9]
 {{- range $index, $input := $rules.monitorInputs }}
 exec(mainMod .. " + ALT + {{ add $index 1 }}", "dymonitor --notify input {{ $input }}")
-{{- end }}
-
-{{- if .hasSound }}
-
--- Multimedia --
--- Through noctalia, so its OSD follows the change
-exec("XF86AudioRaiseVolume", "noctalia msg volume-up", { locked = true, repeating = true })
-exec("XF86AudioLowerVolume", "noctalia msg volume-down", { locked = true, repeating = true })
-exec("XF86AudioMute", "noctalia msg volume-mute", { locked = true })
-exec("XF86AudioMicMute", "noctalia msg mic-mute", { locked = true })
-exec("XF86AudioPlay", "playerctl play-pause")
-exec("XF86AudioPause", "playerctl pause")
-exec("XF86AudioNext", "playerctl next")
-exec("XF86AudioPrev", "playerctl previous")
 {{- end }}
