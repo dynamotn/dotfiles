@@ -408,6 +408,11 @@ Inside zellij these float; outside it they land in a background session named
 `dyai`, shown in a kitty tab when nothing is attached to it. Without zellij,
 a kitty tab. `dyai-hunk` opens through the same path.
 
+**From an agent.** `dyai mcp` serves the crew as tools too: `crew_run`
+(always detached; returns the id), `crew_tasks`, `crew_review` and `crew_fix`
+(detached), `crew_merge`, `crew_drop` and `crew_logs`. Every id, agent and plan
+path is checked before anything runs; a prompt is passed as one string.
+
 **Lean workers.** `global.crew.profile: lean` (the default) keeps each worker
 small. Claude gets `--setting-sources project,local` plus the permission
 rules, sandbox and attribution of your `settings.json`, your `CLAUDE.md` and
