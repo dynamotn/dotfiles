@@ -198,6 +198,9 @@ global:
     timeout: 1800
     cooldown: 900
     require_review: true
+    # lean: a worker loads the policy and the agent rules, not the plugins
+    # and MCP servers (claude: ~57k to ~30k input tokens per call).
+    profile: lean
     # A zellij pane per started worker (its log) and per review (hunk).
     panes: auto
     fences:
