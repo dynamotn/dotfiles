@@ -39,7 +39,7 @@ local function typeSecret(subcommand)
 end
 
 hs.hotkey.bind({ 'cmd' }, 'f2', deeplink('vicinae://toggle'))
-hs.hotkey.bind({ 'cmd' }, 'j', deeplink('vicinae://launch/clipboard/history'))
+hs.hotkey.bind({ 'cmd', 'ctrl' }, 'v', deeplink('vicinae://launch/clipboard/history'))
 hs.hotkey.bind({ 'cmd' }, 'p', typeSecret('password'))
 hs.hotkey.bind({ 'cmd' }, 'o', typeSecret('totp'))
 
@@ -78,9 +78,9 @@ end
 hs.hotkey.bind({ 'cmd' }, 'return', open('-na', 'kitty', '--args', 'zellij'))
 {{-   if $profile }}
 hs.hotkey.bind({ 'cmd' }, 'e', open('-na', '{{ $browser }}', '--args', '-P', '{{ $profile }}'))
-hs.hotkey.bind({ 'cmd' }, 'q', open('-na', '{{ $browser }}', '--args', '-P', '{{ $otherProfile }}'))
+hs.hotkey.bind({ 'cmd', 'shift' }, 'e', open('-na', '{{ $browser }}', '--args', '-P', '{{ $otherProfile }}'))
 hs.hotkey.bind({ 'cmd' }, 'm', open('-na', '{{ $mailClient }}', '--args', '-P', '{{ $profile }}'))
-hs.hotkey.bind({ 'cmd' }, 'k', open('-na', '{{ $mailClient }}', '--args', '-P', '{{ $otherProfile }}'))
+hs.hotkey.bind({ 'cmd', 'shift' }, 'm', open('-na', '{{ $mailClient }}', '--args', '-P', '{{ $otherProfile }}'))
 {{-   end }}
 
 -- At login, Hammerspoon starts OmniWM and the usual applications. Every

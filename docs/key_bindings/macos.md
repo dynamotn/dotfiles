@@ -83,7 +83,7 @@ Bound by Hammerspoon, since Vicinae has no global hotkey of its own on macOS.
 | Keybind | Action |
 |---------|--------|
 | `Command+F2` | Toggle Vicinae |
-| `Command+J` | Clipboard history |
+| `Ctrl+Command+V` | Clipboard history |
 | `Command+P` | Pick a Bitwarden entry and type its password |
 | `Command+O` | Pick a Bitwarden entry and type its TOTP code |
 

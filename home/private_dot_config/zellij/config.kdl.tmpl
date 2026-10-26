@@ -1,6 +1,10 @@
-{{- $defaultKeybind := "Ctrl s" }}
+{{- /* Alt z, or Alt x for a zellij nested inside one (a container, ssh):
+       both free in Neovim, fish, readline, kitty and the TUIs here, unlike
+       Ctrl s (save in Neovim) and Ctrl a (start of line), and z and x sit
+       in the same place in QWERTY and Colemak. */}}
+{{- $defaultKeybind := "Alt z" }}
 {{- if eq .kind "container" }}
-  {{- $defaultKeybind = "Ctrl a" }}
+  {{- $defaultKeybind = "Alt x" }}
 {{- end -}}
 {{- $top := merge . (dict "zellijKeybind" $defaultKeybind) }}
 {{- includeTemplate "zellij/config.kdl.tmpl" $top -}}

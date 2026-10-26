@@ -81,18 +81,18 @@ hl.bind(mainMod .. " + apostrophe", hl.dsp.layout("swapnext"))
 exec(mainMod .. " + Return", app.terminal)
 {{- if eq .place "home" }}
 exec(mainMod .. " + E", app.browser .. " -P Personal")
-exec(mainMod .. " + Q", app.browser .. " -P Enterprise-F1")
+exec(mainMod .. " + SHIFT + E", app.browser .. " -P Enterprise-F1")
 exec(mainMod .. " + M", app.mail_client .. " -P Personal")
 exec(mainMod .. " + SHIFT + M", app.mail_client .. " -P Enterprise-F1")
 {{- else if eq .place "office" }}
 exec(mainMod .. " + E", app.browser .. " -P Enterprise-{{ .company }}")
-exec(mainMod .. " + Q", app.browser .. " -P Personal")
+exec(mainMod .. " + SHIFT + E", app.browser .. " -P Personal")
 exec(mainMod .. " + M", app.mail_client .. " -P Enterprise-{{ .company }}")
 exec(mainMod .. " + SHIFT + M", app.mail_client .. " -P Personal")
 {{- end }}
 exec(mainMod .. " + N", "noctalia msg panel-toggle control-center")
 exec(mainMod .. " + SHIFT + N", "noctalia msg notification-dnd-toggle")
-exec(altMod .. " + N", "noctalia msg notification-invoke-latest")
+exec(mainMod .. " + ALT + N", "noctalia msg notification-invoke-latest")
 exec(mainMod .. " + V", "noctalia msg panel-toggle clipboard")
 -- Bitwarden through noctalia's dmenu; rbw-pick types the pick into the window
 exec(mainMod .. " + P", "rbw-pick password")

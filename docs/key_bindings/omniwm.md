@@ -65,8 +65,8 @@ OmniWM runs no commands, so Hammerspoon binds these:
 |---------|--------|
 | `Super+Return` | Open terminal (kitty + zellij) |
 | `Super+E` | Browser, personal profile at home / enterprise profile at the office |
-| `Super+Q` | Browser, the other profile |
+| `Super+Shift+E` | Browser, the other profile |
 | `Super+M` | Mail client, personal profile at home / enterprise profile at the office |
-| `Super+K` | Mail client, the other profile |
+| `Super+Shift+M` | Mail client, the other profile |
 
 ---

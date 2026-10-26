@@ -74,18 +74,18 @@ binds {
   Mod+Return { spawn "kitty" "zellij"; }
 {{- if eq .place "home" }}
   Mod+E { spawn "{{ $browser }}" "-P" "Personal"; }
-  Mod+Q { spawn "{{ $browser }}" "-P" "Enterprise-F1"; }
+  Mod+Shift+E { spawn "{{ $browser }}" "-P" "Enterprise-F1"; }
   Mod+M { spawn "{{ $mailClient }}" "-P" "Personal"; }
   Mod+Shift+M { spawn "{{ $mailClient }}" "-P" "Enterprise-F1"; }
 {{- else if eq .place "office" }}
   Mod+E { spawn "{{ $browser }}" "-P" "Enterprise-{{ .company }}"; }
-  Mod+Q { spawn "{{ $browser }}" "-P" "Personal"; }
+  Mod+Shift+E { spawn "{{ $browser }}" "-P" "Personal"; }
   Mod+M { spawn "{{ $mailClient }}" "-P" "Enterprise-{{ .company }}"; }
   Mod+Shift+M { spawn "{{ $mailClient }}" "-P" "Personal"; }
 {{- end }}
   Mod+N { spawn-sh "noctalia msg panel-toggle control-center"; }
   Mod+Shift+N { spawn-sh "noctalia msg notification-dnd-toggle"; }
-  Alt+N { spawn-sh "noctalia msg notification-invoke-latest"; }
+  Mod+Alt+N { spawn-sh "noctalia msg notification-invoke-latest"; }
   Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
   // Bitwarden through noctalia's dmenu; rbw-pick types the pick into the window
   Mod+P { spawn-sh "rbw-pick password"; }

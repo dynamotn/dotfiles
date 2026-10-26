@@ -1,3 +1,4 @@
-{{- $defaultKeybind := "Ctrl a" }}
+{{- /* Nested inside the local zellij (Alt z), so it takes Alt x; see config.kdl.tmpl */}}
+{{- $defaultKeybind := "Alt x" }}
 {{- $top := merge . (dict "zellijKeybind" $defaultKeybind) }}
 {{- includeTemplate "zellij/config.kdl.tmpl" $top -}}
