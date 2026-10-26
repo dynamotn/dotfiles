@@ -333,6 +333,71 @@ function dyai::setup_skills {
 }
 
 #######################################
+# @description Bring installed global skills up to date with upstream, by content hash
+# @arg $1 string `apply`, or `check` to only report what would change
+# @stdout One line per skill that needs attention, then a count
+#######################################
+function dyai::skills_update {
+  local check
+  dybatpho::expect_args check -- "$@"
+  local skill name target recorded current upstream fetched backup reported=0
+  # shellcheck disable=SC2312 # a bad config read yields no rows, which is a safe no-op
+  while IFS= read -r skill; do
+    [[ -n "${skill}" ]] || continue
+    name="${skill##*@}"
+    target="${SKILLS_DIR}/${name}"
+    # Not installed yet: `dyai install` does that.
+    dybatpho::is dir "${target}" || continue
+    recorded="$(dyai::installed_hash skills "${name}")"
+    current="$(dyai::dir_hash "${target}")"
+    if [[ -n "${recorded}" && "${current}" != "${recorded}" ]]; then
+      printf 'skill %s: LOCAL EDITS kept; delete %s to take upstream\n' "${name}" "${target}"
+      reported=$((reported + 1))
+      continue
+    fi
+    # Upstream, installed into a throwaway HOME so the real one is untouched.
+    dybatpho::create_temp_dir fetched "dyai-skill"
+    if ! (HOME="${fetched}" dyai::run_external bunx "${SKILLS_CLI}" add "${skill}" -g -y) &> /dev/null \
+      || ! dybatpho::is dir "${fetched}/.agents/skills/${name}"; then
+      dybatpho::warn "skill ${name}: could not fetch upstream"
+      continue
+    fi
+    upstream="$(dyai::dir_hash "${fetched}/.agents/skills/${name}")"
+    if [[ -z "${recorded}" ]]; then
+      # An edit cannot be told from an old copy without a record: keep it.
+      if [[ "${current}" == "${upstream}" ]]; then
+        dyai::installed_hash skills "${name}" "${current}"
+      else
+        printf 'skill %s: differs from upstream, no record; kept\n' "${name}"
+        reported=$((reported + 1))
+      fi
+      continue
+    fi
+    [[ "${upstream}" != "${recorded}" ]] || continue
+    reported=$((reported + 1))
+    if [[ "${check}" == check ]]; then
+      printf 'skill %s: update available\n' "${name}"
+      continue
+    fi
+    # Outside the skills dir: a copy there would load as a second skill.
+    backup="${HOME}/.cache/dyai/backup/skills/${name}.$(date +%s)"
+    dybatpho::ensure_dir "${backup%/*}" > /dev/null
+    if ! mv -- "${target}" "${backup}"; then
+      dybatpho::warn "skill ${name}: could not move the old copy aside; left as it is"
+      continue
+    fi
+    if ! cp -R -- "${fetched}/.agents/skills/${name}" "${target}"; then
+      mv -- "${backup}" "${target}" || true
+      dybatpho::warn "skill ${name}: could not install the new copy; the old one is back"
+      continue
+    fi
+    dyai::installed_hash skills "${name}" "${upstream}"
+    printf 'skill %s: updated; the old copy is in %s\n' "${name}" "${backup}"
+  done < <(dyai::config_json '.global.skills // []' | jq -r '.[]')
+  ((reported == 0)) || printf '%s skill(s) reported\n' "${reported}"
+}
+
+#######################################
 # @description Print every Claude configuration directory of this machine
 # @noargs
 # @stdout One directory per line, the default one first

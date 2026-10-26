@@ -1180,3 +1180,92 @@ function _front {
   assert_line --regexp '^\| opencode \|.* M \|$'
   assert_line --regexp '^\| copilot \|.* M \|$'
 }
+
+# A bunx stub that installs skill alpha into $HOME/.agents/skills, with the
+# content of ${BATS_TEST_TMPDIR}/upstream (the "upstream" version).
+function _skill_upstream {
+  printf '%s\n' "${1}" > "${BATS_TEST_TMPDIR}/upstream"
+  # shellcheck disable=SC2016 # expands when the stub runs
+  printf '#!/usr/bin/env bash\nmkdir -p "$HOME/.agents/skills/alpha"\ncp "%s" "$HOME/.agents/skills/alpha/SKILL.md"\n' \
+    "${BATS_TEST_TMPDIR}/upstream" > "${HOME}/.local/bin/bunx"
+  chmod +x "${HOME}/.local/bin/bunx"
+  _write_config
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  SKILLS_DIR="${HOME}/.agents/skills"
+}
+
+@test "skills_update is silent when a skill matches upstream" {
+  _skill_upstream v1
+  dyai::setup_skills
+  run dyai::skills_update apply
+  assert_success
+  refute_output --partial "skill alpha"
+}
+
+@test "skills_update check reports an update and changes nothing" {
+  _skill_upstream v1
+  dyai::setup_skills
+  printf 'v2\n' > "${BATS_TEST_TMPDIR}/upstream"
+  run dyai::skills_update check
+  assert_success
+  assert_output --partial "skill alpha: update available"
+  run cat "${HOME}/.agents/skills/alpha/SKILL.md"
+  assert_output "v1"
+}
+
+@test "skills_update takes an upstream change and keeps a backup" {
+  _skill_upstream v1
+  dyai::setup_skills
+  printf 'v2\n' > "${BATS_TEST_TMPDIR}/upstream"
+  run dyai::skills_update apply
+  assert_success
+  assert_output --partial "skill alpha: updated"
+  run cat "${HOME}/.agents/skills/alpha/SKILL.md"
+  assert_output "v2"
+  local backup
+  backup="$(find "${HOME}/.cache/dyai/backup/skills" -mindepth 1 -maxdepth 1 -name 'alpha.*')"
+  [[ -n "${backup}" ]] || fail "no backup"
+  run cat "${backup}/SKILL.md"
+  assert_output "v1"
+  local want
+  want="$(dyai::dir_hash "${HOME}/.agents/skills/alpha")"
+  run dyai::installed_hash skills alpha
+  assert_output "${want}"
+  # No backup beside the skill, where a loader would read it as a second skill.
+  run find "${HOME}/.agents/skills" -maxdepth 1 -name 'alpha?*'
+  assert_output ""
+}
+
+@test "skills_update keeps a locally edited skill" {
+  _skill_upstream v1
+  dyai::setup_skills
+  printf 'mine\n' >> "${HOME}/.agents/skills/alpha/SKILL.md"
+  printf 'v2\n' > "${BATS_TEST_TMPDIR}/upstream"
+  run dyai::skills_update apply
+  assert_output --partial "skill alpha: LOCAL EDITS kept"
+  grep -qx mine "${HOME}/.agents/skills/alpha/SKILL.md"
+}
+
+@test "skills_update records an unrecorded copy that matches and keeps one that differs" {
+  _skill_upstream v1
+  mkdir -p "${HOME}/.agents/skills/alpha"
+  printf 'v1\n' > "${HOME}/.agents/skills/alpha/SKILL.md"
+  run dyai::skills_update apply
+  refute_output --partial "skill alpha"
+  [[ -s "${HOME}/.cache/dyai/installed/skills/alpha.sha256" ]]
+  rm "${HOME}/.cache/dyai/installed/skills/alpha.sha256"
+  printf 'old\n' > "${HOME}/.agents/skills/alpha/SKILL.md"
+  run dyai::skills_update apply
+  assert_output --partial "skill alpha: differs from upstream, no record"
+  run cat "${HOME}/.agents/skills/alpha/SKILL.md"
+  assert_output "old"
+}
+
+@test "skills_update warns when upstream cannot be fetched" {
+  _skill_upstream v1
+  dyai::setup_skills
+  printf '#!/usr/bin/env bash\nexit 1\n' > "${HOME}/.local/bin/bunx"
+  run dyai::skills_update apply
+  assert_success
+  assert_output --partial "could not fetch"
+}

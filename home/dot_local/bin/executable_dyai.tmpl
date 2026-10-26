@@ -33,6 +33,7 @@ function _spec_main {
   dybatpho::opts::cmd logs _spec_logs
   dybatpho::opts::cmd selftest _spec_selftest
   dybatpho::opts::cmd eval _spec_eval
+  dybatpho::opts::cmd update _spec_update
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
@@ -210,6 +211,16 @@ function _spec_eval {
 }
 
 #######################################
+# @description Spec of update command
+# @noargs
+#######################################
+function _spec_update {
+  dybatpho::opts::setup "Update installed skills whose upstream changed; keep local edits" UPDATE_ARGS action:"_update"
+  dybatpho::opts::flag "Only report what would change" CHECK --check -n on:true off:false init:="false"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_update"
+}
+
+#######################################
 # @description Run the global install
 # @noargs
 #######################################
@@ -339,14 +350,14 @@ function _logs {
 # dyshellint disable=SC2154 SELFTEST_ARGS is assigned by dybatpho::opts from _spec_selftest
 function _selftest {
   local -a agents=("${SELFTEST_ARGS[@]}")
-  local agent rc=0
+  local name rc=0
   if ((${#agents[@]} == 0)); then
-    for agent in claude codex gemini opencode copilot; do
-      ! dybatpho::is command "${agent}" || agents+=("${agent}")
+    for name in claude codex gemini opencode copilot; do
+      ! dybatpho::is command "${name}" || agents+=("${name}")
     done
   fi
-  for agent in "${agents[@]}"; do
-    dyai_crew::selftest "${agent}" || rc=1
+  for name in "${agents[@]}"; do
+    dyai_crew::selftest "${name}" || rc=1
   done
   return "${rc}"
 }
@@ -358,6 +369,18 @@ function _selftest {
 # dyshellint disable=SC2154 AGENT and EVAL_ARGS are assigned by dybatpho::opts from _spec_eval
 function _eval {
   dyai_crew::eval "${AGENT}" "${EVAL_ARGS[@]}"
+}
+
+#######################################
+# @description Update the global skills
+# @noargs
+#######################################
+# dyshellint disable=SC2154 CHECK is assigned by dybatpho::opts from _spec_update
+function _update {
+  dyai::paths
+  local mode=apply
+  [[ "${CHECK}" != true ]] || mode=check
+  dyai::skills_update "${mode}"
 }
 
 dybatpho::generate_from_spec _spec_main "$@"

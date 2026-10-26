@@ -34,6 +34,7 @@ plus a registry of opt-in presets a project pulls in on demand.
 | `dyai rm <name>` | Drop a preset from this project and remove the files it added. |
 | `dyai mcp` | Serve `ls`, `use` and `rm` as MCP tools on stdio, so an agent can pull in a preset itself. |
 | `dyai status [--quiet]` | Report what drifted between the config and each installed agent: missing skills, plugins, MCP servers, hooks or policy files, and files you edited locally. Claude runs `dyai status --quiet` at every session start; it prints nothing when everything matches. |
+| `dyai update [--check]` | Update the installed global skills whose upstream changed, by content hash. A skill you edited is kept and named; one with no recorded hash that differs from upstream is kept too. The old copy goes to `~/.cache/dyai/backup/skills/`. `--check` only reports. |
 | `dyai enforcement` | Print what each agent actually enforces of the shared config (see [Permissions in other agents](#permissions-in-other-agents)). |
 | `dyai run`, `tasks`, `review`, `fix`, `merge`, `drop`, `logs` | Run a task on a headless agent in its own worktree, review it with another provider, and merge it (see [Crew](#crew)). |
 
