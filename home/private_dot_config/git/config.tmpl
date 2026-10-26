@@ -256,21 +256,10 @@
         # Include config file from enterprise {{ . }} projects
         path = ~/Working/enterprise/{{ . }}/.gitconfig
 {{- end }}
-{{- if .preferGitSSH }}
-[url "git@github.com:"]
-        # Prefer SSH than HTTPS for github
-        insteadOf = https://github.com/
-[url "git@gitlab.com:"]
-        # Prefer SSH than HTTPS for gitlab
-        insteadOf = https://gitlab.com/
-{{- else }}
-[url "https://github.com/"]
-        # Prefer HTTPS than for github
-        insteadOf = git@github.com:
-[url "https://gitlab.com/"]
-        # Prefer HTTPS than for gitlab
-        insteadOf = git@gitlab.com:
-{{- end }}
+[include]
+        # SSH or HTTPS, GitLab or its GitHub mirror: whichever this network
+        # allows, as dynet found on the last network change
+        path = ~/.local/state/dynet/git.config
 {{- if eq .kind "mobile" "tablet" }}
 [safe]
         directory = /storage/emulated/0/Documents/DyBrain

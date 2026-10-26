@@ -6,3 +6,12 @@ export https_proxy={{ . | quote}}
 {{- with $secret.noProxyAddresses }}
 export no_proxy={{ join "," . | quote }}
 {{- end }}
+{{- if $secret.httpProxy }}
+# The NetworkManager dispatcher 90-dynet overrides the proxy above with the
+# one of the network docker starts on, empty where it is out of reach
+if [ -r /run/dynet/proxy.env ]; then
+  set -a
+  . /run/dynet/proxy.env
+  set +a
+fi
+{{- end }}

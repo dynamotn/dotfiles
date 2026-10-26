@@ -1,0 +1,21 @@
+#!/bin/sh
+# dyshellint disable=BSG030 apt runs it for every host it fetches from, sh keeps it cheap
+# dyshellint disable=BSG031 sh has no pipefail, and it pipes nothing
+# @file dynet-proxy
+# @brief Tell apt which proxy the network the machine is on allows
+# @description The Proxy-Auto-Detect command of apt.conf.d/20proxy. It prints
+# the proxy the NetworkManager dispatcher 90-dynet found for this network,
+# DIRECT when that is none, and the proxy of the machine on one without the
+# dispatcher, where nothing is known of the network.
+{{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
+set -eu
+
+# dyshellint disable=SC2292 POSIX sh has no [[ ]]
+if [ -r /run/dynet/proxy.env ]; then
+  http_proxy=""
+  # shellcheck source=/dev/null # written by the dispatcher at run time
+  . /run/dynet/proxy.env
+  printf '%s\n' "${http_proxy:-DIRECT}"
+else
+  printf '%s\n' {{ $secret.httpProxy | default "DIRECT" | squote }}
+fi

@@ -154,7 +154,6 @@ machines:
     hasBluetooth: false
     hasWifi: true
     preferGitSSH: true
-    blockedGitlab: true
     darkMode: false
 EOF
   # Without a terminal, a question left would fail the render.
@@ -162,7 +161,7 @@ EOF
   assert_success
   local config="${output}"
   local query='.data | [.place, .kind, .company, .guiWinManager, .browser, .mailClient,'
-  query+=' .terminalMultiplexer, .darkMode, .blockedGitlab]'
+  query+=' .terminalMultiplexer, .darkMode, .hasWifi]'
   run yq -o=j -I=0 "${query}" <<< "${config}"
   assert_output '["office","laptop","T1","N","F","","T",false,true]'
   run yq -o=j -I=0 '.data.decryptEnterprise' <<< "${config}"
@@ -255,17 +254,26 @@ EOF
   assert_success
 }
 
-@test "setup.sh exports the proxy and its exceptions from the machine secrets" {
-  # `// empty` is jq, not yq: the parse error was hidden, so no_proxy was
-  # never exported.
-  cat > "${HOME}/.local/bin/chezmoi" << 'EOF'
+@test "setup.sh fits git and the proxy to the network before the full apply" {
+  # chezmoi applies dynet's config: a proxy on a closed port, so this network
+  # cannot reach it. curl, standing for GitLab, answers nothing either.
+  cat > "${HOME}/.local/bin/chezmoi" << EOF
 #!/bin/sh
-printf '{"httpProxy":"http://proxy:3128","noProxyAddresses":["localhost","10.0.0.0/8"]}\n'
+printf 'chezmoi %s\n' "\$*" >> "${CALL_LOG}"
+mkdir -p "${HOME}/.config/dynet"
+printf '{"preferGitSSH":false,"httpProxy":"http://127.0.0.1:9","noProxyAddresses":[],"mirrors":[]}\n' \
+  > "${HOME}/.config/dynet/config.json"
 EOF
-  chmod +x "${HOME}/.local/bin/chezmoi"
-  run_setup '_export_proxy; printf "%s|%s|%s\n" "${http_proxy}" "${https_proxy}" "${no_proxy}"'
+  printf '#!/bin/sh\nexit 7\n' > "${HOME}/.local/bin/curl"
+  chmod +x "${HOME}/.local/bin/chezmoi" "${HOME}/.local/bin/curl"
+  # dyshellint disable=SC2016 expanded by the shell run_setup starts
+  local snippet='_detect_network; printf "%s|" "${http_proxy-unset}";'
+  snippet+=' cat "${HOME}/.local/state/dynet/proxy.fish"'
+  http_proxy="http://stale:1" run_setup "${snippet}"
   assert_success
-  assert_output "http://proxy:3128|http://proxy:3128|localhost,10.0.0.0/8"
+  assert_output "unset|set -e http_proxy https_proxy no_proxy"
+  run cat "${CALL_LOG}"
+  assert_output "chezmoi apply ${HOME}/.config/dynet ${HOME}/.config/git/config"
 }
 
 @test "setup.sh skips the system layer inside a container unless asked" {

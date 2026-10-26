@@ -25,5 +25,4 @@ data:
   hasBluetooth: true
   hasWifi: true
   preferGitSSH: false
-  blockedGitlab: false
   darkMode: true

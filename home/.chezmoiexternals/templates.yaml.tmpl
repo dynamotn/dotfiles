@@ -1,14 +1,9 @@
-{{- $github := "git@github.com:" }}
 {{- $gitlab := "git@gitlab.com:" }}
 {{- if not .preferGitSSH }}
-{{-   $github = "https://github.com/" }}
 {{-   $gitlab = "https://gitlab.com/" }}
 {{- end }}
 .local/share/projekt:
   type: git-repo
-  {{- if .blockedGitlab }}
-  url: {{ $github }}dynamo-config/projekt-templates.git
-  {{- else }}
+  {{- /* dynet sends it to its GitHub mirror when the network blocks GitLab */}}
   url: {{ $gitlab }}dynamotn/projekt-templates.git
-  {{- end }}
   refreshPeriod: 168h

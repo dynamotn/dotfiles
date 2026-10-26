@@ -55,7 +55,6 @@ data:
   terminalMultiplexer: "Z"
   darkMode: true
   preferGitSSH: true
-  blockedGitlab: false
   decryptPersonal: false
   decryptEnterprise: []
   browserEnterpriseProfiles: []

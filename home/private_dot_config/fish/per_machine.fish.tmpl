@@ -46,9 +46,16 @@ set -gx MISE_PREFER_OFFLINE 1
 {{- end }}
 
 {{- if $secret.httpProxy }}
-set -gx http_proxy {{ $secret.httpProxy | quote }}
-set -gx https_proxy {{ $secret.httpProxy | quote }}
-{{- end }}
-{{- with $secret.noProxyAddresses }}
-set -gx no_proxy {{ join "," . | quote }}
+
+# The proxy follows the network: dynet rewrites proxy.fish on every network
+# change, and every running shell picks it up at its next prompt
+set -g __dynet_proxy_file $HOME/.local/state/dynet/proxy.fish
+function __dynet_proxy --on-event fish_prompt
+    test -r $__dynet_proxy_file; or return
+    set -l mtime (path mtime $__dynet_proxy_file)
+    test "$mtime" = "$__dynet_proxy_mtime"; and return
+    set -g __dynet_proxy_mtime $mtime
+    source $__dynet_proxy_file
+end
+__dynet_proxy
 {{- end }}

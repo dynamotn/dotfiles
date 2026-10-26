@@ -1,0 +1,14 @@
+#!{{ .bash }}
+# @file dynet
+# @brief Fit git and the proxy to the network the machine is on now
+# @description Run on every network change by the NetworkManager dispatcher on
+# Linux and by Hammerspoon on macOS, after every apply, and by hand. The logic
+# lives in `scripts/lib/network.sh`, shared with setup.sh and the bats tests.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules network file
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/network.sh"
+
+# NetworkManager and Hammerspoon start it with a bare PATH, without yq.
+PATH="{{ .chezmoi.homeDir }}/.local/bin:{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:{{ end }}${PATH}"
+network::detect "{{ .chezmoi.homeDir }}/.config/dynet/config.json" \
+  "{{ .chezmoi.homeDir }}/.local/state/dynet"

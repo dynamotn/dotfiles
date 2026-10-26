@@ -30,7 +30,6 @@ machines:
     hasBluetooth: true
     hasWifi: true
     preferGitSSH: true
-    blockedGitlab: false
     darkMode: true
   l30n4rd0d4v1nc1:
     place: "home"
@@ -57,7 +56,6 @@ machines:
     hasBluetooth: true
     hasWifi: false
     preferGitSSH: true
-    blockedGitlab: false
     darkMode: true
   n0t3:
     place: "home"
@@ -73,7 +71,6 @@ machines:
     hasBluetooth: false
     hasWifi: true
     preferGitSSH: true
-    blockedGitlab: false
     darkMode: false
   tr4nhun9d40:
     place: "home"
@@ -86,7 +83,6 @@ machines:
     hasBluetooth: false
     hasWifi: true
     preferGitSSH: true
-    blockedGitlab: false
     darkMode: true
   v0n9uy3n914p:
     place: "home"
@@ -113,7 +109,6 @@ machines:
     hasBluetooth: true
     hasWifi: true
     preferGitSSH: true
-    blockedGitlab: false
     darkMode: true
   vd10p:
     place: "office"
@@ -137,7 +132,6 @@ machines:
     hasBluetooth: false
     hasWifi: false
     preferGitSSH: false
-    blockedGitlab: true
     darkMode: true
   c1f1:
     place: "cloud"
@@ -156,5 +150,4 @@ machines:
     hasBluetooth: false
     hasWifi: false
     preferGitSSH: false
-    blockedGitlab: true
     darkMode: true

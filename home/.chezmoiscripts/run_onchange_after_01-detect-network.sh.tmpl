@@ -1,0 +1,13 @@
+#!{{ .bash }}
+# @file 01-detect-network.sh
+# @brief Fit git and the proxy to the network after dynet changed
+# @description Run dynet once its config or its library changed, before the
+# hooks that clone or pull, so that git/config already includes the rewrites
+# of this network. Later network changes run it on their own.
+# config hash: {{ include "private_dot_config/dynet/private_config.json.tmpl" | sha256sum }}
+# library hash: {{ joinPath .chezmoi.sourceDir "../scripts/lib/network.sh" | include | sha256sum }}
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+dybatpho::header "Fit git and the proxy to the network"
+"{{ .chezmoi.homeDir }}/.local/bin/dynet"
