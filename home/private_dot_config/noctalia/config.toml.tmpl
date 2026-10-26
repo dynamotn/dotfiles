@@ -52,8 +52,8 @@ follow_focused_output = true
 [lockscreen]
 enabled = true
 
-# Away from home the screen locks itself, goes dark and then suspends; at home
-# nothing happens on idle
+# Away from home the screen locks itself and goes dark; at home nothing happens
+# on idle. Never suspend on idle, so the network stays up for SSH and downloads
 {{- $awayFromHome := ne .place "home" }}
 [idle.behavior.lock]
 enabled = {{ $awayFromHome }}
@@ -66,7 +66,7 @@ timeout = 300
 action = "screen_off"
 
 [idle.behavior.suspend]
-enabled = {{ $awayFromHome }}
+enabled = false
 timeout = 540
 action = "suspend"
 
