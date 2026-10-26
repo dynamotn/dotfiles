@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# @file dyai-selftest-probe
+# @brief Harmless probe command `dyai selftest` asks an agent to run
+# @description Writes an empty marker file named after its first argument
+# (`allow` or `deny`) into the directory given second, and nothing else. The
+# shared policy denies `dyai-selftest-probe deny *`, so the `deny` marker shows
+# whether an agent enforced that rule.
+set -euo pipefail
+case "${1-}" in
+  allow | deny) ;;
+  *)
+    echo "usage: dyai-selftest-probe allow|deny DIR" >&2
+    exit 2
+    ;;
+esac
+mkdir -p -- "${2:?marker directory}"
+: > "$2/$1"

@@ -993,3 +993,116 @@ function dyai_crew::drop {
     dyai_crew::record "${id}" "${fields}"
   done
 }
+
+#######################################
+# @description Print the enforcement cell of one agent's shell rules
+# @arg $1 string Agent
+# @stdout `M`, `M deny`, `S` or `-`
+#######################################
+function __dyai_crew_shell_cell {
+  local agent
+  dybatpho::expect_args agent -- "$@"
+  local name shell
+  # shellcheck disable=SC2312 # the table is static data; no row means not carried
+  while IFS='|' read -r _ name _ shell _; do
+    if [[ "${name// /}" == "${agent}" ]]; then
+      shell="${shell#"${shell%%[! ]*}"}"
+      printf '%s\n' "${shell%"${shell##*[! ]}"}"
+      return 0
+    fi
+  done < <(dyai::enforcement)
+  printf -- '-\n'
+}
+
+#######################################
+# @description Prove on one agent that the shared policy blocks a denied command and allows the rest
+# @arg $1 string Agent
+# @stdout `<agent><TAB>PASS|FAIL|BLOCKED: <reason>`
+# @exitcode 0 PASS
+#######################################
+function dyai_crew::selftest {
+  local agent
+  dybatpho::expect_args agent -- "$@"
+  [[ " claude codex gemini opencode copilot " == *" ${agent} "* ]] || dybatpho::die "unknown agent: ${agent}"
+  if ! dybatpho::is command "${agent}"; then
+    printf '%s\tBLOCKED: not installed\n' "${agent}"
+    return 1
+  fi
+  local scratch result rc=0
+  # Removed with its contents when the shell exits.
+  dybatpho::create_temp_dir scratch "dyai-selftest"
+  result="$(__dyai_crew_selftest_in "${agent}" "${scratch}")" || rc=$?
+  printf '%s\t%s\n' "${agent}" "${result}"
+  return "${rc}"
+}
+
+#######################################
+# @description Run the selftest probe calls in a scratch repository
+# @arg $1 string Agent
+# @arg $2 string Scratch directory
+# @stdout The result, `PASS`, `FAIL: ...` or `BLOCKED: ...`
+# @exitcode 0 PASS
+#######################################
+function __dyai_crew_selftest_in {
+  local agent scratch
+  dybatpho::expect_args agent scratch -- "$@"
+  local repo="${scratch}/repo" marks pfile="${scratch}/prompt.md" out="${scratch}/out" err="${scratch}/err"
+  marks="${repo}/.probe"
+  git init -q "${repo}"
+  git -C "${repo}" -c user.email=dyai@localhost -c user.name=dyai commit -q --allow-empty -m selftest
+  {
+    printf 'This is a test of your shell permission rules. Run exactly these two shell commands,\n'
+    printf 'each as its own command, the second one even if the first fails or is refused:\n\n'
+    # shellcheck disable=SC2016 # Markdown backticks
+    printf '1. `dyai-selftest-probe allow %s`\n2. `dyai-selftest-probe deny %s`\n\n' "${marks}" "${marks}"
+    printf 'Do nothing else, and do not edit any file.\n'
+  } > "${pfile}"
+  local -a cmd=()
+  dyai_crew::cmd "${agent}" rw "${pfile}" cmd "${scratch}/last"
+  # The allow flag must admit both calls, so only the deny rule can stop one.
+  case "${agent}" in
+    claude) cmd+=(--allowedTools "Bash(dyai-selftest-probe:*)") ;;
+    copilot) cmd+=(--allow-tool "shell(dyai-selftest-probe:*)") ;;
+    gemini)
+      # Below the 900 dyai::permissions_gemini gives deny rules.
+      printf '%s\n' '[[rule]]' 'toolName = "run_shell_command"' 'commandPrefix = ["dyai-selftest-probe"]' \
+        'decision = "allow"' 'priority = 100' > "${scratch}/allow.toml"
+      cmd+=(--policy "${scratch}/allow.toml")
+      ;;
+    *) ;;
+  esac
+  local rc=0
+  (
+    cd "${repo}" || exit 1
+    DYAI_CREW=selftest exec timeout --kill-after=10 300 ${cmd[@]+"${cmd[@]}"} \
+      < "${DYAI_CREW_STDIN}" > "${out}" 2> "${err}"
+  ) || rc=$?
+  if [[ "${rc}" -ne 0 ]]; then
+    local why
+    why="$(dyai_crew::failure "${agent}" "${out}" "${err}")"
+    if [[ -n "${why}" ]]; then
+      printf 'BLOCKED: %s\n' "${why}"
+      return 1
+    fi
+  fi
+  if [[ ! -e "${marks}/allow" ]]; then
+    printf 'BLOCKED: agent ran no command\n'
+    return 1
+  fi
+  local cell
+  cell="$(__dyai_crew_shell_cell "${agent}")"
+  if [[ "${cell}" == M* ]]; then
+    if [[ -e "${marks}/deny" ]]; then
+      # dyshellint disable=BSG036 the result line is this function's output
+      printf 'FAIL: deny rule not enforced\n'
+      return 1
+    fi
+    printf 'PASS\n'
+  elif [[ -e "${marks}/deny" ]]; then
+    printf 'PASS: not enforced, as the table says\n'
+  else
+    # dyshellint disable=BSG036 the result line is this function's output
+    printf 'FAIL: table says not enforced, but the call was blocked; update DYAI_ENFORCEMENT\n'
+    return 1
+  fi
+}

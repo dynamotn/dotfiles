@@ -927,3 +927,89 @@ function _cli {
   run _field "${b}" .status
   assert_output "dropped"
 }
+
+# Put the real probe on PATH and write an agent stub $1 that runs the probe
+# calls named in $2 (allow, deny, both or none) for the marker dir its prompt names.
+function _probe_agent {
+  cp "${DOTFILES_DIR}/home/dot_local/bin/executable_dyai-selftest-probe" "${HOME}/.local/bin/dyai-selftest-probe"
+  chmod +x "${HOME}/.local/bin/dyai-selftest-probe"
+  local calls find
+  # shellcheck disable=SC2016 # expands when the stub runs
+  case "${2}" in
+    allow) calls='dyai-selftest-probe allow "${dir}"' ;;
+    deny) calls='dyai-selftest-probe deny "${dir}"' ;;
+    both) calls='dyai-selftest-probe allow "${dir}"; dyai-selftest-probe deny "${dir}"' ;;
+    *) calls=true ;;
+  esac
+  # shellcheck disable=SC2016 # expands when the stub runs
+  find='dir="$(grep -oE "dyai-selftest-probe allow [^ \`]+" "'"${BATS_TEST_TMPDIR}/${1}.stdin"'"'
+  find+=' | head -1 | cut -d" " -f3)"'
+  _agent "${1}" "${find}; ${calls}"
+}
+
+@test "selftest passes when only allow ran on an enforcing agent" {
+  _probe_agent claude allow
+  run dyai_crew::selftest claude
+  assert_success
+  assert_output --partial "PASS"
+}
+
+@test "selftest fails when deny ran on an enforcing agent" {
+  _probe_agent claude both
+  run dyai_crew::selftest claude
+  assert_failure
+  assert_output --partial "FAIL: deny rule not enforced"
+}
+
+@test "selftest passes when deny ran on a non-enforcing agent" {
+  _probe_agent copilot both
+  run dyai_crew::selftest copilot
+  assert_success
+  assert_output --partial "PASS: not enforced, as the table says"
+}
+
+@test "selftest fails when a non-enforcing agent blocked the call" {
+  _probe_agent copilot allow
+  run dyai_crew::selftest copilot
+  assert_failure
+  assert_output --partial "table says not enforced"
+}
+
+@test "selftest is blocked when nothing ran" {
+  _probe_agent claude none
+  run dyai_crew::selftest claude
+  assert_failure
+  assert_output --partial "BLOCKED: agent ran no command"
+}
+
+@test "selftest is blocked by a rate limit" {
+  _agent claude "${RATE}"
+  run dyai_crew::selftest claude
+  assert_failure
+  assert_output --partial "BLOCKED: rate_limited"
+}
+
+@test "selftest admits both probe calls" {
+  _probe_agent claude allow
+  run dyai_crew::selftest claude
+  run grep '^claude' "${LOG}"
+  assert_output --partial "Bash(dyai-selftest-probe:*)"
+  refute_output --partial "Bash(dyai-selftest-probe allow"
+}
+
+@test "selftest gives gemini an allow policy below the deny priority" {
+  _probe_agent gemini allow
+  run dyai_crew::selftest gemini
+  assert_success
+  run grep -cE -- '--policy [^ ]+allow\.toml' "${LOG}"
+  assert_output 1
+}
+
+@test "the probe only writes its marker" {
+  cp "${DOTFILES_DIR}/home/dot_local/bin/executable_dyai-selftest-probe" "${BATS_TEST_TMPDIR}/probe"
+  run bash "${BATS_TEST_TMPDIR}/probe" deny "${BATS_TEST_TMPDIR}/m"
+  assert_success
+  [[ -e "${BATS_TEST_TMPDIR}/m/deny" ]]
+  run bash "${BATS_TEST_TMPDIR}/probe" other "${BATS_TEST_TMPDIR}/m"
+  assert_failure
+}

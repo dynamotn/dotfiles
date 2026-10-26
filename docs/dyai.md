@@ -363,6 +363,7 @@ skills, MCP servers and policy `dyai install` gave it. The design is in
 | `dyai fix ID [--detach]` | After a `fail`: the writer again, in the same worktree, with the review. Voids the verdict. |
 | `dyai merge ID` | Merge a reviewed task into the current branch (see below). |
 | `dyai drop ID... \| --finished` | Remove worktrees; delete branches only once merged (`git branch -d`). |
+| `dyai selftest [AGENT...]` | Spends quota. Asks each agent to run `dyai-selftest-probe allow` and `deny`, with an allow flag that admits both, so only the shared deny rule `Bash(dyai-selftest-probe deny *)` can stop the second. The result is checked against the [enforcement table](#permissions-in-other-agents): `PASS`, `FAIL`, or `BLOCKED` (the agent could not run, or ran no command). |
 
 A task id reads `<date>-<time>-<agent>-<4 hex>`. Task state is one
 append-only `tasks.jsonl` in `<main checkout>/.dyai/crew/`, next to each
