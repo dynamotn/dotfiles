@@ -120,14 +120,13 @@ function _render_config {
   if ! _render_named "ai/dyai-data.yaml.tmpl" "${out}"; then
     fail "chezmoi could not render the data partial: $(cat "${out}.err")"
   fi
-  # 10 marketplaces, including a github and the git one
-  [[ "$(yq '.marketplaces | length' "${out}")" == "10" ]]
+  # 9 marketplaces, including a github one
+  [[ "$(yq '.marketplaces | length' "${out}")" == "9" ]]
   [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
-  [[ "$(yq '.marketplaces["agent-sec-ops-kit-skills"].source.source' "${out}")" == "git" ]]
   # 39 plugins on globally (official LSP plugins replaced by dyai-lsp) and
-  # 13 optional ones, including known entries
+  # 6 optional ones, including known entries
   [[ "$(yq '.plugins | length' "${out}")" == "39" ]]
-  [[ "$(yq '.optional_plugins | length' "${out}")" == "13" ]]
+  [[ "$(yq '.optional_plugins | length' "${out}")" == "6" ]]
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
   # agent-mode plugins, each its own single-plugin marketplace
@@ -171,8 +170,8 @@ function _render_config {
   [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
   [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "39" ]]
-  [[ "$(yq '.agents.claude.optional_plugins | length' "${out}")" == "13" ]]
-  [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "10" ]]
+  [[ "$(yq '.agents.claude.optional_plugins | length' "${out}")" == "6" ]]
+  [[ "$(yq '.agents.claude.marketplaces | length' "${out}")" == "9" ]]
   [[ "$(yq '.global.policy.theme' "${out}")" == "auto" ]]
 }
 
@@ -410,7 +409,7 @@ EOF
   [[ "$(yq '.registry.infra.cicd.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.infra.database.skills | length' "${out}")" == "5" ]]
   [[ "$(yq '.registry.presets.testing.skills | length' "${out}")" == "4" ]]
-  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "23" ]]
+  [[ "$(yq '.registry.presets.security.skills | length' "${out}")" == "30" ]]
   # Registry-expansion presets (nvim-supported languages/tools)
   [[ "$(yq '.registry.languages.vue.subagents[0]' "${out}")" == "vue-expert" ]]
   [[ "$(yq '.registry.languages.swift.subagents[0]' "${out}")" == "swift-expert" ]]
