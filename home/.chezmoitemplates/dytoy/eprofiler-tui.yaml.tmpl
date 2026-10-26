@@ -1,0 +1,6 @@
+name: eprofiler-tui
+method: shell
+dependencies:
+  - rust
+# No release binaries and no crate: build from git (needs protoc and cmake)
+content: cargo install --locked --git https://github.com/rogercoll/eprofiler-tui
