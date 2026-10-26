@@ -1,7 +1,8 @@
 # OmniWM
 
-The keys follow the [AeroSpace ones](./aerospace.md), on OmniWM's
-scrolling columns. OmniWM has no binding modes, so the service and apps
+The keys come from the bindings in `home/.chezmoitemplates/wm/rules.yaml.tmpl`,
+as for [AeroSpace](./aerospace.md), on OmniWM's scrolling columns. OmniWM
+takes one key per action, so it has the arrows but not the hjkl twins. OmniWM has no binding modes, so the service and apps
 modes of AeroSpace have no counterpart here.
 
 ## Modifier keys
@@ -32,10 +33,10 @@ modes of AeroSpace have no counterpart here.
 
 | Keybind | Action |
 |---------|--------|
-| `Ctrl+Super+Left` | Move window left |
-| `Ctrl+Super+Right` | Move window right |
-| `Ctrl+Super+Up` | Move window up |
-| `Ctrl+Super+Down` | Move window down |
+| `Alt+Super+Left` | Move window left |
+| `Alt+Super+Right` | Move window right |
+| `Alt+Super+Up` | Move window up |
+| `Alt+Super+Down` | Move window down |
 
 ## Window resizing
 
@@ -51,7 +52,7 @@ modes of AeroSpace have no counterpart here.
 | `Super+1..9,0` | Switch to workspace `1`-`10` |
 | `Super+Shift+1..9,0` | Move window to workspace `1`-`10` |
 | `Super+Tab` | Switch to previous workspace (back-and-forth) |
-| `Super+Shift+Tab` | Move workspace to the monitor on the right |
+| `Ctrl+Super+Left` / `Ctrl+Super+Right` | Move workspace to the monitor on the left/right |
 
 The workspaces carry the names of the Hyprland ones (`term`, `web`, `mail`,
 `doc`, `chat`, `media`, `game`, `sys`, `misc`, `sec`) as labels on OmniWM's
@@ -68,5 +69,8 @@ OmniWM runs no commands, so Hammerspoon binds these:
 | `Super+Shift+E` | Browser, the other profile |
 | `Super+M` | Mail client, personal profile at home / enterprise profile at the office |
 | `Super+Shift+M` | Mail client, the other profile |
+| `Super+F2` | Launcher (Vicinae) |
+| `Ctrl+Super+V` | Clipboard history |
+| `Super+P` / `Super+O` | Type a password / TOTP picked from Bitwarden |
 
 ---
