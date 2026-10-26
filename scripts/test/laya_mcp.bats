@@ -25,7 +25,9 @@ function _require_python3 {
 }
 
 teardown() {
-  pkill -f "http.server ${LAYA_SHARED_PORT}" || true
+  # By pid rather than name: a stub still sleeping is not yet the http.server.
+  local pid_file="${HOME}/.local/state/laya/serve.pid"
+  [[ -f "${pid_file}" ]] && kill "$(< "${pid_file}")" 2> /dev/null || true
 }
 
 @test "laya-mcp starts one loopback laya-serve and points every session at it" {
@@ -55,4 +57,16 @@ teardown() {
   LAYA_MCP_WAIT=1 run laya_mcp::main
   assert_success
   assert_line --partial "base= preload=0 args="
+}
+
+@test "laya-mcp counts a laya-serve still starting as up and starts no second one" {
+  _require_python3
+  sed -i 's/^exec python3/sleep 3 \&\& exec python3/' "${HOME}/.local/bin/laya-serve"
+  LAYA_MCP_WAIT=1 run laya_mcp::main
+  assert_success
+  assert_line "base=http://127.0.0.1:${LAYA_SHARED_PORT} preload= args="
+  LAYA_MCP_WAIT=1 run laya_mcp::main
+  assert_success
+  run cat "${HOME}/serve.starts"
+  assert_output start
 }
