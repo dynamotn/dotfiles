@@ -1,0 +1,10 @@
+#!{{ .bash }}
+# @file scratchpad.sh
+# @brief Toggle a drop-down window on niri: scratchpad.sh <app-id> <command>...
+# @description Bound in niri/binding.kdl. The logic lives in
+# `scripts/lib/niri_scratchpad.sh`, shared with the bats tests.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/niri_scratchpad.sh"
+
+niri_scratchpad::toggle "$@"
