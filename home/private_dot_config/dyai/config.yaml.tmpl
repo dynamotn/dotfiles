@@ -508,13 +508,6 @@ registry:
         - powershell-security-hardening
       # Switched on in .claude/settings.local.json; off everywhere else.
       plugins:
-        - appsec-skills@agent-sec-ops-kit-skills
-        - compliance-skills@agent-sec-ops-kit-skills
-        - devsecops-skills@agent-sec-ops-kit-skills
-        - incident-response-skills@agent-sec-ops-kit-skills
-        - offsec-skills@agent-sec-ops-kit-skills
-        - secsdlc-skills@agent-sec-ops-kit-skills
-        - threatmodel-skills@agent-sec-ops-kit-skills
         - secskills-core@secskills-marketplace
         - secskills-defense@secskills-marketplace
         - secskills-offense@secskills-marketplace
@@ -529,6 +522,15 @@ registry:
         - Eyadkelleh/awesome-skills-security@security-patterns
         - Eyadkelleh/awesome-skills-security@security-payloads
         - Eyadkelleh/awesome-skills-security@security-usernames
+        # SecOpsAgentKit's plugin manifest is broken, so take only the tools
+        # the secskills plugins do not cover, straight from its repo.
+        - AgentSecOps/SecOpsAgentKit@api-spectral
+        - AgentSecOps/SecOpsAgentKit@sca-blackduck
+        - AgentSecOps/SecOpsAgentKit@vuln-defectdojo
+        - AgentSecOps/SecOpsAgentKit@reviewdog
+        - AgentSecOps/SecOpsAgentKit@sast-horusec
+        - AgentSecOps/SecOpsAgentKit@pytm
+        - AgentSecOps/SecOpsAgentKit@policy-opa
         - Eyadkelleh/awesome-skills-security@security-webshells
         - affaan-m/ecc@security-review
         - affaan-m/ecc@security-scan

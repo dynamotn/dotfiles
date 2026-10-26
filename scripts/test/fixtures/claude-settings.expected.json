@@ -9,7 +9,6 @@
   "effortLevel": "medium",
   "enabledPlugins": {
     "agent-sdk-dev@claude-plugins-official": true,
-    "appsec-skills@agent-sec-ops-kit-skills": false,
     "caveman@caveman": true,
     "chrome-devtools-mcp@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
@@ -18,10 +17,8 @@
     "claude-security@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "compliance-skills@agent-sec-ops-kit-skills": false,
     "context-mode@context-mode": true,
     "context7@claude-plugins-official": true,
-    "devsecops-skills@agent-sec-ops-kit-skills": false,
     "differential-review@trailofbits": true,
     "duckdb-skills@claude-plugins-official": false,
     "dyai-lsp@dyai-lsp": true,
@@ -33,14 +30,12 @@
     "gopls-lsp@claude-plugins-official": false,
     "hookify@claude-plugins-official": true,
     "i-have-adhd@i-have-adhd": true,
-    "incident-response-skills@agent-sec-ops-kit-skills": false,
     "insecure-defaults@trailofbits": true,
     "lua-lsp@claude-plugins-official": false,
     "mattpocock-skills@claude-plugins-official": true,
     "mcp-server-dev@claude-plugins-official": true,
     "modern-python@trailofbits": true,
     "obsidian@obsidian-skills": true,
-    "offsec-skills@agent-sec-ops-kit-skills": false,
     "playwright@claude-plugins-official": true,
     "ponytail@ponytail": true,
     "pr-review-toolkit@claude-plugins-official": true,
@@ -49,7 +44,6 @@
     "redis-development@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": false,
     "second-opinion@trailofbits": true,
-    "secsdlc-skills@agent-sec-ops-kit-skills": false,
     "secskills-core@secskills-marketplace": false,
     "secskills-defense@secskills-marketplace": false,
     "secskills-offense@secskills-marketplace": false,
@@ -62,17 +56,10 @@
     "supply-chain-risk-auditor@trailofbits": true,
     "telegram@claude-plugins-official": true,
     "testing-handbook-skills@trailofbits": false,
-    "threatmodel-skills@agent-sec-ops-kit-skills": false,
     "trailmark@trailofbits": true,
     "typescript-lsp@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {
-    "agent-sec-ops-kit-skills": {
-      "source": {
-        "source": "git",
-        "url": "https://github.com/AgentSecOps/SecOpsAgentKit.git"
-      }
-    },
     "caveman": {
       "source": {
         "repo": "JuliusBrussee/caveman",

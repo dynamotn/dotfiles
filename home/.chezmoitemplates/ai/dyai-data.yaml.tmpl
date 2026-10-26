@@ -15,8 +15,6 @@ marketplaces:
     source: { source: github, repo: trilwu/secskills }
   trailofbits:
     source: { source: github, repo: trailofbits/skills }
-  agent-sec-ops-kit-skills:
-    source: { source: git, url: "https://github.com/AgentSecOps/SecOpsAgentKit.git" }
   thedotmack:
     source: { source: github, repo: thedotmack/claude-mem }
   caveman:
@@ -69,13 +67,6 @@ plugins:
 # so these domain plugins are switched on per project by the registry preset
 # that lists them (`dyai use security`, `dyai use database`).
 optional_plugins:
-  - appsec-skills@agent-sec-ops-kit-skills
-  - compliance-skills@agent-sec-ops-kit-skills
-  - devsecops-skills@agent-sec-ops-kit-skills
-  - incident-response-skills@agent-sec-ops-kit-skills
-  - offsec-skills@agent-sec-ops-kit-skills
-  - secsdlc-skills@agent-sec-ops-kit-skills
-  - threatmodel-skills@agent-sec-ops-kit-skills
   - secskills-core@secskills-marketplace
   - secskills-defense@secskills-marketplace
   - secskills-offense@secskills-marketplace
