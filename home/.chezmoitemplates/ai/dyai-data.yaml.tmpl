@@ -25,6 +25,8 @@ marketplaces:
     source: { source: github, repo: mksglu/context-mode }
   zj-radar:
     source: { source: github, repo: marktoda/zj-radar }
+  understand-anything:
+    source: { source: github, repo: Egonex-AI/Understand-Anything }
 plugins:
   - i-have-adhd@i-have-adhd
   - claude-mem@thedotmack
@@ -79,6 +81,7 @@ optional_plugins:
   - agentic-actions-auditor@trailofbits
   - redis-development@claude-plugins-official
   - duckdb-skills@claude-plugins-official
+  - understand-anything@understand-anything
 
 # Plugins still installed on machines set up before dyai-lsp replaced them,
 # turned off explicitly (`enabledPlugins: false`) so Claude never runs them

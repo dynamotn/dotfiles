@@ -1,0 +1,5 @@
+name: openspec
+method: shell
+dependencies:
+  - bun
+content: bun install -g @fission-ai/openspec

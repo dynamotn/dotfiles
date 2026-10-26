@@ -341,6 +341,7 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[llmfit](https://github.com/AlexsJones/llmfit)|TUI for models finding|
 |[vectorcode](https://github.com/davidyz/vectorcode)|Code repository indexing tool with LLMs|
 |[opencode](https://github.com/anomalyco/opencode)|AI coding agent|
+|[openspec](https://github.com/Fission-AI/OpenSpec)|Spec-driven changes for AI coding agents|
 |[rtk](https://github.com/rtk-ai/rtk)|Proxy that reduces LLM token consumption|
 |[laya](https://github.com/NandhaKishorM/laya)|Typed decision model, served to agents over MCP|
 |[harness2](https://github.com/google-research/harness2)|Research framework that optimises the harness around an LLM agent|

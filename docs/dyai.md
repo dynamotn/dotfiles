@@ -105,10 +105,15 @@ Grouped by tool boundary so a project pulls in only what it uses:
   `modernization`, `apidocs`), observability (`sentry`, `opentelemetry`,
   `sre`, `grafana`, `datadog`, `elastic`), `platform`, `finops`,
   `architecture`, product work (`product`, `office`, `jira`, `linear`,
-  `notion`), `stripe`, LLM work (`llm`, `langchain`, `huggingface`), `context`
-  (context engineering for building agents), and `lifeos` (the thinking
+  `notion`), `writing`, `marketing`, `stripe`, LLM work (`llm`, `langchain`,
+  `huggingface`), `context` (context engineering for building agents),
+  `lifeos` (the thinking
   skills of [LifeOS](https://github.com/danielmiessler/LifeOS) that run
-  without its runtime)
+  without its runtime), and `codegraph` (a code knowledge graph for large
+  repos; run `codegraph init` in the project first), `openspec`
+  (spec-driven changes; needs the `openspec` CLI and `openspec init`), and
+  `onboarding`
+  (getting to know an unfamiliar repo: Understand-Anything and archify)
 
 `dyai ls` prints the full, current list.
 
