@@ -22,6 +22,7 @@ global:
     - wondelai/skills@domain-driven-design
     - anthropics/skills@mcp-builder
     - wshobson/agents@prompt-engineering-patterns
+    - wshobson/agents@git-advanced-workflows
   # Agent role definitions and commands/prompts (populated in a later phase).
   # Baseline subagents: VoltAgent categories installed into every agent's
   # agents dir (Claude-format today). Pinned to a commit, never a branch.
@@ -212,6 +213,28 @@ registry:
         - apollographql/skills@rust-best-practices
         - affaan-m/ecc@rust-patterns
         - affaan-m/ecc@rust-testing
+        - mohitmishra786/low-level-dev-skills@cargo-workflows
+        - mohitmishra786/low-level-dev-skills@rust-async-internals
+        - mohitmishra786/low-level-dev-skills@rust-build-times
+        - mohitmishra786/low-level-dev-skills@rust-cross
+        - mohitmishra786/low-level-dev-skills@rust-debugging
+        - mohitmishra786/low-level-dev-skills@rust-ffi
+        - mohitmishra786/low-level-dev-skills@rust-no-std
+        - mohitmishra786/low-level-dev-skills@rust-profiling
+        - mohitmishra786/low-level-dev-skills@rust-sanitizers-miri
+        - mohitmishra786/low-level-dev-skills@rust-security
+        - mohitmishra786/low-level-dev-skills@rust-unsafe
+        - mohitmishra786/low-level-dev-skills@rustc-basics
+    # Skills-only: no VoltAgent subagent for Zig.
+    zig:
+      skills:
+        - mohitmishra786/low-level-dev-skills@zig-build-system
+        - mohitmishra786/low-level-dev-skills@zig-cinterop
+        - mohitmishra786/low-level-dev-skills@zig-compiler
+        - mohitmishra786/low-level-dev-skills@zig-comptime
+        - mohitmishra786/low-level-dev-skills@zig-cross
+        - mohitmishra786/low-level-dev-skills@zig-debugging
+        - mohitmishra786/low-level-dev-skills@zig-testing
     typescript:
       subagents: [typescript-pro]
       skills:
@@ -259,6 +282,9 @@ registry:
       skills:
         - affaan-m/ecc@cpp-coding-standards
         - affaan-m/ecc@cpp-testing
+        - mohitmishra786/low-level-dev-skills@cpp-coroutines
+        - mohitmishra786/low-level-dev-skills@cpp-modules
+        - mohitmishra786/low-level-dev-skills@cpp-templates
     php:
       subagents: [php-pro, laravel-specialist]
       skills:
@@ -512,6 +538,7 @@ registry:
         - secskills-defense@secskills-marketplace
         - secskills-offense@secskills-marketplace
         - testing-handbook-skills@trailofbits
+        - agentic-actions-auditor@trailofbits
       skills:
         - openai/skills@security-threat-model
         - openai/skills@security-best-practices
@@ -531,6 +558,12 @@ registry:
         - AgentSecOps/SecOpsAgentKit@sast-horusec
         - AgentSecOps/SecOpsAgentKit@pytm
         - AgentSecOps/SecOpsAgentKit@policy-opa
+        # Vets a third-party skill before it is trusted; its scanner is offline.
+        - superagent-ai/skills@skill-security
+        # Claude gets these two as trailofbits plugins; listed so the other
+        # agents get them too.
+        - trailofbits/skills@audit-context-building
+        - trailofbits/skills@agentic-actions-auditor
         - Eyadkelleh/awesome-skills-security@security-webshells
         - affaan-m/ecc@security-review
         - affaan-m/ecc@security-scan
@@ -586,6 +619,144 @@ registry:
         - affaan-m/ecc@perl-patterns
         - affaan-m/ecc@perl-security
         - affaan-m/ecc@perl-testing
+    # Low-level systems work, from mohitmishra786/low-level-dev-skills split by
+    # area so one opt-in does not load all 142 skills; its Rust, Zig and C++
+    # skills live in those language presets. Vetted at bdc5847 (2026-06-27).
+    kernel:
+      skills:
+        - mohitmishra786/low-level-dev-skills@linux-kernel-architecture
+        - mohitmishra786/low-level-dev-skills@linux-kernel-modules
+        - mohitmishra786/low-level-dev-skills@kernel-internals
+        - mohitmishra786/low-level-dev-skills@kernel-concurrency
+        - mohitmishra786/low-level-dev-skills@kernel-memory-management
+        - mohitmishra786/low-level-dev-skills@kernel-debugging
+        - mohitmishra786/low-level-dev-skills@kernel-debugging-advanced
+        - mohitmishra786/low-level-dev-skills@kernel-testing
+        - mohitmishra786/low-level-dev-skills@kernel-security
+        - mohitmishra786/low-level-dev-skills@device-drivers
+        - mohitmishra786/low-level-dev-skills@writing-char-drivers
+        - mohitmishra786/low-level-dev-skills@bus-drivers-i2c-spi
+        - mohitmishra786/low-level-dev-skills@device-tree
+        - mohitmishra786/low-level-dev-skills@platform-device-model
+        - mohitmishra786/low-level-dev-skills@os-dev-scratch
+        - mohitmishra786/low-level-dev-skills@qemu-for-kernel-development
+        - mohitmishra786/low-level-dev-skills@qemu-kvm
+        - mohitmishra786/low-level-dev-skills@hypervisor-internals
+        - mohitmishra786/low-level-dev-skills@containers-internals
+        - mohitmishra786/low-level-dev-skills@ebpf
+        - mohitmishra786/low-level-dev-skills@ebpf-rust
+    embedded:
+      skills:
+        - mohitmishra786/low-level-dev-skills@baremetal-startup
+        - mohitmishra786/low-level-dev-skills@bootloaders-embedded
+        - mohitmishra786/low-level-dev-skills@linker-scripts
+        - mohitmishra786/low-level-dev-skills@interrupts-and-exceptions-baremetal
+        - mohitmishra786/low-level-dev-skills@mmio-and-bit-manipulation
+        - mohitmishra786/low-level-dev-skills@gpio-baremetal
+        - mohitmishra786/low-level-dev-skills@uart-serial-baremetal
+        - mohitmishra786/low-level-dev-skills@spi-i2c-baremetal
+        - mohitmishra786/low-level-dev-skills@adc-dac-baremetal
+        - mohitmishra786/low-level-dev-skills@dma-baremetal
+        - mohitmishra786/low-level-dev-skills@timers-pwm-baremetal
+        - mohitmishra786/low-level-dev-skills@low-power-embedded
+        - mohitmishra786/low-level-dev-skills@stm32-baremetal
+        - mohitmishra786/low-level-dev-skills@datasheet-and-refmanual-reading
+        - mohitmishra786/low-level-dev-skills@peripherals-from-datasheet
+        - mohitmishra786/low-level-dev-skills@protocol-analysis
+        - mohitmishra786/low-level-dev-skills@resource-optimization-lowend
+        - mohitmishra786/low-level-dev-skills@verilog-basics-for-lowlevel
+        - mohitmishra786/low-level-dev-skills@qemu-embedded-simulation
+        - mohitmishra786/low-level-dev-skills@openocd-jtag
+        - mohitmishra786/low-level-dev-skills@freertos
+        - mohitmishra786/low-level-dev-skills@zephyr
+        - mohitmishra786/low-level-dev-skills@embedded-rust
+    # Compilers, build systems and binary tooling for C/C++-family code.
+    toolchain:
+      skills:
+        - mohitmishra786/low-level-dev-skills@gcc
+        - mohitmishra786/low-level-dev-skills@cross-gcc
+        - mohitmishra786/low-level-dev-skills@clang
+        - mohitmishra786/low-level-dev-skills@msvc-cl
+        - mohitmishra786/low-level-dev-skills@llvm
+        - mohitmishra786/low-level-dev-skills@llvm-ir-and-passes
+        - mohitmishra786/low-level-dev-skills@llvm-passes
+        - mohitmishra786/low-level-dev-skills@mlir
+        - mohitmishra786/low-level-dev-skills@compiler-frontend
+        - mohitmishra786/low-level-dev-skills@code-generation-and-backends
+        - mohitmishra786/low-level-dev-skills@compiler-optimizations-deep
+        - mohitmishra786/low-level-dev-skills@jit-compilation
+        - mohitmishra786/low-level-dev-skills@interpreters
+        - mohitmishra786/low-level-dev-skills@pgo
+        - mohitmishra786/low-level-dev-skills@make
+        - mohitmishra786/low-level-dev-skills@cmake
+        - mohitmishra786/low-level-dev-skills@meson
+        - mohitmishra786/low-level-dev-skills@ninja
+        - mohitmishra786/low-level-dev-skills@bazel
+        - mohitmishra786/low-level-dev-skills@conan-vcpkg
+        - mohitmishra786/low-level-dev-skills@build-acceleration
+        - mohitmishra786/low-level-dev-skills@include-what-you-use
+        - mohitmishra786/low-level-dev-skills@static-analysis
+        - mohitmishra786/low-level-dev-skills@binutils
+        - mohitmishra786/low-level-dev-skills@elf-inspection
+        - mohitmishra786/low-level-dev-skills@dynamic-linking
+        - mohitmishra786/low-level-dev-skills@linkers-lto
+        - mohitmishra786/low-level-dev-skills@carbon-lang
+        - mohitmishra786/low-level-dev-skills@hare-lang
+        - mohitmishra786/low-level-dev-skills@wasm-emscripten
+        - mohitmishra786/low-level-dev-skills@wasm-wasmtime
+    # Debuggers, profilers and the hardware behaviour behind the numbers.
+    profiling:
+      skills:
+        - mohitmishra786/low-level-dev-skills@gdb
+        - mohitmishra786/low-level-dev-skills@lldb
+        - mohitmishra786/low-level-dev-skills@core-dumps
+        - mohitmishra786/low-level-dev-skills@debug-optimized-builds
+        - mohitmishra786/low-level-dev-skills@dwarf-debug-format
+        - mohitmishra786/low-level-dev-skills@concurrency-debugging
+        - mohitmishra786/low-level-dev-skills@sanitizers
+        - mohitmishra786/low-level-dev-skills@valgrind
+        - mohitmishra786/low-level-dev-skills@heaptrack
+        - mohitmishra786/low-level-dev-skills@strace-ltrace
+        - mohitmishra786/low-level-dev-skills@linux-perf
+        - mohitmishra786/low-level-dev-skills@flamegraphs
+        - mohitmishra786/low-level-dev-skills@hardware-counters
+        - mohitmishra786/low-level-dev-skills@intel-vtune-amd-uprof
+        - mohitmishra786/low-level-dev-skills@cpu-pipelines-and-hazards
+        - mohitmishra786/low-level-dev-skills@branch-prediction-and-speculation
+        - mohitmishra786/low-level-dev-skills@memory-hierarchy-and-caches
+        - mohitmishra786/low-level-dev-skills@virtual-memory-paging-and-tlb
+        - mohitmishra786/low-level-dev-skills@abi-and-calling-conventions
+    # Hand-tuned systems code: assembly, SIMD, memory, I/O and HPC.
+    lowlevel:
+      skills:
+        - mohitmishra786/low-level-dev-skills@assembly-x86
+        - mohitmishra786/low-level-dev-skills@assembly-arm
+        - mohitmishra786/low-level-dev-skills@assembly-riscv
+        - mohitmishra786/low-level-dev-skills@riscv-privileged
+        - mohitmishra786/low-level-dev-skills@arm-sve
+        - mohitmishra786/low-level-dev-skills@apple-silicon
+        - mohitmishra786/low-level-dev-skills@simd-intrinsics
+        - mohitmishra786/low-level-dev-skills@cpu-cache-opt
+        - mohitmishra786/low-level-dev-skills@memory-model
+        - mohitmishra786/low-level-dev-skills@custom-allocators
+        - mohitmishra786/low-level-dev-skills@numa-programming
+        - mohitmishra786/low-level-dev-skills@io-uring
+        - mohitmishra786/low-level-dev-skills@af-xdp
+        - mohitmishra786/low-level-dev-skills@dpdk
+        - mohitmishra786/low-level-dev-skills@rdma-verbs
+        - mohitmishra786/low-level-dev-skills@mpi
+        - mohitmishra786/low-level-dev-skills@openmp
+        - mohitmishra786/low-level-dev-skills@binary-hardening
+        - mohitmishra786/low-level-dev-skills@fuzzing
+        - mohitmishra786/low-level-dev-skills@reverse-engineering
+    gpu:
+      skills:
+        - mohitmishra786/low-level-dev-skills@cuda
+        - mohitmishra786/low-level-dev-skills@cuda-debugging
+        - mohitmishra786/low-level-dev-skills@cuda-profiling
+        - mohitmishra786/low-level-dev-skills@gpu-memory-model
+        - mohitmishra786/low-level-dev-skills@hip-rocm
+        - mohitmishra786/low-level-dev-skills@triton-lang
     # Domain subagents split out of the global baseline (see global.subagents
     # exclude); opt in per project when the work needs them.
     desktop:
@@ -618,6 +789,7 @@ registry:
         - ollygarden/opentelemetry-agent-skills@otel-collector
         - ollygarden/opentelemetry-agent-skills@otel-semantic-conventions
         - ollygarden/opentelemetry-agent-skills@otel-ottl
+        - addyosmani/agent-skills@observability-and-instrumentation
     # SLOs, incidents, on-call and the Prometheus/Loki stack; Grafana itself
     # has its own preset. prometheus reads PROMETHEUS_URL from the runtime env.
     sre:
