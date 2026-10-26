@@ -15,17 +15,17 @@
 
 <!--toc:start-->
 - [:book:&nbsp; Overview](#booknbsp-overview)
+- [💻 Supported Platforms](#-supported-platforms)
 - [:brain:&nbsp; Philosophy](#brainnbsp-philosophy)
 - [:wrench:&nbsp; Rules](#wrenchnbsp-rules)
 - [:camera:&nbsp; Screenshots](#cameranbsp-screenshots)
 - [:inbox_tray:&nbsp; Installation](#inboxtraynbsp-installation)
 - [:scroll:&nbsp; Cheatsheet](#scrollnbsp-cheatsheet)
 - [:wrench:&nbsp; Tools & Packages](#wrenchnbsp-tools-packages)
-  - [via OS package manager](#via-os-package-manager)
-  - [via chezmoi external](#via-chezmoi-external)
-  - [via Github Release binary](#via-github-release-binary)
-  - [via mise](#via-mise)
+  - [via my `dytoy` scripts](#via-my-dytoy-scripts)
   - [via Mason of neovim](#via-mason-of-neovim)
+- [:books:&nbsp; Guides](#booksnbsp-guides)
+- [:hammer:&nbsp; Development](#hammernbsp-development)
 <!--toc:end-->
 
 ## :book:&nbsp; Overview
@@ -95,7 +95,9 @@ git clone https://github.com/dynamotn/dotfiles ~/Dotfiles
 bash ~/Dotfiles/scripts/setup.sh
 ```
 
-Answer questions, and wait to finish all setup scripts.
+Answer questions, and wait to finish all setup scripts. The options of
+`setup.sh`, the meaning of every question and the container and Lima images
+are described in [setup](docs/setup.md).
 > [!NOTE]
 >
 > - If you aren't me, need to answer no (`n`) for "Do you want to decrypt... secrets?" questions.
@@ -127,3 +129,29 @@ See [dytoy](docs/dytoy.md)
 All LSP servers, debuggers, formatters, linters when I used with `neovim`
 will be managed by [mason plugin](https://github.com/williamboman/mason.nvim/).
 I also have a custom registry in `neovim` config.
+
+## :books:&nbsp; Guides
+
+| Guide                          | Covers                                                |
+|--------------------------------|-------------------------------------------------------|
+| [setup](docs/setup.md)         | `setup.sh` options, init questions, machines, images  |
+| [secrets](docs/secrets.md)     | age identities, `chezmoi-dycrypt`, secret data layout |
+| [dytoy](docs/dytoy.md)         | Installing tools from `dytoy` YAML                    |
+| [dyai](docs/dyai.md)           | AI agents, presets, MCP servers and skills            |
+| [kernel](docs/kernel.md)       | Building the Gentoo kernel with `scripts/kernel.sh`   |
+| [tuning](docs/tuning.md)       | System tuning notes                                   |
+| [notes](docs/notes.md)         | Odd fixes for specific distributions                  |
+
+## :hammer:&nbsp; Development
+
+Conventions for editing this repository, for humans and agents alike, are in
+[AGENTS.md](AGENTS.md). Before committing, run:
+
+```sh
+./scripts/test.sh --all        # bats suite and every schema validation
+dyshellint <changed scripts>   # shellcheck + shfmt + house rules
+pre-commit run --all-files     # incl. betterleaks and detect-private-key
+```
+
+`./scripts/test.sh --dytoy`, `--dyai` or `--secrets` runs one schema
+validation on its own.
