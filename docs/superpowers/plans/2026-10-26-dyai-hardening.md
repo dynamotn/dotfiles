@@ -62,7 +62,8 @@ Live self-test and `dyai eval` depend on the crew runner and live in
 
 **Files:**
 - Modify: `scripts/lib/dyai.sh` (`setup_marketplaces`, `setup_plugins`,
-  `setup_skills`, `setup_installers`)
+  `setup_skills`, `setup_installers`, and the project skill install in
+  `materialize`)
 - Test: `scripts/test/dyai.bats`
 
 **Interfaces:**
@@ -73,8 +74,12 @@ Live self-test and `dyai eval` depend on the crew runner and live in
 Behaviour:
 - Every external install call goes through `run_external`. Today these are
   `claude plugin marketplace add`, `claude plugin install`,
-  `bunx … add` and `bash -c "${cmd}"`. All four already close stdin, so this
-  adds only the time limit.
+  `bunx … add` (global in `setup_skills`, project-scope in `materialize`) and
+  `bash -c "${cmd}"`. All five already close stdin, so this adds only the
+  time limit. `materialize` also gets the post-install path check below, for
+  `<project>/.agents/skills/<leaf>`. (Revised 2026-10-26: the `materialize`
+  call was missed in the first pass, so a hanging skills CLI still hung
+  `dyai use`.)
 - `setup_skills`: after a successful `bunx`, the skill directory must exist
   (`dybatpho::is dir` follows symlinks, so a dangling link counts as
   missing). Otherwise warn
@@ -192,15 +197,16 @@ because it is not installed here and its TOML keys are unverified.
 ### Task 4: `dyai status`, armed vs declared
 
 **Files:**
-- Modify: `scripts/lib/dyai.sh`
+- Create: `scripts/lib/dyai_status.sh` (as built: the checks outgrew
+  `dyai.sh`, so they live in their own library, sourced after it)
 - Modify: `home/dot_local/bin/executable_dyai.tmpl` (`_spec_status`, `_status`)
 - Modify: `home/private_dot_claude/settings.json.tmpl` (SessionStart)
-- Test: `scripts/test/dyai.bats`, `scripts/test/claude_settings.bats` and its
-  fixture `scripts/test/fixtures/claude-settings.expected.json`
+- Test: `scripts/test/dyai_status.bats`, `scripts/test/claude_settings.bats`
+  and its fixture `scripts/test/fixtures/claude-settings.expected.json`
 
 **Interfaces:**
 - Consumes: Task 2's `locally_edited` and `installed_hash`.
-- Produces: `dyai::status [quiet]`. Prints one line per drift as
+- Produces: `dyai_status::main <quiet>`. Prints one line per drift as
   `<agent> <kind> <name>: <problem>`. Exits 1 on any drift. With `quiet`, a
   clean machine prints nothing. CLI form: `dyai status [--quiet|-q]`.
 
@@ -216,9 +222,16 @@ Checks, for installed agents only:
 | policy | `global.policy.permissions` | gemini `policies/dyai.toml`, codex `rules/dyai.rules` and the opencode `permission` block exist |
 
 SessionStart hook entry, appended to the existing `startup|resume|clear|compact`
-matcher's hooks:
-`command -v dyai >/dev/null 2>&1 && dyai status --quiet; true`, with
-`"timeout": 5`.
+matcher's hooks, with `"timeout": 5`. Plain stdout of a SessionStart hook goes
+only into the model's context, so the user would never see the drift. The
+hook therefore wraps a non-empty report in JSON: `systemMessage` shows it to
+the user, `hookSpecificOutput.additionalContext` keeps the model informed. A
+clean machine still prints nothing, and a missing `dyai` or `jq` is a no-op.
+(Revised 2026-10-26: the first version printed the report raw.)
+
+The tests run with a PATH of stubs plus `jq` and `yq` linked one by one, never
+their whole directory: `yq` often lives in `~/.local/bin`, next to real agent
+CLIs that would turn into drift lines on the developer's machine.
 
 - [ ] **Step 1: Write the failing tests:**
   - `@test "status is silent on an armed machine"`: run `dyai::install` with
@@ -228,8 +241,12 @@ matcher's hooks:
   - `@test "status names a locally edited subagent"`.
   - `@test "status skips agents that are not installed"`: no `gemini` on
     `PATH`, so there are no gemini lines.
-  - `@test "status quiet finishes under 2 seconds"`: time the call with
-    `SECONDS`.
+  - `@test "status quiet finishes under 2 seconds"`: time the call in
+    milliseconds with `date +%s%N`. `SECONDS` counts whole seconds and lets
+    almost 3 s through.
+  - `@test "the SessionStart drift hook shows drift to the user and stays quiet when clean"`
+    in `claude_settings.bats`: run the rendered hook command against a stub
+    `dyai`. Empty drift prints nothing; a drift line lands in `systemMessage`.
   - Update the Claude settings fixture and let `claude_settings.bats` fail,
     then pass.
 - [ ] **Step 2: Run.** Expected: FAIL.
@@ -279,7 +296,16 @@ command's output.
   - `@test "enforcement marks claude and codex subagents as mechanical"`.
   - `@test "docs enforcement block matches the command"`: extract the block
     between the markers and compare it with `dyai::enforcement` output. This
-    is the drift check.
+    keeps the docs in step with the table.
+  - `@test "enforcement approval, shell and path cells match what the writers produce"`:
+    the table is filled by hand, so the docs check alone cannot catch a
+    table that lies about the code. Stub every agent, run `setup_policy` and
+    `setup_permissions` on a config with one probe shell rule and one probe
+    path rule, then for every non-Claude row assert that an `M` cell's probe
+    is in that agent's file and an `S`/`-` cell's probe is not. Claude is
+    skipped: chezmoi renders its settings, and `claude_settings.bats` covers
+    them. The hook, mcp and subagent columns are already covered by the
+    `setup_hooks`, `setup_mcp_agents` and `setup_subagents` tests.
 - [ ] **Step 2: Run.** Expected: FAIL.
 - [ ] **Step 3: Implement** the table and the command, then paste the output
   between the markers.
