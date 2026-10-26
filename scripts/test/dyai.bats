@@ -796,6 +796,7 @@ CFG
   _stub bunx
   _write_config
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  # dyshellint disable=SC2030 each bats test is its own subshell by design
   SKILLS_DIR="${HOME}/.agents/skills"
   run dyai::setup_skills
   assert_success
@@ -809,8 +810,7 @@ CFG
   chmod +x "${HOME}/.local/bin/bunx"
   _write_config
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
-  SKILLS_DIR="${HOME}/.agents/skills"
-  dyai::setup_skills
+  SKILLS_DIR="${HOME}/.agents/skills" dyai::setup_skills
   [[ -s "${HOME}/.cache/dyai/installed/skills/alpha.sha256" ]]
 }
 
