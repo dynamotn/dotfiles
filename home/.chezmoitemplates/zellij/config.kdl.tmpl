@@ -346,11 +346,116 @@ load_plugins {
 // Default: default
 //
 // theme "dracula"
-{{- if .darkMode }}
-theme "catppuccin-macchiato"
-{{- else }}
-theme "catppuccin-latte"
-{{- end }}
+theme "catppuccin-zjstatus"
+
+// Built-in catppuccin with the status-bar recoloured to match zjstatus:
+// surface0 background, blue/teal ribbons with crust text.
+{{- $t := $theme }}
+{{- $emph := printf "emphasis_0 %q\n            emphasis_1 %q\n            emphasis_2 %q\n            emphasis_3 %q" $t.peach $t.sky $t.green $t.pink }}
+themes {
+    catppuccin-zjstatus {
+        text_unselected {
+            base "{{ $t.text }}"
+            background "{{ $t.surface0 }}"
+            // Also the keygroup separator arrow.
+            emphasis_0 "{{ $t.sapphire }}"
+            emphasis_1 "{{ $t.sky }}"
+            emphasis_2 "{{ $t.green }}"
+            emphasis_3 "{{ $t.pink }}"
+        }
+        text_selected {
+            base "{{ $t.text }}"
+            background "{{ $t.surface2 }}"
+            {{ $emph }}
+        }
+        ribbon_selected {
+            // Also the keygroup separator's background, so it must match the bar.
+            base "{{ $t.surface0 }}"
+            background "{{ $t.teal }}"
+            emphasis_0 "{{ $t.red }}"
+            emphasis_1 "{{ $t.peach }}"
+            emphasis_2 "{{ $t.pink }}"
+            emphasis_3 "{{ $t.blue }}"
+        }
+        ribbon_unselected {
+            base "{{ $t.crust }}"
+            background "{{ $t.blue }}"
+            emphasis_0 "{{ $t.red }}"
+            emphasis_1 "{{ $t.text }}"
+            emphasis_2 "{{ $t.mauve }}"
+            emphasis_3 "{{ $t.pink }}"
+        }
+        table_title {
+            base "{{ $t.green }}"
+            background 0
+            {{ $emph }}
+        }
+        table_cell_selected {
+            base "{{ $t.text }}"
+            background "{{ $t.surface2 }}"
+            {{ $emph }}
+        }
+        table_cell_unselected {
+            base "{{ $t.text }}"
+            background "{{ $t.mantle }}"
+            {{ $emph }}
+        }
+        list_selected {
+            base "{{ $t.text }}"
+            background "{{ $t.surface2 }}"
+            {{ $emph }}
+        }
+        list_unselected {
+            base "{{ $t.text }}"
+            background "{{ $t.mantle }}"
+            {{ $emph }}
+        }
+        frame_selected {
+            base "{{ $t.green }}"
+            background 0
+            emphasis_0 "{{ $t.peach }}"
+            emphasis_1 "{{ $t.sky }}"
+            emphasis_2 "{{ $t.pink }}"
+            emphasis_3 0
+        }
+        frame_highlight {
+            base "{{ $t.peach }}"
+            background 0
+            emphasis_0 "{{ $t.pink }}"
+            emphasis_1 "{{ $t.peach }}"
+            emphasis_2 "{{ $t.peach }}"
+            emphasis_3 "{{ $t.peach }}"
+        }
+        exit_code_success {
+            base "{{ $t.green }}"
+            background 0
+            emphasis_0 "{{ $t.sky }}"
+            emphasis_1 "{{ $t.mantle }}"
+            emphasis_2 "{{ $t.pink }}"
+            emphasis_3 "{{ $t.blue }}"
+        }
+        exit_code_error {
+            base "{{ $t.red }}"
+            background 0
+            emphasis_0 "{{ $t.yellow }}"
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 "{{ $t.pink }}"
+            player_2 "{{ $t.blue }}"
+            player_3 0
+            player_4 "{{ $t.yellow }}"
+            player_5 "{{ $t.sky }}"
+            player_6 0
+            player_7 "{{ $t.red }}"
+            player_8 0
+            player_9 0
+            player_10 0
+        }
+    }
+}
 
 ui {
     pane_frames {
