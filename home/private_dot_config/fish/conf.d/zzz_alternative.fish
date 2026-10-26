@@ -5,7 +5,7 @@ status is-interactive; or exit
 type -q grc; and __caran_setup_grc
 type -q nvimpager; and alias cat nvimpager
 type -q eza; and alias ls 'eza --icons auto --color=always'
-type -q gping; and alias ping gping
+type -q sping; and alias ping sping
 type -q btop; and alias top btop
 type -q procs; and alias ps procs
 type -q viddy; and alias watch viddy

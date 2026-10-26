@@ -347,7 +347,7 @@ Each is defined only when the replacement is installed.
 |-------|-----------|
 | `cat` | `nvimpager` |
 | `ls` | `eza --icons auto --color=always` |
-| `ping` | `gping` |
+| `ping` | `sping` |
 | `top` / `htop` | `btop` |
 | `ps` | `procs` |
 | `watch` | `viddy` |
