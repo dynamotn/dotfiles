@@ -34,7 +34,10 @@ function _render_settings {
   # Order-independent full-document equality against the captured baseline.
   # The plugin and marketplace lists are left out: they follow the dyai data,
   # which the next test checks, so adding a plugin needs no fixture edit.
-  jq -S 'del(.enabledPlugins, .extraKnownMarketplaces)' "${out}" > "${out}.sorted"
+  # The sandbox denyRead paths are absolute under the working tree, which
+  # differs per checkout, so the repository path is normalized first.
+  jq -S --arg wt "${DOTFILES_DIR}" 'del(.enabledPlugins, .extraKnownMarketplaces)
+    | .sandbox.filesystem.denyRead |= map(sub("^" + $wt; "@DOTFILES@"))' "${out}" > "${out}.sorted"
   diff "${out}.sorted" "${EXPECTED}" \
     || fail "rendered settings.json differs from the pre-dyai baseline"
 }
@@ -88,10 +91,22 @@ function _render_settings {
   _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
   local rule
   for rule in 'Read(**/secrets/data/**)' 'Edit(**/secrets/data/**)' \
-    'Read(~/.ssh/**)' 'Read(**/*.age)' 'Bash(chezmoi-dycrypt:*)'; do
+    'Read(~/.ssh/**)' 'Read(*.age)' 'Bash(chezmoi-dycrypt:*)'; do
     jq -e --arg r "${rule}" '.permissions.deny | index($r) != null' "${out}" > /dev/null \
       || fail "missing deny rule ${rule}"
   done
+}
+
+@test "settings.json keeps the .age deny from exploding the sandbox profile" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json"
+  _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
+  # The sandbox expands a recursive Read deny into one path per match; for
+  # .age that overflowed the bwrap command line (E2BIG).
+  jq -e '.permissions.deny | index("Read(**/*.age)") == null' "${out}" > /dev/null \
+    || fail "Read(**/*.age) is back in the Claude deny list"
+  jq -e --arg s "${DOTFILES_DIR}/secrets" '.sandbox.filesystem.denyRead | index($s) != null' "${out}" > /dev/null \
+    || fail "the sandbox no longer denies reads of secrets/"
 }
 
 @test "settings.json sandboxes bash, so Read denies hold for shell commands too" {
