@@ -67,6 +67,58 @@ function dyai::in_json_file {
 }
 
 #######################################
+# @description Run a third-party install command with stdin closed and a time limit
+# @arg $@ string The command and its arguments
+# @env DYAI_EXTERNAL_TIMEOUT number Seconds before the command is killed (default 300)
+# @exitcode 124 The command timed out; otherwise the command's own exit code
+#######################################
+function dyai::run_external {
+  # A command that waits on stdin or a prompt would hang the whole install.
+  timeout --kill-after=10 "${DYAI_EXTERNAL_TIMEOUT:-300}" "$@" < /dev/null
+}
+
+#######################################
+# @description Hash a file, or every file under a directory with its relative path
+# @arg $1 string Path of the file or directory
+# @stdout The sha256 hex digest
+#######################################
+function dyai::dir_hash {
+  local path
+  dybatpho::expect_args path -- "$@"
+  local sum
+  if dybatpho::is file "${path}"; then
+    sum="$(sha256sum < "${path}")" || return 1
+  else
+    # Paths are part of each line, so a rename changes the digest too.
+    # shellcheck disable=SC2312 # a vanished file only changes the digest
+    sum="$(cd -- "${path}" && find . -type f -exec sha256sum {} + | LC_ALL=C sort -k2 | sha256sum)" \
+      || return 1
+  fi
+  printf '%s\n' "${sum%% *}"
+}
+
+#######################################
+# @description Read, or record, the hash dyai last installed for an item
+# @arg $1 string Kind of item (skills, subagents, codex-agents)
+# @arg $2 string Name of the item
+# @arg $3 string Hash to record; omit to read
+# @stdout The recorded hash when reading, nothing when none was recorded
+#######################################
+function dyai::installed_hash {
+  local kind name
+  dybatpho::expect_args kind name -- "$@"
+  local dir file
+  dir="$(dybatpho::path_join "${HOME}" ".cache" "dyai" "installed" "${kind}")"
+  file="$(dybatpho::path_join "${dir}" "${name}.sha256")"
+  if [[ $# -ge 3 ]]; then
+    dybatpho::ensure_dir "${dir}" > /dev/null
+    printf '%s\n' "$3" > "${file}"
+  elif dybatpho::is file "${file}"; then
+    cat -- "${file}"
+  fi
+}
+
+#######################################
 # @description Read a section of the dyai config as compact JSON
 # @arg $1 string yq path expression, e.g. '.global.mcp // {}'
 # @stdout The section as JSON, or the empty object/array the expression defaults to
@@ -96,8 +148,8 @@ function dyai::setup_marketplaces {
       continue
     fi
     dybatpho::info "Add marketplace ${name}"
-    # stdin is the loop's list; a command that reads it would swallow the rest.
-    claude plugin marketplace add "${source}" < /dev/null || dybatpho::warn "Could not add marketplace ${name}"
+    # stdin is the loop's list; run_external closes it so the command cannot swallow the rest.
+    dyai::run_external claude plugin marketplace add "${source}" || dybatpho::warn "Could not add marketplace ${name}"
   done < <(jq -r 'to_entries[] | [.key, (.value.source.repo // .value.source.url // "")] | @tsv' <<< "${marketplaces}")
 }
 
@@ -119,7 +171,14 @@ function dyai::setup_plugins {
       continue
     fi
     dybatpho::info "Install plugin ${plugin}"
-    claude plugin install "${plugin}" < /dev/null || dybatpho::warn "Could not install plugin ${plugin}"
+    if ! dyai::run_external claude plugin install "${plugin}"; then
+      dybatpho::warn "Could not install plugin ${plugin}"
+      continue
+    fi
+    # Trust the registry, not the exit code: a CLI can exit 0 having done nothing.
+    # shellcheck disable=SC2310 # a missing or non-matching file is a plain no
+    dyai::in_json_file "${installed_file}" ".plugins | has(\"${plugin}\")" \
+      || dybatpho::warn "plugin ${plugin}: installer reported success but it is not in ${installed_file}"
   done < <(dyai::config_json "${all}" | jq -r '.[]')
 }
 
@@ -139,7 +198,14 @@ function dyai::setup_skills {
       continue
     fi
     dybatpho::info "Install skill ${skill}"
-    bunx "${SKILLS_CLI}" add "${skill}" -g -y < /dev/null || dybatpho::warn "Could not install skill ${skill}"
+    if ! dyai::run_external bunx "${SKILLS_CLI}" add "${skill}" -g -y; then
+      dybatpho::warn "Could not install skill ${skill}"
+    # Check by path, not exit code; a dangling symlink fails `is dir` and counts as missing.
+    elif ! dybatpho::is dir "${target}"; then
+      dybatpho::warn "skill ${name}: installer reported success but ${target} is missing"
+    else
+      dyai::installed_hash skills "${name}" "$(dyai::dir_hash "${target}")"
+    fi
   done < <(dyai::config_json '.global.skills // []' | jq -r '.[]')
 }
 
@@ -1438,7 +1504,7 @@ function dyai::setup_installers {
         continue
       fi
       dybatpho::info "Run installer ${name} for ${agent}"
-      if bash -c "${cmd}" < /dev/null; then
+      if dyai::run_external bash -c "${cmd}"; then
         dybatpho::ensure_dir "${dir}" > /dev/null
         : > "${marker}"
       else

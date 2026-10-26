@@ -767,3 +767,60 @@ CFG
   run jq -c '.env' <<< "${output}"
   assert_output null
 }
+
+@test "a skill install that exits 0 but writes nothing is reported" {
+  _stub bunx
+  _write_config
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  SKILLS_DIR="${HOME}/.agents/skills"
+  run dyai::setup_skills
+  assert_success
+  assert_output --partial "installer reported success but ${SKILLS_DIR}/alpha is missing"
+  [[ ! -e "${HOME}/.cache/dyai/installed/skills/alpha.sha256" ]]
+}
+
+@test "a verified skill install records its hash" {
+  printf '#!/usr/bin/env bash\nmkdir -p "%s/.agents/skills/alpha" && echo x > "%s/.agents/skills/alpha/SKILL.md"\n' \
+    "${HOME}" "${HOME}" > "${HOME}/.local/bin/bunx"
+  chmod +x "${HOME}/.local/bin/bunx"
+  _write_config
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  SKILLS_DIR="${HOME}/.agents/skills"
+  dyai::setup_skills
+  [[ -s "${HOME}/.cache/dyai/installed/skills/alpha.sha256" ]]
+}
+
+@test "a hanging installer is cut off and install continues" {
+  _stub opencode
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  installers:
+    a-hang:
+      commands:
+        opencode: "sleep 30"
+    b-ok:
+      commands:
+        opencode: "echo ran >> $HOME/inst.log"
+CFG
+  DYAI_EXTERNAL_TIMEOUT=1 run dyai::setup_installers
+  assert_success
+  assert_output --partial "installer a-hang for opencode failed"
+  grep -qx 'ran' "${HOME}/inst.log"
+}
+
+@test "an installer reading stdin gets EOF" {
+  _stub opencode
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+global:
+  installers:
+    reader:
+      commands:
+        opencode: "read -r x || echo eof >> $HOME/inst.log"
+CFG
+  DYAI_EXTERNAL_TIMEOUT=5 dyai::setup_installers
+  grep -qx 'eof' "${HOME}/inst.log"
+}
