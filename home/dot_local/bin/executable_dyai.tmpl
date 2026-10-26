@@ -32,6 +32,7 @@ function _spec_main {
   dybatpho::opts::cmd drop _spec_drop
   dybatpho::opts::cmd logs _spec_logs
   dybatpho::opts::cmd selftest _spec_selftest
+  dybatpho::opts::cmd eval _spec_eval
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
@@ -199,6 +200,16 @@ function _spec_selftest {
 }
 
 #######################################
+# @description Spec of eval command
+# @noargs
+#######################################
+function _spec_eval {
+  dybatpho::opts::setup "Run the agent setup regression cases (spends quota)" EVAL_ARGS action:"_eval"
+  dybatpho::opts::param "Agent to run the cases on" AGENT --agent -a init:="auto"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_eval"
+}
+
+#######################################
 # @description Run the global install
 # @noargs
 #######################################
@@ -338,6 +349,15 @@ function _selftest {
     dyai_crew::selftest "${agent}" || rc=1
   done
   return "${rc}"
+}
+
+#######################################
+# @description Run the eval cases
+# @noargs
+#######################################
+# dyshellint disable=SC2154 AGENT and EVAL_ARGS are assigned by dybatpho::opts from _spec_eval
+function _eval {
+  dyai_crew::eval "${AGENT}" "${EVAL_ARGS[@]}"
 }
 
 dybatpho::generate_from_spec _spec_main "$@"
