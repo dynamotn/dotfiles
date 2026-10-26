@@ -1,0 +1,22 @@
+# Showing diffs
+
+These rules apply whenever an AI agent shows the user a diff: its own
+changes, a commit, a branch, or two files.
+
+- Do not paste a raw unified diff into the reply. Describe the change in
+  prose, and open the diff side by side where the user can read it.
+- Open it with `hunk` in a new pane of the user's terminal, never inside the
+  agent's own shell, because hunk is an interactive TUI:
+  - inside zellij (`$ZELLIJ` is set):
+    `zellij run --floating --close-on-exit --cwd <repo> -- hunk diff`
+  - inside kitty (`$KITTY_LISTEN_ON` is set):
+    `kitty @ launch --type=tab --cwd=<repo> hunk diff`
+  - anywhere else, give the user the command to run themselves.
+- Pick the subcommand that matches what is shown: `hunk diff` for the working
+  tree, `hunk diff --staged`, `hunk show <rev>` for a commit,
+  `hunk diff <from> <to>` for a range, `hunk diff --files <a> <b>` for two
+  files. hunk reads `~/.config/hunk/config.toml`, which forces split layout.
+- When `hunk` is not installed, open `git diff` (or `git show`) the same way
+  instead; git pages it through delta, already set to side-by-side.
+- To point at lines or leave notes in a hunk window that is already open, load
+  the `hunk-review` skill and drive it with `hunk session`.
