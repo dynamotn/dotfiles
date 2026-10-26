@@ -52,6 +52,82 @@ function _documented_repos {
   sort -u <<< "${links,,}"
 }
 
+# Write a definition $1 (file name) under DEFS with the given doc block body $2
+# and definition text $3.
+function _def {
+  printf '{{- /* doc\n%s\n*/ -}}\n%s\n' "${2}" "${3}" > "${DEFS}/${1}"
+}
+
+# A small tree of definitions, an extra file and a categories file covering
+# every row shape: default and explicit url, `url: none`, label, order.
+function _docs_fixture {
+  DEFS="${BATS_TEST_TMPDIR}/defs"
+  EXTRA="${BATS_TEST_TMPDIR}/extra.yaml"
+  CATS="${BATS_TEST_TMPDIR}/categories.yaml"
+  mkdir -p "${DEFS}"
+  cat > "${CATS}" << 'EOT'
+- category: A
+  subcategories: [x, y]
+- category: B
+  subcategories: [z]
+- category: C
+  subcategories: [w]
+EOT
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  _def tool.yaml.tmpl 'name: tool
+description: "Tool `grep`: faster"
+category: A
+subcategory: y' 'name: tool
+method: binary
+github:
+  repo: o/tool'
+  _def rg.yaml.tmpl 'name: rg
+label: ripgrep
+description: a | b
+category: A
+subcategory: x
+order: 20' 'name: rg
+method: binary
+github:
+  repo: BurntSushi/ripgrep'
+  _def fd.yaml 'name: fd
+url: https://example.com/fd
+description: Find files
+category: A
+subcategory: x
+order: 10' 'name: fd
+method: mise'
+  _def aa.yaml 'name: aa
+description: No order
+category: A
+subcategory: x' 'name: aa
+method: binary
+github:
+  repo: o/aa'
+  _def ssh.yaml 'name: ssh
+url: none
+description: SSH client
+category: B
+subcategory: z' 'name: ssh
+method: os'
+  cat > "${EXTRA}" << 'EOT'
+- name: drivers
+  label: GPU drivers
+  url: none
+  description: Graphics drivers
+  category: B
+  subcategory: z
+  order: 5
+EOT
+}
+
+# Run collect over the fixture and render its result into `output`.
+function _generate {
+  local json
+  json="$(dytoy_docs::collect "${DEFS}" "${EXTRA}" "${CATS}")" || return
+  dytoy_docs::render "${CATS}" <<< "${json}"
+}
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
@@ -127,4 +203,128 @@ EOT
   run dytoy_docs::strip "${BATS_TEST_TMPDIR}/late.yaml"
   assert_success
   assert_output "$(< "${BATS_TEST_TMPDIR}/late.yaml")"
+}
+
+@test "url defaults to the github repo" {
+  _docs_fixture
+  run _generate
+  assert_success
+  assert_line '|[aa](https://github.com/o/aa)|No order|'
+}
+
+@test "label overrides name in the link text" {
+  _docs_fixture
+  run _generate
+  assert_success
+  assert_line --partial '|[ripgrep](https://github.com/BurntSushi/ripgrep)|'
+}
+
+@test "url none renders a plain cell" {
+  _docs_fixture
+  run _generate
+  assert_success
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  assert_line '|`ssh`|SSH client|'
+}
+
+@test "rows sort by subcategory then order then label" {
+  _docs_fixture
+  _def bb.yaml 'name: bb
+description: Also no order
+category: A
+subcategory: x' 'name: bb
+method: binary
+github:
+  repo: o/bb'
+  _def Ab.yaml 'name: Ab
+description: Capital
+category: A
+subcategory: x' 'name: Ab
+method: binary
+github:
+  repo: o/Ab'
+  run _generate
+  assert_success
+  local rows
+  rows="$(grep -oE '^\|\[[^]]+\]' <<< "${output}")"
+  assert_equal "${rows//$'\n'/,}" '|[fd],|[ripgrep],|[aa],|[Ab],|[bb],|[tool]'
+}
+
+@test "extra entries merge into their category" {
+  _docs_fixture
+  run _generate
+  assert_success
+  local section plain
+  section="$(sed -n '/^## B$/,/^## /p' <<< "${output}")"
+  plain="$(grep '^|`' <<< "${section}")"
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  assert_equal "${plain}" '|`GPU drivers`|Graphics drivers|
+|`ssh`|SSH client|'
+}
+
+@test "unknown subcategory dies" {
+  _docs_fixture
+  _def bad.yaml 'name: bad
+description: Bad
+category: A
+subcategory: nope' 'name: bad
+method: os'
+  run _generate
+  assert_failure
+  assert_output --partial 'bad.yaml'
+  assert_output --partial 'subcategory'
+}
+
+@test "duplicate name across files dies" {
+  _docs_fixture
+  _def again.yaml 'name: fd
+url: none
+description: Again
+category: A
+subcategory: x' 'name: fd
+method: os'
+  run _generate
+  assert_failure
+  assert_output --partial 'fd.yaml'
+  assert_output --partial 'again.yaml'
+}
+
+@test "name without matching definition dies" {
+  _docs_fixture
+  _def typo.yaml 'name: tpyo
+url: none
+description: Typo
+category: A
+subcategory: x' 'name: typo
+method: os'
+  run _generate
+  assert_failure
+  assert_output --partial 'typo.yaml'
+  assert_output --partial 'tpyo'
+}
+
+@test "render escapes pipe" {
+  _docs_fixture
+  run _generate
+  assert_success
+  assert_line '|[ripgrep](https://github.com/BurntSushi/ripgrep)|a \| b|'
+}
+
+@test "description with colon and backticks round-trips" {
+  _docs_fixture
+  run _generate
+  assert_success
+  # dyshellint disable=SC2016 the backticks are literal markdown, not a command
+  assert_line '|[tool](https://github.com/o/tool)|Tool `grep`: faster|'
+}
+
+@test "empty category emits no heading" {
+  _docs_fixture
+  run _generate
+  assert_success
+  refute_line '## C'
+  assert_line --index 0 '<!-- dytoy:begin (generated by scripts/dytoy_docs.sh, do not edit) -->'
+  assert_line '## A'
+  assert_line '## B'
+  assert_equal "${lines[-1]}" '<!-- dytoy:end -->'
 }
