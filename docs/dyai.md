@@ -363,7 +363,7 @@ skills, MCP servers and policy `dyai install` gave it. The design is in
 
 | Command | What it does |
 |---------|--------------|
-| `dyai run [--agent A\|auto] [--plan FILE] [--detach] PROMPT` | Create `.worktrees/crew-<id>` on branch `crew/<id>` from `HEAD`, run the agent there, commit what it left. `auto` walks `global.crew.fallback`. `PROMPT` may be `-` (stdin). Prints the task id. |
+| `dyai run [--agent A\|auto] [--plan FILE] [--detach] PROMPT` | Create `.worktrees/crew-<id>` on branch `crew/<id>` from `HEAD`, run the agent there, commit what it left. `auto` walks `global.crew.fallback`. `PROMPT` may be `-` (stdin). Prints the task id. Ctrl-C stops the agent too and records the task `interrupted`. |
 | `dyai tasks` | One line per task: `id`, status, agent, summary. A dead `running` task reads `lost`. |
 | `dyai logs [--follow] [--err] ID` | The agent's stdout (or stderr). Options always come before the id or the prompt: parsing stops at the first argument. |
 | `dyai review [--by A] [--detach] ID` | A read-only review by another agent; records `pass`, `fail` or `unknown`. |
@@ -371,7 +371,7 @@ skills, MCP servers and policy `dyai install` gave it. The design is in
 | `dyai merge ID` | Merge a reviewed task into the current branch (see below). |
 | `dyai drop ID... \| --finished` | Remove worktrees; delete branches only once merged (`git branch -d`). |
 | `dyai eval [--agent A] [CASE...]` | Spends quota. Runs the cases in `scripts/test/evals/` (a seeded scratch repo, a task, a `check.sh`) and prints `PASS`, `FAIL` or `BLOCKED` per case. Run it after changing an `ai/` partial, a hook or the policy; add a case after each incident. |
-| `dyai selftest [AGENT...]` | Spends quota. Asks each agent to run `dyai-selftest-probe allow` and `deny`, with an allow flag that admits both, so only the shared deny rule `Bash(dyai-selftest-probe deny *)` can stop the second. The result is checked against the [enforcement table](#permissions-in-other-agents): `PASS`, `FAIL`, or `BLOCKED` (the agent could not run, or ran no command). |
+| `dyai selftest [AGENT...]` | Spends quota. Asks each agent to run `dyai-selftest-probe allow` and `deny`, with an allow flag that admits both, so only the shared deny rule `Bash(dyai-selftest-probe deny *)` can stop the second. The result is checked against the [enforcement table](#permissions-in-other-agents): `PASS`, `FAIL`, or `BLOCKED` (the agent could not run, ran no command, or never tried the denied call: a missing `deny` marker counts only when the agent's output shows the attempt). |
 
 A task id reads `<date>-<time>-<agent>-<4 hex>`. Task state is one
 append-only `tasks.jsonl` in `<main checkout>/.dyai/crew/`, next to each
@@ -418,7 +418,10 @@ a kitty tab. `dyai-hunk` opens through the same path.
 **From an agent.** `dyai mcp` serves the crew as tools too: `crew_run`
 (always detached; returns the id), `crew_tasks`, `crew_review` and `crew_fix`
 (detached), `crew_merge`, `crew_drop` and `crew_logs`. Every id, agent and plan
-path is checked before anything runs; a prompt is passed as one string.
+path is checked before anything runs; a prompt is passed as one string. A plan
+must be inside the repository, and neither under a `global.crew.fences` path
+nor in `.git/` (the CLI refuses those too): dyai reads it itself and sends it
+to other providers.
 
 **Lean workers.** `global.crew.profile: lean` (the default) keeps each worker
 small. Claude gets `--setting-sources project,local` plus the permission

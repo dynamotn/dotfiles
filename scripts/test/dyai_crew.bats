@@ -961,7 +961,9 @@ function _probe_agent {
   local calls find
   # shellcheck disable=SC2016 # expands when the stub runs
   case "${2}" in
-    allow) calls='dyai-selftest-probe allow "${dir}"' ;;
+    # The attempt shows in the output stream, as a refused tool call does.
+    allow) calls='dyai-selftest-probe allow "${dir}"; echo "{\"tool\":\"dyai-selftest-probe deny ${dir}\"}"' ;;
+    quiet) calls='dyai-selftest-probe allow "${dir}"' ;;
     deny) calls='dyai-selftest-probe deny "${dir}"' ;;
     both) calls='dyai-selftest-probe allow "${dir}"; dyai-selftest-probe deny "${dir}"' ;;
     *) calls=true ;;
@@ -1195,4 +1197,87 @@ function _claude_home {
   [[ "${c[-1]}" == - ]] || fail "codex must keep - last: ${c[*]}"
   dyai_crew::cmd gemini rw /dev/null c
   [[ " ${c[*]} " != *" --pure "* ]]
+}
+
+@test "run records a prompt larger than one argument can hold" {
+  _agent claude "${DONE}"
+  local big
+  head -c 200000 /dev/zero > "${BATS_TEST_TMPDIR}/big0"
+  tr '\0' '"' < "${BATS_TEST_TMPDIR}/big0" > "${BATS_TEST_TMPDIR}/big"
+  big="$(< "${BATS_TEST_TMPDIR}/big")"
+  run dyai_crew::run claude "${big}"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  run _field "${id}" '.status, (.prompt | length)'
+  assert_output "$(printf 'done\n200000')"
+}
+
+@test "run caps a huge summary from the result file" {
+  local body='echo w >> f.txt; { printf "{\"status\":\"done\",\"summary\":\""'
+  body+='; head -c 200000 /dev/zero | tr "\\0" a; printf "\"}"; } > .dyai-result.json'
+  _agent claude "${body}"
+  run dyai_crew::run claude "x"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  run _field "${id}" '.status, (.summary | length)'
+  assert_output "$(printf 'done\n500')"
+}
+
+@test "review never writes the diff through a link the writer planted" {
+  local victim="${BATS_TEST_TMPDIR}/victim"
+  printf 'keep\n' > "${victim}"
+  _agent claude "head -c 200000 /dev/zero | tr '\\0' a > big.txt; ln -s ${victim} .dyai-review.diff; ${DONE}"
+  run dyai_crew::run claude "x"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  _copilot_says pass
+  run dyai_crew::review "${id}" copilot
+  assert_success
+  run cat "${victim}"
+  assert_output keep
+}
+
+@test "run refuses a plan under a fence or in .git, before making a worktree" {
+  _agent claude "${DONE}"
+  printf 'k\n' > "${REPO}/x.age"
+  mkdir -p "${REPO}/sub/secrets"
+  printf 'k\n' > "${REPO}/sub/secrets/a.yaml"
+  local plan
+  for plan in "${REPO}/x.age" "${REPO}/.git/config" "${REPO}/sub/secrets/a.yaml"; do
+    run dyai_crew::run claude "x" "${plan}"
+    assert_failure
+    assert_output --partial "fenced"
+  done
+  run git -C "${REPO}" worktree list
+  [[ "${#lines[@]}" -eq 1 ]] || fail "a worktree was made: ${output}"
+}
+
+@test "a stopped run stops its agent and records the task interrupted" {
+  _agent claude 'echo $$ > '"${BATS_TEST_TMPDIR}"'/agent.pid; sleep 30'
+  dyai_crew::run claude "x" > "${BATS_TEST_TMPDIR}/run.out" 2>&1 &
+  local p=$! i apid
+  for i in {1..100}; do
+    [[ ! -s "${BATS_TEST_TMPDIR}/agent.pid" ]] || break
+    sleep 0.1
+  done
+  kill -TERM "${p}"
+  wait "${p}" || true
+  apid="$(< "${BATS_TEST_TMPDIR}/agent.pid")"
+  for i in {1..20}; do
+    kill -0 "${apid}" 2> /dev/null || break
+    sleep 0.1
+  done
+  ! kill -0 "${apid}" 2> /dev/null || fail "agent ${apid} still running after ${i} tries"
+  run jq -r .status "${REPO}/.dyai/crew/tasks.jsonl"
+  assert_line --index -1 interrupted
+}
+
+@test "selftest is blocked when the agent never tried the denied call" {
+  _probe_agent claude quiet
+  run dyai_crew::selftest claude
+  assert_failure
+  assert_output --partial "BLOCKED: agent did not try the denied call"
 }

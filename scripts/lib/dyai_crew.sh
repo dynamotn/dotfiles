@@ -18,6 +18,11 @@ DYAI_CREW_BLOCKED_RE+='|api key is missing|ProviderAuthError|login required'
 DYAI_CREW_STDIN=/dev/null
 # A diff above this many bytes goes to the reviewer as a file, not inline.
 DYAI_CREW_INLINE_DIFF=96000
+# A worker's summary is cut to this many characters.
+DYAI_CREW_SUMMARY_MAX=500
+# Paths a worker must not touch and a plan must not come from, unless the config says otherwise.
+DYAI_CREW_FENCES='[":(glob).github/**",":(glob)**/.chezmoiscripts/**",":(glob)secrets/**",":(glob)**/*.age"'
+DYAI_CREW_FENCES+=',":(glob)**/.env*"]'
 # What every worker is told on top of its task.
 # shellcheck disable=SC2016 # Markdown backticks, not command substitution
 DYAI_CREW_CONTRACT='
@@ -274,8 +279,9 @@ function __dyai_crew_last {
   dybatpho::expect_args log id -- "$@"
   dybatpho::is file "${log}" || return 0
   local lines
+  # tail, not ${lines##*$'\n'}: that expansion is quadratic on a large state.
   lines="$(jq -c --arg id "${id}" 'select(.id == $id)' "${log}" 2> /dev/null)" || return 0
-  [[ -z "${lines}" ]] || printf '%s\n' "${lines##*$'\n'}"
+  [[ -z "${lines}" ]] || tail -n 1 <<< "${lines}"
 }
 
 #######################################
@@ -295,8 +301,10 @@ function dyai_crew::record {
     # writers start from the same state and drop each other's fields.
     flock 9
     old="$(__dyai_crew_last "${log}" "${id}")"
-    new="$(jq -cn --argjson o "${old:-null}" --argjson n "${json}" --arg id "${id}" --arg ts "${ts}" \
-      '($o // {}) * $n + {id: $id, ts: $ts}')" || dybatpho::die "record ${id}: fields are not a JSON object"
+    # Through stdin, not argv: a state over 128 KiB is too long for one argument.
+    new="$(printf '%s\n%s\n' "${old:-null}" "${json}" | jq -cn --arg id "${id}" --arg ts "${ts}" \
+      'input as $o | input as $n | ($o // {}) * $n + {id: $id, ts: $ts}')" \
+      || dybatpho::die "record ${id}: fields are not a JSON object"
     printf '%s\n' "${new}" >> "${log}"
   } 9>> "${dir}/tasks.lock"
   before="$(jq -r '.status // ""' <<< "${old:-null}")"
@@ -455,6 +463,17 @@ function __dyai_crew_pane {
 }
 
 #######################################
+# @description Stop an agent's process group when dyai itself is stopped
+# @arg $1 number The agent's pid, which leads its process group; 0 before it started
+#######################################
+function __dyai_crew_stop {
+  local pid
+  dybatpho::expect_args pid -- "$@"
+  [[ "${pid}" != 0 ]] || return 0
+  kill -TERM -- "-${pid}" 2> /dev/null || kill -TERM -- "${pid}" 2> /dev/null || true
+}
+
+#######################################
 # @description Run an agent command line in a worktree, in its own process group, under a time limit
 # @arg $1 string Task id (exported to the agent as DYAI_CREW)
 # @arg $2 string Agent
@@ -477,6 +496,18 @@ function __dyai_crew_exec {
   # Its own process group, so a timeout can take the CLI's children with it.
   # shortcut: no setsid (macOS) leaves grandchildren after a timeout; add a pgid-aware kill when needed.
   ! dybatpho::is command setsid || __dyai_crew_exec_group=(setsid)
+  # The agent is in its own session, out of reach of the terminal's Ctrl-C:
+  # stopping dyai has to stop it too. Same dance as dybatpho's lock: our
+  # handler alone while the agent runs, set before it starts so no signal slips
+  # past; then the caller's back, and the signal raised again for them.
+  local __dyai_crew_exec_pid=0 __dyai_crew_exec_traps __dyai_crew_exec_caught="" __dyai_crew_exec_sig
+  __dybatpho_process_traps_save_into __dyai_crew_exec_traps INT TERM
+  for __dyai_crew_exec_sig in INT TERM; do
+    # shellcheck disable=SC2016 # the pid is read when the signal comes
+    __dybatpho_process_trap_only \
+      "__dyai_crew_exec_caught=${__dyai_crew_exec_sig}; "'__dyai_crew_stop "${__dyai_crew_exec_pid}"' \
+      "${__dyai_crew_exec_sig}"
+  done
   (
     cd "${__dyai_crew_exec_wt}" || exit 1
     DYAI_CREW="${__dyai_crew_exec_id}" exec ${__dyai_crew_exec_group[@]+"${__dyai_crew_exec_group[@]}"} \
@@ -484,8 +515,11 @@ function __dyai_crew_exec {
       ${__dyai_crew_exec_cmd[@]+"${__dyai_crew_exec_cmd[@]}"} \
       < "${DYAI_CREW_STDIN}" > "${__dyai_crew_exec_out}" 2> "${__dyai_crew_exec_err}"
   ) &
-  local __dyai_crew_exec_pid=$! __dyai_crew_exec_start="" __dyai_crew_exec_fields __dyai_crew_exec_rc=0
-  if [[ "${__dyai_crew_exec_track}" == task ]]; then
+  __dyai_crew_exec_pid=$!
+  local __dyai_crew_exec_start="" __dyai_crew_exec_fields __dyai_crew_exec_rc=0
+  # A signal before this point found no pid to stop.
+  [[ -z "${__dyai_crew_exec_caught}" ]] || __dyai_crew_stop "${__dyai_crew_exec_pid}"
+  if [[ "${__dyai_crew_exec_track}" == task && -z "${__dyai_crew_exec_caught}" ]]; then
     __dyai_crew_exec_start="$(ps -o lstart= -p "${__dyai_crew_exec_pid}" 2> /dev/null)" || __dyai_crew_exec_start=""
     __dyai_crew_exec_fields="$(jq -cn --arg a "${__dyai_crew_exec_agent}" --argjson p "${__dyai_crew_exec_pid}" \
       --arg s "${__dyai_crew_exec_start}" '{status: "running", agent: $a, pid: $p, pid_start: $s}')"
@@ -495,6 +529,17 @@ function __dyai_crew_exec {
       dyai logs --follow "${__dyai_crew_exec_id}"
   fi
   wait "${__dyai_crew_exec_pid}" || __dyai_crew_exec_rc=$?
+  __dybatpho_process_traps_restore "${__dyai_crew_exec_traps}" INT TERM
+  if [[ -n "${__dyai_crew_exec_caught}" ]]; then
+    # Recorded here, not in the handler: the signal may have come while
+    # record held the task lock.
+    if [[ "${__dyai_crew_exec_track}" == task ]]; then
+      dyai_crew::record "${__dyai_crew_exec_id}" \
+        '{"status":"interrupted","summary":"stopped before it finished","pid":null}'
+    fi
+    kill -s "${__dyai_crew_exec_caught}" "${BASHPID}"
+    return 130
+  fi
   # Anything the CLI left running in its group goes too.
   [[ "${#__dyai_crew_exec_group[@]}" -eq 0 ]] || kill -TERM -- "-${__dyai_crew_exec_pid}" 2> /dev/null || true
   return "${__dyai_crew_exec_rc}"
@@ -545,6 +590,8 @@ function dyai_crew::attempt {
     summary="$(jq -r '.summary // "" | tostring' <<< "${result}" 2> /dev/null)" || summary=""
     [[ "${result}" != null ]] || summary="no result file"
   fi
+  # It ends up in argv (git commit -m, jq --arg); the agent controls its size.
+  summary="${summary:0:${DYAI_CREW_SUMMARY_MAX}}"
   # Commit what the agent left, on its own branch only.
   if [[ "${branch}" == "crew/${id}" ]]; then
     git -C "${wt}" add -A
@@ -584,6 +631,42 @@ function dyai_crew::attempt {
 }
 
 #######################################
+# @description Tell whether a file inside this repository matches a fence or sits in a .git directory
+# @arg $1 string File path
+# @exitcode 0 Fenced
+#######################################
+function __dyai_crew_fenced {
+  local file
+  dybatpho::expect_args file -- "$@"
+  local root real rel fences_json fence pattern
+  root="$(dyai_crew::main_checkout)" || return 1
+  root="$(realpath -e -- "${root}")" || return 1
+  real="$(realpath -e -- "${file}")" || return 1
+  [[ "${real}" == "${root}"/* ]] || return 1
+  rel="${real#"${root}"/}"
+  local -a fences=() tails=()
+  fences_json="$(dyai_crew::conf '.global.crew.fences' "${DYAI_CREW_FENCES}")"
+  mapfile -t fences < <(jq -r '.[]' <<< "${fences_json}" || true)
+  # Each tail of the path counts, so a fence also covers the same path inside a
+  # worktree or a submodule. A `*` here also crosses `/`: it fences more, never less.
+  while :; do
+    tails+=("${rel}")
+    [[ "${rel}" == */* ]] || break
+    rel="${rel#*/}"
+  done
+  for rel in ${tails[@]+"${tails[@]}"}; do
+    [[ "${rel}" != .git/* && "${rel}" != .git ]] || return 0
+    for fence in ${fences[@]+"${fences[@]}"}; do
+      pattern="${fence#:(glob)}"
+      pattern="${pattern//\*\*\//@(*/|)}"
+      # shellcheck disable=SC2053 # the fence is a glob
+      [[ "${rel}" != ${pattern} && "${rel}" != ${pattern}/* ]] || return 0
+    done
+  done
+  return 1
+}
+
+#######################################
 # @description Create a task: its worktree, prompt file and first record
 # @arg $1 string Task id
 # @arg $2 string Agent
@@ -620,7 +703,7 @@ function __dyai_crew_create {
     } >> "${pfile}"
   fi
   printf '%s' "${DYAI_CREW_CONTRACT}" >> "${pfile}"
-  fields="$(jq -cn --arg id "${id}" --arg a "${agent}" --arg p "${prompt}" \
+  fields="$(jq -cn --arg id "${id}" --arg a "${agent}" --rawfile p <(printf '%s' "${prompt}") \
     --arg w "${wt}" --arg b "${base}" --arg plan "${plan_copy}" \
     '{status: "open", agent: $a, prompt: $p, branch: ("crew/" + $id), worktree: $w, base: $b,
       plan: (if $plan == "" then null else $plan end)}')"
@@ -697,6 +780,12 @@ function dyai_crew::run {
   dybatpho::expect_args agent prompt -- "$@"
   local plan="${3:-}" detach="${4:-}"
   [[ -z "${plan}" ]] || dybatpho::is file "${plan}" || dybatpho::die "no such plan file: ${plan}"
+  # dyai reads the plan itself and sends it to other providers: one under a
+  # fence would carry a credential past every agent's deny rules.
+  # shellcheck disable=SC2310 # a plain yes/no
+  if [[ -n "${plan}" ]] && __dyai_crew_fenced "${plan}"; then
+    dybatpho::die "the plan is fenced (global.crew.fences or .git): ${plan}"
+  fi
   local base dirty agents="" a
   base="$(git rev-parse HEAD)" || dybatpho::die "dyai run needs a commit to start from"
   dirty="$(git status --porcelain 2> /dev/null)" || dirty=""
@@ -765,6 +854,9 @@ function __dyai_crew_review_prompt {
     fi
     printf '\n## The change\n\n'
     if ((size > DYAI_CREW_INLINE_DIFF)); then
+      # The writer owns the worktree: a link it left there would aim this
+      # write anywhere the user can write. Replace whatever is at the path.
+      rm -rf -- "${wt:?}/.dyai-review.diff"
       cp -- "${diff}" "${wt}/.dyai-review.diff"
       # shellcheck disable=SC2016 # Markdown backticks
       printf 'The diff is in `.dyai-review.diff` at the root of this directory (%s bytes). Read it.\n' "${size}"
@@ -979,8 +1071,7 @@ function __dyai_crew_merge {
   summary="$(jq -r '.summary // ""' <<< "${state}")"
   local fences_json fenced fields
   local -a fences=()
-  fences_json="$(dyai_crew::conf '.global.crew.fences' \
-    '[":(glob).github/**",":(glob)**/.chezmoiscripts/**",":(glob)secrets/**",":(glob)**/*.age",":(glob)**/.env*"]')"
+  fences_json="$(dyai_crew::conf '.global.crew.fences' "${DYAI_CREW_FENCES}")"
   mapfile -t fences < <(jq -r '.[]' <<< "${fences_json}" || true)
   if ((${#fences[@]} > 0)); then
     fenced="$(git diff --name-only "${base}..${head}" -- ${fences[@]+"${fences[@]}"})" || fenced=""
@@ -1154,6 +1245,18 @@ function __dyai_crew_selftest_in {
   if [[ ! -e "${marks}/allow" ]]; then
     printf 'BLOCKED: agent ran no command\n'
     return 1
+  fi
+  # A missing deny marker proves nothing unless the agent tried the call: its
+  # output stream names the command, on a line that is not the prompt echoed back.
+  if [[ ! -e "${marks}/deny" ]]; then
+    local named tried
+    named="$(grep -F -- "dyai-selftest-probe deny ${marks}" "${out}" 2> /dev/null)" || named=""
+    tried="$(grep -c -v -F -- 'This is a test of your shell permission rules' <<< "${named}")" || tried=0
+    [[ -n "${named}" ]] || tried=0
+    if [[ "${tried}" -eq 0 ]]; then
+      printf 'BLOCKED: agent did not try the denied call\n'
+      return 1
+    fi
   fi
   local cell
   cell="$(__dyai_crew_shell_cell "${agent}")"
