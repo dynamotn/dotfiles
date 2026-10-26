@@ -1,12 +1,49 @@
 # Always side by side, even in a narrow pane.
 mode = "split"
 line_numbers = true
-{{- $theme := "catppuccin-macchiato" }}
+# Show agent notes (session comments, the `dyai-hunk` sidecar) on open.
+agent_notes = true
+{{- $flavor := "macchiato" }}
 {{- if not .darkMode }}
-{{-   $theme = "catppuccin-latte" }}
+{{-   $flavor = "latte" }}
 {{- end }}
+{{- $t := get .catppuccin $flavor }}
+{{- $accent := get $t .catppuccin.variant }}
 # Same catppuccin flavor as Neovim and the terminal.
-theme = "{{ $theme }}"
+theme = "catppuccin"
+
+# The built-in catppuccin themes only color the code: hunk derives the chrome
+# from grey blends with a yellow accent. Paint it from the palette instead;
+# the added/removed row tints stay derived from the base.
+[themes.catppuccin]
+label = "Catppuccin {{ title $flavor }}"
+base = "catppuccin-{{ $flavor }}"
+background = "{{ $t.base }}"
+panel = "{{ $t.mantle }}"
+panelAlt = "{{ $t.surface0 }}"
+border = "{{ $t.surface1 }}"
+accent = "{{ $accent }}"
+accentMuted = "{{ $t.surface1 }}"
+text = "{{ $t.text }}"
+muted = "{{ $t.overlay1 }}"
+contextBg = "{{ $t.base }}"
+contextContentBg = "{{ $t.base }}"
+addedSignColor = "{{ $t.green }}"
+removedSignColor = "{{ $t.red }}"
+lineNumberBg = "{{ $t.base }}"
+lineNumberFg = "{{ $t.overlay0 }}"
+badgeAdded = "{{ $t.green }}"
+badgeRemoved = "{{ $t.red }}"
+badgeNeutral = "{{ $t.overlay1 }}"
+fileNew = "{{ $t.green }}"
+fileDeleted = "{{ $t.red }}"
+fileRenamed = "{{ $t.blue }}"
+fileModified = "{{ $t.yellow }}"
+fileUntracked = "{{ $t.teal }}"
+noteBorder = "{{ $t.mauve }}"
+noteBackground = "{{ $t.mantle }}"
+noteTitleBackground = "{{ $t.surface0 }}"
+noteTitleText = "{{ $t.mauve }}"
 
 # Hunk ships Vim-like keys (j/k, g/G, ctrl+d/u, /, n/N, v, y); these add what
 # the Neovim config has on top. A listed command answers only to these keys.

@@ -7,6 +7,10 @@ setup() {
   REPO="${BATS_TEST_TMPDIR}/repo"
   # dyshellint disable=BSG062 test_helper, loaded above, unsets GIT_DIR and its kin
   git init -q "${REPO}"
+  # git reports the resolved path: macOS temp dirs sit behind a /private symlink.
+  REPO="$(cd "${REPO}" && pwd -P)"
+  NOTES="${REPO}/.git/dyai-hunk.json"
+  HUNK_CMD="hunk diff --watch --agent-context ${NOTES}"
   unset ZELLIJ KITTY_LISTEN_ON
   # hunk: `session get` succeeds only when HUNK_LIVE=1.
   # shellcheck disable=SC2016 # the stub body expands at its own run time
@@ -33,7 +37,7 @@ function _launches {
   assert_success
   local got
   got="$(_launches)"
-  [[ "${got}" == "kitty @ launch --type=tab --keep-focus --cwd=${REPO} hunk diff --watch" ]]
+  [[ "${got}" == "kitty @ launch --type=tab --keep-focus --cwd=${REPO} ${HUNK_CMD}" ]]
 }
 
 @test "dyai-hunk prefers a zellij floating pane inside zellij" {
@@ -42,7 +46,18 @@ function _launches {
   assert_success
   local got
   got="$(_launches)"
-  [[ "${got}" == "zellij run --floating --close-on-exit --cwd ${REPO} -- hunk diff --watch" ]]
+  [[ "${got}" == "zellij run --floating --close-on-exit --cwd ${REPO} -- ${HUNK_CMD}" ]]
+}
+
+@test "dyai-hunk creates an empty notes sidecar but keeps an agent's own" {
+  touch "${REPO}/new"
+  cd "${REPO}" && KITTY_LISTEN_ON=unix:/tmp/kitty-test run dyai_hunk::main
+  run cat "${NOTES}"
+  [[ "${output}" == '{}' ]]
+  echo '{"files":[]}' > "${NOTES}"
+  KITTY_LISTEN_ON=unix:/tmp/kitty-test run dyai_hunk::main
+  run cat "${NOTES}"
+  [[ "${output}" == '{"files":[]}' ]]
 }
 
 @test "dyai-hunk opens nothing on a clean checkout, outside git, or with a live session" {

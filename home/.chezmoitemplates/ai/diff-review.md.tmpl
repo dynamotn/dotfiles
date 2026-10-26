@@ -15,6 +15,11 @@ changes, a commit, a branch, or two files.
 - Every agent's stop hook runs `dyai-hunk`, which opens `hunk diff --watch`
   for a changed working tree, once per checkout. Do not open a second window
   for the working tree; open one only for anything else.
+- To explain a non-obvious edit before stopping, write hunk's agent-context
+  JSON to `$(git rev-parse --git-path dyai-hunk.json)`, replacing what an
+  earlier task left there: `{"summary": …, "files": [{"path": …,
+  "annotations": [{"newRange": [start, end], "summary": …, "rationale": …}]}]}`.
+  `dyai-hunk` loads it as agent notes, which hunk shows on open.
 - Pick the subcommand that matches what is shown: `hunk diff` for the working
   tree, `hunk diff --staged`, `hunk show <rev>` for a commit,
   `hunk diff <from> <to>` for a range, `hunk diff --files <a> <b>` for two
