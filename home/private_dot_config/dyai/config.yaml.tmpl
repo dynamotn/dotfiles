@@ -154,10 +154,11 @@ global:
     stop:
       event: stop
       # dyai-hunk opens the changes side by side; Claude and opencode wire it on their own.
-      run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Task finished!' --icon=dialog-information; command -v dyai-hunk > /dev/null 2>&1 && dyai-hunk; true"
+      # A crew worker (DYAI_CREW set) stays quiet: nobody is at its desktop.
+      run: "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Task finished!' --icon=dialog-information; command -v dyai-hunk > /dev/null 2>&1 && dyai-hunk; true"
     input:
       event: input
-      run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Waiting for your input!' --icon=dialog-information; true"
+      run: "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Waiting for your input!' --icon=dialog-information; true"
   # Tools with their own per-agent installer, run once by `dyai install`.
   installers:
     # claude-mem (memory across sessions). Claude gets it via the plugin above
@@ -185,6 +186,26 @@ global:
   # Shared settings translated into each agent's settings file.
   policy:
 {{ $d.policy | toYaml | indent 4 }}
+  # dyai run / review / merge: headless agents in their own worktrees.
+  # docs/dyai.md#crew. claude and copilot first: the two verified live.
+  crew:
+    fallback: [claude, copilot, gemini, opencode, codex]
+    reviewer: {claude: copilot, copilot: claude, gemini: claude, opencode: claude, codex: claude}
+    # model: per-agent model string. Set opencode's when its default provider
+    # has no key, and copilot's to a non-Anthropic model so a copilot review
+    # of a claude task is a real second provider.
+    model: {}
+    timeout: 1800
+    cooldown: 900
+    require_review: true
+    # A zellij pane per started worker (its log) and per review (hunk).
+    panes: auto
+    fences:
+      - ":(glob).github/**"
+      - ":(glob)**/.chezmoiscripts/**"
+      - ":(glob)secrets/**"
+      - ":(glob)**/*.age"
+      - ":(glob)**/.env*"
 agents:
   claude:
     marketplaces:

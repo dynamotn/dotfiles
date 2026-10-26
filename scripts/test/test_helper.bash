@@ -44,6 +44,9 @@ function setup_dotfiles_test_env {
   export ONLY_NOT_INSTALLED="true"
   export ONLY_ESSENTIAL="false"
   export LIST_CONTENTS="false"
+  # The real zellij and kitty are on PATH: no test may open a pane or a tab in
+  # the user's session. dyai_zellij.bats and dyai_hunk.bats unset it.
+  export DYAI_VIEWS="off"
 }
 
 function render_template {

@@ -13,7 +13,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Prompt waiting for your input!' --icon=dialog-information; true",
+            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Prompt waiting for your input!' --icon=dialog-information; true",
             "type": "command"
           }
         ]
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Permission requested' --icon=dialog-question; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/window-question.oga ] && paplay /usr/share/sounds/freedesktop/stereo/window-question.oga; } 2>/dev/null; true",
+            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Permission requested' --icon=dialog-question; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/window-question.oga ] && paplay /usr/share/sounds/freedesktop/stereo/window-question.oga; } 2>/dev/null; true",
             "type": "command"
           }
         ]
@@ -82,7 +82,7 @@
             "type": "command"
           },
           {
-            "command": "command -v dyai >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || exit 0; out=\"$(dyai status --quiet 2>&1)\"; [ -z \"$out\" ] || jq -n --arg m \"$out\" '{systemMessage: (\"dyai drift:\\n\" + $m), hookSpecificOutput: {hookEventName: \"SessionStart\", additionalContext: (\"dyai drift between the config and the installed agents:\\n\" + $m)}}'; true",
+            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v dyai >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || exit 0; out=\"$(dyai status --quiet 2>&1)\"; [ -z \"$out\" ] || jq -n --arg m \"$out\" '{systemMessage: (\"dyai drift:\\n\" + $m), hookSpecificOutput: {hookEventName: \"SessionStart\", additionalContext: (\"dyai drift between the config and the installed agents:\\n\" + $m)}}'; true",
             "timeout": 5,
             "type": "command"
           }
@@ -95,7 +95,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Task finished!' --icon=dialog-information; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ] && paplay /usr/share/sounds/freedesktop/stereo/complete.oga; } 2>/dev/null; true",
+            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Task finished!' --icon=dialog-information; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ] && paplay /usr/share/sounds/freedesktop/stereo/complete.oga; } 2>/dev/null; true",
             "type": "command"
           },
           {
@@ -105,7 +105,7 @@
           },
           {
             "async": true,
-            "command": "command -v dyai-hunk >/dev/null 2>&1 && dyai-hunk; true",
+            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v dyai-hunk >/dev/null 2>&1 && dyai-hunk; true",
             "type": "command"
           }
         ]

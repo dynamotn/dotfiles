@@ -368,6 +368,52 @@ YAML
     || fail "valid tiers rejected: $(< "${BATS_TEST_TMPDIR}/err")"
 }
 
+@test "schema accepts global.crew" {
+  _require_ys
+  local good="${BATS_TEST_TMPDIR}/good.yaml"
+  cat > "${good}" << 'YAML'
+global:
+  crew:
+    fallback: [claude, gemini]
+    reviewer: {claude: gemini}
+    model: {opencode: "anthropic/claude-sonnet-4-5"}
+    timeout: 600
+    require_review: false
+    panes: "off"
+    fences: [":(glob)secrets/**"]
+    hooks: {on_status: "true"}
+YAML
+  "${YS}" -f "${SCHEMA_FILE}" "${good}" > "${BATS_TEST_TMPDIR}/err" 2>&1 \
+    || fail "valid crew config rejected: $(< "${BATS_TEST_TMPDIR}/err")"
+}
+
+@test "schema rejects an unknown crew agent" {
+  _require_ys
+  local bad="${BATS_TEST_TMPDIR}/bad.yaml"
+  printf 'global:\n  crew:\n    fallback: [gpt]\n' > "${bad}"
+  run "${YS}" -f "${SCHEMA_FILE}" "${bad}"
+  assert_failure
+  printf 'global:\n  crew:\n    model: {gpt: x}\n' > "${bad}"
+  run "${YS}" -f "${SCHEMA_FILE}" "${bad}"
+  assert_failure
+}
+
+@test "schema rejects an unknown crew hook" {
+  _require_ys
+  local bad="${BATS_TEST_TMPDIR}/bad.yaml"
+  printf 'global:\n  crew:\n    hooks: {pre_merge: x}\n' > "${bad}"
+  run "${YS}" -f "${SCHEMA_FILE}" "${bad}"
+  assert_failure
+}
+
+@test "schema rejects an unknown crew panes mode" {
+  _require_ys
+  local bad="${BATS_TEST_TMPDIR}/bad.yaml"
+  printf 'global:\n  crew:\n    panes: always\n' > "${bad}"
+  run "${YS}" -f "${SCHEMA_FILE}" "${bad}"
+  assert_failure
+}
+
 @test "schema rejects an agent model name used as a subagent tier" {
   _require_ys
   local bad="${BATS_TEST_TMPDIR}/bad.yaml"
