@@ -824,3 +824,70 @@ CFG
   DYAI_EXTERNAL_TIMEOUT=5 dyai::setup_installers
   grep -qx 'eof' "${HOME}/inst.log"
 }
+
+# Point setup_subagents at a one-agent fixture source; sets PINNED to the pinned file.
+function _subagent_fixture {
+  local src="${BATS_TEST_TMPDIR}/voltlocal"
+  mkdir -p "${src}/categories/01-core-development"
+  printf -- '---\nname: backend-developer\nmodel: sonnet\n---\nv1\n' \
+    > "${src}/categories/01-core-development/backend-developer.md"
+  eval 'dyai::fetch_repo() { printf "%s" "'"${src}"'"; }'
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << 'CFG'
+global:
+  subagents:
+    - repo: VoltAgent/awesome-claude-code-subagents
+      ref: deadbeef
+      include: [categories/01-core-development]
+agents:
+  claude: {}
+CFG
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  PINNED="${src}/categories/01-core-development/backend-developer.md"
+}
+
+@test "an edited subagent survives a changed upstream" {
+  _stub claude
+  local dest="${HOME}/.claude/agents/backend-developer.md"
+  _subagent_fixture
+  dyai::setup_subagents
+  printf 'my note\n' >> "${dest}"
+  printf -- '---\nname: backend-developer\n---\nv2\n' > "${PINNED}"
+  run dyai::setup_subagents
+  assert_success
+  assert_output --partial "LOCAL EDITS kept"
+  grep -qx 'my note' "${dest}"
+}
+
+@test "an untouched subagent follows upstream" {
+  _stub claude
+  local dest="${HOME}/.claude/agents/backend-developer.md"
+  _subagent_fixture
+  dyai::setup_subagents
+  printf -- '---\nname: backend-developer\n---\nv2\n' > "${PINNED}"
+  run dyai::setup_subagents
+  refute_output --partial "LOCAL EDITS"
+  cmp -s "${PINNED}" "${dest}"
+}
+
+@test "a subagent installed before hashes existed is replaced once" {
+  _stub claude
+  local dest="${HOME}/.claude/agents/backend-developer.md"
+  _subagent_fixture
+  mkdir -p "${HOME}/.claude/agents"
+  printf 'old copy\n' > "${dest}"
+  dyai::setup_subagents
+  cmp -s "${PINNED}" "${dest}"
+  [[ -s "${HOME}/.cache/dyai/installed/subagents/backend-developer.sha256" ]]
+}
+
+@test "dir_hash changes when a file is renamed" {
+  local d="${BATS_TEST_TMPDIR}/h"
+  mkdir -p "${d}"
+  echo x > "${d}/a"
+  local before after
+  before="$(dyai::dir_hash "${d}")"
+  mv "${d}/a" "${d}/b"
+  after="$(dyai::dir_hash "${d}")"
+  [[ "${after}" != "${before}" ]]
+}

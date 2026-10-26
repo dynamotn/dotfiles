@@ -119,6 +119,58 @@ function dyai::installed_hash {
 }
 
 #######################################
+# @description Tell whether a file dyai installed was changed since dyai last wrote it
+# @arg $1 string Kind of item, as given to dyai::installed_hash
+# @arg $2 string Name of the item
+# @arg $3 string Installed path
+# @exitcode 0 The path exists, a hash was recorded, and the path no longer matches it
+# @exitcode 1 Otherwise, including when no hash was ever recorded
+#######################################
+function dyai::locally_edited {
+  local kind name dest
+  dybatpho::expect_args kind name dest -- "$@"
+  local recorded current
+  recorded="$(dyai::installed_hash "${kind}" "${name}")"
+  [[ -n "${recorded}" ]] || return 1
+  dybatpho::is file "${dest}" || return 1
+  current="$(dyai::dir_hash "${dest}")" || return 1
+  [[ "${current}" != "${recorded}" ]]
+}
+
+#######################################
+# @description Install a file dyai ships, keeping one the user edited since dyai last wrote it
+# @arg $1 string Kind of item, as given to dyai::installed_hash
+# @arg $2 string Name of the item
+# @arg $3 string Source file to install
+# @arg $4 string Destination path
+# @arg $5 string Label for messages, e.g. "subagent backend-developer"
+#######################################
+function dyai::install_owned {
+  local kind name src dest label
+  dybatpho::expect_args kind name src dest label -- "$@"
+  local recorded hash
+  recorded="$(dyai::installed_hash "${kind}" "${name}")"
+  if dybatpho::is file "${dest}" && cmp -s "${src}" "${dest}"; then
+    # Installed before hashes were recorded: start tracking it now.
+    if [[ -z "${recorded}" ]]; then
+      hash="$(dyai::dir_hash "${dest}")" && dyai::installed_hash "${kind}" "${name}" "${hash}"
+    fi
+    return 0
+  fi
+  # shellcheck disable=SC2310 # a plain yes/no; no hash recorded reads as no
+  if dyai::locally_edited "${kind}" "${name}" "${dest}"; then
+    dybatpho::warn "${label}: LOCAL EDITS kept; delete ${dest} to take the pinned copy"
+    return 0
+  fi
+  if ! cp -- "${src}" "${dest}"; then
+    dybatpho::warn "Could not install ${label}"
+    return 0
+  fi
+  hash="$(dyai::dir_hash "${dest}")" && dyai::installed_hash "${kind}" "${name}" "${hash}"
+  dybatpho::info "Installed ${label}"
+}
+
+#######################################
 # @description Read a section of the dyai config as compact JSON
 # @arg $1 string yq path expression, e.g. '.global.mcp // {}'
 # @stdout The section as JSON, or the empty object/array the expression defaults to
@@ -976,12 +1028,8 @@ function dyai::subagent_codex {
     dybatpho::warn "Could not convert subagent ${leaf} for Codex"
     return 0
   fi
-  if dybatpho::is file "${dest}" && cmp -s "${tmp}" "${dest}"; then
-    rm -f -- "${tmp}"
-    return 0
-  fi
-  mv -- "${tmp}" "${dest}"
-  dybatpho::info "Installed Codex subagent ${leaf}"
+  dyai::install_owned codex-agents "${leaf}" "${tmp}" "${dest}" "Codex subagent ${leaf}"
+  rm -f -- "${tmp}"
 }
 
 #######################################
@@ -1051,13 +1099,7 @@ function dyai::setup_subagents {
           dyai::subagent_codex "${md}" "$(dybatpho::path_join "${codex_dir}" "${leaf}.toml")"
         fi
         [[ -n "${dest}" ]] || continue
-        if ! dybatpho::is file "${dest}" || ! cmp -s "${md}" "${dest}"; then
-          if cp -- "${md}" "${dest}"; then
-            dybatpho::info "Installed subagent ${leaf}"
-          else
-            dybatpho::warn "Could not install subagent ${name}"
-          fi
-        fi
+        dyai::install_owned subagents "${leaf}" "${md}" "${dest}" "subagent ${leaf}"
       done
     done < <(jq -r --argjson i "${i}" '.[$i].include[]' <<< "${sources}")
   done
