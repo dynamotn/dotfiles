@@ -37,7 +37,7 @@
   "totp" `spawn-sh "rbw-pick totp";`
   "lock" `spawn-sh "noctalia msg session lock";`
   "screenshot" `spawn-sh "noctalia msg screenshot-region";`
-  "system-monitor" `spawn-sh "kitty --class btop --session ~/.config/kitty/sessions/monitor.conf";`
+  "system-monitor" `spawn-sh "~/.config/niri/scripts/scratchpad.sh btop kitty --class btop --session ~/.config/kitty/sessions/monitor.conf";`
   "brightness-up" `spawn "dymonitor" "--notify" "brightness" "up";`
   "brightness-down" `spawn "dymonitor" "--notify" "brightness" "down";`
   "contrast-up" `spawn "dymonitor" "--notify" "contrast" "up";`

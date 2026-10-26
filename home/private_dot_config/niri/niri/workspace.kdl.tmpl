@@ -4,3 +4,6 @@
 {{- range $rules.workspaces }}
 workspace "{{ includeTemplate "wm/workspace-name.tmpl" . }}"
 {{- end }}
+
+// Hidden drop-down windows wait here, see scripts/scratchpad.sh
+workspace "scratchpad"
