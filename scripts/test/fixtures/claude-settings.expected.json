@@ -40,6 +40,16 @@
           }
         ],
         "matcher": "Edit|Write|MultiEdit"
+      },
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "bash ~/.claude/hooks/route-agent.sh record",
+            "type": "command"
+          }
+        ],
+        "matcher": "mcp__laya__laya_route|mcp__laya__laya_route_batch|mcp__laya__laya_decide"
       }
     ],
     "PreToolUse": [
@@ -64,6 +74,11 @@
       },
       {
         "hooks": [
+          {
+            "command": "bash ~/.claude/hooks/route-agent.sh gate",
+            "timeout": 5,
+            "type": "command"
+          },
           {
             "async": true,
             "command": "bash ~/.claude/hooks/log-agent.sh",

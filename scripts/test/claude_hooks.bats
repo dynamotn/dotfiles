@@ -269,3 +269,92 @@ function _run_stop {
   local tmpl="${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
   grep -q 'lint-shell.sh' "${tmpl}"
 }
+
+ROUTE_HOOK_REL="home/private_dot_claude/hooks/executable_route-agent.sh"
+
+# Run the route gate on a spawn with the given tool_input JSON, in session s1.
+function _gate {
+  local input
+  input="$(jq -cn --argjson t "${1}" '{tool_name: "Agent", session_id: "s1", tool_input: $t}')"
+  XDG_STATE_HOME="${WORK}/state" run bash "${DOTFILES_DIR}/${ROUTE_HOOK_REL}" gate <<< "${input}"
+}
+
+# Record a routing call for session $1, $2 seconds ago.
+function _routed {
+  local now
+  now="$(date +%s)"
+  mkdir -p "${WORK}/state/claude"
+  jq -cn --arg s "${1}" --argjson ts "$((now - ${2:-0}))" '{ts: $ts, session: $s}' \
+    >> "${WORK}/state/claude/agent-routes.jsonl"
+}
+
+@test "route gate denies a spawn with no model and no routing call" {
+  unset DYAI_AGENT_ROUTING DYAI_CREW
+  _gate '{"subagent_type":"Explore","description":"x"}'
+  assert_success
+  local filter='.hookSpecificOutput | .permissionDecision + " "'
+  filter+=' + (.permissionDecisionReason | test("model"; "i") | tostring)'
+  run jq -r "${filter}" <<< "${output}"
+  assert_output "deny true"
+}
+
+@test "route gate allows an explicit model and a fork" {
+  unset DYAI_AGENT_ROUTING DYAI_CREW
+  _gate '{"subagent_type":"Explore","model":"haiku","description":"x"}'
+  assert_success
+  assert_output ""
+  _gate '{"subagent_type":"fork","description":"x"}'
+  assert_output ""
+}
+
+@test "route gate allows after a recent routing call in the same session only" {
+  unset DYAI_AGENT_ROUTING DYAI_CREW
+  _routed s1 60
+  _gate '{"description":"x"}'
+  assert_output ""
+  rm -f "${WORK}/state/claude/agent-routes.jsonl"
+  _routed other 0
+  _routed s1 3600
+  _gate '{"description":"x"}'
+  run jq -r .hookSpecificOutput.permissionDecision <<< "${output}"
+  assert_output "deny"
+}
+
+@test "route record notes the session of a laya routing call and prints nothing" {
+  XDG_STATE_HOME="${WORK}/state" run bash "${DOTFILES_DIR}/${ROUTE_HOOK_REL}" record \
+    <<< '{"tool_name":"mcp__laya__laya_route","session_id":"s9"}'
+  assert_success
+  assert_output ""
+  jq -e '.session == "s9" and (.ts | type) == "number"' "${WORK}/state/claude/agent-routes.jsonl" > /dev/null
+}
+
+@test "route gate warns instead with DYAI_AGENT_ROUTING=warn, and stays out with off or in a crew task" {
+  DYAI_AGENT_ROUTING=warn _gate '{"description":"x"}'
+  local filter='.hookSpecificOutput | (.permissionDecision // "none") + " "'
+  filter+=' + (.additionalContext | test("model") | tostring)'
+  run jq -r "${filter}" <<< "${output}"
+  assert_output "none true"
+  DYAI_AGENT_ROUTING=off _gate '{"description":"x"}'
+  assert_output ""
+  DYAI_CREW=x _gate '{"description":"x"}'
+  assert_output ""
+}
+
+@test "route gate allows garbage input" {
+  XDG_STATE_HOME="${WORK}/state" run bash "${DOTFILES_DIR}/${ROUTE_HOOK_REL}" gate <<< 'not json'
+  assert_success
+  assert_output ""
+}
+
+@test "route-agent hook is itself clean under dyshellint" {
+  _require_dyshellint
+  run dyshellint -warnings-as-errors -exclude-rules BSG037 "${DOTFILES_DIR}/${ROUTE_HOOK_REL}"
+  assert_success
+}
+
+@test "settings.json wires the route gate on spawns and the recorder on laya routing" {
+  local tmpl="${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
+  grep -q 'route-agent.sh gate' "${tmpl}"
+  grep -q 'route-agent.sh record' "${tmpl}"
+  grep -q 'mcp__laya__laya_route' "${tmpl}"
+}

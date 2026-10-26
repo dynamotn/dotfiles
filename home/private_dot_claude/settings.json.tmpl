@@ -168,6 +168,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/hooks/route-agent.sh gate",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "bash ~/.claude/hooks/log-agent.sh",
             "async": true
           }
@@ -182,6 +187,16 @@
             "type": "command",
             "command": "bash ~/.claude/hooks/lint-shell.sh",
             "timeout": 60
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__laya__laya_route|mcp__laya__laya_route_batch|mcp__laya__laya_decide",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/route-agent.sh record",
+            "async": true
           }
         ]
       }
