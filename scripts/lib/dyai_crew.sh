@@ -543,6 +543,9 @@ function __dyai_crew_create {
   if exclude="$(dyai::git_exclude "${root}")"; then
     dyai::exclude_add "${exclude}" '/.dyai-result.json'
     dyai::exclude_add "${exclude}" '/.dyai-review.diff'
+    # Not every machine ignores .worktrees/ globally; an untracked one would
+    # read as a dirty tree to `dyai merge`.
+    dyai::exclude_add "${exclude}" '/.worktrees/'
   fi
   pfile="${dir}/${id}.prompt.md"
   printf '%s\n' "${prompt}" > "${pfile}"
@@ -860,4 +863,133 @@ function __dyai_crew_fix {
   dyai_crew::attempt "${id}" "${writer}" "${pfile}" || rc=$?
   dyai_crew::record "${id}" '{"verdict": null, "reviewed_sha": null}'
   return "${rc}"
+}
+
+#######################################
+# @description Merge a done, reviewed task into the current branch behind fences and a gate
+# @arg $1 string Task id
+# @exitcode 0 Merged
+# @exitcode 1 Refused, or stopped at a fence, a conflict or the gate; the tree is as it was
+#######################################
+function dyai_crew::merge {
+  local id
+  dybatpho::expect_args id -- "$@"
+  local dir rc=0
+  dir="$(dyai_crew::state_dir)" || return 1
+  {
+    # One merge at a time: they share the working tree.
+    flock 8
+    __dyai_crew_merge "${id}" || rc=$?
+  } 8>> "${dir}/merge.lock"
+  return "${rc}"
+}
+
+#######################################
+# @description Do the merge steps, under the merge lock
+# @arg $1 string Task id
+# @exitcode 0 Merged
+#######################################
+function __dyai_crew_merge {
+  local id
+  dybatpho::expect_args id -- "$@"
+  local state status branch dirty base summary
+  state="$(dyai_crew::get "${id}")" || dybatpho::die "unknown task ${id}"
+  status="$(jq -r .status <<< "${state}")"
+  [[ "${status}" == "done" ]] || dybatpho::die "only a done task merges; ${id} is ${status}"
+  branch="$(git symbolic-ref -q --short HEAD)" || dybatpho::die "merge needs a branch checked out"
+  if [[ "${branch}" == main || "${branch}" == master ]]; then
+    dybatpho::die "merge into an integration branch, not ${branch}: git switch -c integrate"
+  fi
+  dirty="$(git status --porcelain)" || dirty="?"
+  [[ -z "${dirty}" ]] || dybatpho::die "the working tree has uncommitted changes; commit or stash them first"
+  local require head verdict reviewed
+  require="$(dyai_crew::conf '.global.crew.require_review' true)"
+  head="$(git rev-parse "crew/${id}")" || dybatpho::die "branch crew/${id} is gone"
+  if [[ "${require}" != false ]]; then
+    verdict="$(jq -r '.verdict // ""' <<< "${state}")"
+    reviewed="$(jq -r '.reviewed_sha // ""' <<< "${state}")"
+    [[ "${verdict}" == pass ]] \
+      || dybatpho::die "${id} needs a pass verdict (it has '${verdict:-none}'): dyai review ${id}"
+    [[ "${reviewed}" == "${head}" ]] \
+      || dybatpho::die "crew/${id} moved after its review; review it again: dyai review ${id}"
+  fi
+  base="$(jq -r .base <<< "${state}")"
+  summary="$(jq -r '.summary // ""' <<< "${state}")"
+  local fences_json fenced fields
+  local -a fences=()
+  fences_json="$(dyai_crew::conf '.global.crew.fences' \
+    '[":(glob).github/**",":(glob)**/.chezmoiscripts/**",":(glob)secrets/**",":(glob)**/*.age",":(glob)**/.env*"]')"
+  mapfile -t fences < <(jq -r '.[]' <<< "${fences_json}" || true)
+  if ((${#fences[@]} > 0)); then
+    fenced="$(git diff --name-only "${base}..${head}" -- ${fences[@]+"${fences[@]}"})" || fenced=""
+    if [[ -n "${fenced}" ]]; then
+      fields="$(jq -cn --arg p "${fenced//$'\n'/, }" '{status: "needs_human", summary: $p}')"
+      dyai_crew::record "${id}" "${fields}"
+      dybatpho::warn "crew/${id} touches fenced paths; merge it by hand: ${fenced//$'\n'/, }"
+      return 1
+    fi
+  fi
+  if ! git merge -q --no-ff --no-commit "crew/${id}" &> /dev/null; then
+    git merge --abort &> /dev/null || true
+    dyai_crew::record "${id}" '{"status":"conflict","summary":"merge conflict; rebase the task or merge it by hand"}'
+    dybatpho::warn "crew/${id} conflicts with ${branch}"
+    return 1
+  fi
+  local gate out
+  gate="$(dyai_crew::conf '.global.crew.gate' "")"
+  if [[ -n "${gate}" ]] && ! out="$(bash -c "${gate}" < /dev/null 2>&1)"; then
+    git merge --abort &> /dev/null || true
+    out="$(tail -n 20 <<< "${out}")"
+    fields="$(jq -cn --arg o "${out}" '{status: "gate_failed", summary: $o}')"
+    dyai_crew::record "${id}" "${fields}"
+    dybatpho::warn "the gate failed for ${id}"
+    return 1
+  fi
+  git commit -q -m "merge(crew): ${id}" -m "${summary}" || {
+    git merge --abort &> /dev/null || true
+    dybatpho::die "could not commit the merge of ${id}"
+  }
+  dyai_crew::record "${id}" '{"status":"merged"}'
+  dyai_crew::drop "${id}" > /dev/null
+  # drop records `dropped`; the task's last word is that it merged.
+  dyai_crew::record "${id}" '{"status":"merged"}'
+}
+
+#######################################
+# @description Remove tasks' worktrees and fully merged branches
+# @arg $@ string Task ids, or `finished` for every task that is neither running, done, merged nor dropped
+# @stdout A line per branch kept because it holds unmerged commits
+#######################################
+function dyai_crew::drop {
+  local first
+  dybatpho::expect_args first -- "$@"
+  local -a ids=()
+  local id status
+  if [[ "${first}" == finished ]]; then
+    # shellcheck disable=SC2312 # a corrupt log selects nothing
+    while IFS=$'\t' read -r id status _; do
+      case "${status}" in
+        running | open | "done" | merged | dropped) ;;
+        *) ids+=("${id}") ;;
+      esac
+    done < <(dyai_crew::list)
+  else
+    ids=("$@")
+  fi
+  local root wt fields
+  root="$(dyai_crew::main_checkout)" || return 1
+  for id in ${ids[@]+"${ids[@]}"}; do
+    dyai_crew::get "${id}" > /dev/null || dybatpho::die "unknown task ${id}"
+    wt="${root}/.worktrees/crew-${id}"
+    if dybatpho::is dir "${wt}" && ! git -C "${root}" worktree remove "${wt}" &> /dev/null; then
+      dybatpho::warn "kept ${wt}: it has uncommitted changes"
+      continue
+    fi
+    if git -C "${root}" show-ref --verify -q "refs/heads/crew/${id}" \
+      && ! git -C "${root}" branch -q -d "crew/${id}" &> /dev/null; then
+      printf 'kept branch crew/%s: it has commits no other branch has\n' "${id}"
+    fi
+    fields='{"status":"dropped","worktree":null}'
+    dyai_crew::record "${id}" "${fields}"
+  done
 }

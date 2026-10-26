@@ -688,3 +688,172 @@ function _done_task {
   done
   assert_equal "${st}" "pass"
 }
+
+# A done claude task with a pass verdict on its head, merged from branch
+# `integrate`; its id lands in TASK_ID.
+function _passed_task {
+  git checkout -q -b integrate
+  _done_task
+  _copilot_says pass
+  run dyai_crew::review "${TASK_ID}" copilot
+  assert_success
+}
+
+@test "merge commits a done task and cleans up" {
+  _passed_task
+  local id="${TASK_ID}"
+  run dyai_crew::merge "${id}"
+  assert_success
+  run git log --format=%s -1
+  assert_output "merge(crew): ${id}"
+  run git show HEAD:f.txt
+  assert_output "work"
+  [[ ! -d "${REPO}/.worktrees/crew-${id}" ]]
+  run git rev-parse --verify -q "crew/${id}"
+  assert_failure
+  run _field "${id}" .status
+  assert_output "merged"
+}
+
+@test "merge aborts on conflict and records it" {
+  _passed_task
+  local id="${TASK_ID}"
+  echo mine > f.txt
+  git add f.txt
+  git commit -qm "conflicting"
+  run dyai_crew::merge "${id}"
+  assert_failure
+  run _field "${id}" .status
+  assert_output "conflict"
+  run git status --porcelain
+  assert_output ""
+  run cat f.txt
+  assert_output "mine"
+}
+
+@test "merge aborts when the gate fails" {
+  _passed_task
+  local id="${TASK_ID}"
+  _crew_config "gate: 'echo gate said no; false'"
+  run dyai_crew::merge "${id}"
+  assert_failure
+  run _field "${id}" '.status + ": " + .summary'
+  assert_output "gate_failed: gate said no"
+  run git status --porcelain
+  assert_output ""
+}
+
+@test "merge runs the gate on the merged tree" {
+  _passed_task
+  _crew_config "gate: 'test -f f.txt'"
+  run dyai_crew::merge "${TASK_ID}"
+  assert_success
+}
+
+@test "merge refuses on main" {
+  _done_task
+  run dyai_crew::merge "${TASK_ID}"
+  assert_failure
+  assert_output --partial "integration branch"
+}
+
+@test "merge refuses a dirty tree" {
+  _passed_task
+  echo dirty > dirty.txt
+  run dyai_crew::merge "${TASK_ID}"
+  assert_failure
+  assert_output --partial "uncommitted"
+  [[ -d "${REPO}/.worktrees/crew-${TASK_ID}" ]]
+}
+
+@test "merge refuses without a pass verdict" {
+  git checkout -q -b integrate
+  _done_task
+  local id="${TASK_ID}"
+  run dyai_crew::merge "${id}"
+  assert_failure
+  assert_output --partial "pass verdict"
+  _copilot_says fail
+  dyai_crew::review "${id}" copilot > /dev/null
+  run dyai_crew::merge "${id}"
+  assert_failure
+  _agent copilot "printf '%s\\n' '{\"type\":\"assistant.message\",\"data\":{\"content\":\"LGTM\"}}'"
+  dyai_crew::review "${id}" copilot > /dev/null
+  run dyai_crew::merge "${id}"
+  assert_failure
+}
+
+@test "merge refuses when the branch moved after review" {
+  _passed_task
+  local id="${TASK_ID}"
+  git -C "${REPO}/.worktrees/crew-${id}" commit -q --allow-empty -m "after review"
+  run dyai_crew::merge "${id}"
+  assert_failure
+  assert_output --partial "moved"
+}
+
+@test "merge skips the review check when require_review is false" {
+  git checkout -q -b integrate
+  _done_task
+  _crew_config 'require_review: false'
+  run dyai_crew::merge "${TASK_ID}"
+  assert_success
+}
+
+@test "merge stops at a fenced path" {
+  git checkout -q -b integrate
+  _agent claude 'mkdir -p secrets; echo s > secrets/x; '"${DONE}"
+  run dyai_crew::run claude "x"
+  local id
+  id="$(_last_id "${output}")"
+  _crew_config "require_review: false"
+  run dyai_crew::merge "${id}"
+  assert_failure
+  run _field "${id}" '.status + ": " + .summary'
+  assert_output "needs_human: secrets/x"
+  run git log --format=%s -1
+  assert_output "init"
+  run git status --porcelain
+  assert_output ""
+}
+
+@test "a glob fence matches at the repository root" {
+  git checkout -q -b integrate
+  _agent claude 'echo k > x.age; '"${DONE}"
+  run dyai_crew::run claude "x"
+  local id
+  id="$(_last_id "${output}")"
+  _crew_config "{require_review: false, fences: [':(glob)**/*.age']}"
+  run dyai_crew::merge "${id}"
+  assert_failure
+  run _field "${id}" .status
+  assert_output "needs_human"
+}
+
+@test "drop keeps an unmerged branch and says so" {
+  _done_task
+  local id="${TASK_ID}"
+  run dyai_crew::drop "${id}"
+  assert_success
+  assert_output --partial "kept branch crew/${id}"
+  [[ ! -d "${REPO}/.worktrees/crew-${id}" ]]
+  git rev-parse --verify -q "crew/${id}" > /dev/null
+  run _field "${id}" .status
+  assert_output "dropped"
+}
+
+@test "drop finished leaves done and running tasks alone" {
+  _done_task
+  local done_id="${TASK_ID}"
+  _agent claude 'echo work >> f.txt; printf %s "{\"status\":\"partial\",\"summary\":\"half\"}" > .dyai-result.json'
+  run dyai_crew::run claude "x"
+  local partial_id
+  partial_id="$(_last_id "${output}")"
+  run dyai_crew::drop finished
+  assert_success
+  run _field "${partial_id}" .status
+  assert_output "dropped"
+  run _field "${done_id}" .status
+  assert_output "done"
+  [[ -d "${REPO}/.worktrees/crew-${done_id}" ]]
+}
