@@ -1,14 +1,5 @@
 layout {
-  default_tab_template {
-    children
-    pane size=1 borderless=true {
-      plugin location="status-bar"
-    }
-    pane size=1 borderless=true {
-      plugin location="zjstatus"
-    }
-  }
-
+{{ includeTemplate "zellij/tab-templates.kdl.tmpl" . }}
   tab name="dot" cwd="~/Dotfiles" split_direction="vertical" {
     pane focus=true
     floating_panes {

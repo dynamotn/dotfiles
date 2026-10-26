@@ -1,0 +1,20 @@
+{{- /* CLI behind zj-radar's agent hooks; no Intel macOS build is published. */ -}}
+{{- if and (eq .terminalMultiplexer "Z") (not (and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "amd64"))) }}
+name: zj-radar
+method: binary
+github:
+  repo: marktoda/zj-radar
+  {{- $os := "unknown-linux-musl" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: zj-radar-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: zj-radar
+{{- end }}
