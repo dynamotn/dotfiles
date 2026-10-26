@@ -234,6 +234,37 @@ function _run_stop {
   grep -q 'log-skill.sh' "${tmpl}"
 }
 
+@test "log-agent records type and model and never blocks" {
+  local agent_hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_log-agent.sh"
+  local state="${WORK}/state" input
+  input='{"tool_name":"Agent","session_id":"s1",
+    "tool_input":{"subagent_type":"Explore","model":"haiku","description":"x"}}'
+  XDG_STATE_HOME="${state}" run bash "${agent_hook}" <<< "${input}"
+  assert_success
+  assert_output ""
+  jq -e '.agent == "Explore" and .model == "haiku" and .session == "s1"' \
+    "${state}/claude/agent-usage.jsonl" > /dev/null
+  # No type and no model: the harness default and the session's model.
+  XDG_STATE_HOME="${state}" run bash "${agent_hook}" <<< '{"tool_input":{"description":"y"}}'
+  assert_success
+  jq -se '.[1].agent == "general-purpose" and .[1].model == "inherit"' \
+    "${state}/claude/agent-usage.jsonl" > /dev/null
+}
+
+@test "log-agent never fails on garbage input" {
+  local agent_hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_log-agent.sh"
+  local state="${WORK}/state"
+  XDG_STATE_HOME="${state}" run bash "${agent_hook}" <<< "not json"
+  assert_success
+  assert_output ""
+  [[ ! -e "${state}/claude/agent-usage.jsonl" ]]
+}
+
+@test "settings.json wires the log-agent hook on subagent spawns" {
+  local tmpl="${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
+  grep -q 'log-agent.sh' "${tmpl}"
+}
+
 @test "settings.json wires the lint-shell hook on Edit and Write" {
   local tmpl="${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
   grep -q 'lint-shell.sh' "${tmpl}"

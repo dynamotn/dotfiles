@@ -13,5 +13,9 @@ These rules apply before an AI agent reports any work as finished.
   reported as unverified.
 - When something cannot be verified automatically, state exactly what the user
   has to do to confirm it.
+- A change on a security path (credentials handling, permissions, hooks,
+  anything under `secrets/`) is reviewed by a fresh subagent that did not
+  write it. A security fix counts as proven only when reverting it makes its
+  test fail.
 - Finish the whole task before reporting. If part of it is blocked, complete
   everything else and say plainly what was left out and why.

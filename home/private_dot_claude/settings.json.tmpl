@@ -162,6 +162,16 @@
             "async": true
           }
         ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/log-agent.sh",
+            "async": true
+          }
+        ]
       }
     ],
     "PostToolUse": [
