@@ -82,7 +82,7 @@
             "type": "command"
           },
           {
-            "command": "command -v dyai >/dev/null 2>&1 && dyai status --quiet; true",
+            "command": "command -v dyai >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || exit 0; out=\"$(dyai status --quiet 2>&1)\"; [ -z \"$out\" ] || jq -n --arg m \"$out\" '{systemMessage: (\"dyai drift:\\n\" + $m), hookSpecificOutput: {hookEventName: \"SessionStart\", additionalContext: (\"dyai drift between the config and the installed agents:\\n\" + $m)}}'; true",
             "timeout": 5,
             "type": "command"
           }

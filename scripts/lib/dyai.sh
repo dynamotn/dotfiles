@@ -1446,9 +1446,13 @@ function dyai::materialize {
       if dybatpho::is dir "${root}/.agents/skills/${leaf}"; then
         dybatpho::debug "skill ${leaf} already installed in project"
       else
-        # The skills CLI drains stdin, which here is the rest of the skill list.
-        (cd "${root}" && bunx "${SKILLS_CLI}" add "${sk}" -y &> /dev/null < /dev/null) \
-          || dybatpho::warn "Could not install skill ${sk}"
+        # The skills CLI drains stdin, which here is the rest of the skill list;
+        # run_external closes it and cuts off a hang.
+        if ! (cd "${root}" && dyai::run_external bunx "${SKILLS_CLI}" add "${sk}" -y &> /dev/null); then
+          dybatpho::warn "Could not install skill ${sk}"
+        elif ! dybatpho::is dir "${root}/.agents/skills/${leaf}"; then
+          dybatpho::warn "skill ${sk}: installer reported success but ${root}/.agents/skills/${leaf} is missing"
+        fi
       fi
       desired+=("${root}/.agents/skills/${leaf}")
     done < <(jq -r '.skills[]?' <<< "${pj}")

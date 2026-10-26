@@ -141,6 +141,28 @@ function _render_settings {
     "${out}" > /dev/null
 }
 
+@test "the SessionStart drift hook shows drift to the user and stays quiet when clean" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json" cmd bin="${BATS_TEST_TMPDIR}/bin"
+  _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
+  cmd="$(jq -r '.hooks.SessionStart[].hooks[].command | select(contains("dyai status"))' "${out}")"
+  [[ -n "${cmd}" ]] || fail "no dyai status hook"
+  mkdir -p "${bin}"
+  cat > "${bin}/dyai" << 'STUB'
+#!/usr/bin/env bash
+printf '%s' "${DRIFT:-}"
+STUB
+  chmod +x "${bin}/dyai"
+  run env PATH="${bin}:${PATH}" DRIFT="" sh -c "${cmd}"
+  assert_success
+  assert_output ""
+  run env PATH="${bin}:${PATH}" DRIFT="claude skill alpha: missing" sh -c "${cmd}"
+  assert_success
+  jq -e '.systemMessage | contains("claude skill alpha: missing")' <<< "${output}" > /dev/null \
+    || fail "drift not in systemMessage: ${output}"
+  jq -e '.hookSpecificOutput.additionalContext | contains("alpha")' <<< "${output}" > /dev/null
+}
+
 @test "every git ask rule also covers its rtk rewrite" {
   _require_chezmoi
   local out="${BATS_TEST_TMPDIR}/settings.json"

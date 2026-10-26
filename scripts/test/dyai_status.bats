@@ -4,12 +4,16 @@ setup() {
   setup_dotfiles_test_env
   . "${DOTFILES_DIR}/scripts/lib/dyai.sh"
   # Only the stubs and the system tools: a real agent CLI on the host must not
-  # turn into drift lines here.
-  local jq_bin yq_bin
+  # turn into drift lines here. jq and yq are linked one by one: their own
+  # directory (often ~/.local/bin) may hold real agent CLIs too.
+  local tools="${BATS_TEST_TMPDIR}/tools" jq_bin yq_bin
   jq_bin="$(command -v jq)"
   yq_bin="$(command -v yq)"
+  mkdir -p "${tools}"
+  ln -s "${jq_bin}" "${tools}/jq"
+  ln -s "${yq_bin}" "${tools}/yq"
   FULL_PATH="${PATH}"
-  PATH="${HOME}/.local/bin:${jq_bin%/*}:${yq_bin%/*}:/usr/bin:/bin"
+  PATH="${HOME}/.local/bin:${tools}:/usr/bin:/bin"
   LAYA="${HOME}/.local/bin/laya-mcp-server"
   : > "${LAYA}" && chmod +x "${LAYA}"
   printf '#!/usr/bin/env bash\nexit 0\n' > "${HOME}/.local/bin/claude"
@@ -111,7 +115,10 @@ function _arm {
 
 @test "status quiet finishes under 2 seconds" {
   _arm
-  local start=${SECONDS}
+  # SECONDS counts whole seconds and would let almost 3 s through.
+  local start elapsed_ms
+  start="$(date +%s%N)"
   dyai_status::main true
-  ((SECONDS - start < 2))
+  elapsed_ms=$((($(date +%s%N) - start) / 1000000))
+  ((elapsed_ms < 2000)) || fail "status --quiet took ${elapsed_ms} ms"
 }

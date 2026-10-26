@@ -480,6 +480,30 @@ CFG
   grep -q 'STUB bunx .* add owner/repo@fuzzing' "${HOME}/calls.log"
 }
 
+@test "dyai::materialize cuts off a hanging skill install and reports a missing one" {
+  # The first skill hangs, the second exits 0 without installing anything.
+  printf '#!/usr/bin/env bash\n[[ "$*" == *hang* ]] && sleep 5\nexit 0\n' > "${HOME}/.local/bin/bunx"
+  chmod +x "${HOME}/.local/bin/bunx"
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${CONFIG_FILE}" << 'CFG'
+registry:
+  presets:
+    security:
+      skills:
+        - owner/repo@hang
+        - owner/repo@ghost
+CFG
+  local proj="${BATS_TEST_TMPDIR}/hangproj"
+  mkdir -p "${proj}"
+  git -C "${proj}" init -q
+  cd "${proj}"
+  DYAI_EXTERNAL_TIMEOUT=1 run dyai::use security
+  assert_success
+  assert_output --partial "Could not install skill owner/repo@hang"
+  assert_output --partial "skill owner/repo@ghost: installer reported success but"
+}
+
 @test "dyai::materialize tracks a skill given as a pinned GitHub tree URL" {
   _stub bunx
   CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
@@ -947,6 +971,66 @@ CFG
     "${DOTFILES_DIR}/docs/dyai.md")"
   want="$(dyai::enforcement)"
   [[ "${docs}" == "${want}" ]] || fail "docs/dyai.md is stale; paste the output of dyai enforcement"
+}
+
+function _policy_probe_fixture {
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  cat > "${HOME}/.config/dyai/config.yaml" << 'CFG'
+global:
+  policy:
+    approval: accept-edits
+    permissions:
+      deny: ["Bash(dyaiprobecmd)", "Read(**/dyaiprobepath/**)"]
+CFG
+  CONFIG_FILE="${HOME}/.config/dyai/config.yaml"
+}
+
+@test "enforcement approval, shell and path cells match what the writers produce" {
+  local a
+  for a in codex gemini opencode copilot agy hermes; do _stub "${a}"; done
+  _policy_probe_fixture
+  dyai::setup_policy
+  dyai::setup_permissions
+  local chome="${CODEX_HOME:-${HOME}/.codex}"
+  local opencode="${OPENCODE_CONFIG:-${HOME}/.config/opencode/opencode.json}"
+  local -A rules=(
+    [codex]="${chome}/rules/dyai.rules" [gemini]="${HOME}/.gemini/policies/dyai.toml"
+    [opencode]="${opencode}" [agy]="${HOME}/.gemini/antigravity-cli/settings.json"
+    [hermes]="${HOME}/.hermes/config.yaml" [copilot]=/dev/null
+  )
+  local -A approvals=(
+    [codex]="${chome}/config.toml:workspace-write" [gemini]="${HOME}/.gemini/settings.json:auto_edit"
+    [opencode]="${opencode}:\"edit\""
+  )
+  local approval shell path file
+  # Claude's settings are rendered by chezmoi, not by these writers; claude_settings.bats covers them.
+  # Each table row reads "| agent | approval | shell | path | hooks | mcp | subagents |".
+  local checked=0
+  # shellcheck disable=SC2312 # a failing enforcement prints no row, which the count below catches
+  while IFS='|' read -r _ a approval shell path _; do
+    a="${a// /}" approval="${approval// /}" shell="${shell// /}" path="${path// /}"
+    [[ "${a}" =~ ^[a-z]+$ && -n "${rules[${a}]:-}" ]] || continue
+    checked=$((checked + 1))
+    file="${rules[${a}]}"
+    if [[ "${shell}" == M* ]]; then
+      grep -q dyaiprobecmd "${file}" || fail "${a}: shell rules marked ${shell} but not written"
+    elif grep -qs dyaiprobecmd "${file}"; then
+      fail "${a}: shell rules written but marked ${shell}"
+    fi
+    if [[ "${path}" == M* ]]; then
+      grep -q dyaiprobepath "${file}" || fail "${a}: path rules marked ${path} but not written"
+    elif grep -qs dyaiprobepath "${file}"; then
+      fail "${a}: path rules written but marked ${path}"
+    fi
+    if [[ "${approval}" == M* ]]; then
+      [[ -n "${approvals[${a}]:-}" ]] || fail "${a}: approval marked M but no writer is known"
+      grep -qF -- "${approvals[${a}]#*:}" "${approvals[${a}]%%:*}" \
+        || fail "${a}: approval marked M but not written"
+    elif [[ -n "${approvals[${a}]:-}" ]]; then
+      fail "${a}: approval written but marked ${approval}"
+    fi
+  done < <(dyai::enforcement)
+  ((checked == ${#rules[@]})) || fail "checked ${checked} rows, expected ${#rules[@]}"
 }
 
 @test "a local edit undone by hand stops reading as edited" {
