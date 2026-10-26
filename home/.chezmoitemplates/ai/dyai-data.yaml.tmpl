@@ -153,6 +153,8 @@ policy:
       - "Bash(vault read *)"
       - "Bash(op read *)"
       - "Bash(aws configure get *)"
+      # Sentinel for `dyai selftest`: a harmless command each agent must refuse.
+      - "Bash(dyai-selftest-probe deny *)"
     defaultMode: acceptEdits
     # --dangerously-skip-permissions would skip every ask rule above; auto
     # mode and the sandbox cover the same need without that hole.

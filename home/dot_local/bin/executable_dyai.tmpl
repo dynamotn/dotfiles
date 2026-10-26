@@ -31,6 +31,7 @@ function _spec_main {
   dybatpho::opts::cmd merge _spec_merge
   dybatpho::opts::cmd drop _spec_drop
   dybatpho::opts::cmd logs _spec_logs
+  dybatpho::opts::cmd selftest _spec_selftest
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
@@ -188,6 +189,16 @@ function _spec_logs {
 }
 
 #######################################
+# @description Spec of selftest command
+# @noargs
+#######################################
+function _spec_selftest {
+  dybatpho::opts::setup "Prove that each agent enforces the shared deny rules (spends quota)" SELFTEST_ARGS \
+    action:"_selftest"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_selftest"
+}
+
+#######################################
 # @description Run the global install
 # @noargs
 #######################################
@@ -308,6 +319,25 @@ function _logs {
   else
     tail -n +1 -- "${file}"
   fi
+}
+
+#######################################
+# @description Prove the shared policy on the named agents, or on every installed one
+# @noargs
+#######################################
+# dyshellint disable=SC2154 SELFTEST_ARGS is assigned by dybatpho::opts from _spec_selftest
+function _selftest {
+  local -a agents=("${SELFTEST_ARGS[@]}")
+  local agent rc=0
+  if ((${#agents[@]} == 0)); then
+    for agent in claude codex gemini opencode copilot; do
+      ! dybatpho::is command "${agent}" || agents+=("${agent}")
+    done
+  fi
+  for agent in "${agents[@]}"; do
+    dyai_crew::selftest "${agent}" || rc=1
+  done
+  return "${rc}"
 }
 
 dybatpho::generate_from_spec _spec_main "$@"

@@ -189,7 +189,8 @@
       "Bash(pass show *)",
       "Bash(vault read *)",
       "Bash(op read *)",
-      "Bash(aws configure get *)"
+      "Bash(aws configure get *)",
+      "Bash(dyai-selftest-probe deny *)"
     ],
     "disableBypassPermissionsMode": "disable"
   },
