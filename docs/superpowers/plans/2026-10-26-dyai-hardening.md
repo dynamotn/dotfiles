@@ -155,17 +155,25 @@ The same rule applies to the Codex `.toml` (kind `codex-agents`).
 **Interfaces:**
 - Consumes: Task 2's copy order. The hash is taken over the rewritten
   content, so an override is not mistaken for a local edit.
-- Produces: config key `global.subagents[].models`, a map from leaf name to
-  `haiku | sonnet | opus | inherit`. The installer writes it into the Claude
-  frontmatter as `model:` with `yq --front-matter=process`. The Codex
-  conversion gets no model key: Codex names models by provider, and the
-  user's Codex default applies.
+- Produces:
+  - Config key `global.subagents[].models`: a map from leaf name to an
+    abstract tier, `fast | standard | strong | inherit`.
+  - `agents.<name>.model_tiers`: that agent's own choice for each tier,
+    either a string in its own syntax or `{model, provider, effort}`. The
+    object form covers agents that split those fields, including self-hosted
+    Ollama and LM Studio providers.
+  - `dyai::model_for <agent> <tier>`: prints the choice as JSON, or nothing.
+  - Claude: `model:` is written into the frontmatter.
+  - Codex: `model`, `model_provider` and `model_reasoning_effort` are written
+    into the agent TOML.
+  - A tier that an agent does not map keeps the upstream choice.
+  (Revised 2026-10-26: every agent names its models differently. Shared
+  config never carries one agent's model names.)
 
-Initial overrides in the config, following Intent Loop's tier table (reviews
-and security never below the strongest tier):
-`code-reviewer: opus`, `security-auditor: opus`, `architect-reviewer: opus`,
-`research-analyst: sonnet`. Leave the other 30 at their upstream values
-(21 sonnet, 10 inherit, 3 haiku today).
+Initial config: `code-reviewer`, `security-auditor` and `architect-reviewer`
+are `strong`; `research-analyst` is `standard`. Claude maps
+`fast: haiku, standard: sonnet, strong: opus`. Codex is not mapped yet,
+because it is not installed here and its TOML keys are unverified.
 
 - [ ] **Step 1: Write the failing tests:**
   - `@test "a models override rewrites the frontmatter"`: the pinned file

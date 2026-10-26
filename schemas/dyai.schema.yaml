@@ -88,6 +88,38 @@ $defs:
         description: >
           Subagent leaf names to skip in the global install (a preset can still
           pull them per project).
+      models:
+        type: object
+        description: >
+          Subagent leaf name to an abstract tier. Each agent translates the
+          tier through its own agents.<name>.model_tiers; `inherit` keeps the
+          session's model. An agent with no entry for the tier keeps the
+          upstream choice.
+        additionalProperties: { $ref: "#/$defs/modelTier" }
+
+  modelTier:
+    enum: [fast, standard, strong, inherit]
+    description: Abstract model tier, translated per agent by agents.<name>.model_tiers.
+
+  modelChoice:
+    description: >
+      One agent's own way to name a model: a string in that agent's syntax
+      (Claude `opus`, opencode `ollama/qwen3-coder`), or an object for agents
+      that split model, provider and reasoning effort (Codex, a self-hosted
+      Ollama or LM Studio provider).
+    oneOf:
+      - type: string
+      - type: object
+        additionalProperties: false
+        required: [model]
+        properties:
+          model: { type: string }
+          provider:
+            type: string
+            description: Provider id as the agent names it, e.g. ollama, lmstudio.
+          effort:
+            type: string
+            description: Reasoning effort, for agents that take one.
 
   hook:
     type: object
@@ -212,6 +244,13 @@ properties:
           type: object
           additionalProperties: { $ref: "#/$defs/hook" }
         policy: { $ref: "#/$defs/policy" }
+        model_tiers:
+          type: object
+          description: >
+            This agent's model for each abstract tier. `inherit` needs no
+            entry: it always means the session's own model.
+          propertyNames: { enum: [fast, standard, strong] }
+          additionalProperties: { $ref: "#/$defs/modelChoice" }
 
   registry:
     type: object

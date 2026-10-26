@@ -171,6 +171,26 @@ function dyai::install_owned {
 }
 
 #######################################
+# @description Translate an abstract model tier into one agent's own model choice
+# @arg $1 string Agent name (claude, codex, ...)
+# @arg $2 string Tier: fast, standard, strong or inherit; empty for none
+# @stdout The choice as compact JSON (a string, or {model, provider, effort});
+#   nothing when the agent maps no model for the tier
+#######################################
+function dyai::model_for {
+  local agent tier
+  dybatpho::expect_args agent tier -- "$@"
+  [[ -n "${tier}" ]] || return 0
+  if [[ "${tier}" == "inherit" ]]; then
+    # Only Claude spells "use the session's model" in a subagent file.
+    [[ "${agent}" != "claude" ]] || printf '"inherit"\n'
+    return 0
+  fi
+  # shellcheck disable=SC2312 # a bad config read maps no model, a safe no-op
+  dyai::config_json ".agents.${agent}.model_tiers.${tier} // \"\"" | jq -c 'select(. != "")'
+}
+
+#######################################
 # @description Read a section of the dyai config as compact JSON
 # @arg $1 string yq path expression, e.g. '.global.mcp // {}'
 # @stdout The section as JSON, or the empty object/array the expression defaults to
@@ -999,10 +1019,18 @@ function dyai::fetch_repo {
 # @description Convert a Claude-format subagent .md into a Codex agent .toml, rewriting it only on change
 # @arg $1 string Path to the subagent .md
 # @arg $2 string Path of the .toml to write
+# @arg $3 string Optional Codex model choice from dyai::model_for (JSON)
 #######################################
 function dyai::subagent_codex {
   local md dest
   dybatpho::expect_args md dest -- "$@"
+  local choice="${3:-}" cm="" cp="" ce=""
+  if [[ -n "${choice}" ]]; then
+    # A string is the model alone; an object may also name a self-hosted provider.
+    cm="$(jq -r 'if type == "object" then .model // "" else . end' <<< "${choice}")"
+    cp="$(jq -r 'if type == "object" then .provider // "" else "" end' <<< "${choice}")"
+    ce="$(jq -r 'if type == "object" then .effort // "" else "" end' <<< "${choice}")"
+  fi
   local first leaf name description tools body readonly_agent=0
   IFS= read -r first < "${md}" || first=""
   leaf="$(basename "${md}" .md)"
@@ -1021,9 +1049,13 @@ function dyai::subagent_codex {
   fi
   local tmp="${dest}.dyai-tmp"
   if ! N="${name:-${leaf}}" D="${description:-${leaf}}" B="${body}" R="${readonly_agent}" \
+    CM="${cm}" CP="${cp}" CE="${ce}" \
     yq -n -o=toml '.name = strenv(N) | .description = strenv(D)
       | .developer_instructions = strenv(B)
-      | (select(strenv(R) == "1") | .sandbox_mode) = "read-only"' > "${tmp}"; then
+      | (select(strenv(R) == "1") | .sandbox_mode) = "read-only"
+      | (select(strenv(CM) != "") | .model) = strenv(CM)
+      | (select(strenv(CP) != "") | .model_provider) = strenv(CP)
+      | (select(strenv(CE) != "") | .model_reasoning_effort) = strenv(CE)' > "${tmp}"; then
     rm -f -- "${tmp}"
     dybatpho::warn "Could not convert subagent ${leaf} for Codex"
     return 0
@@ -1049,7 +1081,7 @@ function dyai::setup_subagents {
   [[ -n "${agents_dir}${codex_dir}" ]] || return 0
   local sources
   sources="$(dyai::config_json '.global.subagents // []')"
-  local count i repo ref src incl excl md name dest leaf
+  local count i repo ref src incl excl md name dest leaf models tier model want
   local -a mds
   count="$(jq 'length' <<< "${sources}")"
   for ((i = 0; i < count; i++)); do
@@ -1060,6 +1092,7 @@ function dyai::setup_subagents {
     # Leaf names kept out of the global install (they can still be pulled per
     # project by a preset, which resolves subagents across the whole tree).
     excl="$(jq -c --argjson i "${i}" '.[$i].exclude // []' <<< "${sources}")"
+    models="$(jq -c --argjson i "${i}" '.[$i].models // {}' <<< "${sources}")"
     [[ -z "${agents_dir}" ]] || dybatpho::ensure_dir "${agents_dir}" > /dev/null
     [[ -z "${codex_dir}" ]] || dybatpho::ensure_dir "${codex_dir}" > /dev/null
     # shellcheck disable=SC2312 # the include list comes from the config we just read
@@ -1095,11 +1128,27 @@ function dyai::setup_subagents {
           fi
           continue
         fi
+        # An abstract tier, translated per agent; an agent with no mapping for
+        # it keeps the upstream choice.
+        tier="$(jq -r --arg n "${leaf}" '.[$n] // empty' <<< "${models}")"
         if [[ -n "${codex_dir}" ]]; then
-          dyai::subagent_codex "${md}" "$(dybatpho::path_join "${codex_dir}" "${leaf}.toml")"
+          dyai::subagent_codex "${md}" "$(dybatpho::path_join "${codex_dir}" "${leaf}.toml")" \
+            "$(dyai::model_for codex "${tier}")"
         fi
         [[ -n "${dest}" ]] || continue
-        dyai::install_owned subagents "${leaf}" "${md}" "${dest}" "subagent ${leaf}"
+        # The hash is taken over the rewritten file, so the override never
+        # reads as a local edit.
+        model="$(dyai::model_for claude "${tier}" | jq -r 'if type == "object" then .model else . end')"
+        want="${md}"
+        if [[ -n "${model}" ]]; then
+          want="${dest}.dyai-model"
+          if ! M="${model}" yq --front-matter=process '.model = strenv(M)' "${md}" > "${want}"; then
+            dybatpho::warn "Could not set model ${model} on subagent ${leaf}; installing it unchanged"
+            want="${md}"
+          fi
+        fi
+        dyai::install_owned subagents "${leaf}" "${want}" "${dest}" "subagent ${leaf}"
+        [[ "${want}" == "${md}" ]] || rm -f -- "${want}"
       done
     done < <(jq -r --argjson i "${i}" '.[$i].include[]' <<< "${sources}")
   done

@@ -881,6 +881,52 @@ CFG
   [[ -s "${HOME}/.cache/dyai/installed/subagents/backend-developer.sha256" ]]
 }
 
+@test "a tier is translated into the claude frontmatter" {
+  _stub claude
+  local dest="${HOME}/.claude/agents/backend-developer.md" model
+  _subagent_fixture
+  yq -i '.global.subagents[0].models = {"backend-developer": "strong"}
+    | .agents.claude.model_tiers = {"strong": "opus"}' "${CONFIG_FILE}"
+  dyai::setup_subagents
+  model="$(yq --front-matter=extract '.model' "${dest}")"
+  [[ "${model}" == "opus" ]]
+  grep -qx 'v1' "${dest}"
+}
+
+@test "a tier the agent does not map keeps the upstream model" {
+  _stub claude
+  local dest="${HOME}/.claude/agents/backend-developer.md" model
+  _subagent_fixture
+  yq -i '.global.subagents[0].models = {"backend-developer": "fast"}' "${CONFIG_FILE}"
+  dyai::setup_subagents
+  model="$(yq --front-matter=extract '.model' "${dest}")"
+  [[ "${model}" == "sonnet" ]]
+}
+
+@test "a tier maps to a self-hosted provider for codex" {
+  _stub codex
+  local toml="${HOME}/.codex/agents/backend-developer.toml"
+  _subagent_fixture
+  yq -i '.global.subagents[0].models = {"backend-developer": "strong"}
+    | .agents.codex.model_tiers = {"strong": {"model": "qwen3-coder:30b", "provider": "ollama", "effort": "high"}}' \
+    "${CONFIG_FILE}"
+  dyai::setup_subagents
+  local got
+  got="$(yq -p=toml -o=tsv '[.model, .model_provider, .model_reasoning_effort]' "${toml}")"
+  [[ "${got}" == $'qwen3-coder:30b\tollama\thigh' ]]
+}
+
+@test "an override is not reported as a local edit" {
+  _stub claude
+  _subagent_fixture
+  yq -i '.global.subagents[0].models = {"backend-developer": "strong"}
+    | .agents.claude.model_tiers = {"strong": "opus"}' "${CONFIG_FILE}"
+  dyai::setup_subagents
+  run dyai::setup_subagents
+  refute_output --partial "LOCAL EDITS"
+  [[ ! -e "${HOME}/.claude/agents/backend-developer.md.dyai-model" ]]
+}
+
 @test "dir_hash changes when a file is renamed" {
   local d="${BATS_TEST_TMPDIR}/h"
   mkdir -p "${d}"
