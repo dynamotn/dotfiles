@@ -64,7 +64,13 @@ Installed for every agent, every project:
 - `subagents` — a pinned repo (VoltAgent) and the category directories (or
   single `.md` files) whose agents install into Claude's `~/.claude/agents`
   and, converted to TOML, Codex's `~/.codex/agents` (an agent granted no
-  writing tool runs there in a `read-only` sandbox). `exclude` drops named
+  writing tool runs there in a `read-only` sandbox). Gemini
+  (`~/.gemini/agents/*.md`), opencode (`~/.config/opencode/agents/*.md`,
+  `mode: subagent`) and Copilot (`~/.copilot/agents/*.agent.md`) get a
+  Markdown conversion in their own frontmatter; a read-only agent stays
+  read-only there too (Gemini read tools only, opencode `edit`/`bash`
+  denied, Copilot `read` and `search`). Every copy is hash-tracked, so a
+  local edit is kept. `exclude` drops named
   leaves from the baseline; a preset can still pull one per project.
 - `commands` — pinned repos of command `.md` files, same shape as
   `subagents`. Nothing installs them globally; presets name them.
@@ -267,9 +273,9 @@ drift apart.
 |---|---|---|---|---|---|---|
 | claude | M | M | M | M | M | M |
 | codex | M | M | S | M | M | M |
-| gemini | M | M | S | M | M | - |
-| opencode | M | M | M | - | M | - |
-| copilot | - | S | S | M | M | - |
+| gemini | M | M | S | M | M | M |
+| opencode | M | M | M | - | M | M |
+| copilot | - | S | S | M | M | M |
 | agy | - | M | - | - | M | - |
 | hermes | - | M deny | - | - | M | - |
 

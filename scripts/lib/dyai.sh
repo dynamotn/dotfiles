@@ -61,9 +61,9 @@ def paths($kind; $tool): (.[$kind] // [])
 # edits-only preset. agy and hermes read none of the instruction files.
 DYAI_ENFORCEMENT='claude	M	M	M	M	M	M
 codex	M	M	S	M	M	M
-gemini	M	M	S	M	M	-
-opencode	M	M	M	-	M	-
-copilot	-	S	S	M	M	-
+gemini	M	M	S	M	M	M
+opencode	M	M	M	-	M	M
+copilot	-	S	S	M	M	M
 agy	-	M	-	-	M	-
 hermes	-	M deny	-	-	M	-'
 
@@ -1134,6 +1134,95 @@ function dyai::subagent_codex {
 }
 
 #######################################
+# @description Print where an agent keeps its user-level subagent files, and their suffix
+# @arg $1 string Agent: gemini, opencode or copilot
+# @stdout `<dir><TAB><suffix>`
+#######################################
+function dyai::subagent_home {
+  local agent
+  dybatpho::expect_args agent -- "$@"
+  case "${agent}" in
+    gemini) printf '%s\t.md\n' "${HOME}/.gemini/agents" ;;
+    opencode) printf '%s\t.md\n' "${XDG_CONFIG_HOME:-${HOME}/.config}/opencode/agents" ;;
+    copilot) printf '%s\t.agent.md\n' "${HOME}/.copilot/agents" ;;
+    *) return 1 ;;
+  esac
+}
+
+#######################################
+# @description Convert a Claude-format subagent for Gemini, opencode or Copilot and install it
+# @arg $1 string Agent: gemini, opencode or copilot
+# @arg $2 string The Claude-format .md
+# @arg $3 string Destination file
+# @arg $4 string Model choice for this agent, as JSON, or empty
+#######################################
+function dyai::subagent_md {
+  local agent md dest
+  dybatpho::expect_args agent md dest -- "$@"
+  local choice="${4:-}" model="" first leaf name description tools readonly_agent=0
+  if [[ -n "${choice}" ]]; then
+    model="$(jq -r 'if type == "object" then .model // "" else . end' <<< "${choice}")"
+  fi
+  IFS= read -r first < "${md}" || first=""
+  leaf="$(basename "${md}" .md)"
+  if [[ "${first}" != "---" ]]; then
+    dybatpho::warn "subagent ${leaf} has no frontmatter, skip for ${agent}"
+    return 0
+  fi
+  name="$(yq --front-matter=extract '.name // ""' "${md}" 2> /dev/null || true)"
+  description="$(yq --front-matter=extract '.description // ""' "${md}" 2> /dev/null || true)"
+  tools="$(yq --front-matter=extract '.tools // ""' "${md}" 2> /dev/null || true)"
+  # Their tools differ from Claude's: only "read-only or not" carries over.
+  if [[ -n "${tools}" && ! "${tools}" =~ (Write|Edit|Bash|NotebookEdit) ]]; then
+    readonly_agent=1
+  fi
+  # A slug, as Gemini requires; harmless for the others.
+  name="${name:-${leaf}}"
+  name="${name,,}"
+  name="${name//[^a-z0-9_-]/-}"
+  local front
+  # Claude's own model: value is never copied, it names a Claude model.
+  if ! front="$(N="${name}" D="${description:-${leaf}}" R="${readonly_agent}" M="${model}" A="${agent}" \
+    yq -n '.name = strenv(N) | .description = strenv(D)
+      | (select(strenv(A) == "opencode") | .mode) = "subagent"
+      | (select(strenv(R) == "1" and strenv(A) == "gemini") | .tools)
+          = ["read_file", "read_many_files", "grep_search", "glob", "list_directory"]
+      | (select(strenv(R) == "1" and strenv(A) == "opencode") | .permission) = {"edit": "deny", "bash": "deny"}
+      | (select(strenv(R) == "1" and strenv(A) == "copilot") | .tools) = ["read", "search"]
+      | (select(strenv(M) != "") | .model) = strenv(M)')"; then
+    dybatpho::warn "Could not convert subagent ${leaf} for ${agent}"
+    return 0
+  fi
+  local tmp="${dest}.dyai-tmp"
+  {
+    printf -- '---\n%s\n---\n' "${front}"
+    # Everything after the closing --- of the frontmatter.
+    sed '1,/^---$/d' "${md}"
+  } > "${tmp}"
+  dyai::install_owned "${agent}-agents" "${leaf}" "${tmp}" "${dest}" "${agent} subagent ${leaf}"
+  rm -f -- "${tmp}"
+}
+
+#######################################
+# @description Remove the copy of an excluded subagent dyai installed for an agent, unless it was edited
+# @arg $1 string Hash kind, e.g. gemini-agents
+# @arg $2 string Leaf name
+# @arg $3 string The installed file
+#######################################
+function dyai::drop_owned {
+  local kind leaf dest
+  dybatpho::expect_args kind leaf dest -- "$@"
+  dybatpho::is file "${dest}" || return 0
+  local recorded
+  recorded="$(dyai::installed_hash "${kind}" "${leaf}")"
+  [[ -n "${recorded}" ]] || return 0
+  # shellcheck disable=SC2310 # a plain yes/no
+  dyai::locally_edited "${kind}" "${leaf}" "${dest}" && return 0
+  rm -f -- "${dest}" "${HOME}/.cache/dyai/installed/${kind}/${leaf}.sha256"
+  dybatpho::info "Removed ${kind%-agents} subagent ${leaf}, now excluded from the baseline"
+}
+
+#######################################
 # @description Install the subagents in global.subagents into Claude's agents dir, and converted into Codex's
 # @noargs
 #######################################
@@ -1147,7 +1236,13 @@ function dyai::setup_subagents {
     chome="${CODEX_HOME:-$(dybatpho::path_join "${HOME}" ".codex")}"
     codex_dir="$(dybatpho::path_join "${chome}" "agents")"
   fi
-  [[ -n "${agents_dir}${codex_dir}" ]] || return 0
+  # Gemini, opencode and Copilot take Markdown agents with their own frontmatter.
+  local other other_home other_dir other_suffix
+  local -a others=()
+  for other in gemini opencode copilot; do
+    ! dybatpho::is command "${other}" || others+=("${other}")
+  done
+  [[ -n "${agents_dir}${codex_dir}" || ${#others[@]} -gt 0 ]] || return 0
   local sources
   sources="$(dyai::config_json '.global.subagents // []')"
   local count i repo ref src incl excl md name dest leaf models tier model want
@@ -1198,6 +1293,11 @@ function dyai::setup_subagents {
           else
             dybatpho::debug "subagent ${leaf} excluded from the global baseline"
           fi
+          for other in ${others[@]+"${others[@]}"}; do
+            other_home="$(dyai::subagent_home "${other}")" || continue
+            IFS=$'\t' read -r other_dir other_suffix <<< "${other_home}"
+            dyai::drop_owned "${other}-agents" "${leaf}" "${other_dir}/${leaf}${other_suffix}"
+          done
           continue
         fi
         # An abstract tier, translated per agent; an agent with no mapping for
@@ -1207,6 +1307,13 @@ function dyai::setup_subagents {
           dyai::subagent_codex "${md}" "$(dybatpho::path_join "${codex_dir}" "${leaf}.toml")" \
             "$(dyai::model_for codex "${tier}")"
         fi
+        for other in ${others[@]+"${others[@]}"}; do
+          other_home="$(dyai::subagent_home "${other}")" || continue
+          IFS=$'\t' read -r other_dir other_suffix <<< "${other_home}"
+          dybatpho::ensure_dir "${other_dir}" > /dev/null
+          dyai::subagent_md "${other}" "${md}" "${other_dir}/${leaf}${other_suffix}" \
+            "$(dyai::model_for "${other}" "${tier}")"
+        done
         [[ -n "${dest}" ]] || continue
         # The hash is taken over the rewritten file, so the override never
         # reads as a local edit.

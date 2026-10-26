@@ -191,6 +191,35 @@ function dyai_status::hooks_and_policy {
 }
 
 #######################################
+# @description Report the subagents dyai installed for gemini, opencode or copilot that are gone or edited
+# @arg $1 string Agent
+#######################################
+function dyai_status::agent_subagents {
+  local agent
+  dybatpho::expect_args agent -- "$@"
+  dybatpho::is command "${agent}" || return 0
+  local hash_dir dir suffix file leaf dest
+  hash_dir="$(dybatpho::path_join "${HOME}" ".cache" "dyai" "installed" "${agent}-agents")"
+  dybatpho::is dir "${hash_dir}" || return 0
+  local home
+  home="$(dyai::subagent_home "${agent}")" || return 0
+  IFS=$'\t' read -r dir suffix <<< "${home}"
+  for file in "${hash_dir}"/*.sha256; do
+    dybatpho::is file "${file}" || continue
+    leaf="$(basename "${file}" .sha256)"
+    dest="${dir}/${leaf}${suffix}"
+    if ! dybatpho::is file "${dest}"; then
+      dyai_status::drift "${agent}" subagent "${leaf}" missing
+      continue
+    fi
+    # shellcheck disable=SC2310 # a plain yes/no
+    if dyai::locally_edited "${agent}-agents" "${leaf}" "${dest}"; then
+      dyai_status::drift "${agent}" subagent "${leaf}" "LOCAL EDITS"
+    fi
+  done
+}
+
+#######################################
 # @description Report every drift between the dyai config and the installed agents
 # @arg $1 bool true to print nothing at all on a clean machine
 # @stdout One line per drift, then a summary unless quiet
@@ -208,6 +237,10 @@ function dyai_status::main {
   DYAI_STATUS_DRIFT=0
   dyai_status::skills
   dyai_status::claude
+  local agent
+  for agent in gemini opencode copilot; do
+    dyai_status::agent_subagents "${agent}"
+  done
   dyai_status::mcp
   dyai_status::hooks_and_policy
   if ((DYAI_STATUS_DRIFT > 0)); then

@@ -956,7 +956,7 @@ CFG
 @test "enforcement marks copilot shell rules as instructions only" {
   run dyai::enforcement
   assert_success
-  assert_line "| copilot | - | S | S | M | M | - |"
+  assert_line "| copilot | - | S | S | M | M | M |"
 }
 
 @test "enforcement marks claude and codex subagents as mechanical" {
@@ -1082,4 +1082,101 @@ CFG
   mv "${d}/a" "${d}/b"
   after="$(dyai::dir_hash "${d}")"
   [[ "${after}" != "${before}" ]]
+}
+
+# Frontmatter field $2 of converted subagent file $1, as yq prints it.
+function _front {
+  yq --front-matter=extract "${2}" "${1}"
+}
+
+@test "subagents convert for gemini, opencode and copilot" {
+  _stub gemini
+  _stub opencode
+  _stub copilot
+  _subagent_fixture
+  dyai::setup_subagents
+  local g="${HOME}/.gemini/agents/backend-developer.md"
+  local o="${HOME}/.config/opencode/agents/backend-developer.md"
+  local c="${HOME}/.copilot/agents/backend-developer.agent.md"
+  run _front "${g}" '.name + " " + (.model // "none") + " " + (.tools // "all" | tostring)'
+  assert_output "backend-developer none all"
+  run _front "${o}" '.mode + " " + (.permission // "all" | tostring)'
+  assert_output "subagent all"
+  run _front "${c}" '.name + " " + (.tools // "all" | tostring)'
+  assert_output "backend-developer all"
+  local f last description
+  for f in "${g}" "${o}" "${c}"; do
+    last="$(tail -n 1 "${f}")"
+    [[ "${last}" == v1 ]] || fail "${f} lost its body"
+    description="$(_front "${f}" '.description')"
+    [[ -n "${description}" ]] || fail "${f} has no description"
+  done
+}
+
+@test "a read-only subagent stays read-only in every agent" {
+  _stub gemini
+  _stub opencode
+  _stub copilot
+  _subagent_fixture
+  printf -- '---\nname: backend-developer\ndescription: Reviews\ntools: Read, Grep, Glob\n---\nv1\n' > "${PINNED}"
+  dyai::setup_subagents
+  run _front "${HOME}/.gemini/agents/backend-developer.md" '.tools | join(",")'
+  assert_output "read_file,read_many_files,grep_search,glob,list_directory"
+  run _front "${HOME}/.config/opencode/agents/backend-developer.md" '.permission.edit + " " + .permission.bash'
+  assert_output "deny deny"
+  run _front "${HOME}/.copilot/agents/backend-developer.agent.md" '.tools | join(",")'
+  assert_output "read,search"
+}
+
+@test "a model tier maps per agent and Claude's model is never copied" {
+  _stub gemini
+  _stub opencode
+  _subagent_fixture
+  yq -i '.global.subagents[0].models = {"backend-developer": "strong"}
+    | .agents.gemini.model_tiers = {"strong": "gemini-3-pro"}' "${CONFIG_FILE}"
+  dyai::setup_subagents
+  run _front "${HOME}/.gemini/agents/backend-developer.md" '.model'
+  assert_output "gemini-3-pro"
+  run _front "${HOME}/.config/opencode/agents/backend-developer.md" '.model // "none"'
+  assert_output "none"
+}
+
+@test "an edited gemini subagent survives a changed upstream" {
+  _stub gemini
+  _subagent_fixture
+  dyai::setup_subagents
+  local dest="${HOME}/.gemini/agents/backend-developer.md"
+  printf 'my note\n' >> "${dest}"
+  printf -- '---\nname: backend-developer\n---\nv2\n' > "${PINNED}"
+  run dyai::setup_subagents
+  assert_output --partial "LOCAL EDITS kept"
+  grep -qx 'my note' "${dest}"
+}
+
+@test "excluding a subagent removes the opencode copy dyai made" {
+  _stub opencode
+  _subagent_fixture
+  dyai::setup_subagents
+  local dest="${HOME}/.config/opencode/agents/backend-developer.md"
+  [[ -f "${dest}" ]]
+  yq -i '.global.subagents[0].exclude = ["backend-developer"]' "${CONFIG_FILE}"
+  dyai::setup_subagents
+  [[ ! -e "${dest}" ]]
+}
+
+@test "status names a missing opencode subagent" {
+  _stub opencode
+  _subagent_fixture
+  dyai::setup_subagents
+  rm "${HOME}/.config/opencode/agents/backend-developer.md"
+  . "${DOTFILES_DIR}/scripts/lib/dyai_status.sh"
+  run dyai_status::agent_subagents opencode
+  assert_output --partial "opencode subagent backend-developer: missing"
+}
+
+@test "enforcement marks subagents mechanical for gemini, opencode and copilot" {
+  run dyai::enforcement
+  assert_line --regexp '^\| gemini \|.* M \|$'
+  assert_line --regexp '^\| opencode \|.* M \|$'
+  assert_line --regexp '^\| copilot \|.* M \|$'
 }
