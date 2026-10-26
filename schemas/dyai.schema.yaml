@@ -237,6 +237,11 @@ properties:
             description: Seconds an agent is skipped after a rate limit or an auth failure.
           gate: { type: string, description: "Shell command a merge must pass before it commits" }
           require_review: { type: boolean }
+          panes:
+            enum: [auto, "off"]
+            description: >
+              auto opens a zellij pane per started worker and per review
+              (dyai_zellij::open); off opens none.
           fences:
             type: array
             items: { type: string }

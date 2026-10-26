@@ -379,6 +379,7 @@ global:
     model: {opencode: "anthropic/claude-sonnet-4-5"}
     timeout: 600
     require_review: false
+    panes: "off"
     fences: [":(glob)secrets/**"]
     hooks: {on_status: "true"}
 YAML
@@ -401,6 +402,14 @@ YAML
   _require_ys
   local bad="${BATS_TEST_TMPDIR}/bad.yaml"
   printf 'global:\n  crew:\n    hooks: {pre_merge: x}\n' > "${bad}"
+  run "${YS}" -f "${SCHEMA_FILE}" "${bad}"
+  assert_failure
+}
+
+@test "schema rejects an unknown crew panes mode" {
+  _require_ys
+  local bad="${BATS_TEST_TMPDIR}/bad.yaml"
+  printf 'global:\n  crew:\n    panes: always\n' > "${bad}"
   run "${YS}" -f "${SCHEMA_FILE}" "${bad}"
   assert_failure
 }

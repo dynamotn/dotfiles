@@ -5,6 +5,7 @@
 # The logic lives in `scripts/lib/dyai_hunk.sh`, shared with the bats tests.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai_zellij.sh"
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai_hunk.sh"
 
 dyai_hunk::main "$@"

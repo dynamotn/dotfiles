@@ -197,6 +197,8 @@ global:
     timeout: 1800
     cooldown: 900
     require_review: true
+    # A zellij pane per started worker (its log) and per review (hunk).
+    panes: auto
     fences:
       - ":(glob).github/**"
       - ":(glob)**/.chezmoiscripts/**"
