@@ -107,6 +107,11 @@
             "type": "command",
             "command": "bash ~/.claude/hooks/verify-on-stop.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "command -v dyai-hunk >/dev/null 2>&1 && dyai-hunk; true",
+            "async": true
           }
         ]
       }

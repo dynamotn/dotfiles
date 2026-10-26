@@ -1,0 +1,10 @@
+#!{{ .bash }}
+# @file dyai-hunk
+# @brief Stop hook shared by every AI agent: show its changes side by side in hunk
+# @description Run from each agent's stop hook in the project it worked in.
+# The logic lives in `scripts/lib/dyai_hunk.sh`, shared with the bats tests.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai_hunk.sh"
+
+dyai_hunk::main "$@"

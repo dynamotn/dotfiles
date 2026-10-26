@@ -144,7 +144,8 @@ global:
   hooks:
     stop:
       event: stop
-      run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Task finished!' --icon=dialog-information; true"
+      # dyai-hunk opens the changes side by side; Claude and opencode wire it on their own.
+      run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Task finished!' --icon=dialog-information; command -v dyai-hunk > /dev/null 2>&1 && dyai-hunk; true"
     input:
       event: input
       run: "command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Waiting for your input!' --icon=dialog-information; true"
