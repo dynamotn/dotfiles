@@ -203,8 +203,32 @@
   "agentPushNotifEnabled": true
 }
 ` | fromJson -}}
+{{- /*
+  The sandbox turns every recursive (double-star) Read deny into one path
+  per matching file under the cwd. The .age rule alone matched ~1.7k files
+  here (browser profiles, worktrees): a 1.7MB bwrap command line that fails
+  with E2BIG and adds ~13s to startup. Claude gets the gitignore form
+  `*.age` instead, which the Read tool matches at any depth without
+  expansion, and the sandbox denies the directories that hold .age files.
+  shortcut: a .age file outside these directories is readable from Bash;
+  add its directory here when one appears.
+*/ -}}
+{{- $deny := list -}}
+{{- range $d.policy.permissions.deny }}{{ $deny = append $deny (eq . "Read(**/*.age)" | ternary "Read(*.age)" .) }}{{ end -}}
+{{- $perms := deepCopy $d.policy.permissions -}}
+{{- $_ := set $perms "deny" $deny -}}
+{{- $wt := .chezmoi.workingTree -}}
+{{- $denyRead := list
+      (joinPath $wt "secrets")
+      (joinPath $wt ".worktrees/*/secrets")
+      (joinPath $wt "home/private_dot_ssh/keys")
+      (joinPath $wt "home/private_dot_config/firefox/profiles")
+      (joinPath $wt "home/private_dot_config/thunderbird/profiles")
+      (joinPath $wt "home/private_dot_config/tstruct/encrypted_auth.json.age")
+      (joinPath $wt "home/private_dot_config/nvim/lua/per_machine/encrypted_F1.lua.age") -}}
 {{- $derived := dict
-      "permissions" $d.policy.permissions
+      "permissions" $perms
+      "sandbox" (dict "filesystem" (dict "denyRead" $denyRead))
       "theme" $d.policy.theme
       "effortLevel" $d.policy.effortLevel
       "enabledPlugins" $enabled

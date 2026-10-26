@@ -151,7 +151,7 @@
     "deny": [
       "Read(**/secrets/data/**)",
       "Edit(**/secrets/data/**)",
-      "Read(**/*.age)",
+      "Read(*.age)",
       "Edit(**/*.age)",
       "Read(**/.env)",
       "Read(**/.env.*)",
@@ -204,6 +204,15 @@
         "~/.cache/uv",
         "~/.cargo/registry",
         "~/.local/share/rtk"
+      ],
+      "denyRead": [
+        "@DOTFILES@/secrets",
+        "@DOTFILES@/.worktrees/*/secrets",
+        "@DOTFILES@/home/private_dot_ssh/keys",
+        "@DOTFILES@/home/private_dot_config/firefox/profiles",
+        "@DOTFILES@/home/private_dot_config/thunderbird/profiles",
+        "@DOTFILES@/home/private_dot_config/tstruct/encrypted_auth.json.age",
+        "@DOTFILES@/home/private_dot_config/nvim/lua/per_machine/encrypted_F1.lua.age"
       ],
       "denyWrite": [
         "~/.local/bin",
