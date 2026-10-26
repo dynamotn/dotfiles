@@ -1,0 +1,5 @@
+{"type":"init","timestamp":"2026-10-26T00:00:00.000Z","session_id":"s","model":"gemini-3"}
+{"type":"message","timestamp":"2026-10-26T00:00:00.000Z","role":"user","content":"task"}
+{"type":"message","timestamp":"2026-10-26T00:00:01.000Z","role":"assistant","content":"{\"verdict\":\"pass\",","delta":true}
+{"type":"message","timestamp":"2026-10-26T00:00:01.000Z","role":"assistant","content":"\"findings\":[]}\nLooks fine.","delta":true}
+{"type":"result","timestamp":"2026-10-26T00:00:02.000Z","status":"success","stats":{}}

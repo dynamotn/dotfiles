@@ -1,0 +1,2 @@
+ERROR: Reconnecting... 5/5
+ERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header, url: http://127.0.0.1:8787/w/codex/v1/responses

@@ -1,0 +1,3 @@
+{"type":"step_start","timestamp":1,"sessionID":"s","part":{"type":"step-start"}}
+{"type":"text","timestamp":2,"sessionID":"s","part":{"type":"text","text":"{\"verdict\":\"pass\",\"findings\":[]}\nLooks fine."}}
+{"type":"step_finish","timestamp":3,"sessionID":"s","part":{"type":"step-finish"}}
