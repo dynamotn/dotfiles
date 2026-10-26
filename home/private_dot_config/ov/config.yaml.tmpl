@@ -15,8 +15,13 @@ Prompt:
 
 # ShrinkChar: '…' # Characters displayed when the column is shrinking.
 
+# Keys and options follow the Neovim config: hjkl, g/G, Ctrl+f/b/e/y,
+# H/L between documents like buffers, {/} between sections, tabstop 2,
+# scrolloff 4.
 General:
-  TabWidth: 8
+  TabWidth: 2
+  # Like Neovim's scrolloff: a search or jump lands 4 lines from the top.
+  JumpTarget: "4"
   Header: 0
   AlternateRows: false
   ColumnMode: false
@@ -114,13 +119,13 @@ KeyBind:
   watch_interval:
     - "ctrl+w"
   follow_mode:
-    - "ctrl+f"
+    - "ctrl+alt+f"
   follow_all:
     - "ctrl+a"
   follow_section:
     - "F2"
   help:
-    - "h"
+    - "F1"
     - "ctrl+alt+c"
     - "ctrl+f1"
   logdoc:
@@ -130,17 +135,25 @@ KeyBind:
     - "Enter"
     - "Down"
     - "ctrl+N"
+    - "j"
+    - "ctrl+e"
   up:
     - "Up"
     - "ctrl+p"
+    - "k"
+    - "ctrl+y"
   top:
     - "Home"
+    - "g"
   bottom:
     - "End"
+    - "G"
   left:
     - "left"
+    - "h"
   right:
     - "right"
+    - "l"
   half_left:
     - "ctrl+left"
   half_right:
@@ -150,6 +163,7 @@ KeyBind:
     - "ctrl+b"
   page_down:
     - "PageDown"
+    - "ctrl+f"
     - "ctrl+v"
   page_half_up:
     - "ctrl+u"
@@ -158,7 +172,6 @@ KeyBind:
   section_delimiter:
     - "alt+d"
   section_start:
-    - "ctrl+F3"
     - "alt+s"
   section_header_num:
     - "F7"
@@ -166,10 +179,12 @@ KeyBind:
     - "alt+-"
   next_section:
     - "space"
+    - "}"
   last_section:
     - "9"
   previous_section:
     - "^"
+    - "{"
   mark:
     - "m"
   remove_mark:
@@ -186,7 +201,7 @@ KeyBind:
   alter_rows_mode:
     - "C"
   line_number_mode:
-    - "G"
+    - "alt+n"
   search:
     - "/"
   wrap_mode:
@@ -199,30 +214,32 @@ KeyBind:
   delimiter:
     - "d"
   header:
-    - "H"
+    - "alt+H"
   skip_lines:
     - "ctrl+s"
   tabwidth:
     - "t"
   goto:
-    - "g"
+    - ":"
   next_search:
     - "n"
   next_backsearch:
     - "N"
   next_doc:
     - "]"
+    - "L"
   previous_doc:
     - "["
+    - "H"
   toggle_mouse:
     - "ctrl+f3"
     - "ctrl+alt+r"
   multi_color:
     - "."
   jump_target:
-    - "j"
+    - "J"
   plain_mode:
-    - "ctrl+e"
+    - "alt+p"
   rainbow_mode:
     - "ctrl+r"
   close_file:

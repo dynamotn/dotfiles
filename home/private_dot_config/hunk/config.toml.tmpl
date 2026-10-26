@@ -1,0 +1,26 @@
+# Always side by side, even in a narrow pane.
+mode = "split"
+line_numbers = true
+{{- $theme := "catppuccin-macchiato" }}
+{{- if not .darkMode }}
+{{-   $theme = "catppuccin-latte" }}
+{{- end }}
+# Same catppuccin flavor as Neovim and the terminal.
+theme = "{{ $theme }}"
+
+# Hunk ships Vim-like keys (j/k, g/G, ctrl+d/u, /, n/N, v, y); these add what
+# the Neovim config has on top. A listed command answers only to these keys.
+[keybindings]
+# Like S-h/S-l between buffers.
+"hunk.review.previousFile" = [",", "H"]
+"hunk.review.nextFile" = [".", "L"]
+"hunk.review.stepDown" = ["down", "j", "ctrl+e"]
+"hunk.review.stepUp" = ["up", "k", "ctrl+y"]
+"hunk.review.pageDown" = ["pagedown", "space", "f", "ctrl+f"]
+"hunk.review.pageUp" = ["pageup", "b", "shift+space", "ctrl+b"]
+"hunk.review.scrollCodeLeft" = ["left", "shift+left", "h"]
+"hunk.review.scrollCodeRight" = ["right", "shift+right", "l"]
+# l scrolls now; line numbers move next to it.
+"hunk.view.toggleLineNumbers" = "alt+l"
+"hunk.history.pageDown" = ["pagedown", "space", "f", "ctrl+f"]
+"hunk.history.pageUp" = ["pageup", "b", "shift+space", "ctrl+b"]

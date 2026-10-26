@@ -35,17 +35,23 @@ end
 hl.bind(mainMod .. " + D", hl.dsp.workspace.swap_monitors({ monitor1 = 0, monitor2 = 1 }))
 hl.bind(mainMod .. " + CTRL + left", hl.dsp.workspace.move({ monitor = "-1" }))
 hl.bind(mainMod .. " + CTRL + right", hl.dsp.workspace.move({ monitor = "+1" }))
+hl.bind(mainMod .. " + CTRL + H", hl.dsp.workspace.move({ monitor = "-1" }))
+hl.bind(mainMod .. " + CTRL + L", hl.dsp.workspace.move({ monitor = "+1" }))
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 
 -- Window --
--- Move focus with mainMod + arrow keys
+-- Move focus with mainMod + arrow keys, or mainMod + hjkl as in Neovim
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down", hl.dsp.focus({ direction = "down" }))
+hl.bind(mainMod .. " + H", hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + K", hl.dsp.focus({ direction = "up" }))
+hl.bind(mainMod .. " + J", hl.dsp.focus({ direction = "down" }))
 
 -- Switch between windows in a workspace
 hl.bind(altMod .. " + Tab", hl.dsp.window.cycle_next())
@@ -58,6 +64,10 @@ hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.resize({ x = 100, y = 0, re
 hl.bind(mainMod .. " + SHIFT + left", hl.dsp.window.resize({ x = -100, y = 0, relative = true }))
 hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.resize({ x = 0, y = 100, relative = true }))
 hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.resize({ x = 0, y = -100, relative = true }))
+hl.bind(mainMod .. " + SHIFT + L", hl.dsp.window.resize({ x = 100, y = 0, relative = true }))
+hl.bind(mainMod .. " + SHIFT + H", hl.dsp.window.resize({ x = -100, y = 0, relative = true }))
+hl.bind(mainMod .. " + SHIFT + J", hl.dsp.window.resize({ x = 0, y = 100, relative = true }))
+hl.bind(mainMod .. " + SHIFT + K", hl.dsp.window.resize({ x = 0, y = -100, relative = true }))
 
 -- Windows
 hl.bind(altMod .. " + F4", hl.dsp.window.close())
@@ -73,21 +83,21 @@ exec(mainMod .. " + Return", app.terminal)
 exec(mainMod .. " + E", app.browser .. " -P Personal")
 exec(mainMod .. " + Q", app.browser .. " -P Enterprise-F1")
 exec(mainMod .. " + M", app.mail_client .. " -P Personal")
-exec(mainMod .. " + K", app.mail_client .. " -P Enterprise-F1")
+exec(mainMod .. " + SHIFT + M", app.mail_client .. " -P Enterprise-F1")
 {{- else if eq .place "office" }}
 exec(mainMod .. " + E", app.browser .. " -P Enterprise-{{ .company }}")
 exec(mainMod .. " + Q", app.browser .. " -P Personal")
 exec(mainMod .. " + M", app.mail_client .. " -P Enterprise-{{ .company }}")
-exec(mainMod .. " + K", app.mail_client .. " -P Personal")
+exec(mainMod .. " + SHIFT + M", app.mail_client .. " -P Personal")
 {{- end }}
 exec(mainMod .. " + N", "noctalia msg panel-toggle control-center")
 exec(mainMod .. " + SHIFT + N", "noctalia msg notification-dnd-toggle")
 exec(altMod .. " + N", "noctalia msg notification-invoke-latest")
-exec(mainMod .. " + J", "noctalia msg panel-toggle clipboard")
+exec(mainMod .. " + V", "noctalia msg panel-toggle clipboard")
 -- Bitwarden through noctalia's dmenu; rbw-pick types the pick into the window
 exec(mainMod .. " + P", "rbw-pick password")
 exec(mainMod .. " + O", "rbw-pick totp")
-exec(mainMod .. " + L", "noctalia msg session lock")
+exec(mainMod .. " + Escape", "noctalia msg session lock")
 exec(mainMod .. " + S", "noctalia msg screenshot-region")
 -- Drop-down system monitor; the workspace rule starts btop on first use
 hl.bind(mainMod .. " + Z", hl.dsp.workspace.toggle_special("monitor"))
