@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://json-schema.org/draft-07/schema
+title: Dytoy Doc Block
+description: >
+  Schema for the doc blocks at the top of dytoy tool definitions, and for the
+  entries of docs/dytoy.extra.yaml. scripts/dytoy_docs.sh turns them into the
+  tool tables of docs/dytoy.md.
+type: object
+required: [name, description, category, subcategory]
+additionalProperties: false
+
+properties:
+  name:
+    type: string
+    description: Tool name; must match a `name:` line of the definition
+
+  label:
+    type: string
+    description: Link text in the docs, defaults to `name`
+
+  url:
+    type: string
+    description: >
+      Link target. Defaults to the GitHub page of the definition's only
+      `repo:`; `none` renders the label as plain code without a link.
+
+  description:
+    type: string
+    description: The "Purpose" cell of the row
+
+  category:
+    type: string
+    description: Section of docs/dytoy.md, one of docs/dytoy.categories.yaml
+
+  subcategory:
+    type: string
+    description: Ordering group inside the category, never rendered
+
+  order:
+    type: integer
+    description: Position inside the subcategory; rows without it come last
