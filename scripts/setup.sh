@@ -34,7 +34,7 @@ if [[ ! -f "${SCRIPT_DIR}/lib/dybatpho/init.sh" ]]; then
 fi
 # shellcheck source-path=SCRIPTDIR
 # shellcheck source=lib/dybatpho/init.sh
-. "${SCRIPT_DIR}/lib/dybatpho/init.sh" --modules cli network archive array privilege semver
+. "${SCRIPT_DIR}/lib/dybatpho/init.sh" --modules cli network archive array privilege semver file
 dybatpho::register_common_handlers
 ROOT_DIR="$(dybatpho::path_join "${SCRIPT_DIR}" "..")"
 ROOT_DIR="$(dybatpho::path_normalize "${ROOT_DIR}")"
@@ -209,26 +209,19 @@ function _chezmoi_init_args {
 }
 
 #######################################
-# @description Export the proxy of this machine, if any, for the downloads of
-# the next applies. It is a secret of the machine, so it is only known once
-# the secrets submodule and the age identities are in place, after `~/.ssh`.
+# @description Fit git and the proxy to the network for the next applies: the
+# git rewrites land where `git/config` includes them, before the submodules
+# are cloned, and the proxy is exported only when this network reaches it.
+# The proxy is a secret of the machine, so dynet's config can only be applied
+# once the secrets submodule and the age identities are in place, after
+# `~/.ssh`.
 # @noargs
 #######################################
-function _export_proxy {
-  local data proxy
-  # dyshellint disable=SC2016 a chezmoi template, not a shell expansion
-  data="$(chezmoi execute-template '{{ includeTemplate "machine/secret.tmpl" . }}')"
-  proxy="$(yq -r '.httpProxy // ""' <<< "${data}")"
-  if dybatpho::string_is_blank "${proxy}"; then
-    return 0
-  fi
-  export https_proxy="${proxy}"
-  export http_proxy="${proxy}"
-  local no_proxy_val
-  no_proxy_val="$(yq -r '.noProxyAddresses // [] | join(",")' <<< "${data}")"
-  if ! dybatpho::string_is_blank "${no_proxy_val}"; then
-    export no_proxy="${no_proxy_val}"
-  fi
+function _detect_network {
+  chezmoi apply "${HOME}/.config/dynet" "${HOME}/.config/git/config"
+  # shellcheck source=lib/network.sh
+  . "${SCRIPT_DIR}/lib/network.sh"
+  network::detect "${HOME}/.config/dynet/config.json" "${HOME}/.local/state/dynet"
 }
 
 #######################################
@@ -315,7 +308,7 @@ function _main {
     --mode file "${params[@]}"
   dybatpho::header "Setup SSH"
   chezmoi apply "${HOME}/.ssh" "${params[@]}"
-  _export_proxy
+  _detect_network
   dybatpho::header "Setup other dotfiles"
   chezmoi apply "${params[@]}"
 

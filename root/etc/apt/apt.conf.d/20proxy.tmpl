@@ -1,7 +1,7 @@
 {{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
 {{- if $secret.httpProxy }}
-Acquire::http::Proxy "{{ $secret.httpProxy }}";
-Acquire::https::Proxy "{{ $secret.httpProxy }}";
+Acquire::http::Proxy-Auto-Detect "/etc/apt/dynet-proxy";
+Acquire::https::Proxy-Auto-Detect "/etc/apt/dynet-proxy";
 {{-   range $secret.noProxyAddresses }}
 Acquire::http::proxy::{{ . }} "DIRECT";
 {{-   end }}

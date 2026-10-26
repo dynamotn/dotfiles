@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# dyshellint disable=BSG010 run as root by NetworkManager, it sources nothing from the user's home, dybatpho included
+# @file 90-dynet
+# @brief Fit the proxy and git to the network on every network change
+# @description NetworkManager runs it as root, with the interface and the
+# action. It probes the proxy of this machine itself, not through
+# scripts/lib/network.sh, so that root never runs code the user can edit,
+# and writes the result to /run/dynet/proxy.env: docker reads it when it
+# starts and apt each time it runs. Then it runs the user's dynet, which
+# fits git and the shells the same way.
+{{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
+set -euo pipefail
+
+case "${2:-}" in
+  up | down | vpn-up | vpn-down | dhcp4-change | dhcp6-change | connectivity-change) ;;
+  *) exit 0 ;;
+esac
+
+{{- with $secret.httpProxy }}
+env_file=/run/dynet/proxy.env
+mkdir -p /run/dynet
+{{-   $url := urlParse . }}
+{{-   $port := "80" }}
+{{-   if eq $url.scheme "https" }}
+{{-     $port = "443" }}
+{{-   end }}
+{{-   $hostPort := splitList ":" $url.host }}
+{{-   if gt (len $hostPort) 1 }}
+{{-     $port = last $hostPort }}
+{{-   end }}
+# Every variable is written, empty when the proxy is out of reach, so that it
+# overrides the proxy the consumers fall back to without this file. It stays
+# readable by apt's unprivileged _apt user, as apt.conf.d always was.
+proxy=""
+no_proxy=""
+# shellcheck disable=SC2016 # $1 and $2 are the inner shell's arguments
+if timeout 3 bash -c 'exec 3<>"/dev/tcp/$1/$2"' probe {{ first $hostPort | squote }} {{ $port | squote }} 2> /dev/null; then
+  proxy={{ . | squote }}
+  no_proxy={{ join "," $secret.noProxyAddresses | squote }}
+fi
+printf "http_proxy='%s'\nhttps_proxy='%s'\nno_proxy='%s'\n" "${proxy}" "${proxy}" "${no_proxy}" \
+  > "${env_file}.new"
+mv -f "${env_file}.new" "${env_file}"
+{{- end }}
+
+dynet={{ joinPath .chezmoi.homeDir ".local/bin/dynet" | squote }}
+if [[ -x "${dynet}" ]]; then
+  owner="$(stat -c %U "${dynet}")"
+  # The probes take seconds; NetworkManager waits for this script to end.
+  (runuser -u "${owner}" -- "${dynet}" 2>&1 | logger -t dynet) &
+fi

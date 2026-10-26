@@ -14,11 +14,9 @@ function _require_chezmoi {
 
 # Write a chezmoi config exercising one combination of the knobs the
 # .gitmodules template branches on.
-# Usage: _write_config <file> <multiplexer> <guiServer> <browser> \
-#                      <blockedGitlab> <preferGitSSH>
+# Usage: _write_config <file> <multiplexer> <guiServer> <browser>
 function _write_config {
   local cfg="${1}" multiplexer="${2}" guiServer="${3}" browser="${4}"
-  local blockedGitlab="${5}" preferGitSSH="${6}"
 
   cat > "${cfg}" << EOF
 sourceDir: "${DOTFILES_DIR}/cascadeur"
@@ -26,11 +24,13 @@ data:
   terminalMultiplexer: "${multiplexer}"
   guiServer: "${guiServer}"
   browser: "${browser}"
-  blockedGitlab: ${blockedGitlab}
-  preferGitSSH: ${preferGitSSH}
+  preferGitSSH: true
+  code: "ci"
+  company:
   decryptPersonal: true
   decryptEnterprise: ["F1"]
   browserEnterpriseProfiles: ["F1"]
+  mailEnterpriseProfiles: []
 EOF
 }
 
@@ -61,7 +61,7 @@ function _render_all_profiles {
     for guiServer in "X" "W" "0"; do
       for browser in "F" "Z"; do
         local cfg="${BATS_TEST_TMPDIR}/cfg-${multiplexer}-${guiServer}-${browser}.yaml"
-        _write_config "${cfg}" "${multiplexer}" "${guiServer}" "${browser}" "false" "true"
+        _write_config "${cfg}" "${multiplexer}" "${guiServer}" "${browser}"
         _collect_entries "${cfg}" "${out}"
       done
     done
@@ -103,6 +103,37 @@ function _committed_entries {
       failures+=("${name}: .gitmodules says ${path}, template says ${expected}")
     fi
   done < <(_committed_entries)
+
+  ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"
+}
+
+# A repository of its own the template names only on GitHub must be one dynet
+# knows the GitLab mirror of, or it never moves back to GitLab. dybatpho
+# lives on GitHub alone. The decrypting config renders no secret here: the
+# machine `ci` has no company and no entry in the secrets.
+@test "every submodule of the dotfiles has a mirror in the dynet config" {
+  _require_chezmoi
+  local cfg="${BATS_TEST_TMPDIR}/cfg.yaml" rendered="${BATS_TEST_TMPDIR}/rendered"
+  _write_config "${cfg}" "T" "X" "F"
+  (
+    cd "${DOTFILES_DIR}" || exit 1
+    env HOME="${DOTFILES_REAL_HOME}" \
+      XDG_CONFIG_HOME="${DOTFILES_REAL_XDG_CONFIG_HOME:-${DOTFILES_REAL_HOME}/.config}" \
+      chezmoi --config "${cfg}" execute-template < "${TEMPLATE}" > "${rendered}"
+    env HOME="${DOTFILES_REAL_HOME}" \
+      XDG_CONFIG_HOME="${DOTFILES_REAL_XDG_CONFIG_HOME:-${DOTFILES_REAL_HOME}/.config}" \
+      chezmoi --config "${cfg}" --source "${DOTFILES_DIR}/home" execute-template \
+      < "${DOTFILES_DIR}/home/private_dot_config/dynet/private_config.json.tmpl" \
+      > "${rendered}.json"
+  )
+  local failures=() repository repositories mirrors
+  repositories="$(sed -n 's|^ *url = https://github.com/\(dynamotn/.*\)\.git$|\1|p' "${rendered}")"
+  mirrors="$(jq -r '.mirrors[].github' "${rendered}.json")"
+  while read -r repository; do
+    [[ "${repository}" != "dynamotn/dybatpho" ]] || continue
+    grep -qxF "${repository}" <<< "${mirrors}" \
+      || failures+=("${repository}: no mirror in dynet/config.json")
+  done <<< "${repositories}"
 
   ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"
 }

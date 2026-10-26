@@ -1,9 +1,13 @@
 {{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
 {{- if $secret.httpProxy }}
+# The proxy of the machine, unless the NetworkManager dispatcher 90-dynet
+# found the network docker started on: its file overrides these, with empty
+# values where the proxy is out of reach. Restart docker to follow a change.
 [Service]
 Environment="http_proxy={{ $secret.httpProxy }}"
 Environment="https_proxy={{ $secret.httpProxy }}"
 {{-   with $secret.noProxyAddresses }}
 Environment="no_proxy={{ join "," . }}"
 {{-   end }}
+EnvironmentFile=-/run/dynet/proxy.env
 {{- end }}

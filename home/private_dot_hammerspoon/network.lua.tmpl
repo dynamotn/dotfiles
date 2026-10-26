@@ -1,0 +1,20 @@
+-- Run dynet on every network change, so git and the proxy follow the network
+-- the way the NetworkManager dispatcher 90-dynet makes them on Linux
+local M = {}
+
+local dynet = '{{ .chezmoi.homeDir }}/.local/bin/dynet'
+
+-- One change of network is a burst of events; dynet runs once it settles
+local settle = hs.timer.delayed.new(3, function()
+  hs.task.new(dynet, nil):start()
+end)
+
+-- Kept in the module, which require caches, or it would be collected
+M.watcher = hs.network.configuration.open()
+M.watcher:monitorKeys({ 'State:/Network/Global/IPv4', 'State:/Network/Global/DNS' })
+M.watcher:setCallback(function()
+  settle:start()
+end)
+M.watcher:start()
+
+return M

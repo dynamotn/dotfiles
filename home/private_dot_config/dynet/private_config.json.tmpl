@@ -1,0 +1,30 @@
+{{- /* What dynet needs to fit git and the proxy to the network: whether this
+       machine has the keys to use SSH, its proxy, and the repositories
+       mirrored on both GitLab and GitHub: those of cascadeur/dot_gitmodules.tmpl
+       and .chezmoiexternals, and the dotfiles themselves. It holds the proxy,
+       so it is private. */}}
+{{- $secret := includeTemplate "machine/secret.tmpl" . | fromJson }}
+{{- $mirrors := list
+      (dict "gitlab" "dynamo-config/dotfiles" "github" "dynamotn/dotfiles")
+      (dict "gitlab" "dynamo-config/dotfiles-secrets" "github" "dynamotn/dotfiles-secrets")
+      (dict "gitlab" "dynamo-config/neovim" "github" "dynamotn/neovim-config")
+      (dict "gitlab" "dynamo-config/tmux" "github" "dynamotn/tmux-config")
+      (dict "gitlab" "dynamo-config/awesome" "github" "dynamotn/awesomewm-config")
+      (dict "gitlab" "dynamo-config/wallpaper" "github" "dynamotn/wallpapers-collection")
+      (dict "gitlab" "dynamo-theme/icon" "github" "dynamotn/Dynamo-Icon")
+      (dict "gitlab" "dynamo-config/firefox/personal" "github" "dynamotn/firefox-personal")
+      (dict "gitlab" "dynamo-config/thunderbird/personal" "github" "dynamotn/thunderbird-personal")
+      (dict "gitlab" "dynamotn/projekt-templates" "github" "dynamo-config/projekt-templates") }}
+{{- range $profile := concat .browserEnterpriseProfiles .mailEnterpriseProfiles | uniq }}
+{{-   range $app := list "firefox" "thunderbird" }}
+{{-     $mirrors = append $mirrors (dict
+          "gitlab" (printf "dynamo-config/%s/enterprise-%s" $app $profile)
+          "github" (printf "dynamotn/%s-enterprise-%s" $app $profile)) }}
+{{-   end }}
+{{- end }}
+{{- dict
+      "preferGitSSH" .preferGitSSH
+      "httpProxy" $secret.httpProxy
+      "noProxyAddresses" $secret.noProxyAddresses
+      "mirrors" $mirrors
+    | toPrettyJson }}

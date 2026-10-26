@@ -47,7 +47,6 @@ data:
   hasBluetooth: false
   hasWifi: false
   preferGitSSH: false
-  blockedGitlab: false
   darkMode: true
 EOF
 }
