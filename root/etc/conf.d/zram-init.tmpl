@@ -1,0 +1,15 @@
+{{- /* Same machines as home/.chezmoitemplates/dytoy/zram.yaml.tmpl */ -}}
+{{- if and (eq .initSystem "openrc") (ne .kind "container") (ne (printf "%s_%s" .place .kind) "home_pc") -}}
+# Read by the zram-init service: one zstd-compressed swap device of half the
+# RAM, used before any disk swap.
+load_on_start=yes
+unload_on_stop=yes
+num_devices=1
+
+type0=swap
+flag0=
+size0=$(($(awk '/^MemTotal:/ { print $2 }' /proc/meminfo) / 2048))
+maxs0=1
+algo0=zstd
+labl0=zram_swap
+{{- end }}

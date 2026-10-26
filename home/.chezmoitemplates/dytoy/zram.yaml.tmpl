@@ -1,0 +1,37 @@
+{{- /* Compressed swap in RAM, so running out of memory slows a machine down
+       and lets the OOM killer act instead of freezing it. Every Linux machine
+       but a container, which shares its host's memory, and home_pc, which
+       already has a swap partition behind zswap (root/etc/default/grub). */ -}}
+{{- if and (eq .chezmoi.os "linux") (ne .kind "container") (ne (printf "%s_%s" .place .kind) "home_pc") }}
+name: zram
+method: os
+is_essential: true
+gentoo:
+  packages:
+    {{- if eq .initSystem "systemd" }}
+    - name: sys-apps/zram-generator
+    {{- else }}
+    - name: sys-block/zram-init
+      service: zram-init
+    {{- end }}
+arch:
+  packages:
+    - name: zram-generator
+  hook:
+    after: |-
+      # zram-generator turns /etc/systemd/zram-generator.conf into units on the
+      # next daemon-reload, so swap comes up now rather than after a reboot.
+      sudo systemctl daemon-reload
+      sudo systemctl start systemd-zram-setup@zram0.service
+ubuntu:
+  packages:
+    - name: systemd-zram-generator
+  hook:
+    after: |-
+      sudo systemctl daemon-reload
+      sudo systemctl start systemd-zram-setup@zram0.service
+alpine:
+  packages:
+    - name: zram-init
+      service: zram-init
+{{- end }}
