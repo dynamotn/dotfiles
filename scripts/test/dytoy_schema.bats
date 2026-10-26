@@ -1,7 +1,11 @@
+# dyshellint disable=SC2154 DOTFILES_DIR, DOTFILES_REAL_HOME and BATS_TEST_TMPDIR come from bats and test_helper
 setup() {
   load test_helper
   SCHEMA_FILE="${DOTFILES_DIR}/schemas/dytoy.schema.yaml"
+  DOC_SCHEMA_FILE="${DOTFILES_DIR}/schemas/dytoy-doc.schema.yaml"
   DYTOY_DIR="${DOTFILES_DIR}/home/.chezmoitemplates/dytoy"
+  EXTRA_FILE="${DOTFILES_DIR}/docs/dytoy.extra.yaml"
+  . "${DOTFILES_DIR}/scripts/lib/dytoy_docs.sh"
 }
 
 # ---------------------------------------------------------------------------
@@ -14,6 +18,15 @@ function _require_ys {
   fi
   # A version manager shim costs ~15 ms a call, paid ~200 times per profile.
   YS="$(mise which ys 2> /dev/null || command -v ys)"
+}
+
+# Validate a plain definition against the schema, without its doc blocks.
+function _validate_plain {
+  local stripped
+  mkdir -p "${BATS_TEST_TMPDIR}/stripped"
+  stripped="${BATS_TEST_TMPDIR}/stripped/$(basename "${1}")"
+  dytoy_docs::strip "${1}" > "${stripped}"
+  "${YS}" -f "${SCHEMA_FILE}" "${stripped}"
 }
 
 function _require_chezmoi {
@@ -98,7 +111,7 @@ function _validate_profile {
     printf '\n#==8<== %s\n{{ template "dytoy/%s" . }}\n' "${name%.tmpl}" "${name}" >> "${batch}"
   done
   if ! _render_template "${cfg}" "${batch}" "${rendered}"; then
-    fail "chezmoi could not render the dytoy templates for ${profile}: $(cat "${rendered}.err")"
+    fail "chezmoi could not render the dytoy templates for ${profile}: $(< "${rendered}.err")"
   fi
   awk -v dir="${out_dir}" '
     /^#==8<== / { file = dir "/" $2; printf "" > file; next }
@@ -109,7 +122,7 @@ function _validate_profile {
   for out in "${out_dir}"/*.yaml; do
     # Skip when output is empty, whitespace-only, or contains only YAML comments
     # (template condition was false or tool not applicable on this profile).
-    grep -v '^[[:space:]]*#' "${out}" 2> /dev/null | grep -q '[^[:space:]]' || continue
+    grep -qv -e '^[[:space:]]*#' -e '^[[:space:]]*$' "${out}" || continue
 
     # ys writes validation errors to stdout; capture that for the failure message.
     validated=$((validated + 1))
@@ -137,9 +150,49 @@ function _validate_profile {
   _require_ys
   local failures=()
   for yaml in "${DYTOY_DIR}"/*.yaml; do
-    if ! "${YS}" -f "${SCHEMA_FILE}" "${yaml}" > "${BATS_TEST_TMPDIR}/err" 2>&1; then
+    if ! _validate_plain "${yaml}" > "${BATS_TEST_TMPDIR}/err" 2>&1; then
       failures+=("$(basename "${yaml}"): $(cat "${BATS_TEST_TMPDIR}/err")")
     fi
+  done
+  ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"
+}
+
+@test "a doc block does not break the plain yaml check" {
+  _require_ys
+  printf '{{- /* doc\nname: ssh\n*/ -}}\nname: ssh\nmethod: os\n' > "${BATS_TEST_TMPDIR}/ssh.yaml"
+  run _validate_plain "${BATS_TEST_TMPDIR}/ssh.yaml"
+  assert_success
+}
+
+@test "doc schema rejects a block without a description" {
+  _require_ys
+  printf 'name: ssh\ncategory: A\nsubcategory: x\n' > "${BATS_TEST_TMPDIR}/block.yaml"
+  run "${YS}" -f "${DOC_SCHEMA_FILE}" "${BATS_TEST_TMPDIR}/block.yaml"
+  assert_failure
+  printf 'name: ssh\ndescription: SSH client\ncategory: A\nsubcategory: x\nurl: none\norder: 10\n' \
+    > "${BATS_TEST_TMPDIR}/block.yaml"
+  run "${YS}" -f "${DOC_SCHEMA_FILE}" "${BATS_TEST_TMPDIR}/block.yaml"
+  assert_success
+}
+
+@test "doc blocks conform to doc schema" {
+  _require_ys
+  local failures=() file count index block="${BATS_TEST_TMPDIR}/block.yaml" body
+  for file in "${DYTOY_DIR}"/*.yaml "${DYTOY_DIR}"/*.yaml.tmpl "${EXTRA_FILE}"; do
+    [[ -f "${file}" ]] || continue
+    if [[ "${file}" == "${EXTRA_FILE}" ]]; then
+      body="$(yq '.[] | split_doc' "${file}")"
+    else
+      body="$(dytoy_docs::blocks "${file}")"
+      body="$(yq 'del(.file)' <<< "${body}")"
+    fi
+    [[ -n "${body}" ]] || continue
+    count="$(yq ea '[.] | length' <<< "${body}")"
+    for ((index = 0; index < count; index++)); do
+      INDEX="${index}" yq 'select(document_index == env(INDEX))' <<< "${body}" > "${block}"
+      "${YS}" -f "${DOC_SCHEMA_FILE}" "${block}" > "${BATS_TEST_TMPDIR}/err" 2>&1 \
+        || failures+=("$(basename "${file}") block ${index}: $(cat "${BATS_TEST_TMPDIR}/err")")
+    done
   done
   ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"
 }
