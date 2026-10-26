@@ -2,6 +2,14 @@ keybinds clear-defaults=true {
     locked {
         bind "{{ .zellijKeybind }}" { SwitchToMode "normal"; }
     }
+    // herdr-style agent jumps through zj-radar: a/A cycle the tabs whose agent
+    // needs you, w/W cycle sessions (herdr's workspaces).
+    normal {
+        bind "a" { MessagePlugin "radar" { name "zj_radar.cmd.v1"; payload "attention-next"; }; SwitchToMode "locked"; }
+        bind "A" { MessagePlugin "radar" { name "zj_radar.cmd.v1"; payload "attention-prev"; }; SwitchToMode "locked"; }
+        bind "w" { MessagePlugin "radar" { name "zj_radar.cmd.v1"; payload "session-next"; }; }
+        bind "W" { MessagePlugin "radar" { name "zj_radar.cmd.v1"; payload "session-prev"; }; }
+    }
     pane {
         bind "left" { MoveFocus "left"; }
         bind "down" { MoveFocus "down"; }
@@ -248,6 +256,9 @@ plugins {
     session-manager location="zellij:session-manager"
     status-bar location="zellij:status-bar"
 
+    // Agent status rail, see layouts. The URL is the permission grant's key,
+    // so it must stay stable.
+    radar location="https://github.com/marktoda/zj-radar/releases/latest/download/zj_radar.wasm"
     nvim-navigator location="https://github.com/dynamotn/zellij-nvim-navigator/releases/latest/download/zellij-nvim-navigator.wasm"
     zjstatus location="https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm" {
         {{- $theme := .catppuccin.macchiato }}
@@ -718,3 +729,5 @@ show_startup_tips false
 // can be useful for removing wrappers around commands
 // Note: be sure to escape backslashes and similar characters properly
 // post_command_discovery_hook "echo $RESURRECT_COMMAND | sed <your_regex_here>"
+// Resurrected agent panes resume their last conversation, as herdr does.
+post_command_discovery_hook r#"case "${RESURRECT_COMMAND%% *}" in claude | */claude) echo "claude --continue" ;; codex | */codex) echo "codex resume --last" ;; opencode | */opencode) echo "opencode --continue" ;; *) echo "$RESURRECT_COMMAND" ;; esac"#

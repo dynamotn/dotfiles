@@ -1,14 +1,5 @@
 layout {
-  default_tab_template {
-    children
-    pane size=1 borderless=true {
-      plugin location="status-bar"
-    }
-    pane size=1 borderless=true {
-      plugin location="zjstatus"
-    }
-  }
-
+{{ includeTemplate "zellij/tab-templates.kdl.tmpl" . }}
   tab name="uat" cwd="~/Working/enterprise/F1/DXH" split_direction="vertical" {
     pane {
       command "${SHELL}"
