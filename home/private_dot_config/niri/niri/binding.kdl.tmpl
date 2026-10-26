@@ -30,17 +30,23 @@ binds {
   Mod+D { move-workspace-to-monitor-next; }
   Mod+Ctrl+Left { move-workspace-to-monitor-left; }
   Mod+Ctrl+Right { move-workspace-to-monitor-right; }
+  Mod+Ctrl+H { move-workspace-to-monitor-left; }
+  Mod+Ctrl+L { move-workspace-to-monitor-right; }
 
   // Scroll through workspaces with Mod + scroll
   Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
   Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
 
   // Window --
-  // Move focus with Mod + arrow keys
+  // Move focus with Mod + arrow keys, or Mod + hjkl as in Neovim
   Mod+Left { focus-column-left; }
   Mod+Right { focus-column-right; }
   Mod+Up { focus-window-up; }
   Mod+Down { focus-window-down; }
+  Mod+H { focus-column-left; }
+  Mod+L { focus-column-right; }
+  Mod+K { focus-window-up; }
+  Mod+J { focus-window-down; }
 
   // Switch between columns in a workspace
   Alt+Tab { focus-column-right-or-first; }
@@ -50,6 +56,10 @@ binds {
   Mod+Shift+Left { set-column-width "-10%"; }
   Mod+Shift+Down { set-window-height "+10%"; }
   Mod+Shift+Up { set-window-height "-10%"; }
+  Mod+Shift+L { set-column-width "+10%"; }
+  Mod+Shift+H { set-column-width "-10%"; }
+  Mod+Shift+J { set-window-height "+10%"; }
+  Mod+Shift+K { set-window-height "-10%"; }
 
   // Windows
   Alt+F4 { close-window; }
@@ -66,21 +76,21 @@ binds {
   Mod+E { spawn "{{ $browser }}" "-P" "Personal"; }
   Mod+Q { spawn "{{ $browser }}" "-P" "Enterprise-F1"; }
   Mod+M { spawn "{{ $mailClient }}" "-P" "Personal"; }
-  Mod+K { spawn "{{ $mailClient }}" "-P" "Enterprise-F1"; }
+  Mod+Shift+M { spawn "{{ $mailClient }}" "-P" "Enterprise-F1"; }
 {{- else if eq .place "office" }}
   Mod+E { spawn "{{ $browser }}" "-P" "Enterprise-{{ .company }}"; }
   Mod+Q { spawn "{{ $browser }}" "-P" "Personal"; }
   Mod+M { spawn "{{ $mailClient }}" "-P" "Enterprise-{{ .company }}"; }
-  Mod+K { spawn "{{ $mailClient }}" "-P" "Personal"; }
+  Mod+Shift+M { spawn "{{ $mailClient }}" "-P" "Personal"; }
 {{- end }}
   Mod+N { spawn-sh "noctalia msg panel-toggle control-center"; }
   Mod+Shift+N { spawn-sh "noctalia msg notification-dnd-toggle"; }
   Alt+N { spawn-sh "noctalia msg notification-invoke-latest"; }
-  Mod+J { spawn-sh "noctalia msg panel-toggle clipboard"; }
+  Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
   // Bitwarden through noctalia's dmenu; rbw-pick types the pick into the window
   Mod+P { spawn-sh "rbw-pick password"; }
   Mod+O { spawn-sh "rbw-pick totp"; }
-  Mod+L { spawn-sh "noctalia msg session lock"; }
+  Mod+Escape { spawn-sh "noctalia msg session lock"; }
   Mod+S { spawn-sh "noctalia msg screenshot-region"; }
   // System monitor, floating in the middle like the Hyprland drop-down
   Mod+Z { spawn-sh "kitty --class btop --session ~/.config/kitty/sessions/monitor.conf"; }

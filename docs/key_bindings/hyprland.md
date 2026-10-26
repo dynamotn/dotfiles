@@ -24,7 +24,7 @@
 |---------|--------|
 | `Super+1..9,0` | Switch to the named workspace bound to that key |
 | `Super+D` | Swap the active workspaces of monitor 0 and monitor 1 |
-| `Super+Ctrl+Left` / `Super+Ctrl+Right` | Move current workspace to the previous/next monitor |
+| `Super+Ctrl+Left` / `Super+Ctrl+Right`, `Super+Ctrl+H` / `Super+Ctrl+L` | Move current workspace to the previous/next monitor |
 | `Super+MouseScroll` | Cycle through workspaces |
 
 Workspaces are named, not numbered:
@@ -47,10 +47,10 @@ Workspaces are named, not numbered:
 | Keybind | Action |
 |---------|--------|
 | `Super+Shift+1..9,0` | Move window to that named workspace, silently |
-| `Super+Arrow` | Focus window direction |
+| `Super+Arrow`, `Super+H/J/K/L` | Focus window direction |
 | `Alt+Tab` | Cycle next window |
 | `Super+LMB/RMB` | Move/resize window |
-| `Super+Shift+Arrow` | Resize window with keyboard |
+| `Super+Shift+Arrow`, `Super+Shift+H/J/K/L` | Resize window with keyboard |
 | `Alt+F4` | Close active window |
 | `Super+.` | Fullscreen |
 | `Super+/` | Toggle floating |
@@ -66,14 +66,14 @@ Workspaces are named, not numbered:
 | `Super+E` | Browser, personal profile at home / enterprise profile at the office |
 | `Super+Q` | Browser, the other profile |
 | `Super+M` | Mail client, personal profile at home / enterprise profile at the office |
-| `Super+K` | Mail client, the other profile |
+| `Super+Shift+M` | Mail client, the other profile |
 | `Super+N` | Control center |
 | `Super+Shift+N` | Toggle do not disturb |
 | `Alt+N` | Act on the latest notification |
-| `Super+J` | Clipboard history |
+| `Super+V` | Clipboard history |
 | `Super+P` | Pick a Bitwarden entry and type its password |
 | `Super+O` | Pick a Bitwarden entry and type its TOTP code |
-| `Super+L` | Lock session |
+| `Super+Escape` | Lock session |
 | `Super+S` | Screenshot a selected region, then annotate it |
 | `Super+Z` | Drop-down `btop` in kitty |
 

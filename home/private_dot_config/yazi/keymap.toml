@@ -5,4 +5,7 @@ prepend_keymap = [
     "c",
     "a",
   ], run = "plugin ouch", desc = "Compress with ouch" },
+  # The rest of Neovim's motions (hjkl, gg/G, C-u/d/f/b) are yazi defaults.
+  { on = "<C-e>", run = "arrow 1", desc = "Next file, like Neovim's C-e" },
+  { on = "<C-y>", run = "arrow -1", desc = "Previous file, like Neovim's C-y" },
 ]

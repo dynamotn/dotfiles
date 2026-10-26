@@ -51,9 +51,12 @@ command translate js let googleTranslateCallback = document.createElement('scrip
 " Before we begin, clear all user-defined commands.
 comclear
 
-" Previous/next tab.
+" Previous/next tab. H/L as in Neovim's S-h/S-l between buffers; h/l already
+" do back/forward, the defaults of H/L.
 bind J tabprev
 bind K tabnext
+bind H tabprev
+bind L tabnext
 
 " Find
 bind / fillcmdline find

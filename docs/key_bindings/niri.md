@@ -29,7 +29,7 @@ niri reloads its configuration on its own whenever a file changes.
 |---------|--------|
 | `Super+1..9,0` | Switch to the named workspace bound to that key |
 | `Super+D` | Move current workspace to the next monitor |
-| `Super+Ctrl+Left` / `Super+Ctrl+Right` | Move current workspace to the left/right monitor |
+| `Super+Ctrl+Left` / `Super+Ctrl+Right`, `Super+Ctrl+H` / `Super+Ctrl+L` | Move current workspace to the left/right monitor |
 | `Super+MouseScroll` | Cycle through workspaces |
 | `Super+Tab` | Toggle the overview |
 
@@ -53,8 +53,8 @@ Workspaces are named, not numbered, the same as on Hyprland:
 | Keybind | Action |
 |---------|--------|
 | `Super+Shift+1..9,0` | Move column to that named workspace, silently |
-| `Super+Left` / `Super+Right` | Focus column left/right |
-| `Super+Up` / `Super+Down` | Focus window up/down in the column |
+| `Super+Left` / `Super+Right`, `Super+H` / `Super+L` | Focus column left/right |
+| `Super+Up` / `Super+Down`, `Super+K` / `Super+J` | Focus window up/down in the column |
 | `Alt+Tab` | Focus next column, wrapping around |
 | `Super+LMB/RMB` | Move/resize window |
 | `Super+Shift+Left` / `Super+Shift+Right` | Shrink/grow column width by 10% |
@@ -74,14 +74,14 @@ Workspaces are named, not numbered, the same as on Hyprland:
 | `Super+E` | Browser, personal profile at home / enterprise profile at the office |
 | `Super+Q` | Browser, the other profile |
 | `Super+M` | Mail client, personal profile at home / enterprise profile at the office |
-| `Super+K` | Mail client, the other profile |
+| `Super+Shift+M` | Mail client, the other profile |
 | `Super+N` | Control center |
 | `Super+Shift+N` | Toggle do not disturb |
 | `Alt+N` | Act on the latest notification |
-| `Super+J` | Clipboard history |
+| `Super+V` | Clipboard history |
 | `Super+P` | Pick a Bitwarden entry and type its password |
 | `Super+O` | Pick a Bitwarden entry and type its TOTP code |
-| `Super+L` | Lock session |
+| `Super+Escape` | Lock session |
 | `Super+S` | Screenshot a selected region, then annotate it |
 | `Super+Z` | Floating `btop` in kitty |
 

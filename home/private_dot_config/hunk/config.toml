@@ -1,3 +1,0 @@
-# Always side by side, even in a narrow pane, to match delta's side-by-side.
-mode = "split"
-line_numbers = true

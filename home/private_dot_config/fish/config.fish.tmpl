@@ -73,6 +73,12 @@ end
 # Enable vi key bindings
 if test -n "$TERM"
     fish_vi_key_bindings
+    # Cursor shape per mode, as in Neovim
+    set -g fish_cursor_default block
+    set -g fish_cursor_insert line
+    set -g fish_cursor_replace_one underscore
+    set -g fish_cursor_replace underscore
+    set -g fish_cursor_visual block
 end
 
 # grc for color output
