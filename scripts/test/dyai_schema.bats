@@ -353,6 +353,29 @@ function _render_config {
     <<< "${j}" > /dev/null || fail "an optional plugin no preset enables"
 }
 
+@test "schema accepts abstract subagent tiers and per-agent model choices" {
+  _require_ys
+  local good="${BATS_TEST_TMPDIR}/good.yaml"
+  cat > "${good}" << 'YAML'
+global:
+  subagents:
+    - {repo: a/b, ref: abc123, include: [x], models: {x: strong, y: inherit}}
+agents:
+  claude: {model_tiers: {strong: opus}}
+  codex: {model_tiers: {strong: {model: qwen3-coder, provider: ollama, effort: high}}}
+YAML
+  "${YS}" -f "${SCHEMA_FILE}" "${good}" > "${BATS_TEST_TMPDIR}/err" 2>&1 \
+    || fail "valid tiers rejected: $(< "${BATS_TEST_TMPDIR}/err")"
+}
+
+@test "schema rejects an agent model name used as a subagent tier" {
+  _require_ys
+  local bad="${BATS_TEST_TMPDIR}/bad.yaml"
+  printf 'global:\n  subagents:\n    - {repo: a/b, ref: abc123, include: [x], models: {x: opus}}\n' > "${bad}"
+  run "${YS}" -f "${SCHEMA_FILE}" "${bad}"
+  assert_failure
+}
+
 @test "config declares the baseline subagents from VoltAgent at a pinned ref" {
   _require_chezmoi
   _require_yq

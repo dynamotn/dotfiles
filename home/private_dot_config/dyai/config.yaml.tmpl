@@ -60,6 +60,14 @@ global:
         - scientific-literature-researcher
         - agent-installer
         - it-ops-orchestrator
+      # Abstract tier where the upstream choice is wrong for the job (review
+      # and security judgments never run below the strongest tier). Each
+      # agent translates it through its own agents.<name>.model_tiers.
+      models:
+        code-reviewer: strong
+        security-auditor: strong
+        architect-reviewer: strong
+        research-analyst: standard
   commands: []
   # MCP servers registered into every MCP-capable agent, in its own format.
   mcp:
@@ -190,6 +198,13 @@ agents:
 {{- range $d.optional_plugins }}
       - {{ . }}
 {{- end }}
+    # Claude's own name for each abstract tier. Other agents map theirs the
+    # same way, as a string or {model, provider, effort} (a self-hosted
+    # Ollama or LM Studio provider included) once they get subagents.
+    model_tiers:
+      fast: haiku
+      standard: sonnet
+      strong: opus
 # Opt-in presets pulled per project by `dyai use <name>`; kept out of the
 # global baseline so the discovery index stays lean. One preset per tool, so a
 # project pulls only what it uses. Subagent names resolve against the pinned
