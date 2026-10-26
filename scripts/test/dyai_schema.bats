@@ -169,7 +169,7 @@ function _render_config {
   assert_failure
   run yq -e '.global.skills[] | select(. == "samber/cc-skills-golang@golang-code-style")' "${out}"
   assert_failure
-  [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp-server ]]
+  [[ "$(yq '.global.mcp.laya.command' "${out}")" == */.local/bin/laya-mcp ]]
   [[ "$(yq '.global.mcp.laya.env.HF_HUB_DISABLE_TELEMETRY' "${out}")" == "1" ]]
   [[ "$(yq '.agents.claude.plugins | length' "${out}")" == "39" ]]
   [[ "$(yq '.agents.claude.optional_plugins | length' "${out}")" == "13" ]]

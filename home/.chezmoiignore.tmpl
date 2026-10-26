@@ -80,6 +80,11 @@ Library/thunderbird
 {{-   end }}
 {{- end }}
 
+{{/* laya is not installed on Android (dytoy/laya.yaml.tmpl) */}}
+{{- if eq .osid "android" }}
+.local/bin/laya-mcp
+{{- end }}
+
 {{/* Other GUI tools */}}
 {{- if eq .guiServer "0" }}
 .local/bin/obsidian-app

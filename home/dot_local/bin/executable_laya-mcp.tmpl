@@ -1,0 +1,12 @@
+#!{{ .bash }}
+# @file laya-mcp
+# @brief MCP launcher for laya that shares one laya-serve between all sessions
+# @description Agents register `laya-mcp` instead of `laya-mcp-server`, so
+# every session answers from one loopback laya-serve rather than loading its
+# own copy of the checkpoints. The logic lives in `scripts/lib/laya_mcp.sh`,
+# shared with the bats tests.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules network lock
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/laya_mcp.sh"
+
+laya_mcp::main "$@"

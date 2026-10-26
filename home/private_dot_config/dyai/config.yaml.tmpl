@@ -62,8 +62,10 @@ global:
   commands: []
   # MCP servers registered into every MCP-capable agent, in its own format.
   mcp:
+    # laya-mcp shares one loopback laya-serve between every session instead
+    # of loading the checkpoints (~3.4 GB) in each one (scripts/lib/laya_mcp.sh).
     laya:
-      command: {{ printf "%s/.local/bin/laya-mcp-server" .chezmoi.homeDir | quote }}
+      command: {{ printf "%s/.local/bin/laya-mcp" .chezmoi.homeDir | quote }}
       args: []
       env:
         HF_HUB_DISABLE_TELEMETRY: "1"
