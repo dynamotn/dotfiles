@@ -48,7 +48,9 @@ name: lazydocker
 label: lazydocker
 url: https://github.com/jesseduffield/lazydocker
 description: Interactive TUI with Docker and Compose
-category: [DevOps tools]
+category: DevOps tools
+subcategory: Containers
+order: 40
 */ -}}
 {{- if ne .chezmoi.os "android" }}
 name: lazydocker
@@ -61,7 +63,9 @@ The body between `doc` and `*/` is YAML. Fields:
 |---|---|---|
 | `name` | yes | Tool name; must equal a `name:` line in the same file (generator checks). |
 | `description` | yes | The "Purpose" cell. Markdown allowed (backticks are used today). |
-| `category` | yes | List of section titles the row appears in (usually one; `cht` is in two today). Allowed values: the current section titles, in doc order, plus `Prerequisite`. |
+| `category` | yes | One section title (a string, not a list; user's decision). Allowed values: the categories in `docs/dytoy.categories.yaml`. |
+| `subcategory` | yes | One of the subcategories that file lists for this category. Used only for ordering; never rendered as a heading (user's decision). |
+| `order` | no | Integer; position within the subcategory. Migration assigns 10, 20, 30, … from the current row order, leaving gaps for inserts. Missing `order` sorts after every numbered row, alphabetically by label. |
 | `label` | no | Link text, default `name`. Needed where they differ: `rg` → `ripgrep`, `otel` → `otel-cli`, `wireshark` → `tshark`, `zen` → `zen-browser`. |
 | `url` | no | Link target. Default `https://github.com/<github.repo>` read from the file's `repo:` line when there is exactly one distinct repo; otherwise required (generator errors). |
 
@@ -114,10 +118,29 @@ every definition is documented; no opt-out.
 
 `Prerequisite` becomes a category like the others (my call), so `git`, `yq`,
 `chezmoi`, `age` appear once, there. The `<!-- toc -->` list is regenerated
-too, keeping its `Usage` entry. Category order is the enum order; rows within
-a category keep their current order where possible, new rows appended
-alphabetically by label (my call; builder may pick plain alphabetical if
-"current order" is awkward to keep, and say so).
+too, keeping its `Usage` entry.
+
+### Ordering (user's decision)
+
+`docs/dytoy.categories.yaml` is the single ordering source:
+
+```yaml
+- category: Development tools
+  subcategories: [CLI tools, Languages and runtimes, Package managers, Linters and formatters]
+- category: DevOps tools
+  subcategories: [...]
+```
+
+Sections render in list order. Within a section, rows sort by the
+subcategory's position in that list, then by `order`, then by label. One
+table per section, no subheadings. The migration derives each section's
+subcategories from the visible groups in today's doc (e.g. Development tools:
+watchexec…euporie, rust…zig, uv/nix/prek…, perlcritic/perltidy/qmlformat) so
+the regenerated doc keeps today's order. A `category` or `subcategory` not in
+this file fails the hook.
+
+`cht` is listed twice in `Miscellaneous applications` today; the duplicate row
+is dropped (user's decision).
 
 ## Code layout (repo conventions apply)
 
@@ -127,12 +150,13 @@ alphabetically by label (my call; builder may pick plain alphabetical if
   only reports drift (exit non-zero). Uses `dybatpho::opts`. Parses the doc
   blocks with `yq` (already a prerequisite).
 - `scripts/test/dytoy_docs.bats`: default `url`/`label`, `url: none`, multiple
-  blocks per file, `name` cross-check, missing-block error, marker
-  replacement, idempotence.
+  blocks per file, `name` cross-check, missing-block error, unknown
+  category/subcategory error, ordering (subcategory, then `order`, then
+  label), marker replacement, idempotence.
 - Doc-block schema: `schemas/dytoy-doc.schema.yaml`, checked by the generator
   and by a test in `./scripts/test.sh --dytoy`.
 - `.pre-commit-config.yaml`: local hook, `pass_filenames: false`, `files:`
-  `^home/\.chezmoitemplates/dytoy/|^docs/dytoy\.(md|extra\.yaml)$|^scripts/(lib/)?dytoy_docs\.sh$|^schemas/dytoy`.
+  `^home/\.chezmoitemplates/dytoy/|^docs/dytoy\.(md|extra\.yaml|categories\.yaml)$|^scripts/(lib/)?dytoy_docs\.sh$|^schemas/dytoy`.
 - Checks before done: `dyshellint` on changed scripts, `./scripts/test.sh --all`,
   `./scripts/test.sh --dytoy`, `prek run --all-files`.
 
@@ -142,7 +166,8 @@ A throwaway script writes a doc block into every definition from the current
 doc, matching by name, then by repo URL; unmatched files are listed for
 hand-filling. The regenerated doc is diffed against the old one; allowed
 differences: new rows for previously undocumented definitions, rows moved into
-`Prerequisite`, and ordering. Every other difference is fixed before commit.
+`Prerequisite`, and the dropped duplicate `cht`. Row order must match today's
+doc exactly. Every other difference is fixed before commit.
 
 ## Left to the builder
 
