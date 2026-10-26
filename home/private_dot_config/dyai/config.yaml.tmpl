@@ -153,11 +153,18 @@ global:
   # Tools with their own per-agent installer, run once by `dyai install`.
   installers:
     # claude-mem (memory across sessions). Claude gets it via the plugin above
-    # (claude-mem@thedotmack); other agents use its own installer. Only opencode
-    # has a documented --ide flag today; add others once their flag is known.
+    # (claude-mem@thedotmack); other agents use its own installer, and every
+    # agent shares one local worker and database, so one memory serves them all
+    # (CLAUDE_MEM_SESSION_START_INCLUDE_ALL_SOURCES in fish shares the context).
+    # --provider claude keeps the observer local and skips the hosted sign-in.
+    # Gemini has no integration; Copilot's is MCP-only and writes
+    # .github/copilot-instructions.md into the current directory, so it is left out.
     claude-mem:
       commands:
-        opencode: "npx -y claude-mem install --ide opencode"
+        opencode: "npx -y claude-mem install --ide opencode --provider claude"
+        codex: "npx -y claude-mem install --ide codex-cli --provider claude"
+        agy: "npx -y claude-mem install --ide antigravity --provider claude"
+        hermes: "npx -y claude-mem install --ide hermes --provider claude"
   # Neovim's configured language servers, shared with every agent (dyai-lsp).
   # exclude keeps noisy/non-code-intelligence servers out of every agent;
   # serena.ref pins the MCP bridge Codex, Gemini and agy use for the
@@ -245,7 +252,14 @@ registry:
       subagents: [react-specialist]
       skills:
         - vercel-labs/agent-skills@vercel-react-best-practices
+        - vercel-labs/agent-skills@vercel-composition-patterns
+        - vercel-labs/agent-skills@web-design-guidelines
         - leonxlnx/taste-skill@design-taste-frontend
+        # Product UI (apps, dashboards); design-taste-frontend covers marketing pages.
+        - pbakaus/impeccable@impeccable
+        - addyosmani/agent-skills@frontend-ui-engineering
+        - anthropics/skills@theme-factory
+        - anthropics/skills@canvas-design
         - addyosmani/web-quality-skills@accessibility
         - addyosmani/web-quality-skills@core-web-vitals
         - addyosmani/web-quality-skills@performance
@@ -468,6 +482,7 @@ registry:
         - wshobson/agents@gitops-workflow
         - openai/skills@gh-fix-ci
         - openai/skills@gh-address-comments
+        - addyosmani/agent-skills@ci-cd-and-automation
     database:
       subagents: [postgres-pro]
       plugins:
@@ -522,6 +537,7 @@ registry:
         - wshobson/agents@e2e-testing-patterns
         - affaan-m/ecc@tdd-workflow
         - cypress-io/ai-toolkit@cypress-author
+        - vercel-labs/agent-browser@agent-browser
     # Skills-only: the 04-quality-security subagents stay in the global
     # baseline, so this opt-in collection does not duplicate them.
     security:
@@ -542,6 +558,8 @@ registry:
       skills:
         - openai/skills@security-threat-model
         - openai/skills@security-best-practices
+        - addyosmani/agent-skills@security-and-hardening
+        - openai/skills@security-ownership-map
         - wshobson/agents@stride-analysis-patterns
         - Eyadkelleh/awesome-skills-security@llm-testing
         - Eyadkelleh/awesome-skills-security@security-fuzzing
@@ -913,6 +931,27 @@ registry:
         - jwynia/agent-skills@requirements-analysis
         - markdown-viewer/skills@bpmn
         - markdown-viewer/skills@uml
+    # Prose and content: co-authoring docs, copy, editing out AI tells,
+    # researched long-form pieces, content plans and social posts.
+    writing:
+      subagents: [content-marketer]
+      skills:
+        - anthropics/skills@doc-coauthoring
+        - blader/humanizer@humanizer
+        - ComposioHQ/awesome-claude-skills@content-research-writer
+        - coreyhaines31/marketingskills@copywriting
+        - coreyhaines31/marketingskills@copy-editing
+        - coreyhaines31/marketingskills@content-strategy
+        - coreyhaines31/marketingskills@social
+    # Growth marketing from coreyhaines31/marketingskills: SEO, conversion,
+    # launch and pricing, email and ads, analytics and competitors. Its
+    # channel-specific skills (sms, aso, video, events, PR, outreach) are left out.
+    marketing:
+      subagents: [seo-specialist]
+      skills:
+{{- range list "seo-audit" "ai-seo" "programmatic-seo" "schema" "site-architecture" "cro" "signup" "onboarding" "popups" "paywalls" "launch" "product-marketing" "marketing-ideas" "marketing-psychology" "pricing" "referrals" "lead-magnets" "free-tools" "emails" "cold-email" "ads" "ad-creative" "analytics" "ab-testing" "attribution" "conversion-tracking" "customer-research" "competitors" "competitor-profiling" }}
+        - coreyhaines31/marketingskills@{{ . }}
+{{- end }}
     # Office deliverables (Word, PowerPoint, Excel, PDF) from Anthropic.
     office:
       skills:
@@ -920,6 +959,8 @@ registry:
         - anthropics/skills@pptx
         - anthropics/skills@xlsx
         - anthropics/skills@pdf
+        - anthropics/skills@internal-comms
+        - ComposioHQ/awesome-claude-skills@meeting-insights-analyzer
     # Issue trackers and wikis, one preset per tool. Hosted servers go through
     # mcp-remote, which runs the OAuth sign-in and keeps the token itself.
     jira:
@@ -967,6 +1008,7 @@ registry:
         - axiomhq/skills@writing-evals
         - arize-ai/phoenix@phoenix-evals
         - anthropics/skills@claude-api
+        - openai/skills@openai-docs
     langchain:
       skills:
         - langchain-ai/langchain-skills@langgraph-fundamentals
@@ -983,6 +1025,32 @@ registry:
       subagents: [legacy-modernizer, refactoring-specialist, dependency-manager, git-workflow-manager]
     apidocs:
       subagents: [api-documenter, documentation-engineer, docs-drift-editor]
+    # Code knowledge graph: codegraph_explore returns the source and call paths
+    # a question needs in one call, which pays off on large repos (no bash
+    # support). Needs `codegraph init` in the project; telemetry is off.
+    codegraph:
+      mcp:
+        codegraph:
+          command: bunx
+          args: ["@colbymchenry/codegraph@1.6.2", "serve", "--mcp"]
+          env: { CODEGRAPH_TELEMETRY: "0" }
+    # Getting to know an unfamiliar repo. understand-anything builds a graph
+    # with guided tours and a dashboard (Claude only; the first /understand
+    # spends many tokens); archify draws source-backed interactive diagrams
+    # (needs node).
+    onboarding:
+      plugins:
+        - understand-anything@understand-anything
+      skills:
+        - tt-a1i/archify@archify
+    # Spec-driven changes (propose, apply, archive under openspec/). The skills
+    # drive the `openspec` CLI (dytoy openspec); run `openspec init` in the
+    # project first. OPENSPEC_TELEMETRY=0 turns its usage stats off.
+    openspec:
+      skills:
+{{- range list "explore" "propose" "new-change" "continue-change" "ff-change" "update-change" "apply-change" "verify-change" "sync-specs" "archive-change" "bulk-archive-change" "onboard" }}
+        - Fission-AI/OpenSpec@openspec-{{ . }}
+{{- end }}
     # Context engineering for building agents, from
     # muratcankoylan/Agent-Skills-for-Context-Engineering pinned to a commit.
     # Its root SKILL.md (a collection index) hides the nested skills from the

@@ -122,6 +122,8 @@ if status is-interactive
     set -gx VALE_STYLES_PATH "$HOME/.local/share/vale"
     # Gitlint
     set -gx GITLINT_CONFIG "$XDG_CONFIG_HOME/gitlint/gitlint"
+    # claude-mem: every agent's session start sees what the others observed
+    set -gx CLAUDE_MEM_SESSION_START_INCLUDE_ALL_SOURCES true
 
     # Hooks
     # Fzf config
