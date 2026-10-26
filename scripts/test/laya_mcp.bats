@@ -2,6 +2,7 @@ setup() {
   load test_helper
   setup_dotfiles_test_env
   # shellcheck disable=SC2154 # DOTFILES_DIR is set by test_helper.bash
+  . "${DOTFILES_DIR}/scripts/lib/mcp_share.sh"
   . "${DOTFILES_DIR}/scripts/lib/laya_mcp.sh"
   export LAYA_SHARED_PORT=$((40000 + RANDOM % 20000))
   export LAYA_MCP_WAIT=10

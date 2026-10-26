@@ -7,6 +7,7 @@
 # shared with the bats tests.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules network lock
 dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/mcp_share.sh"
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/laya_mcp.sh"
 
 laya_mcp::main "$@"

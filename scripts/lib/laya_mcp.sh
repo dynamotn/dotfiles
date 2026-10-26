@@ -5,12 +5,11 @@
 # about 3.4 GB per session, enough to run a machine out of memory with a
 # handful of sessions open. `laya-mcp` instead makes sure one `laya-serve`
 # answers on the loopback interface, starting it in the background when no
-# session has yet, then `exec`s `laya-mcp-server` in remote mode
-# (`LAYA_BASE_URL`), which loads no model and imports no torch. The server
-# outlives the session that started it, unloads idle checkpoints, and needs no
-# service manager, so the same launcher works under systemd, OpenRC and macOS.
+# session has yet (`mcp_share::ensure_server`), then `exec`s `laya-mcp-server`
+# in remote mode (`LAYA_BASE_URL`), which loads no model and imports no
+# torch. The server unloads idle checkpoints.
 # Sourced (not executed); the caller sources dybatpho with the `network` and
-# `lock` modules first and owns strict mode.
+# `lock` modules and `mcp_share.sh` first and owns strict mode.
 # shellcheck shell=bash
 
 LAYA_MCP_DEFAULT_PORT=47821
@@ -35,6 +34,17 @@ function laya_mcp::serve {
 }
 
 #######################################
+# @description Succeed once laya-serve listens on the shared port
+# @arg $1 number Seconds to wait
+# @env LAYA_SHARED_PORT number [default: 47821] Port of the shared laya-serve
+#######################################
+function laya_mcp::probe {
+  local wait
+  dybatpho::expect_args wait -- "$@"
+  dybatpho::wait_port 127.0.0.1 "${LAYA_SHARED_PORT:-${LAYA_MCP_DEFAULT_PORT}}" "${wait}" 1
+}
+
+#######################################
 # @description Make sure a shared laya-serve listens on the port, starting one if none does
 # @arg $1 number Port
 # @arg $2 number Seconds to wait for a server this call starts
@@ -43,38 +53,17 @@ function laya_mcp::serve {
 # @exitcode 1 None is running
 #######################################
 function laya_mcp::ensure_server {
-  local port wait state_dir log lock pid_file
+  local port wait
   dybatpho::expect_args port wait -- "$@"
-  dybatpho::port_open 127.0.0.1 "${port}" 1 && return 0
   # An install without the `serve` extra has no laya-serve to start.
-  dybatpho::is command laya-serve || return 1
-  state_dir="${LAYA_MCP_STATE_DIR:-$(dybatpho::xdg_state_dir laya)}"
-  dybatpho::ensure_dir "${state_dir}" > /dev/null
-  log="$(dybatpho::path_join "${state_dir}" "serve.log")"
-  lock="$(dybatpho::path_join "${state_dir}" "serve.lock")"
-  pid_file="$(dybatpho::path_join "${state_dir}" "serve.pid")"
-  # Sessions often start together: the lock lets one of them start the
-  # server while the others wait for it, instead of each starting its own.
-  dybatpho::lock_acquire "${lock}" "${wait}" \
-    || return 1
-  # A server still importing torch has not opened its port yet: the pid
-  # file keeps a later session from starting a second one beside it.
-  if ! dybatpho::port_open 127.0.0.1 "${port}" 1 \
-    && ! dybatpho::pid_file_is_running "${pid_file}"; then
-    dybatpho::background_run laya_serve laya_mcp::serve "${port}" "${log}"
-    local pid
-    pid="$(dybatpho::background_pid laya_serve)"
-    dybatpho::pid_file_write "${pid_file}" "${pid}"
+  if ! dybatpho::is command laya-serve; then
+    dybatpho::port_open 127.0.0.1 "${port}" 1
+    return
   fi
-  # A slow start still counts: remote mode connects on the first tool call,
-  # not at startup, and the agent gives up on an MCP server after 30s.
-  local status=0
-  dybatpho::wait_port 127.0.0.1 "${port}" "${wait}" 1 \
-    || dybatpho::pid_file_is_running "${pid_file}" || status=1
-  # Released before the caller execs: exec keeps this pid, so a lock still
-  # held would look owned by a live process for the whole session.
-  dybatpho::lock_release "${lock}"
-  return "${status}"
+  local state_dir="${LAYA_MCP_STATE_DIR-}"
+  [[ -n "${state_dir}" ]] || state_dir="$(dybatpho::xdg_state_dir laya)"
+  LAYA_SHARED_PORT="${port}" mcp_share::ensure_server "${state_dir}" "${wait}" \
+    laya_mcp::probe laya_mcp::serve "${port}"
 }
 
 #######################################
