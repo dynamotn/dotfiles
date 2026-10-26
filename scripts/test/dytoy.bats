@@ -275,6 +275,56 @@ EOF
 second'
 }
 
+@test "dytoy::iterate resumes after the last tool that succeeded" {
+  write_tools_yaml << 'EOF'
+- name: first
+  method: binary
+- name: second
+  method: binary
+EOF
+  METHOD='binary'
+  TOOL='@empty'
+  local output_file="${BATS_TEST_TMPDIR}/tools"
+  # shellcheck disable=SC2329 # invoked by dytoy::iterate
+  function install_tool {
+    printf '%s\n' "$1" >> "${output_file}"
+    # An installer stops the whole run, as dybatpho::die does
+    [[ "$1" != "second" || -f "${BATS_TEST_TMPDIR}/fixed" ]] || exit 1
+  }
+
+  run dytoy::iterate install_tool
+  assert_failure
+  touch "${BATS_TEST_TMPDIR}/fixed"
+  run dytoy::iterate install_tool
+  assert_success
+  run cat "${output_file}"
+  assert_output $'first\nsecond\nsecond'
+}
+
+@test "dytoy::iterate installs again an edited tool or with --no-check-installed" {
+  write_tools_yaml << 'EOF'
+- name: first
+  method: binary
+EOF
+  METHOD='binary'
+  TOOL='@empty'
+  local output_file="${BATS_TEST_TMPDIR}/tools"
+  # shellcheck disable=SC2329 # invoked by dytoy::iterate
+  function install_tool { printf '%s\n' "$1" >> "${output_file}"; }
+
+  run dytoy::iterate install_tool
+  run dytoy::iterate install_tool
+  ONLY_NOT_INSTALLED='false' run dytoy::iterate install_tool
+  write_tools_yaml << 'EOF'
+- name: first
+  method: binary
+  version: v1
+EOF
+  run dytoy::iterate install_tool
+  run cat "${output_file}"
+  assert_output $'first\nfirst\nfirst'
+}
+
 @test "dytoy::install_dependencies dispatches through the dytoy subcommand of its method" {
   export DRY_RUN='true'
   write_tools_yaml << 'EOF'

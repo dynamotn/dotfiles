@@ -58,6 +58,11 @@ Without a terminal (a chezmoi hook, a pipe) or with `--no-tui`, `dytoy` keeps
 the plain run: every method in order, `os` first. `dytoy <method>` and
 `dytoy --tool <name>` never open the interface.
 
+A plain run of a whole method remembers each tool it installs, under
+`~/.cache/dybatpho/dytoy/`, so a run that fails half way (such as the one
+`chezmoi apply` starts) resumes after the last tool that succeeded. A tool runs
+again once its definition changes, after a week, or with `--no-check-installed`.
+
 ## Prerequisite
 
 |Tool|Purpose|
