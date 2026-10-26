@@ -8,7 +8,8 @@
 #   `${XDG_STATE_HOME:-~/.local/state}/claude/agent-routes.jsonl`.
 # - `gate` (PreToolUse on Agent and Task) lets a spawn through when it is
 #   routed: it names a `model`, it is a `fork` (which keeps the parent's
-#   model), or the session recorded a routing call in the last 15 minutes.
+#   model), its definition in `.claude/agents/` pins a `model`, or the
+#   session recorded a routing call in the last 15 minutes.
 #   Otherwise it denies the spawn, with the reason telling the agent how to
 #   route it. `DYAI_AGENT_ROUTING=warn` allows and only adds that text;
 #   `off`, or a crew worker (`DYAI_CREW` set), turns the gate off.
@@ -36,6 +37,18 @@ routing="${DYAI_AGENT_ROUTING:-block}"
 routed="$(jq -r '(.tool_input.model // "" | strings | length > 0)
   or ((.tool_input.subagent_type // "") == "fork")' <<< "${input}" 2> /dev/null)" || exit 0
 [[ "${routed}" != true ]] || exit 0
+# A subagent whose definition pins a model (not `inherit`) is routed already.
+agent="$(jq -r '.tool_input.subagent_type // "" | strings' <<< "${input}" 2> /dev/null)" || agent=""
+if [[ "${agent}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+  for def in "${CLAUDE_PROJECT_DIR:-${PWD}}/.claude/agents/${agent}.md" \
+    "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}/agents/${agent}.md"; do
+    [[ -f "${def}" ]] || continue
+    model="$(awk 'NR == 1 && $0 != "---" { exit } NR > 1 && $0 == "---" { exit }
+      NR > 1 && sub(/^model:[ \t]*/, "") { gsub(/["\047 \t]/, ""); print; exit }' "${def}" 2> /dev/null)" || model=""
+    [[ -z "${model}" || "${model}" == inherit ]] || exit 0
+    break
+  done
+fi
 if [[ -n "${session}" ]] && [[ -f "${ledger}" ]] \
   && jq -e --arg s "${session}" --argjson since "$((now - 900))" \
     'select(.session == $s and .ts >= $since)' "${ledger}" &> /dev/null; then

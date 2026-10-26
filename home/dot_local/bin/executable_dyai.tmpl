@@ -336,8 +336,15 @@ function _logs {
   file="${dir}/${ID}.out"
   [[ "${ERR}" != true ]] || file="${dir}/${ID}.err"
   dybatpho::is file "${file}" || dybatpho::die "no log for ${ID}: ${file}"
-  if [[ "${FOLLOW}" == true ]]; then
-    tail -n +1 -f -- "${file}"
+  local state status pid start
+  state="$(dyai_crew::get "${ID}")" || state='{}'
+  status="$(jq -r '.status // ""' <<< "${state}")"
+  pid="$(jq -r '.pid // ""' <<< "${state}")"
+  start="$(jq -r '.pid_start // ""' <<< "${state}")"
+  # Follow only a live agent, and stop with it: a log pane must not outlive its task.
+  # shellcheck disable=SC2310 # a plain yes/no
+  if [[ "${FOLLOW}" == true && "${status}" == running ]] && dyai_crew::alive "${pid}" "${start}"; then
+    tail -n +1 -f --pid="${pid}" -- "${file}"
   else
     tail -n +1 -- "${file}"
   fi
