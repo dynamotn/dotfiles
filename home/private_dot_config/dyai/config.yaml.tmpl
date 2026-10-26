@@ -126,11 +126,11 @@ global:
     # link and health checks, edits, move/rename through Obsidian): it
     # refuses `ai: sensitive` notes, which no community Obsidian server
     # does. Only where Obsidian is installed; create_* also needs `node`.
+    # dybrain-mcp shares one backend between every session instead of a
+    # ~120 MB Python server in each one (scripts/lib/dybrain_mcp.sh).
     dybrain:
-      command: uv
+      command: {{ printf "%s/.local/bin/dybrain-mcp" .chezmoi.homeDir | quote }}
       args:
-        - run
-        - --script
         - {{ printf "%s/Documents/DyBrain/99_System/99.03_Scripts/dev/vault-mcp.py" .chezmoi.homeDir | quote }}
       env: {}
 {{- end }}

@@ -191,8 +191,11 @@ community trees by default, the enterprise tree inside an enterprise config
 directory.
 
 The `dybrain` MCP server is the Obsidian vault's own script
-(`~/Documents/DyBrain/99_System/99.03_Scripts/dev/vault-mcp.py`, run with
-`uv run --script`), declared only on the `pc`, `laptop` and `tablet` kinds
+(`~/Documents/DyBrain/99_System/99.03_Scripts/dev/vault-mcp.py`), launched
+through `~/.local/bin/dybrain-mcp`: every session talks to one shared backend
+on a Unix socket in `~/.local/state/dybrain/` (owner only), started by the
+first session and left running, instead of each running its own copy with
+`uv run --script`. It is declared only on the `pc`, `laptop` and `tablet` kinds
 that install Obsidian. It never reads, lists or writes `ai: sensitive`
 notes, and refuses writes to `ai: readonly` notes and templates. Its tools:
 

@@ -262,7 +262,7 @@ function _render_config {
   local cfg="${BATS_TEST_TMPDIR}/laptop.yaml" out="${BATS_TEST_TMPDIR}/laptop.mcp.yaml"
   _write_profile_config "${cfg}" "darwin" "laptop" "launchd" "M" "M" "A"
   _render_config "${cfg}" "${out}" || fail "render failed: $(cat "${out}.err")"
-  [[ "$(yq '.global.mcp.dybrain.command' "${out}")" == "uv" ]]
+  yq '.global.mcp.dybrain.command' "${out}" | grep '/.local/bin/dybrain-mcp$' > /dev/null
   yq '.global.mcp.dybrain.args[-1]' "${out}" \
     | grep '/Documents/DyBrain/99_System/99.03_Scripts/dev/vault-mcp.py$' > /dev/null
   cfg="${BATS_TEST_TMPDIR}/server.yaml" out="${BATS_TEST_TMPDIR}/server.mcp.yaml"
