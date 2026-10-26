@@ -20,7 +20,7 @@ DOTFILES_REAL_HOME="${HOME}"
 # Bats runs each test in its own process, where the module registry
 # `dybatpho::load` reads cannot follow (Bash cannot export an associative
 # array), so every module the libraries under test load is named here.
-. "${DYBATPHO_DIR}/init.sh" --modules cli network archive json array pkg screen privilege lock
+. "${DYBATPHO_DIR}/init.sh" --modules cli network archive json array pkg screen privilege lock cache
 DOTFILES_REAL_XDG_CONFIG_HOME="$(dybatpho::xdg_config_dir)"
 
 bats_require_minimum_version 1.5.0
@@ -33,6 +33,8 @@ function setup_dotfiles_test_env {
   export XDG_DATA_HOME="${HOME}/.local/share"
   export XDG_STATE_HOME="${HOME}/.local/state"
   export XDG_CACHE_HOME="${HOME}/.cache"
+  # The cache module took its directory from the real XDG cache when it loaded.
+  export DYBATPHO_CACHE_DIR="${XDG_CACHE_HOME}/dybatpho"
   dybatpho::ensure_dir "$(dybatpho::xdg_config_dir dytoy)" > /dev/null
   dybatpho::ensure_dir "$(dybatpho::xdg_config_dir chezmoi)" > /dev/null
   dybatpho::ensure_dir "${HOME}/.local/bin" > /dev/null

@@ -5,7 +5,11 @@
 # @description Library `dytoy` to read the tools YAML file and install what it
 # describes. Queries go through the `json` module of dybatpho instead of calling
 # `yq` by hand, and every distro installer shares `dytoy::install_package`.
-dybatpho::load json os semver
+dybatpho::load json os semver cache
+
+# Seconds the state of a tool installed by a whole-method run stays valid, so
+# a run that failed half way resumes after the last tool that succeeded.
+DYTOY_STATE_TTL="${DYTOY_STATE_TTL:-604800}"
 
 #######################################
 # @description Print the path of the tools YAML file
@@ -380,6 +384,8 @@ function dytoy::run_section_hook {
 # @arg $1 string Command to run when iterate over tools
 # @env TOOL string Tool name to install, if set to "@empty", all tools for the specified method will be installed
 # @env METHOD string Method to use for the tool installation: "shell", "os", "binary", "mise"
+# @env ONLY_NOT_INSTALLED boolean Skip the tools an earlier run of every tool
+# installed, until their definition changes or `DYTOY_STATE_TTL` seconds pass
 #######################################
 # shellcheck disable=SC2153
 function dytoy::iterate {
@@ -398,14 +404,39 @@ function dytoy::iterate {
       '.[] | select(.method == $method and .enabled != false and .enabled != "false") | .name' \
       --arg method "${METHOD}" \
       || dybatpho::debug "Can't read tools from ${__dytoy_iterate_yaml_file}"
+    local __dytoy_iterate_state
     for __dytoy_iterate_tool in "${__dytoy_iterate_tools[@]}"; do
+      __dytoy_iterate_state="$(__dytoy_state_key "${__dytoy_iterate_tool}")"
+      # `--no-check-installed` asks to install everything again.
+      if dybatpho::is true "${ONLY_NOT_INSTALLED}" \
+        && DYBATPHO_CACHE_NAMESPACE=dytoy dybatpho::cache_has "${__dytoy_iterate_state}" "${DYTOY_STATE_TTL}"; then
+        dybatpho::debug "Skip ${__dytoy_iterate_tool}, installed by an earlier run"
+        continue
+      fi
       "${__dytoy_iterate_command}" "${__dytoy_iterate_tool}"
+      printf 'done\n' | DYBATPHO_CACHE_NAMESPACE=dytoy dybatpho::cache_set "${__dytoy_iterate_state}"
     done
     dybatpho::success "Installed all ${METHOD} tools"
   else
     dybatpho::info "Install ${METHOD} tool: ${TOOL}"
     "${__dytoy_iterate_command}" "${TOOL}"
   fi
+}
+
+#######################################
+# @description Print the key the state of a tool is remembered under. It hashes
+# the definition of the tool, so editing the tool installs it again.
+# @arg $1 string Name of tool
+# @env METHOD string Method being run
+# @env ONLY_ESSENTIAL boolean An essential-only run skips the other tools
+# @stdout The key
+# @internal
+#######################################
+function __dytoy_state_key {
+  local name definition
+  dybatpho::expect_args name -- "$@"
+  definition="$(dytoy::get_yaml "${name}" "all" "${METHOD}")"
+  dybatpho::cache_key "${METHOD}" "${name}" "${ONLY_ESSENTIAL}" "${definition}"
 }
 
 #######################################
