@@ -20,6 +20,7 @@ function _spec_main {
   dybatpho::opts::cmd ls _spec_ls
   dybatpho::opts::cmd rm _spec_rm
   dybatpho::opts::cmd mcp _spec_mcp
+  dybatpho::opts::cmd status _spec_status
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
 }
 
@@ -68,6 +69,25 @@ function _spec_rm {
 function _spec_mcp {
   dybatpho::opts::setup "Serve ls, use and rm to agents as an MCP server on stdio" MCP_ARGS action:"_mcp"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_mcp"
+}
+
+#######################################
+# @description Spec of status command
+# @noargs
+#######################################
+function _spec_status {
+  dybatpho::opts::setup "Report drift between the config and what each agent has" STATUS_ARGS action:"_status"
+  dybatpho::opts::flag "Print nothing when every agent matches" QUIET --quiet -q on:true off:false init:="false"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_status"
+}
+
+#######################################
+# @description Report drift between the config and the installed agents
+# @noargs
+#######################################
+# dyshellint disable=SC2154 QUIET is assigned by dybatpho::opts from _spec_status
+function _status {
+  dyai_status::main "${QUIET}"
 }
 
 #######################################

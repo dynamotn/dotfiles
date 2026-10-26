@@ -91,6 +91,11 @@
             "type": "command",
             "command": "f=\"${CLAUDE_PROJECT_DIR:-$PWD}/AGENTS.md\"; if [ -f \"$f\" ] && ! [ -f \"${f%AGENTS.md}CLAUDE.md\" ]; then echo '=== AGENTS.md (project rules) ==='; cat \"$f\"; else true; fi",
             "statusMessage": "Loading AGENTS.md..."
+          },
+          {
+            "type": "command",
+            "command": "command -v dyai >/dev/null 2>&1 && dyai status --quiet; true",
+            "timeout": 5
           }
         ]
       }
