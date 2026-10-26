@@ -1,0 +1,20 @@
+{{- $asset := "" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   if eq .chezmoi.arch "arm64" }}
+{{-     $asset = "macos-arm64" }}
+{{-   end }}
+{{- else if eq .chezmoi.arch "amd64" }}
+{{-   $asset = "linux-x86_64-musl" }}
+{{- else if eq .chezmoi.arch "arm64" }}
+{{-   $asset = "linux-aarch64-musl" }}
+{{- end }}
+{{- if $asset }}
+# No distro packages; the static musl build also runs on Termux
+name: sping
+method: binary
+is_essential: true
+github:
+  repo: LambdaBytes/sping
+  release_asset: sping-%v-{{ $asset }}
+  sha256: SHA256SUMS
+{{- end }}

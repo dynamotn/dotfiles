@@ -102,7 +102,7 @@ the plain run: every method in order, `os` first. `dytoy <method>` and
 |[fd](https://github.com/sharkdp/fd)|Alternative to `find`, simpler and faster|
 |[eza](https://github.com/eza-community/eza)|Alternative to `ls` with colours, faster|
 |[ripgrep](https://github.com/BurntSushi/ripgrep)|Alternative to `grep`, with Git integration and faster|
-|[gping](https://github.com/orf/gping)|Alternative to `ping` with graph|
+|[sping](https://github.com/LambdaBytes/sping)|Alternative to `ping` with live diagnostics|
 |[wtf](https://github.com/wtfutil/wtf)|Personal information dashboard on CLI|
 |[mise](https://github.com/jdx/mise)|All-in-one version manager|
 |[vivid](https://github.com/sharkdp/vivid)|A themeable LS_COLORS generator with database|
