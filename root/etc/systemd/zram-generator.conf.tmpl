@@ -1,0 +1,9 @@
+{{- /* Same machines as home/.chezmoitemplates/dytoy/zram.yaml.tmpl */ -}}
+{{- if and (ne .kind "container") (ne (printf "%s_%s" .place .kind) "home_pc") -}}
+# Read by zram-generator: one zstd-compressed swap device of up to half the
+# RAM, used before any disk swap.
+[zram0]
+zram-size = ram / 2
+compression-algorithm = zstd
+swap-priority = 100
+{{- end }}

@@ -24,8 +24,13 @@ GRUB_TIMEOUT_STYLE=menu
 {{- /* zswap is built in, so its pool size can only be set here: a quarter of
        RAM keeps more zstd-compressed pages off the NVMe swap partition */ -}}
 {{-   $cmdline = printf "resume=UUID=38bb8bfd-5a4b-4c37-b614-29b6229dec92 zswap.max_pool_percent=25 %s" $cmdline -}}
-{{- else if eq .kind "vm" }}
-{{-   $cmdline = printf "console=tty0 console=ttyS0 %s" $cmdline -}}
+{{- else }}
+{{- /* Every other machine swaps to zram (dytoy/zram.yaml.tmpl); zswap in
+       front of it would only compress each page twice */ -}}
+{{-   $cmdline = printf "zswap.enabled=0 %s" $cmdline -}}
+{{-   if eq .kind "vm" }}
+{{-     $cmdline = printf "console=tty0 console=ttyS0 %s" $cmdline -}}
+{{-   end -}}
 {{- end -}}
 {{- if eq .guiDriver "N" }}
 {{-   $cmdline = printf "nvidia-drm.modeset=1 nvidia-drm.fbdev=1 %s" $cmdline -}}
