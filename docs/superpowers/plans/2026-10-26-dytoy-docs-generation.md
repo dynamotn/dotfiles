@@ -93,21 +93,10 @@
 - [ ] **Step 1: Write failing tests:** `update replaces only the marked region`, `update is idempotent` (second run returns 0, file unchanged), `missing marker dies and leaves file untouched` (checksum before/after), `toc lists usage and rendered categories`, `check mode exits 1 on drift and writes nothing` (runs `scripts/dytoy_docs.sh --check` against a fixture by env override `DYTOY_DOCS_ROOT`, defaulting to the repo root).
 - [ ] **Step 2: Run** → FAIL.
 - [ ] **Step 3: Implement** `update` and the entry script.
-- [ ] **Step 4: Add the hook** to the existing `- repo: local` block:
+- [ ] **Step 4: Run** the bats file → PASS; `dyshellint scripts/dytoy_docs.sh scripts/lib/dytoy_docs.sh scripts/test/dytoy_docs.bats` → clean.
+- [ ] **Step 5: Commit** `feat(dytoy): add the docs generator script`.
 
-```yaml
-      - id: dytoy-docs
-        name: dytoy docs
-        entry: scripts/dytoy_docs.sh
-        language: system
-        pass_filenames: false
-        files: ^home/\.chezmoitemplates/dytoy/|^docs/dytoy\.(md|extra\.yaml|categories\.yaml)$|^scripts/(lib/)?dytoy_docs\.sh$|^schemas/dytoy
-```
-
-- [ ] **Step 5: Run** the bats file → PASS; `dyshellint scripts/dytoy_docs.sh scripts/lib/dytoy_docs.sh scripts/test/dytoy_docs.bats` → clean.
-- [ ] **Step 6: Commit** `feat(dytoy): regenerate docs in pre-commit`.
-
-(The hook will fail on the real repo until Task 5; that is expected and Task 5 is the next commit touching dytoy files.)
+(The pre-commit hook is added in Task 5, after the doc has markers.)
 
 ### Task 4: Make raw-text readers ignore doc blocks
 
@@ -121,7 +110,7 @@
 
 - [ ] **Step 1: Write failing tests** in `dytoy_schema.bats`: `plain dytoy yaml files conform to schema` validates `dytoy_docs::strip` output (write to `${BATS_TEST_TMPDIR}`) instead of the raw file; new `doc blocks conform to doc schema` runs `ys -f schemas/dytoy-doc.schema.yaml` on each block from `dytoy_docs::blocks` (drop the added `file` key first). Add a fixture-based case proving a block in a plain `.yaml` no longer fails the plain test.
 - [ ] **Step 2: Run** `./scripts/test.sh --dytoy` → new tests FAIL, old ones still PASS.
-- [ ] **Step 3: Implement**: in `dytoy_install.sh.tmpl` hash the text with blocks removed: `{{- $definition := include . | regexReplaceAll "(?s)\\{\\{- /\\* doc\\n.*?\\*/ -\\}\\}\\n" "" }}` (keep the `method:` match on the same stripped text).
+- [ ] **Step 3: Implement**: in `dytoy_install.sh.tmpl` hash the text with blocks removed: `{{- $definition := regexReplaceAll "(?s)\\{\\{- /\\* doc\\n.*?\\*/ -\\}\\}\\n" (include .) "" }}` (sprig's argument order is regex, string, replacement — do not pipe `include .` into it) (keep the `method:` match on the same stripped text).
 - [ ] **Step 4: Verify the hash is unchanged** for a file with no block: `chezmoi execute-template --source <worktree> --file home/.chezmoiscripts/run_onchange_after_02-install-02-binary-tools.sh.tmpl` before and after the change → identical output.
 - [ ] **Step 5: Grep** for every other raw read of definitions: `rg -n 'chezmoitemplates/dytoy' home scripts` — confirm each remaining reader renders (`includeTemplate`) or is adjusted; list them in the commit body only if changed.
 - [ ] **Step 6: Run** `./scripts/test.sh --dytoy` → PASS.
@@ -137,7 +126,16 @@
 - [ ] **Step 1: Write `docs/dytoy.categories.yaml`**: categories in current doc order, `Prerequisite` first; for each category, subcategories named for the contiguous groups visible in today's doc (e.g. Development tools: `CLI tools` (watchexec…euporie), `Languages and runtimes` (rust…zig), `Package managers` (uv, nix…), `Linters and formatters` (perlcritic, perltidy, qmlformat)). Every group must be a contiguous run of today's rows so today's order is reproducible.
 - [ ] **Step 2: Run the throwaway migration**: for each doc row, find the definition by `name`, then by repo URL in the link, then by the overrides `rg`→`ripgrep`, `otel`→`otel-cli`, `wireshark`→`tshark`, `zen`→`zen-browser`; write a block at the top of that file with `name`, `label` (only if ≠ name), `url` (only if ≠ the default; `none` for backtick rows), `description` (YAML-quoted), `category`, `subcategory`, `order` = 10 × position within its subcategory. Choice files get one block per tool. Rows with no definition go to `docs/dytoy.extra.yaml`. Drop the second `cht` row. Print definitions left without a block.
 - [ ] **Step 3: Hand-fill** the ~25 printed definitions (`fonts`, `gpu`, `compression`, `zram`, `system_zzz`, …) with a description and placement, after numbered rows (no `order`).
-- [ ] **Step 4: Insert markers** in `docs/dytoy.md` around `## Prerequisite`…end, then run `scripts/dytoy_docs.sh`.
+- [ ] **Step 4: Insert markers** in `docs/dytoy.md` around `## Prerequisite`…end, then run `scripts/dytoy_docs.sh`. Then add the hook to the existing `- repo: local` block of `.pre-commit-config.yaml`:
+
+```yaml
+      - id: dytoy-docs
+        name: dytoy docs
+        entry: scripts/dytoy_docs.sh
+        language: system
+        pass_filenames: false
+        files: ^home/\.chezmoitemplates/dytoy/|^docs/dytoy\.(md|extra\.yaml|categories\.yaml)$|^scripts/(lib/)?dytoy_docs\.sh$|^schemas/dytoy
+```
 - [ ] **Step 5: Diff old vs new doc** (`git diff --word-diff docs/dytoy.md`): only allowed differences — new rows for hand-filled definitions, rows that moved into `Prerequisite`, the dropped duplicate `cht`, the marker lines. Any reordering of existing rows is a bug in Step 1/2: fix and rerun.
 - [ ] **Step 6: Verify** all of: `scripts/dytoy_docs.sh --check` → exit 0; `./scripts/test.sh --dytoy` → PASS; `./scripts/test.sh --all` → PASS; `prek run --all-files` → PASS; rendering of `run_onchange_after_02-install-0{1,2,3,4}-*.sh.tmpl` identical before and after migration (hashes unchanged, so the next `chezmoi apply` reinstalls nothing).
 - [ ] **Step 7: Commit** `feat(dytoy): document tools from definitions`.
