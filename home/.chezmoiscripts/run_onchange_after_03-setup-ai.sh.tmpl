@@ -1,21 +1,22 @@
 #!{{ .bash }}
 # @file 03-setup-ai.sh
 # @brief Apply the global AI-agent setup at chezmoi apply time
-# @description Thin wrapper around `dyai::install` (scripts/lib/dyai.sh): bring
-# every supported agent in line with ~/.config/dyai/config.yaml. The logic
-# lives in the library so the `dyai install` command and this apply-time hook
-# share one implementation. Re-runs whenever the config, its shared data, or
-# the library changes.
+# @description Thin wrapper around `dyai::install` (scripts/lib/dyai, the
+# dynamo-tools/dyai submodule): bring every supported agent in line with
+# ~/.config/dyai/config.yaml. The logic lives in the library so the
+# `dyai install` command and this apply-time hook share one implementation.
+{{- $dyai := joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai" }}
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 # Re-run when the config, its shared data, or the install library changes.
 # dyai config hash: {{ include (joinPath .chezmoi.sourceDir "private_dot_config/dyai/config.yaml.tmpl") | sha256sum }}
 # dyai data hash: {{ include (joinPath .chezmoi.sourceDir ".chezmoitemplates/ai/dyai-data.yaml.tmpl") | sha256sum }}
-# dyai lib hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai.sh") | sha256sum }}
-# dyai lsp lib hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai_lsp.sh") | sha256sum }}
-# dyai lsp export hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai_lsp_export.lua") | sha256sum }}
-# dyai lsp exec hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai_lsp_exec.sh") | sha256sum }}
-. "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai.sh"
+# dyai catalog hash: {{ include (joinPath $dyai "catalog" "domains.yaml") | sha256sum }}
+# dyai lib hash: {{ include (joinPath $dyai "lib" "dyai.sh") | sha256sum }}
+# dyai lsp lib hash: {{ include (joinPath $dyai "lib" "dyai_lsp.sh") | sha256sum }}
+# dyai lsp export hash: {{ include (joinPath $dyai "lib" "dyai_lsp_export.lua") | sha256sum }}
+# dyai lsp exec hash: {{ include (joinPath $dyai "lib" "dyai_lsp_exec.sh") | sha256sum }}
+. "{{ $dyai }}/lib/dyai.sh"
 dybatpho::header "Setup AI"
 dyai::install
 dybatpho::success "Setup AI"

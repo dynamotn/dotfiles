@@ -181,8 +181,8 @@ The full list, with defaults, is in
 | [`root/`](root/) | source for system files applied to `/` |
 | [`cascadeur/`](cascadeur/) | chezmoi source rendering this repo's `.gitmodules` |
 | [`docker/`](docker/) | Dockerfiles and build script of the toolbox images |
-| [`scripts/`](scripts/) | setup, test, kernel, container and Lima scripts, plus bash libraries |
-| [`schemas/`](schemas/) | YAML schemas for `dytoy`, `dyai` and the secrets data |
+| [`scripts/`](scripts/) | setup, test, kernel, container and Lima scripts, plus bash libraries and the `dyai` submodule |
+| [`schemas/`](schemas/) | YAML schemas for `dytoy` and the secrets data (`dyai`'s live in its submodule) |
 | [`secrets/`](secrets/) | age-encrypted secrets |
 | [`silos/`](silos/) | shortcuts to the configs I open most, and large submodules |
 | [`docs/`](docs/) | guides, commands and key bindings |
@@ -216,7 +216,7 @@ every platform. See [dytoy](docs/dytoy.md).
 
 `dyai` manages skills, subagents, MCP servers, plugins, hooks and policy for
 every supported agent, the way `mise` manages tools: a shared baseline, plus
-presets a project pulls in on demand. See [dyai](docs/dyai.md).
+presets a project pulls in on demand. See [dyai](scripts/lib/dyai/docs/dyai.md).
 
 ### via Mason of neovim
 
@@ -231,7 +231,7 @@ I also have a custom registry in `neovim` config.
 | [setup](docs/setup.md)         | `setup.sh` options, init questions, machines, images  |
 | [secrets](docs/secrets.md)     | age identities, `chezmoi-dycrypt`, secret data layout |
 | [dytoy](docs/dytoy.md)         | Installing tools from `dytoy` YAML                    |
-| [dyai](docs/dyai.md)           | AI agents, presets, MCP servers and skills            |
+| [dyai](scripts/lib/dyai/docs/dyai.md)           | AI agents, presets, MCP servers and skills            |
 | [kernel](docs/kernel.md)       | Building the Gentoo kernel with `scripts/kernel.sh`   |
 | [tuning](docs/tuning.md)       | System tuning notes                                   |
 | [notes](docs/notes.md)         | Odd fixes for specific distributions                  |

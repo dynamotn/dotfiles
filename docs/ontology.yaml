@@ -1,7 +1,7 @@
-# yaml-language-server: $schema=../schemas/ontology.schema.yaml
+# yaml-language-server: $schema=../scripts/lib/dyai/schemas/ontology.schema.yaml
 # The domains of this repository and the meaning of its own words. dyai crew
 # hands the domains and every term a task or a diff uses to the worker and
-# the reviewer (docs/dyai.md#crew).
+# the reviewer (scripts/lib/dyai/docs/dyai.md#crew).
 domains:
   - id: chezmoi
     kind: dotfiles
@@ -16,7 +16,7 @@ domains:
   - id: dyai
     kind: llm-app
     description: The shared AI-agent setup (registry, presets, install) and the crew that runs agents headless.
-    paths: ["scripts/lib/dyai*.sh", "scripts/lib/dyai*.lua", "home/private_dot_config/dyai/**", "schemas/dyai.schema.yaml"]
+    paths: ["scripts/lib/dyai/**", "home/private_dot_config/dyai/**"]
   - id: dytoy
     description: The tool installer, its per-tool definitions and the generated tool docs.
     paths: ["home/.chezmoitemplates/dytoy/**", "scripts/lib/dytoy*.sh", "scripts/dytoy*.sh", "schemas/dytoy*.yaml"]

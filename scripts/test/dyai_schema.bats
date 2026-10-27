@@ -1,6 +1,6 @@
 setup() {
   load test_helper
-  SCHEMA_FILE="${DOTFILES_DIR}/schemas/dyai.schema.yaml"
+  SCHEMA_FILE="${DOTFILES_DIR}/scripts/lib/dyai/schemas/dyai.schema.yaml"
   CONFIG_TMPL="${DOTFILES_DIR}/home/private_dot_config/dyai/config.yaml.tmpl"
   DATA_PARTIAL="${DOTFILES_DIR}/home/.chezmoitemplates/ai/dyai-data.yaml.tmpl"
 }
@@ -427,7 +427,7 @@ YAML
   _require_ys
   _require_yq
   local onto="${DOTFILES_DIR}/docs/ontology.yaml"
-  "${YS}" -f "${DOTFILES_DIR}/schemas/ontology.schema.yaml" "${onto}" > "${BATS_TEST_TMPDIR}/err" 2>&1 \
+  "${YS}" -f "${DOTFILES_DIR}/scripts/lib/dyai/schemas/ontology.schema.yaml" "${onto}" > "${BATS_TEST_TMPDIR}/err" 2>&1 \
     || fail "ontology rejected: $(< "${BATS_TEST_TMPDIR}/err")"
   # shellcheck disable=SC2016 # a yq expression
   run yq -r '[.domains[].id] as $d | .terms[] | select(.domain and ([.domain] - $d | length > 0)) | .term' "${onto}"
@@ -438,7 +438,7 @@ YAML
   _require_ys
   local bad="${BATS_TEST_TMPDIR}/bad.yaml"
   printf 'domains: [{id: a, description: x}]\nterms: [{term: t}]\n' > "${bad}"
-  run "${YS}" -f "${DOTFILES_DIR}/schemas/ontology.schema.yaml" "${bad}"
+  run "${YS}" -f "${DOTFILES_DIR}/scripts/lib/dyai/schemas/ontology.schema.yaml" "${bad}"
   assert_failure
 }
 

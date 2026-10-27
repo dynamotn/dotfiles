@@ -1131,4 +1131,4 @@ registry:
 {{- range list "ArXiv" "BiasCheck" "Council" "ExtractWisdom" "FirstPrinciples" "IterativeDepth" "Novelty" "RedTeam" "RootCauseAnalysis" "Teach" "WorldThreatModel" }}
         - https://github.com/danielmiessler/LifeOS/tree/5e2f2e8c0abde612da0e99c16c0d07d4ec21b88c/LifeOS/install/skills/{{ . }}
 {{- end }}
-{{ includeTemplate "ai/dyai-domains.yaml.tmpl" . | indent 2 }}
+{{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai" "catalog" "domains.yaml") | indent 2 }}
