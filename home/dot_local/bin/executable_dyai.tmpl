@@ -30,6 +30,7 @@ function _spec_main {
   dybatpho::opts::cmd review _spec_review
   dybatpho::opts::cmd fix _spec_fix
   dybatpho::opts::cmd judge _spec_judge
+  dybatpho::opts::cmd resume _spec_resume
   dybatpho::opts::cmd merge _spec_merge
   dybatpho::opts::cmd drop _spec_drop
   dybatpho::opts::cmd logs _spec_logs
@@ -199,6 +200,20 @@ function _spec_judge {
 }
 
 #######################################
+# @description Spec of resume command
+# @noargs
+#######################################
+function _spec_resume {
+  dybatpho::opts::setup "Continue a stuck task in its worktree, on the same or another agent" RESUME_ARGS \
+    action:"_resume"
+  dybatpho::opts::param "Agent: claude, codex, gemini, opencode, copilot, or auto (default: the task's writer)" \
+    AGENT --agent -a init:=""
+  dybatpho::opts::flag "Return at once; follow it with dyai tasks" DETACH --detach -d on:true off:false init:="false"
+  dybatpho::opts::arg "Task id" ID required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_resume"
+}
+
+#######################################
 # @description Spec of merge command
 # @noargs
 #######################################
@@ -351,6 +366,18 @@ function _judge {
 }
 
 #######################################
+# @description Resume a stuck crew task
+# @noargs
+#######################################
+# dyshellint disable=SC2154 ID, AGENT and DETACH are assigned by dybatpho::opts from _spec_resume
+function _resume {
+  [[ -n "${ID-}" ]] || dybatpho::die "dyai resume needs a task id; see dyai tasks"
+  local mode=""
+  [[ "${DETACH}" != true ]] || mode=detach
+  dyai_crew::resume "${ID}" "${AGENT}" "${mode}"
+}
+
+#######################################
 # @description Merge a crew task
 # @noargs
 #######################################
@@ -381,11 +408,9 @@ function _drop {
 # dyshellint disable=SC2154 ID, FOLLOW and ERR are assigned by dybatpho::opts from _spec_logs
 function _logs {
   [[ -n "${ID-}" ]] || dybatpho::die "dyai logs needs a task id; see dyai tasks"
-  local dir file
-  dir="$(dyai_crew::state_dir)"
-  file="${dir}/${ID}.out"
-  [[ "${ERR}" != true ]] || file="${dir}/${ID}.err"
-  dybatpho::is file "${file}" || dybatpho::die "no log for ${ID}: ${file}"
+  local stream=out file
+  [[ "${ERR}" != true ]] || stream=err
+  file="$(dyai_crew::log_file "${ID}" "${stream}")" || dybatpho::die "no ${stream} log for ${ID}"
   local state status pid start
   state="$(dyai_crew::get "${ID}")" || state='{}'
   status="$(jq -r '.status // ""' <<< "${state}")"

@@ -25,7 +25,7 @@ setup() {
   local skill="${DOTFILES_DIR}/home/dot_agents/skills/dyai/SKILL.md" tool
   grep -qx 'name: dyai' "${skill}"
   grep -qx 'disable-model-invocation: true' "${skill}"
-  for tool in crew_run crew_tasks crew_logs crew_review crew_judge crew_fix crew_merge crew_drop; do
+  for tool in crew_run crew_tasks crew_logs crew_review crew_judge crew_fix crew_resume crew_merge crew_drop; do
     grep -q "\`${tool}\`" "${skill}" || fail "${tool} missing"
     grep -q "\"${tool}\"" "${DOTFILES_DIR}/scripts/lib/dyai_mcp.sh" || fail "${tool} is not a dyai mcp tool"
   done
