@@ -383,6 +383,7 @@ global:
     dybrain: false
     consensus: [{agent: copilot, stance: against}, {agent: codex}]
     ontology: docs/terms.yaml
+    judge: {auto: false, laya: true, jev: false}
     fences: [":(glob)secrets/**"]
     hooks: {on_status: "true"}
 YAML

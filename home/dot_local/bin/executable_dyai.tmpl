@@ -28,6 +28,7 @@ function _spec_main {
   dybatpho::opts::cmd tasks _spec_tasks
   dybatpho::opts::cmd review _spec_review
   dybatpho::opts::cmd fix _spec_fix
+  dybatpho::opts::cmd judge _spec_judge
   dybatpho::opts::cmd merge _spec_merge
   dybatpho::opts::cmd drop _spec_drop
   dybatpho::opts::cmd logs _spec_logs
@@ -157,6 +158,16 @@ function _spec_fix {
   dybatpho::opts::flag "Return at once" DETACH --detach -d on:true off:false init:="false"
   dybatpho::opts::arg "Task id" ID required:false
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_fix"
+}
+
+#######################################
+# @description Spec of judge command
+# @noargs
+#######################################
+function _spec_judge {
+  dybatpho::opts::setup "Score a task with laya and jev; the merge stays yours" JUDGE_ARGS action:"_judge"
+  dybatpho::opts::arg "Task id" ID required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_judge"
 }
 
 #######################################
@@ -299,6 +310,16 @@ function _fix {
   local mode=""
   [[ "${DETACH}" != true ]] || mode=detach
   dyai_crew::fix "${ID}" "${mode}"
+}
+
+#######################################
+# @description Judge a crew task
+# @noargs
+#######################################
+# dyshellint disable=SC2154 ID is assigned by dybatpho::opts from _spec_judge
+function _judge {
+  [[ -n "${ID-}" ]] || dybatpho::die "dyai judge needs a task id; see dyai tasks"
+  dyai_crew::judge "${ID}"
 }
 
 #######################################

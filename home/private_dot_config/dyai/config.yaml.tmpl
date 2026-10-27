@@ -212,6 +212,11 @@ global:
     profile: lean
     # A zellij pane per started worker (its log) and per review (hunk).
     panes: auto
+    # dyai judge (and after every pass, with auto): laya, on this machine,
+    # scores risk, scope and whether a person should read it; jev, a hosted
+    # model that gets the diff and needs its provider key in the environment,
+    # gates the change and the writer's claims. Advice only: merging stays yours.
+    judge: {auto: true, laya: true, jev: false}
     # Through the dybrain MCP server, when one is configured: a failed review
     # becomes a fleeting note (a lesson to promote at the weekly review), a
     # merge a line in the daily note.
