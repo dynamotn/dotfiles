@@ -204,6 +204,12 @@ function dytoy_docs::update {
   for marker in '<!-- toc -->' '<!-- tocstop -->' '<!-- dytoy:begin' '<!-- dytoy:end -->'; do
     grep -qF -- "${marker}" "${doc}" || dybatpho::die "${doc}: marker ${marker} is missing"
   done
+  # A closing marker above its opening one would drop the rest of the doc.
+  awk '
+    /^<!-- toc -->$/ { toc = NR } /^<!-- tocstop -->$/ { tocstop = NR }
+    /^<!-- dytoy:begin/ { begin = NR } /^<!-- dytoy:end -->$/ { end = NR }
+    END { exit !(toc < tocstop && begin < end) }
+  ' "${doc}" || dybatpho::die "${doc}: marker <!-- tocstop --> or <!-- dytoy:end --> comes before its opening marker"
   current="$(< "${doc}")"
   updated="$(
     awk -v generated="${generated}" '
