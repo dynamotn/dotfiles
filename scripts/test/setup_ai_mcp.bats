@@ -210,6 +210,12 @@ printf '%s|%s\n' "\${CLAUDE_CONFIG_DIR:-DEFAULT}" "\$*" >> "${HOME}/claude.log"
 exit 0
 CL
   chmod +x "${HOME}/.local/bin/claude"
+  # The context's mise config moves Claude's home into it.
+  cat > "${HOME}/.local/bin/mise" << MISE
+#!/usr/bin/env bash
+printf '{"CLAUDE_CONFIG_DIR":"%s/.claude"}\n' "\$3"
+MISE
+  chmod +x "${HOME}/.local/bin/mise"
   _stub_agent bunx
   dybatpho::ensure_dir "${HOME}/Working/enterprise/U3T/.claude" > /dev/null
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
@@ -221,6 +227,7 @@ global:
       command: bunx
       args: ["@modelcontextprotocol/server-filesystem@2.0.0", "${HOME}/Working/personal", "${HOME}/Working/community"]
       env: {}
+contexts: ["~/Working/enterprise/U3T"]
 agents:
   claude: {}
 CFG
