@@ -41,20 +41,28 @@ function network::proxy_up {
 # @description Tell whether the SSH server of a git host is reachable, at the
 # host name and port `~/.ssh/config` gives it (such as ssh.github.com:443)
 # @arg $1 string Host, as git writes it in `git@<host>:`
-# @exitcode 0 The SSH port accepts a connection
+# @exitcode 0 An SSH handshake with it gets through
 # @exitcode 1 It does not
 #######################################
 function network::ssh_up {
   local host
   dybatpho::expect_args host -- "$@"
-  # shortcut: a TCP probe of the resolved host and port, so a ProxyJump or a
-  # ProxyCommand in ~/.ssh/config is not followed; probe with `ssh -T` when one is.
   local options hostname port
   # dyshellint disable=BSG118 `ssh -G` only prints the config, it never connects
   options="$(ssh -G "${host}" 2> /dev/null)" || return 1
   hostname="$(awk '$1 == "hostname" { print $2; exit }' <<< "${options}")"
   port="$(awk '$1 == "port" { print $2; exit }' <<< "${options}")"
-  dybatpho::port_open "${hostname:-${host}}" "${port:-22}" "${NETWORK_PROBE_TIMEOUT}"
+  dybatpho::port_open "${hostname:-${host}}" "${port:-22}" "${NETWORK_PROBE_TIMEOUT}" || return 1
+  # An open port is not enough: a network can pass the TCP connection and the
+  # banner, then reset the key exchange. A fresh connection (no multiplexed
+  # master hides the network) that gets as far as host key or user
+  # authentication proves it; that it then refuses the key is not the network.
+  local answer
+  answer="$(timeout "$((NETWORK_PROBE_TIMEOUT * 3))" ssh -T -o BatchMode=yes -o ControlMaster=no \
+    -o ControlPath=none -o StrictHostKeyChecking=yes -o ConnectTimeout="${NETWORK_PROBE_TIMEOUT}" \
+    "git@${host}" < /dev/null 2>&1)" || true
+  grep -Eq 'Permission denied|Host key verification failed|Welcome to GitLab|successfully authenticated' \
+    <<< "${answer}"
 }
 
 #######################################

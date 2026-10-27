@@ -20,9 +20,22 @@ EOF
   # The network the tests pretend to be on: every probe reads these.
   UP_PORTS="${BATS_TEST_TMPDIR}/up-ports"
   : > "${UP_PORTS}"
-  cat > "${HOME}/.local/bin/ssh" << 'EOF'
+  # `ssh -G` prints the config; any other call is a handshake, which gets as
+  # far as authentication unless the host is listed in RESET_HOSTS.
+  RESET_HOSTS="${BATS_TEST_TMPDIR}/reset-hosts"
+  : > "${RESET_HOSTS}"
+  cat > "${HOME}/.local/bin/ssh" << EOF
 #!/usr/bin/env bash
-printf 'hostname %s\nport 22\n' "${2}"
+if [[ "\${1}" == -G ]]; then
+  printf 'hostname %s\nport 22\n' "\${2}"
+  exit 0
+fi
+if grep -qxF "\${*: -1}" "${RESET_HOSTS}"; then
+  echo "Connection reset by 192.0.2.1 port 22" >&2
+else
+  echo "git@example: Permission denied (publickey)." >&2
+fi
+exit 255
 EOF
   cat > "${HOME}/.local/bin/curl" << EOF
 #!/usr/bin/env bash
@@ -41,6 +54,18 @@ EOF
 function _git_url {
   # dyshellint disable=BSG062 test_helper, loaded in setup, unsets GIT_DIR and its kin
   GIT_CONFIG_GLOBAL="${1}" GIT_CONFIG_NOSYSTEM=1 git ls-remote --get-url "${2}"
+}
+
+@test "network::ssh_up needs a handshake, not only an open port" {
+  printf 'gitlab.com:22\n' >> "${UP_PORTS}"
+  run network::ssh_up gitlab.com
+  assert_success
+  # The port answers and the banner comes, then the key exchange is reset.
+  printf 'git@gitlab.com\n' >> "${RESET_HOSTS}"
+  run network::ssh_up gitlab.com
+  assert_failure
+  run network::ssh_up github.com
+  assert_failure
 }
 
 @test "network::proxy_up probes the host and port of the proxy URL" {
