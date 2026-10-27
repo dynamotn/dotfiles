@@ -381,6 +381,8 @@ global:
     require_review: false
     panes: "off"
     dybrain: false
+    consensus: [{agent: copilot, stance: against}, {agent: codex}]
+    ontology: docs/terms.yaml
     fences: [":(glob)secrets/**"]
     hooks: {on_status: "true"}
 YAML

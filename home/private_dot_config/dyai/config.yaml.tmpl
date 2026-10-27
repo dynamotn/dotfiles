@@ -197,6 +197,13 @@ global:
     # copilot's default model is Claude: an OpenAI one keeps its review of a
     # claude task a second provider (gpt-6-luna is the lighter option).
     model: {copilot: gpt-6-sol}
+    # dyai review --by consensus: every seat reviews at once from its stance
+    # and a strict majority passes; the writer's own seat sits out.
+    consensus:
+      - {agent: copilot, stance: neutral}
+      - {agent: gemini, stance: against}
+      - {agent: codex, stance: for}
+      - {agent: claude, stance: against}
     timeout: 1800
     cooldown: 900
     require_review: true

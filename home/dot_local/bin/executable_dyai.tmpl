@@ -140,7 +140,8 @@ function _spec_tasks {
 #######################################
 function _spec_review {
   dybatpho::opts::setup "Review a task's change with another provider, read-only" REVIEW_ARGS action:"_review"
-  dybatpho::opts::param "Reviewer agent (default: global.crew.reviewer)" BY --by -b init:=""
+  dybatpho::opts::param "Reviewer agent, or consensus for its panel (default: global.crew.reviewer)" \
+    BY --by -b init:=""
   dybatpho::opts::flag "Return at once; the verdict lands in dyai tasks" DETACH --detach -d \
     on:true off:false init:="false"
   dybatpho::opts::arg "Task id" ID required:false
