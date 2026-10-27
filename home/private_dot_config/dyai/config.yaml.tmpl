@@ -232,6 +232,16 @@ global:
       - ":(glob)**/private_dot_claude/**"
       - ":(glob)**/.chezmoitemplates/ai/**"
       - ":(glob)**/dyai*.sh"
+# Roots whose mise config moves an agent's home (CLAUDE_CONFIG_DIR,
+# COPILOT_HOME, ...): dyai installs the same setup into each moved home. Read
+# off those mise configs, so moving a home there is all a new context takes.
+contexts:
+{{- $work := joinPath .chezmoi.sourceDir "private_Working" }}
+{{- range $f := concat (glob (joinPath $work "*" "*" "dot_mise.toml.tmpl")) (glob (joinPath $work "*" "*" "*" "dot_mise.toml.tmpl")) }}
+{{-   if regexMatch "(?m)^(CLAUDE_CONFIG_DIR|COPILOT_HOME|CODEX_HOME|OPENCODE_CONFIG) =" (include $f) }}
+  - "~/Working/{{ $f | dir | trimPrefix (printf "%s/" $work) }}"
+{{-   end }}
+{{- end }}
 agents:
   claude:
     marketplaces:
