@@ -402,6 +402,27 @@ YAML
   assert_failure
 }
 
+@test "the domain catalog names only registry presets and only valid regexes" {
+  _require_chezmoi
+  _require_yq
+  local cfg="${BATS_TEST_TMPDIR}/pc.yaml" out="${BATS_TEST_TMPDIR}/pc.config.yaml" registry bad re
+  _write_profile_config "${cfg}" "linux-arch" "pc" "systemd" "W" "A" "H"
+  _render_config "${cfg}" "${out}" || fail "chezmoi could not render config.yaml.tmpl: $(< "${out}.err")"
+  registry="$(yq -o=json '.registry' "${out}")"
+  # shellcheck disable=SC2016 # a jq program
+  bad="$(jq -r '([.languages, .infra, .presets] | map(keys) | add) as $k
+    | .domains | to_entries[] | .key as $d | .value.presets[] | select(IN($k[]) | not) | "\($d): \(.)"' \
+    <<< "${registry}")"
+  [[ -z "${bad}" ]] || fail "unknown presets: ${bad}"
+  local count
+  count="$(jq '.domains | length' <<< "${registry}")"
+  ((count > 50)) || fail "the catalog lost its domains: ${count}"
+  while IFS= read -r re; do
+    grep -Eq -- "${re}" /dev/null && :
+    (($? < 2)) || fail "bad regex: ${re}"
+  done < <(jq -r '.domains[].detect[]? | (.match, .deps) // empty' <<< "${registry}" || true)
+}
+
 @test "the repository ontology matches its schema and names only its own domains" {
   _require_ys
   _require_yq
@@ -514,7 +535,7 @@ EOF
   # edit. Every preset carries something, and these name the ones that must.
   local registry
   registry="$(yq -o=json -I=0 '.registry' "${out}")"
-  jq -e '[.[][]] | all((.skills // []) + (.subagents // []) + (.plugins // [])
+  jq -e '[.languages, .infra, .presets | .[]] | all((.skills // []) + (.subagents // []) + (.plugins // [])
     + (.commands // []) + ((.mcp // {}) | keys) | length > 0)' <<< "${registry}" > /dev/null \
     || fail "a registry preset is empty"
   jq -e '. as $r | {registry: $r} | [.registry.languages.go, .registry.infra.cicd, .registry.infra.database,

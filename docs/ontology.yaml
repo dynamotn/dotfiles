@@ -4,6 +4,7 @@
 # the reviewer (docs/dyai.md#crew).
 domains:
   - id: chezmoi
+    kind: dotfiles
     description: The chezmoi source of $HOME and /, its templates, partials and apply hooks.
     paths: ["home/**", "root/**", "cascadeur/**"]
   - id: secrets
@@ -13,6 +14,7 @@ domains:
     description: The rules, hooks and permissions every AI agent runs under.
     paths: ["home/private_dot_claude/**", "home/.chezmoitemplates/ai/**", "home/dot_agents/**"]
   - id: dyai
+    kind: llm-app
     description: The shared AI-agent setup (registry, presets, install) and the crew that runs agents headless.
     paths: ["scripts/lib/dyai*.sh", "scripts/lib/dyai*.lua", "home/private_dot_config/dyai/**", "schemas/dyai.schema.yaml"]
   - id: dytoy
@@ -22,6 +24,7 @@ domains:
     description: Window manager, workspace, monitor and key binding rules, generated from one source.
     paths: ["home/.chezmoitemplates/wm/**"]
   - id: shell-lib
+    kind: shell
     description: The bash libraries built on dybatpho and their bats tests.
     paths: ["scripts/lib/*.sh", "scripts/test/**", "scripts/*.sh"]
   - id: docs

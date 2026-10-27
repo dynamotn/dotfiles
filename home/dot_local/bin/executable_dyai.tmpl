@@ -22,6 +22,7 @@ function _spec_main {
   dybatpho::opts::cmd ls _spec_ls
   dybatpho::opts::cmd rm _spec_rm
   dybatpho::opts::cmd mcp _spec_mcp
+  dybatpho::opts::cmd domains _spec_domains
   dybatpho::opts::cmd status _spec_status
   dybatpho::opts::cmd enforcement _spec_enforcement
   dybatpho::opts::cmd run _spec_run
@@ -93,6 +94,32 @@ function _spec_status {
   dybatpho::opts::setup "Report drift between the config and what each agent has" STATUS_ARGS action:"_status"
   dybatpho::opts::flag "Print nothing when every agent matches" QUIET --quiet -q on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_status"
+}
+
+#######################################
+# @description Spec of domains command
+# @noargs
+#######################################
+function _spec_domains {
+  dybatpho::opts::setup "List the project's domains and the presets each needs" DOMAINS_ARGS action:"_domains"
+  dybatpho::opts::flag "Opt the project into the presets it misses" APPLY --apply -a on:true off:false init:="false"
+  dybatpho::opts::flag "Write docs/ontology.yaml from the detected domains" INIT --init on:true off:false init:="false"
+  dybatpho::opts::flag "List every kind of project the catalog knows" CATALOG --catalog -c \
+    on:true off:false init:="false"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_domains"
+}
+
+#######################################
+# @description Map the project's domains to presets
+# @noargs
+#######################################
+# dyshellint disable=SC2154 APPLY, INIT and CATALOG are assigned by dybatpho::opts from _spec_domains
+function _domains {
+  local mode=list
+  [[ "${APPLY}" != true ]] || mode=apply
+  [[ "${INIT}" != true ]] || mode=init
+  [[ "${CATALOG}" != true ]] || mode=catalog
+  dyai_domains::main "${mode}"
 }
 
 #######################################
