@@ -1,9 +1,13 @@
-  // zj-radar rail on the left of every tab. new_tab_template needs its own
-  // focused pane: Zellij drops a `children` nested inside a split there.
+  // zj-herdr rail on the left of every tab; it also starts the zj-herdr
+  // daemon when none runs. new_tab_template needs its own focused pane:
+  // Zellij drops a `children` nested inside a split there.
   default_tab_template {
     pane split_direction="vertical" {
       pane size=32 borderless=true {
-        plugin location="radar"
+        plugin location="zj_herdr" {
+          pinned "true"
+          start_daemon "true"
+        }
       }
       children
     }
@@ -17,7 +21,10 @@
   new_tab_template {
     pane split_direction="vertical" {
       pane size=32 borderless=true {
-        plugin location="radar"
+        plugin location="zj_herdr" {
+          pinned "true"
+          start_daemon "true"
+        }
       }
       pane focus=true
     }

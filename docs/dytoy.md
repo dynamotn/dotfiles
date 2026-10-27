@@ -98,6 +98,7 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[fish](https://github.com/fish-shell/fish-shell)|Smart command line shell|
 |[tmux](https://github.com/tmux/tmux)|Terminal multiplexer|
 |[zellij](https://github.com/zellij-org/zellij)|Terminal multiplexer|
+|[zj-herdr](https://github.com/dynamotn/zj-herdr)|Agent runtime for Zellij, with hook-free agent state, a socket API and a picker of every agent|
 |[grc](https://github.com/garabik/grc)|Colorise for some GNU/Linux commands|
 |[tree-sitter](https://github.com/tree-sitter/tree-sitter)|Parser generator tool for syntax|
 |[w3m](https://github.com/acg/w3m)|Text-based web browser|

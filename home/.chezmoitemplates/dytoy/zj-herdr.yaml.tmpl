@@ -1,0 +1,28 @@
+{{- /* doc
+name: zj-herdr
+description: Agent runtime for Zellij, with hook-free agent state, a socket API and a picker of every agent
+category: Everyday terminal applications
+subcategory: Core
+order: 65
+*/ -}}
+{{- /* Agent runtime behind the zellij zj_herdr plugin: hook-free agent state,
+       socket API and the daemon the plugin starts. */ -}}
+{{- if eq .terminalMultiplexer "Z" }}
+name: zj-herdr
+method: binary
+github:
+  repo: dynamotn/zj-herdr
+  {{- $os := "unknown-linux-musl" }}
+  {{- if eq .chezmoi.os "darwin" }}
+  {{-   $os = "apple-darwin" }}
+  {{- end }}
+  {{- $arch := "" }}
+  {{- if eq .chezmoi.arch "amd64" }}
+  {{-   $arch = "x86_64" }}
+  {{- else if eq .chezmoi.arch "arm64" }}
+  {{-   $arch = "aarch64" }}
+  {{- end }}
+  release_asset: zj-herdr-{{ $arch }}-{{ $os }}.tar.gz
+archive:
+  - path: zj-herdr
+{{- end }}
