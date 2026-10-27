@@ -205,6 +205,10 @@ global:
     profile: lean
     # A zellij pane per started worker (its log) and per review (hunk).
     panes: auto
+    # Through the dybrain MCP server, when one is configured: a failed review
+    # becomes a fleeting note (a lesson to promote at the weekly review), a
+    # merge a line in the daily note.
+    dybrain: true
     fences:
       - ":(glob).github/**"
       - ":(glob)**/.chezmoiscripts/**"

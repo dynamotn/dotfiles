@@ -380,6 +380,7 @@ global:
     timeout: 600
     require_review: false
     panes: "off"
+    dybrain: false
     fences: [":(glob)secrets/**"]
     hooks: {on_status: "true"}
 YAML
