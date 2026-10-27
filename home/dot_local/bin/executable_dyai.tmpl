@@ -128,7 +128,8 @@ function _domains {
 #######################################
 # dyshellint disable=SC2154 QUIET is assigned by dybatpho::opts from _spec_status
 function _status {
-  dyai_status::main "${QUIET}"
+  # Drift is an answer, not a crash: exit 1 without the error trap's stack trace.
+  dyai_status::main "${QUIET}" || exit 1
 }
 
 #######################################

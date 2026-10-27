@@ -59,6 +59,17 @@ EOF
   [[ "$(jq -r '.mcpServers.laya.command' "${f}")" == "${LAYA}" ]]
 }
 
+@test "agy: laya merged into an empty ~/.gemini/config/mcp_config.json" {
+  _stub_agent agy
+  _write_config
+  dybatpho::ensure_dir "${HOME}/.gemini/config" > /dev/null
+  : > "${HOME}/.gemini/config/mcp_config.json"
+  run bash "${HOOK}"
+  assert_success
+  local f="${HOME}/.gemini/config/mcp_config.json"
+  [[ "$(jq -r '.mcpServers.laya.command' "${f}")" == "${LAYA}" ]]
+}
+
 @test "copilot: laya merged with type=local and tools=[*]" {
   _stub_agent copilot
   _write_config

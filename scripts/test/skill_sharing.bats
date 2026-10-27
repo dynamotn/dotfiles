@@ -29,6 +29,8 @@ setup() {
     grep -q "\`${tool}\`" "${skill}" || fail "${tool} missing"
     grep -q "\"${tool}\"" "${DOTFILES_DIR}/scripts/lib/dyai_mcp.sh" || fail "${tool} is not a dyai mcp tool"
   done
+  # A `!` command that is not allowlisted fails the whole slash command.
+  ! grep -q '!`' "${skill}" || fail "the dyai skill injects a shell command"
 }
 
 @test "hunk's bundled review skill reaches every agent through ~/.agents" {
