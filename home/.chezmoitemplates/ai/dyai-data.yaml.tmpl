@@ -126,6 +126,10 @@ policy:
       - "Bash(chezmoi apply:*)"
       - "Bash(chezmoi destroy:*)"
       - "Bash(chezmoi forget:*)"
+      # An agent driving a crew asks before it merges or drops a task, even
+      # once the dyai MCP server is allowed as a whole.
+      - "mcp__dyai__crew_merge"
+      - "mcp__dyai__crew_drop"
     deny:
       - "Read(**/secrets/data/**)"
       - "Edit(**/secrets/data/**)"

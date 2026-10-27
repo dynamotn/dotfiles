@@ -194,7 +194,9 @@ global:
     # model: per-agent model string. Set opencode's when its default provider
     # has no key, and copilot's to a non-Anthropic model so a copilot review
     # of a claude task is a real second provider.
-    model: {}
+    # copilot's default model is Claude: an OpenAI one keeps its review of a
+    # claude task a second provider (gpt-6-luna is the lighter option).
+    model: {copilot: gpt-6-sol}
     timeout: 1800
     cooldown: 900
     require_review: true

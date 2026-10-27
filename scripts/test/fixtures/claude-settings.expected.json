@@ -175,7 +175,9 @@
       "Bash(paru *)",
       "Bash(chezmoi apply:*)",
       "Bash(chezmoi destroy:*)",
-      "Bash(chezmoi forget:*)"
+      "Bash(chezmoi forget:*)",
+      "mcp__dyai__crew_merge",
+      "mcp__dyai__crew_drop"
     ],
     "defaultMode": "acceptEdits",
     "deny": [
