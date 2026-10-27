@@ -502,6 +502,31 @@ EOT
   assert_success
 }
 
+@test "markers out of order die and leave file untouched" {
+  _doc_fixture
+  local doc
+  doc="$(< "${DOC}")"
+  doc="${doc/<!-- dytoy:end -->/}"
+  printf '<!-- dytoy:end -->\n%s\n' "${doc}" > "${DOC}"
+  cp "${DOC}" "${BATS_TEST_TMPDIR}/before.md"
+  run dytoy_docs::update "${DOC}" "${GENERATED}"
+  assert_failure
+  assert_output --partial 'dytoy:end'
+  run cmp "${DOC}" "${BATS_TEST_TMPDIR}/before.md"
+  assert_success
+}
+
+@test "unreadable doc dies and leaves file untouched" {
+  _doc_fixture
+  cp "${DOC}" "${BATS_TEST_TMPDIR}/before.md"
+  chmod 000 "${DOC}"
+  run dytoy_docs::update "${DOC}" "${GENERATED}"
+  chmod 644 "${DOC}"
+  assert_failure
+  run cmp "${DOC}" "${BATS_TEST_TMPDIR}/before.md"
+  assert_success
+}
+
 @test "toc lists usage and rendered categories" {
   _doc_fixture
   run dytoy_docs::update "${DOC}" "${GENERATED}"
