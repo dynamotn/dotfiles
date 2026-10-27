@@ -209,6 +209,11 @@ global:
       - ":(glob)secrets/**"
       - ":(glob)**/*.age"
       - ":(glob)**/.env*"
+      # The agent policy itself: a worker that loosens it loosens it for every agent.
+      - ":(glob)**/.claude/**"
+      - ":(glob)**/private_dot_claude/**"
+      - ":(glob)**/.chezmoitemplates/ai/**"
+      - ":(glob)**/dyai*.sh"
 agents:
   claude:
     marketplaces:

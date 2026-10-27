@@ -13,3 +13,4 @@ A case is a directory holding:
 | `seed/` | The files of the scratch repository the agent works in |
 | `setup.sh` | Optional; runs in that repository before its first commit, with `DYAI_EVAL_DIR` set to a scratch dir outside it |
 | `check.sh` | Runs in the task worktree afterwards; exit 0 is `PASS`. It gets `DYAI_TASK_ID`, `DYAI_OUT` and `DYAI_ERR` (the agent's output, with tool results in it), `DYAI_BASE` (the seed commit) and `DYAI_EVAL_DIR` |
+| `expect-status` | Optional; the task statuses that may go on to `check.sh`, one per line. Without it only `done` does; any other ends the case `FAIL` |

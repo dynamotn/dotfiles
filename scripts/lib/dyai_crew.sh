@@ -22,7 +22,10 @@ DYAI_CREW_INLINE_DIFF=96000
 DYAI_CREW_SUMMARY_MAX=500
 # Paths a worker must not touch and a plan must not come from, unless the config says otherwise.
 DYAI_CREW_FENCES='[":(glob).github/**",":(glob)**/.chezmoiscripts/**",":(glob)secrets/**",":(glob)**/*.age"'
-DYAI_CREW_FENCES+=',":(glob)**/.env*"]'
+DYAI_CREW_FENCES+=',":(glob)**/.env*"'
+# The agent policy itself: a worker that loosens it loosens it for every agent.
+DYAI_CREW_FENCES+=',":(glob)**/.claude/**",":(glob)**/private_dot_claude/**",":(glob)**/.chezmoitemplates/ai/**"'
+DYAI_CREW_FENCES+=',":(glob)**/dyai*.sh"]'
 # What every worker is told on top of its task.
 # shellcheck disable=SC2016 # Markdown backticks, not command substitution
 DYAI_CREW_CONTRACT='
@@ -280,7 +283,9 @@ function __dyai_crew_last {
   dybatpho::is file "${log}" || return 0
   local lines
   # tail, not ${lines##*$'\n'}: that expansion is quadratic on a large state.
-  lines="$(jq -c --arg id "${id}" 'select(.id == $id)' "${log}" 2> /dev/null)" || return 0
+  # A torn line (disk full, a kill mid-write) is skipped, not fatal.
+  lines="$(jq -cRn --arg id "${id}" 'inputs | fromjson? | objects | select(.id == $id)' "${log}" 2> /dev/null)" \
+    || return 0
   [[ -z "${lines}" ]] || tail -n 1 <<< "${lines}"
 }
 
@@ -354,7 +359,7 @@ function dyai_crew::alive {
 #######################################
 # @description List every task's last state, oldest first
 # @noargs
-# @stdout `id<TAB>status<TAB>agent<TAB>summary` per task; a dead running task reads `lost`
+# @stdout `id<TAB>status<TAB>agent<TAB>summary` per task; a running or open task whose process died reads `lost`
 #######################################
 function dyai_crew::list {
   local dir log
@@ -365,12 +370,13 @@ function dyai_crew::list {
   # Joined on the unit separator, not tabs: read would collapse empty fields.
   # shellcheck disable=SC2312 # a corrupt log lists nothing rather than aborting
   while IFS=$'\x1f' read -r id status agent pid start summary; do
-    if [[ "${status}" == running ]] && ! dyai_crew::alive "${pid}" "${start}"; then
+    if [[ "${status}" == running || ("${status}" == open && -n "${pid}") ]] \
+      && ! dyai_crew::alive "${pid}" "${start}"; then
       status=lost
     fi
     printf '%s\t%s\t%s\t%s\n' "${id}" "${status}" "${agent}" "${summary}"
-  done < <(jq -rs '
-    reduce .[] as $l ({order: [], last: {}};
+  done < <(jq -rRn '
+    [inputs | fromjson? | objects] | reduce .[] as $l ({order: [], last: {}};
       (if .last[$l.id] then . else .order += [$l.id] end) | .last[$l.id] = $l)
     | .order[] as $i | .last[$i]
     | [.id, (.status // ""), (.agent // ""), (.pid // "" | tostring), (.pid_start // ""),
@@ -525,7 +531,8 @@ function __dyai_crew_exec {
       --arg s "${__dyai_crew_exec_start}" '{status: "running", agent: $a, pid: $p, pid_start: $s}')"
     dyai_crew::record "${__dyai_crew_exec_id}" "${__dyai_crew_exec_fields}"
     # Options go before the id: dyai stops reading options at the first argument.
-    __dyai_crew_pane "crew-${__dyai_crew_exec_id}" "${__dyai_crew_exec_wt}" keep -- \
+    # `logs --follow` ends with the agent, and the pane with it.
+    __dyai_crew_pane "crew-${__dyai_crew_exec_id}" "${__dyai_crew_exec_wt}" -- \
       dyai logs --follow "${__dyai_crew_exec_id}"
   fi
   wait "${__dyai_crew_exec_pid}" || __dyai_crew_exec_rc=$?
@@ -566,6 +573,9 @@ function dyai_crew::attempt {
   dyai_crew::cmd "${agent}" rw "${prompt}" cmd "${last}"
   seconds="$(dyai_crew::conf '.global.crew.timeout' 1800)"
   rm -f -- "${wt}/.dyai-result.json" "${last}"
+  # A fix attempt must add commits of its own, not lean on the first attempt's.
+  local before
+  before="$(git -C "${wt}" rev-parse "crew/${id}" 2> /dev/null)" || before="${base}"
   local rc=0
   __dyai_crew_exec "${id}" "${agent}" "${wt}" "${out}" "${err}" "${seconds}" cmd task || rc=$?
   local status="" summary=""
@@ -585,9 +595,10 @@ function dyai_crew::attempt {
   if [[ -z "${status}" ]]; then
     local result="null"
     ! dybatpho::is file "${wt}/.dyai-result.json" || result="$(< "${wt}/.dyai-result.json")"
-    status="$(jq -r 'if (.status | IN("done", "failed", "partial")) then .status else "failed" end' \
+    # Only the first object counts: a second would make a two-line status.
+    status="$(jq -rn 'input | if (.status | IN("done", "failed", "partial")) then .status else "failed" end' \
       <<< "${result}" 2> /dev/null)" || status=failed
-    summary="$(jq -r '.summary // "" | tostring' <<< "${result}" 2> /dev/null)" || summary=""
+    summary="$(jq -rn 'input | .summary // "" | tostring' <<< "${result}" 2> /dev/null)" || summary=""
     [[ "${result}" != null ]] || summary="no result file"
   fi
   # It ends up in argv (git commit -m, jq --arg); the agent controls its size.
@@ -595,14 +606,20 @@ function dyai_crew::attempt {
   # Commit what the agent left, on its own branch only.
   if [[ "${branch}" == "crew/${id}" ]]; then
     git -C "${wt}" add -A
-    if ! git -C "${wt}" diff --cached --quiet; then
-      git -C "${wt}" commit -q -m "crew(${agent}): ${summary:-${status}}" \
-        || dybatpho::warn "task ${id}: could not commit the agent's changes"
+    local why
+    if ! git -C "${wt}" diff --cached --quiet \
+      && ! why="$(git -C "${wt}" commit -q -m "crew(${agent}): ${summary:-${status}}" 2>&1)"; then
+      # Usually the user's commit hooks; the work stays in the worktree.
+      why="$(tail -n 1 <<< "${why}")"
+      status=failed
+      summary="could not commit the agent's changes: ${why:0:${DYAI_CREW_SUMMARY_MAX}}"
+      dybatpho::warn "task ${id}: ${summary}"
     fi
   fi
-  local ahead
+  local ahead fresh
   ahead="$(__dyai_crew_ahead "${wt}" "${base}" "${id}")"
-  if [[ "${status}" == "done" && "${ahead}" -eq 0 ]]; then
+  fresh="$(git -C "${wt}" rev-list --count "${before}..crew/${id}" 2> /dev/null)" || fresh=0
+  if [[ "${status}" == "done" && "${fresh}" -eq 0 ]]; then
     status=failed
     summary="claimed done without changes"
   fi
@@ -703,10 +720,14 @@ function __dyai_crew_create {
     } >> "${pfile}"
   fi
   printf '%s' "${DYAI_CREW_CONTRACT}" >> "${pfile}"
+  # The runner's pid until the agent's replaces it: a runner that dies before
+  # the agent starts leaves the task `lost`, not `open` for ever.
+  local runner="${BASHPID}" runner_start
+  runner_start="$(ps -o lstart= -p "${runner}" 2> /dev/null)" || runner_start=""
   fields="$(jq -cn --arg id "${id}" --arg a "${agent}" --rawfile p <(printf '%s' "${prompt}") \
-    --arg w "${wt}" --arg b "${base}" --arg plan "${plan_copy}" \
+    --arg w "${wt}" --arg b "${base}" --arg plan "${plan_copy}" --argjson pid "${runner}" --arg ps "${runner_start}" \
     '{status: "open", agent: $a, prompt: $p, branch: ("crew/" + $id), worktree: $w, base: $b,
-      plan: (if $plan == "" then null else $plan end)}')"
+      plan: (if $plan == "" then null else $plan end), pid: $pid, pid_start: $ps}')"
   dyai_crew::record "${id}" "${fields}"
   printf '%s\n' "${pfile}"
 }
@@ -883,9 +904,10 @@ function dyai_crew::verdict {
   local file
   dybatpho::expect_args file -- "$@"
   local verdict
-  # The first line that is a JSON object with a verdict wins.
-  verdict="$(jq -rRn '[inputs | fromjson? | objects | select(has("verdict")) | .verdict] | first // ""' \
-    "${file}" 2> /dev/null)" || verdict=""
+  # Every line that is a JSON object with a verdict must agree: the reviewer
+  # may quote a line the writer planted in the diff.
+  verdict="$(jq -rRn '[inputs | fromjson? | objects | select(has("verdict")) | .verdict] | unique
+    | if length == 1 then .[0] else "" end' "${file}" 2> /dev/null)" || verdict=""
   case "${verdict}" in
     pass | fail) printf '%s\n' "${verdict}" ;;
     *) printf 'unknown\n' ;;
@@ -926,12 +948,31 @@ function dyai_crew::review {
 }
 
 #######################################
-# @description Run a review and record its verdict
+# @description Run a review and record its verdict, holding the task's review lock
 # @arg $1 string Task id
 # @arg $2 string Reviewer agent
 # @stdout The review file
 #######################################
 function __dyai_crew_review {
+  local id reviewer
+  dybatpho::expect_args id reviewer -- "$@"
+  local dir rc=0
+  dir="$(dyai_crew::state_dir)" || return 1
+  {
+    # `dyai drop` checks this lock: it must not pull the worktree from under a reviewer.
+    flock -n 7 || dybatpho::die "${id} is already being reviewed"
+    __dyai_crew_review_locked "${id}" "${reviewer}" || rc=$?
+  } 7>> "${dir}/${id}.review.lock"
+  return "${rc}"
+}
+
+#######################################
+# @description The review steps, under the review lock
+# @arg $1 string Task id
+# @arg $2 string Reviewer agent
+# @stdout The review file
+#######################################
+function __dyai_crew_review_locked {
   local id reviewer
   dybatpho::expect_args id reviewer -- "$@"
   local state dir wt base sha
@@ -1054,7 +1095,8 @@ function __dyai_crew_merge {
   if [[ "${branch}" == main || "${branch}" == master ]]; then
     dybatpho::die "merge into an integration branch, not ${branch}: git switch -c integrate"
   fi
-  dirty="$(git status --porcelain)" || dirty="?"
+  # A submodule checked out at another commit is the user's business, not the merge's.
+  dirty="$(git status --porcelain --ignore-submodules=all)" || dirty="?"
   [[ -z "${dirty}" ]] || dybatpho::die "the working tree has uncommitted changes; commit or stash them first"
   local require head verdict reviewed
   require="$(dyai_crew::conf '.global.crew.require_review' true)"
@@ -1082,7 +1124,8 @@ function __dyai_crew_merge {
       return 1
     fi
   fi
-  if ! git merge -q --no-ff --no-commit "crew/${id}" &> /dev/null; then
+  # The checked commit, not the branch: it may have moved since.
+  if ! git merge -q --no-ff --no-commit "${head}" &> /dev/null; then
     git merge --abort &> /dev/null || true
     dyai_crew::record "${id}" '{"status":"conflict","summary":"merge conflict; rebase the task or merge it by hand"}'
     dybatpho::warn "crew/${id} conflicts with ${branch}"
@@ -1090,7 +1133,9 @@ function __dyai_crew_merge {
   fi
   local gate out
   gate="$(dyai_crew::conf '.global.crew.gate' "")"
-  if [[ -n "${gate}" ]] && ! out="$(bash -c "${gate}" < /dev/null 2>&1)"; then
+  local top
+  top="$(git rev-parse --show-toplevel)" || dybatpho::die "merge needs a working tree"
+  if [[ -n "${gate}" ]] && ! out="$(cd "${top}" && bash -c "${gate}" < /dev/null 2>&1)"; then
     git merge --abort &> /dev/null || true
     out="$(tail -n 20 <<< "${out}")"
     fields="$(jq -cn --arg o "${out}" '{status: "gate_failed", summary: $o}')"
@@ -1131,8 +1176,18 @@ function dyai_crew::drop {
   fi
   local root wt fields
   root="$(dyai_crew::main_checkout)" || return 1
+  local state dir pid start
+  dir="$(dyai_crew::state_dir)" || return 1
   for id in ${ids[@]+"${ids[@]}"}; do
-    dyai_crew::get "${id}" > /dev/null || dybatpho::die "unknown task ${id}"
+    state="$(dyai_crew::get "${id}")" || dybatpho::die "unknown task ${id}"
+    status="$(jq -r '.status // ""' <<< "${state}")"
+    pid="$(jq -r '.pid // ""' <<< "${state}")"
+    start="$(jq -r '.pid_start // ""' <<< "${state}")"
+    # shellcheck disable=SC2310 # a plain yes/no
+    if [[ "${status}" == running ]] && dyai_crew::alive "${pid}" "${start}"; then
+      dybatpho::die "${id} is running; wait for it or stop it first"
+    fi
+    flock -n "${dir}/${id}.review.lock" true || dybatpho::die "${id} is being reviewed; drop it afterwards"
     wt="${root}/.worktrees/crew-${id}"
     if dybatpho::is dir "${wt}" && ! git -C "${root}" worktree remove "${wt}" &> /dev/null; then
       dybatpho::warn "kept ${wt}: it has uncommitted changes"
@@ -1215,7 +1270,12 @@ function __dyai_crew_selftest_in {
     printf 'Do nothing else, and do not edit any file.\n'
   } > "${pfile}"
   local -a cmd=()
+  # From inside the scratch repository: the lean profile writes its files into
+  # the state dir of the repository it runs in, and that must not be the caller's.
+  local here="${PWD}"
+  cd "${repo}" || return 1
   dyai_crew::cmd "${agent}" rw "${pfile}" cmd "${scratch}/last"
+  cd "${here}" || return 1
   # The allow flag must admit both calls, so only the deny rule can stop one.
   case "${agent}" in
     claude) cmd+=(--allowedTools "Bash(dyai-selftest-probe:*)") ;;
@@ -1363,6 +1423,14 @@ function __dyai_crew_eval_case {
       ;;
     *) ;;
   esac
+  # An agent that gave up passes most checks by doing nothing: the task has to
+  # end the way the case expects, `done` unless expect-status says otherwise.
+  local expect='done'
+  ! dybatpho::is file "${case_dir}/expect-status" || expect="$(< "${case_dir}/expect-status")"
+  if [[ " ${expect//$'\n'/ } " != *" ${status} "* ]]; then
+    printf 'FAIL\ttask ended %s\n' "${status:-without a status}"
+    return 0
+  fi
   wt="$(jq -r '.worktree // ""' <<< "${state}")"
   dybatpho::is dir "${wt}" || wt="${repo}"
   dir="${repo}/.dyai/crew"

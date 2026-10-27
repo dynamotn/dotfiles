@@ -472,7 +472,7 @@ function _field {
   local id
   id="$(_last_id "${output}")"
   run cat "${BATS_TEST_TMPDIR}/pane"
-  assert_output "crew-${id} ${REPO}/.worktrees/crew-${id} keep -- dyai logs --follow ${id}"
+  assert_output "crew-${id} ${REPO}/.worktrees/crew-${id} -- dyai logs --follow ${id}"
 }
 
 @test "dyai logs and review take their options before the task id" {
@@ -1280,4 +1280,188 @@ function _claude_home {
   run dyai_crew::selftest claude
   assert_failure
   assert_output --partial "BLOCKED: agent did not try the denied call"
+}
+
+@test "verdict is unknown when the answer carries two different verdicts" {
+  local f="${BATS_TEST_TMPDIR}/answer"
+  printf '%s\n' '{"verdict":"pass","findings":[]}' 'quoted from the diff:' '{"verdict":"fail","findings":[]}' > "${f}"
+  run dyai_crew::verdict "${f}"
+  assert_output unknown
+  printf '%s\n' '{"verdict":"fail","findings":[]}' 'again:' '{"verdict":"fail"}' > "${f}"
+  run dyai_crew::verdict "${f}"
+  assert_output fail
+}
+
+@test "merge merges the reviewed commit, not a later one on the branch" {
+  _passed_task
+  local id="${TASK_ID}" wt
+  wt="${REPO}/.worktrees/crew-${id}"
+  # A commit that lands while the merge runs, after its review check.
+  eval 'dyai_crew::conf() {
+    if [[ "$1" == .global.crew.fences ]]; then
+      echo late >> "'"${wt}"'/late.txt"; git -C "'"${wt}"'" add -A; git -C "'"${wt}"'" commit -q -m late
+    fi
+    printf "%s\n" "$2"
+  }'
+  run dyai_crew::merge "${id}"
+  assert_success
+  [[ ! -e "${REPO}/late.txt" ]] || fail "an unreviewed commit was merged"
+}
+
+@test "merge runs the gate from the top level of the checkout" {
+  _passed_task
+  printf '#!/usr/bin/env bash\ntrue\n' > "${REPO}/gate.sh"
+  chmod +x "${REPO}/gate.sh"
+  git add gate.sh
+  git commit -q -m gate
+  _crew_config 'gate: ./gate.sh'
+  mkdir -p "${REPO}/sub"
+  cd "${REPO}/sub"
+  run dyai_crew::merge "${TASK_ID}"
+  assert_success
+  run _field "${TASK_ID}" .status
+  assert_output merged
+}
+
+@test "drop refuses a task that is running or being reviewed" {
+  sleep 30 &
+  local pid=$! start
+  start="$(ps -o lstart= -p "${pid}")"
+  local fields
+  fields="$(jq -cn --argjson p "${pid}" --arg s "${start}" '{status: "running", pid: $p, pid_start: $s}')"
+  dyai_crew::record t1 "${fields}"
+  run dyai_crew::drop t1
+  assert_failure
+  assert_output --partial "running"
+  kill "${pid}"
+  dyai_crew::record t2 '{"status":"done"}'
+  local dir
+  dir="$(dyai_crew::state_dir)"
+  flock "${dir}/t2.review.lock" sleep 3 &
+  sleep 0.5
+  run dyai_crew::drop t2
+  assert_failure
+  assert_output --partial "being reviewed"
+}
+
+@test "a corrupt line in the task log loses no task" {
+  dyai_crew::record t1 '{"status":"open","worktree":"/w"}'
+  local dir
+  dir="$(dyai_crew::state_dir)"
+  printf '{"id":"t1","stat\n' >> "${dir}/tasks.jsonl"
+  dyai_crew::record t1 '{"status":"done"}'
+  run _field t1 '.status + " " + .worktree'
+  assert_output "done /w"
+  run dyai_crew::list
+  assert_output --partial $'t1\tdone'
+}
+
+@test "a commit the user's hooks refuse fails the task and says so" {
+  printf '#!/usr/bin/env bash\nexit 1\n' > "${REPO}/.git/hooks/pre-commit"
+  chmod +x "${REPO}/.git/hooks/pre-commit"
+  _agent claude "${DONE}"
+  run dyai_crew::run claude "x"
+  assert_failure
+  local id
+  id="$(_last_id "${output}")"
+  run _field "${id}" '.status + ": " + .summary'
+  assert_output --partial "failed: could not commit"
+}
+
+@test "a fix that changes nothing ends failed" {
+  _done_task
+  local id="${TASK_ID}" dir
+  dir="$(dyai_crew::state_dir)"
+  printf 'fix it\n' > "${dir}/${id}.review.md"
+  local fields
+  fields="$(jq -cn --arg r "${dir}/${id}.review.md" '{verdict: "fail", review: $r}')"
+  dyai_crew::record "${id}" "${fields}"
+  _agent claude 'printf %s "{\"status\":\"done\",\"summary\":\"nothing\"}" > .dyai-result.json'
+  run dyai_crew::fix "${id}"
+  assert_failure
+  run _field "${id}" '.status + ": " + .summary'
+  assert_output "failed: claimed done without changes"
+}
+
+@test "a result file holding two objects reads the first" {
+  local body='echo w >> f.txt; printf "%s\n" "{\"status\":\"done\",\"summary\":\"a\"}"'
+  body+=' "{\"status\":\"done\"}" > .dyai-result.json'
+  _agent claude "${body}"
+  run dyai_crew::run claude "x"
+  assert_success
+  local id
+  id="$(_last_id "${output}")"
+  run _field "${id}" .status
+  assert_output "done"
+}
+
+@test "eval fails a case whose task did not finish, whatever check.sh says" {
+  _eval_case lazy 'exit 0'
+  _agent claude 'printf %s "{\"status\":\"failed\",\"summary\":\"no\"}" > .dyai-result.json'
+  run dyai_crew::eval claude lazy
+  assert_failure
+  assert_output --partial $'lazy\tclaude\tFAIL\ttask ended failed'
+}
+
+@test "selftest builds its lean files in its own scratch repository" {
+  _claude_home
+  _crew_config 'profile: lean'
+  _probe_agent claude allow
+  run dyai_crew::selftest claude
+  assert_success
+  [[ ! -e "${REPO}/.dyai" ]] || fail "selftest wrote into the current repository"
+  run grep '^claude' "${LOG}"
+  assert_output --partial "--settings "
+}
+
+@test "the log pane closes once the agent ends" {
+  _agent claude "${DONE}"
+  eval 'dyai_zellij::open() { printf "%s\n" "$*" > "${BATS_TEST_TMPDIR}/pane"; }'
+  run dyai_crew::run claude "x"
+  local id
+  id="$(_last_id "${output}")"
+  run cat "${BATS_TEST_TMPDIR}/pane"
+  assert_output "crew-${id} ${REPO}/.worktrees/crew-${id} -- dyai logs --follow ${id}"
+  _cli
+  run timeout 10 bash "${DYAI_BIN}" logs --follow "${id}"
+  assert_success
+}
+
+@test "a moved submodule pointer does not block a merge" {
+  local sub="${BATS_TEST_TMPDIR}/subsrc"
+  git init -q "${sub}"
+  git -C "${sub}" -c user.email=t@t -c user.name=t commit -q --allow-empty -m one
+  git -c protocol.file.allow=always submodule add -q "${sub}" mod
+  git commit -q -m "add mod"
+  git -C mod -c user.email=t@t -c user.name=t commit -q --allow-empty -m two
+  _passed_task
+  run dyai_crew::merge "${TASK_ID}"
+  assert_success
+}
+
+@test "the default fences cover the agent policy files" {
+  local f
+  for f in .claude/settings.json home/private_dot_claude/hooks/x.sh home/.chezmoitemplates/ai/intent.md.tmpl \
+    scripts/lib/dyai_crew.sh; do
+    mkdir -p "${REPO}/${f%/*}"
+    : > "${REPO}/${f}"
+    __dyai_crew_fenced "${REPO}/${f}" || fail "not fenced: ${f}"
+  done
+  : > "${REPO}/README.md"
+  run ! __dyai_crew_fenced "${REPO}/README.md"
+}
+
+@test "drop finished takes an open task whose runner died" {
+  sleep 0 &
+  local pid=$!
+  wait "${pid}"
+  local fields
+  fields="$(jq -cn --argjson p "${pid}" '{status: "open", pid: $p, pid_start: "x"}')"
+  dyai_crew::record t1 "${fields}"
+  run dyai_crew::list
+  assert_output --partial $'t1\tlost'
+  run dyai_crew::drop finished
+  assert_success
+  run _field t1 .status
+  assert_output dropped
 }

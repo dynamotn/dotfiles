@@ -365,7 +365,7 @@ skills, MCP servers and policy `dyai install` gave it. The design is in
 |---------|--------------|
 | `dyai run [--agent A\|auto] [--plan FILE] [--detach] PROMPT` | Create `.worktrees/crew-<id>` on branch `crew/<id>` from `HEAD`, run the agent there, commit what it left. `auto` walks `global.crew.fallback`. `PROMPT` may be `-` (stdin). Prints the task id. Ctrl-C stops the agent too and records the task `interrupted`. |
 | `dyai tasks` | One line per task: `id`, status, agent, summary. A dead `running` task reads `lost`. |
-| `dyai logs [--follow] [--err] ID` | The agent's stdout (or stderr). Options always come before the id or the prompt: parsing stops at the first argument. |
+| `dyai logs [--follow] [--err] ID` | The agent's stdout (or stderr). `--follow` follows a running agent and stops when it ends. Options always come before the id or the prompt: parsing stops at the first argument. |
 | `dyai review [--by A] [--detach] ID` | A read-only review by another agent; records `pass`, `fail` or `unknown`. |
 | `dyai fix [--detach] ID` | After a `fail`: the writer again, in the same worktree, with the review. Voids the verdict. |
 | `dyai merge ID` | Merge a reviewed task into the current branch (see below). |

@@ -358,3 +358,15 @@ function _routed {
   grep -q 'route-agent.sh record' "${tmpl}"
   grep -q 'mcp__laya__laya_route' "${tmpl}"
 }
+
+@test "route gate allows a subagent whose definition pins a model" {
+  unset DYAI_AGENT_ROUTING DYAI_CREW
+  mkdir -p "${WORK}/claude/agents"
+  printf -- '---\nname: pinned\nmodel: haiku\n---\nbody\n' > "${WORK}/claude/agents/pinned.md"
+  printf -- '---\nname: loose\nmodel: inherit\n---\nbody\n' > "${WORK}/claude/agents/loose.md"
+  CLAUDE_CONFIG_DIR="${WORK}/claude" _gate '{"subagent_type":"pinned","description":"x"}'
+  assert_output ""
+  CLAUDE_CONFIG_DIR="${WORK}/claude" _gate '{"subagent_type":"loose","description":"x"}'
+  run jq -r .hookSpecificOutput.permissionDecision <<< "${output}"
+  assert_output deny
+}
