@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=../schemas/ontology.schema.yaml
+# The domains of this repository and the meaning of its own words. dyai crew
+# hands the domains and every term a task or a diff uses to the worker and
+# the reviewer (docs/dyai.md#crew).
+domains:
+  - id: chezmoi
+    description: The chezmoi source of $HOME and /, its templates, partials and apply hooks.
+    paths: ["home/**", "root/**", "cascadeur/**"]
+  - id: secrets
+    description: Age-encrypted files and the live-credential submodule; never read, only their shape.
+    paths: ["secrets/**", "**/*.age", "**/encrypted_*"]
+  - id: policy
+    description: The rules, hooks and permissions every AI agent runs under.
+    paths: ["home/private_dot_claude/**", "home/.chezmoitemplates/ai/**", "home/dot_agents/**"]
+  - id: dyai
+    description: The shared AI-agent setup (registry, presets, install) and the crew that runs agents headless.
+    paths: ["scripts/lib/dyai*.sh", "scripts/lib/dyai*.lua", "home/private_dot_config/dyai/**", "schemas/dyai.schema.yaml"]
+  - id: dytoy
+    description: The tool installer, its per-tool definitions and the generated tool docs.
+    paths: ["home/.chezmoitemplates/dytoy/**", "scripts/lib/dytoy*.sh", "scripts/dytoy*.sh", "schemas/dytoy*.yaml"]
+  - id: wm
+    description: Window manager, workspace, monitor and key binding rules, generated from one source.
+    paths: ["home/.chezmoitemplates/wm/**"]
+  - id: shell-lib
+    description: The bash libraries built on dybatpho and their bats tests.
+    paths: ["scripts/lib/*.sh", "scripts/test/**", "scripts/*.sh"]
+  - id: docs
+    description: Guides, command and key binding references.
+    paths: ["docs/**", "*.md"]
+
+terms:
+  - term: source
+    aliases: [source state, source file]
+    domain: chezmoi
+    means: A file under home/ (or root/) that chezmoi renders into the target; the only place to edit.
+    not: The applied file under $HOME, which may be a symlink back into this tree.
+  - term: target
+    domain: chezmoi
+    means: The path under $HOME or / that chezmoi writes from a source file.
+  - term: partial
+    aliases: [chezmoitemplates]
+    domain: chezmoi
+    means: A shared template under home/.chezmoitemplates/, included by name instead of copied.
+  - term: encrypted_
+    domain: secrets
+    means: A source name prefix for a file stored age-encrypted; its content is off limits.
+  - term: dybatpho
+    domain: shell-lib
+    means: The bash helper library (submodule scripts/lib/dybatpho) every script builds on.
+  - term: preset
+    domain: dyai
+    means: A named bundle of skills, MCP servers and plugins a project opts into with `dyai use`.
+  - term: registry
+    domain: dyai
+    means: The dyai config listing every skill, subagent, MCP server and preset an agent may get.
+  - term: tier
+    aliases: [model tier]
+    domain: dyai
+    means: An abstract model level (fast, standard, strong, inherit) that each agent translates to its own model.
+    not: A provider model name; shared config never names one.
+  - term: crew task
+    aliases: [task]
+    domain: dyai
+    means: One `dyai run`, worked by an agent CLI on branch crew/<id> in .worktrees/crew-<id>.
+  - term: verdict
+    domain: dyai
+    means: A reviewer's pass, fail or unknown on a crew task, valid only for the commit it reviewed.
+  - term: fence
+    aliases: [fences, fenced]
+    domain: dyai
+    means: A pathspec in global.crew.fences that a merge never takes automatically (needs_human).
+  - term: lean profile
+    aliases: [lean]
+    domain: dyai
+    means: A crew worker that loads the policy and agent rules but not the plugins and MCP servers.
+  - term: LOCAL EDITS
+    domain: dyai
+    means: An installed skill or subagent changed since dyai installed it, which dyai then keeps.
+  - term: dytoy definition
+    domain: dytoy
+    means: A YAML file under home/.chezmoitemplates/dytoy/ naming how one tool installs.

@@ -399,6 +399,25 @@ YAML
   assert_failure
 }
 
+@test "the repository ontology matches its schema and names only its own domains" {
+  _require_ys
+  _require_yq
+  local onto="${DOTFILES_DIR}/docs/ontology.yaml"
+  "${YS}" -f "${DOTFILES_DIR}/schemas/ontology.schema.yaml" "${onto}" > "${BATS_TEST_TMPDIR}/err" 2>&1 \
+    || fail "ontology rejected: $(< "${BATS_TEST_TMPDIR}/err")"
+  # shellcheck disable=SC2016 # a yq expression
+  run yq -r '[.domains[].id] as $d | .terms[] | select(.domain and ([.domain] - $d | length > 0)) | .term' "${onto}"
+  assert_output ""
+}
+
+@test "the ontology schema rejects a term without a meaning" {
+  _require_ys
+  local bad="${BATS_TEST_TMPDIR}/bad.yaml"
+  printf 'domains: [{id: a, description: x}]\nterms: [{term: t}]\n' > "${bad}"
+  run "${YS}" -f "${DOTFILES_DIR}/schemas/ontology.schema.yaml" "${bad}"
+  assert_failure
+}
+
 @test "schema rejects an unknown crew hook" {
   _require_ys
   local bad="${BATS_TEST_TMPDIR}/bad.yaml"
