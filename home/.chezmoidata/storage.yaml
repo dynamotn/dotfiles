@@ -1,0 +1,6 @@
+# Machines whose system lives on btrfs (root/etc/fstab.tmpl), so they take
+# btrbk snapshots and a monthly scrub. Read by both the home and the root
+# source (root links here).
+btrfsMachines:
+  - l30n4rd0d4v1nc1
+  - b0n9u4

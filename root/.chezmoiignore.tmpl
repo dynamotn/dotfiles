@@ -76,6 +76,16 @@ etc/selinux
 etc/sandbox.d
 var/lib/portage
 {{- end }}
+{{- /* Snapshots and scrub, for machines on btrfs (dytoy/btrbk.yaml.tmpl) */}}
+{{- if not (has .code .btrfsMachines) }}
+etc/btrbk
+etc/cron.daily/btrbk
+etc/cron.monthly/btrfs-scrub
+{{- end }}
+{{- /* smartd watches real disks only (dytoy/smartmontools.yaml.tmpl) */}}
+{{- if eq .kind "container" "vm" }}
+etc/smartd.conf
+{{- end }}
 {{- /* Disk build dir of env/heavy.conf, beside the tmpfs of fstab */}}
 {{- if ne .code "l30n4rd0d4v1nc1" }}
 var/tmp/notmpfs

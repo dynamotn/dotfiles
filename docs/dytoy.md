@@ -84,9 +84,14 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[tlp](https://linrunner.de/tlp)|Automatic CPU speed & power optimizer for laptop|
 |[grub](https://www.gnu.org/software/grub/)|Bootloader for system|
 |[flatpak](https://github.com/flatpak/flatpak)|Linux application sandboxing and distribution framework|
+|[ananicy-cpp](https://gitlab.com/ananicy-cpp/ananicy-cpp)|Lower the CPU and I/O priority of builds and background jobs|
+|[btrbk](https://digint.ch/btrbk/)|Daily read-only btrfs snapshots|
 |[earlyoom](https://github.com/rfjakob/earlyoom)|Kill the biggest process before the system runs out of memory|
 |`file_system`|Btrfs and NTFS file system tools|
+|[lm_sensors](https://github.com/lm-sensors/lm-sensors)|Read CPU, GPU and board temperatures and fans|
+|[smartmontools](https://www.smartmontools.org)|Disk health monitoring and self-tests|
 |`system_zzz`|Distribution-specific system tools, such as the Portage helpers on Gentoo|
+|[termux-boot](https://github.com/termux/termux-boot)|Start the Termux services when Android boots|
 |`zram`|Compressed swap in RAM|
 
 ## Everyday terminal applications

@@ -1,0 +1,19 @@
+{{- /* doc
+name: ananicy-cpp
+url: "https://gitlab.com/ananicy-cpp/ananicy-cpp"
+description: Lower the CPU and I/O priority of builds and background jobs
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* Keeps the desktop responsive while a compiler or indexer runs, with
+       the CachyOS rules fetched by root/.chezmoiexternal.yaml.tmpl (the
+       package ships none). Arch only: Gentoo has it only in overlays, and
+       the Gentoo PC already favours interactive tasks with scx_cosmos. */ -}}
+{{- if and (eq .osid "linux-arch") (eq .kind "pc" "laptop" "workstation") }}
+name: ananicy-cpp
+method: os
+arch:
+  packages:
+    - name: ananicy-cpp
+      service: ananicy-cpp
+{{- end }}

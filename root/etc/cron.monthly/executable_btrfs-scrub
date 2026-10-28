@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# @file btrfs-scrub
+# @brief Scrub every mounted btrfs filesystem once a month
+# @description Run by cron as root. A scrub reads every block and checks its
+# checksum, so silent corruption shows up while a snapshot or backup still
+# has a good copy. Runs in the idle I/O class to stay out of the way. Plain
+# bash: it runs from /etc, where the dybatpho of the dotfiles may not be
+# readable.
+set -euo pipefail
+
+# One mount point per filesystem: subvolumes of one disk share its UUID.
+mounts="$(findmnt --types btrfs --noheadings --output UUID,TARGET)"
+mounts="$(sort --unique --key=1,1 <<< "${mounts}")"
+while read -r _ target; do
+  /usr/bin/btrfs scrub start -B -c 3 "${target}"
+done <<< "${mounts}"

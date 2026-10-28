@@ -1,0 +1,21 @@
+{{- /* doc
+name: btrbk
+url: "https://digint.ch/btrbk/"
+description: Daily read-only btrfs snapshots
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* Snapshots the subvolumes of root/etc/btrbk/btrbk.conf.tmpl, run daily
+       by root/etc/cron.daily/btrbk, so needs no service. Only machines on
+       btrfs (.chezmoidata/storage.yaml). */ -}}
+{{- if has .code .btrfsMachines }}
+name: btrbk
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: app-backup/btrbk
+arch:
+  packages:
+    - name: btrbk
+{{- end }}

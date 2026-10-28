@@ -9,6 +9,19 @@ usr/share/grub/themes/catppuccin:
   include:
     - grub-0a37ab19f654e77129b409fed371891c01ffd0b9/src/catppuccin-macchiato-grub-theme/*
 {{-   end }}
+{{-   if and (eq .osid "linux-arch") (eq .kind "pc" "laptop" "workstation") }}
+etc/ananicy.d:
+  type: archive
+  # ananicy-cpp ships no rules (dytoy/ananicy.yaml.tmpl): CachyOS's, pinned.
+  url: https://github.com/CachyOS/ananicy-rules/archive/03ef03fbf7e834385377432ccecaedd32e3414bb.tar.gz
+  checksum:
+    sha256: "62bf51bd17c7f4d330f2c6fa7a5f8e1c4e120b8094af41e87d681be4903406fe"
+  stripComponents: 1
+  include:
+    - ananicy-rules-03ef03fbf7e834385377432ccecaedd32e3414bb/ananicy.conf
+    - ananicy-rules-03ef03fbf7e834385377432ccecaedd32e3414bb/00-*
+    - ananicy-rules-03ef03fbf7e834385377432ccecaedd32e3414bb/00-default/**
+{{-   end }}
 {{-   if eq .kind "laptop" }}
 etc/NetworkManager/dispatcher.d/90-open_captive_portal:
   type: file
