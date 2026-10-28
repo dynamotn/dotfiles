@@ -1,0 +1,5 @@
+description: com.apple.desktopservices
+data:
+  com.apple.desktopservices:
+    DSDontWriteNetworkStores: true
+    DSDontWriteUSBStores: true

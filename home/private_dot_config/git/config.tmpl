@@ -124,6 +124,11 @@
         excludesfile = ~/.config/git/ignore
         # Custom global attributes file
         attributesfile = ~/.config/git/attributes
+        {{- if eq .chezmoi.os "darwin" }}
+        # Built-in watcher daemon: `git status` stops scanning the whole tree.
+        # Git has no Linux backend for it.
+        fsmonitor = true
+        {{- end }}
 {{- /* A pager that is not installed breaks every paging command and `add -p` */}}
 {{- if lookPath "hunk" }}
         # Use hunk to review diff, it passes non-diff output through
@@ -187,6 +192,10 @@
         # Prune remote-tracking branches that no longer exist on the remote
         prune = true
         pruneTags = true
+        # Keep the commit-graph current, which speeds up log, merge-base, push
+        writeCommitGraph = true
+        # Fetch several remotes and submodules at once, one job per CPU
+        parallel = 0
 [push]
         # Only push current branch to same name branch
         default = current
