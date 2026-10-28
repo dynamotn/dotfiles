@@ -1,0 +1,21 @@
+#!{{ .bash }}
+# @file start-services
+# @brief Start the Termux services when Android boots
+# @description Run by the Termux:Boot app after boot: starts runsvdir, which
+# brings up every service enabled with `sv-enable` (sshd, crond), without
+# opening Termux first. Plain bash: nothing else of the dotfiles is needed.
+set -euo pipefail
+
+prefix="${PREFIX:-/data/data/com.termux/files/usr}"
+{{- if eq .kind "tablet" }}
+# The tablet serves SSH while its screen is off: keep Android from
+# suspending Termux, at some battery cost.
+termux-wake-lock
+{{- end }}
+start="${prefix}/etc/profile.d/start-services.sh"
+if [[ ! -r "${start}" ]]; then
+  echo "termux-services is not installed: ${start} is missing" >&2
+  exit 1
+fi
+# A child shell is enough: service-daemon detaches runsvdir on its own.
+sh "${start}"

@@ -1,0 +1,17 @@
+{{- /* doc
+name: termux-boot
+url: "https://github.com/termux/termux-boot"
+description: Start the Termux services when Android boots
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* An Android app, not a package: it runs ~/.termux/boot/start-services
+       (home/dot_termux/boot), so sshd and crond come back after a reboot.
+       Open the app once after installing, or Android never starts it. */ -}}
+{{- if eq .chezmoi.os "android" }}
+name: termux-boot
+method: os
+fdroid:
+  packages:
+    - name: com.termux.boot
+{{- end }}

@@ -1,0 +1,26 @@
+{{- /* doc
+name: lm_sensors
+url: "https://github.com/lm-sensors/lm-sensors"
+description: Read CPU, GPU and board temperatures and fans
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* `sensors` shows whether a slow machine is throttling. Current kernels
+       load the sensor drivers on their own, so no service. Only real
+       hardware: not a container nor a VM. */ -}}
+{{- if and (eq .chezmoi.os "linux") (not (eq .kind "container" "vm")) }}
+name: lm_sensors
+method: os
+gentoo:
+  packages:
+    - name: sys-apps/lm-sensors
+arch:
+  packages:
+    - name: lm_sensors
+ubuntu:
+  packages:
+    - name: lm-sensors
+alpine:
+  packages:
+    - name: lm-sensors
+{{- end }}

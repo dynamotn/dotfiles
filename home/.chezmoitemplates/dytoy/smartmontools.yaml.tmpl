@@ -1,0 +1,35 @@
+{{- /* doc
+name: smartmontools
+url: "https://www.smartmontools.org"
+description: Disk health monitoring and self-tests
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* smartd runs the self-tests of root/etc/smartd.conf and logs a failing
+       disk early; nvme-cli reads NVMe wear and error logs by hand. Only
+       machines with their own disks: not a container nor a VM. */ -}}
+{{- if and (eq .chezmoi.os "linux") (not (eq .kind "container" "vm")) }}
+name: smartmontools
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-apps/smartmontools
+      service: smartd
+    - name: sys-apps/nvme-cli
+arch:
+  packages:
+    - name: smartmontools
+      service: smartd
+    - name: nvme-cli
+ubuntu:
+  packages:
+    - name: smartmontools
+      service: smartmontools
+    - name: nvme-cli
+alpine:
+  packages:
+    - name: smartmontools
+      service: smartd
+    - name: nvme-cli
+{{- end }}

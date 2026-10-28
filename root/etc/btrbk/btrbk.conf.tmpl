@@ -1,0 +1,37 @@
+# Read-only snapshots of the system subvolumes, taken daily by
+# /etc/cron.daily/btrbk into the _snapshot subvolume of each filesystem,
+# which fstab mounts. A snapshot is no backup: it dies with the disk.
+timestamp_format        long
+snapshot_create         onchange
+snapshot_preserve_min   2d
+snapshot_preserve       14d 8w 6m
+{{- if eq .code "l30n4rd0d4v1nc1" }}
+
+# System partition
+subvolume /
+  snapshot_dir /snapshot/system
+  snapshot_name root
+subvolume /var
+  snapshot_dir /snapshot/system
+  snapshot_name var
+subvolume /boot
+  snapshot_dir /snapshot/system
+  snapshot_name boot
+
+# Data partition
+subvolume /home
+  snapshot_dir /snapshot/data
+  snapshot_name home
+{{- else if eq .code "b0n9u4" }}
+
+# One filesystem: /var/backup is its _snapshot subvolume.
+subvolume /
+  snapshot_dir /var/backup
+  snapshot_name root
+subvolume /var
+  snapshot_dir /var/backup
+  snapshot_name var
+subvolume /home
+  snapshot_dir /var/backup
+  snapshot_name home
+{{- end }}

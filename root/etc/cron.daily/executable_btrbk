@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# @file btrbk
+# @brief Take the daily btrfs snapshots
+# @description Run by cron as root. Creates the snapshots /etc/btrbk/btrbk.conf
+# lists and prunes the ones past its retention. Plain bash: it runs from
+# /etc, where the dybatpho of the dotfiles may not be readable.
+set -euo pipefail
+
+exec /usr/bin/btrbk -q run

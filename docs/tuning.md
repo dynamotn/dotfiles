@@ -106,6 +106,26 @@ hardware loads. The ebuild writes the installed list back as
 
 Check: `ulimit -n` in a new login shell.
 
+## Data safety and health
+
+- btrbk takes read-only snapshots of the system subvolumes every day
+  (`etc/cron.daily/btrbk`, `etc/btrbk/btrbk.conf.tmpl`), into the
+  `_snapshot` subvolume fstab mounts, and keeps 14 daily, 8 weekly and 6
+  monthly ones. Only on the machines of `.chezmoidata/storage.yaml`.
+- A monthly `btrfs scrub` of each btrfs filesystem, in the idle I/O class
+  (`etc/cron.monthly/btrfs-scrub`), finds silent corruption while a good
+  copy still exists.
+- smartd runs a short self-test nightly and a long one on Saturdays, and
+  logs a failing or hot disk (`etc/smartd.conf`); `nvme smart-log` reads
+  NVMe wear by hand. Not on VMs or containers.
+- `sensors` shows temperatures and fans, to spot throttling.
+- On Arch desktops and laptops, ananicy-cpp lowers the CPU and I/O priority
+  of builds and indexers, with the CachyOS rules pinned in
+  `.chezmoiexternal.yaml.tmpl`.
+
+Check: `btrbk list snapshots`, `btrfs scrub status /`, `smartctl -a
+/dev/nvme0`, `systemctl status ananicy-cpp`.
+
 ## Power and GPU
 
 - The office laptop boots with `amd_pstate=active` (`etc/default/grub.tmpl`),
@@ -133,5 +153,9 @@ Termux app itself is tuned, in `home/dot_termux/termux.properties.tmpl`.
 - Catppuccin colors land in `~/.termux/colors.properties`, the only path the
   app reads them from; the font in `~/.termux/font.ttf`.
 - `05-reload-termux` runs `termux-reload-settings` when either changes.
+- The Termux:Boot app (dytoy `termux-boot`) runs
+  `~/.termux/boot/start-services` at boot, so services enabled with
+  `sv-enable` (sshd, crond) come back without opening Termux; the tablet also
+  takes a wake lock. Open the app once after installing it.
 
 Check: open the drawer and compare its theme; `echo -e '\a'` stays silent.
