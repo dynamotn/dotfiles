@@ -260,7 +260,7 @@
         # SSH or HTTPS, GitLab or its GitHub mirror: whichever this network
         # allows, as dynet found on the last network change
         path = ~/.local/state/dynet/git.config
-{{- if eq .kind "mobile" "tablet" }}
+{{- if eq .osid "android" }}
 [safe]
         directory = /storage/emulated/0/Documents/DyBrain
 {{- end }}
