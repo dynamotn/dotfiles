@@ -1,0 +1,9 @@
+{{- /* Same machines as home/.chezmoitemplates/dytoy/earlyoom.yaml.tmpl, on
+       systemd. OpenRC reads etc/conf.d/earlyoom instead; both come from
+       .chezmoitemplates/earlyoom/args.tmpl. */ -}}
+{{- if and (eq .chezmoi.os "linux") (eq .initSystem "systemd") (ne .kind "container") -}}
+# Read by earlyoom.service as an EnvironmentFile. systemd splits
+# $EARLYOOM_ARGS on whitespace and does not strip inner quotes, so the
+# regexes stay bare. Source: root/.chezmoitemplates/earlyoom/args.tmpl.
+EARLYOOM_ARGS='{{ template "earlyoom/args.tmpl" (dict "quote" "") }}'
+{{ end -}}

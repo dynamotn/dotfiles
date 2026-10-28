@@ -1,0 +1,17 @@
+{{- /* The one list of earlyoom arguments, rendered for both init systems:
+       etc/default/earlyoom (systemd) and etc/conf.d/earlyoom (OpenRC).
+       The two read it differently, so the caller passes the quote that keeps
+       each regex one argument: systemd splits $EARLYOOM_ARGS on whitespace
+       and keeps quotes, so it gets none; OpenRC evals command_args, so it
+       gets single quotes around anything the shell would parse.
+
+       Act at 10% free RAM and swap (SIGTERM) and 5% (SIGKILL), before the
+       kernel thrashes on zram. Prefer the processes that piled up in past
+       freezes (dozens of parallel shellcheck runs from agent lint hooks,
+       hunk viewers), and spare the session, so one big lint dies instead of
+       the desktop. Names are /proc/<pid>/comm, at most 15 characters. */ -}}
+{{- $q := .quote -}}
+-m 10,5 -s 10,5 -r 3600
+{{- "" }} --prefer {{ $q }}^(shellcheck|shfmt|hunk)${{ $q }}
+{{- "" }} --avoid {{ $q }}^(init|systemd|openrc-init|sshd|dbus-daemon|dbus-broker|dbus-broker-lau|niri|Hyprland|Xwayland|greetd|kitty|zellij|pipewire|wireplumber)${{ $q }}
+{{- /* no trailing newline: the callers quote this */ -}}
