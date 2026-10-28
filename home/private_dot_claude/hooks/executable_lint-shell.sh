@@ -31,6 +31,23 @@ case "${file}" in
     ;;
 esac
 
+# One lint at a time across every agent session on the machine: a shellcheck
+# with external sources can take 700M, and dozens of parallel sessions each
+# linting at once drove this machine out of memory. A lint that cannot get
+# the lock in time is skipped, since a hook must never block the edit, but the
+# model is told so it does not read the silence as a clean lint.
+if command -v flock &> /dev/null; then
+  lock="${CLAUDE_LINT_SHELL_LOCK:-${XDG_RUNTIME_DIR:-/tmp}/claude-lint-shell.lock}"
+  # An unwritable lock path (no runtime dir in a container) must not fail the hook.
+  { exec 9>> "${lock}"; } 2> /dev/null || exit 0
+  if ! flock -w "${CLAUDE_LINT_SHELL_WAIT:-30}" 9; then
+    jq -cn --arg f "${file}" '{hookSpecificOutput: {hookEventName: "PostToolUse",
+      additionalContext: ("dyshellint skipped on \($f): another session holds the lint lock;"
+        + " run dyshellint on it before reporting done")}}'
+    exit 0
+  fi
+fi
+
 # Warnings count too: the machine rules say to fix whatever dyshellint reports.
 args=(-warnings-as-errors)
 name="$(basename -- "${file}")"

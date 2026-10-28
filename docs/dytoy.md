@@ -84,6 +84,7 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[tlp](https://linrunner.de/tlp)|Automatic CPU speed & power optimizer for laptop|
 |[grub](https://www.gnu.org/software/grub/)|Bootloader for system|
 |[flatpak](https://github.com/flatpak/flatpak)|Linux application sandboxing and distribution framework|
+|[earlyoom](https://github.com/rfjakob/earlyoom)|Kill the biggest process before the system runs out of memory|
 |`file_system`|Btrfs and NTFS file system tools|
 |`system_zzz`|Distribution-specific system tools, such as the Portage helpers on Gentoo|
 |`zram`|Compressed swap in RAM|

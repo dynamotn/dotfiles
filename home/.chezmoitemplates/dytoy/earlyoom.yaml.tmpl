@@ -1,0 +1,33 @@
+{{- /* doc
+name: earlyoom
+url: "https://github.com/rfjakob/earlyoom"
+description: Kill the biggest process before the system runs out of memory
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* The kernel OOM killer acts too late on a zram machine: it thrashes
+       first, and the desktop freezes until a hard reset. earlyoom kills one
+       process early, on systemd and OpenRC alike; its arguments live in
+       root/.chezmoitemplates/earlyoom/args.tmpl. Every Linux machine but a
+       container, which shares its host's memory. */ -}}
+{{- if and (eq .chezmoi.os "linux") (ne .kind "container") }}
+name: earlyoom
+method: os
+is_essential: true
+gentoo:
+  packages:
+    - name: sys-apps/earlyoom
+      service: earlyoom
+arch:
+  packages:
+    - name: earlyoom
+      service: earlyoom
+ubuntu:
+  packages:
+    - name: earlyoom
+      service: earlyoom
+alpine:
+  packages:
+    - name: earlyoom
+      service: earlyoom
+{{- end }}

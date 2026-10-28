@@ -33,8 +33,20 @@ Check: `findmnt -t btrfs -o TARGET,OPTIONS`, `cat /sys/block/*/queue/scheduler`.
   quarter of RAM with `zswap.max_pool_percent=25` in `etc/default/grub.tmpl`.
   zswap is built in, so the parameter can only go on the command line.
 - MGLRU on, transparent huge pages on `madvise` only (kernel config).
+- earlyoom kills one process at 10% free RAM and swap, before zram thrashing
+  freezes the desktop. It prefers `shellcheck`, `shfmt` and `hunk`, the
+  processes that piled up in past freezes, and avoids the compositor,
+  terminal and session daemons. The arguments live once in
+  `.chezmoitemplates/earlyoom/args.tmpl` and render to
+  `etc/default/earlyoom.tmpl` on systemd and `etc/conf.d/earlyoom.tmpl` on
+  OpenRC, each quoted the way that init system reads it
+  (`scripts/test/earlyoom_config.bats` checks both get the same argv).
+  dytoy installs and enables the service (`dytoy/earlyoom.yaml.tmpl`).
+  After `scz apply`, restart it: `systemctl restart earlyoom` or
+  `rc-service earlyoom restart`.
 
-Check: `grep -r . /sys/module/zswap/parameters/`.
+Check: `grep -r . /sys/module/zswap/parameters/`,
+`journalctl -u earlyoom` or `/var/log/messages` for its kills.
 
 ## CPU scheduling
 

@@ -1,0 +1,11 @@
+{{- /* Same machines as home/.chezmoitemplates/dytoy/earlyoom.yaml.tmpl, on
+       OpenRC. systemd reads etc/default/earlyoom instead; both come from
+       .chezmoitemplates/earlyoom/args.tmpl. Gentoo ships this path as a
+       symlink to /etc/default/earlyoom; a plain file replaces it, because
+       the two init systems need different quoting. */ -}}
+{{- if and (eq .chezmoi.os "linux") (eq .initSystem "openrc") (ne .kind "container") -}}
+# Read by /etc/init.d/earlyoom, which evals command_args="${EARLYOOM_ARGS}",
+# so each regex is single-quoted to stay one argument.
+# Source: root/.chezmoitemplates/earlyoom/args.tmpl.
+EARLYOOM_ARGS="{{ template "earlyoom/args.tmpl" (dict "quote" "'") }}"
+{{ end -}}
