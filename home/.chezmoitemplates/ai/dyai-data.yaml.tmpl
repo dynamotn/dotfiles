@@ -17,20 +17,14 @@ marketplaces:
     source: { source: github, repo: trailofbits/skills }
   thedotmack:
     source: { source: github, repo: thedotmack/claude-mem }
-  caveman:
-    source: { source: github, repo: JuliusBrussee/caveman }
   ponytail:
     source: { source: github, repo: DietrichGebert/ponytail }
-  context-mode:
-    source: { source: github, repo: mksglu/context-mode }
   understand-anything:
     source: { source: github, repo: Egonex-AI/Understand-Anything }
 plugins:
   - i-have-adhd@i-have-adhd
   - claude-mem@thedotmack
-  - caveman@caveman
   - ponytail@ponytail
-  - context-mode@context-mode
   - dyai-lsp@dyai-lsp
   - superpowers@claude-plugins-official
   - telegram@claude-plugins-official
@@ -87,6 +81,10 @@ disabled_plugins:
   - typescript-lsp@claude-plugins-official
   - gopls-lsp@claude-plugins-official
   - rust-analyzer-lsp@claude-plugins-official
+# Dropped for the context they injected every session and prompt: caveman
+# (overlapped ponytail on brevity), context-mode (routing block, MCP flaky).
+  - caveman@caveman
+  - context-mode@context-mode
 
 policy:
   # Harness-enforced versions of the credentials and destructive-commands rules

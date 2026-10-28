@@ -132,16 +132,15 @@ function _render_config {
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
   yq -e '.optional_plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
   # agent-mode plugins, each its own single-plugin marketplace
-  yq -e '.plugins[] | select(. == "caveman@caveman")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "ponytail@ponytail")' "${out}" > /dev/null
-  yq -e '.plugins[] | select(. == "context-mode@context-mode")' "${out}" > /dev/null
   # dyai-lsp replaces the official LSP plugins (registered at runtime, not here)
   yq -e '.plugins[] | select(. == "dyai-lsp@dyai-lsp")' "${out}" > /dev/null
   run yq -e '.plugins[] | select(. == "pyright-lsp@claude-plugins-official")' "${out}"
   assert_failure
   # ...and still-installed copies of them are switched off, never enabled
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
-  [[ "$(yq '.disabled_plugins | length' "${out}")" == "5" ]]
+  [[ "$(yq '.disabled_plugins | length' "${out}")" == "7" ]]
+  yq -e '.disabled_plugins[] | select(. == "caveman@caveman")' "${out}" > /dev/null
   yq -e '.disabled_plugins[] | select(. == "rust-analyzer-lsp@claude-plugins-official")' "${out}" > /dev/null
   # shellcheck disable=SC2016,SC2312 # $p is a yq variable; a bad read fails the comparison
   [[ "$(yq '[.disabled_plugins[] as $p | .plugins[] | select(. == $p)] | length' "${out}")" == "0" ]]
