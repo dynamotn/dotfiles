@@ -1,0 +1,25 @@
+{{- /* doc
+name: restic-system
+label: restic
+url: "https://restic.net"
+description: Daily off-machine backup of /home and /etc
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* The backup job root/etc/cron.daily/restic-backup runs as root, so it
+       needs the distribution's restic in /usr/bin: running the user-writable
+       copy of dytoy/restic.yaml.tmpl as root would hand root to anything
+       that can write ~/.local/bin. Desktops and laptops only. */ -}}
+{{- if and (eq .chezmoi.os "linux") (eq .kind "pc" "laptop" "workstation") }}
+name: restic-system
+method: os
+gentoo:
+  packages:
+    - name: app-backup/restic
+arch:
+  packages:
+    - name: restic
+ubuntu:
+  packages:
+    - name: restic
+{{- end }}

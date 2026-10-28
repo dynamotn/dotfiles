@@ -85,6 +85,12 @@ etc/cron.monthly/btrfs-scrub
 {{- /* smartd watches real disks only (dytoy/smartmontools.yaml.tmpl) */}}
 {{- if eq .kind "container" "vm" }}
 etc/smartd.conf
+usr/local/bin/notify-desktop
+{{- end }}
+{{- /* Off-machine backup of desktops and laptops (dytoy/restic_system.yaml.tmpl) */}}
+{{- if not (eq .kind "pc" "laptop" "workstation") }}
+etc/restic
+etc/cron.daily/restic-backup
 {{- end }}
 {{- /* Disk build dir of env/heavy.conf, beside the tmpfs of fstab */}}
 {{- if ne .code "l30n4rd0d4v1nc1" }}

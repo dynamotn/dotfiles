@@ -1,0 +1,11 @@
+# Patterns restic skips in /etc/cron.daily/restic-backup: what can be
+# downloaded or rebuilt again, and the btrbk snapshots, already copies.
+/home/*/.cache
+/home/*/.local/share/Trash
+/home/*/.local/share/containers
+/home/*/.local/share/mise/installs
+/home/*/.cargo/registry
+/home/*/.npm/_cacache
+/home/*/go/pkg
+node_modules
+/home/*/Downloads

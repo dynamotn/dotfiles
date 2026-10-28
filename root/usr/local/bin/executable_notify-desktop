@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# @file notify-desktop
+# @brief Show a notification to every logged-in desktop user, from root
+# @description Root jobs have no session bus: this finds each user's bus
+# under /run/user and runs notify-send as that user. Also logs the message,
+# so it survives when nobody is logged in. Two callers:
+# - smartd (`-M exec` in /etc/smartd.conf), with no arguments and the
+#   SMARTD_* variables set;
+# - root scripts such as /etc/cron.daily/restic-backup, with arguments.
+# Plain bash: it runs from /usr/local/bin, where the dybatpho of the
+# dotfiles may not be readable.
+# @arg $1 string Urgency: low, normal or critical
+# @arg $2 string Summary line
+# @arg $3 string Body (optional)
+set -euo pipefail
+
+if [[ $# -eq 0 && -n "${SMARTD_MESSAGE:-}" ]]; then
+  urgency=critical
+  summary="Disk ${SMARTD_DEVICE:-?}: ${SMARTD_FAILTYPE:-problem}"
+  body="${SMARTD_MESSAGE:-}"
+else
+  urgency="${1:?usage: notify-desktop <urgency> <summary> [body]}"
+  summary="${2:?usage: notify-desktop <urgency> <summary> [body]}"
+  body="${3:-}"
+fi
+
+logger --tag notify-desktop -- "${summary}: ${body}"
+
+# shortcut: only finds a bus at /run/user/<uid>/bus, which systemd and
+# dbus-broker user units create; a session started by dbus-run-session has
+# none and gets the log line only.
+run_dir="${NOTIFY_DESKTOP_RUN_DIR:-/run/user}"
+shopt -s nullglob
+for bus in "${run_dir}"/*/bus; do
+  [[ -S "${bus}" ]] || continue
+  uid="$(basename "$(dirname "${bus}")")"
+  user="$(id -nu "${uid}")" || continue
+  # env -i: a root caller may hold secrets in its environment (restic-backup),
+  # and runuser keeps it, readable in /proc by every process of the user.
+  runuser -u "${user}" -- env -i PATH=/usr/bin:/bin DBUS_SESSION_BUS_ADDRESS="unix:path=${bus}" \
+    notify-send --urgency="${urgency}" --app-name=system -- "${summary}" "${body}" \
+    || logger --tag notify-desktop -- "could not notify ${user}"
+done

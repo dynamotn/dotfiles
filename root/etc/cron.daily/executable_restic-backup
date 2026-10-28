@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# @file restic-backup
+# @brief Back up /home and /etc off the machine, daily
+# @description Run by cron as root. Where to and with which password come
+# from /etc/restic/env, which the dotfiles do not carry: create it by hand,
+# root-owned and mode 600, with RESTIC_REPOSITORY and RESTIC_PASSWORD_FILE
+# (and RCLONE_* or AWS_* if the repository needs them). Without it the job
+# does nothing. Prunes to 7 daily, 4 weekly and 6 monthly snapshots on
+# Sundays, and notifies the desktop when anything fails. Plain bash: it runs
+# from /etc, where the dybatpho of the dotfiles may not be readable.
+set -euo pipefail
+# dyshellint disable=BSG099 Linux only: root/etc is applied to Linux machines alone, all on Bash 5
+shopt -s inherit_errexit
+
+# @description Tell the logged-in users, and the log, that the backup failed.
+# @arg $1 string What went wrong
+function _notify_failure {
+  # env -i: the repository secrets of the env file stay in this process.
+  env -i PATH=/usr/bin:/bin "${NOTIFY_DESKTOP:-/usr/local/bin/notify-desktop}" \
+    critical "Backup failed" "$1" || true
+}
+
+# @description Print the owner uid and octal mode of a file or directory.
+# @arg $1 string Path, not followed if a symlink
+# @stdout "<uid> <mode>", e.g. "0 600"
+function _owner_mode {
+  # dyshellint disable=BSG083 Linux only: root/etc is applied to Linux machines alone
+  stat --format '%u %a' "$1"
+}
+
+# @description Load the repository settings, then back up and prune.
+# @noargs
+function _main {
+  local env_file="${RESTIC_ENV_FILE:-/etc/restic/env}"
+  if [[ ! -e "${env_file}" ]]; then
+    logger --tag restic-backup -- "no ${env_file}: backup not configured, skipped"
+    return 0
+  fi
+
+  trap '_notify_failure "the backup stopped with status $? on line ${LINENO}"' ERR
+
+  # The file is sourced as root: anyone who can write it, or swap it in its
+  # directory, owns the machine. A symlink reads as mode 777 and is refused.
+  local owner_mode env_dir dir_owner_mode dir_owner dir_mode
+  owner_mode="$(_owner_mode "${env_file}")"
+  if [[ "${owner_mode}" != "0 600" && "${owner_mode}" != "0 400" ]]; then
+    _notify_failure "${env_file} must be owned by root with mode 600, not ${owner_mode}"
+    return 1
+  fi
+  env_dir="$(dirname "${env_file}")"
+  dir_owner_mode="$(_owner_mode "${env_dir}")"
+  read -r dir_owner dir_mode <<< "${dir_owner_mode}"
+  if [[ "${dir_owner}" != 0 ]] || ((8#${dir_mode} & 8#022)); then
+    _notify_failure "${env_dir} must be owned by root and writable by root alone"
+    return 1
+  fi
+
+  set -a
+  # shellcheck source=/dev/null
+  . "${env_file}"
+  set +a
+
+  restic backup --quiet --exclude-caches \
+    --exclude-file /etc/restic/excludes \
+    /home /etc
+
+  local weekday
+  weekday="$(date +%u)"
+  if [[ "${weekday}" == 7 ]]; then
+    restic forget --quiet --prune \
+      --keep-daily 7 --keep-weekly 4 --keep-monthly 6
+  fi
+}
+
+_main

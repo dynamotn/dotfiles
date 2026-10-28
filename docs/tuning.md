@@ -118,6 +118,18 @@ Check: `ulimit -n` in a new login shell.
 - smartd runs a short self-test nightly and a long one on Saturdays, and
   logs a failing or hot disk (`etc/smartd.conf`); `nvme smart-log` reads
   NVMe wear by hand. Not on VMs or containers.
+- smartd and failed backups notify every logged-in desktop user through
+  `/usr/local/bin/notify-desktop`, which also logs; it runs `notify-send` with
+  an empty environment, so root's secrets never reach a user process.
+- restic backs up `/home` and `/etc` off the machine every day
+  (`etc/cron.daily/restic-backup`, skipping `etc/restic/excludes`) and prunes
+  to 7 daily, 4 weekly and 6 monthly snapshots on Sundays. It needs
+  `/etc/restic/env`, which the dotfiles do not carry: create it as root,
+  mode 600, with `RESTIC_REPOSITORY` and `RESTIC_PASSWORD_FILE`, then
+  `restic init` once. It runs the distribution's restic, never the copy in
+  `~/.local/bin`.
+- CPU microcode loads early on Arch and Ubuntu (dytoy `microcode`); laptops
+  get `fwupd` for BIOS and device firmware.
 - `sensors` shows temperatures and fans, to spot throttling.
 - On Arch desktops and laptops, ananicy-cpp lowers the CPU and I/O priority
   of builds and indexers, with the CachyOS rules pinned in

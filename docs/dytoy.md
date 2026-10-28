@@ -88,7 +88,10 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[btrbk](https://digint.ch/btrbk/)|Daily read-only btrfs snapshots|
 |[earlyoom](https://github.com/rfjakob/earlyoom)|Kill the biggest process before the system runs out of memory|
 |`file_system`|Btrfs and NTFS file system tools|
+|[fwupd](https://fwupd.org)|Firmware updates from the LVFS|
 |[lm_sensors](https://github.com/lm-sensors/lm-sensors)|Read CPU, GPU and board temperatures and fans|
+|`microcode`|CPU microcode updates, loaded early at boot|
+|[restic](https://restic.net)|Daily off-machine backup of /home and /etc|
 |[smartmontools](https://www.smartmontools.org)|Disk health monitoring and self-tests|
 |`system_zzz`|Distribution-specific system tools, such as the Portage helpers on Gentoo|
 |[termux-boot](https://github.com/termux/termux-boot)|Start the Termux services when Android boots|

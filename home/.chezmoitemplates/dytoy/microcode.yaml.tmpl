@@ -1,0 +1,36 @@
+{{- /* doc
+name: microcode
+url: none
+description: CPU microcode updates, loaded early at boot
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* Errata and security fixes of the CPU, applied before the kernel uses
+       it. Arch embeds them through the microcode hook of mkinitcpio, which
+       its pacman hook reruns on install; Ubuntu through initramfs-tools.
+       Gentoo gets AMD's from linux-firmware (savedconfig). Only real
+       hardware: a VM or container gets its host's microcode. */ -}}
+{{- if and (eq .chezmoi.os "linux") (not (eq .kind "container" "vm")) }}
+{{-   $vendor := output "awk" "/^vendor_id/ { print $3; exit }" "/proc/cpuinfo" | trim }}
+name: microcode
+method: os
+is_essential: true
+{{-   if eq $vendor "GenuineIntel" }}
+gentoo:
+  packages:
+    - name: sys-firmware/intel-microcode
+arch:
+  packages:
+    - name: intel-ucode
+ubuntu:
+  packages:
+    - name: intel-microcode
+{{-   else if eq $vendor "AuthenticAMD" }}
+arch:
+  packages:
+    - name: amd-ucode
+ubuntu:
+  packages:
+    - name: amd64-microcode
+{{-   end }}
+{{- end }}

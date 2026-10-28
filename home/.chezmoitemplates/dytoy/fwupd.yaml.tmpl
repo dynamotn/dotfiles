@@ -1,0 +1,23 @@
+{{- /* doc
+name: fwupd
+url: "https://fwupd.org"
+description: Firmware updates from the LVFS
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* BIOS, EC, NVMe and dock firmware: `fwupdmgr refresh && fwupdmgr
+       update`. Laptops only, where vendors publish to the LVFS and suspend
+       or battery bugs get fixed in firmware. D-Bus starts it on demand. */ -}}
+{{- if and (eq .chezmoi.os "linux") (eq .kind "laptop") }}
+name: fwupd
+method: os
+gentoo:
+  packages:
+    - name: sys-apps/fwupd
+arch:
+  packages:
+    - name: fwupd
+ubuntu:
+  packages:
+    - name: fwupd
+{{- end }}
