@@ -118,6 +118,36 @@ function _legacy_repo {
   [[ ! -e "${marker}" ]] || fail "the hook ran the repo's core.fsmonitor"
 }
 
+@test "lint-shell hook skips the lint while another session holds the lock" {
+  _require_dyshellint
+  command -v flock &> /dev/null || skip "flock not found"
+  local lock="${WORK}/lint.lock"
+  printf 'x=$1\necho $x\n' > "${WORK}/bad.sh"
+  # Hold the lock in this shell; the hook runs in a child that cannot get it.
+  exec 8>> "${lock}"
+  flock 8
+  CLAUDE_LINT_SHELL_LOCK="${lock}" CLAUDE_LINT_SHELL_WAIT=0 _run_hook "${WORK}/bad.sh"
+  exec 8>&-
+  assert_success
+  # The model is told the lint was skipped, not left to read it as clean.
+  [[ "${output}" == *"dyshellint skipped"* ]] || fail "no skip notice: ${output}"
+}
+
+@test "lint-shell hook passes when the lock path cannot be opened" {
+  _require_dyshellint
+  printf 'x=$1\necho $x\n' > "${WORK}/bad.sh"
+  CLAUDE_LINT_SHELL_LOCK="${WORK}/missing/dir/lint.lock" _run_hook "${WORK}/bad.sh"
+  assert_success
+  [[ -z "${stderr}" ]] || fail "unexpected stderr: ${stderr}"
+}
+
+@test "lint-shell hook still lints once the lock is free" {
+  _require_dyshellint
+  printf 'x=$1\necho $x\n' > "${WORK}/bad.sh"
+  CLAUDE_LINT_SHELL_LOCK="${WORK}/lint.lock" CLAUDE_LINT_SHELL_WAIT=0 _run_hook "${WORK}/bad.sh"
+  [[ "${status}" -eq 2 ]] || fail "expected exit 2, got ${status}"
+}
+
 @test "lint-shell hook is a no-op without dyshellint on PATH" {
   printf 'echo $1\n' > "${WORK}/bad.sh"
   PATH="/usr/bin:/bin" _run_hook "${WORK}/bad.sh"
