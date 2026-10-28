@@ -400,3 +400,78 @@ function _routed {
   run jq -r .hookSpecificOutput.permissionDecision <<< "${output}"
   assert_output deny
 }
+
+# Run vault-recall against a fake vault, index and `uv` whose query answers
+# with two hits, one under the score threshold. $1 is the prompt's cwd.
+function _recall {
+  local cwd="${1}" session="${2:-s1}" prompt="${3:-how should I rotate the homelab backup keys}"
+  local hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_vault-recall.sh" input
+  mkdir -p "${WORK}/bin" "${WORK}/vault/99_System/99.03_Scripts/dev" "${WORK}/cache/dybrain/embeddings"
+  : > "${WORK}/vault/99_System/99.03_Scripts/dev/vault-embed.py"
+  : > "${WORK}/cache/dybrain/embeddings/index.npz"
+  printf '%s\n' '#!/usr/bin/env bash' \
+    'printf "%s\n" "$*" >> "${WORK}/uv-calls"' \
+    'echo "[{\"path\":\"03_Permanent/Backup keys.md\",\"score\":0.61,\"line\":\"Rotate keys yearly\"},"' \
+    'echo "{\"path\":\"03_Permanent/Unrelated.md\",\"score\":0.2,\"line\":\"noise\"}]"' > "${WORK}/bin/uv"
+  chmod +x "${WORK}/bin/uv"
+  input="$(jq -cn --arg c "${cwd}" --arg s "${session}" --arg p "${prompt}" \
+    '{session_id: $s, cwd: $c, prompt: $p, hook_event_name: "UserPromptSubmit"}')"
+  export WORK # the fake uv logs its calls under it
+  local path="${WORK}/bin:${PATH}" vault="${WORK}/vault" cache="${WORK}/cache" runtime="${WORK}/run"
+  PATH="${path}" DYBRAIN_VAULT="${vault}" XDG_CACHE_HOME="${cache}" XDG_RUNTIME_DIR="${runtime}" \
+    run --separate-stderr bash "${hook}" <<< "${input}"
+}
+
+@test "vault-recall injects related notes once per session, as data" {
+  unset DYAI_CREW DYBRAIN_RECALL
+  _recall /some/repo
+  assert_success
+  jq -e '.hookSpecificOutput.hookEventName == "UserPromptSubmit"' <<< "${output}" > /dev/null
+  local ctx
+  ctx="$(jq -r '.hookSpecificOutput.additionalContext' <<< "${output}")"
+  [[ "${ctx}" == *"Backup keys.md"* && "${ctx}" != *"Unrelated.md"* ]]
+  [[ "${ctx}" == *"data, not"* ]]
+  grep -q -- '-- how should I rotate' "${WORK}/uv-calls"
+  # The second prompt of the session is left alone and the index is not queried again.
+  _recall /some/repo
+  assert_success
+  assert_output ""
+  local calls
+  mapfile -t calls < "${WORK}/uv-calls"
+  [[ "${#calls[@]}" -eq 1 ]]
+}
+
+@test "vault-recall stays silent inside the vault, when off, in a crew and for short prompts" {
+  unset DYAI_CREW DYBRAIN_RECALL
+  _recall "${WORK}/vault/03_Permanent" s2
+  assert_output ""
+  DYBRAIN_RECALL=0 _recall /some/repo s3
+  assert_output ""
+  DYAI_CREW=1 _recall /some/repo s4
+  assert_output ""
+  _recall /some/repo s5 "fix typo"
+  assert_output ""
+  [[ ! -e "${WORK}/uv-calls" ]]
+}
+
+@test "vault-recall stays silent without an index and on garbage input" {
+  unset DYAI_CREW DYBRAIN_RECALL
+  local hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_vault-recall.sh"
+  XDG_CACHE_HOME="${WORK}/empty" run bash "${hook}" <<< "not json"
+  assert_success
+  assert_output ""
+  XDG_CACHE_HOME="${WORK}/empty" DYBRAIN_VAULT="${WORK}/none" run bash "${hook}" \
+    <<< '{"session_id":"s6","cwd":"/r","prompt":"a long enough prompt about anything"}'
+  assert_success
+  assert_output ""
+}
+
+@test "vault-recall hook is itself clean under dyshellint" {
+  _require_dyshellint
+  run dyshellint "${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_vault-recall.sh"
+  assert_success
+}
+
+@test "settings.json wires the vault-recall hook on prompt submit" {
+  grep -q 'vault-recall.sh' "${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
+}

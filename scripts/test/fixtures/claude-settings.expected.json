@@ -126,6 +126,17 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "bash ~/.claude/hooks/vault-recall.sh",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "WorktreeCreate": [
       {
         "hooks": [
