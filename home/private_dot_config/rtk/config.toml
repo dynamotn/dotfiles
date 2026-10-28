@@ -1,0 +1,24 @@
+# Only the keys set here differ from rtk's defaults; see `rtk config`.
+
+[hooks]
+# Commands the Claude hook must not rewrite, matched as a prefix:
+# - those Claude's sandbox runs outside it (sandbox.excludedCommands in
+#   private_dot_claude/settings.json.tmpl), since `rtk docker ...` no longer
+#   matches `docker *` and would run sandboxed;
+# - git commands whose short output gets parsed and that rtk's compact form
+#   breaks (porcelain reshaped, a `Changes:` block appended, the stash
+#   `WIP on <branch>:` prefix dropped).
+exclude_commands = [
+  "docker",
+  "podman",
+  "chezmoi",
+  "dyai",
+  "mise",
+  "sudo",
+  "emerge",
+  "systemctl",
+  "git worktree",
+  "git stash list",
+  "git diff --name-only",
+  "git diff --name-status",
+]

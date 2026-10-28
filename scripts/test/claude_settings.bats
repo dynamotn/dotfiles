@@ -198,3 +198,18 @@ STUB
     | select([$ok[] | . as $x | $a | index($x)] | all(. == null)) | $r' "${out}")"
   [[ -z "${missing}" ]] || fail "ask rules without an rtk variant: ${missing}"
 }
+
+@test "rtk leaves alone every command the sandbox runs outside it" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json" cmd missing=""
+  local rtk_config="${DOTFILES_DIR}/home/private_dot_config/rtk/config.toml"
+  _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
+  # `docker ps` rewritten to `rtk docker ps` no longer matches `docker *`
+  # and would run sandboxed. git is listed in its rtk spelling instead.
+  # shellcheck disable=SC2312 # a bad render lists no command, which the other tests catch
+  while IFS= read -r cmd; do
+    rg -qF "\"${cmd}\"," "${rtk_config}" || missing+=" ${cmd}"
+  done < <(jq -r '.sandbox.excludedCommands[] | select(startswith("git ") or startswith("rtk ") | not)
+    | sub(" \\*$"; "")' "${out}")
+  [[ -z "${missing}" ]] || fail "rtk would rewrite sandbox-excluded commands:${missing}"
+}

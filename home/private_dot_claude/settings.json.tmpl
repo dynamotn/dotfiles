@@ -9,7 +9,8 @@
   sits outside the worktree, and push needs the ssh agent), and the tools
   that write all over $HOME or the system. The rtk spelling of git is listed
   because rtk rewrites git before the sandbox sees it; rtk as a whole is not,
-  since `cat` becomes `rtk read` and must stay sandboxed.
+  since `cat` becomes `rtk read` and must stay sandboxed. rtk's own config
+  (private_dot_config/rtk/config.toml) keeps it off the other commands here.
 
   Sandboxed commands run without a prompt, so what they may write must never
   hold something that later runs outside it: only package caches are

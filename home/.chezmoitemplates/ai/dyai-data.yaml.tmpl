@@ -111,6 +111,14 @@ policy:
       - "Bash(rtk git stash drop:*)"
       - "Bash(git stash clear:*)"
       - "Bash(rtk git stash clear:*)"
+      # They run any command line, past every rule matched on its prefix; a
+      # leading global flag (`rtk -v run ...`) would dodge the named ones.
+      - "Bash(rtk run *)"
+      - "Bash(rtk proxy *)"
+      - "Bash(rtk err *)"
+      - "Bash(rtk test *)"
+      - "Bash(rtk summary *)"
+      - "Bash(rtk -*)"
       - "Bash(rm -rf *)"
       - "Bash(rm -fr *)"
       - "Bash(shred *)"

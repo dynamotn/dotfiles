@@ -11,5 +11,8 @@ share syntax, so always be explicit about which one a command is written for.
 - The interactive fish config defines aliases, abbreviations, and wrapper
   functions, so a bare command name may not be the binary it looks like. When
   the exact program matters, call it as `command <tool>` or by absolute path.
+- Claude's rtk hook compacts the output of `git`, `cat`, `ls`, `grep`, `find`,
+  `diff`, `curl`, `gh` and test runners. Pipe into `| cat` when the exact
+  output matters, such as a patch to apply or a format to parse.
 - A `cd` does not carry over between separate commands. Use absolute paths, or
   chain the `cd` into the same command.

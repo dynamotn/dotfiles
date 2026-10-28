@@ -25,6 +25,7 @@ global:
         - "Bash(git push)"
         - "Bash(git push:*)"
         - "Bash(rtk git push *)"
+        - "Bash(rtk run *)"
         - "Bash(rm -rf *)"
         - "Bash(sudo *)"
       deny:
@@ -68,9 +69,11 @@ function _assert_idempotent {
   jq -e --arg v "ask" '.permission.bash["git push *"] == $v' "${f}" > /dev/null
   jq -e --arg v "deny" '.permission.bash["chezmoi-dycrypt*"] == $v' "${f}" > /dev/null
   jq -e --arg v "deny" '.permission.bash["age -d *"] == $v' "${f}" > /dev/null
-  # Deny wins over ask for the same prefix; rtk spellings are Claude-only.
+  # Deny wins over ask for the same prefix; `rtk git` spellings are
+  # Claude-only, while `rtk run` can run anything in any agent.
   jq -e --arg v "deny" '.permission.bash["rm -rf *"] == $v' "${f}" > /dev/null
-  [[ "${got}" != *"rtk"* ]] || fail "rtk rule leaked: ${got}"
+  [[ "${got}" != *"rtk git"* ]] || fail "rtk git rule leaked: ${got}"
+  jq -e --arg v "ask" '.permission.bash["rtk run *"] == $v' "${f}" > /dev/null
   # opencode matches globs, so a rule with an inner * carries over as is.
   jq -e --arg v "deny" '.permission.bash["git * --force"] == $v' "${f}" > /dev/null
   jq -e --arg v "deny" '.permission.read["*secrets/data/*"] == $v' "${f}" > /dev/null
@@ -127,7 +130,7 @@ function _assert_idempotent {
   j="$(yq -p=toml -o=json -I=0 '.' "${f}")"
   jq -e '.rule[] | select(.decision == "deny") | .commandPrefix | index("chezmoi-dycrypt") != null' \
     <<< "${j}" > /dev/null
-  jq -e '.rule[] | select(.decision == "ask_user") | .commandPrefix == ["git push", "sudo"]' \
+  jq -e '.rule[] | select(.decision == "ask_user") | .commandPrefix == ["git push", "rtk run", "sudo"]' \
     <<< "${j}" > /dev/null
   jq -e '([.rule[] | select(.decision == "deny")][0].priority)
     > ([.rule[] | select(.decision == "ask_user")][0].priority)' <<< "${j}" > /dev/null
