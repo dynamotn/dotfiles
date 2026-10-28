@@ -1132,13 +1132,4 @@ registry:
 {{- range list "context-fundamentals" "context-degradation" "context-compression" "context-optimization" "multi-agent-patterns" "memory-systems" "tool-design" "evaluation" }}
         - https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering/tree/9ff0c99108b36d3b886defd825d8ac1f47dba374/skills/{{ . }}
 {{- end }}
-    # Thinking/analysis skills cherry-picked from danielmiessler/LifeOS, pinned
-    # to a commit. Only the ones that run without the LifeOS runtime
-    # (~/.claude/LIFEOS tools, hooks, .env keys) — its agents, commands and
-    # hooks all need that runtime, so they are deliberately left out.
-    lifeos:
-      skills:
-{{- range list "ArXiv" "BiasCheck" "Council" "ExtractWisdom" "FirstPrinciples" "IterativeDepth" "Novelty" "RedTeam" "RootCauseAnalysis" "Teach" "WorldThreatModel" }}
-        - https://github.com/danielmiessler/LifeOS/tree/5e2f2e8c0abde612da0e99c16c0d07d4ec21b88c/LifeOS/install/skills/{{ . }}
-{{- end }}
 {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai" "catalog" "domains.yaml") | indent 2 }}
