@@ -10,7 +10,7 @@
 {{- if eq .chezmoi.os "darwin" }}
 {{-   $pinentry = "pinentry-mac" }}
 {{- else if ne .guiServer "0" }}
-{{-   $pinentry = "pinentry-gnome3" }}
+{{-   $pinentry = "pinentry-gtk" }}
 {{- end }}
 {{- if $rbwSecret }}
 {{-   $rbwSecret = set $rbwSecret "pinentry" $pinentry }}
