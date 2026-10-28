@@ -1,0 +1,27 @@
+{{- if and (eq .chezmoi.os "linux") (eq .place "office") (ne .kind "container") -}}
+#!{{ .bash }}
+# @file 05-update-ca-store.sh
+# @brief Rebuild the system CA bundle when the enterprise certificate changed
+# @description Copying the certificate is not enough: tools read the bundle
+# in /etc/ssl/certs, which only the distribution's update command rebuilds.
+# Runs as root through `scz apply` on every apply, and rebuilds only when the
+# certificate is newer than the bundle, so it never reads the certificate.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+{{- if eq .osid "linux-arch" }}
+cert=/etc/ca-certificates/trust-source/anchors/ssl.crt
+update_cmd=update-ca-trust
+{{- else }}
+cert=/usr/local/share/ca-certificates/ssl.crt
+update_cmd=update-ca-certificates
+{{- end }}
+bundle=/etc/ssl/certs/ca-certificates.crt
+
+if ! dybatpho::is file "${cert}" || [[ "${bundle}" -nt "${cert}" ]]; then
+  exit 0
+fi
+dybatpho::header "Update the CA store"
+"${update_cmd}"
+dybatpho::success "Update the CA store"
+{{- end }}

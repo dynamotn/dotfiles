@@ -139,9 +139,12 @@ etc/tlp.conf
 etc/ca-certificates
 usr/local/share/ca-certificates
 {{- else }}
-{{-   if not (eq .osid "linux-arch" "linux-gentoo") }}
+{{- /* Arch rebuilds its store with update-ca-trust from p11-kit anchors;
+       Gentoo, Debian, Ubuntu and Alpine with update-ca-certificates from
+       /usr/local/share (05-update-ca-store runs either). */}}
+{{-   if ne .osid "linux-arch" }}
 etc/ca-certificates/trust-source
-{{-   else if not (eq .osid "linux-ubuntu" "linux-alpine") }}
+{{-   else }}
 usr/local/share/ca-certificates
 {{-   end }}
 {{- end }}
