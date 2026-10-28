@@ -6,6 +6,7 @@ setup() {
   [ -f "${DOTFILES_DIR}/home/dot_agents/skills/chezmoi-source/SKILL.md" ]
   [ -f "${DOTFILES_DIR}/home/dot_agents/skills/dybatpho/SKILL.md" ]
   [ -f "${DOTFILES_DIR}/home/dot_agents/skills/finish/SKILL.md" ]
+  [ -f "${DOTFILES_DIR}/home/dot_agents/skills/learn/SKILL.md" ]
   [ ! -e "${DOTFILES_DIR}/home/private_dot_claude/skills/chezmoi-source" ]
   [ ! -e "${DOTFILES_DIR}/home/private_dot_claude/skills/dybatpho" ]
 }
@@ -15,6 +16,7 @@ setup() {
   [[ "$(cat "${base}/symlink_chezmoi-source")" == "../../.agents/skills/chezmoi-source" ]]
   [[ "$(cat "${base}/symlink_dybatpho")" == "../../.agents/skills/dybatpho" ]]
   [[ "$(cat "${base}/symlink_finish")" == "../../.agents/skills/finish" ]]
+  [[ "$(cat "${base}/symlink_learn")" == "../../.agents/skills/learn" ]]
   local dyai
   read -r dyai < "${base}/symlink_dyai"
   [[ "${dyai}" == "../../.agents/skills/dyai" ]]
