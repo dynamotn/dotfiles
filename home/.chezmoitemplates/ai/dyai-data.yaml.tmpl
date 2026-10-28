@@ -42,28 +42,14 @@ plugins:
   - security-guidance@claude-plugins-official
   - claude-code-setup@claude-plugins-official
   - obsidian@obsidian-skills
-  - playwright@claude-plugins-official
-  - chrome-devtools-mcp@claude-plugins-official
-  - claude-security@claude-plugins-official
-  - frontend-design@claude-plugins-official
   - code-simplifier@claude-plugins-official
   - commit-commands@claude-plugins-official
-  - differential-review@trailofbits
-  - audit-context-building@trailofbits
   - elements-of-style@superpowers-marketplace
   - episodic-memory@superpowers-marketplace
-  - insecure-defaults@trailofbits
   - mattpocock-skills@claude-plugins-official
-  - modern-python@trailofbits
   - pr-review-toolkit@claude-plugins-official
   - second-opinion@trailofbits
-  - sharp-edges@trailofbits
   - skill-creator@claude-plugins-official
-  - static-analysis@trailofbits
-  - supply-chain-risk-auditor@trailofbits
-  - trailmark@trailofbits
-  - mcp-server-dev@claude-plugins-official
-  - agent-sdk-dev@claude-plugins-official
   - ralph-loop@claude-plugins-official
 # Installed but off globally: each one loads its skills into every session,
 # so these domain plugins are switched on per project by the registry preset
@@ -77,6 +63,20 @@ optional_plugins:
   - redis-development@claude-plugins-official
   - duckdb-skills@claude-plugins-official
   - understand-anything@understand-anything
+  - claude-security@claude-plugins-official
+  - differential-review@trailofbits
+  - audit-context-building@trailofbits
+  - insecure-defaults@trailofbits
+  - sharp-edges@trailofbits
+  - static-analysis@trailofbits
+  - supply-chain-risk-auditor@trailofbits
+  - trailmark@trailofbits
+  - playwright@claude-plugins-official
+  - chrome-devtools-mcp@claude-plugins-official
+  - frontend-design@claude-plugins-official
+  - modern-python@trailofbits
+  - mcp-server-dev@claude-plugins-official
+  - agent-sdk-dev@claude-plugins-official
 
 # Plugins still installed on machines set up before dyai-lsp replaced them,
 # turned off explicitly (`enabledPlugins: false`) so Claude never runs them

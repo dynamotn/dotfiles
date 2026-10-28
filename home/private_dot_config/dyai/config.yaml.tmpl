@@ -282,6 +282,8 @@ registry:
         - samber/cc-skills-golang@golang-security
     python:
       subagents: [python-pro]
+      plugins:
+        - modern-python@trailofbits
       skills:
         - mindrally/skills@fastapi-python
         - affaan-m/ecc@python-patterns
@@ -322,6 +324,8 @@ registry:
         - affaan-m/ecc@vite-patterns
     frontend:
       subagents: [react-specialist]
+      plugins:
+        - frontend-design@claude-plugins-official
       skills:
         - vercel-labs/agent-skills@vercel-react-best-practices
         - vercel-labs/agent-skills@vercel-composition-patterns
@@ -604,6 +608,9 @@ registry:
   presets:
     # Cross-language domains with no single language/tool owner.
     testing:
+      plugins:
+        - playwright@claude-plugins-official
+        - chrome-devtools-mcp@claude-plugins-official
       skills:
         - currents-dev/playwright-best-practices-skill@playwright-best-practices
         - wshobson/agents@e2e-testing-patterns
@@ -627,6 +634,14 @@ registry:
         - secskills-offense@secskills-marketplace
         - testing-handbook-skills@trailofbits
         - agentic-actions-auditor@trailofbits
+        - claude-security@claude-plugins-official
+        - differential-review@trailofbits
+        - audit-context-building@trailofbits
+        - insecure-defaults@trailofbits
+        - sharp-edges@trailofbits
+        - static-analysis@trailofbits
+        - supply-chain-risk-auditor@trailofbits
+        - trailmark@trailofbits
       skills:
         - openai/skills@security-threat-model
         - openai/skills@security-best-practices
@@ -1074,6 +1089,9 @@ registry:
     # Building on LLMs: RAG, evals, and the agent frameworks.
     llm:
       subagents: [ai-engineer, llm-architect, mlops-engineer, prompt-engineer]
+      plugins:
+        - mcp-server-dev@claude-plugins-official
+        - agent-sdk-dev@claude-plugins-official
       skills:
         - wshobson/agents@rag-implementation
         - wshobson/agents@llm-evaluation

@@ -130,7 +130,7 @@ function _render_config {
   [[ "$(yq '.marketplaces.trailofbits.source.source' "${out}")" == "github" ]]
   # Known entries, on globally and opt-in
   yq -e '.plugins[] | select(. == "superpowers@claude-plugins-official")' "${out}" > /dev/null
-  yq -e '.plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
+  yq -e '.optional_plugins[] | select(. == "trailmark@trailofbits")' "${out}" > /dev/null
   # agent-mode plugins, each its own single-plugin marketplace
   yq -e '.plugins[] | select(. == "caveman@caveman")' "${out}" > /dev/null
   yq -e '.plugins[] | select(. == "ponytail@ponytail")' "${out}" > /dev/null
