@@ -39,7 +39,6 @@ plugins:
   - code-simplifier@claude-plugins-official
   - commit-commands@claude-plugins-official
   - elements-of-style@superpowers-marketplace
-  - episodic-memory@superpowers-marketplace
   - mattpocock-skills@claude-plugins-official
   - pr-review-toolkit@claude-plugins-official
   - second-opinion@trailofbits
@@ -82,9 +81,11 @@ disabled_plugins:
   - gopls-lsp@claude-plugins-official
   - rust-analyzer-lsp@claude-plugins-official
 # Dropped for the context they injected every session and prompt: caveman
-# (overlapped ponytail on brevity), context-mode (routing block, MCP flaky).
+# (overlapped ponytail on brevity), context-mode (routing block, MCP flaky),
+# episodic-memory (recall that claude-mem and auto-memory already cover).
   - caveman@caveman
   - context-mode@context-mode
+  - episodic-memory@superpowers-marketplace
 
 policy:
   # Harness-enforced versions of the credentials and destructive-commands rules

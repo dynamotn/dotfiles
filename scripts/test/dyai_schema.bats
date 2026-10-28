@@ -139,7 +139,7 @@ function _render_config {
   assert_failure
   # ...and still-installed copies of them are switched off, never enabled
   # shellcheck disable=SC2312 # a bad read fails the comparison, which is the test
-  [[ "$(yq '.disabled_plugins | length' "${out}")" == "7" ]]
+  [[ "$(yq '.disabled_plugins | length' "${out}")" == "8" ]]
   yq -e '.disabled_plugins[] | select(. == "caveman@caveman")' "${out}" > /dev/null
   yq -e '.disabled_plugins[] | select(. == "rust-analyzer-lsp@claude-plugins-official")' "${out}" > /dev/null
   # shellcheck disable=SC2016,SC2312 # $p is a yq variable; a bad read fails the comparison
