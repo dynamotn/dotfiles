@@ -41,6 +41,12 @@ UUID=5ccb0e95-f187-492d-968a-d051861ef409	/snapshot/data	btrfs     	rw,noatime,c
 # /dev/nvme1n1p4 LABEL=System
 UUID=3ec76d9c-7455-46fe-9f12-803279813e17	/var      	btrfs     	rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=260,subvol=/_active/var	0 0
 
+# Portage builds in RAM: no NVMe writes for files deleted minutes later. Half
+# of RAM fits all but the packages of package.env/heavy, which build in
+# /var/tmp/notmpfs (env/heavy.conf).
+{{- $res := includeTemplate "system/resources.yaml.tmpl" . | fromYaml }}
+tmpfs	/var/tmp/portage	tmpfs	size={{ max 1 (div ($res.memGiB | int) 2) }}G,uid=portage,gid=portage,mode=775,nosuid,nodev,noatime	0 0
+
 # /dev/nvme1n1p2
 UUID=38bb8bfd-5a4b-4c37-b614-29b6229dec92	none      	swap      	defaults  	0 0
 {{- else if eq .code "b0n9u4" }}

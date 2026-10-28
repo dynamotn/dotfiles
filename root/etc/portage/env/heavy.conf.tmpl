@@ -4,3 +4,7 @@
 # Large C++ and Rust builds: a single compile or codegen job can take 2G, so
 # run one per 2G of RAM instead of one per thread, which would end in swap.
 MAKEOPTS="-j{{ max 1 (min $proc (div $mem 2)) }} -l{{ $proc }}"
+{{- if eq .code "l30n4rd0d4v1nc1" }}
+# Their build trees outgrow the /var/tmp/portage tmpfs (fstab): build on disk.
+PORTAGE_TMPDIR="/var/tmp/notmpfs"
+{{- end }}

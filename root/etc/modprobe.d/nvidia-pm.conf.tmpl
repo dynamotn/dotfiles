@@ -1,0 +1,8 @@
+{{- if eq .guiDriver "N" -}}
+# Save all of the video memory across suspend and hibernate, not only what
+# the driver deems essential, so a Wayland session resumes without corrupt
+# windows. The copy goes to /var/tmp, on disk, as hibernation needs it to
+# survive power-off. The elogind hook of nvidia-drivers does the switch.
+# Not named nvidia.conf, which the ebuild installs and owns.
+options nvidia NVreg_PreserveVideoMemoryAllocations=1 NVreg_TemporaryFilePath=/var/tmp
+{{- end }}

@@ -76,6 +76,10 @@ etc/selinux
 etc/sandbox.d
 var/lib/portage
 {{- end }}
+{{- /* Disk build dir of env/heavy.conf, beside the tmpfs of fstab */}}
+{{- if ne .code "l30n4rd0d4v1nc1" }}
+var/tmp/notmpfs
+{{- end }}
 {{- if not (eq .osid "linux-ubuntu" "linux-debian") }}
 etc/apt
 {{- end }}

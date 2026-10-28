@@ -24,6 +24,7 @@ Check: `sysctl net.core.default_qdisc net.ipv4.tcp_congestion_control`.
 | btrfs `noatime,compress=zstd:1`, no `autodefrag` | `etc/fstab.tmpl` | reads write no metadata; faster compression on NVMe; autodefrag rewrites extents and unshares them from snapshots |
 | Dirty pages capped at 256M / 1G on a PC or laptop | `etc/sysctl.d/80-writeback.conf.tmpl` | a slow USB copy no longer stalls every writer |
 | BFQ for spinning disks | `etc/udev/rules.d/60-ioschedulers.rules` | responsiveness during long copies; NVMe keeps `none` |
+| Journal capped at 200M (50M in RAM) on systemd | `etc/systemd/journald.conf.d/size.conf` | the default takes up to 4G of a small VM disk |
 
 Check: `findmnt -t btrfs -o TARGET,OPTIONS`, `cat /sys/block/*/queue/scheduler`.
 
@@ -78,6 +79,10 @@ switch live with `scxctl switch -s lavd`.
   (`etc/portage/make.conf.tmpl`). Small packages keep one job per thread.
 - Large C++ and Rust packages listed in `etc/portage/package.env/heavy` get
   one job per 2G of RAM (`etc/portage/env/heavy.conf.tmpl`).
+- On the home PC, builds run in a tmpfs on `/var/tmp/portage` of half the
+  RAM (`etc/fstab.tmpl`); the heavy packages build on disk in
+  `/var/tmp/notmpfs`, as their trees outgrow it. After `scz apply`, run
+  `mount /var/tmp/portage` once.
 - Both read threads and RAM from `.chezmoitemplates/system/resources.yaml.tmpl`
   when rendered, so another machine scales on its own.
 
@@ -92,10 +97,32 @@ hardware loads. The ebuild writes the installed list back as
 
 - Login sessions may open 65536 files, up to 524288
   (`etc/security/limits.conf`): watchers and language servers exhaust 1024.
+  systemd services and user services get the same through
+  `etc/systemd/{system,user}.conf.d/limits.conf`, as they skip PAM.
+- 524288 inotify watches and 1048576 memory maps
+  (`etc/sysctl.d/70-dev.conf`), for watchers, Electron apps and games.
 - apt skips the `Translation-*` indexes and retries a failed download three
   times (`etc/apt/apt.conf.d/10tuning`).
 
 Check: `ulimit -n` in a new login shell.
+
+## Power and GPU
+
+- The office laptop boots with `amd_pstate=active` (`etc/default/grub.tmpl`),
+  so its CPU follows the EPP hints of `etc/tlp.conf.tmpl`.
+- With an NVIDIA GPU, the driver saves all video memory to `/var/tmp` across
+  suspend and hibernate (`etc/modprobe.d/nvidia-pm.conf.tmpl`); the elogind
+  sleep hook of nvidia-drivers switches it.
+
+Check: `cat /sys/devices/system/cpu/amd_pstate/status` reads `active`;
+`grep PreserveVideo /proc/driver/nvidia/params`, then suspend once.
+
+## macOS
+
+- Fast key repeat, no accent popup on a held key (`.macos/global.yaml.tmpl`).
+- No `.DS_Store` on network or USB volumes
+  (`.macos/com.apple.desktopservices.yaml`).
+- `git status` uses the built-in fsmonitor daemon (`git/config.tmpl`).
 
 ## Termux
 

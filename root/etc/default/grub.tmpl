@@ -35,6 +35,11 @@ GRUB_TIMEOUT_STYLE=menu
 {{- if eq .guiDriver "N" }}
 {{-   $cmdline = printf "nvidia-drm.modeset=1 nvidia-drm.fbdev=1 %s" $cmdline -}}
 {{- end }}
+{{- if eq .code "b0n9u4" }}
+{{- /* Its AMD CPU then honours the EPP hints of tlp.conf, which the passive
+       and acpi-cpufreq drivers ignore */ -}}
+{{-   $cmdline = printf "amd_pstate=active %s" $cmdline -}}
+{{- end }}
 # Append parameters to the linux kernel command line
 GRUB_CMDLINE_LINUX={{ $cmdline | quote }}
 #
