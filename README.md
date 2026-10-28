@@ -96,6 +96,7 @@ templates render only what fits it.
 |Arch Linux|✅|✅|❔|Included ARM version|
 |Ubuntu|✅|❔|❔|Only from 24.04 LTS version|
 |Alpine|✅|✅|❔|Only for container|
+|Fedora|❔|❔|❔|Bootstrap only, `dytoy` installs no packages|
 |MacOS|❌|✅|||
 |Android|❔|✅|❌|Not need to rooted|
 |Windows|❌|❌|❌|Some tools on WSL can work, but not tested|

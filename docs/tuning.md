@@ -88,6 +88,15 @@ hardware loads. The ebuild writes the installed list back as
 `linux-firmware-<version>`, which would take precedence over it;
 `.chezmoiremove` deletes that copy on every apply.
 
+## Limits and packages
+
+- Login sessions may open 65536 files, up to 524288
+  (`etc/security/limits.conf`): watchers and language servers exhaust 1024.
+- apt skips the `Translation-*` indexes and retries a failed download three
+  times (`etc/apt/apt.conf.d/10tuning`).
+
+Check: `ulimit -n` in a new login shell.
+
 ## Termux
 
 Android has no system layer here: `root/` is never applied, so only the

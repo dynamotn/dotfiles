@@ -1,0 +1,7 @@
+// Package descriptions in English are enough: skip the Translation-* index
+// files that every `apt update` otherwise downloads for each locale.
+Acquire::Languages "none";
+
+// Retry a failed download instead of failing the whole install on a flaky
+// office or proxy link.
+Acquire::Retries "3";
