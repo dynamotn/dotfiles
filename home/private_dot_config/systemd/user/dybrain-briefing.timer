@@ -1,0 +1,9 @@
+[Unit]
+Description=DyBrain: write the morning briefing of the vault every morning
+
+[Timer]
+OnCalendar=*-*-* 06:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

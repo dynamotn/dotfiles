@@ -1,0 +1,41 @@
+#!{{ .bash }}
+# @file 04-setup-dybrain-jobs.sh
+# @brief Schedule the background jobs of the DyBrain vault
+# @description Enable the systemd user timers on Linux, or load the launchd
+# agents on macOS, that run `dybrain-tend` for each job of the vault. The hook
+# carries one hash over their unit files, so it re-runs whenever one changes.
+# Other init systems get nothing scheduled; `dybrain-tend` still runs by hand.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh"
+{{- $jobs := list "embed" "triage" "briefing" "weekly" }}
+{{- $units := list }}
+{{- range (joinPath .chezmoi.sourceDir "private_dot_config/systemd/user/dybrain-*" | glob) }}
+{{-   $units = append $units (include . | sha256sum) }}
+{{- end }}
+{{- range (joinPath .chezmoi.sourceDir "Library/LaunchAgents/com.dybrain.*" | glob) }}
+{{-   $units = append $units (include . | sha256sum) }}
+{{- end }}
+# units hash: {{ join "\n" $units | sha256sum }}
+
+{{- if eq .initSystem "systemd" }}
+
+dybatpho::header "Schedule DyBrain jobs"
+init_system::enable_systemd_user_units
+{{- range $jobs }} \
+  dybrain-{{ . }}.timer
+{{- end }}
+dybatpho::success "Schedule DyBrain jobs"
+{{- else if eq .chezmoi.os "darwin" }}
+
+dybatpho::header "Schedule DyBrain jobs"
+agents_dir="$(dybatpho::path_join "${HOME}" "Library" "LaunchAgents")"
+for job in{{ range $jobs }} {{ . }}{{ end }}; do
+  plist="$(dybatpho::path_join "${agents_dir}" "com.dybrain.${job}.plist")"
+  init_system::bootstrap_launchd_agent "${plist}"
+done
+dybatpho::success "Schedule DyBrain jobs"
+{{- else }}
+
+dybatpho::warn "No scheduler for the DyBrain jobs with {{ .initSystem }}, run dybrain-tend by hand"
+{{- end }}

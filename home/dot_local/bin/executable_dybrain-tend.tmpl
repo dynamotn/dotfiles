@@ -1,0 +1,112 @@
+#!{{ .bash }}
+# @file dybrain-tend
+# @brief Run one background job of the DyBrain vault
+# @description Run one of the scheduled jobs of the vault from its root:
+# `embed` rebuilds the embeddings, `triage` sorts the inbox, `briefing` writes
+# the morning briefing and `weekly` drafts the weekly review. The systemd user
+# timers on Linux and the launchd agents on macOS call it; anywhere else it is
+# run by hand. A machine without the vault or without uv logs a line and exits
+# successfully, so a scheduler there does not report a failure.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules cli
+dybatpho::register_common_handlers
+
+# systemd and launchd start jobs with a bare PATH, which has neither the uv,
+# the claude nor the node of this machine.
+PATH="$(dybatpho::path_join "${HOME}" ".local" "bin"):${PATH}"
+PATH="$(dybatpho::path_join "${HOME}" ".local" "share" "mise" "shims"):${PATH}"
+PATH="$(dybatpho::path_join "${HOME}" ".cache" ".bun" "bin"):${PATH}"
+PATH="$(dybatpho::path_join "${HOME}" ".cargo" "bin"):${PATH}"
+PATH="${PATH}:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin"
+export PATH
+
+#######################################
+# @description Spec of dybrain-tend
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Run one background job of the DyBrain vault" MAIN_ARGS \
+    action:"dybatpho::generate_help _spec_main"
+  dybatpho::opts::cmd embed _spec_embed
+  dybatpho::opts::cmd triage _spec_triage
+  dybatpho::opts::cmd briefing _spec_briefing
+  dybatpho::opts::cmd weekly _spec_weekly
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Spec of embed command
+# @noargs
+#######################################
+function _spec_embed {
+  dybatpho::opts::setup "Rebuild the embeddings of the vault" EMBED_ARGS args:none \
+    action:"_run embed dev/vault-embed.py build"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_embed"
+}
+
+#######################################
+# @description Spec of triage command
+# @noargs
+#######################################
+function _spec_triage {
+  dybatpho::opts::setup "Sort the notes of the inbox" TRIAGE_ARGS args:none \
+    action:"_run triage tend/inbox-triage.py"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_triage"
+}
+
+#######################################
+# @description Spec of briefing command
+# @noargs
+#######################################
+function _spec_briefing {
+  dybatpho::opts::setup "Write the morning briefing" BRIEFING_ARGS args:none \
+    action:"_run briefing tend/briefing.py"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_briefing"
+}
+
+#######################################
+# @description Spec of weekly command
+# @noargs
+#######################################
+function _spec_weekly {
+  dybatpho::opts::setup "Draft the weekly review" WEEKLY_ARGS args:none \
+    action:"_run weekly tend/weekly-draft.py"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_weekly"
+}
+
+#######################################
+# @description Run one job script of the vault from the vault root.
+# @arg $1 string Name of the job
+# @arg $2 string Script, relative to the scripts folder of the vault
+# @arg $@ string Arguments of the script
+#######################################
+function _run {
+  local job script
+  dybatpho::expect_args job script -- "$@"
+  shift 2
+  local vault="${DYBRAIN_VAULT:-${HOME}/Documents/DyBrain}"
+  if ! dybatpho::is dir "${vault}"; then
+    dybatpho::info "No DyBrain vault at ${vault}, skipping ${job}"
+    exit 0
+  fi
+  if ! dybatpho::is command uv; then
+    dybatpho::info "uv is not installed, skipping ${job}"
+    exit 0
+  fi
+  cd "${vault}" || dybatpho::die "Cannot enter the vault at ${vault}"
+
+  if [[ "${job}" == "briefing" ]]; then
+    local env_file
+    env_file="$(dybatpho::path_join "${XDG_CONFIG_HOME:-${HOME}/.config}" "dybrain" "env")"
+    if dybatpho::is file "${env_file}"; then
+      # The file holds the settings of the briefing; it is only sourced, never shown.
+      set -a
+      # shellcheck source=/dev/null
+      . "${env_file}" || dybatpho::die "Cannot load ${env_file}"
+      set +a
+    fi
+  fi
+
+  exec uv run --script "99_System/99.03_Scripts/${script}" "$@"
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

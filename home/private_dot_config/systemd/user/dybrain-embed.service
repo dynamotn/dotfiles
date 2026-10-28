@@ -1,0 +1,6 @@
+[Unit]
+Description=DyBrain: rebuild the embeddings of the vault
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/dybrain-tend embed

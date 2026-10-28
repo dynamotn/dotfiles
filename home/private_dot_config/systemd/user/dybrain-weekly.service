@@ -1,0 +1,6 @@
+[Unit]
+Description=DyBrain: draft the weekly review of the vault
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/dybrain-tend weekly

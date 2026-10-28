@@ -102,3 +102,43 @@ function init_system::enable_launchd_service {
     brew services start "${service}"
   fi
 }
+
+#######################################
+# @description Reload the systemd user manager, then enable and start some of
+# its units. It skips with a warning when no user manager answers, as on a
+# machine booted with another init system or in a container. Unlike
+# `is-system-running`, the check still passes on a degraded manager.
+# @arg $@ string Names of the units
+#######################################
+function init_system::enable_systemd_user_units {
+  (($# > 0)) || dybatpho::die "${FUNCNAME[0]}: no unit given"
+  if ! dybatpho::is command systemctl \
+    || ! systemctl --user show-environment &> /dev/null; then
+    dybatpho::warn "The systemd user manager is not running, cannot enable $*"
+    return 0
+  fi
+  dybatpho::progress "Enabling $*"
+  systemctl --user daemon-reload
+  systemctl --user enable --now "$@"
+}
+
+#######################################
+# @description Load a launchd agent of the logged-in user from its plist,
+# unloading the copy loaded before so that a changed plist takes effect.
+# @arg $1 string Path of the plist
+# @exitcode 1 launchctl is missing
+#######################################
+function init_system::bootstrap_launchd_agent {
+  local plist
+  dybatpho::expect_args plist -- "$@"
+  if ! dybatpho::is command launchctl; then
+    dybatpho::warn "launchctl command not found, cannot load ${plist}"
+    return 1
+  fi
+  local domain
+  domain="gui/$(id -u)"
+  dybatpho::progress "Loading launchd agent ${plist##*/}"
+  # Fails when the agent is not loaded yet, as on the first apply
+  launchctl bootout "${domain}" "${plist}" &> /dev/null || true
+  launchctl bootstrap "${domain}" "${plist}"
+}

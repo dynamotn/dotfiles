@@ -1,0 +1,9 @@
+[Unit]
+Description=DyBrain: draft the weekly review of the vault every Sunday evening
+
+[Timer]
+OnCalendar=Sun *-*-* 20:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

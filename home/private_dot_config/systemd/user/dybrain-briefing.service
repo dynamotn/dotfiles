@@ -1,0 +1,6 @@
+[Unit]
+Description=DyBrain: write the morning briefing of the vault
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/dybrain-tend briefing

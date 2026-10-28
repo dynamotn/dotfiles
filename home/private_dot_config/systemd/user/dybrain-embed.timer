@@ -1,0 +1,9 @@
+[Unit]
+Description=DyBrain: rebuild the embeddings of the vault every night
+
+[Timer]
+OnCalendar=*-*-* 01:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

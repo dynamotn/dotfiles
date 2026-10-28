@@ -1,0 +1,6 @@
+[Unit]
+Description=DyBrain: sort the inbox of the vault
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/dybrain-tend triage

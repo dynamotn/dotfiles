@@ -76,6 +76,25 @@ encrypted per identity, see [secrets](./secrets.md).
 To add a machine, add an entry under `machines:` with the fields to pin, then
 run `./scripts/test.sh --all` to validate it.
 
+## DyBrain jobs
+
+`dybrain-tend <job>` runs one background job of the DyBrain vault
+(`$DYBRAIN_VAULT`, default `~/Documents/DyBrain`) from its root. Without the
+vault or `uv` it logs a line and exits successfully.
+
+| Job        | When           | Runs (under `99_System/99.03_Scripts/`) |
+|------------|----------------|-----------------------------------------|
+| `embed`    | daily 01:30    | `dev/vault-embed.py build`              |
+| `triage`   | daily 02:00    | `tend/inbox-triage.py`                  |
+| `briefing` | daily 06:30    | `tend/briefing.py`, with `~/.config/dybrain/env` sourced when present |
+| `weekly`   | Sunday 20:00   | `tend/weekly-draft.py`                  |
+
+The `04-setup-dybrain-jobs` hook schedules them: systemd user timers
+(`dybrain-<job>.timer`, `Persistent=true`) on Linux, launchd agents
+(`com.dybrain.<job>`, logging to `~/Library/Logs/dybrain-<job>.log`) on macOS.
+A run missed while the machine slept happens when it wakes. Other init
+systems (OpenRC, runit, Termux) get nothing scheduled; run the jobs by hand.
+
 ## Container images
 
 `scripts/docker.sh <image>` builds a toolbox image from
