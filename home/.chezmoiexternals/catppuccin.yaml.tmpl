@@ -41,7 +41,7 @@
   refreshPeriod: 168h
 {{- end }}
 {{- if eq .chezmoi.os "android" }}
-.config/termux/color.properties:
+.termux/colors.properties:
   type: file
   url: https://raw.githubusercontent.com/catppuccin/termux/main/themes/catppuccin-{{ $theme }}.properties
   refreshPeriod: 168h

@@ -1,0 +1,12 @@
+# Termux app settings, read from ~/.termux/termux.properties.
+# Apply a change with `termux-reload-settings` (05-reload-termux does it).
+
+# Match the app UI (drawer, dialogs) to the Catppuccin flavour of the colors.
+night-mode = {{ .darkMode }}
+
+# No vibration or beep on BEL: shells and editors ring it on every failed
+# completion.
+bell-character = ignore
+
+# Open a URL by tapping it, instead of long-press then "Select URL".
+terminal-onclick-url-open = true

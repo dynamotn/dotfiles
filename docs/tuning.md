@@ -22,7 +22,7 @@ Check: `sysctl net.core.default_qdisc net.ipv4.tcp_congestion_control`.
 | Setting | Where | Why |
 |---------|-------|-----|
 | btrfs `noatime,compress=zstd:1`, no `autodefrag` | `etc/fstab.tmpl` | reads write no metadata; faster compression on NVMe; autodefrag rewrites extents and unshares them from snapshots |
-| Dirty pages capped at 256M / 1G | `etc/sysctl.d/80-writeback.conf.tmpl` | a slow USB copy no longer stalls every writer |
+| Dirty pages capped at 256M / 1G on a PC or laptop | `etc/sysctl.d/80-writeback.conf.tmpl` | a slow USB copy no longer stalls every writer |
 | BFQ for spinning disks | `etc/udev/rules.d/60-ioschedulers.rules` | responsiveness during long copies; NVMe keeps `none` |
 
 Check: `findmnt -t btrfs -o TARGET,OPTIONS`, `cat /sys/block/*/queue/scheduler`.
@@ -87,3 +87,15 @@ switch live with `scxctl switch -s lavd`.
 hardware loads. The ebuild writes the installed list back as
 `linux-firmware-<version>`, which would take precedence over it;
 `.chezmoiremove` deletes that copy on every apply.
+
+## Termux
+
+Android has no system layer here: `root/` is never applied, so only the
+Termux app itself is tuned, in `home/dot_termux/termux.properties.tmpl`.
+
+- No bell vibration, URLs open on tap, app UI follows `darkMode`.
+- Catppuccin colors land in `~/.termux/colors.properties`, the only path the
+  app reads them from; the font in `~/.termux/font.ttf`.
+- `05-reload-termux` runs `termux-reload-settings` when either changes.
+
+Check: open the drawer and compare its theme; `echo -e '\a'` stays silent.

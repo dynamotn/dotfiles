@@ -29,3 +29,6 @@
 # The hyprlang configuration, replaced by hyprland.lua and its modules.
 .config/hypr/hyprland.conf
 .config/hypr/hyprland/*.conf
+
+# Termux reads its colors only from ~/.termux/colors.properties.
+.config/termux/color.properties

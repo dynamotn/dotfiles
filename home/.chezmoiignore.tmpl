@@ -84,6 +84,9 @@ Library/thunderbird
 {{- if eq .osid "android" }}
 .local/bin/laya-mcp
 {{- end }}
+{{- if ne .chezmoi.os "android" }}
+.termux
+{{- end }}
 
 {{/* Other GUI tools */}}
 {{- if eq .guiServer "0" }}

@@ -1,0 +1,16 @@
+{{- if eq .chezmoi.os "android" -}}
+#!{{ .bash }}
+# @file 05-reload-termux.sh
+# @brief Reload Termux when its settings changed
+# @description Reload the Termux app settings after `chezmoi apply` changed
+# anything under dot_termux. The hook carries one hash over that whole
+# directory, so it re-runs on any change there.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+# config hash: {{ includeTemplate "chezmoiscripts/dir_hash.tmpl" (dict "ctx" . "dirs" (list "dot_termux")) }}
+# chezmoi runs inside the Termux app, so it is always running: no pgrep check.
+dybatpho::header "Reload Termux"
+termux-reload-settings
+dybatpho::success "Reload Termux"
+{{- end }}
