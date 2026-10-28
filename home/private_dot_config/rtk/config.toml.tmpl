@@ -1,0 +1,40 @@
+# Sections set here differ from rtk's defaults (see `rtk config`); a section
+# must repeat every key rtk declares in it.
+
+# Writable state lives in ~/.cache/rtk, the only rtk path Claude's sandbox
+# may write. ~/.local/share/rtk keeps trusted_filters.json out of its reach,
+# so a sandboxed command cannot trust a repository's own output filters.
+[tracking]
+enabled = true
+history_days = 90
+database_path = "{{ .chezmoi.homeDir }}/.cache/rtk/history.db"
+
+[tee]
+enabled = true
+mode = "failures"
+max_files = 20
+max_file_size = 1048576
+directory = "{{ .chezmoi.homeDir }}/.cache/rtk/tee"
+
+[hooks]
+# Commands the Claude hook must not rewrite, matched as a prefix:
+# - those Claude's sandbox runs outside it (sandbox.excludedCommands in
+#   private_dot_claude/settings.json.tmpl), since `rtk docker ...` no longer
+#   matches `docker *` and would run sandboxed; rtk strips a bare `sudo`
+#   before matching, so `sudo -- <cmd>` is the form it leaves alone;
+# - git commands whose short output gets parsed and that rtk's compact form
+#   breaks (porcelain reshaped, a `Changes:` block appended, the stash
+#   `WIP on <branch>:` prefix dropped).
+exclude_commands = [
+  "docker",
+  "podman",
+  "chezmoi",
+  "dyai",
+  "mise",
+  "emerge",
+  "systemctl",
+  "git worktree",
+  "git stash list",
+  "git diff --name-only",
+  "git diff --name-status",
+]

@@ -119,6 +119,8 @@ policy:
       - "Bash(rtk test *)"
       - "Bash(rtk summary *)"
       - "Bash(rtk -*)"
+      # Trusting a repository's filters lets it shape what the agent reads.
+      - "Bash(rtk trust:*)"
       - "Bash(rm -rf *)"
       - "Bash(rm -fr *)"
       - "Bash(shred *)"

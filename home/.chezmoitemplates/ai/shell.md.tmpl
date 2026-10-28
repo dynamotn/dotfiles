@@ -13,6 +13,7 @@ share syntax, so always be explicit about which one a command is written for.
   the exact program matters, call it as `command <tool>` or by absolute path.
 - Claude's rtk hook compacts the output of `git`, `cat`, `ls`, `grep`, `find`,
   `diff`, `curl`, `gh` and test runners. Pipe into `| cat` when the exact
-  output matters, such as a patch to apply or a format to parse.
+  output matters, such as a patch to apply or a format to parse. Write
+  `sudo -- <cmd>`: it turns `sudo ls` into `sudo rtk ls`.
 - A `cd` does not carry over between separate commands. Use absolute paths, or
   chain the `cd` into the same command.

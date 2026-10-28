@@ -202,14 +202,20 @@ STUB
 @test "rtk leaves alone every command the sandbox runs outside it" {
   _require_chezmoi
   local out="${BATS_TEST_TMPDIR}/settings.json" cmd missing=""
-  local rtk_config="${DOTFILES_DIR}/home/private_dot_config/rtk/config.toml"
+  local rtk_config="${DOTFILES_DIR}/home/private_dot_config/rtk/config.toml.tmpl"
   _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
   # `docker ps` rewritten to `rtk docker ps` no longer matches `docker *`
-  # and would run sandboxed. git is listed in its rtk spelling instead.
+  # and would run sandboxed. git is listed in its rtk spelling instead, and
+  # rtk strips a bare `sudo` before it reads its exclusions.
   # shellcheck disable=SC2312 # a bad render lists no command, which the other tests catch
   while IFS= read -r cmd; do
     rg -qF "\"${cmd}\"," "${rtk_config}" || missing+=" ${cmd}"
-  done < <(jq -r '.sandbox.excludedCommands[] | select(startswith("git ") or startswith("rtk ") | not)
+  done < <(jq -r '.sandbox.excludedCommands[]
+    | select(startswith("git ") or startswith("rtk ") or startswith("sudo ") | not)
     | sub(" \\*$"; "")' "${out}")
   [[ -z "${missing}" ]] || fail "rtk would rewrite sandbox-excluded commands:${missing}"
+  # rtk keeps the filters a repository may trust in ~/.local/share/rtk.
+  jq -e '.sandbox.filesystem.allowWrite | all(startswith("~/.local/share/rtk") | not)' "${out}" > /dev/null \
+    || fail "the sandbox can write rtk's trusted filters"
+  rg -q 'database_path = .*/\.cache/rtk/' "${rtk_config}" || fail "rtk history is not under ~/.cache/rtk"
 }

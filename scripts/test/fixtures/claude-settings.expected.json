@@ -183,6 +183,7 @@
       "Bash(rtk test *)",
       "Bash(rtk summary *)",
       "Bash(rtk -*)",
+      "Bash(rtk trust:*)",
       "Bash(rm -rf *)",
       "Bash(rm -fr *)",
       "Bash(shred *)",
@@ -253,7 +254,7 @@
         "~/.cache/pip",
         "~/.cache/uv",
         "~/.cargo/registry",
-        "~/.local/share/rtk"
+        "~/.cache/rtk"
       ],
       "denyRead": [
         "@DOTFILES@/secrets",
