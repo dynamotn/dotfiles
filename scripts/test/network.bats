@@ -20,8 +20,9 @@ EOF
   # The network the tests pretend to be on: every probe reads these.
   UP_PORTS="${BATS_TEST_TMPDIR}/up-ports"
   : > "${UP_PORTS}"
-  # `ssh -G` prints the config; any other call is a handshake, which gets as
-  # far as authentication unless the host is listed in RESET_HOSTS.
+  # `ssh -G` prints the config; any other call is a handshake, which times out
+  # unless port 22 of the host is in UP_PORTS, and otherwise gets as far as
+  # authentication unless the host is listed in RESET_HOSTS.
   RESET_HOSTS="${BATS_TEST_TMPDIR}/reset-hosts"
   : > "${RESET_HOSTS}"
   cat > "${HOME}/.local/bin/ssh" << EOF
@@ -30,7 +31,10 @@ if [[ "\${1}" == -G ]]; then
   printf 'hostname %s\nport 22\n' "\${2}"
   exit 0
 fi
-if grep -qxF "\${*: -1}" "${RESET_HOSTS}"; then
+target="\${*: -1}"
+if ! grep -qxF "\${target#git@}:22" "${UP_PORTS}"; then
+  echo "ssh: connect to host \${target#git@} port 22: Operation timed out" >&2
+elif grep -qxF "\${target}" "${RESET_HOSTS}"; then
   echo "Connection reset by 192.0.2.1 port 22" >&2
 else
   echo "git@example: Permission denied (publickey)." >&2
@@ -66,6 +70,14 @@ function _git_url {
   assert_failure
   run network::ssh_up github.com
   assert_failure
+}
+
+@test "network::ssh_up does not depend on a /dev/tcp port probe" {
+  # Such a probe gets killed on macOS for some hosts while SSH to them works.
+  printf 'github.com:22\n' >> "${UP_PORTS}"
+  function dybatpho::port_open { return 137; }
+  run network::ssh_up github.com
+  assert_success
 }
 
 @test "network::proxy_up probes the host and port of the proxy URL" {

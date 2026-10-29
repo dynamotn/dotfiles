@@ -47,16 +47,11 @@ function network::proxy_up {
 function network::ssh_up {
   local host
   dybatpho::expect_args host -- "$@"
-  local options hostname port
-  # dyshellint disable=BSG118 `ssh -G` only prints the config, it never connects
-  options="$(ssh -G "${host}" 2> /dev/null)" || return 1
-  hostname="$(awk '$1 == "hostname" { print $2; exit }' <<< "${options}")"
-  port="$(awk '$1 == "port" { print $2; exit }' <<< "${options}")"
-  dybatpho::port_open "${hostname:-${host}}" "${port:-22}" "${NETWORK_PROBE_TIMEOUT}" || return 1
   # An open port is not enough: a network can pass the TCP connection and the
   # banner, then reset the key exchange. A fresh connection (no multiplexed
   # master hides the network) that gets as far as host key or user
   # authentication proves it; that it then refuses the key is not the network.
+  # It also replaces a /dev/tcp port probe, which macOS kills for some hosts.
   local answer
   answer="$(timeout "$((NETWORK_PROBE_TIMEOUT * 3))" ssh -T -o BatchMode=yes -o ControlMaster=no \
     -o ControlPath=none -o StrictHostKeyChecking=yes -o ConnectTimeout="${NETWORK_PROBE_TIMEOUT}" \
