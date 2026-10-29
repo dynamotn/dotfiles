@@ -12,6 +12,19 @@ These rules apply whenever an AI agent works with git in any repository.
 - `.worktrees/` is already in the global git ignore, so it never needs a
   per-repository `.gitignore` entry.
 
+## Merging a finished branch
+
+- When a task is done and the user asks for it to be merged, first rebase the
+  branch onto the current tip of the target branch (`git rebase <target>`),
+  so the target can fast-forward to it. Then merge with
+  `git merge --ff-only <branch>`: no merge commit, and a refused
+  fast-forward means rebase again, never fall back to `--no-ff`.
+- A rebase conflict is the user's to settle when it is not obvious: abort
+  with `git rebase --abort` and report it rather than guessing.
+- Rebasing a branch that is already pushed rewrites shared history; ask first,
+  as the destructive-command rules require. Run `dyai merge` for a crew task:
+  it does this rebase and fast-forward on its own.
+
 ## Commit messages
 
 - Keep the subject short and to the point: one line, imperative mood,
