@@ -109,11 +109,21 @@ templates render only what fits it.
 
 ## :brain:&nbsp; Philosophy
 
-- Everything must be under control
-- Everything must be easy to initial or change
-- Everything must be automatically, with fewest manual steps before setup
-- Everything must be dynamic, on every places
-- Everything must have same pastel, with harmony
+- **Everything must be under control:** every configuration lives in this
+  repository, plain text and credentials alike (encrypted), with no
+  exception.
+- **Everything must be easy to set up or change:** initializing, editing,
+  removing, extending and updating anything stays simple.
+- **Everything must be automated, with the fewest manual steps before
+  setup:** a new device, like the old one or not, should not pull me away
+  from other work with hand-made steps.
+- **Everything must be dynamic, everywhere:** it adapts to every machine and
+  place, without tying me to one tool or one way of deploying.
+- **Everything must share the same pastel palette, in harmony:** one colour
+  scheme ([Catppuccin](https://catppuccin.com)) from the terminal to the
+  wallpaper.
+- **Everything must work together:** a tool that does not fit with the rest
+  is dropped.
 
 ## :wrench:&nbsp; Rules
 
