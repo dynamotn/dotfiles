@@ -539,7 +539,7 @@ EOF
     || fail "a registry preset is empty"
   jq -e '. as $r | {registry: $r} | [.registry.languages.go, .registry.infra.cicd, .registry.infra.database,
     .registry.presets.testing, .registry.presets.security, .registry.presets.shell,
-    .registry.presets.lifeos, .registry.infra.terraform, .registry.infra.cloudflare,
+    .registry.infra.terraform, .registry.infra.cloudflare,
     .registry.infra.mongodb, .registry.presets.graphql, .registry.presets.mobile,
     .registry.presets.sentry, .registry.presets.opentelemetry, .registry.presets.context,
     .registry.presets.sre, .registry.presets.finops, .registry.presets.architecture,
@@ -565,9 +565,6 @@ EOF
   [[ "$(yq '.registry.presets.mobile.subagents[0]' "${out}")" == "mobile-developer" ]]
   [[ "$(yq '.registry.presets.desktop.subagents[0]' "${out}")" == "electron-pro" ]]
   [[ "$(yq '.registry.presets.realtime.subagents | length' "${out}")" == "2" ]]
-  # LifeOS skills, pinned to a commit by tree URL
-  yq '.registry.presets.lifeos.skills[]' "${out}" \
-    | grep -x 'https://github.com/danielmiessler/LifeOS/tree/[0-9a-f]\{40\}/LifeOS/install/skills/RedTeam' > /dev/null
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'electron-pro' > /dev/null
   # shellcheck disable=SC2312 # a bad read yields no match, which grep's own exit code catches
   yq '.global.subagents[0].exclude[]' "${out}" | grep -x 'graphql-architect' > /dev/null
