@@ -96,7 +96,7 @@ function _run {
 
   if [[ "${job}" == "briefing" ]]; then
     local env_file
-    env_file="$(dybatpho::path_join "${XDG_CONFIG_HOME:-${HOME}/.config}" "dybrain" "env")"
+    env_file="$(dybatpho::path_join "${HOME}" ".config" "dybrain" "env")"
     if dybatpho::is file "${env_file}"; then
       # The file holds the settings of the briefing; it is only sourced, never shown.
       set -a
