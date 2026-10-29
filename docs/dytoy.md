@@ -92,6 +92,7 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[lm_sensors](https://github.com/lm-sensors/lm-sensors)|Read CPU, GPU and board temperatures and fans|
 |`microcode`|CPU microcode updates, loaded early at boot|
 |[restic](https://restic.net)|Daily off-machine backup of /home and /etc|
+|[scx](https://github.com/sched-ext/scx)|sched_ext CPU schedulers, loaded on boot by scx_loader|
 |[smartmontools](https://www.smartmontools.org)|Disk health monitoring and self-tests|
 |`system_zzz`|Distribution-specific system tools, such as the Portage helpers on Gentoo|
 |[termux-boot](https://github.com/termux/termux-boot)|Start the Termux services when Android boots|

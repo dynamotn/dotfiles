@@ -1,0 +1,18 @@
+{{- /* doc
+name: scx
+url: "https://github.com/sched-ext/scx"
+description: sched_ext CPU schedulers, loaded on boot by scx_loader
+category: System core tools
+subcategory: Base
+*/ -}}
+{{- /* Same machine as sys-kernel/scx in root/etc/portage/world.tmpl. The
+       package alone loads nothing: scx_loader starts the scheduler of
+       root/etc/scx_loader/config.toml.tmpl. */ -}}
+{{- if eq .osid "linux-gentoo" }}
+name: scx
+method: os
+gentoo:
+  packages:
+    - name: sys-kernel/scx
+      service: scx_loader
+{{- end }}

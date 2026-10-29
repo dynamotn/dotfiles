@@ -8,8 +8,12 @@ app-alternatives/cpio
 app-alternatives/lex
 app-alternatives/yacc
 app-arch/unzip
+{{- if has .code .btrfsMachines }}
+app-backup/btrbk
+{{- end }}
 app-containers/docker
 app-containers/docker-cli
+app-crypt/pinentry
 app-editors/neovim
 {{- if has "zh" .languages }}
 app-i18n/fcitx-chinese-addons
@@ -25,6 +29,9 @@ app-i18n/fcitx-m17n
 {{- end }}
 {{- if has "ja" .languages }}
 app-i18n/mozc
+{{- end }}
+{{- if ne .guiServer "0" }}
+app-misc/ddcutil
 {{- end }}
 app-misc/grc
 app-misc/resolve-march-native
@@ -51,9 +58,7 @@ dev-lang/rust-bin
 {{- if eq .guiServer "W" }}
 dev-libs/wayland
 {{- end }}
-{{- if eq .code "l30n4rd0d4v1nc1" }}
 dev-util/bcc
-{{- end }}
 dev-util/ccache
 dev-util/kcov
 {{- if has .code .gentooSourcesMachines }}
@@ -62,9 +67,7 @@ dev-util/pahole
 dev-util/pkgdev
 dev-util/sccache
 dev-vcs/git
-{{- if eq .code "l30n4rd0d4v1nc1" }}
 dev-vcs/git-lfs
-{{- end }}
 games-util/game-device-udev-rules
 {{- if eq .guiServer "W" }}
 {{- if eq .guiWinManager "H" }}
@@ -102,9 +105,7 @@ media-fonts/noto-cjk
 media-fonts/noto-emoji
 media-fonts/roboto
 media-gfx/fontforge
-{{-   if eq .code "l30n4rd0d4v1nc1" }}
 media-gfx/imagemagick
-{{-   end }}
 {{- end }}
 media-libs/exiftool
 {{- if .hasSound }}
@@ -135,10 +136,17 @@ net-vpn/wireguard-tools
 net-wireless/bluez
 {{- end }}
 sci-ml/ollama-bin
+{{- if ne .kind "container" }}
+sys-apps/earlyoom
+{{- end }}
 sys-apps/etckeeper
 sys-apps/ethtool
 sys-apps/flatpak
 sys-apps/nvimpager
+{{- if not (eq .kind "container" "vm") }}
+sys-apps/nvme-cli
+sys-apps/smartmontools
+{{- end }}
 sys-apps/usbutils
 sys-auth/pam_u2f
 {{- if eq .guiServer "W" }}
@@ -160,9 +168,7 @@ sys-kernel/gentoo-kernel
 sys-kernel/installkernel
 sys-kernel/linux-firmware
 sys-kernel/modprobed-db
-{{- if eq .code "l30n4rd0d4v1nc1" }}
 sys-kernel/scx
-{{- end }}
 sys-libs/gpm
 sys-process/cronie
 sys-process/lsof
