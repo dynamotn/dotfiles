@@ -68,7 +68,7 @@ switch live with `scxctl switch -s lavd`.
 
 - OpenRC starts independent services in parallel
   (`etc/rc.conf.d/parallel.conf`).
-- Nothing waits for the network: `ntpd -g` replaces the one-shot
+- Nothing waits for the network: chronyd's `makestep` replaces the one-shot
   `ntp-client`, and `netmount` is dropped since nothing is mounted over the
   network (dytoy `ntp.yaml`; on an installed machine run the `rc-update del`
   lines of its hook once).

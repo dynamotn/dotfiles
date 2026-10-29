@@ -120,11 +120,11 @@ net-firewall/nftables
 {{- if eq .guiServer "W" "X" }}
 net-im/telegram-desktop-bin
 {{- end }}
+net-misc/chrony
 net-misc/curl
 {{- if .hasWifi }}
 net-misc/networkmanager
 {{- end }}
-net-misc/ntp
 net-misc/openssh
 {{- if eq .guiServer "W" "X" }}
 net-misc/rustdesk

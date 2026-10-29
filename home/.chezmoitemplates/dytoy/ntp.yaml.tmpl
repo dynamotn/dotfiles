@@ -14,12 +14,13 @@ method: os
 is_essential: true
 gentoo:
   {{- if eq .initSystem "openrc" }}
-  # ntpd runs with -g, so it steps a large offset at start by itself: the
-  # one-shot ntp-client only makes boot wait for the network. netmount waits
-  # for it too, and nothing here is mounted over the network.
+  # chronyd steps a large offset at start by itself (makestep): the one-shot
+  # ntp-client only makes boot wait for the network. netmount waits for it
+  # too, and nothing here is mounted over the network. net-misc/ntp is
+  # masked for removal, so ntpd goes as well.
   packages:
-    - name: net-misc/ntp
-      service: ntpd
+    - name: net-misc/chrony
+      service: chronyd
   {{- else if eq .initSystem "systemd" }}
   packages:
     - name:  sys-apps/systemd
@@ -29,6 +30,7 @@ gentoo:
     {{- if eq .initSystem "openrc" }}
     before: |-
       sudo rc-update del ntp-client default || true
+      sudo rc-update del ntpd default || true
       sudo rc-update del netmount default || true
     {{- end }}
     after: |-
