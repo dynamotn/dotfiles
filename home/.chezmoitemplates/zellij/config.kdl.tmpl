@@ -5,10 +5,17 @@ keybinds clear-defaults=true {
     // Agent jumps through zj-herdr: a/A cycle the agents that need you
     // (blocked first, then idle) across every session, w toggles the
     // floating picker of all agents.
+    // j/k move the selection on the pinned rail and g jumps to it. The rail
+    // is unselectable, so it gets no keys of its own; Zellij matches pipe
+    // targets by URL and configuration, so these repeat the rail's options
+    // from tab-templates.kdl.tmpl exactly.
     normal {
         bind "a" { MessagePlugin "zj_herdr" { name "zj_herdr.cmd.v1"; payload "attention-next"; }; SwitchToMode "locked"; }
         bind "A" { MessagePlugin "zj_herdr" { name "zj_herdr.cmd.v1"; payload "attention-prev"; }; SwitchToMode "locked"; }
         bind "w" { MessagePlugin "zj_herdr" { name "zj_herdr.cmd.v1"; payload "toggle"; }; SwitchToMode "locked"; }
+        bind "j" { MessagePlugin "zj_herdr" { name "zj_herdr.cmd.v1"; payload "select-next"; floating true; pinned "true"; start_daemon "true"; }; }
+        bind "k" { MessagePlugin "zj_herdr" { name "zj_herdr.cmd.v1"; payload "select-prev"; floating true; pinned "true"; start_daemon "true"; }; }
+        bind "g" { MessagePlugin "zj_herdr" { name "zj_herdr.cmd.v1"; payload "jump"; floating true; pinned "true"; start_daemon "true"; }; SwitchToMode "locked"; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
