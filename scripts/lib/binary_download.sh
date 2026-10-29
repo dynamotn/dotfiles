@@ -197,6 +197,22 @@ function __binary_download_glob_matches {
 }
 
 #######################################
+# @description Put a file at a path as a new file, never by writing over the old
+# one: macOS kills a signed binary whose file changed under the signature it
+# cached for that file, so an update in place leaves the command dying with
+# SIGKILL until it is replaced again.
+# @arg $1 string File to copy
+# @arg $2 string Path it takes the place of
+#######################################
+function __binary_download_replace {
+  local source target
+  dybatpho::expect_args source target -- "$@"
+  local staged="${target}.dytoy-new"
+  cp -- "${source}" "${staged}"
+  mv -f -- "${staged}" "${target}"
+}
+
+#######################################
 # @description Copy selected archive entries from a temp extraction directory.
 # @arg $1 string Extracted archive root
 # @arg $2 string Archive member pattern
@@ -236,7 +252,11 @@ function __binary_download_copy_selection {
     destination_path="$(dybatpho::path_join "${destination}" "${stripped_path}")"
     destination_dir="$(dybatpho::path_dirname "${destination_path}")"
     dybatpho::ensure_dir "${destination_dir}" > /dev/null
-    cp -R "${match}" "${destination_path}"
+    if dybatpho::is file "${match}"; then
+      __binary_download_replace "${match}" "${destination_path}"
+    else
+      cp -R "${match}" "${destination_path}"
+    fi
   done
 
   [[ -n "${rename_target}" ]] || return 0
@@ -307,16 +327,20 @@ function __binary_download_extract_archive {
 function __binary_download_extract_single_file {
   local name path location
   dybatpho::expect_args name path location -- "$@"
-  dybatpho::dry_run dybatpho::archive_extract "${path}" "${location}"
+  # Into a scratch directory first: decompressing over an installed command
+  # would rewrite its file in place (see __binary_download_replace).
+  local temp_dir
+  dybatpho::create_temp_dir temp_dir
+  dybatpho::dry_run dybatpho::archive_extract "${path}" "${temp_dir}"
   # The codec writes the archive name without its suffix, which is rarely the
   # command name.
   local extracted_name
   extracted_name="$(dybatpho::path_basename "${path%.*}")"
-  [[ "${extracted_name}" != "${name}" ]] || return 0
   local extracted_path target_path
-  extracted_path="$(dybatpho::path_join "${location}" "${extracted_name}")"
+  extracted_path="$(dybatpho::path_join "${temp_dir}" "${extracted_name}")"
   target_path="$(dybatpho::path_join "${location}" "${name}")"
-  dybatpho::dry_run mv "${extracted_path}" "${target_path}"
+  dybatpho::ensure_dir "${location}" > /dev/null
+  dybatpho::dry_run __binary_download_replace "${extracted_path}" "${target_path}"
 }
 
 #######################################

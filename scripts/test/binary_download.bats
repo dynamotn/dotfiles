@@ -450,6 +450,52 @@ PY
   assert_output "hello single"
 }
 
+# Inode of a file; perl reads it the same on BSD and GNU systems.
+function _inode {
+  perl -e 'print((stat shift)[1])' "$1"
+}
+
+@test "a reinstall from a tarball puts a new file in place, not the old one rewritten" {
+  # macOS kills a signed binary rewritten in place: an update must be a new file.
+  local root="${BATS_TEST_TMPDIR}/extracted" destination="${BATS_TEST_TMPDIR}/bin"
+  mkdir -p "${root}" "${destination}"
+  printf 'new\n' > "${root}/mytool"
+  printf 'old\n' > "${destination}/mytool"
+  # Held open, so the old inode cannot be reused for the new file.
+  exec 9< "${destination}/mytool"
+  local before
+  before="$(_inode "${destination}/mytool")"
+  run __binary_download_copy_selection "${root}" "mytool" "${destination}" 0 tree ""
+  exec 9<&-
+  assert_success
+  run cat "${destination}/mytool"
+  assert_output "new"
+  local after
+  after="$(_inode "${destination}/mytool")"
+  [[ "${after}" != "${before}" ]] || fail "mytool was rewritten in place"
+  assert_file_not_exist "${destination}/mytool.dytoy-new"
+}
+
+@test "a reinstall from a single compressed file puts a new file in place" {
+  function dybatpho::archive_extract {
+    printf 'new\n' > "$2/mytool"
+  }
+  local destination="${BATS_TEST_TMPDIR}/out"
+  mkdir -p "${destination}"
+  printf 'old\n' > "${destination}/mytool"
+  exec 9< "${destination}/mytool"
+  local before
+  before="$(_inode "${destination}/mytool")"
+  run __binary_download_extract_single_file mytool "${BATS_TEST_TMPDIR}/mytool.gz" "${destination}"
+  exec 9<&-
+  assert_success
+  run cat "${destination}/mytool"
+  assert_output "new"
+  local after
+  after="$(_inode "${destination}/mytool")"
+  [[ "${after}" != "${before}" ]] || fail "mytool was rewritten in place"
+}
+
 @test "a dry run shows the copy as a command that could be pasted back" {
   # The whole command used to reach `dybatpho::dry_run` as one string, so it
   # came out as a single quoted word rather than `cp` and its arguments.
