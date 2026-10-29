@@ -7,6 +7,11 @@
   },
   "cleanupPeriodDays": 20,
   "effortLevel": "medium",
+  "env": {
+    "GIT_CONFIG_COUNT": "1",
+    "GIT_CONFIG_KEY_0": "core.fsmonitor",
+    "GIT_CONFIG_VALUE_0": "false"
+  },
   "hooks": {
     "Notification": [
       {
@@ -229,6 +234,10 @@
       "Bash(vault read *)",
       "Bash(op read *)",
       "Bash(aws configure get *)",
+      "Bash(git commit --no-gpg-sign*)",
+      "Bash(rtk git commit --no-gpg-sign*)",
+      "Bash(git -c commit.gpgsign=false *)",
+      "Bash(rtk git -c commit.gpgsign=false *)",
       "Bash(dyai-selftest-probe deny *)"
     ],
     "disableBypassPermissionsMode": "disable"
