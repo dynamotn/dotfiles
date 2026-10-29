@@ -15,11 +15,15 @@ fi
 # Values are single-quoted for the shell: a quote, `$` or backtick in a
 # password must reach nmcli as itself, not run as code.
 device=$(nmcli --get-values GENERAL.DEVICE,GENERAL.TYPE device show | sed '/^wifi$/!{h;d;};x')
+
+# NetworkManager allows several profiles with one name, so each network below
+# first drops every profile of its name, or each run piles up a duplicate.
+connections=$(nmcli --get-values UUID,NAME connection show)
 {{-   if .decryptPersonal }}
 # hash: {{ joinPath .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.tmpl" | include | sha256sum }}
 {{-     $wifiSecret := includeTemplate (join .chezmoi.sourceDir "../secrets/data/personal/wifi.yaml.tmpl") . | fromYaml }}
 {{-     range $wifiSecret }}
-rm -f -- /etc/NetworkManager/system-connections/{{ .name | replace "'" "'\\''" | printf "'%s'" }}-*.nmconnection
+{{- template "deleteConnection" .name }}
 nmcli connection add type wifi \
   ifname "${device}" \
   con-name {{ .name | replace "'" "'\\''" | printf "'%s'" }} \
@@ -45,7 +49,7 @@ nmcli connection add type wifi \
 {{-     $commonSecret := printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-     $wifiSecret := printf "../secrets/data/enterprise-%s/wifi.yaml.age" . | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-     range $wifiSecret }}
-rm -f -- /etc/NetworkManager/system-connections/{{ .name | replace "'" "'\\''" | printf "'%s'" }}-*.nmconnection
+{{- template "deleteConnection" .name }}
 nmcli connection add type wifi \
   ifname "${device}" \
   con-name {{ .name | replace "'" "'\\''" | printf "'%s'" }} \
@@ -68,4 +72,13 @@ systemctl restart NetworkManager
 rc-service NetworkManager restart
 {{- end }}
 dybatpho::success "Setup Wi-Fi"
+{{- end }}
+
+{{- define "deleteConnection" }}
+# nmcli escapes `\` and `:` in its terse output, as this name is.
+while IFS=: read -r uuid name; do
+  if [[ "${name}" == {{ . | replace "\\" "\\\\" | replace ":" "\\:" | replace "'" "'\\''" | printf "'%s'" }} ]]; then
+    nmcli connection delete uuid "${uuid}" > /dev/null
+  fi
+done <<< "${connections}"
 {{- end }}
