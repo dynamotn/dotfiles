@@ -1,0 +1,20 @@
+{{- /* This machine's keys for the dyai crew store, as JSON: signing and
+       deploy (the private keys), public and deploy_public, from the
+       `nodes.<code>` entry of secrets/data/personal/dyai.yaml.age. The store
+       is personal, so only a machine that decrypts the personal identity
+       gets them. Every field is empty otherwise, or when the file or the entry is missing, so
+       containers and CI never decrypt anything.
+       Read it with: includeTemplate "dyai/node-key.tmpl" . | fromJson */ -}}
+{{- $node := dict }}
+{{- if .decryptPersonal }}
+{{-   $file := joinPath .chezmoi.sourceDir "../secrets/data/personal/dyai.yaml.age" }}
+{{-   if stat $file }}
+{{-     $node = include $file | decrypt | fromYaml | dig "nodes" .code dict }}
+{{-   end }}
+{{- end }}
+{{- dict
+      "signing" (dig "signing" "" $node | default "")
+      "public" (dig "public" "" $node | default "")
+      "deploy" (dig "deploy" "" $node | default "")
+      "deploy_public" (dig "deploy_public" "" $node | default "")
+    | toJson }}

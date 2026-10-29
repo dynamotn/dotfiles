@@ -1,0 +1,5 @@
+{{- /* Public half of the store signing key (dyai/node-key.tmpl). */ -}}
+{{- $key := includeTemplate "dyai/node-key.tmpl" . | fromJson }}
+{{- with $key.public -}}
+{{ trim . }}
+{{ end -}}

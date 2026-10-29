@@ -1,0 +1,6 @@
+{{- /* The deploy key this machine pushes to the dyai crew store with; empty,
+       so not written, where the secrets hold none (dyai/node-key.tmpl). */ -}}
+{{- $key := includeTemplate "dyai/node-key.tmpl" . | fromJson }}
+{{- with $key.deploy -}}
+{{ trim . }}
+{{ end -}}

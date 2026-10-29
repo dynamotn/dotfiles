@@ -211,11 +211,16 @@ global:
     timeout: 1800
     cooldown: 900
     # Crew state in one repository every machine shares (docs/dyai-store.md):
-    # signed with ~/.config/dyai/node/signing, trusted through
-    # nodes/allowed_signers on the store's main branch.
+    # signed with ~/.config/dyai/node/signing and pushed with the deploy key
+    # ~/.config/dyai/node/deploy, both rendered from
+    # secrets/data/personal/dyai.yaml.age and made on a new machine by
+    # .chezmoiscripts/run_onchange_after_04-setup-dyai-node.sh. Trust lives in
+    # nodes/allowed_signers on the store's main, which no deploy key may push.
     store:
       backend: git
       url: git@gitlab.com:dynamo-brain/dyai-state.git
+      node: {{ .code | quote }}
+      ssh_key: ~/.config/dyai/node/deploy
     require_review: true
     # lean: a worker loads the policy and the agent rules, not the plugins
     # and MCP servers (claude: ~57k to ~30k input tokens per call).

@@ -22,6 +22,21 @@ age identities. Templates read the decrypted data at apply time, e.g.
 `secrets/data/<identity>/machine.yaml.age`, so no value lands in this public
 tree. Containers and CI decrypt nothing, and every such field stays empty.
 
+The dyai crew store needs two SSH keys per machine: `signing`, which signs
+its events, and `deploy`, a deploy key of the store project that pushes them.
+Both live in `secrets/data/personal/dyai.yaml.age` under `nodes.<code>`
+(`signing`, `public`, `deploy`, `deploy_public`;
+`schemas/secrets/dyai.schema.yaml`), and
+`home/.chezmoitemplates/dyai/node-key.tmpl` renders this machine's keys to
+`~/.config/dyai/node/`. A machine that does not decrypt the personal identity,
+or has no entry, gets none. On a new machine
+`run_onchange_after_04-setup-dyai-node.sh` makes both keys, adds them to that
+file (committed in `secrets/data`, not pushed), and through `glab` with your
+own account keeps the store's `main` protected from deploy keys, registers the
+deploy key with write access, and adds the signing key to
+`nodes/allowed_signers` on `main`. Agents are denied reading
+`~/.config/dyai/node/`.
+
 ## `chezmoi-dycrypt`
 
 Encrypts and decrypts with a single identity. It handles two layouts:

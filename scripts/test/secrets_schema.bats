@@ -199,6 +199,11 @@ function _validate {
   _validate "${SCHEMA_DIR}/machine.schema.yaml" "${DATA_DIR}/personal/machine.yaml"
 }
 
+@test "secrets/personal/dyai.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/dyai.schema.yaml" "${DATA_DIR}/personal/dyai.yaml"
+}
+
 @test "secrets/enterprise-F1/machine.yaml conforms to schema" {
   _require_ys
   _validate "${SCHEMA_DIR}/machine.schema.yaml" "${DATA_DIR}/enterprise-F1/machine.yaml"

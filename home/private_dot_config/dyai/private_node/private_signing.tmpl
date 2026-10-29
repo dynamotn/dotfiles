@@ -1,0 +1,6 @@
+{{- /* The dyai crew store's signing key of this machine; empty, so not
+       written, where the secrets hold none (dyai/node-key.tmpl). */ -}}
+{{- $key := includeTemplate "dyai/node-key.tmpl" . | fromJson }}
+{{- with $key.signing -}}
+{{ trim . }}
+{{ end -}}
