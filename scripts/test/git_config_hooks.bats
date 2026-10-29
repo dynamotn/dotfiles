@@ -5,7 +5,7 @@ setup() {
   setup_dotfiles_test_env
 
   local name
-  for name in strip_agent_credit worktree_submodules worktree_cleanup; do
+  for name in strip_agent_credit commit_message worktree_submodules worktree_cleanup; do
     render_template "home/private_dot_config/git/scripts/executable_${name}.sh.tmpl" \
       "${BATS_TEST_TMPDIR}/${name}.sh"
   done
@@ -120,4 +120,16 @@ EOF
   assert_exists .worktrees/dirty/untracked
   run git branch --list finished
   assert_output --partial "finished"
+}
+
+@test "commit_message refuses a long subject and passes a short one" {
+  local msg="${BATS_TEST_TMPDIR}/msg"
+  printf 'feat: %s\n' "$(printf 'x%.0s' {1..70})" > "${msg}"
+  run bash "${BATS_TEST_TMPDIR}/commit_message.sh" "${msg}"
+  assert_failure
+  assert_output --partial "the limit is 72"
+
+  printf 'fix: a bug\n' > "${msg}"
+  run bash "${BATS_TEST_TMPDIR}/commit_message.sh" "${msg}"
+  assert_success
 }

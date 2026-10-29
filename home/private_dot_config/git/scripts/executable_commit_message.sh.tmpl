@@ -1,10 +1,12 @@
 #!{{ .bash }}
-# @file commit-msg
+# @file commit_message.sh
 # @brief Reject a commit message that breaks the commit conventions
-# @description Reject an empty message, a subject over 72 characters and any trailer that
-# credits an AI agent, and warn when the subject goes over the 50 character mark.
+# @description Run by the global `commit-msg` hook (`hook.commit-message` in the git
+# config), after `strip_agent_credit.sh` has dropped any agent credit. Reject an
+# empty message and a subject over 72 characters, and warn when the subject goes
+# over the 50 character mark.
 {{ template "git/hooks/modern_bash.sh.tmpl" . }}
-. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules array
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 
 readonly SUBJECT_WARN_LENGTH=50
@@ -29,16 +31,6 @@ subject="${message%%$'\n'*}"
 # commit they point at, so holding them to the length rule helps nobody.
 if [[ ${subject} =~ ^(Merge|Revert|fixup!|squash!|amend!) ]]; then
   exit 0
-fi
-
-# Attribution belongs to the human author, so no agent trailer gets committed.
-attribution_pattern='(Co-[Aa]uthored-[Bb]y:.*(Claude|Copilot|Cursor|Codex|Gemini|ChatGPT|GPT-|Aider))|([Gg]enerated with)|(🤖)'
-offenders=()
-mapfile -t offenders < <(grep -E "${attribution_pattern}" <<< "${message}" || true)
-if ((${#offenders[@]} > 0)); then
-  dybatpho::error "Agent attribution is not allowed in a commit message:"
-  dybatpho::array_print offenders >&2
-  dybatpho::die "Remove the trailer, the human author is the only author"
 fi
 
 if ((${#subject} > SUBJECT_MAX_LENGTH)); then

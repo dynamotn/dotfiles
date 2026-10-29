@@ -252,19 +252,36 @@
         # Create worktree with new branch, in the repository itself even inside a submodule
         wt = "!_() { branch=$1; branch_safe=${branch//\\//-}; unset GIT_DIR GIT_WORK_TREE; c=$(git rev-parse --path-format=absolute --git-common-dir); repo=$(git -C \"$c\" rev-parse --path-format=absolute --show-toplevel 2>/dev/null); [ -n \"$repo\" ] || repo=$(dirname \"$c\"); mkdir -p \"${repo}/.worktrees\"; git -C \"$repo\" worktree add -b \"$branch\" \"${repo}/.worktrees/${branch_safe}\"; }; _"
 {{- /* Hooks from config (git 2.54+) run in every repository, before its own
-       hooks; an older git ignores them */}}
+       hooks; an older git ignores them. Each event runs its hooks in the
+       order listed here. */}}
+[hook "conflict-markers"]
+        # Refuse staged content that still holds conflict markers
+        event = pre-commit
+        command = ~/.config/git/scripts/conflict_markers.sh
 [hook "agent-credit"]
-        # Drop the lines crediting an AI agent from every commit message
+        # Drop the lines crediting an AI agent, before the message is checked
         event = commit-msg
         command = ~/.config/git/scripts/strip_agent_credit.sh
+[hook "commit-message"]
+        # Refuse an empty message or a subject over 72 characters
+        event = commit-msg
+        command = ~/.config/git/scripts/commit_message.sh
 [hook "commit-signed"]
         # Flag a commit left unsigned while the global config asks for signing
         event = post-commit
         command = "[ \"$(git config --global --type=bool commit.gpgsign)\" != true ] || git cat-file commit HEAD | grep -q '^gpgsig' || echo 'error: HEAD is not signed; sign it with: git commit --amend --no-edit -S' >&2"
+[hook "checkout-changes"]
+        # Warn about dependency changes; give a mirrored clone its remotes
+        event = post-checkout
+        command = ~/.config/git/scripts/checkout_changes.sh
 [hook "worktree-submodules"]
-        # Check out the submodules marked worktreeInit in a new linked worktree
+        # Check out a new linked worktree's submodules, minus worktreeInit = false
         event = post-checkout
         command = ~/.config/git/scripts/worktree_submodules.sh
+[hook "merge-changes"]
+        # Warn about dependency changes a merge or pull brought in
+        event = post-merge
+        command = ~/.config/git/scripts/merge_changes.sh
 [hook "worktree-cleanup"]
         # Remove a clean worktree once a merge brought its branch in, keep the branch
         event = post-merge
@@ -274,7 +291,6 @@
         auto = 0
 [init]
         defaultBranch = main
-        templatedir = ~/.config/git/templates
 [include]
         path = ~/.config/git/diff-filter
         path = ~/.config/git/delta

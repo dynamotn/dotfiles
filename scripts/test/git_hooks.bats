@@ -4,7 +4,7 @@ setup() {
 
   HOOK="${BATS_TEST_TMPDIR}/pre-commit"
   render_template \
-    "home/private_dot_config/git/templates/hooks/executable_pre-commit.tmpl" "${HOOK}"
+    "home/private_dot_config/git/scripts/executable_conflict_markers.sh.tmpl" "${HOOK}"
 
   REPO="${BATS_TEST_TMPDIR}/repo"
   dybatpho::ensure_dir "${REPO}" > /dev/null

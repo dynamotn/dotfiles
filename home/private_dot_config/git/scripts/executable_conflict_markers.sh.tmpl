@@ -1,7 +1,8 @@
 #!{{ .bash }}
-# @file pre-commit
+# @file conflict_markers.sh
 # @brief Reject a commit that still has conflict markers
-# @description Reject a commit whose staged content still contains merge conflict
+# @description Run by the global `pre-commit` hook (`hook.conflict-markers` in the git
+# config). Reject a commit whose staged content still contains merge conflict
 # markers, and point at the exact lines. A file that carries markers on purpose,
 # such as a document explaining a conflict or a test fixture, opts out with the
 # `conflict-markers=allowed` gitattribute.

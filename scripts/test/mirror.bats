@@ -102,18 +102,17 @@ gh https://github.com/dynamotn/dotfiles-secrets.git"
 }
 
 @test "the post-checkout hook gives a clone of a mirrored repository gh" {
-  local templates="${BATS_TEST_TMPDIR}/templates" bare="${BATS_TEST_TMPDIR}/dotfiles.git"
-  local clone="${BATS_TEST_TMPDIR}/clone" hook
-  hook="${templates}/hooks/post-checkout"
-  mkdir -p "${templates}/hooks"
-  render_template home/private_dot_config/git/templates/hooks/executable_post-checkout.tmpl "${hook}"
+  local bare="${BATS_TEST_TMPDIR}/dotfiles.git"
+  local clone="${BATS_TEST_TMPDIR}/clone" hook="${BATS_TEST_TMPDIR}/checkout_changes.sh"
+  render_template home/private_dot_config/git/scripts/executable_checkout_changes.sh.tmpl "${hook}"
   sed -i "s|'${DOTFILES_REAL_HOME}/.config/dynet/mirrors.json'|'${MIRRORS}'|" "${hook}"
   git init -q --bare -b main "${bare}"
   git -C "${REPO}" -c user.name=test -c user.email=test@example.com commit -q --allow-empty -m init
   git -C "${REPO}" push -q "${bare}" HEAD:main
   # The clone keeps the GitLab URL in its config; only the transport is local.
   git -c "url.${bare}.insteadOf=git@gitlab.com:dynamo-config/dotfiles.git" \
-    clone -q --template "${templates}" git@gitlab.com:dynamo-config/dotfiles.git "${clone}"
+    -c hook.checkout-changes.event=post-checkout -c "hook.checkout-changes.command=${hook}" \
+    clone -q git@gitlab.com:dynamo-config/dotfiles.git "${clone}"
   run git -C "${clone}" config --get remote.gh.url
   assert_output "git@github.com:dynamotn/dotfiles.git"
   run git -C "${clone}" config --get remote.origin.url

@@ -1,7 +1,8 @@
 #!{{ .bash }}
-# @file post-checkout
+# @file checkout_changes.sh
 # @brief Warn when switching branches brought in dependency changes
-# @description Warn when a branch checkout changed the submodules, the lockfiles or the
+# @description Run by the global `post-checkout` hook (`hook.checkout-changes` in the
+# git config). Warn when a branch checkout changed the submodules, the lockfiles or the
 # pinned tool versions, so the install step is not forgotten. After a clone of a
 # repository mirrored from GitLab to GitHub, give it `origin` on GitLab and `gh` on GitHub.
 {{ template "git/hooks/modern_bash.sh.tmpl" . }}

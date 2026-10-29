@@ -1,7 +1,8 @@
 #!{{ .bash }}
-# @file post-merge
+# @file merge_changes.sh
 # @brief Warn when a merge brought in dependency changes
-# @description Warn when a merge or a `git pull` changed the submodules, the lockfiles or
+# @description Run by the global `post-merge` hook (`hook.merge-changes` in the git
+# config). Warn when a merge or a `git pull` changed the submodules, the lockfiles or
 # the pinned tool versions, so the install step is not forgotten.
 {{ template "git/hooks/modern_bash.sh.tmpl" . }}
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules array

@@ -1,5 +1,5 @@
 # Global config, picked up through GITLINT_CONFIG (see fish config).
-# Mirrors ~/.config/git/templates/hooks/commit-msg: Conventional Commits,
+# Mirrors ~/.config/git/scripts/commit_message.sh: Conventional Commits,
 # subject at most 72 characters, no agent attribution. Merge, revert, fixup
 # and squash commits are skipped by gitlint's defaults, as in the hook.
 [general]
