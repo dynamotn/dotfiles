@@ -160,6 +160,10 @@
   },
   "inputNeededNotifEnabled": true,
   "permissions": {
+    "allow": [
+      "Bash(git wt *)",
+      "Bash(rtk git wt *)"
+    ],
     "ask": [
       "Bash(git push)",
       "Bash(git push:*)",

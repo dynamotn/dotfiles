@@ -182,6 +182,48 @@ function _assert_idempotent {
   _assert_idempotent "${f}"
 }
 
+@test "allow rules reach every agent with an allow list, below ask and deny" {
+  local a
+  for a in opencode agy gemini codex hermes; do _stub_agent "${a}"; done
+  _write_config
+  # git push is also asked and rm -rf also denied: the stricter list wins.
+  yq -i '.global.policy.permissions.allow = ["Bash(git wt *)", "Bash(rtk git wt *)",
+    "Bash(git push *)", "Bash(rm -rf *)"]' "${HOME}/.config/dyai/config.yaml"
+  run bash "${HOOK}"
+  assert_success
+  local o="${HOME}/.config/opencode/opencode.json"
+  jq -e '.permission.bash["git wt *"] == "allow"' "${o}" > /dev/null
+  jq -e '.permission.bash["git push *"] == "ask"' "${o}" > /dev/null
+  jq -e '.permission.bash["rm -rf *"] == "deny"' "${o}" > /dev/null
+  # opencode lets the last matching key win, so allow keys come first.
+  jq -e '.permission.bash | keys_unsorted | index("git wt *") < index("git push *")' "${o}" > /dev/null
+  jq -e '.permissions.allow == ["command(git wt)"]' \
+    "${HOME}/.gemini/antigravity-cli/settings.json" > /dev/null
+  local j
+  j="$(yq -p=toml -o=json -I=0 '.' "${HOME}/.gemini/policies/dyai.toml")"
+  jq -e '[.rule[] | select(.decision == "allow")] | length == 1 and .[0].commandPrefix == ["git wt"]
+    and .[0].priority < 800' <<< "${j}" > /dev/null
+  local c="${HOME}/.codex/rules/dyai.rules"
+  grep -F 'prefix_rule(pattern = ["git","wt"], decision = "allow"' "${c}" > /dev/null
+  run grep -F '["git","push"], decision = "allow"' "${c}"
+  assert_failure
+  run grep -F 'git wt' "${HOME}/.hermes/config.yaml"
+  assert_failure
+}
+
+@test "opencode: a broad allow stays before an ask already in the file" {
+  _stub_agent opencode
+  dybatpho::ensure_dir "${HOME}/.config/opencode" > /dev/null
+  printf '{"permission":{"bash":{"git push *":"ask"}}}' > "${HOME}/.config/opencode/opencode.json"
+  _write_config
+  yq -i '.global.policy.permissions.allow = ["Bash(git *)"]' "${HOME}/.config/dyai/config.yaml"
+  run bash "${HOOK}"
+  assert_success
+  # The last matching key wins, so an appended "git *" would approve pushes.
+  jq -e '.permission.bash | keys_unsorted | index("git *") < index("git push *")' \
+    "${HOME}/.config/opencode/opencode.json" > /dev/null
+}
+
 @test "no permission rules writes no agent file" {
   _stub_agent gemini
   _stub_agent codex

@@ -9,6 +9,9 @@ These rules apply whenever an AI agent works with git in any repository.
 - Prefer the `git wt <branch>` alias, which picks the right location on its
   own. Otherwise use `git worktree add .worktrees/<name>` from the main
   checkout.
+- Run `git wt <branch>` on its own, never chained after `cd` or `mkdir`:
+  alone it is pre-approved and runs outside the sandbox, while a chained one
+  runs inside it and fails on the secret files it cannot write.
 - `.worktrees/` is already in the global git ignore, so it never needs a
   per-repository `.gitignore` entry.
 

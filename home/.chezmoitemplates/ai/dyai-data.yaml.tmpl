@@ -96,6 +96,14 @@ policy:
   # PreToolUse hook rewrites some git commands to `rtk git ...` before they are
   # matched, so every git rule is listed in both spellings.
   permissions:
+    # Creating a worktree cannot run sandboxed: checkout writes the .age
+    # files, secrets/ and .gitmodules the sandbox fences off. Only the alias
+    # is allowed: it takes one branch name and always lands in .worktrees/,
+    # while a raw `git worktree add .worktrees/*` would also match `..` and
+    # extra flags such as -B.
+    allow:
+      - "Bash(git wt *)"
+      - "Bash(rtk git wt *)"
     ask:
       - "Bash(git push)"
       - "Bash(git push:*)"
