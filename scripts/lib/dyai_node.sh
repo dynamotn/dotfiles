@@ -89,6 +89,32 @@ function dyai_node::save_secret {
 }
 
 #######################################
+# @description Print what a machine's store setup covers: a change to any of it sets it up again
+# @arg $1 string URL of the store
+# @arg $2 string Path of the public signing key
+# @arg $3 string Path of the public deploy key
+# @stdout One line: the URL and the two keys
+#######################################
+function dyai_node::stamp {
+  local url signing deploy
+  dybatpho::expect_args url signing deploy -- "$@"
+  local a b
+  a="$(cut -d' ' -f1,2 < "${signing}")" || return 1
+  b="$(cut -d' ' -f1,2 < "${deploy}")" || return 1
+  printf '%s %s %s\n' "${url}" "${a}" "${b}"
+}
+
+#######################################
+# @description Tell whether glab can reach gitlab.com as you
+# @noargs
+# @exitcode 1 glab is missing, or not logged in yet
+#######################################
+function dyai_node::glab_ready {
+  dybatpho::is command glab || return 1
+  glab auth status --hostname gitlab.com &> /dev/null
+}
+
+#######################################
 # @description Print a GitLab project path encoded for the API
 # @arg $1 string Project path, such as group/name
 #######################################

@@ -28,13 +28,15 @@ Both live in `secrets/data/personal/dyai.yaml.age` under `nodes.<code>`
 (`signing`, `public`, `deploy`, `deploy_public`;
 `schemas/secrets/dyai.schema.yaml`), and
 `home/.chezmoitemplates/dyai/node-key.tmpl` renders this machine's keys to
-`~/.config/dyai/node/`. A machine that does not decrypt the personal identity,
-or has no entry, gets none. On a new machine
-`run_onchange_after_04-setup-dyai-node.sh` makes both keys, adds them to that
-file (committed in `secrets/data`, not pushed), and through `glab` with your
-own account keeps the store's `main` protected from deploy keys, registers the
-deploy key with write access, and adds the signing key to
-`nodes/allowed_signers` on `main`. Agents are denied reading
+`~/.config/dyai/node/`. A machine that does not decrypt the personal identity
+gets none, and its dyai config keeps the crew state local. On a new machine
+`run_after_04-setup-dyai-node.sh` makes both keys and adds them to that file
+(committed in `secrets/data`, not pushed). Once `glab auth login` was run, the
+next apply goes on through `glab` with your own account: it keeps the store's
+`main` protected from deploy keys, registers the deploy key with write access,
+and adds the signing key to `nodes/allowed_signers` on `main`, then leaves a
+stamp under `~/.local/state/dyai/` so later applies skip it. Until then, or
+while GitLab is away, it only warns. Agents are denied reading
 `~/.config/dyai/node/`.
 
 ## `chezmoi-dycrypt`
