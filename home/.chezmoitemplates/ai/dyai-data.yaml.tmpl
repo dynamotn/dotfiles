@@ -161,6 +161,9 @@ policy:
       - "Read(~/.netrc)"
       - "Read(~/.password-store/**)"
       - "Read(~/.local/share/keyrings/**)"
+      # The dyai crew store's signing key: a worker that reads it can sign a verdict.
+      - "Read(~/.config/dyai/node/**)"
+      - "Edit(~/.config/dyai/node/**)"
       - "Bash(chezmoi-dycrypt:*)"
       - "Bash(age -d *)"
       - "Bash(age --decrypt *)"
