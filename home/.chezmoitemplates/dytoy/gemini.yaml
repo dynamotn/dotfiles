@@ -7,7 +7,7 @@ subcategory: Models and agents
 order: 60
 */ -}}
 name: gemini
-method: shell
+method: mise
+backend: npm:@google/gemini-cli
 dependencies:
   - bun
-content: bun install -g @google/gemini-cli

@@ -7,7 +7,7 @@ subcategory: Utilities
 order: 160
 */ -}}
 name: wol
-method: shell
+method: mise
+backend: go:github.com/sabhiram/go-wol/cmd/wol
 dependencies:
   - go
-content: go install github.com/sabhiram/go-wol/cmd/wol@latest

@@ -7,7 +7,7 @@ subcategory: CLI tools
 order: 100
 */ -}}
 name: euporie
-method: shell
+method: mise
+backend: pipx:euporie
 dependencies:
   - uv
-content: uv tool install euporie

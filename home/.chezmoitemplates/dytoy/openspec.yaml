@@ -1,5 +1,5 @@
 name: openspec
-method: shell
+method: mise
+backend: npm:@fission-ai/openspec
 dependencies:
   - bun
-content: bun install -g @fission-ai/openspec

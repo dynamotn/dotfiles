@@ -8,8 +8,8 @@ order: 40
 */ -}}
 {{- if eq .kind "pc" "laptop" }}
 name: gtt
-method: shell
+method: mise
+backend: go:github.com/eeeXun/gtt
 dependencies:
   - go
-content: go install -ldflags="-s -w" github.com/eeeXun/gtt@latest
 {{- end }}

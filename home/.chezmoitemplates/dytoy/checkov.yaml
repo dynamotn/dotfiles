@@ -7,7 +7,4 @@ subcategory: Scanners
 order: 20
 */ -}}
 name: checkov
-method: shell
-dependencies:
-  - uv
-content: uv tool install checkov
+method: mise

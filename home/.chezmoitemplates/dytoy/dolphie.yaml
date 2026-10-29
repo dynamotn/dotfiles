@@ -7,7 +7,7 @@ subcategory: Data
 order: 40
 */ -}}
 name: dolphie
-method: shell
+method: mise
+backend: pipx:dolphie
 dependencies:
   - uv
-content: uv tool install dolphie

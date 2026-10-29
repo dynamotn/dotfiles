@@ -7,7 +7,7 @@ subcategory: Office and data
 order: 20
 */ -}}
 name: csvkit
-method: shell
+method: mise
+backend: pipx:csvkit
 dependencies:
   - uv
-content: uv tool install csvkit

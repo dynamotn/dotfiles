@@ -7,7 +7,4 @@ subcategory: Models and agents
 order: 50
 */ -}}
 name: codex
-method: shell
-dependencies:
-  - bun
-content: bun install -g @openai/codex
+method: mise

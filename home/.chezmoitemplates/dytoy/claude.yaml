@@ -7,7 +7,4 @@ subcategory: Models and agents
 order: 40
 */ -}}
 name: claude
-method: shell
-dependencies:
-  - bun
-content: bun install -g @anthropic-ai/claude-code
+method: mise

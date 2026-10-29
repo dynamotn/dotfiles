@@ -7,7 +7,7 @@ subcategory: Office and data
 order: 10
 */ -}}
 name: pptx2md
-method: shell
+method: mise
+backend: pipx:pptx2md
 dependencies:
   - uv
-content: uv tool install pptx2md

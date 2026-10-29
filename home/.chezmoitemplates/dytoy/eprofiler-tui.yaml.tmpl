@@ -7,8 +7,9 @@ subcategory: Operations
 order: 70
 */ -}}
 name: eprofiler-tui
-method: shell
+# No release binaries and no crate: build from git (needs protoc and cmake)
+method: mise
+backend: cargo:https://github.com/rogercoll/eprofiler-tui
+version: branch:main
 dependencies:
   - rust
-# No release binaries and no crate: build from git (needs protoc and cmake)
-content: cargo install --locked --git https://github.com/rogercoll/eprofiler-tui

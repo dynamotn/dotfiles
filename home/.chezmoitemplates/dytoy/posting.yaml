@@ -7,7 +7,7 @@ subcategory: CLI tools
 order: 90
 */ -}}
 name: posting
-method: shell
+method: mise
+backend: pipx:posting
 dependencies:
   - uv
-content: uv tool install --python 3.12 posting

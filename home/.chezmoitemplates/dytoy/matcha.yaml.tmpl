@@ -13,8 +13,8 @@ github:
   repo: piqoni/matcha
   release_asset: matcha-{{ .chezmoi.os }}-{{ .chezmoi.arch }}
 {{- else }}
-method: os
+method: mise
+backend: go:github.com/piqoni/matcha
 dependencies:
   - go
-content: go install github.com/piqoni/matcha@latest
 {{- end }}

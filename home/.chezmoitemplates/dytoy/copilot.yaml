@@ -7,7 +7,4 @@ subcategory: Models and agents
 order: 50
 */ -}}
 name: copilot
-method: shell
-dependencies:
-  - bun
-content: bun install -g @github/copilot
+method: mise
