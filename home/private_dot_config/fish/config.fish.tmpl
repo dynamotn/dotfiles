@@ -154,7 +154,11 @@ if status is-interactive
     end
 
     # Navi
-    type -q navi; and navi widget fish | source
+    # _navi_smart_replace autoloads from functions/
+    if type -q navi
+        bind \cg _navi_smart_replace
+        bind --mode insert \cg _navi_smart_replace
+    end
     # Projekt
     if type -q projekt
         projekt init fish | source
