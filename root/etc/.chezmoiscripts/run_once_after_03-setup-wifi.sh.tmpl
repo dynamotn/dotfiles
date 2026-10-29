@@ -36,7 +36,8 @@ nmcli connection add type wifi \
 {{-     end }}
 {{-   end }}
 {{-   range .decryptEnterprise }}
-{{-     if not (stat (printf "../secrets/data/enterprise-%s/wifi.yaml.age" . | joinPath $.chezmoi.sourceDir)) }}
+{{- /* Only the owner company's networks: decrypting another company's secrets is no reason to join its Wi-Fi */}}
+{{-     if or (ne . $.company) (not (stat (printf "../secrets/data/enterprise-%s/wifi.yaml.age" . | joinPath $.chezmoi.sourceDir))) }}
 {{-       continue }}
 {{-     end }}
 # hash: {{ printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
