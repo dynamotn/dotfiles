@@ -4,10 +4,12 @@
 # @description Enable the systemd user timers on Linux, or load the launchd
 # agents on macOS, that run `dybrain-tend` for each job of the vault. The hook
 # carries one hash over their unit files, so it re-runs whenever one changes.
-# Other init systems get nothing scheduled; `dybrain-tend` still runs by hand.
+# Other init systems (OpenRC, runit) get a block in the user crontab instead;
+# a container gets nothing scheduled.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh"
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/cron.sh"
 {{- $jobs := list "embed" "triage" "briefing" "weekly" }}
 {{- $units := list }}
 {{- range (joinPath .chezmoi.sourceDir "private_dot_config/systemd/user/dybrain-*" | glob) }}
@@ -35,7 +37,27 @@ for job in{{ range $jobs }} {{ . }}{{ end }}; do
   init_system::bootstrap_launchd_agent "${plist}"
 done
 dybatpho::success "Schedule DyBrain jobs"
-{{- else }}
+{{- else if ne .kind "container" }}
 
-dybatpho::warn "No scheduler for the DyBrain jobs with {{ .initSystem }}, run dybrain-tend by hand"
+# OpenRC, runit and the like have no user timers: a crontab block runs the jobs
+# at the times of the systemd timers. Unlike `Persistent=true`, cron does not
+# catch up a run missed while the machine was off.
+if ! dybatpho::is command crontab; then
+  dybatpho::warn "crontab is not installed, run dybrain-tend by hand"
+  exit 0
+fi
+
+dybatpho::header "Schedule DyBrain jobs"
+log_dir="$(dybatpho::xdg_state_dir dybrain)"
+dybatpho::ensure_dir "${log_dir}" > /dev/null
+log="$(printf '%q' "${log_dir}/cron.log")"
+tend="$(dybatpho::path_join "${HOME}" ".local" "bin" "dybrain-tend")"
+tend="$(printf '%q' "${tend}")"
+cron::set_block dybrain << EOF
+30 1 * * * ${tend} embed >> ${log} 2>&1
+0 2 * * * ${tend} triage >> ${log} 2>&1
+30 6 * * * ${tend} briefing >> ${log} 2>&1
+0 20 * * 0 ${tend} weekly >> ${log} 2>&1
+EOF
+dybatpho::success "Schedule DyBrain jobs"
 {{- end }}

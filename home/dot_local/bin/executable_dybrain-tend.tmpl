@@ -4,8 +4,8 @@
 # @description Run one of the scheduled jobs of the vault from its root:
 # `embed` rebuilds the embeddings, `triage` sorts the inbox, `briefing` writes
 # the morning briefing and `weekly` drafts the weekly review. The systemd user
-# timers on Linux and the launchd agents on macOS call it; anywhere else it is
-# run by hand. A machine without the vault or without uv logs a line and exits
+# timers on Linux, the launchd agents on macOS and a crontab block elsewhere
+# (OpenRC, runit) call it. A machine without the vault or without uv logs a line and exits
 # successfully, so a scheduler there does not report a failure.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules cli
 dybatpho::register_common_handlers

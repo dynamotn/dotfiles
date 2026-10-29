@@ -93,7 +93,10 @@ The `04-setup-dybrain-jobs` hook schedules them: systemd user timers
 (`dybrain-<job>.timer`, `Persistent=true`) on Linux, launchd agents
 (`com.dybrain.<job>`, logging to `~/Library/Logs/dybrain-<job>.log`) on macOS.
 A run missed while the machine slept happens when it wakes. Other init
-systems (OpenRC, runit, Termux) get nothing scheduled; run the jobs by hand.
+systems (OpenRC, runit, Termux) get a `dotfiles:dybrain` block in the user
+crontab when `crontab` is installed, logging to
+`$XDG_STATE_HOME/dybrain/cron.log`; cron does not catch up a run missed while
+the machine was off. Containers get nothing scheduled; run the jobs by hand.
 
 ## Container images
 
