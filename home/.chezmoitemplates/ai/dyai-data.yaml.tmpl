@@ -5,6 +5,9 @@
   docs/superpowers/specs/2026-10-24-dyai-shared-ai-config-design.md
 */ -}}
 marketplaces:
+  # Claude adds it on its own only in ~/.claude; a context's home needs it listed.
+  claude-plugins-official:
+    source: { source: github, repo: anthropics/claude-plugins-official }
   i-have-adhd:
     source: { source: github, repo: ayghri/i-have-adhd }
   superpowers-marketplace:

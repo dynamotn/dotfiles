@@ -1,0 +1,42 @@
+#!{{ .bash }}
+# @file 03-setup-ssh-known-hosts.sh
+# @brief Add the host keys of the SSH services to known_hosts
+# @description Check every host of ssh/service.yaml against known_hosts and
+# scan the keys of those missing, so a new forge host is trusted before the
+# first clone instead of on a prompt. The host list is rendered in, so the
+# hook runs again whenever it changes.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+dybatpho::header "Add SSH service host keys"
+ssh_dir="$(dybatpho::path_join "{{ .chezmoi.homeDir }}" ".ssh")"
+known_hosts="$(dybatpho::path_join "${ssh_dir}" "known_hosts")"
+dybatpho::ensure_dir "${ssh_dir}" > /dev/null
+touch "${known_hosts}"
+
+{{- $ssh := includeTemplate "ssh/service.yaml.tmpl" . | fromYaml }}
+{{- range $ssh.hosts }}
+{{-   $hostname := .host }}
+{{-   if hasKey . "hostname" }}
+{{-     $hostname = .hostname }}
+{{-   end }}
+# {{ .host }}
+host={{ $hostname | quote }}
+port={{  get . "port" | default 22 | quote }}
+entry="${host}"
+[[ "${port}" == 22 ]] || entry="[${host}]:${port}"
+if ssh-keygen -F "${entry}" -f "${known_hosts}" > /dev/null; then
+  dybatpho::progress "Already known: ${entry}"
+else
+  dybatpho::progress "Scan ${entry}"
+  # shortcut: trust on first use, as ssh itself does; pin published
+  # fingerprints if a forge is ever reached over an untrusted network.
+  if keys="$(ssh-keyscan -H -T 10 -t ed25519,rsa -p "${port}" "${host}" 2> /dev/null)" \
+    && [[ -n "${keys}" ]]; then
+    printf '%s\n' "${keys}" >> "${known_hosts}"
+  else
+    dybatpho::warn "Cannot scan ${entry}, skip it"
+  fi
+fi
+{{- end }}
+dybatpho::success "Add SSH service host keys"
