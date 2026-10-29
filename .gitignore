@@ -3,3 +3,4 @@ secrets/*
 !secrets/data
 !secrets/*.age
 .dockerignore
+**/*.lock
