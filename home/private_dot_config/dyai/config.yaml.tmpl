@@ -210,6 +210,12 @@ global:
       - {agent: claude, stance: against}
     timeout: 1800
     cooldown: 900
+    # Crew state in one repository every machine shares (docs/dyai-store.md):
+    # signed with ~/.config/dyai/node/signing, trusted through
+    # nodes/allowed_signers on the store's main branch.
+    store:
+      backend: git
+      url: git@gitlab.com:dynamo-brain/dyai-state.git
     require_review: true
     # lean: a worker loads the policy and the agent rules, not the plugins
     # and MCP servers (claude: ~57k to ~30k input tokens per call).
