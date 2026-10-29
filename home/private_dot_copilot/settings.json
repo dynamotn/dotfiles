@@ -1,4 +1,5 @@
 {
+  "includeCoAuthoredBy": false,
   "statusLine": {
     "command": "bash ~/.copilot/statusline.sh"
   }

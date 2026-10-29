@@ -188,3 +188,6 @@ policy:
   effortLevel: medium
   # Shared approval stance, translated per agent where an edits-only preset exists.
   approval: accept-edits
+  # No agent credits itself in a commit (Copilot, Codex); Claude's own
+  # attribution block in settings.json.tmpl does the same for Claude.
+  attribution: false
