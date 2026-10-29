@@ -192,7 +192,15 @@ global:
     # of a claude task is a real second provider.
     # copilot's default model is Claude: an OpenAI one keeps its review of a
     # claude task a second provider (gpt-6-luna is the lighter option).
-    model: {copilot: gpt-6-sol}
+    # opencode's default provider (Copilot) rejects its default model and
+    # github-copilot/gpt-6-sol ("model is not supported"), so it uses the free
+    # OpenCode Zen model; the codex and gemini names are untested on this machine.
+    model:
+      claude: opus
+      copilot: gpt-6-sol
+      opencode: opencode/deepseek-v4.1-flash-free
+      codex: gpt-5.3-codex
+      gemini: gemini-4-argon
     # dyai review --by consensus: every seat reviews at once from its stance
     # and a strict majority passes; the writer's own seat sits out.
     consensus:

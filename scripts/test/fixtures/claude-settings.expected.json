@@ -230,7 +230,7 @@
     "disableBypassPermissionsMode": "disable"
   },
   "preferredNotifChannel": "auto",
-  "remoteControlAtStartup": false,
+  "remoteControlAtStartup": true,
   "sandbox": {
     "allowUnsandboxedCommands": true,
     "autoAllowBashIfSandboxed": true,
