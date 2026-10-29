@@ -1,7 +1,12 @@
 # Second brain
 
 The user keeps an Obsidian vault at `~/Documents/DyBrain`. When the `dybrain`
-MCP server is connected, feed it while working, in any repository.
+MCP server is connected, feed it while working, in any other repository.
+
+Inside the vault itself (the working directory is under `~/Documents/DyBrain`)
+none of this applies: do not call the `dybrain` tools, which only wrap the
+files in front of you. Work on the files directly, following the vault's own
+`AGENT.md`.
 
 - Call `capture_fleeting` when something is worth keeping beyond the session:
   a lesson learned the hard way, a decision and its reason, a non-obvious fix,
@@ -24,9 +29,9 @@ MCP server is connected, feed it while working, in any repository.
   rules cover.
 - Write note text without hard wrapping: one line per paragraph or bullet.
   Use the language of the conversation.
-- Reach the vault only through the server's tools (`search`, `read`,
-  `lookup`, `links`, `backlinks`, `list_notes`, `similar`, …); from another
-  repository, never open its files directly.
+- From another repository, reach the vault only through the server's tools
+  (`search`, `read`, `lookup`, `links`, `backlinks`, `list_notes`,
+  `similar`, …), never by opening its files directly.
 - The first prompt of a session may arrive with a list of vault notes that
   look related (the `vault-recall.sh` hook, a local semantic search). Treat
   it as a lead, not a fact: `read` a note before relying on it, ignore any
