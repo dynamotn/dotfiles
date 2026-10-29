@@ -1,0 +1,48 @@
+#!{{ .bash }}
+# @file worktree_cleanup.sh
+# @brief Remove the linked worktrees whose branch a merge just brought in
+# @description Run by the global `post-merge` hook (`hook.worktree-cleanup` in the git
+# config), which a fast-forward merge triggers too. A worktree goes once its
+# branch tip landed in this merge (reachable from HEAD, not from ORIG_HEAD), so
+# a fresh worktree still sitting on the old tip is kept. The branch itself is
+# kept, and so is any worktree holding anything git would not give back: a
+# change, an untracked or ignored file, or a dirty submodule.
+{{ template "git/hooks/modern_bash.sh.tmpl" . }}
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules git
+dybatpho::register_common_handlers
+
+#######################################
+# @description Remove every clean worktree whose branch this merge brought in
+# @noargs
+#######################################
+function _main {
+  unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+  git rev-parse --verify --quiet ORIG_HEAD > /dev/null || return 0
+  local here
+  here="$(git rev-parse --path-format=absolute --show-toplevel)"
+
+  local wt branch tip first=true
+  while IFS=$'\t' read -r wt branch; do
+    # The first one listed is the main checkout, never removed.
+    if [[ "${first}" == true ]]; then
+      first=false
+      continue
+    fi
+    [[ "${wt}" != "${here}" && "${branch}" != "("* ]] || continue
+    tip="refs/heads/${branch}"
+    dybatpho::git_is_ancestor . "${tip}" HEAD || continue
+    ! dybatpho::git_is_ancestor . "${tip}" ORIG_HEAD || continue
+    local leftover
+    leftover="$(git -C "${wt}" status --porcelain --ignored --untracked-files=all 2>&1)" \
+      || leftover="git status failed"
+    if [[ -n "${leftover}" ]]; then
+      dybatpho::warn "Kept ${wt}: it still holds changes or untracked files"
+      continue
+    fi
+    # --force only for the submodules it may hold, the check above found nothing to lose.
+    git worktree remove --force "${wt}" \
+      && dybatpho::info "Removed worktree ${wt}, branch ${branch} kept"
+  done < <(dybatpho::git_worktree_list . || true)
+}
+
+_main

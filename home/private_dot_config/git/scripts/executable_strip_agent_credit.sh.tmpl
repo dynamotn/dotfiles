@@ -1,0 +1,33 @@
+#!{{ .bash }}
+# @file strip_agent_credit.sh
+# @brief Drop every line that credits an AI agent from a commit message
+# @description Run by the global `commit-msg` hook (`hook.agent-credit` in the git
+# config), so it covers every repository, also the ones whose hooks directory
+# was never filled from the template. Agents add these lines on their own or
+# because their harness tells them to, whatever their instructions say, so the
+# lines are removed rather than the commit refused. The diff below a scissors
+# line is left alone.
+{{ template "git/hooks/modern_bash.sh.tmpl" . }}
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+# A trailer naming an agent, an agent session link, or a "generated with" footer.
+readonly AGENTS='(claude|anthropic|copilot|cursor|codex|openai|gemini|chatgpt|gpt-|aider|opencode|hermes|antigravity)'
+readonly CREDIT="^((co-authored-by|signed-off-by|assisted-by|generated-by|ai-assisted-by):.*${AGENTS}\
+|[a-z]+-session:|.*claude[.]ai/code/session_|.*generated (with|by) .*${AGENTS}|.*🤖)"
+
+message_file="${1-}"
+dybatpho::is file "${message_file}" \
+  || dybatpho::die "strip_agent_credit expects the path of the message file"
+
+message="$(< "${message_file}")"
+stripped="$(awk -v re="${CREDIT}" '
+  /^# ------------------------ >8 ------------------------$/ { cut = 1 }
+  !cut && tolower($0) ~ re { next }
+  { print }
+' "${message_file}")"
+
+if [[ "${stripped}" != "${message}" ]]; then
+  printf '%s\n' "${stripped}" > "${message_file}"
+  dybatpho::warn "Dropped the agent attribution lines, the human author is the only author"
+fi

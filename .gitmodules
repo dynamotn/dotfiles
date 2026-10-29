@@ -16,6 +16,7 @@
 [submodule "wallpaper"]
   path = home/Multimedia/Pictures/Wallpaper
   url = git@gitlab.com:dynamo-config/wallpaper.git
+  worktreeInit = false
 [submodule "icon"]
   path = silos/icon
   url = git@gitlab.com:dynamo-theme/icon.git
@@ -26,18 +27,23 @@
   path = home/private_dot_config/firefox/profiles/personal
   url = git@gitlab.com:dynamo-config/firefox/personal.git
   shallow = true
+  worktreeInit = false
 [submodule "thunderbird-personal"]
   path = home/private_dot_config/thunderbird/profiles/personal
   url = git@gitlab.com:dynamo-config/thunderbird/personal.git
   shallow = true
+  worktreeInit = false
 [submodule "firefox-enterprise-F1"]
   path = home/private_dot_config/firefox/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/firefox/enterprise-F1.git
   shallow = true
+  worktreeInit = false
 [submodule "thunderbird-enterprise-F1"]
   path = home/private_dot_config/thunderbird/profiles/enterprise-F1
   url = git@gitlab.com:dynamo-config/thunderbird/enterprise-F1.git
   shallow = true
+  worktreeInit = false
 [submodule "secrets/data"]
   path = secrets/data
   url = git@gitlab.com:dynamo-config/dotfiles-secrets.git
+  worktreeInit = false

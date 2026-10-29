@@ -1,0 +1,69 @@
+#!{{ .bash }}
+# @file worktree_submodules.sh
+# @brief Check out the submodules a new linked worktree needs
+# @description Run by the global `post-checkout` hook (`hook.worktree-submodules` in
+# the git config), so `git wt`, Claude's WorktreeCreate hook, a dyai crew task
+# and a plain `git worktree add` all get it, in every repository. A linked
+# worktree starts with every submodule empty, and an agent working in it then
+# trips over a missing library or test helper. Every submodule the main
+# checkout has checked out is checked out here too, recursively, borrowing the
+# main checkout's objects so no network is needed. One marked
+# `worktreeInit = false` in `.gitmodules` (secrets, large assets) stays empty.
+{{ template "git/hooks/modern_bash.sh.tmpl" . }}
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+readonly NULL_REF="0000000000000000000000000000000000000000"
+
+#######################################
+# @description Check out in a repository the submodules its main checkout copy has
+# @arg $1 string Repository in the new worktree
+# @arg $2 string Main checkout's copy of that repository
+#######################################
+function _init_all {
+  local repo main
+  dybatpho::expect_args repo main -- "$@"
+  dybatpho::is file "${repo}/.gitmodules" || return 0
+  local name path wanted shallow
+  # shellcheck disable=SC2016 # name and sm_path are set by git for each submodule
+  while IFS=$'\t' read -r name path; do
+    [[ -n "${path}" ]] || continue
+    # Only one this commit has too, and not one opted out.
+    git config -f "${repo}/.gitmodules" "submodule.${name}.path" > /dev/null || continue
+    wanted="$(git config -f "${repo}/.gitmodules" --type=bool "submodule.${name}.worktreeInit" || true)"
+    [[ "${wanted}" != "false" ]] || continue
+    # A shallow copy cannot lend its objects; that one is fetched instead.
+    local -a borrow=(--reference "${main}/${path}")
+    shallow="$(git -C "${main}/${path}" rev-parse --is-shallow-repository)" || shallow=true
+    [[ "${shallow}" != "true" ]] || borrow=()
+    if ! git -C "${repo}" submodule update --quiet --init ${borrow[@]+"${borrow[@]}"} -- "${path}" < /dev/null; then
+      dybatpho::warn "Could not check out ${path} in this worktree"
+      continue
+    fi
+    _init_all "${repo}/${path}" "${main}/${path}"
+  done < <(git -C "${main}" submodule foreach --quiet 'printf "%s\t%s\n" "${name}" "${sm_path}"' 2> /dev/null || true)
+}
+
+#######################################
+# @description Check out the submodules of a new linked worktree
+# @arg $1 string Previous HEAD, the null ref for a new worktree or a clone
+#######################################
+function _main {
+  local previous
+  dybatpho::expect_args previous -- "$@"
+  [[ "${previous}" == "${NULL_REF}" ]] || return 0
+  unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+  local git_dir common_dir
+  git_dir="$(git rev-parse --path-format=absolute --git-dir)"
+  common_dir="$(git rev-parse --path-format=absolute --git-common-dir)"
+  # A clone ends with this checkout too, but it is not a linked worktree.
+  [[ "${git_dir}" != "${common_dir}" ]] || return 0
+  # Same lookup as the `wt` alias: a submodule's common dir has core.worktree.
+  local main
+  main="$(git -C "${common_dir}" rev-parse --path-format=absolute --show-toplevel 2> /dev/null || true)"
+  [[ -n "${main}" ]] || main="$(dirname "${common_dir}")"
+
+  _init_all "${PWD}" "${main}"
+}
+
+_main "${1-}"
