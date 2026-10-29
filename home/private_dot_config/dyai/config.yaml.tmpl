@@ -216,11 +216,15 @@ global:
     # secrets/data/personal/dyai.yaml.age and made on a new machine by
     # .chezmoiscripts/run_onchange_after_04-setup-dyai-node.sh. Trust lives in
     # nodes/allowed_signers on the store's main, which no deploy key may push.
+    # Only a machine that decrypts the personal secrets has the keys; the
+    # others keep their crew state on their own (the local backend).
+    {{- if .decryptPersonal }}
     store:
       backend: git
       url: git@gitlab.com:dynamo-brain/dyai-state.git
       node: {{ .code | quote }}
       ssh_key: ~/.config/dyai/node/deploy
+    {{- end }}
     require_review: true
     # lean: a worker loads the policy and the agent rules, not the plugins
     # and MCP servers (claude: ~57k to ~30k input tokens per call).
@@ -703,20 +707,25 @@ registry:
     # Regulated domains and licensing, apart from the security tooling.
     compliance:
       subagents: [hipaa-compliance, risk-manager, license-engineer, legal-advisor]
-    # Notebooks, R and Quarto — the data-science filetypes nvim supports.
+    # Notebooks, R and Quarto — the data-science filetypes nvim supports —
+    # plus test selection and EDA. Only the K-Dense skills that neither read
+    # .env nor send data to OpenRouter.
     datascience:
       subagents: [data-scientist]
       skills:
         - openai/skills@jupyter-notebook
         - posit-dev/skills@quarto-authoring
         - posit-dev/skills@r-tidyverse-style
+        - K-Dense-AI/scientific-agent-skills@statistical-analysis
+        - K-Dense-AI/scientific-agent-skills@exploratory-data-analysis
     # Authoring: LaTeX, Typst, academic writing.
     docs:
       subagents: [technical-writer]
       skills:
         - bahayonghang/academic-writing-skills@latex-paper-en
         - lucifer1004/claude-skill-typst@typst
-    # Product and market analysis: experiments, cohorts, competitors, trends.
+    # Product and market analysis: experiments, cohorts, competitors, trends;
+    # appraising evidence and pulling YouTube transcripts as sources.
     research:
       subagents:
         - ab-test-analysis
@@ -726,6 +735,9 @@ registry:
         - project-idea-validator
         - trend-analyst
         - scientific-literature-researcher
+      skills:
+        - K-Dense-AI/scientific-agent-skills@scientific-critical-thinking
+        - intellectronica/agent-skills@youtube-transcript
     # Shell scripting (bash, fish): defensive patterns, shellcheck, bats.
     shell:
       subagents: [cli-developer]
@@ -898,6 +910,41 @@ registry:
         - apollographql/skills@apollo-client
     realtime:
       subagents: [websocket-engineer, webhook-engineer]
+    # Games: engine-neutral design in gamedev, then one preset per engine.
+    gamedev:
+      subagents: [game-developer]
+      skills:
+        - gamedev-skills/awesome-gamedev-agent-skills@game-feel
+        - gamedev-skills/awesome-gamedev-agent-skills@game-ai
+        - gamedev-skills/awesome-gamedev-agent-skills@level-design
+        - gamedev-skills/awesome-gamedev-agent-skills@save-systems
+    godot:
+      skills:
+        - wshobson/agents@godot-gdscript-patterns
+        - gamedev-skills/awesome-gamedev-agent-skills@godot-gdscript
+        - gamedev-skills/awesome-gamedev-agent-skills@godot-nodes-scenes
+    unity:
+      skills:
+        - unity-technologies/skills@unity-cli
+        - unity-technologies/skills@unity-package-management
+        - wshobson/agents@unity-ecs-patterns
+        - gamedev-skills/awesome-gamedev-agent-skills@unity-csharp-scripting
+    unreal:
+      skills:
+        - gamedev-skills/awesome-gamedev-agent-skills@unreal-cpp-gameplay
+        - gamedev-skills/awesome-gamedev-agent-skills@unreal-blueprints
+    bevy:
+      skills: [gamedev-skills/awesome-gamedev-agent-skills@bevy-ecs]
+    # Geospatial: PostGIS and GeoPandas in gis, the Mapbox web SDK apart.
+    gis:
+      skills:
+        - postgis/postgis@postgis
+        - K-Dense-AI/scientific-agent-skills@geopandas
+    mapbox:
+      skills:
+        - mapbox/mapbox-agent-skills@mapbox-web-integration-patterns
+        - mapbox/mapbox-agent-skills@mapbox-geospatial-operations
+        - mapbox/mapbox-agent-skills@mapbox-data-visualization-patterns
     # Error tracking and vendor-neutral telemetry, one preset per tool.
     sentry:
       skills:
@@ -1063,6 +1110,16 @@ registry:
         - anthropics/skills@pdf
         - anthropics/skills@internal-comms
         - ComposioHQ/awesome-claude-skills@meeting-insights-analyzer
+    # Google Workspace through Google's own gws CLI; the user installs it and
+    # runs its OAuth sign-in, which keeps the token itself.
+    gworkspace:
+      skills:
+        - googleworkspace/cli@gws-shared
+        - googleworkspace/cli@gws-gmail
+        - googleworkspace/cli@gws-drive
+        - googleworkspace/cli@gws-calendar
+        - googleworkspace/cli@gws-sheets
+        - googleworkspace/cli@gws-docs
     # Issue trackers and wikis, one preset per tool. Hosted servers go through
     # mcp-remote, which runs the OAuth sign-in and keeps the token itself.
     jira:
