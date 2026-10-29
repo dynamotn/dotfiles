@@ -54,7 +54,7 @@ machines:
     terminalMultiplexer: "Z"
     hasSound: true
     hasBluetooth: true
-    hasWifi: false
+    hasWifi: true
     preferGitSSH: true
     darkMode: true
   n0t3:
