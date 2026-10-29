@@ -107,11 +107,13 @@ function dyai_node::stamp {
 #######################################
 # @description Tell whether glab can reach gitlab.com as you
 # @noargs
-# @exitcode 1 glab is missing, or not logged in yet
+# @exitcode 1 glab is missing, has no token, or gitlab.com cannot be reached
 #######################################
 function dyai_node::glab_ready {
   dybatpho::is command glab || return 1
-  glab auth status --hostname gitlab.com &> /dev/null
+  # A real call, not `glab auth status`: that reads only glab's own config and
+  # misses a token given in GITLAB_TOKEN.
+  glab api --hostname gitlab.com user &> /dev/null
 }
 
 #######################################

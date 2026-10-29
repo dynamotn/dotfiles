@@ -57,7 +57,8 @@ if [[ "${backend}" == git && -n "${url}" ]]; then
   fi
   # shellcheck disable=SC2310 # a plain yes/no
   if ! dyai_node::glab_ready; then
-    dybatpho::warn "run \`glab auth login\`: the next chezmoi apply registers the keys of ${code} on ${project}"
+    dybatpho::warn "glab cannot reach gitlab.com (glab auth login, or GITLAB_TOKEN): the next chezmoi apply registers \
+the keys of ${code} on ${project}"
     exit 0
   fi
   # In a subshell: a GitLab that is away costs a warning, not the apply. set -e

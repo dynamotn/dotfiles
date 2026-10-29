@@ -42,7 +42,7 @@ setup() {
 #!/usr/bin/env bash
 printf '%s\\n' "\$*" >> "${GLAB_DIR}/calls"
 case "\$*" in
-  "auth status"*) [[ -e "${GLAB_DIR}/ok" ]] ;;
+  "api --hostname gitlab.com user") [[ -e "${GLAB_DIR}/ok" ]] ;;
   *"-X "*) echo '{}' ;;
   *deploy_keys*) cat "${GLAB_DIR}/keys.json" ;;
   *protected_branches/main*) echo "404 Not found" >&2; exit 1 ;;
