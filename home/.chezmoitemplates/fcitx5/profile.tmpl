@@ -13,13 +13,13 @@ DefaultIM=keyboard-us
 # Name
 Name=keyboard-us-colemak
 # Layout
-Layout=
+# Layout=
 
 [Groups/{{ $index }}/Items/1]
 # Name
 Name=keyboard-us
 # Layout
-Layout=
+# Layout=
 
 {{- if has "vi" .languages }}
 {{-   $index = add1 $index }}
@@ -38,14 +38,13 @@ DefaultIM=lotus
 # Name
 Name=lotus
 # Layout
-Layout=
+# Layout=
 {{- end }}
 
 {{- if has "ja" .languages }}
 {{-   $index = add1 $index }}
 {{-   $group := "Japanese" }}
 {{-   $order = printf "%s\n%d=%s" $order $index $group }}
-{{- $order }}
 
 [Groups/{{ $index }}]
 # Group Name
@@ -59,7 +58,7 @@ DefaultIM=mozc
 # Name
 Name=mozc
 # Layout
-Layout=
+# Layout=
 {{- end }}
 
 {{- if has "zh" .languages }}
@@ -79,13 +78,13 @@ DefaultIM=m17n_zh_pinyin
 # Name
 Name=pinyin
 # Layout
-Layout=
+# Layout=
 
 [Groups/{{ $index }}/Items/1]
 # Name
 Name=m17n_zh_pinyin
 # Layout
-Layout=
+# Layout=
 {{- end }}
 
 [GroupOrder]

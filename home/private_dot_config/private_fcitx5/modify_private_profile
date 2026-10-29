@@ -1,0 +1,15 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /*
+fcitx5 rewrites profile on exit and moves the active group to the top of
+GroupOrder. Keep its copy while it holds the same groups and input methods,
+so switching groups is not reported as drift; render afresh otherwise.
+*/ -}}
+{{- $want := includeTemplate "fcitx5/profile.tmpl" . -}}
+{{- $re := "(?m)^(Name|DefaultIM|Default Layout)=.*$" -}}
+{{- $wantKey := regexFindAll $re $want -1 | sortAlpha | join "\n" -}}
+{{- $haveKey := regexFindAll $re .chezmoi.stdin -1 | sortAlpha | join "\n" -}}
+{{- if eq $wantKey $haveKey -}}
+{{-   .chezmoi.stdin -}}
+{{- else -}}
+{{-   $want -}}
+{{- end -}}
