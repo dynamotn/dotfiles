@@ -10,19 +10,16 @@ setup() {
 {
   "preferGitSSH": true,
   "httpProxy": "http://proxy.example:3128",
-  "noProxyAddresses": ["localhost", "10.0.0.0/8"],
-  "mirrors": [
-    {"gitlab": "dynamo-config/dotfiles", "github": "dynamotn/dotfiles"},
-    {"gitlab": "dynamo-config/dotfiles-secrets", "github": "dynamotn/dotfiles-secrets"}
-  ]
+  "noProxyAddresses": ["localhost", "10.0.0.0/8"]
 }
 EOF
   # The network the tests pretend to be on: every probe reads these.
   UP_PORTS="${BATS_TEST_TMPDIR}/up-ports"
   : > "${UP_PORTS}"
   # `ssh -G` prints the config; any other call is a handshake, which times out
-  # unless port 22 of the host is in UP_PORTS, and otherwise gets as far as
-  # authentication unless the host is listed in RESET_HOSTS.
+  # unless the port of the host is in UP_PORTS, and otherwise gets as far as
+  # authentication unless the host is listed in RESET_HOSTS. As in
+  # ~/.ssh/config, the fallback hosts listen on port 443.
   RESET_HOSTS="${BATS_TEST_TMPDIR}/reset-hosts"
   : > "${RESET_HOSTS}"
   cat > "${HOME}/.local/bin/ssh" << EOF
@@ -32,8 +29,12 @@ if [[ "\${1}" == -G ]]; then
   exit 0
 fi
 target="\${*: -1}"
-if ! grep -qxF "\${target#git@}:22" "${UP_PORTS}"; then
-  echo "ssh: connect to host \${target#git@} port 22: Operation timed out" >&2
+port=22
+case "\${target#git@}" in
+  ssh.github.com | altssh.gitlab.com) port=443 ;;
+esac
+if ! grep -qxF "\${target#git@}:\${port}" "${UP_PORTS}"; then
+  echo "ssh: connect to host \${target#git@} port \${port}: Operation timed out" >&2
 elif grep -qxF "\${target}" "${RESET_HOSTS}"; then
   echo "Connection reset by 192.0.2.1 port 22" >&2
 else
@@ -94,31 +95,57 @@ function _git_url {
   assert_success
 }
 
-@test "network::git_config sends every URL of a mirror to GitLab over SSH" {
-  network::git_config true true true "${CONFIG}" > "${BATS_TEST_TMPDIR}/git.config"
+@test "network::ssh_host falls back to the host on port 443" {
+  run network::ssh_host github.com ssh.github.com
+  assert_success
+  assert_output ""
+  printf 'ssh.github.com:443\n' >> "${UP_PORTS}"
+  run network::ssh_host github.com ssh.github.com
+  assert_output "ssh.github.com"
+  printf 'github.com:22\n' >> "${UP_PORTS}"
+  run network::ssh_host github.com ssh.github.com
+  assert_output "github.com"
+}
+
+@test "network::git_config sends every URL of a host over SSH on port 22" {
+  network::git_config github.com gitlab.com > "${BATS_TEST_TMPDIR}/git.config"
   local url
-  for url in https://github.com/dynamotn/dotfiles.git git@github.com:dynamotn/dotfiles.git \
-    https://gitlab.com/dynamo-config/dotfiles.git git@gitlab.com:dynamo-config/dotfiles.git; do
+  for url in https://github.com/someone/tool.git git@ssh.github.com:someone/tool.git; do
     run _git_url "${BATS_TEST_TMPDIR}/git.config" "${url}"
-    assert_output "git@gitlab.com:dynamo-config/dotfiles.git"
+    assert_output "git@github.com:someone/tool.git"
+  done
+  run _git_url "${BATS_TEST_TMPDIR}/git.config" git@altssh.gitlab.com:someone/tool.git
+  assert_output "git@gitlab.com:someone/tool.git"
+}
+
+@test "network::git_config falls back to SSH on port 443" {
+  network::git_config ssh.github.com altssh.gitlab.com > "${BATS_TEST_TMPDIR}/git.config"
+  local url
+  for url in https://github.com/someone/tool.git git@github.com:someone/tool.git; do
+    run _git_url "${BATS_TEST_TMPDIR}/git.config" "${url}"
+    assert_output "git@ssh.github.com:someone/tool.git"
+  done
+  for url in https://gitlab.com/someone/tool.git git@gitlab.com:someone/tool.git; do
+    run _git_url "${BATS_TEST_TMPDIR}/git.config" "${url}"
+    assert_output "git@altssh.gitlab.com:someone/tool.git"
   done
 }
 
-@test "network::git_config sends a mirror to GitHub over HTTPS when GitLab is down" {
-  network::git_config false false false "${CONFIG}" > "${BATS_TEST_TMPDIR}/git.config"
-  run _git_url "${BATS_TEST_TMPDIR}/git.config" git@gitlab.com:dynamo-config/dotfiles-secrets.git
-  assert_output "https://github.com/dynamotn/dotfiles-secrets.git"
-  # The longest rule wins, so dotfiles does not swallow dotfiles-secrets.
-  run _git_url "${BATS_TEST_TMPDIR}/git.config" git@gitlab.com:dynamo-config/dotfiles
-  assert_output "https://github.com/dynamotn/dotfiles"
+@test "network::git_config sends a host over HTTPS when no SSH gets through" {
+  network::git_config github.com "" > "${BATS_TEST_TMPDIR}/git.config"
+  local url
+  for url in git@gitlab.com:someone/tool.git git@altssh.gitlab.com:someone/tool.git; do
+    run _git_url "${BATS_TEST_TMPDIR}/git.config" "${url}"
+    assert_output "https://gitlab.com/someone/tool.git"
+  done
 }
 
-@test "network::git_config rewrites other repositories by host" {
-  network::git_config true false false "${CONFIG}" > "${BATS_TEST_TMPDIR}/git.config"
-  run _git_url "${BATS_TEST_TMPDIR}/git.config" https://github.com/someone/tool.git
-  assert_output "git@github.com:someone/tool.git"
-  run _git_url "${BATS_TEST_TMPDIR}/git.config" git@gitlab.com:someone/tool.git
-  assert_output "https://gitlab.com/someone/tool.git"
+@test "network::git_config leaves a mirrored repository on its own host" {
+  network::git_config github.com "" > "${BATS_TEST_TMPDIR}/git.config"
+  run _git_url "${BATS_TEST_TMPDIR}/git.config" git@gitlab.com:dynamo-config/dotfiles.git
+  assert_output "https://gitlab.com/dynamo-config/dotfiles.git"
+  run _git_url "${BATS_TEST_TMPDIR}/git.config" https://github.com/dynamotn/dotfiles.git
+  assert_output "git@github.com:dynamotn/dotfiles.git"
 }
 
 @test "network::proxy_fish erases the proxy when there is none" {
@@ -143,6 +170,8 @@ function _git_url {
   [[ "${https_proxy}" == "http://proxy.example:3128" ]]
   [[ "${no_proxy}" == "localhost,10.0.0.0/8" ]]
   run _git_url "${STATE}/git.config" https://github.com/dynamotn/dotfiles.git
+  assert_output "git@github.com:dynamotn/dotfiles.git"
+  run _git_url "${STATE}/git.config" git@gitlab.com:dynamo-config/dotfiles.git
   assert_output "https://gitlab.com/dynamo-config/dotfiles.git"
   run grep -c "set -gx" "${STATE}/proxy.fish"
   assert_output "3"
@@ -157,7 +186,16 @@ function _git_url {
   run cat "${STATE}/proxy.fish"
   assert_output "set -e http_proxy https_proxy no_proxy"
   run _git_url "${STATE}/git.config" git@gitlab.com:dynamo-config/dotfiles.git
-  assert_output "https://github.com/dynamotn/dotfiles.git"
+  assert_output "https://gitlab.com/dynamo-config/dotfiles.git"
+}
+
+@test "network::detect falls back to SSH on port 443 when port 22 is blocked" {
+  printf '%s\n' "gitlab.com:443" "ssh.github.com:443" "altssh.gitlab.com:443" > "${UP_PORTS}"
+  network::detect "${CONFIG}" "${STATE}"
+  run _git_url "${STATE}/git.config" git@github.com:someone/tool.git
+  assert_output "git@ssh.github.com:someone/tool.git"
+  run _git_url "${STATE}/git.config" https://gitlab.com/someone/tool.git
+  assert_output "git@altssh.gitlab.com:someone/tool.git"
 }
 
 @test "network::detect keeps HTTPS when the machine does not prefer SSH" {

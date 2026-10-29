@@ -1,0 +1,28 @@
+# Repositories of their own pushed from GitLab to a GitHub mirror (`git
+# mirror`), by their path on each. Rendered with the enterprise browser and
+# mail profiles into ~/.config/dynet/mirrors.json, from which a checkout gets
+# its `origin` on GitLab and its `gh` on GitHub: on clone, with `dynet
+# remotes`, and with `git mirror`.
+gitMirrors:
+  - gitlab: dynamo-config/dotfiles
+    github: dynamotn/dotfiles
+  - gitlab: dynamo-config/dotfiles-secrets
+    github: dynamotn/dotfiles-secrets
+  - gitlab: dynamo-config/neovim
+    github: dynamotn/neovim-config
+  - gitlab: dynamo-tools/dyai
+    github: dynamotn/dyai
+  - gitlab: dynamo-config/tmux
+    github: dynamotn/tmux-config
+  - gitlab: dynamo-config/awesome
+    github: dynamotn/awesomewm-config
+  - gitlab: dynamo-config/wallpaper
+    github: dynamotn/wallpapers-collection
+  - gitlab: dynamo-theme/icon
+    github: dynamotn/Dynamo-Icon
+  - gitlab: dynamo-config/firefox/personal
+    github: dynamotn/firefox-personal
+  - gitlab: dynamo-config/thunderbird/personal
+    github: dynamotn/thunderbird-personal
+  - gitlab: dynamo-config/projekt-templates
+    github: dynamotn/projekt-templates

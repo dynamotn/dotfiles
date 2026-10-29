@@ -4,11 +4,58 @@
 # @description Run on every network change by the NetworkManager dispatcher on
 # Linux and by Hammerspoon on macOS, after every apply, and by hand. The logic
 # lives in `scripts/lib/network.sh`, shared with setup.sh and the bats tests.
-. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules network file
+# `dynet remotes` gives a checkout of a repository mirrored from GitLab to
+# GitHub its two remotes, `origin` and `gh` (`scripts/lib/mirror.sh`).
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules cli network file
 dybatpho::register_common_handlers
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/network.sh"
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/mirror.sh"
 
 # NetworkManager and Hammerspoon start it with a bare PATH, without yq.
 PATH="{{ .chezmoi.homeDir }}/.local/bin:{{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin:{{ end }}${PATH}"
-network::detect "{{ .chezmoi.homeDir }}/.config/dynet/config.json" \
-  "{{ .chezmoi.homeDir }}/.local/state/dynet"
+
+#######################################
+# @description Spec of dynet
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Fit git and the proxy to the network the machine is on now" MAIN_ARGS \
+    action:"_detect"
+  dybatpho::opts::cmd remotes _spec_remotes
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Spec of remotes command
+# @noargs
+#######################################
+function _spec_remotes {
+  dybatpho::opts::setup "Give a checkout of a mirrored repository origin on GitLab and gh on GitHub" \
+    REMOTES_ARGS action:"_remotes"
+  dybatpho::opts::arg "Checkout, the current directory when left out" CHECKOUT required:false
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_remotes"
+}
+
+#######################################
+# @description Probe the network and write the git rewrites and the proxy
+# @noargs
+#######################################
+function _detect {
+  network::detect "{{ .chezmoi.homeDir }}/.config/dynet/config.json" \
+    "{{ .chezmoi.homeDir }}/.local/state/dynet"
+}
+
+#######################################
+# @description Give the checkout its two remotes
+# @noargs
+#######################################
+function _remotes {
+  local checkout="${CHECKOUT:-.}"
+  mirror::set_remotes "{{ .chezmoi.homeDir }}/.config/dynet/mirrors.json" "${checkout}" \
+    || dybatpho::die "${checkout} has no origin, or its repository is not in ~/.config/dynet/mirrors.json"
+  dybatpho::success "${checkout} has origin on GitLab and gh on GitHub"
+  # Or the root action, probing the network, runs after it.
+  exit 0
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

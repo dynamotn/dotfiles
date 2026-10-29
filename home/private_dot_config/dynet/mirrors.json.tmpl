@@ -1,0 +1,14 @@
+{{- /* The repositories mirrored from GitLab to GitHub, from which a checkout
+       gets its `origin` on GitLab and its `gh` on GitHub (scripts/lib/mirror.sh):
+       those of .chezmoidata/mirrors.yaml, and the browser and mail profiles of
+       the companies of this machine. It holds no secret, so the git hooks read
+       it rather than the private config.json. */}}
+{{- $mirrors := .gitMirrors }}
+{{- range $profile := concat .browserEnterpriseProfiles .mailEnterpriseProfiles | uniq }}
+{{-   range $app := list "firefox" "thunderbird" }}
+{{-     $mirrors = append $mirrors (dict
+          "gitlab" (printf "dynamo-config/%s/enterprise-%s" $app $profile)
+          "github" (printf "dynamotn/%s-enterprise-%s" $app $profile)) }}
+{{-   end }}
+{{- end }}
+{{- dict "mirrors" $mirrors | toPrettyJson }}

@@ -11,10 +11,13 @@
 # a sync.
 # Both APIs are called through `forge.sh`, which reads its tokens from
 # `GITLAB_TOKEN` and `GITHUB_TOKEN`.
+# With the default remotes, a repository listed in ~/.config/dynet/mirrors.json
+# first gets them (`scripts/lib/mirror.sh`): `origin` on GitLab, `gh` on GitHub.
 # @arg $1 string Optional GitLab remote, default is `origin`
 # @arg $2 string Optional GitHub remote, default is `gh`
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules git forge
 dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/mirror.sh"
 
 #######################################
 # @description Call the GitLab API of the source project.
@@ -95,6 +98,10 @@ function _main {
 
   [[ "${gitlab_remote}" != "${github_remote}" ]] \
     || dybatpho::die "GitLab and GitHub remote must differ"
+  if [[ "${gitlab_remote}" == origin && "${github_remote}" == gh ]]; then
+    # A repository that is not listed keeps the remotes it has.
+    mirror::set_remotes {{ joinPath .chezmoi.homeDir ".config/dynet/mirrors.json" | squote }} . || true
+  fi
   local remote
   for remote in "${gitlab_remote}" "${github_remote}"; do
     dybatpho::git_has_remote "${remote}" \

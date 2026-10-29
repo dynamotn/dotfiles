@@ -5,7 +5,9 @@
 # that network reaches its proxy. `network::detect` probes the network it is
 # on and writes what it found as files read at run time, not at apply time:
 #
-# - `git.config`: `url.<base>.insteadOf` rules, included by `git/config`
+# - `git.config`: `url.<base>.insteadOf` rules, included by `git/config`, that
+#   send GitHub and GitLab over SSH on port 22, over SSH on port 443
+#   (ssh.github.com, altssh.gitlab.com) when port 22 is blocked, or over HTTPS
 # - `proxy.fish`: the proxy variables, reloaded by fish at its prompt
 #
 # It runs on every network change (the NetworkManager dispatcher on Linux,
@@ -61,6 +63,23 @@ function network::ssh_up {
 }
 
 #######################################
+# @description Print the first of the SSH hosts of a git host that git
+# reaches: the host itself on port 22, then its fallback on port 443
+# @arg $@ string Hosts to try, in order
+# @stdout The first one reachable, nothing when none is
+#######################################
+function network::ssh_host {
+  local host
+  dybatpho::expect_args host -- "$@"
+  for host in "$@"; do
+    if network::ssh_up "${host}"; then
+      printf '%s\n' "${host}"
+      return 0
+    fi
+  done
+}
+
+#######################################
 # @description Tell whether an HTTPS site answers, through the proxy in the
 # environment if any; a block page with an error status counts as down
 # @arg $1 string URL
@@ -106,62 +125,41 @@ function __network_insteadof {
 }
 
 #######################################
-# @description Print the git URL rewrites that fit the network. GitHub and
-# GitLab are each reached over SSH or HTTPS, and every repository mirrored on
-# both goes to GitLab while it is reachable and to GitHub otherwise, whichever
-# of their four URLs a remote or a `.gitmodules` names. git applies the
-# longest matching rule alone, so a mirror's rule beats its host's.
-# @arg $1 bool Whether git reaches GitHub over SSH
-# @arg $2 bool Whether GitLab is reachable at all
-# @arg $3 bool Whether git reaches GitLab over SSH
-# @arg $4 string Config of dynet, a JSON file with `.mirrors`
+# @description Print the rule that sends every URL of a git host, over HTTPS,
+# SSH or SSH on port 443, the one way the network lets through
+# @arg $1 string Host, such as github.com
+# @arg $2 string Its SSH host on port 443, such as ssh.github.com
+# @arg $3 string SSH host git reaches, one of the two; empty for HTTPS
+# @stdout The rule, in git config syntax
+#######################################
+function __network_git_host {
+  local host fallback ssh_host
+  dybatpho::expect_args host fallback ssh_host -- "$@"
+  local https="https://${host}/" ssh="git@${host}:" alt="git@${fallback}:"
+  if [[ -z "${ssh_host}" ]]; then
+    __network_insteadof "${https}" "${ssh}" "${alt}"
+  elif [[ "${ssh_host}" == "${host}" ]]; then
+    __network_insteadof "${ssh}" "${https}" "${alt}"
+  else
+    __network_insteadof "${alt}" "${https}" "${ssh}"
+  fi
+}
+
+#######################################
+# @description Print the git URL rewrites that fit the network: GitHub and
+# GitLab each over SSH on port 22, over SSH on port 443 when only that gets
+# through, or over HTTPS, whichever URL a remote or a `.gitmodules` names.
+# A repository mirrored on both keeps its two remotes, `origin` on GitLab and
+# `gh` on GitHub (scripts/lib/mirror.sh): neither is sent to the other host.
+# @arg $1 string SSH host git reaches GitHub at (github.com, ssh.github.com), empty for HTTPS
+# @arg $2 string SSH host git reaches GitLab at (gitlab.com, altssh.gitlab.com), empty for HTTPS
 # @stdout The rules, in git config syntax
 #######################################
 function network::git_config {
-  local github_ssh gitlab_up gitlab_ssh config
-  dybatpho::expect_args github_ssh gitlab_up gitlab_ssh config -- "$@"
-  local -A base=(
-    [github_ssh]="git@github.com:"
-    [github_https]="https://github.com/"
-    [gitlab_ssh]="git@gitlab.com:"
-    [gitlab_https]="https://gitlab.com/"
-  )
-  local host uses_ssh
-  for host in github gitlab; do
-    uses_ssh="${host}_ssh"
-    if dybatpho::is true "${!uses_ssh}"; then
-      __network_insteadof "${base[${host}_ssh]}" "${base[${host}_https]}"
-    else
-      __network_insteadof "${base[${host}_https]}" "${base[${host}_ssh]}"
-    fi
-  done
-
-  local target="github"
-  if dybatpho::is true "${gitlab_up}"; then
-    target="gitlab"
-  fi
-  local protocol="https"
-  uses_ssh="${target}_ssh"
-  if dybatpho::is true "${!uses_ssh}"; then
-    protocol="ssh"
-  fi
-  # shortcut: a rule matches by prefix, so it also catches an unlisted
-  # repository whose name extends a listed one; list that repository too.
-  local mirrors gitlab github form
-  local -A path
-  local -a from
-  mirrors="$(__network_config "${config}" '.mirrors[] | .gitlab + " " + .github')"
-  while read -r gitlab github; do
-    [[ -n "${gitlab}" ]] || continue
-    path=([gitlab]="${gitlab}" [github]="${github}")
-    from=()
-    for form in github_ssh github_https gitlab_ssh gitlab_https; do
-      if [[ "${form}" != "${target}_${protocol}" ]]; then
-        from+=("${base[${form}]}${path[${form%_*}]}")
-      fi
-    done
-    __network_insteadof "${base[${target}_${protocol}]}${path[${target}]}" ${from[@]+"${from[@]}"}
-  done <<< "${mirrors}"
+  local github_ssh gitlab_ssh
+  dybatpho::expect_args github_ssh gitlab_ssh -- "$@"
+  __network_git_host github.com ssh.github.com "${github_ssh}"
+  __network_git_host gitlab.com altssh.gitlab.com "${gitlab_ssh}"
 }
 
 #######################################
@@ -192,7 +190,7 @@ function network::proxy_fish {
 # it. The proxy found is also exported, or the inherited one unset, so a
 # caller that runs this in its own shell downloads the way the network allows.
 # @arg $1 string Config of dynet: a JSON file with `.preferGitSSH`,
-# `.httpProxy`, `.noProxyAddresses` and `.mirrors`
+# `.httpProxy` and `.noProxyAddresses`
 # @arg $2 string Directory to write the files into
 # @set http_proxy string The proxy, when it is reachable
 # @set https_proxy string The proxy, when it is reachable
@@ -213,19 +211,19 @@ function network::detect {
     unset http_proxy https_proxy no_proxy
     proxy=""
   fi
-  local github_ssh=false gitlab_up=false gitlab_ssh=false
-  if dybatpho::is true "${prefer_ssh}" && network::ssh_up github.com; then
-    github_ssh=true
+  local github_ssh="" gitlab_up=false gitlab_ssh=""
+  if dybatpho::is true "${prefer_ssh}"; then
+    github_ssh="$(network::ssh_host github.com ssh.github.com)"
   fi
   if network::https_up "https://gitlab.com/"; then
     gitlab_up=true
-    if dybatpho::is true "${prefer_ssh}" && network::ssh_up gitlab.com; then
-      gitlab_ssh=true
+    if dybatpho::is true "${prefer_ssh}"; then
+      gitlab_ssh="$(network::ssh_host gitlab.com altssh.gitlab.com)"
     fi
   fi
 
   local git_config proxy_fish
-  git_config="$(network::git_config "${github_ssh}" "${gitlab_up}" "${gitlab_ssh}" "${config}")"
+  git_config="$(network::git_config "${github_ssh}" "${gitlab_ssh}")"
   proxy_fish="$(network::proxy_fish "${proxy}" "${no_proxy_hosts}")"
   dybatpho::ensure_dir "${state}" > /dev/null
   # proxy.fish may hold the credentials of the proxy.
@@ -238,5 +236,7 @@ function network::detect {
   if [[ -n "${proxy}" ]]; then
     proxy_state="on"
   fi
-  dybatpho::info "proxy: ${proxy_state}, GitHub SSH: ${github_ssh}, GitLab: ${gitlab_up}, GitLab SSH: ${gitlab_ssh}"
+  local found="proxy: ${proxy_state}, GitHub SSH: ${github_ssh:-none}"
+  found+=", GitLab: ${gitlab_up}, GitLab SSH: ${gitlab_ssh:-none}"
+  dybatpho::info "${found}"
 }

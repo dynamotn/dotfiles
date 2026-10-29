@@ -107,11 +107,11 @@ function _committed_entries {
   ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"
 }
 
-# A repository of its own the template names only on GitHub must be one dynet
-# knows the GitLab mirror of, or it never moves back to GitLab. dybatpho
-# lives on GitHub alone. The decrypting config renders no secret here: the
-# machine `ci` has no company and no entry in the secrets.
-@test "every submodule of the dotfiles has a mirror in the dynet config" {
+# A repository of its own the template names only on GitHub must be listed in
+# the mirrors of dynet, or a checkout of it never gets its origin on GitLab.
+# dybatpho lives on GitHub alone. The decrypting config renders no secret
+# here: the machine `ci` has no company and no entry in the secrets.
+@test "every submodule of the dotfiles has a mirror in the dynet mirrors" {
   _require_chezmoi
   local cfg="${BATS_TEST_TMPDIR}/cfg.yaml" rendered="${BATS_TEST_TMPDIR}/rendered"
   _write_config "${cfg}" "T" "X" "F"
@@ -123,7 +123,7 @@ function _committed_entries {
     env HOME="${DOTFILES_REAL_HOME}" \
       XDG_CONFIG_HOME="${DOTFILES_REAL_XDG_CONFIG_HOME:-${DOTFILES_REAL_HOME}/.config}" \
       chezmoi --config "${cfg}" --source "${DOTFILES_DIR}/home" execute-template \
-      < "${DOTFILES_DIR}/home/private_dot_config/dynet/private_config.json.tmpl" \
+      < "${DOTFILES_DIR}/home/private_dot_config/dynet/mirrors.json.tmpl" \
       > "${rendered}.json"
   )
   local failures=() repository repositories mirrors
@@ -132,7 +132,7 @@ function _committed_entries {
   while read -r repository; do
     [[ "${repository}" != "dynamotn/dybatpho" ]] || continue
     grep -qxF "${repository}" <<< "${mirrors}" \
-      || failures+=("${repository}: no mirror in dynet/config.json")
+      || failures+=("${repository}: no mirror in dynet/mirrors.json")
   done <<< "${repositories}"
 
   ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"

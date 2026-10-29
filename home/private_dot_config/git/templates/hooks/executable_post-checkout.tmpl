@@ -2,7 +2,8 @@
 # @file post-checkout
 # @brief Warn when switching branches brought in dependency changes
 # @description Warn when a branch checkout changed the submodules, the lockfiles or the
-# pinned tool versions, so the install step is not forgotten.
+# pinned tool versions, so the install step is not forgotten. After a clone of a
+# repository mirrored from GitLab to GitHub, give it `origin` on GitLab and `gh` on GitHub.
 {{ template "git/hooks/modern_bash.sh.tmpl" . }}
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules array
 dybatpho::register_common_handlers
@@ -20,4 +21,11 @@ if [[ ${is_branch_checkout} == "1" ]] \
   && [[ ${previous_head} != "${null_ref}" ]] \
   && [[ ${previous_head} != "${new_head}" ]]; then
   dependency_changes::report "${previous_head}..${new_head}"
+fi
+
+# The checkout a clone ends with starts from the null ref. A clone of anything
+# not in the mirrors keeps its remotes, and no failure here fails the clone.
+if [[ ${previous_head} == "${null_ref}" ]]; then
+  . "{{ .chezmoi.sourceDir }}/../scripts/lib/mirror.sh"
+  mirror::set_remotes {{ joinPath .chezmoi.homeDir ".config/dynet/mirrors.json" | squote }} . || true
 fi

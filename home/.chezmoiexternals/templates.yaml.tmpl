@@ -4,6 +4,6 @@
 {{- end }}
 .local/share/projekt:
   type: git-repo
-  {{- /* dynet sends it to its GitHub mirror when the network blocks GitLab */}}
-  url: {{ $gitlab }}dynamotn/projekt-templates.git
+  {{- /* The clone gets its GitHub mirror as the remote gh (dynet mirrors.json) */}}
+  url: {{ $gitlab }}dynamo-config/projekt-templates.git
   refreshPeriod: 168h

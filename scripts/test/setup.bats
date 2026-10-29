@@ -261,7 +261,7 @@ EOF
 #!/bin/sh
 printf 'chezmoi %s\n' "\$*" >> "${CALL_LOG}"
 mkdir -p "${HOME}/.config/dynet"
-printf '{"preferGitSSH":false,"httpProxy":"http://127.0.0.1:9","noProxyAddresses":[],"mirrors":[]}\n' \
+printf '{"preferGitSSH":false,"httpProxy":"http://127.0.0.1:9","noProxyAddresses":[]}\n' \
   > "${HOME}/.config/dynet/config.json"
 EOF
   printf '#!/bin/sh\nexit 7\n' > "${HOME}/.local/bin/curl"
