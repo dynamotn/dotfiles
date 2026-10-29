@@ -46,6 +46,11 @@ properties:
     type: string
     description: Override the mise backend/plugin name when it differs from the tool name
 
+  # Used by mise method: extra flags for 'mise use', such as
+  # '--tool-option=extras=render' for a pipx tool.
+  params:
+    $ref: "#/$defs/params"
+
   dependencies:
     type: array
     description: Tool names that must be installed before this one
@@ -213,7 +218,8 @@ $defs:
       type: string
     description: >-
       Extra flags handed to the package manager when installing the package,
-      such as '--no-quarantine' for 'brew install'
+      such as '--no-quarantine' for 'brew install' or
+      '--tool-option=extras=render' for 'mise use'
 
   releases:
     type: array

@@ -196,7 +196,7 @@ function dytoy::get_yaml {
       # dyshellint disable=SC2016 $name and $method are jq variables, set by --arg
       filter='[.[] | select(.name == $name and .method == $method)]'
       ;;
-    archive | *.packages | *.services | dependencies)
+    archive | *.packages | *.services | dependencies | params)
       # One line per entry; a tool without the list has none
       filter=".[] | select(.name == \$name) | (.${field} // []) | .[]"
       ;;

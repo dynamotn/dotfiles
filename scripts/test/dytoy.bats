@@ -16,6 +16,9 @@ function _pipe_replace_version {
   method: binary
   dependencies:
     - helper
+  params:
+    - --tool-option=extras=render
+    - --tool-option=uvx_args=--python 3.12
   github:
     repo: owner/repo
 EOF
@@ -27,6 +30,10 @@ EOF
   run dytoy::get_yaml sample dependencies
   assert_success
   assert_output 'helper'
+
+  run dytoy::get_yaml sample params
+  assert_success
+  assert_output $'--tool-option=extras=render\n--tool-option=uvx_args=--python 3.12'
 }
 
 @test "dytoy::create_script writes a runnable temp script and dytoy::run_script clears it" {

@@ -343,6 +343,8 @@ function _install_mise_tool {
   backend=$(dytoy::get_yaml "${name}" "backend")
   [[ "${backend}" == "null" ]] && backend=""
   backend=$(dybatpho::coalesce "${backend}" "${name}")
+  local -a params
+  readarray -t params < <(dytoy::get_yaml "${name}" "params" || true)
 
   local -a mise_command=(mise)
   {{- if eq .chezmoi.os "android" }}
@@ -351,7 +353,7 @@ function _install_mise_tool {
   mise_command=(proot -b "${PREFIX}/etc/resolv.conf:/etc/resolv.conf" -b "${PREFIX}/etc/tls:/etc/ssl" "${mise_bin}")
   {{- end }}
 
-  dybatpho::dry_run "${mise_command[@]}" use -g "${backend}@${version}"
+  dybatpho::dry_run "${mise_command[@]}" use -g ${params[@]+"${params[@]}"} "${backend}@${version}"
 
   dytoy::run_hook "${name}" after "" "${version}"
 
