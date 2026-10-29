@@ -7,6 +7,18 @@ identity per purpose: `personal`, `enterprise-<CODE>` for each company code in
 the identities it is told to (see [setup](./setup.md)), so a machine that is
 not mine answers no and gets none of them.
 
+The public key of each identity lives in
+[`home/.chezmoidata/age.yaml`](../home/.chezmoidata/age.yaml), as
+`ageRecipients.personal` and `ageRecipients.enterprise.<shared|CODE>`. Adding a
+company is one line in `companies.yaml` and one in `age.yaml`; `setup.bats`
+fails when they disagree, and the config template refuses to render for a
+company without a key. To check a key against its identity:
+
+```bash
+diff <(age-keygen -y ~/.config/chezmoi/enterprise-<CODE>.key) \
+  <(yq '.ageRecipients.enterprise.<CODE>' home/.chezmoidata/age.yaml)
+```
+
 ## Layout
 
 | Path                                 | Holds                                                |

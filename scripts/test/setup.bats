@@ -11,9 +11,11 @@ setup() {
   cp "${DOTFILES_DIR}/.chezmoi.yaml.tmpl" "${DOTFILES_DIR}/.chezmoiroot" \
     "${DOTFILES_DIR}/.chezmoiversion" "${SANDBOX}/"
   cp -P "${DOTFILES_DIR}/home/.chezmoi.yaml.tmpl" "${SANDBOX}/home/"
-  # The options of its choice questions are data the config template reads.
+  # The options of its choice questions and the age recipients are data the
+  # config template reads.
   cp "${DOTFILES_DIR}/home/.chezmoidata/choices.yaml" \
-    "${DOTFILES_DIR}/home/.chezmoidata/companies.yaml" "${SANDBOX}/home/.chezmoidata/"
+    "${DOTFILES_DIR}/home/.chezmoidata/companies.yaml" \
+    "${DOTFILES_DIR}/home/.chezmoidata/age.yaml" "${SANDBOX}/home/.chezmoidata/"
   # The suite may itself run on CI or in a container; each test says which.
   unset CI GITHUB_ACTIONS GITLAB_CI container CODESPACES REMOTE_CONTAINERS DEVCONTAINER KUBERNETES_SERVICE_HOST
 }
@@ -64,6 +66,47 @@ function fake_chezmoi_version {
   run yq -r '.age.identities[]' "${config}"
   assert_output --partial "enterprise-F1.key"
   assert_output --partial "enterprise-ZOO.key"
+  # One recipient per identity: personal, enterprise.shared, F1 and ZOO.
+  run yq -o=j -I=0 '.ageRecipients | [.personal, .enterprise.shared, .enterprise.F1, .enterprise.ZOO]' \
+    "${SANDBOX}/home/.chezmoidata/age.yaml"
+  assert_success
+  local expected="${output}"
+  run yq -o=j -I=0 '.age.recipients' "${config}"
+  assert_output "${expected}"
+}
+
+@test "age.yaml has one distinct recipient per identity of companies.yaml" {
+  local data="${DOTFILES_DIR}/home/.chezmoidata/age.yaml"
+  # A company missing here encrypted its files without its key, silently.
+  run yq -o=j -I=0 '.companies | . + ["shared"] | sort' "${DOTFILES_DIR}/home/.chezmoidata/companies.yaml"
+  assert_success
+  local expected="${output}"
+  run yq -o=j -I=0 '.ageRecipients.enterprise | keys | sort' "${data}"
+  assert_output "${expected}"
+  run yq -r '.ageRecipients | [.personal] + (.enterprise | to_entries | map(.value)) | .[]' "${data}"
+  assert_success
+  local -a recipients
+  mapfile -t recipients <<< "${output}"
+  local recipient
+  for recipient in "${recipients[@]}"; do
+    [[ "${recipient}" =~ ^age1(pq1)?[02-9ac-hj-np-z]+$ ]] || fail "Not an age recipient: ${recipient:0:20}..."
+  done
+  run bash -c 'printf "%s\n" "$@" | sort | uniq -d' _ "${recipients[@]}"
+  assert_output ""
+}
+
+@test "the config template fails for a company without a recipient" {
+  dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  yq -i 'del(.ageRecipients.enterprise.ZOO)' "${SANDBOX}/home/.chezmoidata/age.yaml"
+  write_machines_yaml << 'EOF'
+machines:
+  test0:
+    decryptPersonal: false
+    decryptEnterprise: [ZOO]
+EOF
+  render_config_for test0
+  assert_failure
+  assert_stderr --partial "age.yaml: no ageRecipients.enterprise.ZOO"
 }
 
 @test "chezmoi init reads the config template of the repository through home/" {
