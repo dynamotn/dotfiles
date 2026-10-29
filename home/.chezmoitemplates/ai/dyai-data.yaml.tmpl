@@ -172,6 +172,12 @@ policy:
       - "Bash(vault read *)"
       - "Bash(op read *)"
       - "Bash(aws configure get *)"
+      # Commits are signed; an agent whose signing fails in the sandbox
+      # otherwise turns it off. The post-commit hook flags the other spellings.
+      - "Bash(git commit --no-gpg-sign*)"
+      - "Bash(rtk git commit --no-gpg-sign*)"
+      - "Bash(git -c commit.gpgsign=false *)"
+      - "Bash(rtk git -c commit.gpgsign=false *)"
       # Sentinel for `dyai selftest`: a harmless command each agent must refuse.
       - "Bash(dyai-selftest-probe deny *)"
     defaultMode: acceptEdits

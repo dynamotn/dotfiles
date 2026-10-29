@@ -1,0 +1,24 @@
+# Every agent, not only this one
+
+These rules apply whenever an AI agent changes how AI agents work: their
+instructions, rules, skills, subagents, hooks, permissions, MCP servers,
+plugins or settings, in the dotfiles, in dyai, or in any other repository.
+
+- This machine runs seven agents from one dyai config: Claude Code, Codex,
+  Gemini, opencode, Copilot, Antigravity and Hermes. A change meant for the
+  agent you are is a change for all seven, unless it is specific to one.
+- Before editing, list where each of them keeps the thing being changed, and
+  change every one of them in the same task. Search next to the code you
+  touch for the others:
+  `rg -i 'claude|codex|gemini|opencode|copilot|antigravity|agy|hermes'`.
+- Prefer the one place they all read: an instruction goes in a partial under
+  `home/.chezmoitemplates/ai/`, a permission in the dyai policy
+  (`ai/dyai-data.yaml.tmpl`), an extension in `~/.config/dyai/config.yaml`,
+  rather than in one agent's own file.
+- In the dotfiles, each agent's own files live in `home/private_dot_claude/`,
+  `private_dot_codex/`, `private_dot_gemini/` (Gemini and Antigravity),
+  `private_dot_config/opencode/`, `private_dot_copilot/` and
+  `private_dot_hermes/`. In dyai, a feature has one function per agent in
+  `lib/` and a test for each.
+- When a change cannot reach some agents (no such hook, a matcher that
+  cannot express the rule), say in the reply which ones are left out and why.

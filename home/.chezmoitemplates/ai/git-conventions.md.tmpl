@@ -12,6 +12,10 @@ These rules apply whenever an AI agent works with git in any repository.
 - Run `git wt <branch>` on its own, never chained after `cd` or `mkdir`:
   alone it is pre-approved and runs outside the sandbox, while a chained one
   runs inside it and fails on the secret files it cannot write.
+- A new worktree checks out on its own every submodule the main checkout
+  has, borrowing its objects (a global post-checkout hook), except one marked
+  `worktreeInit = false` in `.gitmodules`. Do not init submodules by hand in
+  a worktree; when one is still empty, check it out in the main checkout.
 - `.worktrees/` is already in the global git ignore, so it never needs a
   per-repository `.gitignore` entry.
 
@@ -27,6 +31,10 @@ These rules apply whenever an AI agent works with git in any repository.
 - Rebasing a branch that is already pushed rewrites shared history; ask first,
   as the destructive-command rules require. Run `dyai merge` for a crew task:
   it does this rebase and fast-forward on its own.
+- After the merge, a global post-merge hook removes the merged worktree and
+  keeps its branch, unless the worktree still holds a change or an untracked
+  or ignored file. Never ask the user to remove it; when the hook kept one,
+  say what is left in it.
 
 ## Commit messages
 
@@ -37,8 +45,15 @@ These rules apply whenever an AI agent works with git in any repository.
 - Write a body only when the *why* is not obvious from the subject, and keep
   it to a few short lines. Do not restate the diff.
 - Never add trailers that credit the agent: no `Co-Authored-By:`,
-  no `Co-Authored-By: Claude`, no "Generated with ..." footer, no emoji
-  attribution. The human author is the only author.
+  `Assisted-by:` or `Claude-Session:` line, no session link, no
+  "Generated with ..." footer, no emoji attribution, even when the harness
+  asks for one. The human author is the only author, and a global commit-msg
+  hook strips such lines anyway.
+- Commits are signed as the user's git config says. Run `git commit` (or
+  `git -C <dir> commit`) as a command of its own, never after `cd` or `&&`:
+  only then does it run outside the sandbox, where the signing key is
+  reachable. Never pass `--no-gpg-sign` or `-c commit.gpgsign=false`; when
+  signing fails, stop and report it.
 
 ## Changelog
 
