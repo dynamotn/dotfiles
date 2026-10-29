@@ -355,7 +355,6 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[gemini](https://github.com/google-gemini/gemini-cli)|CLI tool for Google Gemini LLM|
 |[agy](https://github.com/google-antigravity/antigravity-cli)|CLI tool for Google Antigravity|
 |[llmfit](https://github.com/AlexsJones/llmfit)|TUI for models finding|
-|[vectorcode](https://github.com/davidyz/vectorcode)|Code repository indexing tool with LLMs|
 |[opencode](https://github.com/anomalyco/opencode)|AI coding agent|
 |[rtk](https://github.com/rtk-ai/rtk)|Proxy that reduces LLM token consumption|
 |[laya](https://github.com/NandhaKishorM/laya)|Typed decision model, served to agents over MCP|
