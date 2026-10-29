@@ -60,6 +60,21 @@ jobs:
       - name: Fetch dybatpho
         run: git submodule update --init --recursive scripts/lib/dybatpho
 
+      # dyai is private on GitLab: a read-only deploy key fetches only it.
+      # The host key is GitLab's published ED25519 key, pinned rather than scanned.
+      - name: Fetch dyai
+        env:
+          DYAI_DEPLOY_KEY: ${{ secrets.DYAI_DEPLOY_KEY }}
+        run: |
+          [[ -n "${DYAI_DEPLOY_KEY}" ]] || { echo "::error::secret DYAI_DEPLOY_KEY is not set"; exit 1; }
+          install -d -m 700 ~/.ssh
+          trap 'rm -f ~/.ssh/dyai' EXIT
+          printf '%s\n' "${DYAI_DEPLOY_KEY}" > ~/.ssh/dyai
+          chmod 600 ~/.ssh/dyai
+          echo 'gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf' > ~/.ssh/known_hosts
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/dyai -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            git submodule update --init --recursive scripts/lib/dyai
+
       - name: Install chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin -t "${CHEZMOI_VERSION}"
 
@@ -67,9 +82,9 @@ jobs:
       - name: Write chezmoi config
         run: install -D -m 600 scripts/test/fixtures/chezmoi.yaml ~/.config/chezmoi/chezmoi.yaml
 
-      # dycrypt tests round trip a throwaway key.
-      - name: Install age
-        run: sudo apt-get update && sudo apt-get install -y age
+      # dycrypt tests round trip a throwaway key; claude_settings.bats calls rg.
+      - name: Install age and ripgrep
+        run: sudo apt-get update && sudo apt-get install -y age ripgrep
 
       - name: Cache cargo binaries
         uses: actions/cache@v4
