@@ -1,0 +1,32 @@
+{{- /* Remotes of the zj-herdr daemon: every Host of ~/.ssh/config whose alias
+       is the code of another machine of .chezmoidata/machines.yaml running
+       Zellij, read from the same sources as ~/.ssh/config.d. */ -}}
+{{- $hosts := list }}
+{{- range .decryptEnterprise }}
+{{-   $file := printf "../secrets/data/enterprise-%s/ssh.yaml.age" . | joinPath $.chezmoi.sourceDir }}
+{{-   if stat $file }}
+{{-     $hosts = concat $hosts (include $file | decrypt | fromYaml).hosts }}
+{{-   end }}
+{{- end }}
+{{- if .decryptPersonal }}
+{{-   $file := joinPath .chezmoi.sourceDir "../secrets/data/personal/ssh.yaml.age" }}
+{{-   if stat $file }}
+{{-     $hosts = concat $hosts (include $file | decrypt | fromYaml).hosts }}
+{{-   end }}
+{{- end }}
+{{- $hosts = concat $hosts (includeTemplate "ssh/service.yaml.tmpl" . | fromYaml).hosts }}
+{{- $machines := include (joinPath .chezmoi.sourceDir ".chezmoidata/machines.yaml") | fromYaml | dig "machines" dict }}
+{{- $remotes := list }}
+{{- range $hosts }}
+{{-   $m := dig .host dict $machines }}
+{{-   if and (ne .host $.code) (eq (dig "terminalMultiplexer" "" $m) "Z") (not (has .host $remotes)) }}
+{{-     $remotes = append $remotes .host }}
+{{-   end }}
+{{- end -}}
+# vim:ft=toml
+{{- range $remotes }}
+
+[[remote]]
+name = {{ . | quote }}
+ssh = {{ . | quote }}
+{{- end }}
