@@ -944,6 +944,17 @@ registry:
         - mohitmishra786/low-level-dev-skills@gpu-memory-model
         - mohitmishra786/low-level-dev-skills@hip-rocm
         - mohitmishra786/low-level-dev-skills@triton-lang
+    # REA (rea.tools): binaries, Electron/JS, .NET and websites through MCP.
+    # Native analysis needs Hopper, Ghidra, IDA or Kuna installed; Linux
+    # needs a procps `ps` on PATH.
+    reverse-engineering:
+      skills:
+        - morluto/rea@reverse-engineer-anything
+      mcp:
+        rea:
+          command: bunx
+          args: ["rea-agents@6.7.0", "mcp"]
+          env: {}
     # Domain subagents split out of the global baseline (see global.subagents
     # exclude); opt in per project when the work needs them.
     desktop:
