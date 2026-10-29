@@ -9,7 +9,9 @@ setup() {
   command -v ssh-keygen &> /dev/null || skip "ssh-keygen not found"
   unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
   SANDBOX="${BATS_TEST_TMPDIR}/dotfiles"
-  mkdir -p "${SANDBOX}/home/.chezmoiscripts" "${SANDBOX}/scripts/lib" "${SANDBOX}/secrets/data"
+  mkdir -p "${SANDBOX}/home/.chezmoiscripts" "${SANDBOX}/home/.chezmoitemplates/dyai" "${SANDBOX}/scripts/lib" \
+    "${SANDBOX}/secrets/data"
+  cp "${DOTFILES_DIR}/home/.chezmoitemplates/dyai/node-identity.tmpl" "${SANDBOX}/home/.chezmoitemplates/dyai/"
   cp "${DOTFILES_DIR}/home/.chezmoiscripts/run_after_04-setup-dyai-node.sh.tmpl" "${SANDBOX}/home/.chezmoiscripts/"
   cp "${DOTFILES_DIR}/scripts/lib/dycrypt.sh" "${DOTFILES_DIR}/scripts/lib/dyai_node.sh" "${SANDBOX}/scripts/lib/"
   ln -s "${DOTFILES_DIR}/scripts/lib/dybatpho" "${SANDBOX}/scripts/lib/dybatpho"
@@ -19,8 +21,11 @@ setup() {
   # The personal identity dycrypt reads, private as it checks.
   mkdir -p "${HOME}/.config/chezmoi"
   chmod 700 "${HOME}/.config/chezmoi"
-  age-keygen -o "${HOME}/.config/chezmoi/personal.key" 2> /dev/null
-  chmod 600 "${HOME}/.config/chezmoi/personal.key"
+  local identity
+  for identity in personal enterprise-F1; do
+    age-keygen -o "${HOME}/.config/chezmoi/${identity}.key" 2> /dev/null
+    chmod 600 "${HOME}/.config/chezmoi/${identity}.key"
+  done
   # The store: gitlab.com is a bare repository on disk.
   STORE="${BATS_TEST_TMPDIR}/store.git"
   git init -q --bare -b main "${STORE}"
@@ -29,8 +34,6 @@ setup() {
   printf 'global:\n  crew:\n    store:\n      backend: git\n      url: git@gitlab.com:group/store.git\n' \
     > "${HOME}/.config/dyai/config.yaml"
   CONFIG="${BATS_TEST_TMPDIR}/chezmoi.yaml"
-  printf 'sourceDir: "%s/home"\ndata:\n  bash: "%s"\n  code: laptop\n  kind: laptop\n  decryptPersonal: true\n' "${SANDBOX}" "$(command -v bash)" \
-    > "${CONFIG}"
   # glab: logged in when GLAB_OK exists, every call logged.
   GLAB_DIR="${BATS_TEST_TMPDIR}/glab"
   mkdir -p "${GLAB_DIR}" "${BATS_TEST_TMPDIR}/bin"
@@ -48,6 +51,27 @@ EOF
   chmod +x "${BATS_TEST_TMPDIR}/bin/glab"
   PATH="${BATS_TEST_TMPDIR}/bin:${PATH}"
   HOOK="${BATS_TEST_TMPDIR}/hook.sh"
+  _render laptop true "" "[]"
+}
+
+# Renders the hook for a machine.
+# @arg $1 string Machine code
+# @arg $2 string decryptPersonal
+# @arg $3 string Owner company
+# @arg $4 string decryptEnterprise, as a YAML list
+function _render {
+  local code personal company enterprise
+  dybatpho::expect_args code personal company enterprise -- "$@"
+  cat > "${CONFIG}" << EOF
+sourceDir: "${SANDBOX}/home"
+data:
+  bash: "$(command -v bash)"
+  code: "${code}"
+  kind: laptop
+  company: "${company}"
+  decryptPersonal: ${personal}
+  decryptEnterprise: ${enterprise}
+EOF
   chezmoi execute-template --config "${CONFIG}" --source "${SANDBOX}/home" \
     --file "${SANDBOX}/home/.chezmoiscripts/run_after_04-setup-dyai-node.sh.tmpl" > "${HOOK}"
 }
@@ -103,6 +127,23 @@ function _signers {
 
 @test "hook: a machine on the local store gets no keys" {
   printf 'global:\n  crew:\n    timeout: 60\n' > "${HOME}/.config/dyai/config.yaml"
+  run --separate-stderr bash "${HOOK}"
+  assert_success
+  [[ ! -e "${HOME}/.config/dyai/node" ]]
+}
+
+@test "hook: a company machine without the personal secrets keeps its keys under its company's identity" {
+  _render work false F1 "[F1]"
+  run --separate-stderr bash "${HOOK}"
+  assert_success
+  [[ -f "${SANDBOX}/secrets/data/enterprise-F1/dyai.yaml.age" ]]
+  [[ ! -e "${SANDBOX}/secrets/data/personal/dyai.yaml.age" ]]
+  run age -d -i "${HOME}/.config/chezmoi/enterprise-F1.key" "${SANDBOX}/secrets/data/enterprise-F1/dyai.yaml.age"
+  [[ "$(yq '.nodes | keys | join(" ")' <<< "${output}")" == work ]]
+}
+
+@test "hook: a machine with no identity for its keys gets none" {
+  _render other false F1 "[]"
   run --separate-stderr bash "${HOOK}"
   assert_success
   [[ ! -e "${HOME}/.config/dyai/node" ]]

@@ -1,0 +1,11 @@
+{{- /* The age identity this machine keeps its dyai crew store keys under:
+       personal when it decrypts the personal secrets, else its owner
+       company's (enterprise-<CODE>) when it decrypts that one, else empty,
+       and the machine stays off the shared store. The same order as
+       machine/secret.tmpl, reversed: the store is personal, so personal wins.
+       Read it with: includeTemplate "dyai/node-identity.tmpl" . | trim */ -}}
+{{- if .decryptPersonal }}
+{{-   "personal" }}
+{{- else if and .company (has .company .decryptEnterprise) }}
+{{-   printf "enterprise-%s" .company }}
+{{- end }}

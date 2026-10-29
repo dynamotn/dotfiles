@@ -1,13 +1,14 @@
 {{- /* This machine's keys for the dyai crew store, as JSON: signing and
        deploy (the private keys), public and deploy_public, from the
-       `nodes.<code>` entry of secrets/data/personal/dyai.yaml.age. The store
-       is personal, so only a machine that decrypts the personal identity
-       gets them. Every field is empty otherwise, or when the file or the entry is missing, so
+       `nodes.<code>` entry of secrets/data/<identity>/dyai.yaml.age, the
+       identity dyai/node-identity.tmpl picks. Every field is empty when it
+       picks none, or when the file or the entry is missing, so
        containers and CI never decrypt anything.
        Read it with: includeTemplate "dyai/node-key.tmpl" . | fromJson */ -}}
 {{- $node := dict }}
-{{- if .decryptPersonal }}
-{{-   $file := joinPath .chezmoi.sourceDir "../secrets/data/personal/dyai.yaml.age" }}
+{{- $identity := includeTemplate "dyai/node-identity.tmpl" . | trim }}
+{{- if $identity }}
+{{-   $file := printf "../secrets/data/%s/dyai.yaml.age" $identity | joinPath .chezmoi.sourceDir }}
 {{-   if stat $file }}
 {{-     $node = include $file | decrypt | fromYaml | dig "nodes" .code dict }}
 {{-   end }}

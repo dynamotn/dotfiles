@@ -216,9 +216,10 @@ global:
     # secrets/data/personal/dyai.yaml.age and made on a new machine by
     # .chezmoiscripts/run_onchange_after_04-setup-dyai-node.sh. Trust lives in
     # nodes/allowed_signers on the store's main, which no deploy key may push.
-    # Only a machine that decrypts the personal secrets has the keys; the
-    # others keep their crew state on their own (the local backend).
-    {{- if .decryptPersonal }}
+    # Only a machine with keys (dyai/node-identity.tmpl: the personal
+    # secrets, or its company's) joins; the others keep their crew state on
+    # their own (the local backend).
+    {{- if includeTemplate "dyai/node-identity.tmpl" . | trim }}
     store:
       backend: git
       url: git@gitlab.com:dynamo-brain/dyai-state.git

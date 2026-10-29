@@ -24,12 +24,16 @@ tree. Containers and CI decrypt nothing, and every such field stays empty.
 
 The dyai crew store needs two SSH keys per machine: `signing`, which signs
 its events, and `deploy`, a deploy key of the store project that pushes them.
-Both live in `secrets/data/personal/dyai.yaml.age` under `nodes.<code>`
+Both live in `secrets/data/<identity>/dyai.yaml.age` under `nodes.<code>`
 (`signing`, `public`, `deploy`, `deploy_public`;
 `schemas/secrets/dyai.schema.yaml`), and
 `home/.chezmoitemplates/dyai/node-key.tmpl` renders this machine's keys to
-`~/.config/dyai/node/`. A machine that does not decrypt the personal identity
-gets none, and its dyai config keeps the crew state local. On a new machine
+`~/.config/dyai/node/`. The identity is the personal one when the machine
+decrypts it, else its owner company's (`enterprise-<CODE>`) when it decrypts
+that (`dyai/node-identity.tmpl`): a company machine without the personal
+secrets still joins the same store, its keys encrypted to its company's
+identity. A machine with
+neither gets none, and its dyai config keeps the crew state local. On a new machine
 `run_after_04-setup-dyai-node.sh` makes both keys and adds them to that file
 (committed in `secrets/data`, not pushed). Once `glab auth login` was run, the
 next apply goes on through `glab` with your own account: it keeps the store's

@@ -9,7 +9,8 @@ setup() {
   # its own, encrypted to a throwaway key: the real secrets are never read here.
   SANDBOX="${BATS_TEST_TMPDIR}/dotfiles"
   mkdir -p "${SANDBOX}/home/.chezmoitemplates/dyai" "${SANDBOX}/home/private_dot_config/dyai"
-  cp "${DOTFILES_DIR}/home/.chezmoitemplates/dyai/node-key.tmpl" "${SANDBOX}/home/.chezmoitemplates/dyai/"
+  cp "${DOTFILES_DIR}/home/.chezmoitemplates/dyai/node-key.tmpl" \
+    "${DOTFILES_DIR}/home/.chezmoitemplates/dyai/node-identity.tmpl" "${SANDBOX}/home/.chezmoitemplates/dyai/"
   cp -R "${DOTFILES_DIR}/home/private_dot_config/dyai/private_node" "${SANDBOX}/home/private_dot_config/dyai/"
   KEY="${BATS_TEST_TMPDIR}/test.key"
   age-keygen -o "${KEY}" 2> /dev/null
@@ -19,18 +20,22 @@ setup() {
   PRIVATE=$'fake signing key\nAAAA\nend'
 }
 
-# Encrypts stdin as the personal dyai secrets.
+# Encrypts stdin as the dyai secrets of an identity, personal by default.
 function write_dyai_secret {
-  mkdir -p "${SANDBOX}/secrets/data/personal"
-  age -r "${RECIPIENT}" -o "${SANDBOX}/secrets/data/personal/dyai.yaml.age"
+  local identity="${1:-personal}"
+  mkdir -p "${SANDBOX}/secrets/data/${identity}"
+  age -r "${RECIPIENT}" -o "${SANDBOX}/secrets/data/${identity}/dyai.yaml.age"
 }
 
 # Writes the chezmoi config of a machine.
 # @arg $1 string Machine code
 # @arg $2 string decryptPersonal, true or false
+# @arg $3 string Owner company, empty by default
+# @arg $4 string decryptEnterprise, as a YAML list, [] by default
 function write_config {
   local code personal
   dybatpho::expect_args code personal -- "$@"
+  local company="${3:-}" enterprise="${4:-[]}"
   cat > "${CONFIG}" << EOF
 sourceDir: "${SANDBOX}/home"
 encryption: age
@@ -39,7 +44,9 @@ age:
   recipient: "${RECIPIENT}"
 data:
   code: "${code}"
+  company: "${company}"
   decryptPersonal: ${personal}
+  decryptEnterprise: ${enterprise}
 EOF
 }
 
@@ -124,4 +131,25 @@ function write_two_nodes {
   write_config pc true
   render private_dot_config/dyai/private_node/private_deploy.tmpl
   assert_output ""
+}
+
+@test "dyai node key: a company machine without the personal secrets reads its company's" {
+  printf 'nodes:\n  work:\n    public: "ssh-ed25519 AAAAwork work"\n' | write_dyai_secret enterprise-F1
+  write_two_nodes
+  write_config work false F1 '[F1]'
+  render private_dot_config/dyai/private_node/signing.pub.tmpl
+  assert_success
+  assert_output "ssh-ed25519 AAAAwork work"
+  # Its company's secrets it cannot decrypt: no key.
+  write_config work false F1 '[]'
+  render private_dot_config/dyai/private_node/signing.pub.tmpl
+  assert_output ""
+}
+
+@test "dyai node key: a machine with both the personal and its company's secrets uses the personal" {
+  printf 'nodes:\n  laptop:\n    public: "ssh-ed25519 AAAAcompany laptop"\n' | write_dyai_secret enterprise-F1
+  write_two_nodes
+  write_config laptop true F1 '[F1]'
+  render private_dot_config/dyai/private_node/signing.pub.tmpl
+  assert_output "ssh-ed25519 AAAAlaptop laptop"
 }

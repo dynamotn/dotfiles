@@ -204,6 +204,26 @@ function _validate {
   _validate "${SCHEMA_DIR}/dyai.schema.yaml" "${DATA_DIR}/personal/dyai.yaml"
 }
 
+@test "secrets/enterprise-F1/dyai.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/dyai.schema.yaml" "${DATA_DIR}/enterprise-F1/dyai.yaml"
+}
+
+@test "secrets/enterprise-T1/dyai.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/dyai.schema.yaml" "${DATA_DIR}/enterprise-T1/dyai.yaml"
+}
+
+@test "secrets/enterprise-ZOO/dyai.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/dyai.schema.yaml" "${DATA_DIR}/enterprise-ZOO/dyai.yaml"
+}
+
+@test "secrets/enterprise-U3T/dyai.yaml conforms to schema" {
+  _require_ys
+  _validate "${SCHEMA_DIR}/dyai.schema.yaml" "${DATA_DIR}/enterprise-U3T/dyai.yaml"
+}
+
 @test "secrets/enterprise-F1/machine.yaml conforms to schema" {
   _require_ys
   _validate "${SCHEMA_DIR}/machine.schema.yaml" "${DATA_DIR}/enterprise-F1/machine.yaml"
