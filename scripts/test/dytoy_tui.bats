@@ -1,3 +1,4 @@
+# dyshellint disable=SC2154 DOTFILES_DIR, BATS_TEST_TMPDIR and DYBATPHO_* come from bats, test_helper, dybatpho
 setup() {
   load test_helper
   setup_dotfiles_test_env
@@ -9,6 +10,7 @@ setup() {
   # the drawing assertions do not depend on the machine running the suite.
   export COLUMNS=100 LINES=16
   export NO_COLOR=1
+  # dyshellint disable=SC2034 read by the screen module, sized from COLUMNS and LINES below
   DYBATPHO_SCREEN_WIDTH=0
   DYBATPHO_SCREEN_HEIGHT=0
   dybatpho::screen_size || true

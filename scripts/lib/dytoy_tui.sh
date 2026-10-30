@@ -168,7 +168,7 @@ function dytoy_tui::load_tools {
     while IFS=$'\x1f' read -r name tool_method essential dependencies packages; do
       [[ -n "${name}" && "${tool_method}" == "${method}" ]] || continue
       hidden=false
-      if dybatpho::is true "${ONLY_ESSENTIAL}" && ! dybatpho::is true "${essential}"; then
+      if dybatpho::is true "${ONLY_ESSENTIAL:-false}" && ! dybatpho::is true "${essential}"; then
         hidden=true
       fi
       installed="$(dytoy_tui::detect_installed "${name}" "${method}" "${packages}")"
@@ -382,17 +382,17 @@ function dytoy_tui::child_args {
   __dytoy_tui_args=(
     "${DYTOY_TUI_METHOD[__dytoy_tui_args_index]}"
     --tool "${DYTOY_TUI_NAME[__dytoy_tui_args_index]}"
-    --log-level "${LOG_LEVEL}"
+    --log-level "${LOG_LEVEL:-info}"
   )
-  dybatpho::is true "${DRY_RUN}" && __dytoy_tui_args+=(--dry-run)
-  dybatpho::is true "${ONLY_ESSENTIAL}" && __dytoy_tui_args+=(--essential)
-  if dybatpho::is true "${ONLY_NOT_INSTALLED}"; then
+  dybatpho::is true "${DRY_RUN:-false}" && __dytoy_tui_args+=(--dry-run)
+  dybatpho::is true "${ONLY_ESSENTIAL:-false}" && __dytoy_tui_args+=(--essential)
+  if dybatpho::is true "${ONLY_NOT_INSTALLED:-true}"; then
     __dytoy_tui_args+=(--check-installed)
   else
     __dytoy_tui_args+=(--no-check-installed)
   fi
   dybatpho::is true "${__dytoy_tui_args_sync}" && __dytoy_tui_args+=(--sync)
-  dybatpho::is true "${LIST_CONTENTS}" && __dytoy_tui_args+=(--list)
+  dybatpho::is true "${LIST_CONTENTS:-false}" && __dytoy_tui_args+=(--list)
   return 0
 }
 
@@ -712,7 +712,7 @@ function dytoy_tui::draw_header {
   read -r x y width _ <<< "${rect}"
   local -a segments=(" ◆ dytoy " "${DYTOY_TUI_STYLE_BRAND}" "  " "0" "$@")
   local badge=""
-  dybatpho::is true "${DRY_RUN}" && badge=" DRY RUN "
+  dybatpho::is true "${DRY_RUN:-false}" && badge=" DRY RUN "
   dybatpho::screen_spans "${y}" "${x}" "$((width - ${#badge}))" "" "${segments[@]}"
   [[ -n "${badge}" ]] && dybatpho::screen_put "${y}" "$((x + width - ${#badge}))" "${badge}" "${DYTOY_TUI_STYLE_BADGE}"
   return 0
@@ -1422,7 +1422,7 @@ function dytoy_tui::start_next {
   # The repositories are synced once, by the first package manager tool,
   # rather than once per tool.
   local sync=false position
-  if dybatpho::is true "${SYNC_REPO}" && [[ "${DYTOY_TUI_METHOD[index]}" == "os" ]]; then
+  if dybatpho::is true "${SYNC_REPO:-false}" && [[ "${DYTOY_TUI_METHOD[index]}" == "os" ]]; then
     sync=true
     for ((position = 0; position < DYTOY_TUI_QUEUE_POS - 1; position++)); do
       [[ "${DYTOY_TUI_METHOD[${DYTOY_TUI_QUEUE[position]}]}" == "os" ]] && sync=false
@@ -1525,7 +1525,7 @@ function dytoy_tui::stop {
 # @noargs
 #######################################
 function dytoy_tui::needs_sudo {
-  dybatpho::is true "${DRY_RUN}" && return 1
+  dybatpho::is true "${DRY_RUN:-false}" && return 1
   dybatpho::privilege_needed || return 1
   local index
   for index in "${DYTOY_TUI_QUEUE[@]}"; do

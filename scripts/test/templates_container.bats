@@ -1,3 +1,4 @@
+# dyshellint disable=SC2154 DOTFILES_DIR and BATS_TEST_TMPDIR come from bats and test_helper
 setup() {
   load test_helper
   setup_dotfiles_test_env

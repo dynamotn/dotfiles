@@ -1,3 +1,4 @@
+# dyshellint disable=SC2154 DOTFILES_DIR, BATS_TEST_TMPDIR and DYBATPHO_* come from bats, test_helper, dybatpho
 setup() {
   load test_helper
   setup_dotfiles_test_env
@@ -61,6 +62,7 @@ EOF
 
 @test "dytoy::run_script keeps the temp files registered before the hook" {
   local script_path="${BATS_TEST_TMPDIR}/sample.sh"
+  # dyshellint disable=SC2034 dybatpho::create_temp fills it by name
   local temp_file
   dybatpho::create_temp temp_file ".tmp"
   local before="${#DYBATPHO_CLEANUP_PATHS[@]}"
@@ -820,7 +822,8 @@ EOF
 }
 
 @test "dytoy::add_apt_repo calls package_manager::add_apt_repo with expanded suite for ubuntu" {
-  local yaml='{"name":"sample","repo":"https://packages.example/dists/%v","suite":"null","components":"main","key":"ABCD1234","repo_name":"null"}'
+  local yaml='{"name":"sample","repo":"https://packages.example/dists/%v","suite":"null",'
+  yaml+='"components":"main","key":"ABCD1234","repo_name":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
   function package_manager::add_apt_repo { printf 'add_apt_repo:%s|%s\n' "$1" "$3" >> "${actions_file}"; }
   function package_manager::sync_apt_repo { true; }
