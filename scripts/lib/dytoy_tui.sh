@@ -217,9 +217,7 @@ function dytoy_tui::detect_installed {
     fi
     return 0
   fi
-  local local_bin_file
-  local_bin_file="$(dybatpho::path_join "${HOME}" ".local" "bin" "${name}")"
-  if dybatpho::is command "${name}" || dybatpho::is file "${local_bin_file}"; then
+  if dytoy::has_command "${name}"; then
     printf '%s\n' "yes"
   else
     printf '%s\n' "no"

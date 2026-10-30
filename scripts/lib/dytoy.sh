@@ -520,18 +520,25 @@ function dytoy::is_invalid_essential {
 function dytoy::is_installed_command {
   local name
   dybatpho::expect_args name -- "$@"
-  local location
-  location="${2:-$(dybatpho::path_join "${HOME}" ".local" "bin")}"
-  if dybatpho::is true "${ONLY_NOT_INSTALLED}"; then
-    local tool_path
-    tool_path="$(dybatpho::path_join "${location}" "${name}")"
-    if dybatpho::is command "${name}" || dybatpho::is file "${tool_path}"; then
-      dybatpho::debug "${name} tool is already installed, skipping"
-      return 0
-    fi
-    return 1
-  fi
-  return 1
+  dybatpho::is true "${ONLY_NOT_INSTALLED}" || return 1
+  dytoy::has_command "${name}" "${2:-}" || return 1
+  dybatpho::debug "${name} tool is already installed, skipping"
+}
+
+#######################################
+# @description Check whether a tool is installed: its command is on `PATH` or
+# its file is in the directory it installs to
+# @arg $1 string Name of tool
+# @arg $2 string Directory the tool installs to, `~/.local/bin` when empty
+#######################################
+function dytoy::has_command {
+  local name
+  dybatpho::expect_args name -- "$@"
+  local location="${2:-}"
+  [[ -n "${location}" ]] || location="$(dybatpho::path_join "${HOME}" ".local" "bin")"
+  local tool_path
+  tool_path="$(dybatpho::path_join "${location}" "${name}")"
+  dybatpho::is command "${name}" || dybatpho::is file "${tool_path}"
 }
 
 #######################################
