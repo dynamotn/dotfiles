@@ -227,6 +227,10 @@ global:
       node: {{ .code | quote }}
       ssh_key: ~/.config/dyai/node/deploy
       signing_key: ~/.config/dyai/node/signing
+      # Who may sign accounts.yaml on the store's main (`dyai accounts sign`):
+      # the user's own key, never a node's.
+      registry_signers:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPLc0+n6eOPVVVpa/PXNkniyWLlxVXjlS3xzllA+bLhD dynamo
       # The other machines, by their code (also their SSH host name), to reach
       # the store through when this one cannot: personal ones only, as the
       # store is, always-on ones first, never a phone or a tablet.
