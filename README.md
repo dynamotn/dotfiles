@@ -239,6 +239,7 @@ I also have a custom registry in `neovim` config.
 
 | Guide                          | Covers                                                |
 |--------------------------------|-------------------------------------------------------|
+| [architecture](docs/architecture.md) | How the layers, data, hooks and agents fit together |
 | [setup](docs/setup.md)         | `setup.sh` options, init questions, machines, images  |
 | [secrets](docs/secrets.md)     | age identities, `chezmoi-dycrypt`, secret data layout |
 | [dytoy](docs/dytoy.md)         | Installing tools from `dytoy` YAML                    |

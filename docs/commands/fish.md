@@ -354,7 +354,7 @@ Each is defined only when the replacement is installed.
 | `du` | `dust` |
 | `df` | `duf` |
 | `curl` | `curlie` |
-| `dig` | `q` |
+| `dig` | `doggo` |
 | `less` / `more` | `ov` |
 | `fd` | `fdfind` (Debian/Ubuntu only) |
 | `mise` | `mise` wrapped in `proot` so it can resolve DNS and TLS (Termux only) |

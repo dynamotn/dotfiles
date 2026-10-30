@@ -20,7 +20,7 @@ apply here.
 | `scripts/test/`           | bats tests, one file per library                     |
 | `schemas/`                | YAML schemas for `dytoy` and for the secrets data    |
 | `secrets/`                | age-encrypted secrets; `secrets/data/` is a submodule |
-| `docs/`                   | guides (setup, secrets, dytoy, dyai, kernel), commands and key bindings |
+| `docs/`                   | architecture overview, guides (setup, secrets, dytoy, kernel), commands and key bindings |
 
 ## Chezmoi conventions
 
