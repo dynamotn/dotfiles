@@ -170,6 +170,8 @@ function dytoy::get_package_spec {
 #   object again with `dybatpho::json_get`.
 # @arg $1 string `jq` filter
 # @arg $@ string Further `jq` options, such as `--arg name value`
+# @env DYTOY_TOOLS_JSON string The file already read as JSON, set by
+#   `dytoy::iterate` for the run it makes; read from the file when empty
 # @stdout One result per line
 # @internal
 #######################################
@@ -177,9 +179,11 @@ function __dytoy_query_tools {
   local filter
   dybatpho::expect_args filter -- "$@"
   shift
-  local yaml_file document
-  yaml_file="$(dytoy::yaml_file)"
-  document="$(dybatpho::yaml_to_json "${yaml_file}")" || return
+  local yaml_file document="${DYTOY_TOOLS_JSON:-}"
+  if [[ -z "${document}" ]]; then
+    yaml_file="$(dytoy::yaml_file)"
+    document="$(dybatpho::yaml_to_json "${yaml_file}")" || return
+  fi
   dybatpho::json_query - "${filter}" -c -r "$@" <<< "${document}"
 }
 
@@ -411,6 +415,13 @@ function dytoy::iterate {
   dybatpho::expect_args __dytoy_iterate_command -- "$@"
   dybatpho::is function "${__dytoy_iterate_command}" \
     || dybatpho::die "${__dytoy_iterate_command} function of ${METHOD} method is not defined"
+  # Every query of this run reads the file converted once, rather than
+  # converting it again for each field of each tool. Local, so a later run
+  # reads the file afresh.
+  # dyshellint disable=BSG015 the installers it runs are meant to read this cache
+  local DYTOY_TOOLS_JSON="" __dytoy_iterate_file
+  __dytoy_iterate_file="$(dytoy::yaml_file)"
+  DYTOY_TOOLS_JSON="$(dybatpho::yaml_to_json "${__dytoy_iterate_file}" 2> /dev/null)" || DYTOY_TOOLS_JSON=""
   if [[ "${TOOL}" == "@empty" ]]; then
     dybatpho::info "Install ${METHOD} tools"
     local __dytoy_iterate_yaml_file __dytoy_iterate_tool

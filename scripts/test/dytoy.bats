@@ -896,6 +896,35 @@ EOF
   assert_equal "${lines[*]}" 'partial'
 }
 
+@test "dytoy::iterate converts the YAML file once for the whole run" {
+  write_tools_yaml << 'EOF'
+- name: first
+  method: binary
+  version: v1
+- name: second
+  method: binary
+EOF
+  local METHOD='binary' ONLY_ESSENTIAL='false' ONLY_NOT_INSTALLED='false' TOOL='@empty'
+  local count_file="${BATS_TEST_TMPDIR}/conversions" bin="${BATS_TEST_TMPDIR}/bin" real_yq
+  real_yq="$(command -v yq)"
+  mkdir -p "${bin}"
+  # A yq that counts how often the file is converted, leaving out the version
+  # check dybatpho makes first.
+  # dyshellint disable=SC2016 "$1" and "$@" belong to the generated script
+  printf '#!/usr/bin/env bash\n[[ "$1" == --version ]] || printf x >> %q\nexec %q "$@"\n' \
+    "${count_file}" "${real_yq}" > "${bin}/yq"
+  chmod +x "${bin}/yq"
+  local PATH="${bin}:${PATH}"
+  # shellcheck disable=SC2329 # invoked by dytoy::iterate
+  function _install { dytoy::get_version "$1"; }
+
+  run dytoy::iterate _install
+  assert_success
+  assert_output --partial 'v1'
+  run cat "${count_file}"
+  assert_output 'x'
+}
+
 @test "dytoy::iterate leaves out a non-essential tool and refuses an unknown one" {
   write_tools_yaml << 'EOF'
 - name: core
