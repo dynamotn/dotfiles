@@ -1,14 +1,18 @@
   // zj-herdr rail on the left of every tab; it also starts the zj-herdr
-  // daemon when none runs. new_tab_template needs its own focused pane:
-  // Zellij drops a `children` nested inside a split there.
+  // daemon when none runs. A zellij nested over SSH (zellijNested) leaves it
+  // to the outer one, whose rail lists this machine as a remote.
+  // new_tab_template needs its own focused pane: Zellij drops a `children`
+  // nested inside a split there.
   default_tab_template {
     pane split_direction="vertical" {
+      {{- if not (hasKey . "zellijNested") }}
       pane size=32 borderless=true {
         plugin location="zj_herdr" {
           pinned "true"
           start_daemon "true"
         }
       }
+      {{- end }}
       children
     }
     pane size=1 borderless=true {
@@ -20,12 +24,14 @@
   }
   new_tab_template {
     pane split_direction="vertical" {
+      {{- if not (hasKey . "zellijNested") }}
       pane size=32 borderless=true {
         plugin location="zj_herdr" {
           pinned "true"
           start_daemon "true"
         }
       }
+      {{- end }}
       pane focus=true
     }
     pane size=1 borderless=true {

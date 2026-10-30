@@ -508,6 +508,9 @@ default_shell "fish"
 // Default: "default"
 //
 // default_layout "compact"
+{{- if hasKey . "zellijNested" }}
+default_layout "ssh"
+{{- end }}
 
 // The folder in which Zellij will look for layouts
 // (Requires restart)

@@ -1,4 +1,5 @@
-{{- /* Nested inside the local zellij (Alt z), so it takes Alt x; see config.kdl.tmpl */}}
+{{- /* Nested inside the local zellij (Alt z), so it takes Alt x and the
+       rail-less ssh layout; see config.kdl.tmpl */}}
 {{- $defaultKeybind := "Alt x" }}
-{{- $top := merge . (dict "zellijKeybind" $defaultKeybind) }}
+{{- $top := merge . (dict "zellijKeybind" $defaultKeybind "zellijNested" true) }}
 {{- includeTemplate "zellij/config.kdl.tmpl" $top -}}
