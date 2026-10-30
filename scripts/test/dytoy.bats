@@ -227,6 +227,23 @@ EOF
   assert_output 'latest'
 }
 
+@test "dytoy::get_yaml_or falls back on an unset or empty field, even to an empty default" {
+  write_tools_yaml << 'EOF'
+- name: sample
+  method: binary
+  location: /opt/bin
+  backend: ""
+EOF
+
+  run dytoy::get_yaml_or sample location /default
+  assert_output '/opt/bin'
+  run dytoy::get_yaml_or sample backend sample
+  assert_output 'sample'
+  run dytoy::get_yaml_or sample github.host ""
+  assert_success
+  assert_output ''
+}
+
 @test "dytoy::run_script shows the script content in dry-run mode" {
   export DRY_RUN='true'
   local script_path="${BATS_TEST_TMPDIR}/sample.sh"

@@ -204,7 +204,7 @@ function _run_hook_without_tools {
   local cfg="${BATS_TEST_TMPDIR}/debian.yaml" rendered="${BATS_TEST_TMPDIR}/dytoy"
   _write_container_config "${cfg}" linux-debian none
   _render_linux "${cfg}" home/dot_local/bin/executable_dytoy.tmpl "${rendered}"
-  run grep -E 'dytoy::install_ubuntu_package|package_manager::init_ubuntu' "${rendered}"
+  run grep -x 'DYTOY_OS="ubuntu"' "${rendered}"
   assert_success
 }
 

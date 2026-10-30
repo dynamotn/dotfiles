@@ -73,9 +73,6 @@ DYTOY_TUI_RUNNING=true
 DYTOY_TUI_STATUS=""
 DYTOY_TUI_SELF=""
 DYTOY_TUI_LOG_DIR=""
-# The key of this OS in a tool's YAML, such as `gentoo` or `macos`; the
-# installed `dytoy` sets it, and without it a package manager tool is `unknown`.
-DYTOY_TUI_OS=""
 
 declare -ga DYTOY_TUI_SPINNER=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
 # The Catppuccin flavour of the screen module's theme, and its palette by
@@ -155,7 +152,7 @@ function dytoy_tui::load_tools {
           + ((.flatpak.packages // []) | map(.type = "flatpak"))
           + ((.fdroid.packages // []) | map(.type = "fdroid"))
           | map([.type // "", .name, .version // ""] | map(tostring) | join("|")) | join(","))]
-      | map(tostring) | join("\u001f")' -r --arg os "${DYTOY_TUI_OS}")
+      | map(tostring) | join("\u001f")' -r --arg os "${DYTOY_OS}")
 
   local method name tool_method essential dependencies packages installed hidden
   for method in "${DYTOY_METHODS[@]}"; do
@@ -236,7 +233,7 @@ function dytoy_tui::detect_installed {
 #   `cask`, or empty
 # @arg $2 string Package name
 # @arg $3 string Version asked for, empty for the default one
-# @env DYTOY_TUI_OS string Key of this OS in a tool's YAML
+# @env DYTOY_OS string Key of this OS in a tool's YAML
 # @exitcode 0 Installed
 # @exitcode 1 Not installed
 # @exitcode 2 Not installed on this OS by any installer, so not checked
@@ -245,7 +242,7 @@ function dytoy_tui::package_installed {
   local type package version
   dybatpho::expect_args type package version -- "$@"
   local checker
-  case "${type}:${DYTOY_TUI_OS}" in
+  case "${type}:${DYTOY_OS}" in
     flatpak:gentoo | flatpak:arch | flatpak:ubuntu | flatpak:alpine) checker=flatpak ;;
     fdroid:termux) checker=fdroidcl ;;
     flatpak:* | fdroid:*) return 2 ;;

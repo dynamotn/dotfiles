@@ -135,7 +135,7 @@ function run_until_done {
 EOF
   function package_manager::check_installed_pacman { [[ "$1" == "have" || "$1" == "live-git" ]]; }
   function package_manager::check_installed_flatpak { [[ "$1" == "org.have.App" ]]; }
-  DYTOY_TUI_OS="arch"
+  DYTOY_OS="arch"
   dytoy_tui::load_tools
   assert_equal "${DYTOY_TUI_INSTALLED[*]}" "unknown yes no unknown"
 }
@@ -144,7 +144,7 @@ EOF
   function package_manager::check_installed_brew { [[ "$1" == "go@1.22" ]]; }
   function package_manager::check_installed_mas { [[ "$1" == "123" ]]; }
   function package_manager::check_installed_dmg { return 1; }
-  DYTOY_TUI_OS="macos"
+  DYTOY_OS="macos"
   run dytoy_tui::package_installed "" go 1.22
   assert_success
   run dytoy_tui::package_installed store 123 ""
