@@ -372,13 +372,20 @@ EOF
   method: binary
   dependencies:
     - helper
+    - lib
 - name: helper
   method: shell
+- name: lib
+  method: os
+- name: lib
+  method: mise
 EOF
 
   run dytoy::install_dependencies sample
   assert_success
   assert_output --partial "${HOME}/.local/bin/dytoy shell -i -t helper"
+  assert_output --partial "${HOME}/.local/bin/dytoy os -i -t lib"
+  refute_output --partial "dytoy mise"
 }
 
 @test "dytoy::is_defined fails for a missing tool" {

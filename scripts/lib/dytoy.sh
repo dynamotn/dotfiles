@@ -251,14 +251,20 @@ function dytoy::get_version {
 function dytoy::install_dependencies {
   local name
   dybatpho::expect_args name -- "$@"
+  # Each dependency with its method, in one query rather than one per dependency;
+  # the first definition of a name gives its method.
   local -a dependencies
-  __dytoy_lines_into dependencies dytoy::get_yaml "${name}" "dependencies" \
+  # dyshellint disable=SC2016 $name is a jq variable, set by --arg
+  __dytoy_lines_into dependencies __dytoy_query_tools \
+    '(reduce .[] as $tool ({}; .[$tool.name] //= $tool.method)) as $methods
+      | .[] | select(.name == $name) | (.dependencies // [])[]
+      | "\(.)\t\($methods[.] // "")"' --arg name "${name}" \
     || dybatpho::debug "Can't read dependencies of ${name}"
-  local dytoy_bin dependency method
+  local dytoy_bin entry dependency method
   dytoy_bin="$(dybatpho::path_join "${HOME}" ".local" "bin" "dytoy")"
-  for dependency in "${dependencies[@]}"; do
+  for entry in ${dependencies[@]+"${dependencies[@]}"}; do
+    IFS=$'\t' read -r dependency method <<< "${entry}"
     dybatpho::debug "Need dependency: ${dependency}"
-    method=$(dytoy::get_yaml "${dependency}" "method")
     dybatpho::dry_run "${dytoy_bin}" "${method}" -i -t "${dependency}"
   done
 }
