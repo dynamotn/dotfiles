@@ -19,7 +19,7 @@
 # @env MOZILLA_PROFILES array Profiles this installation knows about
 # @env PROFILE string Profile the user selected, empty for all of them
 
-# @env MOZILLA_FAILED_STORES number Folders `mozilla_profile::store` could not encrypt
+# @env MOZILLA_FAILED_STORES number Folders `mozilla_profile::add` or `mozilla_profile::store` could not store
 MOZILLA_FAILED_STORES=0
 
 #######################################
@@ -87,7 +87,7 @@ function mozilla_profile::for_each_profile {
     if mozilla_profile::selected "${__mozilla_profile_each}"; then
       "${__mozilla_profile_callback}" "${__mozilla_profile_each}"
     else
-      dybatpho::debug "${PROFILE}"
+      dybatpho::debug "Skip profile ${__mozilla_profile_each}, only ${PROFILE} is selected"
     fi
   done
 }
@@ -136,27 +136,59 @@ function mozilla_profile::extract_prefs {
 }
 
 #######################################
+# @description Track paths of one folder in the dotfiles as they are, in one
+#   chezmoi call
+# @arg $1 string Folder holding the paths, for the warning
+# @arg $@ string Paths to track, taken literally
+#######################################
+function mozilla_profile::track {
+  local folder
+  dybatpho::expect_args folder -- "$@"
+  shift
+
+  # Several of these files only exist for some profiles or some versions of
+  # the application, and chezmoi reports a missing path as an error.
+  local path
+  local -a paths=()
+  for path in "$@"; do
+    if [[ -e "${path}" ]]; then
+      paths+=("${path}")
+    else
+      dybatpho::debug "No file at ${path}, nothing to track"
+    fi
+  done
+  ((${#paths[@]})) || return 0
+
+  if ! dybatpho::dry_run chezmoi add --create ${paths[@]+"${paths[@]}"}; then
+    dybatpho::warn "Cannot add ${#paths[@]} file(s) of ${folder}"
+    MOZILLA_FAILED_STORES=$((MOZILLA_FAILED_STORES + 1))
+  fi
+}
+
+#######################################
 # @description Track files of a folder in the dotfiles as they are
 # @arg $1 string Folder holding the files
-# @arg $@ string Names of the files, relative to that folder
+# @arg $@ string Names of the files, relative to that folder, globs allowed
 #######################################
 function mozilla_profile::add {
   local folder
   dybatpho::expect_args folder -- "$@"
   shift
 
-  local name path
+  # chezmoi does not expand a glob, so it is expanded here; a name matching
+  # nothing is passed on as it is, for `track` to report.
+  local name pattern
+  local -a matches paths=()
   for name in "$@"; do
-    path="$(dybatpho::path_join "${folder}" "${name}")"
-    # Several of these files only exist for some profiles or some versions of
-    # the application, and chezmoi reports a missing path as an error. Asking
-    # first keeps a normal run free of errors that mean nothing.
-    if ! compgen -G "${path}" > /dev/null; then
-      dybatpho::debug "No file at ${path}, nothing to track"
-      continue
+    pattern="$(dybatpho::path_join "${folder}" "${name}")"
+    mapfile -t matches < <(compgen -G "${pattern}" | sort || true)
+    if ((${#matches[@]})); then
+      paths+=(${matches[@]+"${matches[@]}"})
+    else
+      paths+=("${pattern}")
     fi
-    dybatpho::dry_run chezmoi add "${path}" --create || true
   done
+  mozilla_profile::track "${folder}" ${paths[@]+"${paths[@]}"}
 }
 
 #######################################
@@ -173,7 +205,13 @@ function mozilla_profile::store {
   (($#)) || return 0
 
   if [[ "${profile}" == "public" ]]; then
-    mozilla_profile::add "${folder}" "$@"
+    # Taken literally: a real file name such as `[Gmail].sbd` reads as a glob.
+    local name
+    local -a paths=()
+    for name in "$@"; do
+      paths+=("$(dybatpho::path_join "${folder}" "${name}")")
+    done
+    mozilla_profile::track "${folder}" ${paths[@]+"${paths[@]}"}
   elif ! dybatpho::dry_run chezmoi-dycrypt encrypt -i "${profile}" -f "${folder}" -a "create" "$@"; then
     # One call now carries a whole folder, so swallowing its failure would lose
     # every file of that folder without a word. The run carries on and says so
@@ -247,7 +285,7 @@ function mozilla_profile::run {
     dybatpho::header "Update ${MOZILLA_APP_NAME} settings"
     mozilla_profile::for_each_profile "${__mozilla_profile_update}"
     ((MOZILLA_FAILED_STORES == 0)) \
-      || dybatpho::die "${MOZILLA_FAILED_STORES} folder(s) could not be encrypted, the dotfiles are not up to date"
+      || dybatpho::die "${MOZILLA_FAILED_STORES} folder(s) could not be stored, the dotfiles are not up to date"
     dybatpho::success "Update ${MOZILLA_APP_NAME} settings"
   fi
 }

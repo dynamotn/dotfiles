@@ -139,8 +139,7 @@ EOF
 
   run mozilla_profile::add "${folder}" "addons.json" "extensions.json"
   assert_success
-  assert_output --partial "chezmoi add ${folder}/addons.json --create"
-  assert_output --partial "chezmoi add ${folder}/extensions.json --create"
+  assert_output --partial "chezmoi add --create ${folder}/addons.json ${folder}/extensions.json"
 }
 
 @test "mozilla_profile::store encrypts for a private profile and adds for the public one" {
@@ -155,7 +154,7 @@ EOF
 
   run mozilla_profile::store public "${folder}" "cookies.sqlite"
   assert_success
-  assert_output --partial "chezmoi add ${folder}/cookies.sqlite --create"
+  assert_output --partial "chezmoi add --create ${folder}/cookies.sqlite"
   refute_output --partial "chezmoi-dycrypt"
 }
 
@@ -165,11 +164,36 @@ EOF
   mkdir -p "${folder}"
   touch "${folder}/addons.json"
 
-  run mozilla_profile::add "${folder}" "addons.json" "absent.json" "glob*.json"
+  run mozilla_profile::add "${folder}" "addons.json" "absent.json" "nomatch*.json"
   assert_success
-  assert_output --partial "chezmoi add ${folder}/addons.json --create"
-  refute_output --partial "chezmoi add ${folder}/absent.json"
-  refute_output --partial "chezmoi add ${folder}/glob"
+  assert_output --partial "chezmoi add --create ${folder}/addons.json"
+  refute_output --regexp "chezmoi add.*absent.json"
+  refute_output --regexp "chezmoi add.*nomatch"
+}
+
+@test "mozilla_profile::add expands a glob itself, since chezmoi does not" {
+  local folder="${BATS_TEST_TMPDIR}/live"
+  mkdir -p "${folder}"
+  touch "${folder}/abook.sqlite" "${folder}/abook-1.sqlite"
+
+  DRY_RUN=true run mozilla_profile::add "${folder}" "abook*.sqlite"
+  assert_success
+  assert_output --partial "chezmoi add --create ${folder}/abook-1.sqlite ${folder}/abook.sqlite"
+  refute_output --partial "abook*"
+}
+
+@test "mozilla_profile::add counts a folder chezmoi could not add" {
+  fake_command chezmoi 1
+  local folder="${BATS_TEST_TMPDIR}/live"
+  mkdir -p "${folder}"
+  touch "${folder}/addons.json"
+
+  run mozilla_profile::add "${folder}" "addons.json"
+  assert_success
+  assert_output --partial "Cannot add 1 file(s) of ${folder}"
+
+  mozilla_profile::add "${folder}" "addons.json"
+  assert_equal "${MOZILLA_FAILED_STORES}" "1"
 }
 
 @test "mozilla_profile::store counts a folder it could not encrypt" {
@@ -185,13 +209,13 @@ EOF
   assert_equal "${MOZILLA_FAILED_STORES}" "1"
 }
 
-@test "mozilla_profile::run reports the folders it could not encrypt" {
+@test "mozilla_profile::run reports the folders it could not store" {
   fake_command pgrep 1
   function _update_profile { MOZILLA_FAILED_STORES=2; }
 
   run mozilla_profile::run _update_profile
   assert_failure
-  assert_output --partial "2 folder(s) could not be encrypted"
+  assert_output --partial "2 folder(s) could not be stored"
   refute_output --partial "DONE"
 }
 
@@ -217,6 +241,29 @@ EOF
   assert_success
   assert_output --partial "data.sqlite"
   refute_output --partial "other.sqlite"
+}
+
+@test "mozilla_profile::store_tree adds the public profile one folder at a time" {
+  local root="${BATS_TEST_TMPDIR}/ImapMail"
+  mkdir -p "${root}/one"
+  touch "${root}/one/INBOX" "${root}/one/INBOX.msf"
+
+  DRY_RUN=true run mozilla_profile::store_tree public "${root}"
+  assert_success
+  assert_output --partial "chezmoi add --create ${root}/one/INBOX ${root}/one/INBOX.msf"
+  refute_output --partial "chezmoi-dycrypt"
+}
+
+@test "mozilla_profile::store_tree takes a file name of the public profile as it is, not as a glob" {
+  # Gmail keeps its labels under `[Gmail].sbd`, a bracket expression to a glob.
+  local root="${BATS_TEST_TMPDIR}/ImapMail"
+  mkdir -p "${root}/[Gmail].sbd"
+  touch "${root}/[Gmail].sbd/Sent Mail"
+
+  DRY_RUN=true run mozilla_profile::store_tree public "${root}"
+  assert_success
+  # The dry run prints each argument quoted for the shell.
+  assert_output --partial "chezmoi add --create $(printf '%q' "${root}/[Gmail].sbd/Sent Mail")"
 }
 
 @test "mozilla_profile::store_tree walks past a folder that does not exist" {

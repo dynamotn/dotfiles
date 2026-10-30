@@ -1,6 +1,6 @@
 #!{{ .bash }}
 # @file dybird
-# @brief Update/Refresh your live data of thundebird/betterbird mail client to/from your dotfiles
+# @brief Update/Refresh your live data of thunderbird/betterbird mail client to/from your dotfiles
 # @description Only the list of files this mail client keeps lives here; walking
 # the profiles, reading `prefs.js` and handing files to chezmoi is shared with
 # `dyfox` in `scripts/lib/mozilla_profile.sh`.
@@ -79,7 +79,8 @@ function _update_profile {
   if [[ "${profile}" =~ enterprise-.* ]]; then
     local tbsync_dir
     tbsync_dir="$(dybatpho::path_join "${profile_dir}" "TbSync")"
-    mozilla_profile::add "${tbsync_dir}" "account*.json" "folder*.json"
+    mozilla_profile::store_tree "${profile}" "${tbsync_dir}" \
+      -maxdepth 1 \( -name "account*.json" -o -name "folder*.json" \)
   fi
 
   dybatpho::progress "Update search engines for profile ${profile}"
@@ -87,11 +88,9 @@ function _update_profile {
 
   dybatpho::progress "Update storage data for profile ${profile}"
   mozilla_profile::store "${profile}" "${profile_dir}" "storage.sqlite"
+  mozilla_profile::store_tree "${profile}" "${storage_dir}" -path "*/moz-extension+++*"
   if [[ "${profile}" == "public" ]]; then
-    mozilla_profile::add "${storage_dir}" "moz-extension+++*"
     mozilla_profile::add "${profile_dir}" "global-messages-db.sqlite"
-  else
-    mozilla_profile::store_tree "${profile}" "${storage_dir}" -path "*/moz-extension+++*"
   fi
 
   if dybatpho::is true "${COOKIES}"; then
@@ -102,37 +101,25 @@ function _update_profile {
 
   if dybatpho::is true "${MAIL}"; then
     dybatpho::progress "Update mail data for profile ${profile}"
-    if [[ "${profile}" == "public" ]]; then
-      mozilla_profile::add "${profile_dir}" "ImapMail"
-    else
-      mozilla_profile::store_tree "${profile}" "${mail_dir}"
-    fi
+    mozilla_profile::store_tree "${profile}" "${mail_dir}"
   fi
 
   if dybatpho::is true "${FEEDS}"; then
     dybatpho::progress "Update feeds data for profile ${profile}"
     local feeds_dir
-    feeds_dir="$(dybatpho::path_join "${profile_dir}" "Mail")"
-    mozilla_profile::add "${feeds_dir}" "Feeds"
+    feeds_dir="$(dybatpho::path_join "${profile_dir}" "Mail" "Feeds")"
+    mozilla_profile::store_tree "${profile}" "${feeds_dir}"
   fi
 
   if dybatpho::is true "${ADDRESSES}"; then
     dybatpho::progress "Update address book data for profile ${profile}"
     mozilla_profile::store "${profile}" "${profile_dir}" "history.sqlite"
-    if [[ "${profile}" == "public" ]]; then
-      mozilla_profile::add "${profile_dir}" "abook*.sqlite"
-    else
-      mozilla_profile::store_tree "${profile}" "${profile_dir}" -maxdepth 1 -name "abook*.sqlite"
-    fi
+    mozilla_profile::store_tree "${profile}" "${profile_dir}" -maxdepth 1 -name "abook*.sqlite"
   fi
 
   if dybatpho::is true "${CALENDAR}"; then
     dybatpho::progress "Update calendar data for profile ${profile}"
-    if [[ "${profile}" == "public" ]]; then
-      mozilla_profile::add "${profile_dir}" "calendar-data"
-    else
-      mozilla_profile::store_tree "${profile}" "${calendar_dir}" -name "*.sqlite"
-    fi
+    mozilla_profile::store_tree "${profile}" "${calendar_dir}" -name "*.sqlite"
   fi
 }
 

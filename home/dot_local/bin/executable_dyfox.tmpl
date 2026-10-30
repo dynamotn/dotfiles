@@ -77,11 +77,7 @@ function _update_profile {
 
   dybatpho::progress "Update storage data for profile ${profile}"
   mozilla_profile::store "${profile}" "${profile_dir}" "storage.sqlite"
-  if [[ "${profile}" == "public" ]]; then
-    mozilla_profile::add "${storage_dir}" "moz-extension+++*"
-  else
-    mozilla_profile::store_tree "${profile}" "${storage_dir}" -path "*/moz-extension+++*"
-  fi
+  mozilla_profile::store_tree "${profile}" "${storage_dir}" -path "*/moz-extension+++*"
 
   if dybatpho::is true "${COOKIES}"; then
     dybatpho::progress "Update cookies for profile ${profile}"
