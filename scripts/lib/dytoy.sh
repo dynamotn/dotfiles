@@ -863,6 +863,30 @@ function dytoy::install_macos_rosetta {
 }
 
 #######################################
+# @description Install the packages of the app store section of a tool, inside
+# the hook of that section, once the store itself is installed
+# @arg $1 string Name of tool
+# @arg $2 string Section, `flatpak` or `fdroid`
+# @arg $3 string Tool installing from the store, such as `fdroidcl`
+# @internal
+#######################################
+function __dytoy_install_store_section {
+  local name section store
+  dybatpho::expect_args name section store -- "$@"
+  local package
+  local -a packages=()
+  readarray packages < <(dytoy::get_yaml "${name}" "${section}.packages" || true)
+  dybatpho::array_first packages &> /dev/null || return 0
+  misc::install_tool "${store}"
+  "package_manager::init_${section}"
+  dytoy::run_section_hook "${name}" before "${section}"
+  for package in ${packages[@]+"${packages[@]}"}; do
+    "dytoy::install_${section}_package" "${package}"
+  done
+  dytoy::run_section_hook "${name}" after "${section}"
+}
+
+#######################################
 # @description Install a tool with the package manager of this OS
 # @arg $1 string Name of tool
 # @env DYTOY_OS string Key of this OS in a tool's YAML, such as `gentoo`
@@ -884,30 +908,8 @@ function dytoy::install_os_tool {
       need_rosetta="$(dytoy::get_yaml "${name}" "need_rosetta")"
       dybatpho::is true "${need_rosetta}" && dytoy::install_macos_rosetta
       ;;
-    termux)
-      # Install fdroid applications if defined
-      readarray packages < <(dytoy::get_yaml "${name}" "fdroid.packages" || true)
-      if dybatpho::array_first packages &> /dev/null; then
-        misc::install_tool fdroidcl
-        package_manager::init_fdroid
-        for package in ${packages[@]+"${packages[@]}"}; do
-          dytoy::install_fdroid_package "${package}"
-        done
-      fi
-      ;;
-    *)
-      # Install flatpak packages if defined
-      readarray packages < <(dytoy::get_yaml "${name}" "flatpak.packages" || true)
-      if dybatpho::array_first packages &> /dev/null; then
-        misc::install_tool flatpak
-        package_manager::init_flatpak
-        dytoy::run_section_hook "${name}" before flatpak
-        for package in ${packages[@]+"${packages[@]}"}; do
-          dytoy::install_flatpak_package "${package}"
-        done
-        dytoy::run_section_hook "${name}" after flatpak
-      fi
-      ;;
+    termux) __dytoy_install_store_section "${name}" fdroid fdroidcl ;;
+    *) __dytoy_install_store_section "${name}" flatpak flatpak ;;
   esac
   readarray packages < <(dytoy::get_yaml "${name}" "${DYTOY_OS}.packages" || true)
   for package in ${packages[@]+"${packages[@]}"}; do

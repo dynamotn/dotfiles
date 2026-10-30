@@ -757,6 +757,38 @@ EOF
   assert_line "fdroid:com.example.App"
 }
 
+@test "__dytoy_install_store_section installs the store, then its packages inside the section hook" {
+  write_tools_yaml << 'EOF'
+- name: app
+  method: os
+  fdroid:
+    packages:
+      - name: org.app
+- name: bare
+  method: os
+EOF
+  # shellcheck disable=SC2329 # stand-ins called by the section installer
+  function misc::install_tool { printf 'store:%s\n' "$1"; }
+  # shellcheck disable=SC2329
+  function package_manager::init_fdroid { printf 'init\n'; }
+  # shellcheck disable=SC2329
+  function dytoy::run_section_hook { printf 'hook:%s:%s\n' "$2" "$3"; }
+  # shellcheck disable=SC2329
+  function dytoy::install_fdroid_package {
+    local name
+    name="$(dybatpho::json_get "$1" .name)"
+    printf 'install:%s\n' "${name}"
+  }
+
+  run __dytoy_install_store_section app fdroid fdroidcl
+  assert_success
+  assert_output $'store:fdroidcl\ninit\nhook:before:fdroid\ninstall:org.app\nhook:after:fdroid'
+
+  run __dytoy_install_store_section bare fdroid fdroidcl
+  assert_success
+  assert_output ''
+}
+
 @test "dytoy::install_flatpak_package calls install_via_flatpak for new packages" {
   local yaml='{"name":"org.gnome.Calendar","repo":"flathub","url":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"
