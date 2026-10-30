@@ -135,6 +135,11 @@
             "type": "command",
             "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v dyai-hunk >/dev/null 2>&1 && dyai-hunk; true",
             "async": true
+          },
+          {
+            "type": "command",
+            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v dyai-session-report >/dev/null 2>&1 && dyai-session-report; true",
+            "timeout": 10
           }
         ]
       }

@@ -169,7 +169,7 @@ STUB
   _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
   mkdir -p "${bin}"
   local tool
-  for tool in dyai dyai-hunk notify-send paplay; do
+  for tool in dyai dyai-hunk dyai-session-report notify-send paplay; do
     printf '#!/usr/bin/env bash\necho "%s ran" >> "%s/ran"\nprintf drift\n' "${tool}" "${BATS_TEST_TMPDIR}" \
       > "${bin}/${tool}"
     chmod +x "${bin}/${tool}"

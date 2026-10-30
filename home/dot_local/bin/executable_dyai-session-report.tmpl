@@ -1,0 +1,7 @@
+#!{{ .bash }}
+# @file dyai-session-report
+# @brief Stop hook for Claude Code: advise on wasteful habits seen in the session
+# @description Runs dyai-session-report from the dotfiles' dyai submodule, with
+# the dotfiles' dybatpho. It reads the hook's JSON on stdin and only advises.
+export DYBATPHO_DIR="{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho"
+exec {{ .bash }} "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai/bin/dyai-session-report" "$@"
