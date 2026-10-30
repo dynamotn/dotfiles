@@ -387,6 +387,8 @@ EOF
   dependencies:
     - helper
     - lib
+# A template that renders nothing on this machine leaves a null entry.
+-
 - name: helper
   method: shell
 - name: lib

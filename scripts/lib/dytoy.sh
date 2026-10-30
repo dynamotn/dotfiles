@@ -264,11 +264,12 @@ function dytoy::install_dependencies {
   local name
   dybatpho::expect_args name -- "$@"
   # Each dependency with its method, in one query rather than one per dependency;
-  # the first definition of a name gives its method.
+  # the first definition of a name gives its method. A template that renders
+  # nothing leaves a null entry, which has no name to key by.
   local -a dependencies
   # dyshellint disable=SC2016 $name is a jq variable, set by --arg
   __dytoy_lines_into dependencies __dytoy_query_tools \
-    '(reduce .[] as $tool ({}; .[$tool.name] //= $tool.method)) as $methods
+    '(reduce (.[] | select(.name != null)) as $tool ({}; .[$tool.name] //= $tool.method)) as $methods
       | .[] | select(.name == $name) | (.dependencies // [])[]
       | "\(.)\t\($methods[.] // "")"' --arg name "${name}" \
     || dybatpho::debug "Can't read dependencies of ${name}"
