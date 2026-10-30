@@ -848,6 +848,28 @@ EOF
   assert_equal "${lines[*]}" 'partial'
 }
 
+@test "dytoy::iterate leaves out a non-essential tool and refuses an unknown one" {
+  write_tools_yaml << 'EOF'
+- name: core
+  method: binary
+  is_essential: true
+- name: extra
+  method: binary
+EOF
+  local METHOD='binary' ONLY_ESSENTIAL='true' ONLY_NOT_INSTALLED='false' TOOL='@empty'
+  # shellcheck disable=SC2329 # invoked by dytoy::iterate
+  function _install { printf 'install:%s\n' "$1"; }
+  run dytoy::iterate _install
+  assert_success
+  assert_output --partial 'install:core'
+  refute_output --partial 'install:extra'
+
+  TOOL='ghost'
+  run --separate-stderr dytoy::iterate _install
+  assert_failure
+  assert_stderr --partial 'Not found ghost tool'
+}
+
 @test "dytoy::iterate installs nothing when tools.yaml is missing" {
   export TOOL='@empty' METHOD='os'
   # shellcheck disable=SC2329 # invoked by dytoy::iterate

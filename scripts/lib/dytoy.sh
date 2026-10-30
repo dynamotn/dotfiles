@@ -430,14 +430,32 @@ function dytoy::iterate {
         dybatpho::debug "Skip ${__dytoy_iterate_tool}, installed by an earlier run"
         continue
       fi
-      "${__dytoy_iterate_command}" "${__dytoy_iterate_tool}"
+      __dytoy_install_one "${__dytoy_iterate_command}" "${__dytoy_iterate_tool}"
       printf 'done\n' | DYBATPHO_CACHE_NAMESPACE=dytoy dybatpho::cache_set "${__dytoy_iterate_state}"
     done
     dybatpho::success "Installed all ${METHOD} tools"
   else
     dybatpho::info "Install ${METHOD} tool: ${TOOL}"
-    "${__dytoy_iterate_command}" "${TOOL}"
+    __dytoy_install_one "${__dytoy_iterate_command}" "${TOOL}"
   fi
+}
+
+#######################################
+# @description Install one tool with the installer of its method, once it is
+# known to be defined and wanted by this run
+# @arg $1 string Installer to run
+# @arg $2 string Name of tool
+# @env METHOD string Method being run
+# @internal
+#######################################
+# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
+function __dytoy_install_one {
+  # Prefixed, as the installer run here would otherwise see these locals.
+  local __dytoy_one_command __dytoy_one_tool
+  dybatpho::expect_args __dytoy_one_command __dytoy_one_tool -- "$@"
+  dytoy::is_defined "${__dytoy_one_tool}" "${METHOD}"
+  dytoy::is_invalid_essential "${__dytoy_one_tool}" && return 0
+  "${__dytoy_one_command}" "${__dytoy_one_tool}"
 }
 
 #######################################
@@ -830,8 +848,6 @@ function dytoy::install_macos_rosetta {
 function dytoy::install_os_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "${name}" "${METHOD}"
-  dytoy::is_invalid_essential "${name}" && return
   dytoy::install_dependencies "${name}"
 
   local package
@@ -946,8 +962,6 @@ function dytoy::install_release {
 function dytoy::install_binary_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "${name}" "${METHOD}"
-  dytoy::is_invalid_essential "${name}" && return
 
   local forge release_source
   for forge in github gitlab; do
@@ -969,8 +983,6 @@ function dytoy::install_binary_tool {
 function dytoy::install_mise_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "${name}" "${METHOD}"
-  dytoy::is_invalid_essential "${name}" && return
   dytoy::is_installed_command "${name}" && return
   dytoy::install_dependencies "${name}"
 
@@ -1008,8 +1020,6 @@ function dytoy::install_mise_tool {
 function dytoy::install_shell_tool {
   local name
   dybatpho::expect_args name -- "$@"
-  dytoy::is_defined "${name}" "${METHOD}"
-  dytoy::is_invalid_essential "${name}" && return
   dytoy::is_installed_command "${name}" && return
   dytoy::install_dependencies "${name}"
 
