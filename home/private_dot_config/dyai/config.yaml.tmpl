@@ -227,6 +227,17 @@ global:
       node: {{ .code | quote }}
       ssh_key: ~/.config/dyai/node/deploy
       signing_key: ~/.config/dyai/node/signing
+      # The other machines, by their code (also their SSH host name), to reach
+      # the store through when this one cannot: personal ones only, as the
+      # store is, always-on ones first, never a phone or a tablet.
+      relays:
+      {{- range $kind := list "vm" "pc" "laptop" }}
+      {{-   range $code, $m := $.machines }}
+      {{-     if and (ne $code $.code) (eq $m.kind $kind) $m.decryptPersonal }}
+        - {{ $code | quote }}
+      {{-     end }}
+      {{-   end }}
+      {{- end }}
     {{- end }}
     require_review: true
     # A first failed review asks one more provider for the root cause and
