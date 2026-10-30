@@ -1,8 +1,8 @@
 {{- /* Same machines as home/.chezmoitemplates/dytoy/zram.yaml.tmpl */ -}}
-{{- if and (ne .kind "container") (ne (printf "%s_%s" .place .kind) "home_pc") -}}
+{{- if includeTemplate "machine/zram.tmpl" . -}}
 # Swap is zram here: swapping costs a compression, not a disk write, so swap
-# early (overriding 90-swap.conf), and read one page at a time since there is
-# no seek to amortize.
+# early (90-swap.conf leaves swappiness to this file), and read one page at a
+# time since there is no seek to amortize.
 vm.swappiness = 180
 vm.page-cluster = 0
 vm.watermark_boost_factor = 0

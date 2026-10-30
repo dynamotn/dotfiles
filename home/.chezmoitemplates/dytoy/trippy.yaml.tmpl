@@ -16,11 +16,7 @@ github:
   {{- else if eq .chezmoi.os "linux" "android" }}
   {{-   $os = includeTemplate "dytoy_lib/linux_target.tmpl" (dict "ctx" . "musl" (list "amd64" "arm64")) }}
   {{- end }}
-  {{- if eq .chezmoi.arch "amd64" }}
-  {{-   $arch = "x86_64" }}
-  {{- else if eq .chezmoi.arch "arm64" }}
-  {{-   $arch = "aarch64" }}
-  {{- end }}
+  {{- $arch = includeTemplate "dytoy_lib/arch.tmpl" (dict "ctx" . "arm" "aarch64") }}
   release_asset: trippy-%v-{{ $arch }}-{{ $os }}.tar.gz
 archive:
   - path: trippy-%v-{{ $arch }}-{{ $os }}/trip

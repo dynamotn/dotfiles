@@ -16,7 +16,8 @@ set -gx HOMEBREW_REPOSITORY "/opt/homebrew"
 
 {{- if eq .chezmoi.os "linux" }}
 if type -q manpath
-    set -gx MANPATH (manpath -g)
+    # Keeps the ~/.local/man config.fish prepended
+    set -gx MANPATH (contains -- $HOME/.local/man $MANPATH; and echo $HOME/.local/man) (manpath -g)
 end
 {{- end }}
 

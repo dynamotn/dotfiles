@@ -17,9 +17,9 @@ a destructive one can cost the whole machine.
   as deleting a remote branch, merging, and creating remote tags or releases.
   Finish with local commits and let the user push.
 - Anything system-wide: `sudo`, installing or removing packages with
-  `pacman`, `paru`, `apt` or `brew`, `systemctl` enable/disable/start/stop,
-  writing under `/etc`, and changing ownership or permissions outside the
-  repository.
+  `emerge`, `pacman`, `paru`, `apt` or `brew`, `systemctl`
+  enable/disable/start/stop, writing under `/etc`, and changing ownership or
+  permissions outside the repository.
 - `chezmoi apply`, `chezmoi destroy`, and `chezmoi forget` — they write over
   the real `$HOME`. Show `chezmoi diff` and wait for a yes.
 - Container commands that prune, remove volumes, or rebuild an image the user

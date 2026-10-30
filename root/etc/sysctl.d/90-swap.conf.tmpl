@@ -1,8 +1,11 @@
 {{- if eq .kind "vm" "workstation" }}
+{{- /* 95-zram.conf sets the swappiness of a zram machine */}}
+{{- if not (includeTemplate "machine/zram.tmpl" .) }}
 # Reduce default swappiness, this is a much better default for servers,
 # especially databases. A value of 0 is never recommended.
 vm.swappiness = 10
 
+{{ end -}}
 # Define at what percentage of total memory is dirty do we begin writing it
 # out. These values are tuned for more database oriented workloads, but should
 # be generally good on servers in general.

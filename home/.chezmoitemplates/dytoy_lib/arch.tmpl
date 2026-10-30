@@ -1,0 +1,12 @@
+{{- /*
+  Print the CPU name a release asset uses for this machine: `x86_64` on amd64,
+  and the arm64 name of the asset on arm64 (empty on any other architecture).
+  Called with a dict:
+    ctx  the template data of the definition (`.`)
+    arm  how upstream spells arm64: `aarch64` (Rust, Zig) or `arm64` (Go)
+*/ -}}
+{{- if eq .ctx.chezmoi.arch "amd64" -}}
+x86_64
+{{- else if eq .ctx.chezmoi.arch "arm64" -}}
+{{ .arm }}
+{{- end -}}

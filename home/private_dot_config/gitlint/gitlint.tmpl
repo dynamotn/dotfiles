@@ -14,6 +14,7 @@ line-length=72
 [title-match-regex]
 regex=^[a-z]+(\([\w./-]+\))?!?: \S
 
-# The human author is the only author.
+# The human author is the only author. The agent names are shared with
+# strip_agent_credit.sh (.chezmoitemplates/git/agent-names.tmpl).
 [body-match-regex]
-regex=(?s)^(?!.*(Co-[Aa]uthored-[Bb]y:.*(Claude|Copilot|Cursor|Codex|Gemini|ChatGPT|GPT-|Aider)|[Gg]enerated with|🤖))
+regex=(?s)^(?!.*(Co-[Aa]uthored-[Bb]y:.*(?i:{{ includeTemplate "git/agent-names.tmpl" . | trim }})|[Gg]enerated with|🤖))

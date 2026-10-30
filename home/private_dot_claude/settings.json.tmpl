@@ -25,13 +25,9 @@
 {{- /* Installed but off; a dyai preset turns one on per project. */ -}}
 {{- range $d.optional_plugins }}{{ $_ := set $enabled . false }}{{ end -}}
 {{- range $d.disabled_plugins }}{{ $_ := set $enabled . false }}{{ end -}}
-{{- $static := `
+{{- $raw := `
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
   "cleanupPeriodDays": 20,
   "env": {
     "GIT_CONFIG_COUNT": "1",
@@ -123,7 +119,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Task finished!' --icon=dialog-information; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/complete.oga ] && paplay /usr/share/sounds/freedesktop/stereo/complete.oga; } 2>/dev/null; true",
+            "command": "@notify-stop@",
             "async": true
           },
           {
@@ -149,7 +145,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Prompt waiting for your input!' --icon=dialog-information; true",
+            "command": "@notify-input@",
             "async": true
           }
         ]
@@ -160,7 +156,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send >/dev/null 2>&1 && notify-send 'Claude' 'Permission requested' --icon=dialog-question; { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/window-question.oga ] && paplay /usr/share/sounds/freedesktop/stereo/window-question.oga; } 2>/dev/null; true",
+            "command": "@notify-permission@",
             "async": true
           }
         ]
@@ -181,7 +177,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/log-skill.sh",
+            "command": "bash ~/.claude/hooks/log-tool.sh skill",
             "async": true
           }
         ]
@@ -196,7 +192,7 @@
           },
           {
             "type": "command",
-            "command": "bash ~/.claude/hooks/log-agent.sh",
+            "command": "bash ~/.claude/hooks/log-tool.sh agent",
             "async": true
           }
         ]
@@ -255,7 +251,16 @@
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true
 }
-` | fromJson -}}
+` -}}
+{{- /* The desktop notifications, shared with dyai's global.hooks. */ -}}
+{{- $notify := dict
+      "@notify-stop@" (dict "title" "Claude" "body" "Task finished!" "icon" "dialog-information" "sound" "complete")
+      "@notify-input@" (dict "title" "Claude" "body" "Prompt waiting for your input!" "icon" "dialog-information")
+      "@notify-permission@" (dict "title" "Claude" "body" "Permission requested" "icon" "dialog-question" "sound" "window-question") -}}
+{{- range $mark, $args := $notify }}
+{{-   $raw = replace (quote $mark) (includeTemplate "ai/notify-hook.sh.tmpl" $args | trim | toJson) $raw }}
+{{- end -}}
+{{- $static := $raw | fromJson -}}
 {{- /*
   The sandbox turns every recursive (double-star) Read deny into one path
   per matching file under the cwd. The .age rule alone matched ~1.7k files
@@ -270,6 +275,8 @@
 {{- range $d.policy.permissions.deny }}{{ $deny = append $deny (eq . "Read(**/*.age)" | ternary "Read(*.age)" .) }}{{ end -}}
 {{- $perms := deepCopy $d.policy.permissions -}}
 {{- $_ := set $perms "deny" $deny -}}
+{{- /* The shared approval stance, in Claude's name for it. */ -}}
+{{- with get (dict "accept-edits" "acceptEdits") ($d.policy.approval | default "") }}{{ $_ := set $perms "defaultMode" . }}{{ end -}}
 {{- $wt := .chezmoi.workingTree -}}
 {{- $denyRead := list
       (joinPath $wt "secrets")
@@ -286,4 +293,5 @@
       "effortLevel" $d.policy.effortLevel
       "enabledPlugins" $enabled
       "extraKnownMarketplaces" $d.marketplaces -}}
+{{- if eq (toString $d.policy.attribution) "false" }}{{ $_ := set $derived "attribution" (dict "commit" "" "pr" "") }}{{ end -}}
 {{ mergeOverwrite $static $derived | toPrettyJson }}

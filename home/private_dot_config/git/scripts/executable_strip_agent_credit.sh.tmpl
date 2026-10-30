@@ -12,7 +12,7 @@
 dybatpho::register_common_handlers
 
 # A trailer naming an agent, an agent session link, or a "generated with" footer.
-readonly AGENTS='(claude|anthropic|copilot|cursor|codex|openai|gemini|chatgpt|gpt-|aider|opencode|hermes|antigravity)'
+readonly AGENTS='({{ includeTemplate "git/agent-names.tmpl" . | trim }})'
 readonly CREDIT="^((co-authored-by|signed-off-by|assisted-by|generated-by|ai-assisted-by):.*${AGENTS}\
 |[a-z]+-session:|.*claude[.]ai/code/session_|.*generated (with|by) .*${AGENTS}|.*🤖)"
 

@@ -66,7 +66,7 @@ end
 function __caran_dir_abbr_is_trusted --argument-names file
     set -l store (__caran_dir_abbr_trust_file)
     test -f $store; or return 1
-    contains -- (__caran_dir_abbr_hash $file)"  $file" (cat $store)
+    contains -- (__caran_dir_abbr_hash $file)"  $file" (command cat $store)
 end
 
 __caran_dir_abbr_load

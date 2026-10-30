@@ -1,0 +1,12 @@
+{{- /*
+  The desktop notification an agent hook sends, as one sh command line:
+  Claude's Stop/Notification/PermissionRequest hooks (settings.json.tmpl)
+  and dyai's global.hooks for every other agent (dyai/config.yaml.tmpl).
+  A crew worker (DYAI_CREW set) stays quiet: nobody is at its desktop.
+  Called with a dict: title, body, icon, and optionally sound (a freedesktop
+  stereo theme name) and then (a command run after the notification).
+  Read it with: includeTemplate "ai/notify-hook.sh.tmpl" (dict ...) | trim
+*/ -}}
+[ -z "${DYAI_CREW:-}" ] || exit 0; command -v notify-send >/dev/null 2>&1 && notify-send '{{ .title }}' '{{ .body }}' --icon={{ .icon }};
+{{- with get . "sound" }} { command -v paplay >/dev/null 2>&1 && [ -f /usr/share/sounds/freedesktop/stereo/{{ . }}.oga ] && paplay /usr/share/sounds/freedesktop/stereo/{{ . }}.oga; } 2>/dev/null;{{ end }}
+{{- with get . "then" }} {{ . }};{{ end }} true

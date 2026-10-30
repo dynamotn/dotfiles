@@ -150,11 +150,11 @@ global:
     stop:
       event: stop
       # dyai-hunk opens the changes side by side; Claude and opencode wire it on their own.
-      # A crew worker (DYAI_CREW set) stays quiet: nobody is at its desktop.
-      run: "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Task finished!' --icon=dialog-information; command -v dyai-hunk > /dev/null 2>&1 && dyai-hunk; true"
+      # The notification is shared with Claude's hooks (ai/notify-hook.sh.tmpl).
+      run: {{ includeTemplate "ai/notify-hook.sh.tmpl" (dict "title" "AI agent" "body" "Task finished!" "icon" "dialog-information" "then" "command -v dyai-hunk >/dev/null 2>&1 && dyai-hunk") | trim | quote }}
     input:
       event: input
-      run: "[ -z \"${DYAI_CREW:-}\" ] || exit 0; command -v notify-send > /dev/null 2>&1 && notify-send 'AI agent' 'Waiting for your input!' --icon=dialog-information; true"
+      run: {{ includeTemplate "ai/notify-hook.sh.tmpl" (dict "title" "AI agent" "body" "Waiting for your input!" "icon" "dialog-information") | trim | quote }}
   # Tools with their own per-agent installer, run once by `dyai install`.
   installers:
     # claude-mem (memory across sessions). Claude gets it via the plugin above
@@ -255,7 +255,15 @@ global:
       # The agent policy itself: a worker that loosens it loosens it for every agent.
       - ":(glob)**/.claude/**"
       - ":(glob)**/private_dot_claude/**"
+      - ":(glob)**/private_dot_codex/**"
+      - ":(glob)**/private_dot_gemini/**"
+      - ":(glob)**/private_dot_copilot/**"
+      - ":(glob)**/private_dot_hermes/**"
+      - ":(glob)**/private_dot_config/opencode/**"
+      - ":(glob)**/private_dot_config/dyai/**"
+      - ":(glob)**/dot_agents/**"
       - ":(glob)**/.chezmoitemplates/ai/**"
+      - ":(glob)**/.chezmoitemplates/dyai/**"
       - ":(glob)**/dyai*.sh"
 # Roots whose mise config moves an agent's home (CLAUDE_CONFIG_DIR,
 # COPILOT_HOME, ...): dyai installs the same setup into each moved home. Read
@@ -284,9 +292,7 @@ agents:
     # same way, as a string or {model, provider, effort} (a self-hosted
     # Ollama or LM Studio provider included) once they get subagents.
     model_tiers:
-      fast: haiku
-      standard: sonnet
-      strong: opus
+{{ $d.model_tiers | toYaml | trim | indent 6 }}
 # Opt-in presets pulled per project by `dyai use <name>`; kept out of the
 # global baseline so the discovery index stays lean. One preset per tool, so a
 # project pulls only what it uses. Subagent names resolve against the pinned

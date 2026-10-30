@@ -11,11 +11,7 @@ github:
   repo: pamburus/hl
   {{- $variant := "" }}
   {{- $arch := "" }}
-  {{- if eq .chezmoi.arch "amd64" }}
-  {{-   $arch = "x86_64" }}
-  {{- else if eq .chezmoi.arch "arm64" }}
-  {{-   $arch = "arm64" }}
-  {{- end }}
+  {{- $arch = includeTemplate "dytoy_lib/arch.tmpl" (dict "ctx" . "arm" "arm64") }}
   {{- if eq .chezmoi.os "darwin" }}
   {{-   $variant = printf "macos-%s" $arch }}
   {{- else if eq .chezmoi.os "linux" }}

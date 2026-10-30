@@ -65,11 +65,7 @@ method: binary
 github:
   repo: zen-browser/desktop
   {{-   $arch := "" }}
-  {{-   if eq .chezmoi.arch "amd64" }}
-  {{-     $arch = "x86_64" }}
-  {{-   else if eq .chezmoi.arch "arm64" }}
-  {{-     $arch = "aarch64" }}
-  {{-   end }}
+  {{- $arch = includeTemplate "dytoy_lib/arch.tmpl" (dict "ctx" . "arm" "aarch64") }}
   release_asset: zen.linux-{{ $arch }}.tar.xz
 {{      $path := "/opt/zen-browser-bin" }}
 archive:

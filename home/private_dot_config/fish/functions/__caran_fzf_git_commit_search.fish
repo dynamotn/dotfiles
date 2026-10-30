@@ -1,7 +1,7 @@
 function __caran_fzf_git_commit_search -d 'Show list commits by tree graph'
     __fish_is_git_repository; or return 1
     set -l preview_cmd "--preview-window=right:wrap --preview='fish -c \"__fzf_complete_preview {} \'{1}\' \'Commit: \"{3..}\"\'\"'"
-    eval "$FZF_GIT_COMMIT_SEARCH_COMMAND | "(__fzfcmd) $preview_cmd "-m --ansi" | read -l select
+    eval "$FZF_GIT_COMMIT_SEARCH_COMMAND | "(__fzfcmd) $preview_cmd --ansi | read -l select
 
     if not test -z "$select"
         set -l hash (echo $select | awk '{ print $1 }')

@@ -1,5 +1,5 @@
 {{- /* Same machines as home/.chezmoitemplates/dytoy/zram.yaml.tmpl */ -}}
-{{- if and (eq .initSystem "openrc") (ne .kind "container") (ne (printf "%s_%s" .place .kind) "home_pc") -}}
+{{- if and (eq .initSystem "openrc") (includeTemplate "machine/zram.tmpl" .) -}}
 # Read by the zram-init service: one zstd-compressed swap device of half the
 # RAM, used before any disk swap.
 load_on_start=yes

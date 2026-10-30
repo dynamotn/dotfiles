@@ -16,11 +16,7 @@ github:
   {{- else if eq .chezmoi.os "linux" "android" }}
   {{-   $os = "Linux" }}
   {{- end }}
-  {{- if eq .chezmoi.arch "amd64" }}
-  {{-   $arch = "x86_64" }}
-  {{- else if eq .chezmoi.arch "arm64" }}
-  {{-   $arch = "arm64" }}
-  {{- end }}
+  {{- $arch = includeTemplate "dytoy_lib/arch.tmpl" (dict "ctx" . "arm" "arm64") }}
   release_asset: flyctl_%1v_{{ $os }}_{{ $arch }}.tar.gz
   sha256: flyctl_%1v_checksums.txt
 archive:

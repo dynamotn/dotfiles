@@ -90,6 +90,13 @@ disabled_plugins:
   - context-mode@context-mode
   - episodic-memory@superpowers-marketplace
 
+# Claude's own name for each abstract model tier: dyai's agents.claude.model_tiers
+# and the routing advice of the route-agent hook both render from it.
+model_tiers:
+  fast: haiku
+  standard: sonnet
+  strong: opus
+
 policy:
   # Harness-enforced versions of the credentials and destructive-commands rules
   # in ai/: a rule here holds even when the prose is lost from context. The rtk
@@ -138,6 +145,16 @@ policy:
       - "Bash(emerge *)"
       - "Bash(pacman *)"
       - "Bash(paru *)"
+      - "Bash(apt *)"
+      - "Bash(apt-get *)"
+      - "Bash(brew install *)"
+      - "Bash(brew uninstall *)"
+      - "Bash(brew upgrade *)"
+      - "Bash(systemctl enable *)"
+      - "Bash(systemctl disable *)"
+      - "Bash(systemctl start *)"
+      - "Bash(systemctl stop *)"
+      - "Bash(systemctl restart *)"
       - "Bash(chezmoi apply:*)"
       - "Bash(chezmoi destroy:*)"
       - "Bash(chezmoi forget:*)"
@@ -183,14 +200,14 @@ policy:
       - "Bash(rtk git -c commit.gpgsign=false *)"
       # Sentinel for `dyai selftest`: a harmless command each agent must refuse.
       - "Bash(dyai-selftest-probe deny *)"
-    defaultMode: acceptEdits
     # --dangerously-skip-permissions would skip every ask rule above; auto
     # mode and the sandbox cover the same need without that hole.
     disableBypassPermissionsMode: disable
   theme: auto
   effortLevel: medium
-  # Shared approval stance, translated per agent where an edits-only preset exists.
+  # Shared approval stance, translated per agent where an edits-only preset
+  # exists (Claude's permissions.defaultMode: acceptEdits, in settings.json.tmpl).
   approval: accept-edits
-  # No agent credits itself in a commit (Copilot, Codex); Claude's own
-  # attribution block in settings.json.tmpl does the same for Claude.
+  # No agent credits itself in a commit (Copilot, Codex); settings.json.tmpl
+  # turns it into Claude's empty attribution block.
   attribution: false

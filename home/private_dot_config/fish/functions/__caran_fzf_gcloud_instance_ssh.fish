@@ -1,21 +1,10 @@
 function __caran_fzf_gcloud_instance_ssh -d "SSH to Gcloud instance"
-    eval "$FZF_GCLOUD_ACTIVE_INSTANCE_SEARCH_COMMAND | "(__fzfcmd) "-m --ansi" | read -l select
+    gcloud compute instances list --filter='status=RUNNING' | tail -n +2 | __caran_fzf --ansi | read -l select
+    test -n "$select"; or return 1
 
-    if test -z "$select"
-        return 1
-    end
+    set -l fields (string split -n ' ' -- $select)
 
-    set -l instance (echo $select | awk '{ print $1 }')
-    set -l zone (echo $select | awk '{ print $2 }')
-
-    __caran_terminal_workspace_rename_window ssh-$instance
-    set -l ssh_command (string unescape "gcloud compute ssh --zone '$zone' '$instance' --")
-    if ! test -z (eval "$ssh_command command -v zellij")
-        eval "$ssh_command zellij"
-    else if ! test -z (eval "$ssh_command command -v tmux")
-        eval "$ssh_command tmux"
-    else
-        eval "$ssh_command"
-    end
+    __caran_terminal_workspace_rename_window ssh-$fields[1]
+    __caran_remote_workspace '' gcloud compute ssh --zone $fields[2] $fields[1] --
     __caran_terminal_workspace_undo_rename_window
 end

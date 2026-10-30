@@ -1,0 +1,50 @@
+#!{{ .bash }}
+# @file log-tool.sh
+# @brief PreToolUse hook recording every Skill invocation or subagent spawn
+# @description Append one JSON line per call to
+# `${XDG_STATE_HOME:-~/.local/state}/claude/<kind>-usage.jsonl`, where the
+# first argument picks the kind:
+#
+# - `skill` (on Skill): the skill name, so the skills that never fire, and
+#   the plugins that only cost context, show up over time:
+#
+#       jq -r .skill ~/.local/state/claude/skill-usage.jsonl | sort | uniq -c | sort -rn
+#
+# - `agent` (on Agent and Task): the subagent type and model, so it shows
+#   whether the expensive reasoning ran where it mattered and which subagents
+#   never fire. A spawn that names no subagent type runs the harness default,
+#   logged as general-purpose; one that names no model inherits the
+#   session's, logged as inherit:
+#
+#       jq -r '[.agent, .model] | @tsv' ~/.local/state/claude/agent-usage.jsonl | sort | uniq -c | sort -rn
+#
+# It only observes: it prints nothing and always exits 0, so it can never
+# block or change a tool call.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json || exit 0
+dybatpho::register_common_handlers
+# A DRY_RUN exported for another tool must not turn this hook's writes into no-ops.
+unset DRY_RUN DYBATPHO_DRY_RUN
+
+kind="${1-}"
+case "${kind}" in
+  skill)
+    filter='{ts: (now | todate), skill: (.tool_input.skill // ""), cwd: (.cwd // ""),
+      session: (.session_id // "")} | select(.skill != "")'
+    ;;
+  agent)
+    filter='{ts: (now | todate),
+      agent: ((.tool_input.subagent_type // "") | if . == "" then "general-purpose" else . end),
+      model: ((.tool_input.model // "") | if . == "" then "inherit" else . end),
+      description: (.tool_input.description // ""), cwd: (.cwd // ""), session: (.session_id // "")}
+      | select(.description != "" or .agent != "general-purpose")'
+    ;;
+  *) exit 0 ;;
+esac
+
+dir="$(dybatpho::xdg_state_dir claude 2> /dev/null)" || exit 0
+input="$(cat)"
+line="$(dybatpho::json_eval "${input}" "${filter}" 2> /dev/null || true)"
+[[ -n "${line}" ]] || exit 0
+(dybatpho::ensure_dir "${dir}") &> /dev/null || exit 0
+printf '%s\n' "${line}" >> "${dir}/${kind}-usage.jsonl" 2> /dev/null || true
+exit 0

@@ -1,5 +1,5 @@
 {{- /* Same machines as home/.chezmoitemplates/dytoy/zram.yaml.tmpl */ -}}
-{{- if and (ne .kind "container") (ne (printf "%s_%s" .place .kind) "home_pc") -}}
+{{- if includeTemplate "machine/zram.tmpl" . -}}
 # Read by zram-generator: one zstd-compressed swap device of up to half the
 # RAM, used before any disk swap.
 [zram0]

@@ -10,8 +10,9 @@ function __caran_setup_grc
         set execs $grc_plugin_execs
     end
 
+    # The names in $argv have an alternative of their own
     for executable in $execs
-        if type -q $executable
+        if type -q $executable; and not contains -- $executable $argv
             # @fish-lsp-disable 4004
             function $executable --inherit-variable executable --wraps=$executable
                 if isatty 1

@@ -30,5 +30,9 @@
 .config/hypr/hyprland.conf
 .config/hypr/hyprland/*.conf
 
+# Merged into ~/.claude/hooks/log-tool.sh, which takes the kind as its argument.
+.claude/hooks/log-agent.sh
+.claude/hooks/log-skill.sh
+
 # Termux reads its colors only from ~/.termux/colors.properties.
 .config/termux/color.properties

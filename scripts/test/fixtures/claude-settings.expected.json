@@ -71,7 +71,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "bash ~/.claude/hooks/log-skill.sh",
+            "command": "bash ~/.claude/hooks/log-tool.sh skill",
             "type": "command"
           }
         ],
@@ -86,7 +86,7 @@
           },
           {
             "async": true,
-            "command": "bash ~/.claude/hooks/log-agent.sh",
+            "command": "bash ~/.claude/hooks/log-tool.sh agent",
             "type": "command"
           }
         ],
@@ -205,6 +205,16 @@
       "Bash(emerge *)",
       "Bash(pacman *)",
       "Bash(paru *)",
+      "Bash(apt *)",
+      "Bash(apt-get *)",
+      "Bash(brew install *)",
+      "Bash(brew uninstall *)",
+      "Bash(brew upgrade *)",
+      "Bash(systemctl enable *)",
+      "Bash(systemctl disable *)",
+      "Bash(systemctl start *)",
+      "Bash(systemctl stop *)",
+      "Bash(systemctl restart *)",
       "Bash(chezmoi apply:*)",
       "Bash(chezmoi destroy:*)",
       "Bash(chezmoi forget:*)",

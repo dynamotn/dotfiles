@@ -9,7 +9,7 @@ subcategory: Base
        and lets the OOM killer act instead of freezing it. Every Linux machine
        but a container, which shares its host's memory, and home_pc, which
        already has a swap partition behind zswap (root/etc/default/grub). */ -}}
-{{- if and (eq .chezmoi.os "linux") (ne .kind "container") (ne (printf "%s_%s" .place .kind) "home_pc") }}
+{{- if and (eq .chezmoi.os "linux") (includeTemplate "machine/zram.tmpl" .) }}
 name: zram
 method: os
 is_essential: true

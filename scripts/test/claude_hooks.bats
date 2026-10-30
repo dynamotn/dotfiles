@@ -6,7 +6,7 @@ setup_file() {
   load test_helper
   local name
   mkdir -p "${BATS_FILE_TMPDIR}/hooks"
-  for name in lint-shell log-agent log-skill route-agent vault-recall verify-on-stop worktree-create; do
+  for name in lint-shell log-tool route-agent vault-recall verify-on-stop worktree-create; do
     render_template "home/private_dot_claude/hooks/executable_${name}.sh.tmpl" \
       "${BATS_FILE_TMPDIR}/hooks/${name}.sh"
   done
@@ -254,16 +254,16 @@ function _run_stop {
 }
 
 @test "log-skill appends one line per Skill call and never blocks" {
-  local skill_hook="${HOOKS_DIR}/log-skill.sh"
+  local hook="${HOOKS_DIR}/log-tool.sh"
   local state="${WORK}/state" input
   input='{"tool_name":"Skill","tool_input":{"skill":"dybatpho"},"cwd":"/r","session_id":"s1"}'
-  XDG_STATE_HOME="${state}" run bash "${skill_hook}" <<< "${input}"
+  XDG_STATE_HOME="${state}" run bash "${hook}" skill <<< "${input}"
   assert_success
   assert_output ""
   jq -e '.skill == "dybatpho" and .cwd == "/r" and .session == "s1"' \
     "${state}/claude/skill-usage.jsonl" > /dev/null
   # Garbage in, nothing written, still exit 0.
-  XDG_STATE_HOME="${state}" run bash "${skill_hook}" <<< "not json"
+  XDG_STATE_HOME="${state}" run bash "${hook}" skill <<< "not json"
   assert_success
   local lines
   mapfile -t lines < "${state}/claude/skill-usage.jsonl"
@@ -273,30 +273,30 @@ function _run_stop {
 @test "settings.json wires the stop and skill hooks" {
   local tmpl="${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
   grep -q 'verify-on-stop.sh' "${tmpl}"
-  grep -q 'log-skill.sh' "${tmpl}"
+  grep -q 'log-tool.sh skill' "${tmpl}"
 }
 
 @test "log-agent records type and model and never blocks" {
-  local agent_hook="${HOOKS_DIR}/log-agent.sh"
+  local hook="${HOOKS_DIR}/log-tool.sh"
   local state="${WORK}/state" input
   input='{"tool_name":"Agent","session_id":"s1",
     "tool_input":{"subagent_type":"Explore","model":"haiku","description":"x"}}'
-  XDG_STATE_HOME="${state}" run bash "${agent_hook}" <<< "${input}"
+  XDG_STATE_HOME="${state}" run bash "${hook}" agent <<< "${input}"
   assert_success
   assert_output ""
   jq -e '.agent == "Explore" and .model == "haiku" and .session == "s1"' \
     "${state}/claude/agent-usage.jsonl" > /dev/null
   # No type and no model: the harness default and the session's model.
-  XDG_STATE_HOME="${state}" run bash "${agent_hook}" <<< '{"tool_input":{"description":"y"}}'
+  XDG_STATE_HOME="${state}" run bash "${hook}" agent <<< '{"tool_input":{"description":"y"}}'
   assert_success
   jq -se '.[1].agent == "general-purpose" and .[1].model == "inherit"' \
     "${state}/claude/agent-usage.jsonl" > /dev/null
 }
 
 @test "log-agent never fails on garbage input" {
-  local agent_hook="${HOOKS_DIR}/log-agent.sh"
+  local hook="${HOOKS_DIR}/log-tool.sh"
   local state="${WORK}/state"
-  XDG_STATE_HOME="${state}" run bash "${agent_hook}" <<< "not json"
+  XDG_STATE_HOME="${state}" run bash "${hook}" agent <<< "not json"
   assert_success
   assert_output ""
   [[ ! -e "${state}/claude/agent-usage.jsonl" ]]
@@ -304,7 +304,7 @@ function _run_stop {
 
 @test "settings.json wires the log-agent hook on subagent spawns" {
   local tmpl="${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
-  grep -q 'log-agent.sh' "${tmpl}"
+  grep -q 'log-tool.sh agent' "${tmpl}"
 }
 
 @test "settings.json wires the lint-shell hook on Edit and Write" {

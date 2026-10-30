@@ -1,0 +1,8 @@
+{{- /* "true" on a machine that swaps to zram, empty otherwise: every Linux
+       machine but a container, which shares its host's memory, and home_pc,
+       which already has a swap partition behind zswap (root/etc/default/grub).
+       Read it with: includeTemplate "machine/zram.tmpl" . | eq "true"
+       (root links here, like machine/secret.tmpl) */ -}}
+{{- if and (ne .kind "container") (ne (printf "%s_%s" .place .kind) "home_pc") -}}
+true
+{{- end -}}

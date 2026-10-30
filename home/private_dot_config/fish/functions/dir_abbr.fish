@@ -10,12 +10,9 @@ function dir_abbr --description 'Trust, untrust or list the abbreviations of the
             end
             # Shown in full: what is trusted is what Enter will run
             echo "$file:"
-            cat -- $file
-            if not contains -- -y $argv[2..]
-                read -l -P 'Trust these abbreviations? [y/N] ' answer; or return 1
-                string match -qi -- 'y*' "$answer"; or return 1
-            end
-            mkdir -p (path dirname -- $store)
+            command cat -- $file
+            contains -- -y $argv[2..]; or __caran_confirm 'Trust these abbreviations?'; or return 1
+            command mkdir -p (path dirname -- $store)
             # One line per file: a new hash replaces the one of its old content
             set -l kept
             test -f $store; and set kept (string match -v -- "*  $file" <$store)

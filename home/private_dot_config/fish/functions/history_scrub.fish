@@ -35,10 +35,7 @@ function history_scrub --description 'Delete the history entries that carry a cr
     printf '%d history entries carry a credential.\n' (count $found)
 
     set -q _flag_dry_run; and return 0
-    if not set -q _flag_yes
-        read -l -P 'Delete them? [y/N] ' answer; or return 1
-        string match -qi -- 'y*' "$answer"; or return 1
-    end
+    set -q _flag_yes; or __caran_confirm 'Delete them?'; or return 1
     history delete --exact --case-sensitive -- $found
     history save
     printf 'Deleted %d entries.\n' (count $found)

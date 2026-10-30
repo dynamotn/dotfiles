@@ -145,7 +145,7 @@ function _render_config {
   # shellcheck disable=SC2016,SC2312 # $p is a yq variable; a bad read fails the comparison
   [[ "$(yq '[.disabled_plugins[] as $p | .plugins[] | select(. == $p)] | length' "${out}")" == "0" ]]
   # policy
-  [[ "$(yq '.policy.permissions.defaultMode' "${out}")" == "acceptEdits" ]]
+  [[ "$(yq '.policy.approval' "${out}")" == "accept-edits" ]]
   [[ "$(yq '.policy.theme' "${out}")" == "auto" ]]
   [[ "$(yq '.policy.effortLevel' "${out}")" == "medium" ]]
 }

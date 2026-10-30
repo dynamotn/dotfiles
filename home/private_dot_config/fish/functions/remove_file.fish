@@ -7,8 +7,7 @@ function remove_file --description "Remove files with some extra behaviors"
     if set -q _flag_r; or set -q _flag_R; and not set -q _flag_f
         for f in (path filter -d -- $argv)
             for gitdir in (command find $f -mindepth 1 -name .git)
-                read -l -P "Remove .git directory "(string replace $HOME '~' -- $gitdir)"? [y/N] " answer
-                if not string match -qi y -- $answer
+                if not __caran_confirm "Remove .git directory "(string replace $HOME '~' -- $gitdir)"?"
                     echo 'remove_file: cancelling.' >&2
                     return 1
                 end

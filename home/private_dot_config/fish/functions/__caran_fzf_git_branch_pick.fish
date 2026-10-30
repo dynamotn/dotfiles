@@ -8,8 +8,8 @@ function __caran_fzf_git_branch_pick -d 'Pick a local or remote branch, and prin
         git for-each-ref --format='%(refname:short)%09%(upstream:track)%09%(worktreepath)' refs/heads
         git for-each-ref --format='%(refname:lstrip=3)%09[remote]%09' refs/remotes
     end | string match -rv '^HEAD\t' | awk -F '\t' '!seen[$1]++' \
-        | eval (__fzfcmd) "--prompt='branch> ' --delimiter='\t' \
-            --preview='git log --color --oneline -20 {1} -- 2>/dev/null || git log --color --oneline -20 --remotes=\"*/{1}\"'" \
+        | __caran_fzf --prompt='branch> ' --delimiter='\t' \
+        --preview='git log --color --oneline -20 {1} -- 2>/dev/null || git log --color --oneline -20 --remotes="*/{1}"' \
         | read -l select
     test -n "$select"; or return 1
     # The name, then the worktree path, empty when there is none

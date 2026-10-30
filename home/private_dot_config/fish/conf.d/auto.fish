@@ -22,7 +22,10 @@ function __auto_ls --on-variable PWD --description 'Automatically ls when the $P
         eza --icons -la@ --color=always 2>/dev/null; or ls -laZ
     end
     __auto_ls_readme
-    __auto_ls_git_summary
+    # One spawn for both git steps; empty outside a repository
+    set -l root (git rev-parse --show-toplevel 2>/dev/null)
+    __auto_ls_git_summary "$root"
+    __auto_prek_install "$root"
 end
 
 function __auto_ls_readme --description 'Show the first lines of the README of $PWD'
@@ -37,9 +40,8 @@ function __auto_ls_readme --description 'Show the first lines of the README of $
     end
 end
 
-function __auto_ls_git_summary --description 'Show branch and upstream distance on entering a repository'
+function __auto_ls_git_summary --description 'Show branch and upstream distance on entering a repository' --argument-names root
     test "$auto_ls_git_summary" != 0; or return
-    set -l root (git rev-parse --show-toplevel 2>/dev/null)
     if test -z "$root"
         set -e __auto_ls_repo
         return
@@ -63,10 +65,10 @@ function __auto_ls_git_summary --description 'Show branch and upstream distance 
     set_color normal
 end
 
-function __auto_prek_install --on-variable PWD --description 'Install the prek pre-commit Git shim when entering a repository.'
+function __auto_prek_install --description 'Install the prek pre-commit Git shim when entering a repository.' --argument-names repo_root
     command -sq prek; or return
 
-    set -l repo_root (git rev-parse --show-toplevel 2>/dev/null); or return
+    test -n "$repo_root"; or return
     test -f "$repo_root/.pre-commit-config.yaml"; or test -f "$repo_root/prek.toml"; or return
     # Already installed: skip the process spawn on every `cd` inside the repository
     set -l hook (git rev-parse --git-path hooks/pre-commit 2>/dev/null)

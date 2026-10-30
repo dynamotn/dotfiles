@@ -63,8 +63,9 @@ if [[ -n "${session}" ]] && dybatpho::is file "${ledger}" \
   exit 0
 fi
 
-reason="Pick the model for this subagent before spawning it: set model (haiku for search, lookups and"
-reason+=" summaries, sonnet for routine coding, opus for review, security and design judgments), or call"
+{{ $tier := (includeTemplate "ai/dyai-data.yaml.tmpl" . | fromYaml).model_tiers -}}
+reason="Pick the model for this subagent before spawning it: set model ({{ $tier.fast }} for search, lookups and"
+reason+=" summaries, {{ $tier.standard }} for routine coding, {{ $tier.strong }} for review, security and design judgments), or call"
 reason+=" laya_route first. A fork keeps your model and needs neither."
 if [[ "${routing}" == warn ]]; then
   output="$(dybatpho::json_object hookEventName PreToolUse additionalContext "${reason}")"
