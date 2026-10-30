@@ -1,11 +1,13 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file status.sh
 # @brief Declare the status widgets at the end of the bar
 # @description Declare, from the right edge inwards, the session button, the
 # battery, the volume and the Wi-Fi, in the order the noctalia bar ends with.
 # Right items stack from the edge, so the first one added is the rightmost.
 # Run by sketchybarrc before indicators.sh, which goes left of them.
-set -euo pipefail
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" || exit 1
+dybatpho::register_common_handlers
 
 #######################################
 # @description Declare every status item

@@ -1,17 +1,14 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file swap-monitors.sh
 # @brief Swap the workspaces shown on the focused monitor and the next one
 # @description Like Hyprland's swap_monitors: the workspace on the focused
 # monitor moves to the next monitor and the one shown there comes here, then
 # focus stays on this monitor. Does nothing with a single monitor. Bound to
 # cmd-d in aerospace.toml.
-set -euo pipefail
-# readarray, associative arrays and inherit_errexit need bash 4.4; macOS ships 3.2
-if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 4))); then
-  printf 'bash 4.4 or later is needed, found %s\n' "${BASH_VERSION}" >&2
-  exit 1
-fi
-shopt -s inherit_errexit
+# The library needs bash 4.3 or later; macOS ships 3.2
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" || exit 1
+dybatpho::register_common_handlers
 
 #######################################
 # @description Swap the visible workspaces of the two monitors

@@ -1,9 +1,11 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file volume.sh
 # @brief Show the output volume
 # @description Run by the `volume` item on volume_change, which passes the new
 # volume in INFO; asks osascript for it when run any other way.
-set -euo pipefail
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" || exit 1
+dybatpho::register_common_handlers
 
 name=${NAME:-volume}
 volume=${INFO:-}

@@ -1,17 +1,15 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file workspaces.sh
 # @brief Show each aerospace workspace on the bar of the monitor that owns it
 # @description Run by the hidden `workspaces` item. Adds an item for every
 # workspace aerospace has, removes the item of a workspace it dropped, puts
 # each item on the display of its monitor and highlights the visible ones, so
 # every screen shows only its own workspaces, as Hyprland does.
-set -euo pipefail
-# readarray, associative arrays and inherit_errexit need bash 4.4; macOS ships 3.2
-if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 4))); then
-  printf 'bash 4.4 or later is needed, found %s\n' "${BASH_VERSION}" >&2
-  exit 1
-fi
-shopt -s inherit_errexit
+# The library needs bash 4.3 or later; macOS ships 3.2
+# dyshellint disable=BSG104 init.sh turns on inherit_errexit
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json || exit 1
+dybatpho::register_common_handlers
 
 # sketchybar exports these to every item script it runs.
 config_dir=${CONFIG_DIR:-${HOME}/.config/sketchybar}
@@ -33,7 +31,9 @@ idle_background=${SKETCHY_SURFACE_0:?}
 # @stdout Icon of the workspace, a generic one for any other id
 #######################################
 function _get_icon {
-  case "$1" in
+  local id
+  dybatpho::expect_args id -- "$@"
+  case "${id}" in
 {{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
 {{- range $index, $workspace := $rules.workspaces }}
     {{ mod (add $index 1) 10 }}) printf "%s" "{{ $workspace.icon }}" ;; # {{ $workspace.name }}
@@ -48,6 +48,7 @@ function _get_icon {
 # @noargs
 # @stdout One workspace per line
 #######################################
+# dyshellint disable=BSG050 the $1 below is awk's field; the function takes no arguments
 function _list_workspaces {
   local listing
   listing=$(aerospace list-workspaces --all \
@@ -75,15 +76,15 @@ function _main {
   local -a workspace_items=() workspaces=() args=()
   local bar workspace_item workspace id display visible listing
   bar=$(sketchybar --query bar)
-  listing=$(jq -r '.items[] | select(startswith("workspace."))' <<< "${bar}")
+  listing=$(dybatpho::json_query - '.items[] | select(startswith("workspace."))' -r <<< "${bar}")
   [[ -z "${listing}" ]] || readarray -t workspace_items <<< "${listing}"
-  for workspace_item in "${workspace_items[@]}"; do
+  for workspace_item in ${workspace_items[@]+"${workspace_items[@]}"}; do
     stale["${workspace_item}"]=1
   done
 
   listing=$(_list_workspaces)
   [[ -z "${listing}" ]] || readarray -t workspaces <<< "${listing}"
-  for workspace in "${workspaces[@]}"; do
+  for workspace in ${workspaces[@]+"${workspaces[@]}"}; do
     IFS='|' read -r id display visible <<< "${workspace}"
     workspace_item="workspace.${id}"
     if [[ -z "${stale["${workspace_item}"]:-}" ]]; then
@@ -113,6 +114,7 @@ function _main {
   done
 
   if ((${#args[@]} > 0)); then
+    # dyshellint disable=BSG049 guarded by the length test above
     sketchybar "${args[@]}"
   fi
 }

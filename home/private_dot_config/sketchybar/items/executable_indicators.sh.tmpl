@@ -1,11 +1,13 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file indicators.sh
 # @brief Declare the status indicators that Hammerspoon drives
 # @description Declare the caffeinate and microphone mute indicators. They
 # start hidden; Hammerspoon (laptop.lua) shows and hides them, and a click
 # toggles the state back through the `hs` command line client. Run by
 # sketchybarrc, which exports the theme colors.
-set -euo pipefail
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" || exit 1
+dybatpho::register_common_handlers
 
 #######################################
 # @description Declare one hidden indicator on the right of the bar
@@ -15,7 +17,8 @@ set -euo pipefail
 # @arg $4 string Lua function of laptop.lua to call on click
 #######################################
 function _add_indicator {
-  local name=$1 icon=$2 color=$3 toggle=$4
+  local name icon color toggle
+  dybatpho::expect_args name icon color toggle -- "$@"
   sketchybar --add item "${name}" right
   sketchybar --set "${name}" \
     drawing=off \

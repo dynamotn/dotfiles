@@ -1,9 +1,11 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file battery.sh
 # @brief Show the battery charge and whether it is charging
 # @description Run by the `battery` item. Hides the item on a Mac without a
 # battery, where pmset reports no percentage.
-set -euo pipefail
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" || exit 1
+dybatpho::register_common_handlers
 
 name=${NAME:-battery}
 info=$(pmset -g batt)

@@ -3,7 +3,9 @@
 # @brief Restart the desktop portals used for screencasting
 # @description Restart the xdg desktop portals, so that screencasting picks the Hyprland
 # portal instead of a stale one.
-set -euo pipefail
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" || exit 1
+dybatpho::register_common_handlers
 
 # A portal that is not running is the state we want, so a failed kill is fine.
 killall xdg-desktop-portal-wlr || true
@@ -14,7 +16,7 @@ killall xdg-desktop-portal || true
 /usr/libexec/xdg-desktop-portal-wlr &
 sleep 2
 /usr/libexec/xdg-desktop-portal
-{{ else if eq .osid "linux-arch" }}
+{{- else if eq .osid "linux-arch" }}
 /usr/lib64/xdg-desktop-portal-hyprland &
 sleep 2
 /usr/lib64/xdg-desktop-portal
