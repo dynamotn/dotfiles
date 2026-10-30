@@ -151,7 +151,8 @@ function dytoy_tui::load_tools {
         ((if $os == "" then [] else .[$os].packages // [] end)
           + ((.flatpak.packages // []) | map(.type = "flatpak"))
           + ((.fdroid.packages // []) | map(.type = "fdroid"))
-          | map([.type // "", .name, .version // ""] | map(tostring) | join("|")) | join(","))]
+          | map([.type // "", .name, .version // "", ((.releases // []) | map(tostring) | join(";"))]
+            | map(tostring) | join("|")) | join(","))]
       | map(tostring) | join("\u001f")' -r --arg os "${DYTOY_OS}")
 
   local method name tool_method essential dependencies packages installed hidden
@@ -186,7 +187,8 @@ function dytoy_tui::load_tools {
 # package manager tool, every package it lists for this OS.
 # @arg $1 string Name of tool
 # @arg $2 string Method of tool
-# @arg $3 string Packages of an `os` tool, comma-separated `type|name|version`
+# @arg $3 string Packages of an `os` tool, comma-separated `type|name|version|releases`,
+#   the releases separated by `;`
 # @stdout `yes`, `no`, or `unknown` for a package manager tool listing no package here
 #######################################
 function dytoy_tui::detect_installed {
@@ -195,12 +197,12 @@ function dytoy_tui::detect_installed {
   local packages="${3:-}"
   if [[ "${method}" == "os" ]]; then
     local -a entries=()
-    local entry type package version status checked=false
+    local entry type package version releases status checked=false
     IFS=',' read -r -a entries <<< "${packages}"
     for entry in ${entries[@]+"${entries[@]}"}; do
-      IFS='|' read -r type package version <<< "${entry}"
+      IFS='|' read -r type package version releases <<< "${entry}"
       status=0
-      dytoy_tui::package_installed "${type}" "${package}" "${version}" || status=$?
+      dytoy_tui::package_installed "${type}" "${package}" "${version}" "${releases}" || status=$?
       case "${status}" in
         0) checked=true ;;
         2) ;;
@@ -231,6 +233,7 @@ function dytoy_tui::detect_installed {
 #   `cask`, or empty
 # @arg $2 string Package name
 # @arg $3 string Version asked for, empty for the default one
+# @arg $4 string Releases the package is meant for, separated by `;`, empty for every one
 # @env DYTOY_OS string Key of this OS in a tool's YAML
 # @exitcode 0 Installed
 # @exitcode 1 Not installed
@@ -239,6 +242,10 @@ function dytoy_tui::detect_installed {
 function dytoy_tui::package_installed {
   local type package version
   dybatpho::expect_args type package version -- "$@"
+  local -a releases=()
+  IFS=';' read -r -a releases <<< "${4:-}"
+  # A package meant for other releases is one the installer skips here.
+  dytoy::is_release_in ${releases[@]+"${releases[@]}"} || return 2
   local checker
   checker=$(dytoy::package_checker "${DYTOY_OS}" "${type}") || return 2
   # An app store or a macOS app is checked by its own ID or name, whatever

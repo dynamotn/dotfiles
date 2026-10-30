@@ -140,6 +140,30 @@ EOF
   assert_equal "${DYTOY_TUI_INSTALLED[*]}" "unknown yes no unknown"
 }
 
+@test "dytoy_tui::load_tools leaves out the packages meant for other releases" {
+  write_tools_yaml << 'EOF'
+- name: mixed
+  method: os
+  ubuntu:
+    packages:
+      - name: have
+      - name: future
+        releases: [">=99"]
+- name: old
+  method: os
+  ubuntu:
+    packages:
+      - name: legacy
+        releases: ["<20", "22.04"]
+EOF
+  function package_manager::check_installed_apt { [[ "$1" == "have" || "$1" == "legacy" ]]; }
+  DYTOY_OS="ubuntu"
+  DYTOY_RELEASE="24.04" dytoy_tui::load_tools
+  assert_equal "${DYTOY_TUI_INSTALLED[*]}" "yes unknown"
+  DYTOY_RELEASE="22.04" dytoy_tui::load_tools
+  assert_equal "${DYTOY_TUI_INSTALLED[*]}" "yes yes"
+}
+
 @test "dytoy_tui::package_installed uses the checker of each macOS package type" {
   function package_manager::check_installed_brew { [[ "$1" == "go@1.22" ]]; }
   function package_manager::check_installed_mas { [[ "$1" == "123" ]]; }

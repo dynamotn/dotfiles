@@ -29,8 +29,8 @@ bold, dim and reverse only under `NO_COLOR`.
 
 Each tool shows `●` when it is installed, `○` when it is not, and `◌` when
 `dytoy` cannot tell. A tool of the `os` tab counts as installed when the
-package manager of this OS has every package it lists here, Flatpak and F-Droid
-ones included; `◌` marks one that lists no package for this OS.
+package manager of this OS has every package it lists for this OS and release,
+Flatpak and F-Droid ones included; `◌` marks one that lists none.
 
 |Key|Action|
 |---|------|

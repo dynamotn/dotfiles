@@ -106,18 +106,30 @@ function dytoy::is_package_for_release {
   __dytoy_lines_into releases dytoy::get_field "${yaml}" "releases // [] | .[]" \
     || dybatpho::debug "Can't read releases, matching every release"
   ((${#releases[@]})) || return 0
-  local name release range
+  dytoy::is_release_in "${releases[@]}" && return 0
+  local name
   name=$(dytoy::get_field "${yaml}" "name")
+  dybatpho::debug "Skip ${name}: this release satisfies none of ${releases[*]}"
+  return 1
+}
+
+#######################################
+# @description Check if the release of this OS satisfies one of some version ranges
+# @arg $@ string Version ranges, such as `>=24.04`
+# @exitcode 0 It satisfies one, or no range is given
+# @exitcode 1 It satisfies none, or this OS publishes no release
+#######################################
+function dytoy::is_release_in {
+  (($#)) || return 0
+  local release range
   # A release such as Arch's `rolling` is no version, so no range can hold it.
   if ! release=$(dytoy::get_release) \
     || ! release=$(dybatpho::semver_coerce "${release}" 2> /dev/null); then
-    dybatpho::debug "Skip ${name}: this OS publishes no release to match ${releases[*]}"
     return 1
   fi
-  for range in "${releases[@]}"; do
+  for range in "$@"; do
     dybatpho::semver_satisfies "${release}" "${range}" && return 0
   done
-  dybatpho::debug "Skip ${name}: release ${release} satisfies none of ${releases[*]}"
   return 1
 }
 
