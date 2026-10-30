@@ -875,7 +875,7 @@ function __dytoy_install_store_section {
   dybatpho::expect_args name section store -- "$@"
   local package
   local -a packages=()
-  readarray packages < <(dytoy::get_yaml "${name}" "${section}.packages" || true)
+  readarray -t packages < <(dytoy::get_yaml "${name}" "${section}.packages" || true)
   dybatpho::array_first packages &> /dev/null || return 0
   misc::install_tool "${store}"
   "package_manager::init_${section}"
@@ -911,7 +911,7 @@ function dytoy::install_os_tool {
     termux) __dytoy_install_store_section "${name}" fdroid fdroidcl ;;
     *) __dytoy_install_store_section "${name}" flatpak flatpak ;;
   esac
-  readarray packages < <(dytoy::get_yaml "${name}" "${DYTOY_OS}.packages" || true)
+  readarray -t packages < <(dytoy::get_yaml "${name}" "${DYTOY_OS}.packages" || true)
   for package in ${packages[@]+"${packages[@]}"}; do
     dytoy::is_package_for_release "${package}" || continue
     "dytoy::install_${DYTOY_OS}_package" "${package}" "${DYTOY_INIT_SYSTEM:-}"
