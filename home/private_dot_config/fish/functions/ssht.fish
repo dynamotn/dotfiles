@@ -10,8 +10,11 @@ function ssht --description "Run terminal workspace after ssh"
         if test -z "$session"
             set session (ssh $server zellij ls -n 2>/dev/null | string match -v '*EXITED*' | string split -f1 ' ')[1]
         end
-        ssh $server zellij a $session
-        or ssh $server zellij --config "\$HOME/.config/zellij/ssh.kdl"
+        # The remote fish runs this non-interactively, so its config.fish
+        # never points ZELLIJ_CONFIG_FILE at ssh.kdl (Alt x, no rail)
+        set -l config "\$HOME/.config/zellij/ssh.kdl"
+        ssh $server zellij --config $config a $session
+        or ssh $server zellij --config $config
     else if test -n "$(ssh $server command -v tmux)"
         set -l attach_argv
         set -l new_argv
