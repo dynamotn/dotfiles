@@ -14,9 +14,9 @@ function _require_chezmoi {
 
 # Write a chezmoi config exercising one combination of the knobs the
 # .gitmodules template branches on.
-# Usage: _write_config <file> <multiplexer> <guiServer> <browser>
+# Usage: _write_config <file> <multiplexer> <guiServer> <browser> [mailClient]
 function _write_config {
-  local cfg="${1}" multiplexer="${2}" guiServer="${3}" browser="${4}"
+  local cfg="${1}" multiplexer="${2}" guiServer="${3}" browser="${4}" mailClient="${5-T}"
 
   cat > "${cfg}" << EOF
 sourceDir: "${DOTFILES_DIR}/cascadeur"
@@ -24,13 +24,14 @@ data:
   terminalMultiplexer: "${multiplexer}"
   guiServer: "${guiServer}"
   browser: "${browser}"
+  mailClient: "${mailClient}"
   preferGitSSH: true
   code: "ci"
   company:
   decryptPersonal: true
   decryptEnterprise: ["F1"]
   browserEnterpriseProfiles: ["F1"]
-  mailEnterpriseProfiles: []
+  mailEnterpriseProfiles: ["F1"]
 EOF
 }
 
@@ -105,6 +106,28 @@ function _committed_entries {
   done < <(_committed_entries)
 
   ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"
+}
+
+# Thunderbird profiles belong to the mail client: a machine can have one
+# without a browser, and its company profiles can differ from the browser's.
+@test "thunderbird submodules follow the mail client, not the browser" {
+  _require_chezmoi
+  local cfg="${BATS_TEST_TMPDIR}/cfg.yaml" entries="${BATS_TEST_TMPDIR}/entries"
+
+  _write_config "${cfg}" "T" "X" "" "B"
+  : > "${entries}"
+  _collect_entries "${cfg}" "${entries}"
+  run cut -f1 "${entries}"
+  assert_line "thunderbird-personal"
+  assert_line "thunderbird-enterprise-F1"
+  refute_line --partial "firefox-"
+
+  _write_config "${cfg}" "T" "X" "F" ""
+  : > "${entries}"
+  _collect_entries "${cfg}" "${entries}"
+  run cut -f1 "${entries}"
+  assert_line "firefox-personal"
+  refute_line --partial "thunderbird-"
 }
 
 # A repository of its own the template names only on GitHub must be listed in

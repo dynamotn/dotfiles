@@ -48,11 +48,6 @@
   url = https://github.com/dynamotn/firefox-personal.git
   shallow = true
   worktreeInit = false
-[submodule "thunderbird-personal"]
-  path = home/private_dot_config/thunderbird/profiles/personal
-  url = https://github.com/dynamotn/thunderbird-personal.git
-  shallow = true
-  worktreeInit = false
 {{-   end }}
 {{-   range .browserEnterpriseProfiles }}
 [submodule "firefox-enterprise-{{ . }}"]
@@ -60,6 +55,17 @@
   url = https://github.com/dynamotn/firefox-enterprise-{{ . }}.git
   shallow = true
   worktreeInit = false
+{{-   end }}
+{{- end }}
+{{- if eq .mailClient "T" "B" }}
+{{-   if .decryptPersonal }}
+[submodule "thunderbird-personal"]
+  path = home/private_dot_config/thunderbird/profiles/personal
+  url = https://github.com/dynamotn/thunderbird-personal.git
+  shallow = true
+  worktreeInit = false
+{{-   end }}
+{{-   range .mailEnterpriseProfiles }}
 [submodule "thunderbird-enterprise-{{ . }}"]
   path = home/private_dot_config/thunderbird/profiles/enterprise-{{ . }}
   url = https://github.com/dynamotn/thunderbird-enterprise-{{ . }}.git
