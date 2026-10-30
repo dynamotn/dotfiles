@@ -27,6 +27,11 @@ cursor. Nothing is picked until you pick it. The interface is drawn in the Catpp
 flavour the terminal uses (Macchiato, or Latte without `darkMode`), and in
 bold, dim and reverse only under `NO_COLOR`.
 
+Each tool shows `●` when it is installed, `○` when it is not, and `◌` when
+`dytoy` cannot tell. A tool of the `os` tab counts as installed when the
+package manager of this OS has every package it lists here, Flatpak and F-Droid
+ones included; `◌` marks one that lists no package for this OS.
+
 |Key|Action|
 |---|------|
 |`↑` `↓` `j` `k`|Move the cursor|

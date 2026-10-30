@@ -74,6 +74,8 @@ export DYTOY_INIT_SYSTEM={{ .initSystem | quote }}
 # The order the methods run in when none is named. `os` goes first because it
 # installs the package managers and system libraries the other three need.
 DYTOY_METHODS=(os binary mise shell)
+# The interface checks the packages listed under this key of each `os` tool.
+DYTOY_TUI_OS="{{ $shortCode }}"
 
 #######################################
 # @description Options every method accepts. Declared once on the root command

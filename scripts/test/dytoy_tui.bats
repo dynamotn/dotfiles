@@ -104,6 +104,57 @@ function run_until_done {
   assert_equal "${DYTOY_TUI_INSTALLED[*]}" "unknown yes no no"
 }
 
+@test "dytoy_tui::load_tools checks the packages an os tool lists for this OS" {
+  write_tools_yaml << 'EOF'
+- name: bare
+  method: os
+- name: have
+  method: os
+  arch:
+    packages:
+      - name: have
+      - name: live
+        version: HEAD
+  flatpak:
+    packages:
+      - name: org.have.App
+  fdroid:
+    packages:
+      - name: org.not.checked
+- name: lack
+  method: os
+  arch:
+    packages:
+      - name: have
+      - name: lack
+- name: other
+  method: os
+  gentoo:
+    packages:
+      - name: app-misc/other
+EOF
+  function package_manager::check_installed_pacman { [[ "$1" == "have" || "$1" == "live-git" ]]; }
+  function package_manager::check_installed_flatpak { [[ "$1" == "org.have.App" ]]; }
+  DYTOY_TUI_OS="arch"
+  dytoy_tui::load_tools
+  assert_equal "${DYTOY_TUI_INSTALLED[*]}" "unknown yes no unknown"
+}
+
+@test "dytoy_tui::package_installed uses the checker of each macOS package type" {
+  function package_manager::check_installed_brew { [[ "$1" == "go@1.22" ]]; }
+  function package_manager::check_installed_mas { [[ "$1" == "123" ]]; }
+  function package_manager::check_installed_dmg { return 1; }
+  DYTOY_TUI_OS="macos"
+  run dytoy_tui::package_installed "" go 1.22
+  assert_success
+  run dytoy_tui::package_installed store 123 ""
+  assert_success
+  run dytoy_tui::package_installed download Betterbird ""
+  assert_failure 1
+  run dytoy_tui::package_installed flatpak org.some.App ""
+  assert_failure 2
+}
+
 @test "dytoy_tui::load_tools starts with nothing picked" {
   dytoy_tui::load_tools
   assert_equal "${DYTOY_TUI_PICKED[*]}" "false false false false"

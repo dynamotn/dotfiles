@@ -24,7 +24,7 @@ dybatpho::load screen privilege array
 declare -ga DYTOY_TUI_NAME=()
 declare -ga DYTOY_TUI_METHOD=()
 declare -ga DYTOY_TUI_ESSENTIAL=()
-# `yes`, `no`, or `unknown` (a package manager tool, too slow to ask about).
+# `yes`, `no`, or `unknown` (a package manager tool listing no package here).
 declare -ga DYTOY_TUI_INSTALLED=()
 declare -ga DYTOY_TUI_PICKED=()
 # `true` for a tool left out of the list by `--essential`; it is still loaded
@@ -73,6 +73,9 @@ DYTOY_TUI_RUNNING=true
 DYTOY_TUI_STATUS=""
 DYTOY_TUI_SELF=""
 DYTOY_TUI_LOG_DIR=""
+# The key of this OS in a tool's YAML, such as `gentoo` or `macos`; the
+# installed `dytoy` sets it, and without it a package manager tool is `unknown`.
+DYTOY_TUI_OS=""
 
 declare -ga DYTOY_TUI_SPINNER=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
 # The Catppuccin flavour of the screen module's theme, and its palette by
@@ -140,21 +143,29 @@ function dytoy_tui::load_tools {
 
   # One query for the whole file rather than one per tool: the list is read
   # before the first frame, and a `yq` call per tool is seconds of blank screen.
+  # Fields are split on a unit separator, not a tab: `read` merges the tabs
+  # around an empty field, which would shift the packages into the dependencies.
   local rows yaml_file
   yaml_file="$(dytoy::yaml_file)"
+  # dyshellint disable=SC2016 `$os` is a jq variable, given with `--arg`
   rows=$(dybatpho::yaml_query "${yaml_file}" \
     '.[] | select(.enabled != false and .enabled != "false")
-      | [.name, .method, (.is_essential // false), ((.dependencies // []) | join(","))] | @tsv' -r)
+      | [.name, .method, (.is_essential // false), ((.dependencies // []) | join(",")),
+        ((if $os == "" then [] else .[$os].packages // [] end)
+          + ((.flatpak.packages // []) | map(.type = "flatpak"))
+          + ((.fdroid.packages // []) | map(.type = "fdroid"))
+          | map([.type // "", .name, .version // ""] | map(tostring) | join("|")) | join(","))]
+      | map(tostring) | join("\u001f")' -r --arg os "${DYTOY_TUI_OS}")
 
-  local method name tool_method essential dependencies installed hidden
+  local method name tool_method essential dependencies packages installed hidden
   for method in "${DYTOY_METHODS[@]}"; do
-    while IFS=$'\t' read -r name tool_method essential dependencies; do
+    while IFS=$'\x1f' read -r name tool_method essential dependencies packages; do
       [[ -n "${name}" && "${tool_method}" == "${method}" ]] || continue
       hidden=false
       if dybatpho::is true "${ONLY_ESSENTIAL}" && ! dybatpho::is true "${essential}"; then
         hidden=true
       fi
-      installed="$(dytoy_tui::detect_installed "${name}" "${method}")"
+      installed="$(dytoy_tui::detect_installed "${name}" "${method}" "${packages}")"
       [[ -n "${DYTOY_TUI_INDEX[${name}]+set}" ]] || DYTOY_TUI_INDEX["${name}"]="${#DYTOY_TUI_NAME[@]}"
       DYTOY_TUI_HIDDEN+=("${hidden}")
       DYTOY_TUI_DEPS+=("${dependencies}")
@@ -174,23 +185,93 @@ function dytoy_tui::load_tools {
 
 #######################################
 # @description Print whether a tool is installed, the same way the installers
-# decide to skip it: a command on `PATH` or a file in `~/.local/bin`.
+# decide to skip it: a command on `PATH` or a file in `~/.local/bin`, or for a
+# package manager tool, every package it lists for this OS.
 # @arg $1 string Name of tool
 # @arg $2 string Method of tool
-# @stdout `yes`, `no`, or `unknown` for a package manager tool
+# @arg $3 string Packages of an `os` tool, comma-separated `type|name|version`
+# @stdout `yes`, `no`, or `unknown` for a package manager tool listing no package here
 #######################################
 function dytoy_tui::detect_installed {
   local name method
   dybatpho::expect_args name method -- "$@"
+  local packages="${3:-}"
+  if [[ "${method}" == "os" ]]; then
+    local -a entries=()
+    local entry type package version status checked=false
+    IFS=',' read -r -a entries <<< "${packages}"
+    for entry in ${entries[@]+"${entries[@]}"}; do
+      IFS='|' read -r type package version <<< "${entry}"
+      status=0
+      dytoy_tui::package_installed "${type}" "${package}" "${version}" || status=$?
+      case "${status}" in
+        0) checked=true ;;
+        2) ;;
+        *)
+          printf '%s\n' "no"
+          return 0
+          ;;
+      esac
+    done
+    if dybatpho::is true "${checked}"; then
+      printf '%s\n' "yes"
+    else
+      printf '%s\n' "unknown"
+    fi
+    return 0
+  fi
   local local_bin_file
   local_bin_file="$(dybatpho::path_join "${HOME}" ".local" "bin" "${name}")"
-  if [[ "${method}" == "os" ]]; then
-    printf '%s\n' "unknown"
-  elif dybatpho::is command "${name}" || dybatpho::is file "${local_bin_file}"; then
+  if dybatpho::is command "${name}" || dybatpho::is file "${local_bin_file}"; then
     printf '%s\n' "yes"
   else
     printf '%s\n' "no"
   fi
+}
+
+#######################################
+# @description Check one package of an `os` tool with the package manager the
+# installer of this OS would use, by the name the installer checks.
+# @arg $1 string Type: `flatpak`, `fdroid`, a macOS `store`, `download` or
+#   `cask`, or empty
+# @arg $2 string Package name
+# @arg $3 string Version asked for, empty for the default one
+# @env DYTOY_TUI_OS string Key of this OS in a tool's YAML
+# @exitcode 0 Installed
+# @exitcode 1 Not installed
+# @exitcode 2 Not installed on this OS by any installer, so not checked
+#######################################
+function dytoy_tui::package_installed {
+  local type package version
+  dybatpho::expect_args type package version -- "$@"
+  local checker
+  case "${type}:${DYTOY_TUI_OS}" in
+    flatpak:gentoo | flatpak:arch | flatpak:ubuntu | flatpak:alpine) checker=flatpak ;;
+    fdroid:termux) checker=fdroidcl ;;
+    flatpak:* | fdroid:*) return 2 ;;
+    store:macos) checker=mas ;;
+    download:macos) checker=dmg ;;
+    *:gentoo) checker=portage ;;
+    # The installer checks the `-git` package it installs for HEAD.
+    *:arch)
+      checker=pacman
+      [[ "${version}" != "HEAD" ]] || package="${package}-git"
+      ;;
+    *:ubuntu | *:termux) checker=apt ;;
+    *:alpine) checker=apk ;;
+    # shortcut: one `brew list` per package takes about a second, so a Mac
+    # with many formulae opens slowly; list them all once if that hurts.
+    *:macos)
+      checker=brew
+      case "${version}" in
+        "" | null | latest | HEAD) ;;
+        *) package="${package}@${version}" ;;
+      esac
+      ;;
+    *) return 2 ;;
+  esac
+  dybatpho::is function "package_manager::check_installed_${checker}" || return 2
+  "package_manager::check_installed_${checker}" "${package}" &> /dev/null || return 1
 }
 
 #######################################
