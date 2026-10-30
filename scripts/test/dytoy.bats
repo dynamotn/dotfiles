@@ -232,6 +232,18 @@ EOF
   assert_output 'apt'
   run dytoy::package_checker fedora
   assert_failure
+  run dytoy::package_checker arch flatpak
+  assert_output 'flatpak'
+  run dytoy::package_checker macos flatpak
+  assert_failure
+  run dytoy::package_checker termux fdroid
+  assert_output 'fdroidcl'
+  run dytoy::package_checker macos store
+  assert_output 'mas'
+  run dytoy::package_checker macos download
+  assert_output 'dmg'
+  run dytoy::package_checker macos cask
+  assert_output 'brew'
 
   run dytoy::checked_package_name arch neovim HEAD
   assert_output 'neovim-git'

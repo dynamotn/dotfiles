@@ -630,18 +630,25 @@ function dytoy::install_package {
 # @description Print the package manager asked whether a package of an OS is
 # installed
 # @arg $1 string Key of the OS in a tool's YAML, such as `gentoo`
+# @arg $2 string Type of the package: `flatpak` or `fdroid` for an app store
+#   section, a macOS `store`, `download` or `cask`, or empty for the OS's own
 # @stdout The manager, one `package_manager::check_installed_<manager>` takes
-# @exitcode 1 No installer of this OS checks its packages
+# @exitcode 1 No installer of this OS installs such a package
 #######################################
 function dytoy::package_checker {
   local os
   dybatpho::expect_args os -- "$@"
-  case "${os}" in
-    gentoo) printf 'portage\n' ;;
-    arch) printf 'pacman\n' ;;
-    ubuntu | termux) printf 'apt\n' ;;
-    alpine) printf 'apk\n' ;;
-    macos) printf 'brew\n' ;;
+  case "${2:-}:${os}" in
+    flatpak:gentoo | flatpak:arch | flatpak:ubuntu | flatpak:alpine) printf 'flatpak\n' ;;
+    fdroid:termux) printf 'fdroidcl\n' ;;
+    flatpak:* | fdroid:*) return 1 ;;
+    store:macos) printf 'mas\n' ;;
+    download:macos) printf 'dmg\n' ;;
+    *:gentoo) printf 'portage\n' ;;
+    *:arch) printf 'pacman\n' ;;
+    *:ubuntu | *:termux) printf 'apt\n' ;;
+    *:alpine) printf 'apk\n' ;;
+    *:macos) printf 'brew\n' ;;
     *) return 1 ;;
   esac
 }
@@ -835,15 +842,17 @@ function dytoy::install_macos_package {
   local -a params
   dytoy::get_params_into params "${yaml}"
   type=$(dytoy::get_field "${yaml}" "type")
+  local checker
+  checker=$(dytoy::package_checker macos "${type}")
   case "${type}" in
     store)
-      dytoy::install_package "${name}" "mas" "" "${yaml}" \
+      dytoy::install_package "${name}" "${checker}" "" "${yaml}" \
         package_manager::install_via_mas "${name}" "${params[@]}"
       ;;
     download)
       local url
       url=$(dytoy::get_field "${yaml}" "url")
-      dytoy::install_package "${name}" "dmg" "" "${yaml}" \
+      dytoy::install_package "${name}" "${checker}" "" "${yaml}" \
         package_manager::install_via_dmg "${name}" "${url}"
       ;;
     *)
@@ -863,7 +872,7 @@ function dytoy::install_macos_package {
       local repo
       repo=$(dytoy::get_field "${yaml}" "repo")
       [[ "${repo}" == "null" ]] || package_manager::add_brew_tap "${repo}" > /dev/null
-      dytoy::install_package "${name}" "brew" "launchd" "${yaml}" \
+      dytoy::install_package "${name}" "${checker}" "launchd" "${yaml}" \
         package_manager::install_via_brew "${name}" "${brew_params[@]}"
       ;;
   esac

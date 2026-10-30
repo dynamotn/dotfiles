@@ -240,18 +240,12 @@ function dytoy_tui::package_installed {
   local type package version
   dybatpho::expect_args type package version -- "$@"
   local checker
-  case "${type}:${DYTOY_OS}" in
-    flatpak:gentoo | flatpak:arch | flatpak:ubuntu | flatpak:alpine) checker=flatpak ;;
-    fdroid:termux) checker=fdroidcl ;;
-    flatpak:* | fdroid:*) return 2 ;;
-    store:macos) checker=mas ;;
-    download:macos) checker=dmg ;;
-    # shortcut: one `brew list` per package takes about a second, so a Mac
-    # with many formulae opens slowly; list them all once if that hurts.
-    *)
-      checker=$(dytoy::package_checker "${DYTOY_OS}") || return 2
-      package=$(dytoy::checked_package_name "${DYTOY_OS}" "${package}" "${version}")
-      ;;
+  checker=$(dytoy::package_checker "${DYTOY_OS}" "${type}") || return 2
+  # An app store or a macOS app is checked by its own ID or name, whatever
+  # version it asks for.
+  case "${type}" in
+    flatpak | fdroid | store | download) ;;
+    *) package=$(dytoy::checked_package_name "${DYTOY_OS}" "${package}" "${version}") ;;
   esac
   dybatpho::is function "package_manager::check_installed_${checker}" || return 2
   "package_manager::check_installed_${checker}" "${package}" &> /dev/null || return 1
