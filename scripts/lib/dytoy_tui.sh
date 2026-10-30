@@ -248,24 +248,12 @@ function dytoy_tui::package_installed {
     flatpak:* | fdroid:*) return 2 ;;
     store:macos) checker=mas ;;
     download:macos) checker=dmg ;;
-    *:gentoo) checker=portage ;;
-    # The installer checks the `-git` package it installs for HEAD.
-    *:arch)
-      checker=pacman
-      [[ "${version}" != "HEAD" ]] || package="${package}-git"
-      ;;
-    *:ubuntu | *:termux) checker=apt ;;
-    *:alpine) checker=apk ;;
     # shortcut: one `brew list` per package takes about a second, so a Mac
     # with many formulae opens slowly; list them all once if that hurts.
-    *:macos)
-      checker=brew
-      case "${version}" in
-        "" | null | latest | HEAD) ;;
-        *) package="${package}@${version}" ;;
-      esac
+    *)
+      checker=$(dytoy::package_checker "${DYTOY_OS}") || return 2
+      package=$(dytoy::checked_package_name "${DYTOY_OS}" "${package}" "${version}")
       ;;
-    *) return 2 ;;
   esac
   dybatpho::is function "package_manager::check_installed_${checker}" || return 2
   "package_manager::check_installed_${checker}" "${package}" &> /dev/null || return 1

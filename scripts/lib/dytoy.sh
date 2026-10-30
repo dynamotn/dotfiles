@@ -603,6 +603,73 @@ function dytoy::install_package {
 }
 
 #######################################
+# @description Print the package manager asked whether a package of an OS is
+# installed
+# @arg $1 string Key of the OS in a tool's YAML, such as `gentoo`
+# @stdout The manager, one `package_manager::check_installed_<manager>` takes
+# @exitcode 1 No installer of this OS checks its packages
+#######################################
+function dytoy::package_checker {
+  local os
+  dybatpho::expect_args os -- "$@"
+  case "${os}" in
+    gentoo) printf 'portage\n' ;;
+    arch) printf 'pacman\n' ;;
+    ubuntu | termux) printf 'apt\n' ;;
+    alpine) printf 'apk\n' ;;
+    macos) printf 'brew\n' ;;
+    *) return 1 ;;
+  esac
+}
+
+#######################################
+# @description Print the name a package is checked by, which differs from its
+# own name for the version it asks for on some package managers
+# @arg $1 string Key of the OS in a tool's YAML, such as `arch`
+# @arg $2 string Package name
+# @arg $3 string Version asked for, `null` or empty for the default one
+# @stdout The name to check
+#######################################
+function dytoy::checked_package_name {
+  local os name
+  dybatpho::expect_args os name -- "$@"
+  local version="${3:-}"
+  case "${os}:${version}" in
+    # The AUR carries the development branch as a package of its own.
+    arch:HEAD) printf '%s-git\n' "${name}" ;;
+    # Homebrew ships other versions as their own `name@version` package.
+    macos:null | macos:latest | macos:HEAD | macos:) printf '%s\n' "${name}" ;;
+    macos:*) printf '%s@%s\n' "${name}" "${version}" ;;
+    *) printf '%s\n' "${name}" ;;
+  esac
+}
+
+#######################################
+# @description Install the package of an OS whose package manager takes a
+# version in the package spec, the way every Linux distro and Termux do
+# @arg $1 string YAML content of the package
+# @arg $2 string Key of the OS in a tool's YAML
+# @arg $3 string Package manager the spec is spelled for, as `dytoy::get_package_spec` takes it
+# @arg $4 string Init system to enable the service of the package with, empty to skip
+# @arg $5 string Function installing the spec, with the params after it
+# @internal
+#######################################
+function __dytoy_install_spec_package {
+  local yaml os manager init installer
+  dybatpho::expect_args yaml os manager init installer -- "$@"
+  local name version spec checker checked
+  name=$(dytoy::get_field "${yaml}" "name")
+  version=$(dytoy::get_field "${yaml}" "version")
+  local -a params
+  dytoy::get_params_into params "${yaml}"
+  spec=$(dytoy::get_package_spec "${manager}" "${name}" "${version}") || return 1
+  checker=$(dytoy::package_checker "${os}")
+  checked=$(dytoy::checked_package_name "${os}" "${name}" "${version}")
+  dytoy::install_package "${checked}" "${checker}" "${init}" "${yaml}" \
+    "${installer}" "${spec}" ${params[@]+"${params[@]}"}
+}
+
+#######################################
 # @description Install Gentoo package from the YAML file
 # @arg $1 string YAML content
 # @arg $2 string Init system of machine
@@ -610,20 +677,11 @@ function dytoy::install_package {
 function dytoy::install_gentoo_package {
   local yaml init_system
   dybatpho::expect_args yaml init_system -- "$@"
-  local name repo url
-  name=$(dytoy::get_field "${yaml}" "name")
-  local -a params
-  dytoy::get_params_into params "${yaml}"
+  local repo url
   repo=$(dytoy::get_field "${yaml}" "repo")
   url=$(dytoy::get_field "${yaml}" "url")
   [[ "${repo}" == "null" ]] || package_manager::add_overlay "${repo}" "${url}" > /dev/null
-
-  local spec
-  local version
-  version=$(dytoy::get_field "${yaml}" "version")
-  spec=$(dytoy::get_package_spec portage "${name}" "${version}") || return 1
-  dytoy::install_package "${name}" "portage" "${init_system}" "${yaml}" \
-    package_manager::install_via_portage "${spec}" "${params[@]}"
+  __dytoy_install_spec_package "${yaml}" gentoo portage "${init_system}" package_manager::install_via_portage
 }
 
 #######################################
@@ -633,16 +691,7 @@ function dytoy::install_gentoo_package {
 function dytoy::install_arch_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name
-  name=$(dytoy::get_field "${yaml}" "name")
-  local -a params
-  dytoy::get_params_into params "${yaml}"
-  # A `-git` package is a package of its own, so it is also the one checked.
-  local version
-  version=$(dytoy::get_field "${yaml}" "version")
-  name=$(dytoy::get_package_spec pacman "${name}" "${version}") || return 1
-  dytoy::install_package "${name}" "pacman" "systemd" "${yaml}" \
-    package_manager::install_via_pacman "${name}" "${params[@]}"
+  __dytoy_install_spec_package "${yaml}" arch pacman systemd package_manager::install_via_pacman
 }
 
 #######################################
@@ -689,17 +738,7 @@ function dytoy::install_ubuntu_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
   dytoy::add_apt_repo "${yaml}" "ubuntu"
-
-  local name
-  name=$(dytoy::get_field "${yaml}" "name")
-  local -a params
-  dytoy::get_params_into params "${yaml}"
-  local spec
-  local version
-  version=$(dytoy::get_field "${yaml}" "version")
-  spec=$(dytoy::get_package_spec apt "${name}" "${version}") || return 1
-  dytoy::install_package "${name}" "apt" "systemd" "${yaml}" \
-    package_manager::install_via_apt "${spec}" "${params[@]}"
+  __dytoy_install_spec_package "${yaml}" ubuntu apt systemd package_manager::install_via_apt
 }
 
 #######################################
@@ -709,16 +748,7 @@ function dytoy::install_ubuntu_package {
 function dytoy::install_alpine_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name
-  name=$(dytoy::get_field "${yaml}" "name")
-  local -a params
-  dytoy::get_params_into params "${yaml}"
-  local spec
-  local version
-  version=$(dytoy::get_field "${yaml}" "version")
-  spec=$(dytoy::get_package_spec apk "${name}" "${version}") || return 1
-  dytoy::install_package "${name}" "apk" "openrc" "${yaml}" \
-    package_manager::install_via_apk "${spec}" "${params[@]}"
+  __dytoy_install_spec_package "${yaml}" alpine apk openrc package_manager::install_via_apk
 }
 
 #######################################
@@ -728,16 +758,7 @@ function dytoy::install_alpine_package {
 function dytoy::install_termux_package {
   local yaml
   dybatpho::expect_args yaml -- "$@"
-  local name
-  name=$(dytoy::get_field "${yaml}" "name")
-  local -a params
-  dytoy::get_params_into params "${yaml}"
-  local spec
-  local version
-  version=$(dytoy::get_field "${yaml}" "version")
-  spec=$(dytoy::get_package_spec termux "${name}" "${version}") || return 1
-  dytoy::install_package "${name}" "apt" "termux" "${yaml}" \
-    package_manager::install_via_termux "${spec}" "${params[@]}"
+  __dytoy_install_spec_package "${yaml}" termux termux termux package_manager::install_via_termux
 }
 
 #######################################
@@ -812,12 +833,8 @@ function dytoy::install_macos_package {
       else
         brew_params=("--formula")
       fi
-      case "${version}" in
-        null | latest) ;;
-        HEAD) brew_params+=("--HEAD") ;;
-        # Homebrew ships other versions as their own `name@version` package.
-        *) name="${name}@${version}" ;;
-      esac
+      [[ "${version}" != "HEAD" ]] || brew_params+=("--HEAD")
+      name=$(dytoy::checked_package_name macos "${name}" "${version}")
       brew_params+=("${params[@]}")
       local repo
       repo=$(dytoy::get_field "${yaml}" "repo")

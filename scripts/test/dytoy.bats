@@ -227,6 +227,22 @@ EOF
   assert_output 'latest'
 }
 
+@test "dytoy::package_checker and checked_package_name name what an OS checks" {
+  run dytoy::package_checker termux
+  assert_output 'apt'
+  run dytoy::package_checker fedora
+  assert_failure
+
+  run dytoy::checked_package_name arch neovim HEAD
+  assert_output 'neovim-git'
+  run dytoy::checked_package_name macos go 1.22
+  assert_output 'go@1.22'
+  run dytoy::checked_package_name macos neovim null
+  assert_output 'neovim'
+  run dytoy::checked_package_name gentoo app-editors/neovim HEAD
+  assert_output 'app-editors/neovim'
+}
+
 @test "dytoy::get_yaml_or falls back on an unset or empty field, even to an empty default" {
   write_tools_yaml << 'EOF'
 - name: sample
