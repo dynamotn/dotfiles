@@ -34,6 +34,10 @@ declare -ga DYTOY_TUI_HIDDEN=()
 declare -ga DYTOY_TUI_DEPS=()
 # The index of each tool, by name.
 declare -gA DYTOY_TUI_INDEX=()
+# Every formula and cask Homebrew has installed, by name, listed once per load
+# on macOS: asking `brew` about each package takes about a second apiece.
+declare -gA DYTOY_TUI_BREW=()
+DYTOY_TUI_BREW_LISTED=false
 # The stage a queued tool installs in: `dependencies` for one installed ahead
 # of the others, otherwise its method.
 declare -ga DYTOY_TUI_STAGE=()
@@ -155,6 +159,10 @@ function dytoy_tui::load_tools {
             | map(tostring) | join("|")) | join(","))]
       | map(tostring) | join("\u001f")' -r --arg os "${DYTOY_OS}")
 
+  DYTOY_TUI_BREW=()
+  DYTOY_TUI_BREW_LISTED=false
+  [[ "${DYTOY_OS}" != "macos" ]] || ! dybatpho::is command brew || dytoy_tui::list_brew
+
   local method name tool_method essential dependencies packages installed hidden
   for method in "${DYTOY_METHODS[@]}"; do
     while IFS=$'\x1f' read -r name tool_method essential dependencies packages; do
@@ -179,6 +187,25 @@ function dytoy_tui::load_tools {
     done <<< "${rows}"
     DYTOY_TUI_CURSOR["${method}"]=0
   done
+}
+
+#######################################
+# @description Remember every formula and cask Homebrew has installed.
+# @noargs
+# @set DYTOY_TUI_BREW, DYTOY_TUI_BREW_LISTED
+#######################################
+function dytoy_tui::list_brew {
+  local listed="" name
+  # A listing that fails leaves every brew package not installed, as the
+  # check of each package did.
+  # dyshellint disable=BSG095 listing only reads, and a dry run shows the same list
+  listed="$(brew list --formula -1 2> /dev/null)" || listed=""
+  # dyshellint disable=BSG095 listing only reads, and a dry run shows the same list
+  listed+=$'\n'"$(brew list --cask -1 2> /dev/null || true)"
+  while IFS= read -r name; do
+    [[ -z "${name}" ]] || DYTOY_TUI_BREW["${name}"]=1
+  done <<< "${listed}"
+  DYTOY_TUI_BREW_LISTED=true
 }
 
 #######################################
@@ -254,6 +281,10 @@ function dytoy_tui::package_installed {
     flatpak | fdroid | store | download) ;;
     *) package=$(dytoy::checked_package_name "${DYTOY_OS}" "${package}" "${version}") ;;
   esac
+  if [[ "${checker}" == "brew" ]] && dybatpho::is true "${DYTOY_TUI_BREW_LISTED}"; then
+    [[ -n "${DYTOY_TUI_BREW[${package}]+set}" ]] || return 1
+    return 0
+  fi
   dybatpho::is function "package_manager::check_installed_${checker}" || return 2
   "package_manager::check_installed_${checker}" "${package}" &> /dev/null || return 1
 }

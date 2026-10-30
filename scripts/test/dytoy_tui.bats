@@ -164,6 +164,45 @@ EOF
   assert_equal "${DYTOY_TUI_INSTALLED[*]}" "yes yes"
 }
 
+@test "dytoy_tui::load_tools lists Homebrew once for every brew package" {
+  write_tools_yaml << 'EOF'
+- name: cli
+  method: os
+  macos:
+    packages:
+      - name: go
+        version: "1.22"
+      - name: ripgrep
+- name: app
+  method: os
+  macos:
+    packages:
+      - name: firefox
+        type: cask
+- name: gone
+  method: os
+  macos:
+    packages:
+      - name: missing
+EOF
+  local bin="${BATS_TEST_TMPDIR}/bin" calls="${BATS_TEST_TMPDIR}/brew-calls"
+  mkdir -p "${bin}"
+  cat > "${bin}/brew" << EOF
+#!/usr/bin/env bash
+printf 'x' >> "${calls}"
+case "\$2" in
+  --formula) printf 'go@1.22\nripgrep\n' ;;
+  --cask) printf 'firefox\n' ;;
+esac
+EOF
+  chmod +x "${bin}/brew"
+  DYTOY_OS="macos"
+  PATH="${bin}:${PATH}" dytoy_tui::load_tools
+  assert_equal "${DYTOY_TUI_INSTALLED[*]}" "yes yes no"
+  run cat "${calls}"
+  assert_output 'xx'
+}
+
 @test "dytoy_tui::package_installed uses the checker of each macOS package type" {
   function package_manager::check_installed_brew { [[ "$1" == "go@1.22" ]]; }
   function package_manager::check_installed_mas { [[ "$1" == "123" ]]; }
