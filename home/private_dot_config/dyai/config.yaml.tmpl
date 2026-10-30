@@ -208,7 +208,8 @@ global:
       - {agent: gemini, stance: against}
       - {agent: codex, stance: for}
       - {agent: claude, stance: against}
-    timeout: 1800
+    # An hour: a big feature outruns half of one.
+    timeout: 3600
     cooldown: 900
     # Crew state in one repository every machine shares (docs/dyai-store.md):
     # signed with ~/.config/dyai/node/signing and pushed with the deploy key
@@ -225,8 +226,12 @@ global:
       url: git@gitlab.com:dynamo-brain/dyai-state.git
       node: {{ .code | quote }}
       ssh_key: ~/.config/dyai/node/deploy
+      signing_key: ~/.config/dyai/node/signing
     {{- end }}
     require_review: true
+    # A first failed review asks one more provider for the root cause and
+    # the smallest fix, which `dyai fix` hands the writer.
+    advice: {enabled: true, by: auto}
     # lean: a worker loads the policy and the agent rules, not the plugins
     # and MCP servers (claude: ~57k to ~30k input tokens per call).
     profile: lean
