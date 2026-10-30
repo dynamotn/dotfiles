@@ -111,6 +111,10 @@ policy:
     allow:
       - "Bash(git wt *)"
       - "Bash(rtk git wt *)"
+      # No read-only git, chezmoi, dyai or mise rule on purpose: those tools run
+      # outside the sandbox, and a sandboxed agent can plant what makes them
+      # act (a textconv in .git/config, a chezmoi template, a mise.toml), or
+      # read past the sandbox with them (`git diff --no-index ~/.ssh/...`).
     ask:
       - "Bash(git push)"
       - "Bash(git push:*)"
@@ -203,6 +207,10 @@ policy:
     # --dangerously-skip-permissions would skip every ask rule above; auto
     # mode and the sandbox cover the same need without that hole.
     disableBypassPermissionsMode: disable
+  # dyai-guard judges a removal by its target in each agent's pre-shell hook:
+  # it denies one of $HOME, / or the repository, asks outside the temporary
+  # directories, and lets Claude drop its blanket `rm -rf` ask rules above.
+  guard: true
   theme: auto
   effortLevel: medium
   # Shared approval stance, translated per agent where an edits-only preset

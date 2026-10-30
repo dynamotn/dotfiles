@@ -63,6 +63,11 @@
           {
             "command": "rtk hook claude",
             "type": "command"
+          },
+          {
+            "command": "command -v dyai-guard >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 && command -v shfmt >/dev/null 2>&1 && exec dyai-guard claude; cat >/dev/null; printf '%s\\n' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"dyai-guard, jq or shfmt is missing, so no removal can be checked\"}}'",
+            "timeout": 10,
+            "type": "command"
           }
         ],
         "matcher": "Bash"
@@ -198,8 +203,6 @@
       "Bash(rtk summary *)",
       "Bash(rtk -*)",
       "Bash(rtk trust:*)",
-      "Bash(rm -rf *)",
-      "Bash(rm -fr *)",
       "Bash(shred *)",
       "Bash(sudo *)",
       "Bash(emerge *)",
@@ -273,6 +276,7 @@
       "chezmoi *",
       "dyai *",
       "mise *",
+      "prek *",
       "sudo *",
       "emerge *",
       "systemctl *"

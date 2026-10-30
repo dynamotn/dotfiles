@@ -7,7 +7,9 @@
   too (they merge into its denyRead), so `cat ~/.ssh/x` is blocked like the
   Read tool is. Excluded commands run outside it: git (a worktree's git dir
   sits outside the worktree, and push needs the ssh agent), and the tools
-  that write all over $HOME or the system. The rtk spelling of git is listed
+  that write all over $HOME or the system. prek is one: it locks and logs in
+  ~/.cache/prek, which must stay read-only in the sandbox because it holds
+  the hook code `git commit` runs outside it. The rtk spelling of git is listed
   because rtk rewrites git before the sandbox sees it; rtk as a whole is not,
   since `cat` becomes `rtk read` and must stay sandboxed. rtk's own config
   (private_dot_config/rtk/config.toml.tmpl) keeps it off the other commands
@@ -46,6 +48,7 @@
       "chezmoi *",
       "dyai *",
       "mise *",
+      "prek *",
       "sudo *",
       "emerge *",
       "systemctl *"
@@ -169,6 +172,11 @@
           {
             "type": "command",
             "command": "rtk hook claude"
+          },
+          {
+            "type": "command",
+            "command": "command -v dyai-guard >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 && command -v shfmt >/dev/null 2>&1 && exec dyai-guard claude; cat >/dev/null; printf '%s\\n' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"dyai-guard, jq or shfmt is missing, so no removal can be checked\"}}'",
+            "timeout": 10
           }
         ]
       },
@@ -275,6 +283,18 @@
 {{- range $d.policy.permissions.deny }}{{ $deny = append $deny (eq . "Read(**/*.age)" | ternary "Read(*.age)" .) }}{{ end -}}
 {{- $perms := deepCopy $d.policy.permissions -}}
 {{- $_ := set $perms "deny" $deny -}}
+{{- /*
+  With the guard on, dyai-guard (the PreToolUse hook above) judges a
+  recursive rm by its target, so the blanket ask rules go: an ask rule
+  outranks every hook and allow rule, so no temporary directory could ever
+  be spared the prompt. The sandbox still confines a sandboxed rm to the
+  working tree and $TMPDIR, and an unsandboxed one still prompts.
+*/ -}}
+{{- if $d.policy.guard }}
+{{-   $ask := list -}}
+{{-   range $perms.ask }}{{ if not (has . (list "Bash(rm -rf *)" "Bash(rm -fr *)")) }}{{ $ask = append $ask . }}{{ end }}{{ end -}}
+{{-   $_ := set $perms "ask" $ask -}}
+{{- end -}}
 {{- /* The shared approval stance, in Claude's name for it. */ -}}
 {{- with get (dict "accept-edits" "acceptEdits") ($d.policy.approval | default "") }}{{ $_ := set $perms "defaultMode" . }}{{ end -}}
 {{- $wt := .chezmoi.workingTree -}}

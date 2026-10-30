@@ -199,6 +199,37 @@ STUB
   [[ -z "${missing}" ]] || fail "ask rules without an rtk variant: ${missing}"
 }
 
+@test "every git allow rule also covers its rtk rewrite" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json"
+  _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
+  # Without the rtk spelling, `git log` rewritten to `rtk git log` prompts again.
+  local missing
+  missing="$(jq -r '.permissions.allow as $a
+    | $a[] | select(startswith("Bash(git "))
+    | ("Bash(rtk " + ltrimstr("Bash(")) as $r
+    | select($a | index($r) == null) | $r' "${out}")"
+  [[ -z "${missing}" ]] || fail "allow rules without an rtk variant: ${missing}"
+}
+
+@test "with the guard on, dyai-guard judges rm and the blanket rm ask rules are gone" {
+  _require_chezmoi
+  local out="${BATS_TEST_TMPDIR}/settings.json"
+  _render_settings "${out}" || fail "render failed: $(< "${out}.err")"
+  jq -e '.permissions.ask | map(select(test("^Bash\\(rm -(rf|fr) "))) | length == 0' "${out}" > /dev/null \
+    || fail "an rm ask rule outranks dyai-guard"
+  jq -e '[.hooks.PreToolUse[] | select(.matcher == "Bash") | .hooks[].command
+    | select(test("exec dyai-guard claude"))] | length == 1' "${out}" > /dev/null \
+    || fail "no dyai-guard PreToolUse hook on Bash"
+  # Without dyai-guard on PATH, the hook asks instead of letting an rm through.
+  local cmd
+  cmd="$(jq -r '.hooks.PreToolUse[] | select(.matcher == "Bash") | .hooks[].command
+    | select(test("dyai-guard"))' "${out}")"
+  run env PATH=/usr/bin:/bin bash -c "${cmd}" <<< '{"tool_input":{"command":"rm -rf src"}}'
+  assert_success
+  assert_output --partial '"permissionDecision":"ask"'
+}
+
 @test "rtk leaves alone every command the sandbox runs outside it" {
   _require_chezmoi
   local out="${BATS_TEST_TMPDIR}/settings.json" cmd missing=""

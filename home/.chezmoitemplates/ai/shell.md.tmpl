@@ -17,3 +17,8 @@ share syntax, so always be explicit about which one a command is written for.
   `sudo -- <cmd>`: it turns `sudo ls` into `sudo rtk ls`.
 - A `cd` does not carry over between separate commands. Use absolute paths, or
   chain the `cd` into the same command.
+- Run a command inside the agent's sandbox, and turn the sandbox off only
+  after it failed there with a sandbox error. git, chezmoi, dyai, mise and
+  prek already run outside Claude's sandbox; turning it off for them, or
+  ahead of time for anything else, only adds a permission prompt. Put
+  scratch files under `$TMPDIR`: removing them there needs no approval.

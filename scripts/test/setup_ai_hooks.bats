@@ -120,3 +120,36 @@ EOF
     [[ "$(jq -r '.hooks // "none"' "${HOME}/.config/opencode/opencode.json")" == "none" ]]
   fi
 }
+
+@test "policy.guard wires dyai-guard into gemini, copilot and codex, idempotently" {
+  _stub_agent gemini
+  _stub_agent copilot
+  _stub_agent codex
+  dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
+  printf 'global:\n  skills: []\n  mcp: {}\n  policy:\n    guard: true\nagents:\n  claude: {}\n' \
+    > "${HOME}/.config/dyai/config.yaml"
+  run bash "${HOOK}"
+  assert_success
+  local gemini="${HOME}/.gemini/settings.json" copilot="${HOME}/.copilot/hooks/dyai-guard.json"
+  local codex="${HOME}/.codex/config.toml"
+  jq -e '.hooks.BeforeTool == [{matcher: "run_shell_command",
+    hooks: [{type: "command", command: "dyai-guard gemini", name: "dyai-guard"}]}]' "${gemini}" > /dev/null
+  jq -e '.hooks.preToolUse == [{type: "command", matcher: "bash", bash: "dyai-guard copilot"}]' \
+    "${copilot}" > /dev/null
+  local pre before after
+  pre="$(yq -p=toml -o=json -I=0 '.hooks.PreToolUse' "${codex}")"
+  assert_equal "${pre}" '[{"matcher":"^Bash$","hooks":[{"type":"command","command":"dyai-guard codex"}]}]'
+  before="$(cat "${gemini}" "${copilot}" "${codex}")"
+  run bash "${HOOK}"
+  assert_success
+  after="$(cat "${gemini}" "${copilot}" "${codex}")"
+  assert_equal "${after}" "${before}"
+}
+
+@test "without policy.guard no agent gets the dyai-guard hook" {
+  _stub_agent gemini
+  _write_config
+  run bash "${HOOK}"
+  assert_success
+  jq -e '.hooks.BeforeTool == null' "${HOME}/.gemini/settings.json" > /dev/null
+}
