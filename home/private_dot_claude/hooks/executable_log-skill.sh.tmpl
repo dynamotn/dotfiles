@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file log-skill.sh
 # @brief PreToolUse hook recording every Skill invocation
 # @description Append one JSON line per skill Claude invokes to
@@ -9,13 +9,16 @@
 #
 # It only observes: it prints nothing and always exits 0, so it can never
 # block or change a tool call.
-set -euo pipefail
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json || exit 0
+dybatpho::register_common_handlers
+# A DRY_RUN exported for another tool must not turn this hook's writes into no-ops.
+unset DRY_RUN DYBATPHO_DRY_RUN
 
-dir="${XDG_STATE_HOME:-${HOME}/.local/state}/claude"
+dir="$(dybatpho::xdg_state_dir claude 2> /dev/null)" || exit 0
 input="$(cat)"
-line="$(jq -c '{ts: (now | todate), skill: (.tool_input.skill // ""), cwd: (.cwd // ""),
-  session: (.session_id // "")} | select(.skill != "")' <<< "${input}" 2> /dev/null || true)"
+line="$(dybatpho::json_eval "${input}" '{ts: (now | todate), skill: (.tool_input.skill // ""), cwd: (.cwd // ""),
+  session: (.session_id // "")} | select(.skill != "")' 2> /dev/null || true)"
 [[ -n "${line}" ]] || exit 0
-mkdir -p -- "${dir}" 2> /dev/null || exit 0
+(dybatpho::ensure_dir "${dir}") &> /dev/null || exit 0
 printf '%s\n' "${line}" >> "${dir}/skill-usage.jsonl" 2> /dev/null || true
 exit 0

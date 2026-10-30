@@ -1,9 +1,22 @@
 # dyshellint disable=SC2154 DOTFILES_DIR and BATS_TEST_TMPDIR come from bats and test_helper
 # dyshellint disable=SC2016 the fixtures write a literal $1 for dyshellint to flag
+# The hooks are templates that source dybatpho from the checkout; render them
+# once for the whole file.
+setup_file() {
+  load test_helper
+  local name
+  mkdir -p "${BATS_FILE_TMPDIR}/hooks"
+  for name in lint-shell log-agent log-skill route-agent vault-recall verify-on-stop worktree-create; do
+    render_template "home/private_dot_claude/hooks/executable_${name}.sh.tmpl" \
+      "${BATS_FILE_TMPDIR}/hooks/${name}.sh"
+  done
+}
+
 setup() {
   load test_helper
-  HOOK="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_lint-shell.sh"
-  STOP_HOOK="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_verify-on-stop.sh"
+  HOOKS_DIR="${BATS_FILE_TMPDIR}/hooks"
+  HOOK="${HOOKS_DIR}/lint-shell.sh"
+  STOP_HOOK="${HOOKS_DIR}/verify-on-stop.sh"
   WORK="${BATS_TEST_TMPDIR}/work"
   mkdir -p "${WORK}"
 }
@@ -21,8 +34,7 @@ function _run_hook {
 
 @test "lint-shell hook is itself clean under dyshellint" {
   _require_dyshellint
-  # The source carries chezmoi's executable_ prefix instead of the bit.
-  run dyshellint -warnings-as-errors -exclude-rules BSG037 "${HOOK}"
+  run dyshellint -warnings-as-errors "${HOOK}"
   assert_success
 }
 
@@ -237,12 +249,12 @@ function _run_stop {
 
 @test "verify-on-stop hook is itself clean under dyshellint" {
   _require_dyshellint
-  run dyshellint -warnings-as-errors -exclude-rules BSG037 "${STOP_HOOK}"
+  run dyshellint -warnings-as-errors "${STOP_HOOK}"
   assert_success
 }
 
 @test "log-skill appends one line per Skill call and never blocks" {
-  local skill_hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_log-skill.sh"
+  local skill_hook="${HOOKS_DIR}/log-skill.sh"
   local state="${WORK}/state" input
   input='{"tool_name":"Skill","tool_input":{"skill":"dybatpho"},"cwd":"/r","session_id":"s1"}'
   XDG_STATE_HOME="${state}" run bash "${skill_hook}" <<< "${input}"
@@ -265,7 +277,7 @@ function _run_stop {
 }
 
 @test "log-agent records type and model and never blocks" {
-  local agent_hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_log-agent.sh"
+  local agent_hook="${HOOKS_DIR}/log-agent.sh"
   local state="${WORK}/state" input
   input='{"tool_name":"Agent","session_id":"s1",
     "tool_input":{"subagent_type":"Explore","model":"haiku","description":"x"}}'
@@ -282,7 +294,7 @@ function _run_stop {
 }
 
 @test "log-agent never fails on garbage input" {
-  local agent_hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_log-agent.sh"
+  local agent_hook="${HOOKS_DIR}/log-agent.sh"
   local state="${WORK}/state"
   XDG_STATE_HOME="${state}" run bash "${agent_hook}" <<< "not json"
   assert_success
@@ -300,13 +312,13 @@ function _run_stop {
   grep -q 'lint-shell.sh' "${tmpl}"
 }
 
-ROUTE_HOOK_REL="home/private_dot_claude/hooks/executable_route-agent.sh"
+ROUTE_HOOK_NAME="route-agent.sh"
 
 # Run the route gate on a spawn with the given tool_input JSON, in session s1.
 function _gate {
   local input
   input="$(jq -cn --argjson t "${1}" '{tool_name: "Agent", session_id: "s1", tool_input: $t}')"
-  XDG_STATE_HOME="${WORK}/state" run bash "${DOTFILES_DIR}/${ROUTE_HOOK_REL}" gate <<< "${input}"
+  XDG_STATE_HOME="${WORK}/state" run bash "${HOOKS_DIR}/${ROUTE_HOOK_NAME}" gate <<< "${input}"
 }
 
 # Record a routing call for session $1, $2 seconds ago.
@@ -351,7 +363,7 @@ function _routed {
 }
 
 @test "route record notes the session of a laya routing call and prints nothing" {
-  XDG_STATE_HOME="${WORK}/state" run bash "${DOTFILES_DIR}/${ROUTE_HOOK_REL}" record \
+  XDG_STATE_HOME="${WORK}/state" run bash "${HOOKS_DIR}/${ROUTE_HOOK_NAME}" record \
     <<< '{"tool_name":"mcp__laya__laya_route","session_id":"s9"}'
   assert_success
   assert_output ""
@@ -371,14 +383,14 @@ function _routed {
 }
 
 @test "route gate allows garbage input" {
-  XDG_STATE_HOME="${WORK}/state" run bash "${DOTFILES_DIR}/${ROUTE_HOOK_REL}" gate <<< 'not json'
+  XDG_STATE_HOME="${WORK}/state" run bash "${HOOKS_DIR}/${ROUTE_HOOK_NAME}" gate <<< 'not json'
   assert_success
   assert_output ""
 }
 
 @test "route-agent hook is itself clean under dyshellint" {
   _require_dyshellint
-  run dyshellint -warnings-as-errors -exclude-rules BSG037 "${DOTFILES_DIR}/${ROUTE_HOOK_REL}"
+  run dyshellint -warnings-as-errors "${HOOKS_DIR}/${ROUTE_HOOK_NAME}"
   assert_success
 }
 
@@ -405,7 +417,7 @@ function _routed {
 # with two hits, one under the score threshold. $1 is the prompt's cwd.
 function _recall {
   local cwd="${1}" session="${2:-s1}" prompt="${3:-how should I rotate the homelab backup keys}"
-  local hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_vault-recall.sh" input
+  local hook="${HOOKS_DIR}/vault-recall.sh" input
   mkdir -p "${WORK}/bin" "${WORK}/vault/99_System/99.03_Scripts/dev" "${WORK}/cache/dybrain/embeddings"
   : > "${WORK}/vault/99_System/99.03_Scripts/dev/vault-embed.py"
   : > "${WORK}/cache/dybrain/embeddings/index.npz"
@@ -456,7 +468,7 @@ function _recall {
 
 @test "vault-recall stays silent without an index and on garbage input" {
   unset DYAI_CREW DYBRAIN_RECALL
-  local hook="${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_vault-recall.sh"
+  local hook="${HOOKS_DIR}/vault-recall.sh"
   XDG_CACHE_HOME="${WORK}/empty" run bash "${hook}" <<< "not json"
   assert_success
   assert_output ""
@@ -468,10 +480,20 @@ function _recall {
 
 @test "vault-recall hook is itself clean under dyshellint" {
   _require_dyshellint
-  run dyshellint "${DOTFILES_DIR}/home/private_dot_claude/hooks/executable_vault-recall.sh"
+  run dyshellint "${HOOKS_DIR}/vault-recall.sh"
   assert_success
 }
 
 @test "settings.json wires the vault-recall hook on prompt submit" {
   grep -q 'vault-recall.sh' "${DOTFILES_DIR}/home/private_dot_claude/settings.json.tmpl"
+}
+
+@test "worktree-create fails, printing no path, when dybatpho cannot load" {
+  # Claude Code takes the last stdout line as the worktree path, so a hook that
+  # runs on without the library must not report `/.worktrees/` as created.
+  sed 's|^\. ".*/init.sh"|. "/nonexistent/init.sh"|' \
+    "${HOOKS_DIR}/worktree-create.sh" > "${WORK}/broken.sh"
+  run --separate-stderr bash "${WORK}/broken.sh" <<< "{\"name\":\"wt\",\"cwd\":\"${WORK}\"}"
+  assert_failure 1
+  assert_output ""
 }

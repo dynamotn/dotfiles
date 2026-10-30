@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file route-agent.sh
 # @brief Require a routing decision before Claude spawns a subagent
 # @description Two modes, one per hook:
@@ -16,40 +16,48 @@
 #
 # Input that does not parse is let through: the gate must never wedge a
 # session on garbage. `record` prints nothing and always exits 0.
-set -euo pipefail
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json date \
+  || {
+    # Fail open, but say so: the gate is off until dybatpho loads again.
+    printf 'route-agent: dybatpho failed to load, skipping the gate\n' >&2
+    exit 0
+  }
+dybatpho::register_common_handlers
+# A DRY_RUN exported for another tool must not turn this hook's writes into no-ops.
+unset DRY_RUN DYBATPHO_DRY_RUN
 
 mode="${1:-gate}"
-dir="${XDG_STATE_HOME:-${HOME}/.local/state}/claude"
+dir="$(dybatpho::xdg_state_dir claude 2> /dev/null)" || exit 0
 ledger="${dir}/agent-routes.jsonl"
 input="$(cat)"
-session="$(jq -r '.session_id // "" | strings' <<< "${input}" 2> /dev/null)" || exit 0
-now="$(date +%s)"
+session="$(dybatpho::json_get "${input}" '.session_id // "" | strings' 2> /dev/null)" || exit 0
+now="$(dybatpho::date_now)"
 
 if [[ "${mode}" == record ]]; then
   [[ -n "${session}" ]] || exit 0
-  mkdir -p -- "${dir}" 2> /dev/null || exit 0
-  jq -cn --argjson ts "${now}" --arg s "${session}" '{ts: $ts, session: $s}' >> "${ledger}" 2> /dev/null || true
+  (dybatpho::ensure_dir "${dir}") &> /dev/null || exit 0
+  dybatpho::json_object ts:json "${now}" session "${session}" >> "${ledger}" 2> /dev/null || true
   exit 0
 fi
 
 routing="${DYAI_AGENT_ROUTING:-block}"
 [[ "${routing}" != off && -z "${DYAI_CREW:-}" ]] || exit 0
-routed="$(jq -r '(.tool_input.model // "" | strings | length > 0)
-  or ((.tool_input.subagent_type // "") == "fork")' <<< "${input}" 2> /dev/null)" || exit 0
+routed="$(dybatpho::json_get "${input}" '(.tool_input.model // "" | strings | length > 0)
+  or ((.tool_input.subagent_type // "") == "fork")' 2> /dev/null)" || exit 0
 [[ "${routed}" != true ]] || exit 0
 # A subagent whose definition pins a model (not `inherit`) is routed already.
-agent="$(jq -r '.tool_input.subagent_type // "" | strings' <<< "${input}" 2> /dev/null)" || agent=""
+agent="$(dybatpho::json_get "${input}" '.tool_input.subagent_type // "" | strings' 2> /dev/null)" || agent=""
 if [[ "${agent}" =~ ^[A-Za-z0-9._-]+$ ]]; then
   for def in "${CLAUDE_PROJECT_DIR:-${PWD}}/.claude/agents/${agent}.md" \
     "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}/agents/${agent}.md"; do
-    [[ -f "${def}" ]] || continue
+    dybatpho::is file "${def}" || continue
     model="$(awk 'NR == 1 && $0 != "---" { exit } NR > 1 && $0 == "---" { exit }
       NR > 1 && sub(/^model:[ \t]*/, "") { gsub(/["\047 \t]/, ""); print; exit }' "${def}" 2> /dev/null)" || model=""
     [[ -z "${model}" || "${model}" == inherit ]] || exit 0
     break
   done
 fi
-if [[ -n "${session}" ]] && [[ -f "${ledger}" ]] \
+if [[ -n "${session}" ]] && dybatpho::is file "${ledger}" \
   && jq -e --arg s "${session}" --argjson since "$((now - 900))" \
     'select(.session == $s and .ts >= $since)' "${ledger}" &> /dev/null; then
   exit 0
@@ -59,9 +67,10 @@ reason="Pick the model for this subagent before spawning it: set model (haiku fo
 reason+=" summaries, sonnet for routine coding, opus for review, security and design judgments), or call"
 reason+=" laya_route first. A fork keeps your model and needs neither."
 if [[ "${routing}" == warn ]]; then
-  jq -cn --arg r "${reason}" '{hookSpecificOutput: {hookEventName: "PreToolUse", additionalContext: $r}}'
+  output="$(dybatpho::json_object hookEventName PreToolUse additionalContext "${reason}")"
 else
-  jq -cn --arg r "${reason}" \
-    '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: $r}}'
+  output="$(dybatpho::json_object hookEventName PreToolUse permissionDecision deny \
+    permissionDecisionReason "${reason}")"
 fi
+dybatpho::json_object hookSpecificOutput:json "${output}"
 exit 0

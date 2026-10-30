@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file vault-recall.sh
 # @brief UserPromptSubmit hook bringing related DyBrain notes into a new session
 # @description On the first prompt of a session, ask DyBrain's local semantic
@@ -10,29 +10,31 @@
 # does nothing inside a dyai crew, inside the vault itself (it has its own
 # tools), without an index, with DYBRAIN_RECALL=0, for short prompts, after
 # the first prompt of a session, and on any error.
-set -euo pipefail
-((BASH_VERSINFO[0] * 100 + BASH_VERSINFO[1] >= 404)) || exit 0
-shopt -s inherit_errexit
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json || exit 0
+dybatpho::register_common_handlers
+# A DRY_RUN exported for another tool must not turn this hook's writes into no-ops.
+unset DRY_RUN DYBATPHO_DRY_RUN
 
 [[ -z "${DYAI_CREW:-}" && "${DYBRAIN_RECALL:-1}" != "0" ]] || exit 0
-command -v jq &> /dev/null && command -v uv &> /dev/null || exit 0
+dybatpho::command_exists_all jq uv || exit 0
 vault="${DYBRAIN_VAULT:-${HOME}/Documents/DyBrain}"
 embed="${vault}/99_System/99.03_Scripts/dev/vault-embed.py"
-index="${XDG_CACHE_HOME:-${HOME}/.cache}/dybrain/embeddings/index.npz"
-[[ -f "${embed}" && -f "${index}" ]] || exit 0
+cache="$(dybatpho::xdg_cache_dir dybrain 2> /dev/null)" || exit 0
+index="${cache}/embeddings/index.npz"
+dybatpho::is file "${embed}" && dybatpho::is file "${index}" || exit 0
 
 input="$(cat)"
-session="$(jq -r '.session_id // ""' <<< "${input}" 2> /dev/null || true)"
-cwd="$(jq -r '.cwd // ""' <<< "${input}" 2> /dev/null || true)"
-prompt="$(jq -r '.prompt // ""' <<< "${input}" 2> /dev/null || true)"
+session="$(dybatpho::json_get "${input}" '.session_id // ""' 2> /dev/null || true)"
+cwd="$(dybatpho::json_get "${input}" '.cwd // ""' 2> /dev/null || true)"
+prompt="$(dybatpho::json_get "${input}" '.prompt // ""' 2> /dev/null || true)"
 session="${session//[^A-Za-z0-9_-]/}"
 [[ -n "${session}" && "${#prompt}" -ge 20 ]] || exit 0
 [[ "${cwd}/" != "${vault}/"* ]] || exit 0
 
 # Once per session: later prompts follow the conversation, not a fresh topic.
 marks="${XDG_RUNTIME_DIR:-/tmp}/dybrain-recall"
-mkdir -p "${marks}" 2> /dev/null || exit 0
-[[ ! -e "${marks}/${session}" ]] || exit 0
+(dybatpho::ensure_dir "${marks}") &> /dev/null || exit 0
+! dybatpho::is exist "${marks}/${session}" || exit 0
 : > "${marks}/${session}"
 
 hits="$(timeout 20 uv run --quiet --script "${embed}" query --json -k 5 -- "${prompt:0:1000}" 2> /dev/null || true)"
@@ -46,4 +48,5 @@ context="$(jq -r --argjson min "${DYBRAIN_RECALL_MIN:-0.45}" '
       + (map("- \(.path) (\(.score)): \(.line)") | join("\n"))
     end' <<< "${hits}" 2> /dev/null || true)"
 [[ -n "${context}" ]] || exit 0
-jq -cn --arg c "${context}" '{hookSpecificOutput: {hookEventName: "UserPromptSubmit", additionalContext: $c}}'
+output="$(dybatpho::json_object hookEventName UserPromptSubmit additionalContext "${context}")"
+dybatpho::json_object hookSpecificOutput:json "${output}"

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file verify-on-stop.sh
 # @brief Stop hook asking Claude to verify a change it has not checked yet
 # @description Read the Stop hook input on stdin and look at the current turn
@@ -8,15 +8,18 @@
 # as the machine-wide verification rules require. A second stop in the same
 # chain (`stop_hook_active`) always passes, so the hook can never loop, and
 # any failure to read the transcript passes too.
-set -euo pipefail
-((BASH_VERSINFO[0] * 100 + BASH_VERSINFO[1] >= 404)) || exit 0
-shopt -s inherit_errexit
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json || {
+  # Fail open, but say so: the check is off until dybatpho loads again.
+  printf 'verify-on-stop: dybatpho failed to load, skipping the check\n' >&2
+  exit 0
+}
+dybatpho::register_common_handlers
 
 input="$(cat)"
-active="$(jq -r '.stop_hook_active // false' <<< "${input}" 2> /dev/null || echo true)"
+active="$(dybatpho::json_get "${input}" '.stop_hook_active // false' 2> /dev/null || echo true)"
 [[ "${active}" != "true" ]] || exit 0
-transcript="$(jq -r '.transcript_path // ""' <<< "${input}" 2> /dev/null || true)"
-[[ -n "${transcript}" && -f "${transcript}" ]] || exit 0
+transcript="$(dybatpho::json_get "${input}" '.transcript_path // ""' 2> /dev/null || true)"
+[[ -n "${transcript}" ]] && dybatpho::is file "${transcript}" || exit 0
 
 # Commands that count as checking the work: test runners, linters, type
 # checkers, pre-commit, and the chezmoi render and diff previews.
@@ -48,9 +51,7 @@ verdict="$(tail -n 4000 -- "${transcript}" | jq -rn --arg re "${checks}" '
     else "" end' 2> /dev/null || true)"
 [[ -n "${verdict}" ]] || exit 0
 
-jq -cn --arg f "${verdict}" '{
-  decision: "block",
-  reason: ("You changed " + $f + " after the last test or lint run of this turn. "
-    + "Run the checks that cover it now, or say plainly in your reply that the "
-    + "change is unverified and what the user has to run to confirm it.")
-}'
+reason="You changed ${verdict} after the last test or lint run of this turn. "
+reason+="Run the checks that cover it now, or say plainly in your reply that the "
+reason+="change is unverified and what the user has to run to confirm it."
+dybatpho::json_object decision block reason "${reason}"

@@ -1,0 +1,47 @@
+#!{{ .bash }}
+# @file worktree-create.sh
+# @brief WorktreeCreate hook placing worktrees in <repo>/.worktrees/
+# @description Place worktrees in `<repo>/.worktrees/<name>` instead of the built-in
+# `<repo>/.claude/worktrees/<name>`. Claude Code reads the last line of stdout
+# as the worktree path, so every other message goes to stderr.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json || exit 1
+dybatpho::register_common_handlers
+# A DRY_RUN exported for another tool must not turn this hook's writes into no-ops.
+unset DRY_RUN DYBATPHO_DRY_RUN
+
+input="$(cat)"
+name="$(dybatpho::json_get "${input}" '.name')"
+cwd="$(dybatpho::json_get "${input}" '.cwd')"
+
+if [[ -z "${name}" || "${name}" == "null" ]]; then
+  dybatpho::die "worktree-create: no name in hook input"
+fi
+
+# Resolve the main checkout, not the current worktree: --git-common-dir points
+# at the shared .git directory even when invoked from inside a linked worktree.
+common_dir="$(git -C "${cwd}" rev-parse --path-format=absolute --git-common-dir)"
+root="$(dybatpho::path_dirname "${common_dir}")"
+
+dir="${root}/.worktrees/${name}"
+branch="worktree-${name}"
+
+# Reusing a name reopens the existing worktree, matching the built-in behavior.
+if dybatpho::is dir "${dir}"; then
+  dybatpho::info "worktree-create: reusing ${dir}"
+  printf '%s\n' "${dir}"
+  exit 0
+fi
+
+dybatpho::ensure_dir "${root}/.worktrees" > /dev/null
+
+if git -C "${root}" show-ref --verify --quiet "refs/heads/${branch}"; then
+  git -C "${root}" worktree add "${dir}" "${branch}" >&2
+else
+  # Match the default "fresh" base: the remote's default branch, falling back
+  # to local HEAD when there is no remote or it has not been fetched.
+  base="$(git -C "${root}" rev-parse --verify --quiet origin/HEAD || true)"
+  [[ -n "${base}" ]] || base=HEAD
+  git -C "${root}" worktree add -b "${branch}" "${dir}" "${base}" >&2
+fi
+
+printf '%s\n' "${dir}"

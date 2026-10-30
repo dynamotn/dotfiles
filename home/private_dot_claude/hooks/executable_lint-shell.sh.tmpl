@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!{{ .bash }}
 # @file lint-shell.sh
 # @brief PostToolUse hook running dyshellint on a shell script Claude just wrote
 # @description Read the Edit/Write hook input on stdin and, when the file is a
@@ -9,15 +9,13 @@
 # rewriting the rest of the file. Anything that is not a lintable shell
 # script, or a machine without dyshellint, passes silently: a hook must never
 # block an unrelated edit.
-set -euo pipefail
-# inherit_errexit needs Bash 4.4; on an older Bash the hook passes rather than
-# fail every edit with a confusing error.
-((BASH_VERSINFO[0] * 100 + BASH_VERSINFO[1] >= 404)) || exit 0
-shopt -s inherit_errexit
+# On a Bash too old for dybatpho the hook passes rather than fail every edit.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json || exit 0
+dybatpho::register_common_handlers
 
-command -v dyshellint &> /dev/null || exit 0
-file="$(jq -r '.tool_input.file_path // ""')"
-[[ -n "${file}" && -f "${file}" ]] || exit 0
+dybatpho::is command dyshellint || exit 0
+file="$(dybatpho::json_query - '.tool_input.file_path // ""' -r)"
+[[ -n "${file}" ]] && dybatpho::is file "${file}" || exit 0
 
 case "${file}" in
   # Go templates are not valid shell until chezmoi renders them.
@@ -36,21 +34,22 @@ esac
 # linting at once drove this machine out of memory. A lint that cannot get
 # the lock in time is skipped, since a hook must never block the edit, but the
 # model is told so it does not read the silence as a clean lint.
-if command -v flock &> /dev/null; then
+if dybatpho::is command flock; then
   lock="${CLAUDE_LINT_SHELL_LOCK:-${XDG_RUNTIME_DIR:-/tmp}/claude-lint-shell.lock}"
   # An unwritable lock path (no runtime dir in a container) must not fail the hook.
   { exec 9>> "${lock}"; } 2> /dev/null || exit 0
   if ! flock -w "${CLAUDE_LINT_SHELL_WAIT:-30}" 9; then
-    jq -cn --arg f "${file}" '{hookSpecificOutput: {hookEventName: "PostToolUse",
-      additionalContext: ("dyshellint skipped on \($f): another session holds the lint lock;"
-        + " run dyshellint on it before reporting done")}}'
+    context="dyshellint skipped on ${file}: another session holds the lint lock;"
+    context+=" run dyshellint on it before reporting done"
+    output="$(dybatpho::json_object hookEventName PostToolUse additionalContext "${context}")"
+    dybatpho::json_object hookSpecificOutput:json "${output}"
     exit 0
   fi
 fi
 
 # Warnings count too: the machine rules say to fix whatever dyshellint reports.
 args=(-warnings-as-errors)
-name="$(basename -- "${file}")"
+name="$(dybatpho::path_basename "${file}")"
 # A chezmoi `executable_` source is stored without the bit; apply sets it.
 [[ "${name}" != executable_* ]] || args+=(-exclude-rules BSG037)
 
@@ -62,7 +61,7 @@ fi
 # `path:line:col: `, so a finding that only moved lines still matches, and
 # each key is numbered by occurrence, so a second copy of an old finding
 # counts as new.
-dir="$(dirname -- "${file}")"
+dir="$(dybatpho::path_dirname "${file}")"
 # The edited file may sit in a repository nobody vetted, whose own config
 # could name a program for git to run. Read only objects (no index, so no
 # fsmonitor), with the config hooks that execute turned off.

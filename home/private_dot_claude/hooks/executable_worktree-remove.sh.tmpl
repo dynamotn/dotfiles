@@ -1,0 +1,37 @@
+#!{{ .bash }}
+# @file worktree-remove.sh
+# @brief WorktreeRemove hook, counterpart to worktree-create.sh
+# @description Remove the worktree created by `worktree-create.sh`. Configuring a
+# WorktreeCreate hook replaces the built-in git cleanup too, so the removal has
+# to happen here.
+#
+# Exiting non-zero while the directory still exists makes removal fail, so
+# fall back to a plain delete and always report success.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules json safety \
+  || exit 0
+dybatpho::register_common_handlers
+# A DRY_RUN exported for another tool must not turn this hook's writes into no-ops.
+unset DRY_RUN DYBATPHO_DRY_RUN
+
+input="$(cat)"
+path="$(dybatpho::json_get "${input}" '.worktree_path' 2> /dev/null)" || exit 0
+
+if [[ -z "${path}" || "${path}" == "null" ]] || ! dybatpho::is dir "${path}"; then
+  exit 0
+fi
+
+# Run git from the main checkout: removing a worktree from inside it fails.
+common_dir="$(git -C "${path}" rev-parse --path-format=absolute --git-common-dir 2> /dev/null || true)"
+
+# safe_rm refuses `/`, the home directory and other protected paths; a
+# refusal ends only its subshell, so the hook still exits 0.
+if [[ -n "${common_dir}" ]]; then
+  root="$(dybatpho::path_dirname "${common_dir}")"
+  git -C "${root}" worktree remove --force "${path}" >&2 \
+    || (dybatpho::safe_rm --force --recursive -- "${path}") >&2 || true
+  git -C "${root}" worktree prune >&2 || true
+else
+  (dybatpho::safe_rm --force --recursive -- "${path}") >&2 || true
+fi
+
+exit 0
