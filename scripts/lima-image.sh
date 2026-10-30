@@ -54,7 +54,7 @@ function _main {
   machine="$(uname -m)"
   [[ "${machine}" == "arm64" ]] || dybatpho::die "Only Apple silicon hosts build aarch64 images"
   [[ -z "${LIMA_INSTANCE:-}" ]] || dybatpho::die "Run this on the host, not inside a Lima VM"
-  mkdir -p "${OUTPUT_DIR}"
+  dybatpho::ensure_dir "${OUTPUT_DIR}" > /dev/null
 
   # A builder left over from an earlier run would keep its old mounts
   instances="$(limactl list --quiet 2> /dev/null)"

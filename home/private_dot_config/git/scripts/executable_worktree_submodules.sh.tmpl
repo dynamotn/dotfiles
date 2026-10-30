@@ -61,7 +61,7 @@ function _main {
   # Same lookup as the `wt` alias: a submodule's common dir has core.worktree.
   local main
   main="$(git -C "${common_dir}" rev-parse --path-format=absolute --show-toplevel 2> /dev/null || true)"
-  [[ -n "${main}" ]] || main="$(dirname "${common_dir}")"
+  [[ -n "${main}" ]] || main="$(dybatpho::path_dirname "${common_dir}")"
 
   _init_all "${PWD}" "${main}"
 }

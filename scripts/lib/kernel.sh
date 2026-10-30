@@ -46,11 +46,11 @@ function kernel::check_tree {
   marker="$(dybatpho::path_join "${source_dir}" "dist-kernel")"
   main="$(dybatpho::path_join "${source_dir}" "init" "main.c")"
   if [[ -e "${marker}" ]]; then
-    printf '%s is the module tree of a gentoo-kernel dist kernel\n' "${source_dir}" >&2
+    dybatpho::error "${source_dir} is the module tree of a gentoo-kernel dist kernel"
     return 1
   fi
-  if [[ ! -f "${main}" ]]; then
-    printf '%s holds no kernel sources\n' "${source_dir}" >&2
+  if ! dybatpho::is file "${main}"; then
+    dybatpho::error "${source_dir} holds no kernel sources"
     return 1
   fi
 }

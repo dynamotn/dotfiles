@@ -22,6 +22,8 @@ dybatpho::register_common_handlers
 {{- end }}
 {{- if eq .kind "container" }}
 if dybatpho::is file "/run/secrets/age_passphrases"; then
+  # Not dybatpho::privilege_run: it honors DRY_RUN, which would put its
+  # "DRY RUN" line in place of the passphrases.
   age_passphrases=$(sudo cat /run/secrets/age_passphrases)
 else
   dybatpho::die "No age passphrase found"

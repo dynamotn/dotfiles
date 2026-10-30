@@ -45,9 +45,10 @@ function _spec_main {
 # @stdout The TAP output of the file
 #######################################
 function _run_bats_file {
-  local file
+  local file base
   dybatpho::expect_args file -- "$@"
-  printf '# %s\n' "$(basename "${file}")"
+  base="$(dybatpho::path_basename "${file}")"
+  printf '# %s\n' "${base}"
   "${BATS_CMD}" --print-output-on-failure --verbose-run "${file}"
 }
 

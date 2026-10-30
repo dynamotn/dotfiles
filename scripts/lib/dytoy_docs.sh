@@ -35,7 +35,7 @@ function dytoy_docs::scan {
 function dytoy_docs::blocks {
   dybatpho::expect_args file -- "$@"
   local file="$1" base body
-  base="$(basename "${file}")"
+  base="$(dybatpho::path_basename "${file}")"
   body="$(dytoy_docs::scan blocks "${file}")" \
     || dybatpho::die "${file}: doc block is not closed with '*/ -}}'"
   [[ -n "${body}" ]] || return 0
@@ -77,7 +77,7 @@ function dytoy_docs::definition_rows {
       /^name:/ { value = $0; sub(/^name:[ \t]*/, "", value); sub(/[ \t]+$/, "", value); if (value == name) found = 1 }
       END { exit !found }
     ' <<< "${text}" \
-      || dybatpho::die "$(basename "${file}"): doc name '${name}' matches no name: line"
+      || dybatpho::die "$(dybatpho::path_basename "${file}"): doc name '${name}' matches no name: line"
   done <<< "${names}"
   URL="${url}" yq 'with(select(.url == null and strenv(URL) != ""); .url = strenv(URL))' <<< "${body}"
 }
@@ -126,7 +126,7 @@ function dytoy_docs::collect {
   for file in "${dir}"/*.yaml "${dir}"/*.yaml.tmpl "${extra}"; do
     [[ -f "${file}" ]] || continue
     if [[ "${file}" == "${extra}" ]]; then
-      rows="$(BASE="$(basename "${extra}")" yq '.[] | .file = strenv(BASE) | split_doc' "${extra}")"
+      rows="$(BASE="$(dybatpho::path_basename "${extra}")" yq '.[] | .file = strenv(BASE) | split_doc' "${extra}")"
     else
       rows="$(dytoy_docs::definition_rows "${file}")" || return 1
     fi

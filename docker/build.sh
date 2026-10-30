@@ -106,7 +106,7 @@ function _main {
   # pages, and trust other hosts on first use: the build has the secrets
   # mounted, so a swapped github.com or gitlab.com must not be accepted.
   local known_hosts
-  known_hosts="$(realpath "$(dirname "${BASH_SOURCE[0]}")")/known_hosts"
+  known_hosts="$(realpath "$(dybatpho::path_dirname "${BASH_SOURCE[0]}")")/known_hosts"
   export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=accept-new -oUserKnownHostsFile=${known_hosts}"
 
   # An image build does not always look like a container from the inside:

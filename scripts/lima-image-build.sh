@@ -44,7 +44,7 @@ function _spec_main {
 # @noargs
 #######################################
 function _cleanup {
-  if [[ -d "${MNT}" ]] && mountpoint -q "${MNT}"; then
+  if dybatpho::is dir "${MNT}" && mountpoint -q "${MNT}"; then
     umount -R "${MNT}" || umount -R -l "${MNT}" || true
   fi
   if [[ -n "${LOOP}" ]]; then
@@ -67,7 +67,7 @@ function _prepare_host {
     gdisk dosfstools e2fsprogs qemu-utils curl ca-certificates zstd xz-utils
 
   dybatpho::header "Trusting the Arch Linux ARM keyring"
-  mkdir -p /usr/share/keyrings
+  dybatpho::ensure_dir /usr/share/keyrings > /dev/null
   for file in archlinuxarm.gpg archlinuxarm-trusted archlinuxarm-revoked; do
     curl -fsSL --connect-timeout 10 --max-time 120 "${ALARM_KEYRING_URL}/${file}" -o "/usr/share/keyrings/${file}"
   done
@@ -75,7 +75,7 @@ function _prepare_host {
   pacman-key --populate archlinuxarm
 
   # A private config keeps the builder's own /etc/pacman.conf untouched
-  mkdir -p "${WORK_DIR}"
+  dybatpho::ensure_dir "${WORK_DIR}" > /dev/null
   printf 'Server = %s\n' "${ALARM_MIRROR}" > "${WORK_DIR}/mirrorlist"
   cat > "${WORK_DIR}/pacman.conf" << EOF
 [options]
@@ -114,9 +114,9 @@ function _make_disk {
   udevadm settle
   mkfs.fat -F32 -n ESP "${LOOP}p1"
   mkfs.ext4 -q -L root "${LOOP}p2"
-  mkdir -p "${MNT}"
+  dybatpho::ensure_dir "${MNT}" > /dev/null
   mount "${LOOP}p2" "${MNT}"
-  mkdir -p "${MNT}/boot"
+  dybatpho::ensure_dir "${MNT}/boot" > /dev/null
   mount "${LOOP}p1" "${MNT}/boot"
 }
 
@@ -140,7 +140,7 @@ function _install_system {
 
   # vz exposes the serial port as virtio-console, so the log reaches
   # ~/.lima/<vm>/serialv.log only on hvc0
-  mkdir -p "${MNT}/boot/loader/entries"
+  dybatpho::ensure_dir "${MNT}/boot/loader/entries" > /dev/null
   printf 'default arch.conf\ntimeout 0\n' > "${MNT}/boot/loader/loader.conf"
   cat > "${MNT}/boot/loader/entries/arch.conf" << EOF
 title   Arch Linux ARM
@@ -195,7 +195,7 @@ EOF
 # @arg $2 string Path of the qcow2 to write
 #######################################
 function _finalize {
-  local raw qcow2
+  local raw qcow2 out_dir
   dybatpho::expect_args raw qcow2 -- "$@"
   dybatpho::header "Finalizing"
   rm -f -- "${MNT:?}/etc/machine-id"
@@ -207,7 +207,8 @@ function _finalize {
   LOOP=""
 
   dybatpho::header "Writing ${qcow2}"
-  mkdir -p "$(dirname "${qcow2}")"
+  out_dir="$(dybatpho::path_dirname "${qcow2}")"
+  dybatpho::ensure_dir "${out_dir}" > /dev/null
   qemu-img convert -c -f raw -O qcow2 "${raw}" "${qcow2}"
   rm -f -- "${raw}"
 }
@@ -220,8 +221,8 @@ function _finalize {
 function _main {
   local name raw machine qcow2
   ((EUID == 0)) || dybatpho::die "Run as root inside the builder VM"
-  machine="$(uname -m)"
-  [[ "${machine}" == "aarch64" ]] || dybatpho::die "The builder must be aarch64"
+  machine="$(dybatpho::goarch)"
+  [[ "${machine}" == "arm64" ]] || dybatpho::die "The builder must be aarch64"
   dybatpho::is file /etc/debian_version || dybatpho::die "The builder must be Debian or Ubuntu"
 
   name="Arch-Linux-aarch64-cloudimg-$(date -u '+%Y%m%d')"
