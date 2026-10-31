@@ -53,7 +53,6 @@ PROMPT_ENTERPRISE="Which company's secrets do you want to decrypt"
 # @description Spec of setup.sh
 # @noargs
 #######################################
-# shellcheck disable=SC2154
 function _spec_main {
   dybatpho::opts::setup "Setup your machine from dotfiles" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" \

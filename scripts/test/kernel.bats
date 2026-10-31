@@ -257,7 +257,6 @@ make -C ${tree} savedefconfig"
   chmod 555 "${base_dir}"
   printf '#!/usr/bin/env bash\nprintf "CONFIG_X=y\\n" > "$2/defconfig"\n' > "${HOME}/.local/bin/make"
   chmod +x "${HOME}/.local/bin/make"
-  # shellcheck disable=SC2329 # invoked by kernel::run_in_tree
   function dybatpho::privilege_run {
     shift
     printf 'privileged:%s\n' "$*"

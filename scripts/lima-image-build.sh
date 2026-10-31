@@ -100,7 +100,6 @@ EOF
 #   so cloud-init's growpart can extend it to the Lima disk size
 # @arg $1 string Path of the raw image
 #######################################
-# dyshellint disable=SC2154 IMAGE_SIZE is assigned by dybatpho::opts from _spec_main
 function _make_disk {
   local raw
   dybatpho::expect_args raw -- "$@"
@@ -217,7 +216,6 @@ function _finalize {
 # @description Main function
 # @noargs
 #######################################
-# dyshellint disable=SC2154 OUTPUT_DIR and IMAGE_SIZE are assigned by dybatpho::opts from _spec_main
 function _main {
   local name raw machine qcow2
   ((EUID == 0)) || dybatpho::die "Run as root inside the builder VM"

@@ -104,7 +104,6 @@ DYTOY_TUI_STYLE_BRAND="" DYTOY_TUI_STYLE_ROW_BG="" DYTOY_TUI_STYLE_TEXT=""
 DYTOY_TUI_STYLE_STRONG="" DYTOY_TUI_STYLE_RUN="" DYTOY_TUI_STYLE_KEY=""
 DYTOY_TUI_STYLE_VALUE="" DYTOY_TUI_STYLE_GAUGE_EMPTY="" DYTOY_TUI_STYLE_BADGE=""
 # `true` once a picked tool failed or was stopped, read by the caller.
-# dyshellint disable=SC2034 read by the dytoy executable that sources this file
 DYTOY_TUI_FAILED=false
 
 #######################################

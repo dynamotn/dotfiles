@@ -408,7 +408,6 @@ YAML
   _write_profile_config "${cfg}" "linux-arch" "pc" "systemd" "W" "A" "H"
   _render_config "${cfg}" "${out}" || fail "chezmoi could not render config.yaml.tmpl: $(< "${out}.err")"
   registry="$(yq -o=json '.registry' "${out}")"
-  # shellcheck disable=SC2016 # a jq program
   bad="$(jq -r '([.languages, .infra, .presets] | map(keys) | add) as $k
     | .domains | to_entries[] | .key as $d | .value.presets[] | select(IN($k[]) | not) | "\($d): \(.)"' \
     <<< "${registry}")"

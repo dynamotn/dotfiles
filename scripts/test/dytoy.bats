@@ -363,7 +363,6 @@ EOF
   METHOD='binary'
   TOOL='@empty'
   local output_file="${BATS_TEST_TMPDIR}/tools"
-  # shellcheck disable=SC2329 # invoked by dytoy::iterate
   function install_tool { printf '%s\n' "$1" >> "${output_file}"; }
 
   run dytoy::iterate install_tool
@@ -790,13 +789,9 @@ EOF
 - name: bare
   method: os
 EOF
-  # shellcheck disable=SC2329 # stand-ins called by the section installer
   function misc::install_tool { printf 'store:%s\n' "$1"; }
-  # shellcheck disable=SC2329
   function package_manager::init_fdroid { printf 'init\n'; }
-  # shellcheck disable=SC2329
   function dytoy::run_section_hook { printf 'hook:%s:%s\n' "$2" "$3"; }
-  # shellcheck disable=SC2329
   function dytoy::install_fdroid_package {
     local name
     name="$(dybatpho::json_get "$1" .name)"
@@ -973,7 +968,6 @@ EOF
 
 @test "dytoy::iterate installs nothing when tools.yaml is missing" {
   export TOOL='@empty' METHOD='os'
-  # shellcheck disable=SC2329 # invoked by dytoy::iterate
   function _install { printf 'install:%s\n' "$1"; }
   run dytoy::iterate _install
   assert_success

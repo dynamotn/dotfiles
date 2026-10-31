@@ -298,7 +298,6 @@ EOF
 
 @test "setup.sh stops with a clear message on a Bash older than 4.3" {
   [[ -x /bin/bash ]] || skip "no /bin/bash"
-  # shellcheck disable=SC2016
   /bin/bash -c '((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 3)))' \
     || skip "/bin/bash is already 4.3 or newer"
 

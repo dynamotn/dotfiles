@@ -56,7 +56,6 @@ function _run_bats_file {
 # @description Main function
 # @noargs
 #######################################
-# dyshellint disable=SC2154 the options are assigned by dybatpho::opts from _spec_main
 function _main {
   if [[ ! -x "${BATS_CMD}" ]]; then
     if dybatpho::is command bats; then

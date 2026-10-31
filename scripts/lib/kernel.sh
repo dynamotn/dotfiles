@@ -6,7 +6,6 @@
 # fragments ask for. `make olddefconfig` drops an option silently when one of
 # its dependencies is missing; checking afterwards turns that into an error
 # instead of a kernel built without it.
-# shellcheck disable=2154
 dybatpho::load privilege
 
 #######################################

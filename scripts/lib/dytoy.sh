@@ -478,7 +478,6 @@ function dytoy::iterate {
 # @env METHOD string Method being run
 # @internal
 #######################################
-# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function __dytoy_install_one {
   # Prefixed, as the installer run here would otherwise see these locals.
   local __dytoy_one_command __dytoy_one_tool
@@ -931,7 +930,6 @@ function __dytoy_install_store_section {
 # @env DYTOY_OS string Key of this OS in a tool's YAML, such as `gentoo`
 # @env DYTOY_INIT_SYSTEM string Init system to enable services with
 #######################################
-# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function dytoy::install_os_tool {
   local name
   dybatpho::expect_args name -- "$@"
@@ -966,7 +964,6 @@ function dytoy::install_os_tool {
 # @arg $1 string Name of tool
 # @arg $2 string "github" or "gitlab"
 #######################################
-# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function dytoy::install_release {
   local name type
   dybatpho::expect_args name type -- "$@"
@@ -1023,7 +1020,6 @@ function dytoy::install_release {
 # @description Install a tool from a forge release
 # @arg $1 string Name of tool
 #######################################
-# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function dytoy::install_binary_tool {
   local name
   dybatpho::expect_args name -- "$@"
@@ -1044,7 +1040,6 @@ function dytoy::install_binary_tool {
 # @arg $1 string Name of tool
 # @env DYTOY_OS string `termux` runs mise under proot
 #######################################
-# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function dytoy::install_mise_tool {
   local name
   dybatpho::expect_args name -- "$@"
@@ -1081,7 +1076,6 @@ function dytoy::install_mise_tool {
 # @description Install a tool by running the shell commands it declares
 # @arg $1 string Name of tool
 #######################################
-# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function dytoy::install_shell_tool {
   local name
   dybatpho::expect_args name -- "$@"
@@ -1108,7 +1102,6 @@ function dytoy::install_shell_tool {
 # @env DYTOY_OS_NAME string Name of this OS, as the os method reports it
 # @env DYTOY_OSID string Chezmoi's ID of this OS, named when it has no package manager
 #######################################
-# dyshellint disable=SC2310 the dytoy predicates are meant to be tested here
 function dytoy::run_method {
   dybatpho::expect_args METHOD -- "$@"
   case "${METHOD}" in

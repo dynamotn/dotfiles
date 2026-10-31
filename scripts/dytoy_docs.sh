@@ -30,7 +30,6 @@ function _spec_main {
 # @description Main function
 # @noargs
 #######################################
-# dyshellint disable=SC2154 CHECK is assigned by dybatpho::opts from _spec_main
 function _main {
   local root doc json generated target changed=0
   root="${DYTOY_DOCS_ROOT:-$(realpath "${SCRIPT_DIR}/..")}"

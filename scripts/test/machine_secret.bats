@@ -48,7 +48,6 @@ EOF
 }
 
 function render_secret {
-  # shellcheck disable=SC2016
   run --separate-stderr chezmoi execute-template --config "${CONFIG}" --source "${SANDBOX}/home" \
     '{{ includeTemplate "machine/secret.tmpl" . }}'
 }

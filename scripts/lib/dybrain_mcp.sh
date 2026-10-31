@@ -133,7 +133,6 @@ function dybrain_mcp::bridge {
   local line reply id
   while IFS= read -r line || [[ -n "${line}" ]]; do
     [[ -n "${line//[[:space:]]/}" ]] || continue
-    # shellcheck disable=SC2310 # a failed relay is answered below
     reply="$(dybrain_mcp::relay "${line}" "${script}" "${wait}")" || {
       id="$(jq -c 'select(type == "object" and has("id")) | .id' <<< "${line}" 2> /dev/null)" || id=""
       [[ -n "${id}" ]] || continue
@@ -155,7 +154,6 @@ function dybrain_mcp::main {
   dybatpho::expect_args script -- "$@"
   local wait="${DYBRAIN_MCP_WAIT:-10}" state_dir
   state_dir="$(dybrain_mcp::state_dir)"
-  # shellcheck disable=SC2310 # the fallback below handles a failed start
   if dybatpho::is command curl && dybatpho::is command jq \
     && mcp_share::ensure_server "${state_dir}" "${wait}" dybrain_mcp::probe \
       dybrain_mcp::serve "${script}"; then

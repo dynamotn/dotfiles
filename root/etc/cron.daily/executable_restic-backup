@@ -24,7 +24,6 @@ function _notify_failure {
 # @arg $1 string Path, not followed if a symlink
 # @stdout "<uid> <mode>", e.g. "0 600"
 function _owner_mode {
-  # dyshellint disable=BSG083 Linux only: root/etc is applied to Linux machines alone
   stat --format '%u %a' "$1"
 }
 

@@ -37,7 +37,6 @@ function _spec_main {
 # @description Delete the builder VM, unless asked to keep it
 # @noargs
 #######################################
-# dyshellint disable=SC2154 BUILDER and KEEP_BUILDER are assigned by dybatpho::opts from _spec_main
 function _remove_builder {
   [[ "${KEEP_BUILDER}" == "true" ]] && return 0
   limactl delete --force "${BUILDER}" &> /dev/null || true
@@ -47,7 +46,6 @@ function _remove_builder {
 # @description Main function
 # @noargs
 #######################################
-# dyshellint disable=SC2154 OUTPUT_DIR and BUILDER are assigned by dybatpho::opts from _spec_main
 function _main {
   local name image latest machine instances
   dybatpho::require "limactl"

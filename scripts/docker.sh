@@ -22,7 +22,6 @@ SECRETS=()
 # @description Spec of docker.sh
 # @noargs
 #######################################
-# shellcheck disable=SC2154
 function _spec_main {
   dybatpho::opts::setup "Build a toolbox container image" MAIN_ARGS action:"_main"
   dybatpho::opts::param "Log level" LOG_LEVEL --log-level -l init:="info" \
@@ -110,7 +109,6 @@ function _configure_enterprise {
 # @env MAIN_ARGS Positional arguments; the first names the image to build
 # @noargs
 #######################################
-# dyshellint disable=SC2154 MAIN_ARGS is assigned by dybatpho::opts from _spec_main
 function _main {
   local target bin_dir
   ((${#MAIN_ARGS[@]} > 0)) \

@@ -30,7 +30,6 @@ function _systemd_argv {
 # The argv /etc/init.d/earlyoom gets from $1: the file is sourced by sh, and
 # OpenRC evals command_args="${EARLYOOM_ARGS}".
 function _openrc_argv {
-  # dyshellint disable=SC2016 the inner script expands in sh, not here
   sh -c '. "$1" && eval "set -- ${EARLYOOM_ARGS}" && printf "%s\n" "$@"' sh "${1}"
 }
 

@@ -7,8 +7,6 @@
 # install the kernel. Out-of-tree modules are rebuilt before `make install`,
 # so that GRUB never offers a kernel without its NVIDIA driver. The previous
 # kernel is left in place as a fallback.
-# The upper-case options are assigned by dybatpho::opts from _spec_main.
-# shellcheck disable=SC2153,SC2154
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 # The library lives in a submodule, which a fresh clone or a new worktree
 # does not populate. Fetch it before sourcing, or nothing below is defined.
@@ -124,7 +122,6 @@ function _main {
   kernel::clean_stale_tools "${SOURCE_DIR}"
   kernel::run_in_tree "${SOURCE_DIR}" -- make -C "${SOURCE_DIR}" -j "${JOBS}"
   # Strip only the DWARF: the BTF sections that bcc and sched_ext read stay.
-  # dyshellint disable=BSG035 modules_install writes to /lib/modules
   dybatpho::privilege_run -- make -C "${SOURCE_DIR}" INSTALL_MOD_STRIP=1 modules_install
   _install
 }
@@ -149,13 +146,11 @@ function _install {
     # from a slow one.
     local -a ask=()
     dybatpho::is_tty stdin || ask=(--ask=n)
-    # dyshellint disable=BSG035 emerge writes to the system package database
     dybatpho::privilege_run -- emerge ${ask[@]+"${ask[@]}"} --oneshot @module-rebuild
   fi
 
   dybatpho::header "Install kernel"
   # installkernel generates the initramfs with dracut and updates GRUB.
-  # dyshellint disable=BSG035 make install writes to /boot
   dybatpho::privilege_run -- make -C "${SOURCE_DIR}" install
   release="$(make -s -C "${SOURCE_DIR}" kernelrelease)"
   dybatpho::success "Kernel ${release} installed; the previous one stays in GRUB"

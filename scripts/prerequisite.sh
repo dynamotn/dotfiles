@@ -1,7 +1,7 @@
 #!/bin/sh
 # Checked as dash, the strictest target sh that has `local` (see below).
 # shellcheck shell=dash
-# dyshellint disable=BSG030,BSG031,BSG001,SC2292 POSIX sh bootstrap: it installs bash, so cannot need it or dybatpho
+# dyshellint disable=BSG030,BSG031,BSG001 POSIX sh bootstrap: it installs bash, so cannot need it or dybatpho
 # @file prerequisite.sh
 # @brief Install prerequisite packages for chezmoi and dotfiles setup
 # @description Install what `scripts/setup.sh` cannot install itself: the
@@ -48,7 +48,6 @@ _detect_sudo() {
 #######################################
 _as_root() {
   if [ -n "${SUDO}" ]; then
-    # dyshellint disable=BSG035 installing system packages is the point of this script
     "${SUDO}" "$@"
   else
     "$@"

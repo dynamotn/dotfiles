@@ -587,9 +587,7 @@ SH
 }
 
 @test "package_manager::install_via_dmg fails and unmounts when the copy fails" {
-  # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
   function dybatpho::curl_download { :; }
-  # shellcheck disable=SC2329 # invoked by package_manager::install_via_dmg
   function dybatpho::privilege_run {
     shift
     printf 'run:%s\n' "$*"

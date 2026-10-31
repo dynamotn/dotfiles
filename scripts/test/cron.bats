@@ -1,5 +1,4 @@
 # dyshellint disable=SC2154 DOTFILES_DIR and BATS_TEST_TMPDIR come from bats and test_helper
-# dyshellint disable=SC1091 the library path is only known once test_helper ran
 setup() {
   load test_helper
   setup_dotfiles_test_env
