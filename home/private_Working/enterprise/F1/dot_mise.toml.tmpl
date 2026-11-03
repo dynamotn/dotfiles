@@ -6,6 +6,3 @@
 {{- if ne .kind "container" }}
 {{-   template "mise/env_proxy.toml.tmpl" $top }}
 {{- end }}
-{{- if eq .place "office" }}
-{{-   template "mise/env_ssl.toml" $top }}
-{{- end }}

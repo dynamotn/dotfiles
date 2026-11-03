@@ -9,4 +9,4 @@
 }}
 {{-   template "mise/env_jira.toml.tmpl" $top }}
 {{- end }}
-JIRA_CONFIG_FILE = "{{ "{{config_root}}" }}/.jira/config.yaml"
+{{- template "mise/env_ai.toml.tmpl" . }}

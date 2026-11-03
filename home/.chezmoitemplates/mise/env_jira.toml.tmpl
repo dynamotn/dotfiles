@@ -6,6 +6,7 @@
 {{-   $jiraSecret = printf "../secrets/data/enterprise-%s/jira.yaml.age" .enterprise.name | join .chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-   $scope = .enterprise.scope }}
 {{- end }}
+JIRA_CONFIG_FILE = "{{ "{{config_root}}" }}/.jira/config.yaml"
 {{- range $jiraSecret.servers }}
 {{-   if eq .scope $scope }}
 JIRA_API_TOKEN = {{ .token | quote }}

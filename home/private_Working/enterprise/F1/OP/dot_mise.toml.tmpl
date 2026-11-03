@@ -9,6 +9,4 @@
 }}
 {{-   template "mise/env_jira.toml.tmpl" $top }}
 {{- end }}
-KUBECONFIG = "{{ "{{config_root}}" }}/.kube/config"
-DOCKER_CONFIG = "{{ "{{config_root}}" }}/.docker"
-JIRA_CONFIG_FILE = "{{ "{{config_root}}" }}/.jira/config.yaml"
+{{- template "mise/env_container.toml.tmpl" . }}
