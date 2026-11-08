@@ -87,7 +87,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y age ripgrep
 
       - name: Cache cargo binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cargo/bin
           key: cargo-bin-yaml-schema-${{ env.YAML_SCHEMA_VERSION }}-${{ runner.os }}
