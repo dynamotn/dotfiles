@@ -12,9 +12,10 @@ changes, a commit, a branch, or two files.
   - inside kitty (`$KITTY_LISTEN_ON` is set):
     `kitty @ launch --type=tab --cwd=<repo> hunk diff`
   - anywhere else, give the user the command to run themselves.
-- Every agent's stop hook runs `dyai-hunk`, which opens `hunk diff --watch`
-  for a changed working tree, once per checkout. Do not open a second window
-  for the working tree; open one only for anything else.
+- Every agent's stop hook runs `dyai-hunk`, which opens `hunk diff` for a
+  changed working tree, once per checkout (not `--watch`: it leaks memory).
+  Do not open a second window for the working tree; open one only for
+  anything else.
 - To explain a non-obvious edit before stopping, write hunk's agent-context
   JSON to `$(git rev-parse --git-path dyai-hunk.json)`, replacing what an
   earlier task left there: `{"summary": …, "files": [{"path": …,
