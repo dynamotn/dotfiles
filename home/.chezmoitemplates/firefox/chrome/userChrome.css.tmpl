@@ -1,5 +1,7 @@
 @import "css/sidebar.css";
 {{- if ne .browser "Z" }}
 @import "lepton/css/leptonChrome.css";
-@import "plain_css/tabline.css";
+/* MrOtherGuy/firefox-csshacks@a6fa8ba5 */
+@import "plain_css/hide_tabs_toolbar_v2.css";
+@import "plain_css/urlbar_container_color_border.css";
 {{- end }}
