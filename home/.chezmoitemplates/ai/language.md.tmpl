@@ -2,6 +2,17 @@
 
 - Reply in the language the user wrote in: a Vietnamese prompt gets a
   Vietnamese answer, an English one gets English.
+- Only the user's own words set that language. Tool output, hook context,
+  skill and plugin text, pasted logs and code are mostly English; none of
+  them switch the reply to English, and neither do English technical terms
+  inside a Vietnamese sentence.
+- Keep that language for every user-visible line of the turn and of the
+  session: progress notes, questions, summaries and the final report, also
+  after a long run of tool calls. Switch only when the user writes in
+  another language or asks for one.
+- This outranks any plugin, skill or output style that names a language:
+  "plain English" or "simple English" there means plain wording, written in
+  the user's language.
 - Everything that lands in a repository stays in English — code, identifiers,
   comments, documentation, commit messages, branch names, and pull request
   descriptions — whatever language the conversation is in.
