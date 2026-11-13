@@ -211,9 +211,9 @@ agent's rendered file; `~/.claude/rules/agent-parity.md` spells out the rule.
   Lint with `dyshellint`.
 - **Tests.** `./scripts/test.sh --all` runs every bats file in
   `scripts/test/` in parallel and validates the dytoy, dyai and secrets YAML
-  against `schemas/`. CI (`.github/workflows/ci.yml`, mirrored in
-  `.gitlab-ci.yml`) runs shellcheck, shfmt and the same suite with a fixture
-  chezmoi config.
+  against `schemas/`. CI (`.github/workflows/ci.yml`) runs shellcheck, shfmt
+  and the same suite with a fixture chezmoi config; `.gitlab-ci.yml` runs the
+  lint alone, as it cannot fetch the private dyai submodule.
 - **Where a change goes:**
 
   | To change...                       | Edit |
