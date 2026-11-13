@@ -20,9 +20,10 @@ if not test -f $plugins_list
 end
 
 if set -q _flag_update; or not functions -q fisher
-    curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+    # Pinned, as in plugins.list: bump the tag in both places together
+    curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/4.4.8/functions/fisher.fish | source
     or exit 1
-    fisher install jorgebucaran/fisher </dev/null
+    fisher install jorgebucaran/fisher@4.4.8 </dev/null
 end
 
 # Blank lines, comments and duplicates out, the order of the list kept

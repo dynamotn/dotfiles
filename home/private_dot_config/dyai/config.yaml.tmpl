@@ -11,18 +11,21 @@ global:
   # skills CLI. Only cross-cutting skills every project benefits from live here;
   # everything tied to a language, tool or domain moved to a registry preset
   # (`dyai use <name>`) so this baseline stays lean.
+  # Pinned to a commit by a GitHub tree URL; `dyai skills update` takes a new
+  # one once the SHA here changes. design-doc-mermaid keeps its SKILL.md at
+  # the repository root, which no tree URL names, so it follows upstream.
   skills:
-    - vercel-labs/skills@find-skills
-    - wshobson/agents@api-design-principles
-    - addyosmani/agent-skills@api-and-interface-design
+    - https://github.com/vercel-labs/skills/tree/b716f9dc2ba36b6aa8f0080615e5a3a6caeac63b/skills/find-skills
+    - https://github.com/wshobson/agents/tree/9c61ab243def98f72da12abd41cfcf5bcd91af9d/plugins/backend-development/skills/api-design-principles
+    - https://github.com/addyosmani/agent-skills/tree/301b02b12bff98e4688e6984af6556802322bbde/skills/api-and-interface-design
     - spillwavesolutions/design-doc-mermaid@design-doc-mermaid
-    - softaworks/agent-toolkit@c4-architecture
-    - addyosmani/agent-skills@documentation-and-adrs
-    - wshobson/agents@architecture-patterns
-    - wondelai/skills@domain-driven-design
-    - anthropics/skills@mcp-builder
-    - wshobson/agents@prompt-engineering-patterns
-    - wshobson/agents@git-advanced-workflows
+    - https://github.com/softaworks/agent-toolkit/tree/3027f20f3181758385a1bb8c022d4041dfb4de84/dist/plugins/c4-architecture/skills/c4-architecture
+    - https://github.com/addyosmani/agent-skills/tree/301b02b12bff98e4688e6984af6556802322bbde/skills/documentation-and-adrs
+    - https://github.com/wshobson/agents/tree/9c61ab243def98f72da12abd41cfcf5bcd91af9d/plugins/backend-development/skills/architecture-patterns
+    - https://github.com/wondelai/skills/tree/d8d5d75f83da9f16d8aad5bab5f5b341a4770a30/domain-driven-design
+    - https://github.com/anthropics/skills/tree/2c5958ecac7cee2b583967a2c4981d0f4a75c579/skills/mcp-builder
+    - https://github.com/wshobson/agents/tree/9c61ab243def98f72da12abd41cfcf5bcd91af9d/plugins/llm-application-dev/skills/prompt-engineering-patterns
+    - https://github.com/wshobson/agents/tree/9c61ab243def98f72da12abd41cfcf5bcd91af9d/plugins/developer-essentials/skills/git-advanced-workflows
   # Agent role definitions and commands/prompts (populated in a later phase).
   # Baseline subagents: VoltAgent categories installed into every agent's
   # agents dir (Claude-format today). Pinned to a commit, never a branch.
@@ -151,7 +154,7 @@ global:
     # runtime environment; only the variable name is stored here, never a value.
     github:
       command: docker
-      args: ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"]
+      args: ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server:v0.20.1@sha256:d909564772c4afc7ed08831c1fce367c051d82f8602abc4c1f033cdfc4a89e68"]
       env: {}
   # Abstract event automation, translated to each hook-capable agent's format.
   hooks:
@@ -174,10 +177,10 @@ global:
     # .github/copilot-instructions.md into the current directory, so it is left out.
     claude-mem:
       commands:
-        opencode: "npx -y claude-mem install --ide opencode --provider claude"
-        codex: "npx -y claude-mem install --ide codex-cli --provider claude"
-        agy: "npx -y claude-mem install --ide antigravity --provider claude"
-        hermes: "npx -y claude-mem install --ide hermes --provider claude"
+        opencode: "npx -y claude-mem@15.18.3 install --ide opencode --provider claude"
+        codex: "npx -y claude-mem@15.18.3 install --ide codex-cli --provider claude"
+        agy: "npx -y claude-mem@15.18.3 install --ide antigravity --provider claude"
+        hermes: "npx -y claude-mem@15.18.3 install --ide hermes --provider claude"
   # Neovim's configured language servers, shared with every agent (dyai-lsp).
   # exclude keeps noisy/non-code-intelligence servers out of every agent;
   # serena.ref pins the MCP bridge Codex, Gemini and agy use for the

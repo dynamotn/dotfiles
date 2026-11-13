@@ -160,8 +160,9 @@ function _render_config {
     fail "chezmoi could not render config.yaml.tmpl: $(cat "${out}.err")"
   fi
   # Phase 4: global.skills is trimmed to the cross-cutting baseline.
-  yq -e '.global.skills[] | select(. == "vercel-labs/skills@find-skills")' "${out}" > /dev/null
-  yq -e '.global.skills[] | select(. == "anthropics/skills@mcp-builder")' "${out}" > /dev/null
+  # Matched by name: a skill may be pinned as a GitHub tree URL.
+  yq -e '.global.skills[] | select(test("[@/]find-skills$"))' "${out}" > /dev/null
+  yq -e '.global.skills[] | select(test("[@/]mcp-builder$"))' "${out}" > /dev/null
   # moved into presets, so no longer global
   run yq -e '.global.skills[] | select(. == "Eyadkelleh/awesome-skills-security@llm-testing")' "${out}"
   assert_failure
@@ -194,8 +195,9 @@ function _render_config {
     | all(test("^[^/@[:space:]]+/[^/@[:space:]]+@[^@[:space:]]+$")
       or test("^https://github\\.com/[^/]+/[^/]+/tree/[0-9a-f]{40}/"))' > /dev/null \
     || fail "a skill entry is neither owner/repo@skill nor a pinned tree URL"
-  # A skill is either global or in a preset, never both.
-  overlap="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" '[$g[] | select([.] | inside($p))] | length')"
+  # A skill is either global or in a preset, never both, whichever form names it.
+  overlap="$(jq -n --argjson g "${gjson}" --argjson p "${pjson}" 'def name: sub(".*[@/]"; "") | ascii_downcase;
+    ($p | map(name)) as $pn | [$g[] | name | select(. as $n | $pn | any(.[]; . == $n))] | length')"
   [[ "${overlap}" == "0" ]]
   # No skill appears in two presets.
   pcount="$(jq -n --argjson p "${pjson}" '$p | length')"

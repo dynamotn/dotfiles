@@ -5,25 +5,28 @@
   docs/superpowers/specs/2026-10-24-dyai-shared-ai-config-design.md
 */ -}}
 marketplaces:
+  # Pinned to a release tag: their plugin hooks run outside the sandbox. Claude
+  # clones a marketplace with --branch, so a ref is a tag or branch, never a
+  # commit; the three without a tag follow their default branch.
   # Claude adds it on its own only in ~/.claude; a context's home needs it listed.
   claude-plugins-official:
     source: { source: github, repo: anthropics/claude-plugins-official }
   i-have-adhd:
-    source: { source: github, repo: ayghri/i-have-adhd }
+    source: { source: github, repo: ayghri/i-have-adhd, ref: v0.4.1 }
   superpowers-marketplace:
-    source: { source: github, repo: obra/superpowers-marketplace }
+    source: { source: github, repo: obra/superpowers-marketplace, ref: v1.0.12 }
   obsidian-skills:
-    source: { source: github, repo: kepano/obsidian-skills }
+    source: { source: github, repo: kepano/obsidian-skills, ref: 1.1.0 }
   secskills-marketplace:
     source: { source: github, repo: trilwu/secskills }
   trailofbits:
     source: { source: github, repo: trailofbits/skills }
   thedotmack:
-    source: { source: github, repo: thedotmack/claude-mem }
+    source: { source: github, repo: thedotmack/claude-mem, ref: v15.18.3 }
   ponytail:
-    source: { source: github, repo: DietrichGebert/ponytail }
+    source: { source: github, repo: DietrichGebert/ponytail, ref: v5.3.3 }
   understand-anything:
-    source: { source: github, repo: Egonex-AI/Understand-Anything }
+    source: { source: github, repo: Egonex-AI/Understand-Anything, ref: v2.9.0 }
 plugins:
   - i-have-adhd@i-have-adhd
   - claude-mem@thedotmack
