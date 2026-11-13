@@ -1,3 +1,5 @@
+status is-interactive; or exit
+
 # Abbreviations rather than aliases: the full command lands on the line before
 # it runs, so history keeps what really ran and a destructive one (`grh`,
 # `gbd`, `gcl`) is seen in full before Enter.

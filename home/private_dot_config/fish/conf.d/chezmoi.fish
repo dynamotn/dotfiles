@@ -1,3 +1,5 @@
+status is-interactive; or exit
+
 abbr -a cz chezmoi
 abbr -a cza 'chezmoi apply'
 abbr -a czA 'chezmoi add'

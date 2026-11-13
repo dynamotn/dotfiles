@@ -1,3 +1,5 @@
+status is-interactive; or exit
+
 abbr -a G gcloud
 abbr -a Gal "gcloud auth login"
 abbr -a Gb "bq query --use_legacy_sql=false"

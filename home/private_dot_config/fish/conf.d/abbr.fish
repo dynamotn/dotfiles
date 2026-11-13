@@ -1,3 +1,5 @@
+status is-interactive; or exit
+
 # History shortcuts, anywhere on the line: `sudo !!`, `cd !$`
 abbr -a __caran_last_command --position anywhere --regex '^!!$' --function __caran_abbr_last_command
 abbr -a __caran_last_argument --position anywhere --regex '^!\$$' --function __caran_abbr_last_argument

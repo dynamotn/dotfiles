@@ -176,7 +176,7 @@ function _all_fish_files {
 }
 
 @test "shortcuts are abbreviations that expand to the full command" {
-  run _fish "source '${FISH_DIR}/conf.d/git.fish'
+  run _fishi "source '${FISH_DIR}/conf.d/git.fish'
     source '${FISH_DIR}/conf.d/kubectl.fish'
     abbr --show | string match -e -- 'grh'
     abbr --show | string match -e -- ' kk '"
@@ -191,6 +191,13 @@ function _all_fish_files {
   chmod +x "${HOME}/.local/bin/procs"
 
   run _fish "source '${FISH_DIR}/conf.d/zzz_alternative.fish'; functions -q ps"
+  assert_failure
+}
+
+@test "shortcut files cost a non-interactive shell nothing" {
+  run _fish "source '${FISH_DIR}/conf.d/git.fish'
+    source '${FISH_DIR}/conf.d/abbr.fish'
+    functions -q gR; or abbr -q grh"
   assert_failure
 }
 
@@ -429,7 +436,7 @@ esac"
 }
 
 @test "a short subcommand expands only as the first argument" {
-  run _fishf "source '${FISH_DIR}/conf.d/abbr.fish'
+  run _fishi "source '${FISH_DIR}/conf.d/abbr.fish'
     function commandline; echo git; end
     __caran_abbr_subcommand co
     function commandline; printf '%s\n' git add; end

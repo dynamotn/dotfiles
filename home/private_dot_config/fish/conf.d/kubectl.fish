@@ -1,3 +1,5 @@
+status is-interactive; or exit
+
 abbr -a k kubectl
 abbr -a ka 'kubectl apply -f'
 abbr -a kc 'kubectl create'

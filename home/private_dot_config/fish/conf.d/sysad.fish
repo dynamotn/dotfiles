@@ -1,3 +1,5 @@
+status is-interactive; or exit
+
 # Rsync
 abbr -a syncdy 'rsync --delete -avhz'
 

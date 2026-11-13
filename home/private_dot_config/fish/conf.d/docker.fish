@@ -1,3 +1,5 @@
+status is-interactive; or exit
+
 abbr -a d docker
 abbr -a db 'docker build'
 abbr -a di 'docker image'

@@ -1,8 +1,5 @@
 # vim:foldmethod=marker:foldmarker={,}
 ## Some environment variables {
-# Path of Fish config
-set -gx CONFIG_PATH (dirname (readlink -f (status --current-filename)))
-
 {{- if eq .chezmoi.os "linux" }}
 # XDG base directories
 set -gx XDG_CACHE_HOME $HOME/.cache
@@ -17,7 +14,7 @@ set -gx XDG_RUNTIME_DIR /run/user/(id -u)
 {{- end }}
 
 # GPG interface to insert passphrase
-set -gx GPG_TTY (tty)
+status is-interactive; and set -gx GPG_TTY (tty)
 
 # GO workspace
 set -gx GOPATH $HOME/.go
@@ -45,7 +42,7 @@ type -q brew; and brew shellenv | source
 if command -sq mise
     set -gx MISE_PREFER_OFFLINE true
     mise activate fish | source
-    command -sq usage; and mise completion fish | source
+    status is-interactive; and command -sq usage; and mise completion fish | source
 end
 
 # Set default editor
@@ -71,8 +68,9 @@ end
 
 ## Fish or shell miscellaneous config {
 # Enable vi key bindings
-if test -n "$TERM"
-    fish_vi_key_bindings
+# The variable, not the function: fish applies it once at its own init
+if status is-interactive
+    set -g fish_key_bindings fish_vi_key_bindings
     # Cursor shape per mode, as in Neovim
     set -g fish_cursor_default block
     set -g fish_cursor_insert line
@@ -88,8 +86,8 @@ if type -q grc
 end
 
 # Color for Virtual console
-if test "$TERM" = linux; and test -f $CONFIG_PATH/console_color
-    for i in (sed -n "s/.*\*color\([0-9]\{1,\}\).*#\([0-9a-fA-F]\{6\}\).*/\1 \2/p" $CONFIG_PATH/console_color | awk '$1 < 16 {printf "\\\e]P%X%s", $1, $2}')
+if test "$TERM" = linux; and test -f $__fish_config_dir/console_color
+    for i in (sed -n "s/.*\*color\([0-9]\{1,\}\).*#\([0-9a-fA-F]\{6\}\).*/\1 \2/p" $__fish_config_dir/console_color | awk '$1 < 16 {printf "\\\e]P%X%s", $1, $2}')
         echo -en "$i"
     end
     set -g theme_nerd_fonts no
