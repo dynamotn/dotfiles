@@ -133,3 +133,27 @@ EOF
   run bash "${BATS_TEST_TMPDIR}/commit_message.sh" "${msg}"
   assert_success
 }
+
+# A stand-in age that shows whether the textconv got as far as decrypting
+function _decrypt_setup {
+  render_template "home/private_dot_config/git/scripts/decrypt_chezmoi.sh.tmpl" \
+    "${BATS_TEST_TMPDIR}/decrypt.sh"
+  printf '#!/bin/sh\necho PLAINTEXT\n' > "${HOME}/.local/bin/age"
+  chmod +x "${HOME}/.local/bin/age"
+  : > "${BATS_TEST_TMPDIR}/secret.age"
+}
+
+@test "decrypt_chezmoi prints a placeholder, not the secret, without a terminal" {
+  _decrypt_setup
+  # setsid drops the controlling terminal, as an agent's shell has none
+  run setsid -w bash "${BATS_TEST_TMPDIR}/decrypt.sh" _normal personal "${BATS_TEST_TMPDIR}/secret.age"
+  assert_success
+  assert_output '<encrypted: decrypting a diff needs a terminal>'
+}
+
+@test "decrypt_chezmoi decrypts for a process with a terminal" {
+  command -v script > /dev/null || skip "script(1) gives the terminal"
+  _decrypt_setup
+  run script -qec "bash '${BATS_TEST_TMPDIR}/decrypt.sh' _normal personal '${BATS_TEST_TMPDIR}/secret.age'" /dev/null
+  assert_output --partial PLAINTEXT
+}

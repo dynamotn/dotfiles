@@ -38,16 +38,34 @@ function _sqlite {
 }
 
 #######################################
-# @description Run the decoder named by the first argument
-# @arg $1 string Decoder to use, `_normal` or `_sqlite`
+# @description Decode a sops encrypted file
+# @arg $1 string Path of the encrypted file
+# @stdout Decrypted content
+#######################################
+function _sops {
+  local encrypted_file
+  dybatpho::expect_args encrypted_file -- "$@"
+  sops -d "${encrypted_file}"
+}
+
+#######################################
+# @description Run the decoder named by the first argument, only for a
+# process with a controlling terminal: git runs outside the agents' sandbox,
+# and an agent has no terminal, however it got git to load this driver.
+# @arg $1 string Decoder to use, `_normal`, `_sqlite` or `_sops`
 # @arg $@ string Arguments of that decoder
+# @stdout Decrypted content, or a placeholder line without a terminal
 #######################################
 function _main {
   local decoder
   dybatpho::expect_args decoder -- "$@"
   shift
+  if ! (exec 3< /dev/tty) 2> /dev/null; then
+    printf '<encrypted: decrypting a diff needs a terminal>\n'
+    return 0
+  fi
   case "${decoder}" in
-    _normal | _sqlite) "${decoder}" "$@" ;;
+    _normal | _sqlite | _sops) "${decoder}" "$@" ;;
     *) dybatpho::die "Unknown decoder '${decoder}'" ;;
   esac
 }
