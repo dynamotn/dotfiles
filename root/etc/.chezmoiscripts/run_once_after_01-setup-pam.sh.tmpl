@@ -11,13 +11,17 @@ dybatpho::header "Setup PAM"
 {{-   range (joinPath .chezmoi.sourceDir "etc/pam.d/*" | glob) }}
 # {{ . }} hash: {{ . | include | sha256sum }}
 {{-   end }}
+# An include of a missing file breaks the whole stack and locks out local
+# login; an office VM gets no etc/pam.d from this repo.
 if dybatpho::is file /etc/pam.d/system-local-login; then
-  if ! grep -q '^auth\s*include\s*u2f' /etc/pam.d/system-local-login; then
+  if dybatpho::is file /etc/pam.d/u2f \
+    && ! grep -q '^auth\s*include\s*u2f' /etc/pam.d/system-local-login; then
     dybatpho::header "Adding pam_u2f to system-local-login"
     sed -i '1 i\auth include u2f' /etc/pam.d/system-local-login
   fi
   {{- if eq .code "b0n9u4" }}
-  if ! grep -q '^auth\s*include\s*fprintd' /etc/pam.d/system-local-login; then
+  if dybatpho::is file /etc/pam.d/fprintd \
+    && ! grep -q '^auth\s*include\s*fprintd' /etc/pam.d/system-local-login; then
     dybatpho::header "Adding pam_fprintd to system-local-login"
     sed -i '1 i\auth include fprintd' /etc/pam.d/system-local-login
   fi

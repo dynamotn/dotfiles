@@ -25,6 +25,8 @@ etc/ananicy.d:
 {{-   if eq .kind "laptop" }}
 etc/NetworkManager/dispatcher.d/90-open_captive_portal:
   type: file
+  # The dispatcher skips a script that is not executable.
+  executable: true
   # NetworkManager runs dispatcher scripts as root: pin what lands here.
   url: https://raw.githubusercontent.com/Seme4eg/captive-portal-sh/babe4a10bae4aa66d97bead01fa36561ced53ba6/90-open_captive_portal
   checksum:

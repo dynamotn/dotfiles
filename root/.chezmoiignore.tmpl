@@ -173,14 +173,14 @@ usr/local/share/ca-certificates
 
 {{/* Input method */}}
 {{- if empty .languages }}
-etc/portage/**fcitx-configtool
-etc/portage/**fcitx-m17n
+etc/portage/**/fcitx-configtool
+etc/portage/**/fcitx-m17n
 {{- end }}
 {{- if not (has "ja" .languages) }}
-etc/portage/**mozc
+etc/portage/**/mozc
 {{- end }}
 {{- if not (has "zh" .languages) }}
-etc/portage/**fcitx-m17n
+etc/portage/**/fcitx-m17n
 {{- end }}
 
 {{/* Per machine */}}
