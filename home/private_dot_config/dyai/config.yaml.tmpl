@@ -283,13 +283,16 @@ global:
 # Roots whose mise config moves an agent's home (CLAUDE_CONFIG_DIR,
 # COPILOT_HOME, ...): dyai installs the same setup into each moved home. Read
 # off those mise configs, so moving a home there is all a new context takes.
-contexts:
 {{- $work := joinPath .chezmoi.sourceDir "private_Working" }}
+{{- $contexts := list }}
 {{- range $f := concat (glob (joinPath $work "*" "*" "dot_mise.toml.tmpl")) (glob (joinPath $work "*" "*" "*" "dot_mise.toml.tmpl")) }}
-{{-   if regexMatch "(?m)^(CLAUDE_CONFIG_DIR|COPILOT_HOME|CODEX_HOME|OPENCODE_CONFIG) =" (include $f) }}
-  - "~/Working/{{ $f | dir | trimPrefix (printf "%s/" $work) }}"
+{{- /* The raw source, not the render (that would decrypt): match the shared partial too */}}
+{{-   if regexMatch "(?m)^(CLAUDE_CONFIG_DIR|COPILOT_HOME|CODEX_HOME|OPENCODE_CONFIG) =|\"mise/env_ai\\.toml\\.tmpl\"" (include $f) }}
+{{-     $contexts = append $contexts (printf "~/Working/%s" ($f | dir | trimPrefix (printf "%s/" $work))) }}
 {{-   end }}
 {{- end }}
+{{- /* toJson, not a block list: with no context it must stay [], not null */}}
+contexts: {{ $contexts | toJson }}
 agents:
   claude:
     marketplaces:
