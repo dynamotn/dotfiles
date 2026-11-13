@@ -1,36 +1,69 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":dependencyDashboard"],
-  "enabledManagers": ["pre-commit", "github-actions", "git-submodules", "custom.regex"],
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard"
+  ],
+  "enabledManagers": [
+    "pre-commit",
+    "github-actions",
+    "git-submodules",
+    "custom.regex"
+  ],
   "pre-commit": {
     "enabled": true
   },
   "git-submodules": {
     "enabled": true,
-    "ignorePaths": ["secrets/data"]
+    "ignorePaths": [
+      "secrets/data"
+    ]
   },
   "customManagers": [
     {
       "customType": "regex",
       "description": "The GitHub MCP server image, pinned by tag and digest in the dyai config.",
-      "managerFilePatterns": ["/^home/private_dot_config/dyai/config\\.yaml\\.tmpl$/"],
-      "matchStrings": ["\"(?<depName>ghcr\\.io/github/github-mcp-server):(?<currentValue>v[0-9.]+)@(?<currentDigest>sha256:[0-9a-f]{64})\""],
+      "managerFilePatterns": [
+        "/^home/private_dot_config/dyai/config\\.yaml\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "\"(?<depName>ghcr\\.io/github/github-mcp-server):(?<currentValue>v[0-9.]+)@(?<currentDigest>sha256:[0-9a-f]{64})\""
+      ],
       "datasourceTemplate": "docker"
     },
     {
       "customType": "regex",
       "description": "claude-mem, run through npx by the other agents' installers.",
-      "managerFilePatterns": ["/^home/private_dot_config/dyai/config\\.yaml\\.tmpl$/"],
-      "matchStrings": ["npx -y (?<depName>claude-mem)@(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)"],
+      "managerFilePatterns": [
+        "/^home/private_dot_config/dyai/config\\.yaml\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "npx -y (?<depName>claude-mem)@(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)"
+      ],
       "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "Claude marketplaces, pinned to a release tag in the shared dyai data.",
+      "managerFilePatterns": [
+        "/^home/\\.chezmoitemplates/ai/dyai-data\\.yaml\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "repo: (?<depName>[\\w.-]+/[\\w.-]+), ref: (?<currentValue>[^ }]+)"
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ],
   "packageRules": [
     {
       "description": "The dotfiles submodules follow their own branches; group their bumps into one pull request instead of one each.",
-      "matchManagers": ["git-submodules"],
+      "matchManagers": [
+        "git-submodules"
+      ],
       "groupName": "submodules",
-      "schedule": ["before 9am on monday"]
+      "schedule": [
+        "before 9am on monday"
+      ]
     }
   ]
 }
