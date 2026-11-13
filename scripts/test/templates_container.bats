@@ -157,6 +157,18 @@ function _assert_profile_renders {
   refute_output 0
 }
 
+@test "a tool install hook re-runs when the machine data changes what it installs" {
+  local hook=home/.chezmoiscripts/run_onchange_after_02-install-02-binary-tools.sh.tmpl os
+  for os in alpine debian; do
+    _write_container_config "${BATS_TEST_TMPDIR}/${os}.yaml" "linux-${os}" none
+    _render_linux "${BATS_TEST_TMPDIR}/${os}.yaml" "${hook}" "${BATS_TEST_TMPDIR}/${os}.sh"
+    grep ' hash: ' "${BATS_TEST_TMPDIR}/${os}.sh" > "${BATS_TEST_TMPDIR}/${os}.hashes"
+  done
+  # musl and glibc download other release assets, so the hashes differ.
+  run diff -q "${BATS_TEST_TMPDIR}/alpine.hashes" "${BATS_TEST_TMPDIR}/debian.hashes"
+  assert_failure
+}
+
 # ---------------------------------------------------------------------------
 # Hooks that meet a missing tool
 # ---------------------------------------------------------------------------

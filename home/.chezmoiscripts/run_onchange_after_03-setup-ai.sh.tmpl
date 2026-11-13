@@ -8,14 +8,14 @@
 {{- $dyai := joinPath .chezmoi.sourceDir ".." "scripts" "lib" "dyai" }}
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
-# Re-run when the config, its shared data, or the install library changes.
+# Re-run when the config, the partials it renders, or the install library
+# changes: every file under lib/, which dyai.sh sources all of.
 # dyai config hash: {{ include (joinPath .chezmoi.sourceDir "private_dot_config/dyai/config.yaml.tmpl") | sha256sum }}
-# dyai data hash: {{ include (joinPath .chezmoi.sourceDir ".chezmoitemplates/ai/dyai-data.yaml.tmpl") | sha256sum }}
+{{- range list "ai/dyai-data.yaml.tmpl" "ai/notify-hook.sh.tmpl" "dyai/node-identity.tmpl" }}
+# {{ . }} hash: {{ include (joinPath $.chezmoi.sourceDir ".chezmoitemplates" .) | sha256sum }}
+{{- end }}
 # dyai catalog hash: {{ include (joinPath $dyai "catalog" "domains.yaml") | sha256sum }}
-# dyai lib hash: {{ include (joinPath $dyai "lib" "dyai.sh") | sha256sum }}
-# dyai lsp lib hash: {{ include (joinPath $dyai "lib" "dyai_lsp.sh") | sha256sum }}
-# dyai lsp export hash: {{ include (joinPath $dyai "lib" "dyai_lsp_export.lua") | sha256sum }}
-# dyai lsp exec hash: {{ include (joinPath $dyai "lib" "dyai_lsp_exec.sh") | sha256sum }}
+# dyai lib hash: {{ includeTemplate "chezmoiscripts/dir_hash.tmpl" (dict "ctx" . "dirs" (list "../scripts/lib/dyai/lib")) }}
 . "{{ $dyai }}/lib/dyai.sh"
 dybatpho::header "Setup AI"
 dyai::install

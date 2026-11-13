@@ -9,9 +9,14 @@ dybatpho::register_common_handlers
 
 {{- if and (not (empty .decryptEnterprise)) (ne .kind "container") }}
 {{- $rcloneConf := joinPath .chezmoi.homeDir ".config/rclone/rclone.conf" }}
-{{- /* Rendered before the files are written, so a first apply has no config yet */}}
-{{- if stat $rcloneConf }}
-# config hash: {{ include $rcloneConf | sha256sum }}
+{{- /*
+  The inputs of rclone.conf, not the file: this renders before the apply
+  writes it, so its hash was always one apply late. The ciphertext changes
+  with the secrets, and hashing it decrypts nothing.
+*/}}
+# template hash: {{ joinPath .chezmoi.sourceDir "private_dot_config/rclone/rclone.conf.tmpl" | include | sha256sum }}
+{{- range .decryptEnterprise }}
+# secrets hash: {{ printf "../secrets/data/enterprise-%s/common.yaml.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
 {{- end }}
 
 dybatpho::header "Start rclone"

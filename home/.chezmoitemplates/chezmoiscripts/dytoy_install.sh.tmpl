@@ -6,8 +6,11 @@
     label  name of the tools in the messages
     args   extra arguments of `dytoy <method>`
   Only the definitions that name the method are hashed, so editing one tool
-  re-runs the installer of its own method rather than all four. A file
-  choosing its method in a condition names both, and is hashed in both.
+  re-runs the installer of its own method rather than all four. Each is
+  hashed as rendered for this machine, as tools.yaml renders it: a change to
+  the machine data or to a dytoy_lib partial re-runs it too, a doc block
+  (a template comment) does not, and a file choosing its method in a
+  condition counts only for the method it chose.
 */ -}}
 {{- /* Decided while rendering, so a run with it unset differs and runs again */ -}}
 {{- if eq (env "DOTFILES_SKIP_TOOLS") "1" -}}
@@ -16,9 +19,9 @@ dybatpho::warn "DOTFILES_SKIP_TOOLS is set, skip installing the {{ .label }} too
 local_bin_dir="$(dybatpho::path_join "{{ .ctx.chezmoi.homeDir }}" ".local" "bin")"
 export PATH="${local_bin_dir}:${PATH}"
 {{- $pattern := printf "(?m)^[ \t-]*method:[ \t]*%s[ \t]*$" .method }}
+{{- $ctx := .ctx }}
 {{- range (joinPath .ctx.chezmoi.sourceDir ".chezmoitemplates/dytoy/*.yaml*" | glob) }}
-{{- /* Hash without the doc blocks, so a doc-only edit reinstalls nothing */}}
-{{-   $definition := regexReplaceAll "(?s)\\{\\{- /\\* doc\\n.*?\\*/ -\\}\\}\\n" (include .) "" }}
+{{-   $definition := includeTemplate . $ctx }}
 {{-   if regexMatch $pattern $definition }}
 # {{ base . }} hash: {{ $definition | sha256sum }}
 {{-   end }}
