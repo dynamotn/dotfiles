@@ -550,3 +550,19 @@ function _project {
   assert_output --partial '  on main'
   assert_file_not_exists "${BATS_TEST_TMPDIR}/fsmonitor-ran"
 }
+
+@test "a cached command runs once, then again only when what it watches is newer" {
+  local tool="${BATS_TEST_TMPDIR}/tool"
+  printf '#!/bin/sh\necho run >> "%s/calls"\necho "set -g hello world"\n' "${BATS_TEST_TMPDIR}" > "${tool}"
+  chmod +x "${tool}"
+  run env XDG_CACHE_HOME="${BATS_TEST_TMPDIR}/cache" fish --no-config -c "set -p fish_function_path '${FISH_DIR}/functions'
+    for i in 1 2
+      if set -l f (__caran_cached t '${tool}' -- '${tool}'); source \$f; end
+    end
+    touch -d '+5 seconds' '${tool}'
+    if set -l f (__caran_cached t '${tool}' -- '${tool}'); source \$f; end
+    echo \$hello"
+  assert_success
+  assert_output world
+  assert_equal "$(wc -l < "${BATS_TEST_TMPDIR}/calls")" 2
+}

@@ -17,4 +17,11 @@ type -q doggo; and alias dig doggo; and set -a replaced dig
 type -q ov; and alias less ov; and alias more ov
 type -q btop; and alias htop btop
 
-type -q grc; and __caran_setup_grc $replaced
+# Cached until grc, the wrapper list, or a $PATH directory (a tool installed
+# or removed there) changes
+if command -sq grc
+    and set -l wrappers (__caran_cached grc-(string join - $replaced) \
+        (command -s grc) (functions --details __caran_setup_grc) $PATH \
+        -- __caran_setup_grc $replaced)
+    source $wrappers
+end

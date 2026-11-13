@@ -1,3 +1,7 @@
+# Print a grc wrapper for each installed tool grc colours, for the startup to
+# cache: testing some sixty names and defining the wrappers on every start
+# cost more than reading them back. The names in $argv have an alternative of
+# their own and get none.
 function __caran_setup_grc
     set -l execs cat cvs df diff dig gcc g++ ifconfig make mount mtr netstat \
         ping ps tail traceroute wdiff blkid du dnf docker docker-compose \
@@ -10,22 +14,10 @@ function __caran_setup_grc
         set execs $grc_plugin_execs
     end
 
-    # The names in $argv have an alternative of their own
     for executable in $execs
         if type -q $executable; and not contains -- $executable $argv
-            # @fish-lsp-disable 4004
-            function $executable --inherit-variable executable --wraps=$executable
-                if isatty 1
-                    set -l optionsvariable "grcplugin_"$executable
-                    set -l options $$optionsvariable
-                    grc -es --colour=auto $executable $options $argv
-                else
-                    # No `eval` here: it re-parses the arguments, and an empty
-                    # one then disappears. Completion scripts pass exactly that
-                    # to ask for "complete the next, still empty word".
-                    command $executable $argv
-                end
-            end
+            printf 'function %s --wraps=%s\n    __caran_grc %s $argv\nend\n' \
+                $executable $executable $executable
         end
     end
 end

@@ -42,7 +42,11 @@ type -q brew; and brew shellenv | source
 if command -sq mise
     set -gx MISE_PREFER_OFFLINE true
     mise activate fish | source
-    status is-interactive; and command -sq usage; and mise completion fish | source
+    # Cached until mise or usage changes: generating it cost a run every start
+    if status is-interactive; and command -sq usage
+        and set -l completion (__caran_cached mise-completion (command -s mise usage) -- mise completion fish)
+        source $completion
+    end
 end
 
 # Set default editor
@@ -158,8 +162,9 @@ if status is-interactive
         bind --mode insert \cg _navi_smart_replace
     end
     # Projekt
-    if type -q projekt
-        projekt init fish | source
+    if command -sq projekt
+        and set -l init (__caran_cached projekt-init (command -s projekt) -- projekt init fish)
+        source $init
     end
     # ov, as the pager of everything that takes one
     if type -q ov
@@ -168,7 +173,10 @@ if status is-interactive
         type -q tspin; and set -gx TAILSPIN_PAGER 'ov -f [FILE]'
     end
     # Vivid
-    type -q vivid; and set -gx LS_COLORS (vivid generate catppuccin-{{ $themeName }})
+    if command -sq vivid
+        and set -l colors (__caran_cached vivid-{{ $themeName }} (command -s vivid) -- vivid generate catppuccin-{{ $themeName }})
+        set -gx LS_COLORS (string collect <$colors)
+    end
     # Zellij
     if type -q zellij
         set -gx ZELLIJ_AUTO_ATTACH true
