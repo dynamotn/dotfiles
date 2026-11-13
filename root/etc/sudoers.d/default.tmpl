@@ -1,10 +1,19 @@
 # A password or a touch of the key (pam.d/u2f), never nothing: anything running
 # as the user, an agent's plugin or an npm postinstall included, could
 # otherwise become root without a prompt.
+{{- /* A cloud VM's default user often has no password and no key there: asking
+       for one would lock root out, scz included. */}}
+{{- $tag := (eq .place "cloud") | ternary "NOPASSWD: " "" }}
 {{ if eq .osid "linux-gentoo" -}}
 # Run as sysadm_r:sysadm_t: the staff_t domain of a login cannot administer
 # the system once SELinux enforces.
-%wheel ALL=(ALL:ALL) ROLE=sysadm_r TYPE=sysadm_t ALL
+%wheel ALL=(ALL:ALL) ROLE=sysadm_r TYPE=sysadm_t {{ $tag }}ALL
 {{ else -}}
-%wheel ALL=(ALL:ALL) ALL
+%wheel ALL=(ALL:ALL) {{ $tag }}ALL
+{{ end -}}
+{{- if and (eq .guiServer "W") (ne .kind "container") }}
+# The greeter has no password and no terminal: only its power buttons, with
+# the paths sudo may resolve them to on each distribution.
+greetd ALL=(root) NOPASSWD: /usr/bin/reboot, /usr/sbin/reboot, /sbin/reboot, \
+  /usr/bin/shutdown -P -h now, /usr/sbin/shutdown -P -h now, /sbin/shutdown -P -h now
 {{ end -}}
