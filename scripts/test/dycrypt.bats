@@ -86,6 +86,19 @@ function run_resolve {
   assert_equal "$(stat -c '%a' "$(data_file secret.yaml)")" "600"
 }
 
+@test "dycrypt::decrypt tightens a world-readable plaintext it overwrites" {
+  local plain cipher mode
+  write_data_file secret.yaml "token: hunter2"
+  plain="$(data_file secret.yaml)"
+  cipher="$(data_file secret.yaml.age)"
+  dycrypt::encrypt test "${plain}" "${cipher}" false false
+  chmod 644 "${plain}"
+
+  dycrypt::decrypt test "${cipher}" "${plain}" true
+  mode="$(stat -c '%a' "${plain}")"
+  assert_equal "${mode}" "600"
+}
+
 @test "dycrypt::encrypt leaves an up to date ciphertext alone" {
   write_data_file secret.yaml "token: hunter2"
   dycrypt::encrypt test "$(data_file secret.yaml)" "$(data_file secret.yaml.age)" false false

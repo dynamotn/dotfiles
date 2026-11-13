@@ -199,6 +199,11 @@ function dycrypt::decrypt {
   dycrypt::ensure_parent "${plain}"
   (
     umask 077
+    # umask covers a new file only; age keeps the mode of one it overwrites,
+    # so close that one first, keeping its owner bits (an executable stays so).
+    if dybatpho::is file "${plain}"; then
+      dybatpho::dry_run chmod go= -- "${plain}"
+    fi
     dybatpho::dry_run age -d -i "${key}" -o "${plain}" "${cipher}"
   )
 }
