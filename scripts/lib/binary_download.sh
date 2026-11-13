@@ -66,6 +66,8 @@ function __binary_download_temp_suffix {
 function binary_download::verify_sha256 {
   local name temp_file url sha256_asset
   dybatpho::expect_args name temp_file url sha256_asset -- "$@"
+  # A dry run downloads nothing, so there is no checksum file to read.
+  dybatpho::is true "${DRY_RUN}" && return 0
 
   local sha256_url="${url%/*}/${sha256_asset}"
   dybatpho::progress "Verifying SHA256 for ${name}"

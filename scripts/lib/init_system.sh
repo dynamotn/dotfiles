@@ -20,7 +20,8 @@ function init_system::enable_systemd_service {
   fi
   dybatpho::progress "Enabling service ${service}"
 
-  if systemctl is-system-running > /dev/null; then
+  # Not is-system-running: it fails on a degraded manager, one failed unit away.
+  if systemctl show-environment &> /dev/null; then
     if dybatpho::is true "${is_user_service}"; then
       systemctl enable --now --user "${service}"
     else

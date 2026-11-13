@@ -23,6 +23,23 @@ EOF
   assert_output 'enable --now --user sample.service'
 }
 
+@test "init_system::enable_systemd_service still enables on a degraded manager" {
+  local args_file="${BATS_TEST_TMPDIR}/systemctl-args"
+  cat > "${HOME}/.local/bin/systemctl" << EOF
+#!/usr/bin/env bash
+case "\$1" in
+  is-system-running) echo degraded; exit 1 ;;
+  show-environment) exit 0 ;;
+esac
+echo "\$*" > "${args_file}"
+EOF
+  chmod +x "${HOME}/.local/bin/systemctl"
+
+  run init_system::enable_systemd_service sample.service true
+  assert_success
+  assert_file_exist "${args_file}"
+}
+
 @test "init_system::enable_openrc_service enables user services without sudo" {
   local args_file="${BATS_TEST_TMPDIR}/rc-update-args"
   cat > "${HOME}/.local/bin/rc-service" << 'EOF'

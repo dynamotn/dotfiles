@@ -285,10 +285,18 @@ EOF
   function dytoy::run_script { :; }
   function dytoy::get_yaml { printf 'null\n'; }
   function dybatpho::curl_download { printf 'binary-data' > "$2"; }
-  function binary_download::verify_sha256 { return 99; }
+  # bats `run` turns errexit off, so a failing stub alone would go unnoticed.
+  local verify_called="${BATS_TEST_TMPDIR}/verify-called"
+  function binary_download::verify_sha256 { touch "${verify_called}"; }
   mkdir -p "${BATS_TEST_TMPDIR}/out"
 
   run binary_download::download_and_extract sample "${BATS_TEST_TMPDIR}/out" "https://example.com/tool" "v1.0.0" ""
+  assert_success
+  assert_file_not_exist "${verify_called}"
+}
+
+@test "binary_download::verify_sha256 passes a dry run, which downloads nothing" {
+  DRY_RUN=true run binary_download::verify_sha256 sample /nonexistent "https://example.com/tool" "sha256sums.txt"
   assert_success
 }
 
