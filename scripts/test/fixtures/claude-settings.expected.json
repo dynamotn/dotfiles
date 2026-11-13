@@ -223,7 +223,9 @@
       "Bash(chezmoi destroy:*)",
       "Bash(chezmoi forget:*)",
       "mcp__dyai__crew_merge",
-      "mcp__dyai__crew_drop"
+      "mcp__dyai__crew_drop",
+      "mcp__dyai__crew_stop",
+      "mcp__dyai__crew_approve"
     ],
     "defaultMode": "acceptEdits",
     "deny": [
