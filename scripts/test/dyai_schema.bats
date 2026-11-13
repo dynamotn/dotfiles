@@ -251,6 +251,10 @@ function _render_config {
   [[ "$(yq '.global.mcp.fetch.command' "${out}")" == "uvx" ]]
   [[ "$(yq '.global.mcp."sequential-thinking".command' "${out}")" == "bunx" ]]
   [[ "$(yq '.global.mcp.github.command' "${out}")" == "docker" ]]
+  # projekt serves what it knows read-only: no --write in the baseline.
+  [[ "$(yq '.global.mcp.projekt.command' "${out}")" == */.local/bin/projekt ]]
+  [[ "$(yq -o json -I 0 '.global.mcp.projekt.args' "${out}")" == '["mcp"]' ]]
+  [[ "$(yq '.global.mcp.projekt.readonly' "${out}")" == "true" ]]
   # SQL database servers live in the database preset now, not the global baseline.
   [[ "$(yq '.global.mcp | has("postgres")' "${out}")" == "false" ]]
   [[ "$(yq '.global.mcp | has("mysql")' "${out}")" == "false" ]]

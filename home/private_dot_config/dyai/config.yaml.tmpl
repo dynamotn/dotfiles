@@ -84,6 +84,14 @@ global:
       command: {{ printf "%s/.local/bin/dyai" .chezmoi.homeDir | quote }}
       args: ["mcp"]
       env: {}
+    # projekt: where each project is, its tags, description, note, working
+    # trees and git state (`projekt mcp`). Without --write it only reads, so
+    # it is readonly. Needs a projekt newer than v4.1.0, the first with `mcp`.
+    projekt:
+      command: {{ printf "%s/.local/bin/projekt" .chezmoi.homeDir | quote }}
+      args: ["mcp"]
+      env: {}
+      readonly: true
     # Community servers from the official modelcontextprotocol registry (and
     # Upstash's context7), pinned. Node servers run via bunx, Python via uvx,
     # github via docker. An agent missing the launcher is skipped by the hook.
