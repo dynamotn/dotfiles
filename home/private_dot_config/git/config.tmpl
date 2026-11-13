@@ -203,6 +203,8 @@
         # Fetch submodules parallel
         fetchJobs = 0
 [alias]
+        # Diff that decrypts age and sops files: their drivers load only here
+        sdiff = -c include.path=~/.config/git/diff-secret diff
         # Get main branch
         main = "!_() { git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'; }; _"
         # Graph log view

@@ -194,6 +194,11 @@ policy:
       - "Read(~/.config/dyai/node/**)"
       - "Edit(~/.config/dyai/node/**)"
       - "Bash(chezmoi-dycrypt:*)"
+      # The decrypting diff drivers load only through these; git runs unsandboxed.
+      - "Bash(git sdiff*)"
+      - "Bash(rtk git sdiff*)"
+      - "Bash(git -c include.path*)"
+      - "Bash(rtk git -c include.path*)"
       - "Bash(age -d *)"
       - "Bash(age --decrypt *)"
       - "Bash(sops -d *)"
