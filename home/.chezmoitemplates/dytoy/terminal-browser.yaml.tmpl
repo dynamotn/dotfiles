@@ -1,0 +1,33 @@
+{{- /* doc
+name: terminal-browser
+description: Real browser in a terminal pane, driven by AI agents
+category: Everyday terminal applications
+subcategory: Core
+order: 95
+*/ -}}
+{{- if eq .chezmoi.os "linux" "darwin" }}
+{{-   $arch := "" }}
+{{-   if eq .chezmoi.arch "amd64" }}
+{{-     $arch = "x64" }}
+{{-   else if eq .chezmoi.arch "arm64" }}
+{{-     $arch = "arm64" }}
+{{-   end }}
+{{-   $path := joinPath .chezmoi.homeDir ".local" "share" "terminal-browser" "app" }}
+name: terminal-browser
+method: binary
+github:
+  repo: zenbu-labs/terminal-browser
+  # The repo also releases `pixel-v*` and `electron-v*` tags, so `latest` picks
+  # the wrong one; bump this tag by hand.
+  version: v0.15.3
+  release_asset: terminal-browser-{{ .chezmoi.os }}-{{ $arch }}.tar.gz
+# Same layout as the upstream installer, so `terminal-browser upgrade` keeps working.
+archive:
+  - path: terminal-browser/*
+    location: {{ $path }}
+    strip: 1
+location: {{ $path }}
+hook:
+  after: |-
+    ln -sf "{{ $path }}/bin/terminal-browser" "$(dybatpho::path_join "$HOME" ".local" "bin" "terminal-browser")"
+{{- end }}

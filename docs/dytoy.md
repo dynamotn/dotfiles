@@ -117,6 +117,7 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[grc](https://github.com/garabik/grc)|Colorise for some GNU/Linux commands|
 |[tree-sitter](https://github.com/tree-sitter/tree-sitter)|Parser generator tool for syntax|
 |[w3m](https://github.com/acg/w3m)|Text-based web browser|
+|[terminal-browser](https://github.com/zenbu-labs/terminal-browser)|Real browser in a terminal pane, driven by AI agents|
 |[git-lfs](https://github.com/git-lfs/git-lfs)|Git extension for large files|
 |[jq](https://github.com/jqlang/jq)|JSON processor|
 |[delta](https://github.com/dandavison/delta)|Syntax highlighting pager for git, diff, and grep output|
