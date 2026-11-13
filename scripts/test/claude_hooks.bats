@@ -6,7 +6,7 @@ setup_file() {
   load test_helper
   local name
   mkdir -p "${BATS_FILE_TMPDIR}/hooks"
-  for name in lint-shell log-tool route-agent vault-recall verify-on-stop worktree-create; do
+  for name in lint-shell log-tool route-agent vault-recall verify-on-stop worktree-create worktree-remove; do
     render_template "home/private_dot_claude/hooks/executable_${name}.sh.tmpl" \
       "${BATS_FILE_TMPDIR}/hooks/${name}.sh"
   done
@@ -161,8 +161,11 @@ function _legacy_repo {
 }
 
 @test "lint-shell hook is a no-op without dyshellint on PATH" {
+  local input
   printf 'echo $1\n' > "${WORK}/bad.sh"
-  PATH="/usr/bin:/bin" _run_hook "${WORK}/bad.sh"
+  # Built first: jq may share a directory with dyshellint, off the narrowed PATH.
+  input="$(jq -cn --arg f "${WORK}/bad.sh" '{tool_input: {file_path: $f}}')"
+  PATH="/usr/bin:/bin" run --separate-stderr bash "${HOOK}" <<< "${input}"
   assert_success
 }
 
@@ -496,4 +499,29 @@ function _recall {
   run --separate-stderr bash "${WORK}/broken.sh" <<< "{\"name\":\"wt\",\"cwd\":\"${WORK}\"}"
   assert_failure 1
   assert_output ""
+}
+
+@test "worktree-create refuses a name that leaves .worktrees/" {
+  git -C "${WORK}" init -q
+  local name input
+  for name in .. ../x a/../.. /abs 'a b'; do
+    input="$(jq -cn --arg n "${name}" --arg c "${WORK}" '{name: $n, cwd: $c}')"
+    run --separate-stderr bash "${HOOKS_DIR}/worktree-create.sh" <<< "${input}"
+    assert_failure
+    assert_output ""
+  done
+  [[ ! -e "${WORK}/.worktrees" ]] || fail "a refused name still created .worktrees/"
+}
+
+@test "worktree-remove deletes nothing outside .worktrees/" {
+  local tree="${WORK}/repo" input path
+  mkdir -p "${tree}/.worktrees/a"
+  touch "${tree}/keep" "${tree}/.worktrees/a/keep"
+  for path in "${tree}" "${tree}/.worktrees/." "${tree}/.worktrees//" "${tree}/.worktrees/a/.."; do
+    input="$(jq -cn --arg p "${path}" '{worktree_path: $p}')"
+    run --separate-stderr bash "${HOOKS_DIR}/worktree-remove.sh" <<< "${input}"
+    assert_success
+  done
+  assert_file_exist "${tree}/keep"
+  assert_file_exist "${tree}/.worktrees/a/keep"
 }

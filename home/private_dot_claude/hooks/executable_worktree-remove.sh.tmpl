@@ -19,6 +19,14 @@ path="$(dybatpho::json_get "${input}" '.worktree_path' 2> /dev/null)" || exit 0
 if [[ -z "${path}" || "${path}" == "null" ]] || ! dybatpho::is dir "${path}"; then
   exit 0
 fi
+# Only what worktree-create.sh made: never a main checkout or any other tree.
+# The same name rule as worktree-create.sh: `.worktrees/.` would take them all.
+rel="${path#*/.worktrees/}"
+if [[ "${path}" != */.worktrees/* || ! "${rel}" =~ ^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$ ||
+  "/${rel}/" == */../* || "/${rel}/" == */./* ]]; then
+  dybatpho::warn "worktree-remove: refusing ${path}, not under .worktrees/" >&2
+  exit 0
+fi
 
 # Run git from the main checkout: removing a worktree from inside it fails.
 common_dir="$(git -C "${path}" rev-parse --path-format=absolute --git-common-dir 2> /dev/null || true)"

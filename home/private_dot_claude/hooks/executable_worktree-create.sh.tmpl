@@ -16,6 +16,10 @@ cwd="$(dybatpho::json_get "${input}" '.cwd')"
 if [[ -z "${name}" || "${name}" == "null" ]]; then
   dybatpho::die "worktree-create: no name in hook input"
 fi
+# `..` would land on the main checkout, which the remove hook then deletes.
+if [[ ! "${name}" =~ ^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$ || "/${name}/" == */../* || "/${name}/" == */./* ]]; then
+  dybatpho::die "worktree-create: invalid name ${name}"
+fi
 
 # Resolve the main checkout, not the current worktree: --git-common-dir points
 # at the shared .git directory even when invoked from inside a linked worktree.
