@@ -190,6 +190,12 @@ policy:
       # chezmoi's age identities: reading one decrypts every .age file.
       - "Read(~/.config/chezmoi/*.key)"
       - "Edit(~/.config/chezmoi/*.key)"
+      # Rendered logins outside the stores above. The mise files that export
+      # tokens are not here: mise reads them for every shim in the sandbox.
+      - "Read(~/.config/rclone/**)"
+      - "Read(~/.config/dynet/config.json)"
+      - "Read(~/Working/enterprise/**/.docker*/**)"
+      - "Read(~/Working/enterprise/**/.kube/**)"
       # The dyai crew store's signing key: a worker that reads it can sign a verdict.
       - "Read(~/.config/dyai/node/**)"
       - "Edit(~/.config/dyai/node/**)"
