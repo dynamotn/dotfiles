@@ -25,7 +25,8 @@ if [[ "${SHELL:-}" != "${fish_bin}" ]]; then
   # We need chsh without sudo cause sometimes we don't have sudo permissions on collaborative environment
   chsh -s "${fish_bin}" || :
   {{- else if eq .chezmoi.os "darwin" }}
-  echo "${fish_bin}" | dybatpho::privilege_run -- tee -a /etc/shells
+  grep -qxF "${fish_bin}" /etc/shells \
+    || echo "${fish_bin}" | dybatpho::privilege_run -- tee -a /etc/shells
   chsh -s "${fish_bin}" || :
   {{- else }}
   chsh -s fish || :

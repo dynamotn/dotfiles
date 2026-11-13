@@ -20,7 +20,9 @@ spawn-sh-at-startup "~/.config/niri/scripts/gtk.sh"
 spawn-at-startup "noctalia"
 
 // Screen changes detection
+{{- if eq .kind "laptop" }}
 spawn-at-startup "shikane"
+{{- end }}
 
 // IM
 spawn-sh-at-startup "fcitx5 -d --replace"

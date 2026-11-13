@@ -12,7 +12,7 @@ dybatpho::register_common_handlers
 {{- if eq .place "office" }}
 
 # Office machines work out of the company vault
-export RBW_PROFILE="enterprise-{{ .company }}"
+export RBW_PROFILE="enterprise-{{ .company | lower }}"
 {{- end }}
 {{- if eq .chezmoi.os "darwin" }}
 

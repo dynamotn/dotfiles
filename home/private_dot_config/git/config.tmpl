@@ -160,8 +160,6 @@
         {{-   $theme = "latte" }}
         {{- end }}
         features = catppuccin-{{ $theme }}
-        # Change decorations
-        features = decorations
         # Show navigate section
         navigate = true
         # Show line number & Two side
@@ -242,7 +240,7 @@
         # Delete merged branch
         delete-merged = "!_() { git branch --merged | grep -v $(git main) | grep -v develop | xargs git branch -d; }; _"
         # Submodule clean
-        submodule-clean = "!_() { git submodule update --init --recursive && git submodule foreach --recursive 'git reset --hard' && git submodule foreach --recursive 'git clean -fd' }; _"
+        submodule-clean = "!_() { git submodule update --init --recursive && git submodule foreach --recursive 'git reset --hard' && git submodule foreach --recursive 'git clean -fd'; }; _"
         # Update main branch
         update-main = !bash ~/.config/git/scripts/update_main.sh
         # Push-mirror the GitLab project to GitHub via GitLab mirroring (default: origin -> gh)

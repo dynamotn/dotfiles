@@ -27,7 +27,9 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("noctalia")
 
   -- Screen changes detection
+{{- if eq .kind "laptop" }}
   hl.exec_cmd("shikane")
+{{- end }}
 
   -- IM
   hl.exec_cmd("fcitx5 -d --replace")
