@@ -37,7 +37,7 @@ EOF
   chmod u+w "${tree}"
   assert_success
   run cat "${BATS_TEST_TMPDIR}/calls"
-  assert_output 'elevated make olddefconfig'
+  assert_output 'elevated -- make olddefconfig'
 }
 
 @test "kernel::check_tree accepts a full source tree" {
