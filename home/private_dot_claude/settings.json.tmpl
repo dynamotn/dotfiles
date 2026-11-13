@@ -306,9 +306,18 @@
       (joinPath $wt "home/private_dot_config/thunderbird/profiles")
       (joinPath $wt "home/private_dot_config/tstruct/encrypted_auth.json.age")
       (joinPath $wt "home/private_dot_config/nvim/lua/per_machine/encrypted_F1.lua.age") -}}
+{{- /*
+  Every hook, git hook, chezmoi script and dyai-guard sources these from the
+  checkout and runs outside the sandbox, the root ones under `scz` too: a
+  session working in the checkout must not change them unasked.
+*/ -}}
+{{- $denyWrite := concat $static.sandbox.filesystem.denyWrite (list
+      (joinPath $wt "scripts/lib")
+      (joinPath $wt "scripts/*.sh")
+      (joinPath $wt ".pre-commit-config.yaml")) -}}
 {{- $derived := dict
       "permissions" $perms
-      "sandbox" (dict "filesystem" (dict "denyRead" $denyRead))
+      "sandbox" (dict "filesystem" (dict "denyRead" $denyRead "denyWrite" $denyWrite))
       "theme" $d.policy.theme
       "effortLevel" $d.policy.effortLevel
       "enabledPlugins" $enabled

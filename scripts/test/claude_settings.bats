@@ -34,10 +34,12 @@ function _render_settings {
   # Order-independent full-document equality against the captured baseline.
   # The plugin and marketplace lists are left out: they follow the dyai data,
   # which the next test checks, so adding a plugin needs no fixture edit.
-  # The sandbox denyRead paths are absolute under the working tree, which
-  # differs per checkout, so the repository path is normalized first.
+  # The sandbox denyRead and denyWrite paths are absolute under the working
+  # tree, which differs per checkout, so the repository path is normalized
+  # first.
   jq -S --arg wt "${DOTFILES_DIR}" 'del(.enabledPlugins, .extraKnownMarketplaces)
-    | .sandbox.filesystem.denyRead |= map(sub("^" + $wt; "@DOTFILES@"))' "${out}" > "${out}.sorted"
+    | .sandbox.filesystem.denyRead |= map(sub("^" + $wt; "@DOTFILES@"))
+    | .sandbox.filesystem.denyWrite |= map(sub("^" + $wt; "@DOTFILES@"))' "${out}" > "${out}.sorted"
   diff "${out}.sorted" "${EXPECTED}" \
     || fail "rendered settings.json differs from the pre-dyai baseline"
 }

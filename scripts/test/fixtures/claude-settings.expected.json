@@ -316,7 +316,10 @@
         "~/.local/share/nvim/mason",
         "~/.claude/plugins",
         "~/.krew/bin",
-        "~/.hunk/bin"
+        "~/.hunk/bin",
+        "@DOTFILES@/scripts/lib",
+        "@DOTFILES@/scripts/*.sh",
+        "@DOTFILES@/.pre-commit-config.yaml"
       ]
     },
     "network": {
