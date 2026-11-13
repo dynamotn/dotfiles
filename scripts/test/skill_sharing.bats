@@ -4,7 +4,6 @@ setup() {
 
 @test "bundled skills live in the shared ~/.agents store, not Claude's own dir" {
   [ -f "${DOTFILES_DIR}/home/dot_agents/skills/chezmoi-source/SKILL.md" ]
-  [ -f "${DOTFILES_DIR}/home/dot_agents/skills/dybatpho/SKILL.md" ]
   [ -f "${DOTFILES_DIR}/home/dot_agents/skills/finish/SKILL.md" ]
   [ -f "${DOTFILES_DIR}/home/dot_agents/skills/learn/SKILL.md" ]
   [ ! -e "${DOTFILES_DIR}/home/private_dot_claude/skills/chezmoi-source" ]
@@ -27,6 +26,15 @@ setup() {
   read -r target < "${DOTFILES_DIR}/home/dot_agents/skills/symlink_dyai.tmpl"
   [[ "${target}" == "{{ .chezmoi.sourceDir }}/../scripts/lib/dyai/skills/dyai" ]]
   [[ -f "${DOTFILES_DIR}/scripts/lib/dyai/skills/dyai/SKILL.md" ]] || skip "the dyai submodule is not checked out"
+}
+
+@test "the dybatpho skill reaches every agent from the dybatpho submodule" {
+  local target
+  read -r target < "${DOTFILES_DIR}/home/dot_agents/skills/symlink_dybatpho.tmpl"
+  [[ "${target}" == "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/skills/dybatpho" ]]
+  [ ! -e "${DOTFILES_DIR}/home/dot_agents/skills/dybatpho" ]
+  [[ -f "${DOTFILES_DIR}/scripts/lib/dybatpho/skills/dybatpho/SKILL.md" ]] \
+    || skip "the dybatpho submodule does not ship its skill at this commit"
 }
 
 @test "hunk's bundled review skill reaches every agent through ~/.agents" {

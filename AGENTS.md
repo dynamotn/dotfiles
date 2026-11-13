@@ -62,6 +62,20 @@ apply here.
   `# @description`, `# @arg`, `# @stdout`.
 - Every library has a matching `scripts/test/<area>.bats`. A new function that
   can be tested gets a test in the same commit.
+- How to use dybatpho itself is in its skill (`scripts/lib/dybatpho/skills/dybatpho`,
+  shared to every agent as `~/.agents/skills/dybatpho`). Pitfalls specific to
+  this tree:
+  - `dyshellint` exits 0 on warnings alone; pass `-warnings-as-errors` when its
+    status decides anything.
+  - A source named `executable_*` is stored without the executable bit, so
+    `BSG037` fires on it: run `dyshellint -exclude-rules BSG037` on such files
+    rather than `chmod +x` the source.
+  - `cmd | grep -q pattern` under `pipefail` can fail with status 141 (SIGPIPE);
+    capture the output first, or drop `-q` and redirect to `/dev/null`.
+  - The bats `test_helper` loads dybatpho once with a fixed `--modules` list. A
+    library that starts using a new module needs it added there too.
+  - `scripts/test.sh` has no `--related`: pass bats files, or `--all`,
+    `--dyai`, `--dytoy`, `--secrets`.
 
 ## Checks before reporting work done
 
