@@ -145,6 +145,9 @@ policy:
       - "Bash(rm -rf *)"
       - "Bash(rm -fr *)"
       - "Bash(shred *)"
+      # The deny rules below match `age -d` only as a prefix, and
+      # `age -i KEY -d FILE` decrypts all the same.
+      - "Bash(age *)"
       - "Bash(sudo *)"
       - "Bash(emerge *)"
       - "Bash(pacman *)"
@@ -182,6 +185,9 @@ policy:
       - "Read(~/.netrc)"
       - "Read(~/.password-store/**)"
       - "Read(~/.local/share/keyrings/**)"
+      # chezmoi's age identities: reading one decrypts every .age file.
+      - "Read(~/.config/chezmoi/*.key)"
+      - "Edit(~/.config/chezmoi/*.key)"
       # The dyai crew store's signing key: a worker that reads it can sign a verdict.
       - "Read(~/.config/dyai/node/**)"
       - "Edit(~/.config/dyai/node/**)"
