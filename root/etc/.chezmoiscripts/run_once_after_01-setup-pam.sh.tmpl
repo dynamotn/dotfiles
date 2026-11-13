@@ -27,6 +27,14 @@ if dybatpho::is file /etc/pam.d/system-local-login; then
   fi
   {{- end }}
 fi
+# sudo takes a touch of the key, else falls through to the password: u2f is
+# `sufficient`, so a missing or unregistered key locks no one out.
+if dybatpho::is file /etc/pam.d/sudo && dybatpho::is file /etc/pam.d/u2f \
+  && ! grep -q '^auth\s*include\s*u2f' /etc/pam.d/sudo; then
+  dybatpho::header "Adding pam_u2f to sudo"
+  # dyshellint disable=BSG083 Linux only, where GNU and BusyBox sed take -i
+  sed -i '1 i\auth include u2f' /etc/pam.d/sudo
+fi
 {{-   if eq .osid "linux-arch" "linux-ubuntu" }}
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su
 sed -i '/#auth\s*required\s*pam_wheel.so/s/^#//g' /etc/pam.d/su-l

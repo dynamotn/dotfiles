@@ -1,7 +1,10 @@
+# A password or a touch of the key (pam.d/u2f), never nothing: anything running
+# as the user, an agent's plugin or an npm postinstall included, could
+# otherwise become root without a prompt.
 {{ if eq .osid "linux-gentoo" -}}
 # Run as sysadm_r:sysadm_t: the staff_t domain of a login cannot administer
 # the system once SELinux enforces.
-%wheel ALL=(ALL:ALL) ROLE=sysadm_r TYPE=sysadm_t NOPASSWD: ALL
+%wheel ALL=(ALL:ALL) ROLE=sysadm_r TYPE=sysadm_t ALL
 {{ else -}}
-%wheel ALL=(ALL:ALL) NOPASSWD: ALL
+%wheel ALL=(ALL:ALL) ALL
 {{ end -}}
