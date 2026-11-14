@@ -235,6 +235,10 @@ policy:
   guard: true
   theme: auto
   effortLevel: medium
+  # Claude's main model, and the stronger one it consults at decision points
+  # (Claude Code's advisor tool). /fast on a Sonnet session switches it to Opus.
+  model: sonnet
+  advisorModel: opus
   # Shared approval stance, translated per agent where an edits-only preset
   # exists (Claude's permissions.defaultMode: acceptEdits, in settings.json.tmpl).
   approval: accept-edits

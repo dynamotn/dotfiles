@@ -320,6 +320,8 @@
       "sandbox" (dict "filesystem" (dict "denyRead" $denyRead "denyWrite" $denyWrite))
       "theme" $d.policy.theme
       "effortLevel" $d.policy.effortLevel
+      "model" $d.policy.model
+      "advisorModel" $d.policy.advisorModel
       "enabledPlugins" $enabled
       "extraKnownMarketplaces" $d.marketplaces -}}
 {{- if eq (toString $d.policy.attribution) "false" }}{{ $_ := set $derived "attribution" (dict "commit" "" "pr" "") }}{{ end -}}

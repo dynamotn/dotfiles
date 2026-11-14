@@ -71,6 +71,10 @@ global:
         security-auditor: strong
         architect-reviewer: strong
         research-analyst: standard
+        # Search and lookups on the fast tier; running tests on the standard one.
+        search-specialist: fast
+        data-researcher: fast
+        accessibility-tester: standard
   commands: []
   # MCP servers registered into every MCP-capable agent, in its own format.
   mcp:
@@ -206,8 +210,9 @@ global:
     # opencode's default provider (Copilot) rejects its default model and
     # github-copilot/gpt-6-sol ("model is not supported"), so it uses the free
     # OpenCode Zen model; the codex and gemini names are untested on this machine.
+    # claude codes on sonnet and consults the advisor of the user's settings (policy.advisorModel).
     model:
-      claude: opus
+      claude: sonnet
       copilot: gpt-6-sol
       opencode: opencode/deepseek-v4.1-flash-free
       codex: gpt-5.3-codex
