@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # secrets/data is a private submodule; never ask CI for it.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
 
@@ -52,7 +52,7 @@ jobs:
     name: Bats suite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
 
