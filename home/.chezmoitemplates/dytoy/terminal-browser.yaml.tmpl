@@ -26,8 +26,14 @@ archive:
   - path: terminal-browser/*
     location: {{ $path }}
     strip: 1
-location: {{ $path }}
+# The tree lands in `{{ $path }}`; this is where the command itself ends up, which
+# dytoy marks executable and checks to tell whether the tool is installed.
+location: {{ $path }}/bin
 hook:
+  # `cp -R` into an existing directory nests it (`bin/bin`), so the old tree
+  # goes before the new one is copied in.
+  before: |-
+    rm -rf -- "{{ $path }}"
   after: |-
     ln -sf "{{ $path }}/bin/terminal-browser" "$(dybatpho::path_join "$HOME" ".local" "bin" "terminal-browser")"
 {{- end }}
