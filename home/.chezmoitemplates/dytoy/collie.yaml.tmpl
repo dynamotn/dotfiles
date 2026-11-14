@@ -1,0 +1,43 @@
+{{- /* doc
+name: collie
+url: "https://github.com/AltanS/collie"
+description: Self-hosted phone PWA to drive coding agents in Herdr, tmux or Zellij
+category: AI tools
+subcategory: Models and agents
+order: 140
+*/ -}}
+{{- if eq .chezmoi.os "linux" "darwin" }}
+{{-   $os := .chezmoi.os }}
+{{-   if eq .chezmoi.os "darwin" }}
+{{-     $os = "macos" }}
+{{-   end }}
+{{-   $arch := "" }}
+{{-   if eq .chezmoi.arch "amd64" }}
+{{-     $arch = "x64" }}
+{{-   else if eq .chezmoi.arch "arm64" }}
+{{-     $arch = "arm64" }}
+{{-   end }}
+{{-   $path := joinPath .chezmoi.homeDir ".local" "share" "collie" "app" }}
+name: collie
+method: binary
+github:
+  repo: AltanS/collie
+  release_asset: collie-%1v-{{ $os }}-{{ $arch }}.tar.gz
+  sha256: collie-%1v-{{ $os }}-{{ $arch }}.tar.gz.sha256
+# `bin/collie` finds `web/` and `herdr-plugin.toml` from its own root, so the
+# whole release tree is kept and only the binary is linked onto PATH.
+archive:
+  - path: collie-%1v-{{ $os }}-{{ $arch }}/*
+    location: {{ $path }}
+    strip: 1
+# The tree lands in `{{ $path }}`; this is where the command itself ends up, which
+# dytoy marks executable and checks to tell whether the tool is installed.
+location: {{ $path }}/bin
+hook:
+  # `cp -R` into an existing directory nests it (`bin/bin`, `web/web`), so the
+  # old tree goes before the new one is copied in.
+  before: |-
+    rm -rf -- "{{ $path }}"
+  after: |-
+    ln -sf "{{ $path }}/bin/collie" "$(dybatpho::path_join "$HOME" ".local" "bin" "collie")"
+{{- end }}

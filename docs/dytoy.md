@@ -369,6 +369,7 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[rtk](https://github.com/rtk-ai/rtk)|Proxy that reduces LLM token consumption|
 |[laya](https://github.com/NandhaKishorM/laya)|Typed decision model, served to agents over MCP|
 |[harness2](https://github.com/google-research/harness2)|Research framework that optimises the harness around an LLM agent|
+|[collie](https://github.com/AltanS/collie)|Self-hosted phone PWA to drive coding agents in Herdr, tmux or Zellij|
 
 ## Android tools
 
