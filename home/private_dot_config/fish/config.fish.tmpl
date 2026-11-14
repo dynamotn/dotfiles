@@ -126,6 +126,10 @@ if status is-interactive
     set -gx GITLINT_CONFIG "$XDG_CONFIG_HOME/gitlint/gitlint"
     # claude-mem: every agent's session start sees what the others observed
     set -gx CLAUDE_MEM_SESSION_START_INCLUDE_ALL_SOURCES true
+    {{- if ne .osid "android" }}
+    # dyai-guard: an asked removal also shows laya's risk (never changes the decision)
+    set -gx DYAI_GUARD_LAYA 1
+    {{- end }}
 
     # Hooks
     # Fzf config
