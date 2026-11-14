@@ -4,6 +4,21 @@ These rules apply before an AI agent reports any work as finished.
 
 - Run the checks the repository already provides — its test suite, linter,
   formatter, and pre-commit hooks — and name the ones that were run.
+- Size the test run to the moment. A whole suite takes minutes and its output
+  fills the context, so it is not the check to repeat after every edit:
+  - while editing, run the one test file, or the one test, of the code in
+    hand;
+  - before reporting, run the tests covering everything that changed: with
+    the repository's own selector when it has one (`--changed`, `--related`,
+    `--affected`), otherwise the test files of every module touched;
+  - run the whole suite once, before a merge or a push, when the change
+    reaches what every test shares, or when no smaller set can be named.
+    Never rerun it over a tree it already passed on, and never for a change
+    to documentation alone.
+- Say which of these ran. A selected run is a verified change; it is not "the
+  whole suite passes", so do not report it as that.
+- Ask a test runner for its failures only (a quiet or summary mode) rather
+  than reading every passing line.
 - Never bypass a check to make a commit land: no `--no-verify`, no skipping
   hooks, and no disabling a lint rule to silence a warning instead of fixing
   the code behind it.

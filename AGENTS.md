@@ -74,20 +74,27 @@ apply here.
     capture the output first, or drop `-q` and redirect to `/dev/null`.
   - The bats `test_helper` loads dybatpho once with a fixed `--modules` list. A
     library that starts using a new module needs it added there too.
-  - `scripts/test.sh` has no `--related`: pass bats files, or `--all`,
-    `--dyai`, `--dytoy`, `--secrets`.
+  - `scripts/test.sh --changed` reads the working tree and the commits ahead
+    of `main`: on `main` itself, run it before committing, as a commit there
+    is no longer a change. It prints one line per passing file; `--jobs 1`
+    with `--all` gives the full TAP output.
 
 ## Checks before reporting work done
 
 ```bash
-./scripts/test.sh --all        # whole bats suite
+./scripts/test.sh <file.bats>  # while editing: the tests of the code in hand
+./scripts/test.sh --changed    # before reporting: the tests covering the change
+./scripts/test.sh --all        # whole bats suite, once, before a merge
 ./scripts/test.sh --dytoy      # dytoy YAML against its schema
 ./scripts/test.sh --secrets    # secrets YAML against schemas/secrets/
 dyshellint <changed scripts>   # shellcheck + shfmt + its own rules
 pre-commit run --all-files     # incl. betterleaks and detect-private-key
 ```
 
-Run at least the suite covering what changed, and say which ones ran.
+`--changed` picks the bats file named after each changed file and every bats
+file that mentions it (`scripts/lib/test_select.sh`), and the whole suite when
+the runner, `test_helper` or dybatpho changed, or a file no test names. Say
+which ones ran.
 
 ## Repository-specific rules
 

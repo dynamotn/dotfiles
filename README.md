@@ -254,6 +254,7 @@ Conventions for editing this repository, for humans and agents alike, are in
 [AGENTS.md](AGENTS.md). Before committing, run:
 
 ```sh
+./scripts/test.sh --changed    # the tests covering what changed since main
 ./scripts/test.sh --all        # bats suite and every schema validation
 dyshellint <changed scripts>   # shellcheck + shfmt + house rules
 pre-commit run --all-files     # incl. betterleaks and detect-private-key
