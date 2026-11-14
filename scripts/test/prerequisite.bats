@@ -150,6 +150,38 @@ EOF
   assert_line --partial "dnf [] install -y"
 }
 
+@test "prerequisite.sh takes the sleep of its sudo keepalive down with it" {
+  # Only the keepalive's subshell was killed: its `sleep 60` lived on, holding
+  # the script's output open, so this file took three minutes to end.
+  setup_linux 1000
+  fake_sudo
+  local pid_file="${BATS_TEST_TMPDIR}/sleep.pid" real_sleep
+  real_sleep="$(command -v sleep)"
+  rm "${FAKE_BIN}/sleep"
+  printf '#!/bin/sh\necho "$$" > "%s"\nexec "%s" "$@"\n' "${pid_file}" "${real_sleep}" \
+    > "${FAKE_BIN}/sleep"
+  # An install that lasts until the keepalive sleeps, as a real one does.
+  cat > "${FAKE_BIN}/dnf" << EOF
+#!/bin/sh
+i=0
+while [ ! -f '${pid_file}' ] && [ "\${i}" -lt 50 ]; do
+  '${real_sleep}' 0.1
+  i=\$((i + 1))
+done
+EOF
+  chmod +x "${FAKE_BIN}/sleep" "${FAKE_BIN}/dnf"
+
+  # Into a file: `run` would wait for the sleep to let go of its pipe.
+  env PATH="${FAKE_BIN}" "${SH_BIN}" "${PREREQUISITE}" &> "${BATS_TEST_TMPDIR}/out"
+  assert_file_exists "${pid_file}"
+  local _
+  for _ in {1..20}; do
+    kill -0 "$(< "${pid_file}")" 2> /dev/null || return 0
+    "${real_sleep}" 0.1
+  done
+  fail "the keepalive's sleep is still running"
+}
+
 @test "prerequisite.sh upgrades Arch in one transaction with the install" {
   # `pacman -Sy` followed by an install is a partial upgrade.
   setup_linux 0

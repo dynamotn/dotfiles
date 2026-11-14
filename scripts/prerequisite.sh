@@ -67,19 +67,24 @@ _keep_sudo_alive() {
   sudo -v
   local parent_pid="$$"
   (
+    # The sleep is waited for, not run in the foreground, so the kill below
+    # takes it along: left behind, it held the script's output open for up to
+    # a minute after the script ended.
+    trap 'kill "${!:-}" 2> /dev/null; exit' TERM
     while true; do
       # dyshellint disable=BSG035 refreshing the sudo timestamp is the point of this loop
-      sudo -n true
-      sleep 60
+      sudo -n true 2> /dev/null
+      sleep 60 &
+      wait "$!" || true
       kill -0 "${parent_pid}" 2> /dev/null || exit
     done
-  ) 2> /dev/null &
+  ) &
   local sudo_pid="$!"
   # The pid is expanded now, while the local holds it: the trap runs after
   # this function has returned. EXIT alone also covers an interrupt, which
   # still ends the script as it would without the keepalive.
   # shellcheck disable=SC2064
-  trap "kill -9 ${sudo_pid} 2> /dev/null || true" EXIT
+  trap "kill ${sudo_pid} 2> /dev/null || true" EXIT
 }
 
 #######################################
