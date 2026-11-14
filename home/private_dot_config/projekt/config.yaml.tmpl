@@ -189,17 +189,6 @@ folders:
     name: "notes"
     is_workspace: false
     priority: 0
-  - path: {{ .chezmoi.homeDir }}/Documents/DyBrain/_assets/books
-    prefix: "book"
-    is_workspace: true
-    regex: ""
-    priority: 0
-    git:
-      host: gl
-      group: dynamo-brain/books
-      repos:
-        - name: self-development
-          path: self-development
   {{- end }}
   {{- $top := . }}
   {{- range .decryptEnterprise }}
