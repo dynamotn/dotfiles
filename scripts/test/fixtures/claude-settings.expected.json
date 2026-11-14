@@ -179,7 +179,10 @@
   "permissions": {
     "allow": [
       "Bash(git wt *)",
-      "Bash(rtk git wt *)"
+      "Bash(rtk git wt *)",
+      "mcp__dybrain__read",
+      "mcp__dybrain__similar",
+      "mcp__dybrain__find"
     ],
     "ask": [
       "Bash(git push)",

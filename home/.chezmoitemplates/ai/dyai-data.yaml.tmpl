@@ -118,6 +118,10 @@ policy:
       # outside the sandbox, and a sandboxed agent can plant what makes them
       # act (a textconv in .git/config, a chezmoi template, a mise.toml), or
       # read past the sandbox with them (`git diff --no-index ~/.ssh/...`).
+      # The vault's read-only lookups: the server hides its sensitive notes itself.
+      - "mcp__dybrain__read"
+      - "mcp__dybrain__similar"
+      - "mcp__dybrain__find"
     ask:
       - "Bash(git push)"
       - "Bash(git push:*)"
