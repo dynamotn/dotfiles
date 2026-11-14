@@ -327,6 +327,13 @@ agents:
     # Ollama or LM Studio provider included) once they get subagents.
     model_tiers:
 {{ $d.model_tiers | toYaml | trim | indent 6 }}
+  # Copilot on its own GPT line, a provider apart from Claude; each checked
+  # live on 2026-11-15. Its main model is gpt-6-sol (~/.copilot/settings.json).
+  copilot:
+    model_tiers:
+      fast: gpt-6-luna
+      standard: gpt-6-sol
+      strong: gpt-6.1-sol
 # Opt-in presets pulled per project by `dyai use <name>`; kept out of the
 # global baseline so the discovery index stays lean. One preset per tool, so a
 # project pulls only what it uses. Subagent names resolve against the pinned

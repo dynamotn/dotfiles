@@ -1,5 +1,6 @@
 {
   "includeCoAuthoredBy": false,
+  "model": "gpt-6-sol",
   "statusLine": {
     "command": "bash ~/.copilot/statusline.sh"
   }
