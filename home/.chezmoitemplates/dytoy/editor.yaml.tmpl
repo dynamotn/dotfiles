@@ -24,7 +24,8 @@ alpine:
     - name: neovim
 termux:
   packages:
-    - name: neovim
+    # Conflicts with the stable `neovim`, which apt then removes
+    - name: neovim-nightly
     - name: tree-sitter
 macos:
   packages:
