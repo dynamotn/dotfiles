@@ -34,6 +34,7 @@ git -C "${repo_root}" add .gitmodules{{ $onFailure }}
 git -C "${repo_root}" submodule sync --recursive{{ $onFailure }}
 git -C "${repo_root}" update-index --assume-unchanged .gitmodules{{ $onFailure }}
 git -C "${repo_root}" submodule update --init \
+  scripts/lib/dyai \
   {{-   if or .decryptPersonal (not (empty .decryptEnterprise)) }}
   secrets/data \
   {{-   end }}
