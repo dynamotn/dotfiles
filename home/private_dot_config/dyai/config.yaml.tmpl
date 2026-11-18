@@ -793,13 +793,15 @@ registry:
       skills:
         - K-Dense-AI/scientific-agent-skills@scientific-critical-thinking
         - intellectronica/agent-skills@youtube-transcript
-    # Shell scripting (bash, fish): defensive patterns, shellcheck, bats.
+    # Shell scripting (bash, fish): defensive patterns, shellcheck, bats, and
+    # the rules of our own bash-coding-style guide that dyshellint checks.
     shell:
       subagents: [cli-developer]
       skills:
         - wshobson/agents@bash-defensive-patterns
         - wshobson/agents@shellcheck-configuration
         - wshobson/agents@bats-testing-patterns
+        - dynamotn/bash-coding-style@bash-coding-style
     # Perl (nvim supports it; no VoltAgent subagent, so skills-only).
     perl:
       skills:
