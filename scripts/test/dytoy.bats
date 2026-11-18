@@ -1009,3 +1009,62 @@ EOF
   refute_output --partial 'install:'
   assert_output --partial 'Installed all os tools'
 }
+
+# Print "<dependency> <file>" for every entry of a `dependencies:` list of the
+# definitions in a directory. Template lines and comments are skipped.
+# @arg $1 string Directory of definitions
+function _declared_dependencies {
+  local file
+  shopt -s nullglob
+  for file in "$1"/*.yaml "$1"/*.yaml.tmpl; do
+    awk -v f="${file##*/}" '
+      /^dependencies:/ { in_list = 1; next }
+      in_list && /^  - / { print $2 " " f; next }
+      in_list && !/^  - / && !/^\{\{/ && !/^[[:space:]]*#/ { in_list = 0 }
+    ' "${file}"
+  done
+}
+
+# Print "<file>: <line>" for every package of an OS that is not a `name:`
+# entry, which `dytoy` could not read as an object.
+# @arg $1 string Directory of definitions
+function _plain_packages {
+  local file
+  shopt -s nullglob
+  for file in "$1"/*.yaml "$1"/*.yaml.tmpl; do
+    awk -v f="${file##*/}" '
+      /^  packages:/ { in_list = 1; next }
+      in_list && /^    - / { if ($0 !~ /^    - (name:|\{)/) print f ": " $0; next }
+      in_list && !/^    / && !/^\{\{/ && !/^[[:space:]]*#/ { in_list = 0 }
+    ' "${file}"
+  done
+}
+
+@test "every dependency of a tool names a tool that dytoy defines" {
+  local dir="${DOTFILES_DIR}/home/.chezmoitemplates/dytoy"
+  local names failures=() dependency file
+  names="$(cat "${dir}"/*.yaml "${dir}"/*.yaml.tmpl | awk '/^name: / { print $2 }' | sort -u)"
+  while read -r dependency file; do
+    [[ -n "${dependency}" ]] || continue
+    grep -qxF "${dependency}" <<< "${names}" \
+      || failures+=("${file}: depends on ${dependency}, which no definition names")
+  done < <(_declared_dependencies "${dir}")
+  ((${#failures[@]} == 0)) || fail "$(printf '%s\n' "${failures[@]}")"
+}
+
+@test "every package of a tool is a name entry, not a plain string" {
+  run _plain_packages "${DOTFILES_DIR}/home/.chezmoitemplates/dytoy"
+  assert_success
+  assert_output ''
+}
+
+@test "the dependency and package checks catch what broke on Android" {
+  local dir="${BATS_TEST_TMPDIR}/defs"
+  mkdir -p "${dir}"
+  printf 'name: ov\ndependencies:\n  - golang\n' > "${dir}/ov.yaml"
+  printf 'name: go\ntermux:\n  packages:\n    - golang\n' > "${dir}/go.yaml"
+  run _declared_dependencies "${dir}"
+  assert_output 'golang ov.yaml'
+  run _plain_packages "${dir}"
+  assert_output 'go.yaml:     - golang'
+}
