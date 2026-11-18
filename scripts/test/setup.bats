@@ -52,6 +52,21 @@ function fake_chezmoi_version {
   done <<< "${output}"
 }
 
+@test "setup.sh turns --machine into the answer that picks the machine" {
+  run_setup 'printf "%s\n" "${PROMPT_MACHINE}"'
+  local prompt="${output}"
+  grep -qF "\"${prompt}\"" "${DOTFILES_DIR}/.chezmoi.yaml.tmpl"
+
+  MACHINE="n0t3" run_setup '_chezmoi_init_args; printf "%s\n" "${CHEZMOI_INIT_ARGS[@]}"'
+  assert_success
+  assert_line -- "--promptString"
+  assert_line -- "${prompt}=n0t3"
+
+  MACHINE="no good" run_setup '_chezmoi_init_args'
+  assert_failure
+  assert_stderr --partial "Invalid machine name"
+}
+
 @test "setup.sh turns --identities into decryption answers chezmoi applies" {
   dybatpho::is command chezmoi || skip "chezmoi is not installed"
 
@@ -316,7 +331,8 @@ EOF
   assert_success
   assert_output "unset|set -e http_proxy https_proxy no_proxy"
   run cat "${CALL_LOG}"
-  assert_output "chezmoi apply ${HOME}/.config/dynet ${HOME}/.config/git/config"
+  local git_dir="${HOME}/.config/git"
+  assert_output "chezmoi apply --parent-dirs ${HOME}/.config/dynet ${git_dir}/config ${git_dir}/scripts"
 }
 
 @test "setup.sh skips the system layer inside a container unless asked" {

@@ -48,6 +48,9 @@ export PATH="${BIN_DIR}:${PATH}"
 # stored answers win over these.
 PROMPT_PERSONAL="Do you want to decrypt personal's secrets (y/n)"
 PROMPT_ENTERPRISE="Which company's secrets do you want to decrypt"
+# The machine name picks its entry of machines.yaml. Where the hostname says
+# nothing, as on Termux (`localhost`), the default name matches no entry.
+PROMPT_MACHINE="What is this machine's name"
 
 #######################################
 # @description Spec of setup.sh
@@ -59,6 +62,8 @@ function _spec_main {
     validate:"dybatpho::validate_log_level \$OPTARG"
   dybatpho::opts::flag "Use default values of chezmoi" USE_DEFAULT --use-default -d on:true off:false init:="false"
   dybatpho::opts::param "List of identities to decrypt, separated by \`,\`" IDENTITIES --identities -i optional:true on:
+  dybatpho::opts::param "Name of this machine, which picks its entry of machines.yaml" MACHINE \
+    --machine -m optional:true on:
   dybatpho::opts::flag "Apply the root-owned system layer even inside a container" SYSTEM_LAYER --system -s \
     on:true off:false init:="false"
   dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
@@ -178,6 +183,13 @@ function _chezmoi_init_args {
     CHEZMOI_INIT_ARGS+=(--prompt)
   fi
 
+  # chezmoi keeps a stored answer over this flag (promptStringOnce), so a
+  # machine that was set up under another name needs its chezmoi.yaml removed.
+  if ! dybatpho::string_is_blank "${MACHINE:-}"; then
+    [[ "${MACHINE}" =~ ^[A-Za-z0-9_-]+$ ]] || dybatpho::die "Invalid machine name: ${MACHINE}"
+    CHEZMOI_INIT_ARGS+=(--promptString "${PROMPT_MACHINE}=${MACHINE}")
+  fi
+
   # Blank fields, such as the one a trailing `,` leaves, are skipped.
   local identity fields enable_personal=false
   local -a identities=() enterprise_identities=()
@@ -217,7 +229,12 @@ function _chezmoi_init_args {
 # @noargs
 #######################################
 function _detect_network {
-  chezmoi apply "${HOME}/.config/dynet" "${HOME}/.config/git/config"
+  # --parent-dirs: on a fresh home `~/.config/git` does not exist yet, and
+  # chezmoi does not create the directory of a single file it is asked to apply.
+  # git/scripts: `git/config` registers hooks that run them (git 2.54+), and a
+  # missing one fails every checkout, the submodules' included.
+  chezmoi apply --parent-dirs "${HOME}/.config/dynet" "${HOME}/.config/git/config" \
+    "${HOME}/.config/git/scripts"
   # shellcheck source=lib/network.sh
   . "${SCRIPT_DIR}/lib/network.sh"
   network::detect "${HOME}/.config/dynet/config.json" "${HOME}/.local/state/dynet"
