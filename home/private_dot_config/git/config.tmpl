@@ -28,6 +28,9 @@
         # Use SSH instead of GPG to sign
         format = ssh
 {{- end }}
+[gpg "ssh"]
+        # My public keys, to verify signatures with `git log --show-signature`
+        allowedSignersFile = ~/.config/git/allowed_signers
 [commit]
         {{- if $signingKey }}
         # Always sign commit

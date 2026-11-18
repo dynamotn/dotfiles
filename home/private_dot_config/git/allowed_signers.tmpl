@@ -1,0 +1,4 @@
+{{- /* Any email: enterprise ones live in secrets, and the key alone proves it is mine */ -}}
+{{- range list "personal" "enterprise-shared" "enterprise-F1" "enterprise-U3T" -}}
+* {{ includeTemplate (printf "ssh/pub/%s_ed25519.txt" .) | trim }}
+{{ end -}}
