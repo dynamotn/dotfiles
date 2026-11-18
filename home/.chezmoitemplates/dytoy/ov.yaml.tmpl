@@ -12,7 +12,15 @@ is_essential: true
 method: shell
 dependencies:
   - go
-content: go install github.com/noborus/ov@latest
+# Termux's Go is android/arm64 with cgo, and ov pulls in golang.design/x/clipboard,
+# whose Android build needs the GLES2 headers and fails without them. A static
+# linux/arm64 build runs on Termux as well. Go puts a cross-compiled binary
+# under bin/linux_arm64, so it is moved where a plain `go install` puts it.
+content: |-
+  gopath_bin="$(go env GOPATH)/bin"
+  dest="$(go env GOBIN)"
+  env -u GOBIN GOOS=linux CGO_ENABLED=0 go install github.com/noborus/ov@latest
+  install -D -m 755 "${gopath_bin}/linux_arm64/ov" "${dest:-${gopath_bin}}/ov"
 {{- else }}
 # Although this is essential tool but there isn't any packages on Arch, Alpine,
 # Ubuntu so I will use binary
