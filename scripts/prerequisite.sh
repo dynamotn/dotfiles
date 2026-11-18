@@ -153,7 +153,13 @@ _setup_alpine() {
 # @noargs
 #######################################
 _setup_termux() {
-  pkg update -y && pkg upgrade -y
+  # A partial upgrade leaves libcurl out of step with openssl, which breaks
+  # `curl`, `git` over HTTPS and `pkg` itself. `full-upgrade` pulls the new
+  # dependencies in, and a changed config file takes the maintainer's version
+  # instead of stopping on a prompt that nobody answers over SSH.
+  DEBIAN_FRONTEND=noninteractive apt-get update -y
+  DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y \
+    -o Dpkg::Options::=--force-confnew
   termux-change-repo && pkg update -y
   termux-setup-storage
   # Linux compatible tools

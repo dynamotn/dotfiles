@@ -36,3 +36,6 @@
 
 # Termux reads its colors only from ~/.termux/colors.properties.
 .config/termux/color.properties
+
+# Old SSH keys
+.ssh/key
