@@ -138,17 +138,20 @@ monitorInputs:
   - hdmi2
   - usbc
 # Browser and mail profiles: `main` on Mod+E / Mod+M, `other` on the same keys
-# with Shift. Empty away from home and office, where those keys stay unbound
+# with Shift. The enterprise one is the first company with a browser (else mail)
+# profile, main at the office; an empty one leaves its keys unbound
+{{- $personal := .decryptPersonal | ternary "Personal" "" }}
+{{- $enterprise := "" }}
+{{- with concat .browserEnterpriseProfiles .mailEnterpriseProfiles }}
+{{-   $enterprise = printf "Enterprise-%s" (first .) }}
+{{- end }}
 profiles:
-{{- if eq .place "home" }}
-  main: Personal
-  other: Enterprise-F1
-{{- else if eq .place "office" }}
-  main: Enterprise-{{ .company }}
-  other: Personal
+{{- if eq .place "office" }}
+  main: {{ $enterprise | quote }}
+  other: {{ $personal | quote }}
 {{- else }}
-  main: ""
-  other: ""
+  main: {{ $personal | quote }}
+  other: {{ $enterprise | quote }}
 {{- end }}
 # Key bindings of every window manager (niri, Hyprland, aerospace, OmniWM and
 # Hammerspoon). `key` is written the niri way: Mod (Super on Linux, Command on

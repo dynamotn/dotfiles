@@ -69,3 +69,14 @@ function _no_duplicates {
     grep -qF "\"${action}\"" "${out}/consumers" || fail "no window manager binds ${action}"
   done < "${out}/actions"
 }
+
+@test "the enterprise profile is main at the office and other elsewhere" {
+  local out="${BATS_TEST_TMPDIR}/rules.yaml"
+  local enterprise='"browserEnterpriseProfiles":[],"mailEnterpriseProfiles":["F1","T1"]'
+  _render "${RULES}" "${out}" "{\"place\":\"office\",\"decryptPersonal\":true,${enterprise}}"
+  run yq -o=j -I=0 '.profiles' "${out}"
+  assert_output '{"main":"Enterprise-F1","other":"Personal"}'
+  _render "${RULES}" "${out}" "{\"place\":\"mobility\",\"decryptPersonal\":false,${enterprise}}"
+  run yq -o=j -I=0 '.profiles' "${out}"
+  assert_output '{"main":"","other":"Enterprise-F1"}'
+}

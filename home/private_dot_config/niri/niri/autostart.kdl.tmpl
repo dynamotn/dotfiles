@@ -31,12 +31,9 @@ spawn-sh-at-startup "fcitx5 -d --replace"
 spawn-at-startup "kitty" "zellij"
 
 // Browser and email client
-{{- if eq .place "home" }}
-spawn-at-startup "{{ $firefoxSettings.executableFile }}" "-P" "Personal"
-spawn-at-startup "{{ $thunderbirdSettings.executableFile }}" "-P" "Personal"
-{{- else if eq .place "office" }}
-spawn-at-startup "{{ $firefoxSettings.executableFile }}" "-P" "Enterprise-{{ .company }}"
-spawn-at-startup "{{ $thunderbirdSettings.executableFile }}" "-P" "Enterprise-{{ .company }}"
+{{- with (includeTemplate "wm/rules.yaml.tmpl" . | fromYaml).profiles.main }}
+spawn-at-startup "{{ $firefoxSettings.executableFile }}" "-P" "{{ . }}"
+spawn-at-startup "{{ $thunderbirdSettings.executableFile }}" "-P" "{{ . }}"
 {{- end }}
 
 // Note-taking

@@ -38,12 +38,9 @@ hl.on("hyprland.start", function()
   hl.exec_cmd(app.terminal)
 
   -- Browser and email client
-{{- if eq .place "home" }}
-  hl.exec_cmd(app.browser .. " -P Personal")
-  hl.exec_cmd(app.mail_client .. " -P Personal")
-{{- else if eq .place "office" }}
-  hl.exec_cmd(app.browser .. " -P Enterprise-{{ .company }}")
-  hl.exec_cmd(app.mail_client .. " -P Enterprise-{{ .company }}")
+{{- with (includeTemplate "wm/rules.yaml.tmpl" . | fromYaml).profiles.main }}
+  hl.exec_cmd(app.browser .. " -P {{ . }}")
+  hl.exec_cmd(app.mail_client .. " -P {{ . }}")
 {{- end }}
 
   -- Note-taking

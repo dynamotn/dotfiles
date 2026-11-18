@@ -23,10 +23,12 @@ after-startup-command = [
   'exec-and-forget sketchybar --reload ~/.config/sketchybar/sketchybarrc',
   ## Kitty
   'exec-and-forget open -na kitty --args zellij',
+{{- with $rules.profiles.main }}
   ## Firefox/Zen
-  'exec-and-forget open -na {{ $browser }} --args -P {{ $rules.profiles.main }} ',
+  'exec-and-forget open -na {{ $browser }} --args -P {{ . }}',
   ## Thunderbird/Betterbird
-  'exec-and-forget open -na {{ $mailClient }} --args -P {{ $rules.profiles.main }} ',
+  'exec-and-forget open -na {{ $mailClient }} --args -P {{ . }}',
+{{- end }}
   ## Obsidian
   'exec-and-forget open -a Obsidian',
   ## Hammerspoon

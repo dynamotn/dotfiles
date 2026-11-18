@@ -4,19 +4,10 @@
 {{- else if eq .browser "Z" }}
 {{-   $browser = "Zen" }}
 {{- end }}
-{{- $profile := "" }}
-{{- $otherProfile := "" }}
-{{- if eq .place "home" }}
-{{-   $profile = "Personal" }}
-{{-   $otherProfile = "Enterprise-F1" }}
-{{- else if eq .place "office" }}
-{{-   $profile = printf "Enterprise-%s" .company }}
-{{-   $otherProfile = "Personal" }}
-{{- end }}
-{{- $enterpriseProfile := "Enterprise-F1" }}
-{{- if eq .place "office" }}
-{{-   $enterpriseProfile = $profile }}
-{{- end -}}
+{{- $rules := includeTemplate "wm/rules.yaml.tmpl" . | fromYaml }}
+{{- $profile := $rules.profiles.main }}
+{{- $otherProfile := $rules.profiles.other | default $profile }}
+{{- $enterpriseProfile := (eq .place "office") | ternary $profile $otherProfile -}}
 -- Hammerspoon is the default browser and hands every http(s) link to the
 -- right {{ $browser }} profile:
 -- - hosts listed in the `enterpriseHosts` chezmoi data, and links opened from
