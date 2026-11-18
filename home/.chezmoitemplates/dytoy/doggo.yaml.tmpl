@@ -15,7 +15,7 @@ github:
   {{-   $os = "linux" }}
   {{- end }}
   {{- $arch := "" }}
-  {{- $arch = includeTemplate "dytoy_lib/arch.tmpl" (dict "ctx" . "arm" "arm64") }}
+  {{- $arch = includeTemplate "dytoy_lib/arch.tmpl" (dict "ctx" . "arm" "aarch64") }}
   release_asset: doggo-{{ $os }}-{{ $arch }}.tar.gz
   sha256: doggo_%1v_checksums.txt
 archive:
