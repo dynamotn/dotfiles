@@ -1,0 +1,37 @@
+#!{{ .bash }}
+# @file colorfull
+# @brief Show every colour and text attribute the terminal supports
+# @description Print each background, foreground and attribute combination
+# (normal, bold, dim, underline, blink, reverse) with its escape sequence.
+DOTFILES_DIR="{{ .chezmoi.sourceDir }}/.."
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "${DOTFILES_DIR}/scripts/lib/dybatpho/init.sh" --modules cli
+dybatpho::register_common_handlers
+
+#######################################
+# @description Spec of colorfull
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Show every colour and text attribute the terminal supports" MAIN_ARGS action:"_main"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Print the matrix of backgrounds, foregrounds and attributes
+# @noargs
+# @stdout One line per background and foreground, six attributes each
+#######################################
+function _main {
+  local bg fg attr
+  for bg in {40..47} {100..107} 49; do
+    for fg in {30..37} {90..97} 39; do
+      for attr in 0 1 2 4 5 7; do
+        printf '\e[%s;%s;%sm ^[%s;%s;%sm \e[0m' "${attr}" "${bg}" "${fg}" "${attr}" "${bg}" "${fg}"
+      done
+      echo
+    done
+  done
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

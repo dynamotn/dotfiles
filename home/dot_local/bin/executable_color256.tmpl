@@ -1,0 +1,40 @@
+#!{{ .bash }}
+# @file color256
+# @brief Show the 256 colours of the terminal
+# @description Print every colour of the 256-colour palette, first as a
+# foreground and then as a background, six to a line.
+DOTFILES_DIR="{{ .chezmoi.sourceDir }}/.."
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "${DOTFILES_DIR}/scripts/lib/dybatpho/init.sh" --modules cli
+dybatpho::register_common_handlers
+
+#######################################
+# @description Spec of color256
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Show the 256 colours of the terminal" MAIN_ARGS action:"_main"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Print the palette as foreground, then as background
+# @noargs
+# @stdout Colour cells, six to a line
+#######################################
+function _main {
+  local mode color
+  for mode in 38 48; do
+    for color in {0..255}; do
+      printf '\e[%s;5;%sm %3s \e[0m' "${mode}" "${color}" "${color}"
+      # The 16 system colours end the first line early, so the 6x6x6 cube and
+      # the greys start on a fresh one.
+      if (((color + 1) % 6 == 4)); then
+        echo
+      fi
+    done
+    echo
+  done
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

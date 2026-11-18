@@ -1,0 +1,50 @@
+#!{{ .bash }}
+# @file color16
+# @brief Show the 16 basic colours of the terminal
+# @description Print a sample text in every foreground style (normal, bold and
+# the eight colours, each plain and bold) over the eight background colours.
+DOTFILES_DIR="{{ .chezmoi.sourceDir }}/.."
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "${DOTFILES_DIR}/scripts/lib/dybatpho/init.sh" --modules cli
+dybatpho::register_common_handlers
+
+#######################################
+# @description Spec of color16
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Show the 16 basic colours of the terminal" MAIN_ARGS action:"_main"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Print the sample over every background, per foreground style
+# @noargs
+# @stdout A header of background codes, then one line per foreground style
+#######################################
+function _main {
+  local sample='gYw' bg fg style
+  local -a styles
+  printf '\n%18s' ''
+  for bg in {40..47}; do
+    printf ' %5sm ' "${bg}"
+  done
+  printf '\n'
+  for fg in '' 1 {30..37}; do
+    # Each colour is shown plain and, with the leading 1, in bold.
+    styles=("${fg}")
+    if [[ "${fg}" =~ ^3 ]]; then
+      styles+=("1;${fg}")
+    fi
+    for style in "${styles[@]}"; do
+      printf ' %5sm \e[%sm  %s  ' "${style}" "${style}" "${sample}"
+      for bg in {40..47}; do
+        printf '\e[%sm\e[%sm  %s  \e[0m ' "${style}" "${bg}" "${sample}"
+      done
+      printf '\n'
+    done
+  done
+  printf '\n'
+}
+
+dybatpho::generate_from_spec _spec_main "$@"

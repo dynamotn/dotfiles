@@ -1,0 +1,60 @@
+#!{{ .bash }}
+# @file truecolor
+# @brief Show whether the terminal renders 24-bit colour
+# @description Print smooth ramps of red, green, blue and a rainbow, as wide as
+# the terminal, with the escape sequence ^[48;2;<r>;<g>;<b>m. A terminal
+# without true colour shows visible bands or the wrong hues instead of a
+# gradient.
+DOTFILES_DIR="{{ .chezmoi.sourceDir }}/.."
+# shellcheck source={{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh
+. "${DOTFILES_DIR}/scripts/lib/dybatpho/init.sh" --modules cli
+dybatpho::register_common_handlers
+
+#######################################
+# @description Spec of truecolor
+# @noargs
+#######################################
+function _spec_main {
+  dybatpho::opts::setup "Show whether the terminal renders 24-bit colour" MAIN_ARGS action:"_main"
+  dybatpho::opts::disp "Show help" --help -h action:"dybatpho::generate_help _spec_main"
+}
+
+#######################################
+# @description Print the four ramps, each as wide as the terminal up to 256
+# cells. The rainbow sweeps six sectors of 43 steps: red, yellow, green, cyan,
+# blue and magenta, one channel rising or falling in each.
+# @env COLORTERM string `truecolor` or `24bit` when the terminal says it renders 24-bit colour
+# @noargs
+# @stdout Four lines of coloured cells
+#######################################
+function _main {
+  case "${COLORTERM:-}" in
+    truecolor | 24bit) ;;
+    *) dybatpho::warn "COLORTERM is not truecolor or 24bit: the terminal may not render 24-bit colour" ;;
+  esac
+  local cells row i value sector rise fall rgb
+  local -a red green blue
+  cells="$(dybatpho::terminal_width 128)"
+  ((cells <= 256)) || cells=256
+  for row in red green blue rainbow; do
+    for ((i = 0; i < cells; i++)); do
+      value=$((i * 256 / cells))
+      sector=$((value / 43))
+      rise=$((value % 43 * 255 / 43))
+      fall=$((255 - rise))
+      red=(255 "${fall}" 0 0 "${rise}" 255)
+      green=("${rise}" 255 255 "${fall}" 0 0)
+      blue=(0 0 "${rise}" 255 255 "${fall}")
+      case "${row}" in
+        red) rgb="${value};0;0" ;;
+        green) rgb="0;${value};0" ;;
+        blue) rgb="0;0;${value}" ;;
+        *) rgb="${red[sector]};${green[sector]};${blue[sector]}" ;;
+      esac
+      printf '\e[48;2;%sm \e[0m' "${rgb}"
+    done
+    printf '\n'
+  done
+}
+
+dybatpho::generate_from_spec _spec_main "$@"
