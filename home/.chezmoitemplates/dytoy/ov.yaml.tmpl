@@ -11,7 +11,7 @@ is_essential: true
 # Need to use system package for Android with ABI compatible
 method: shell
 dependencies:
-  - golang
+  - go
 content: go install github.com/noborus/ov@latest
 {{- else }}
 # Although this is essential tool but there isn't any packages on Arch, Alpine,
