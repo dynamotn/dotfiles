@@ -189,6 +189,42 @@ EOF
   assert_output --partial 'fdroidcl update'
 }
 
+@test "package_manager::has_android_device wants a device that accepts commands" {
+  function adb { printf 'List of devices attached\n%s\n' "${ADB_LINE}"; }
+  ADB_LINE=$'localhost:37001\tdevice' run package_manager::has_android_device
+  assert_success
+  for state in unauthorized offline; do
+    ADB_LINE=$'7a921237\t'"${state}" run package_manager::has_android_device
+    assert_failure
+  done
+  ADB_LINE='' run package_manager::has_android_device
+  assert_failure
+}
+
+@test "package_manager::has_android_device fails without adb" {
+  function adb { return 127; }
+  run package_manager::has_android_device
+  assert_failure
+}
+
+@test "package_manager::init_fdroid warns and asks to skip without a device" {
+  function package_manager::has_android_device { return 1; }
+  function package_manager::sync_fdroid_repo { printf 'synced\n'; }
+  run package_manager::init_fdroid
+  assert_failure 2
+  assert_output --partial "No adb device"
+  refute_output --partial "synced"
+}
+
+@test "package_manager::init_fdroid does not need a device in dry-run mode" {
+  export DRY_RUN='true'
+  function package_manager::has_android_device { return 1; }
+  function package_manager::check_installed_fdroidcl { return 0; }
+  run package_manager::init_fdroid
+  assert_success
+  assert_output --partial 'fdroidcl update'
+}
+
 @test "package_manager::sync_brew_repo calls brew update in dry-run mode" {
   export DRY_RUN='true'
   run package_manager::sync_brew_repo
@@ -229,6 +265,7 @@ EOF
 
 @test "package_manager::init_fdroid installs droidify when not present" {
   local actions_file="${BATS_TEST_TMPDIR}/actions"
+  function package_manager::has_android_device { return 0; }
   function package_manager::sync_fdroid_repo { printf 'synced\n' >> "${actions_file}"; }
   function package_manager::check_installed_fdroidcl { return 1; }
   function package_manager::install_via_fdroidcl { printf 'installed:%s\n' "$1" >> "${actions_file}"; }

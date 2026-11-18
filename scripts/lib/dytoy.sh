@@ -916,7 +916,14 @@ function __dytoy_install_store_section {
   readarray -t packages < <(dytoy::get_yaml "${name}" "${section}.packages" || true)
   dybatpho::array_first packages &> /dev/null || return 0
   misc::install_tool "${store}"
-  "package_manager::init_${section}"
+  # Exit code 2 of an init means the store cannot be used now and has warned
+  # why: leave the section out instead of failing every package after it.
+  local init_status=0
+  "package_manager::init_${section}" || init_status=$?
+  if ((init_status == 2)); then
+    return 0
+  fi
+  ((init_status == 0)) || return "${init_status}"
   dytoy::run_section_hook "${name}" before "${section}"
   for package in ${packages[@]+"${packages[@]}"}; do
     "dytoy::install_${section}_package" "${package}"

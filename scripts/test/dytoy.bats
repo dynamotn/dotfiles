@@ -807,6 +807,41 @@ EOF
   assert_output ''
 }
 
+@test "__dytoy_install_store_section leaves the section out when the store asks to skip" {
+  write_tools_yaml << 'EOF'
+- name: app
+  method: os
+  fdroid:
+    packages:
+      - name: org.app
+EOF
+  function misc::install_tool { true; }
+  function package_manager::init_fdroid { return 2; }
+  function dytoy::run_section_hook { printf 'hook:%s\n' "$2"; }
+  function dytoy::install_fdroid_package { printf 'install\n'; }
+
+  run __dytoy_install_store_section app fdroid fdroidcl
+  assert_success
+  assert_output ''
+}
+
+@test "__dytoy_install_store_section stops when the store fails for another reason" {
+  write_tools_yaml << 'EOF'
+- name: app
+  method: os
+  fdroid:
+    packages:
+      - name: org.app
+EOF
+  function misc::install_tool { true; }
+  function package_manager::init_fdroid { return 1; }
+  function dytoy::install_fdroid_package { printf 'install\n'; }
+
+  run __dytoy_install_store_section app fdroid fdroidcl
+  assert_failure
+  refute_output --partial 'install'
+}
+
 @test "dytoy::install_flatpak_package calls install_via_flatpak for new packages" {
   local yaml='{"name":"org.gnome.Calendar","repo":"flathub","url":"null"}'
   local actions_file="${BATS_TEST_TMPDIR}/actions"

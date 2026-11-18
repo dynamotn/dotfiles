@@ -246,10 +246,33 @@ function package_manager::init_termux {
 }
 
 #######################################
-# @description Initialize F-Droid application manager
+# @description Check if `adb` has a device that accepts commands, which
+# `fdroidcl install` needs to put an APK on the tablet. A device that is still
+# `unauthorized` or `offline` does not count.
 # @noargs
+# @exitcode 0 A device is connected and ready
+# @exitcode 1 There is none, or `adb` is missing
+#######################################
+function package_manager::has_android_device {
+  local devices
+  devices="$(adb devices 2> /dev/null)" || return 1
+  grep -Eq '[[:space:]]device$' <<< "${devices}"
+}
+
+#######################################
+# @description Initialize F-Droid application manager. Without an `adb` device
+# nothing can be installed, so it only warns and asks the caller to skip.
+# @env DRY_RUN string When true, the device is not required: commands are only printed
+# @noargs
+# @exitcode 0 The store is ready
+# @exitcode 2 No `adb` device: it warned, and the apps are left out
 #######################################
 function package_manager::init_fdroid {
+  if ! dybatpho::is true "${DYBATPHO_DRY_RUN:-${DRY_RUN:-}}" && ! package_manager::has_android_device; then
+    dybatpho::warn "No adb device, skipping the F-Droid apps: pair Wireless debugging with" \
+      "\`adb pair\` and \`adb connect localhost:<port>\`, then run the setup again"
+    return 2
+  fi
   package_manager::sync_fdroid_repo
   package_manager::check_installed_fdroidcl com.looker.droidify \
     || package_manager::install_via_fdroidcl com.looker.droidify
