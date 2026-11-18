@@ -58,13 +58,10 @@ machines:
     preferGitSSH: true
     darkMode: true
   n0t3:
-    place: "home"
+    place: "mobility"
     kind: "tablet"
     decryptPersonal: true
-    decryptEnterprise:
-      - F1
-      - ZOO
-      - T1
+    decryptEnterprise: []
     guiServer: "0"
     terminalMultiplexer: "Z"
     hasSound: false
@@ -73,7 +70,7 @@ machines:
     preferGitSSH: true
     darkMode: false
   tr4nhun9d40:
-    place: "home"
+    place: "mobility"
     kind: "mobile"
     decryptPersonal: true
     decryptEnterprise: []
@@ -85,7 +82,7 @@ machines:
     preferGitSSH: true
     darkMode: true
   v0n9uy3n914p:
-    place: "home"
+    place: "mobility"
     kind: "laptop"
     decryptPersonal: true
     decryptEnterprise:
