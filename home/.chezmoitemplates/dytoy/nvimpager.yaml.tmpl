@@ -10,6 +10,10 @@ name: nvimpager
 is_essential: true
 dependencies:
   - neovim
+{{- /* The source build makes the man page with scdoc */}}
+{{- if not (eq .osid "linux-arch" "darwin" "linux-gentoo") }}
+  - scdoc
+{{- end }}
 {{- if eq .osid "linux-arch" "darwin" "linux-gentoo" }}
 method: os
 arch:

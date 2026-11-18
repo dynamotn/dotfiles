@@ -288,6 +288,7 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[prek](https://github.com/j178/prek)|Framework for manage pre-commit hooks, re-engineered in Rust|
 |[gawk](https://www.gnu.org/software/gawk/)|GNU implementation of `awk`|
 |[mkcert](https://github.com/FiloSottile/mkcert)|Make locally-trusted development certificates|
+|[scdoc](https://git.sr.ht/~sircmpwn/scdoc)|Builds man pages from `scdoc` markup, needed to build `nvimpager`|
 |[scc](https://github.com/boyter/scc)|Display statistics about code|
 |[ys](https://github.com/yaml-schema/yaml-schema)|YAML schema validator (`yaml-schema` crate)|
 |[perlcritic](https://github.com/Perl-Critic/Perl-Critic)|Linter for Perl|
