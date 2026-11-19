@@ -759,6 +759,96 @@ registry:
         # the other agents get them too.
         - trailofbits/skills@codeql
         - trailofbits/skills@supply-chain-risk-auditor
+    # Authorized bug-bounty hunting: 83 offensive, dual-use skills from
+    # elementalsouls/Claude-BugHunter. Claude loads them as a plugin; the other
+    # agents take the skills. Vetted at v2.1 (2026-11-18): no hooks, no MCP.
+    bugbounty:
+      plugins:
+        - claude-bughunter@elementalsouls
+      skills:
+        - elementalsouls/Claude-BugHunter@apk-redteam-pipeline
+        - elementalsouls/Claude-BugHunter@bb-local-toolkit
+        - elementalsouls/Claude-BugHunter@bb-methodology
+        - elementalsouls/Claude-BugHunter@bug-bounty
+        - elementalsouls/Claude-BugHunter@bugcrowd-reporting
+        - elementalsouls/Claude-BugHunter@cloud-iam-deep
+        - elementalsouls/Claude-BugHunter@enterprise-vpn-attack
+        - elementalsouls/Claude-BugHunter@evidence-hygiene
+        - elementalsouls/Claude-BugHunter@hunt-api-misconfig
+        - elementalsouls/Claude-BugHunter@hunt-aspnet
+        - elementalsouls/Claude-BugHunter@hunt-ato
+        - elementalsouls/Claude-BugHunter@hunt-auth-bypass
+        - elementalsouls/Claude-BugHunter@hunt-brute-force
+        - elementalsouls/Claude-BugHunter@hunt-business-logic
+        - elementalsouls/Claude-BugHunter@hunt-cache-poison
+        - elementalsouls/Claude-BugHunter@hunt-captcha-bypass
+        - elementalsouls/Claude-BugHunter@hunt-cicd
+        - elementalsouls/Claude-BugHunter@hunt-clickjacking
+        - elementalsouls/Claude-BugHunter@hunt-cloud-misconfig
+        - elementalsouls/Claude-BugHunter@hunt-cors
+        - elementalsouls/Claude-BugHunter@hunt-csrf
+        - elementalsouls/Claude-BugHunter@hunt-deserialization
+        - elementalsouls/Claude-BugHunter@hunt-dispatch
+        - elementalsouls/Claude-BugHunter@hunt-dom
+        - elementalsouls/Claude-BugHunter@hunt-exceptional-conditions
+        - elementalsouls/Claude-BugHunter@hunt-file-upload
+        - elementalsouls/Claude-BugHunter@hunt-fintech-graphql
+        - elementalsouls/Claude-BugHunter@hunt-forgot-password
+        - elementalsouls/Claude-BugHunter@hunt-graphql
+        - elementalsouls/Claude-BugHunter@hunt-grpc
+        - elementalsouls/Claude-BugHunter@hunt-host-header
+        - elementalsouls/Claude-BugHunter@hunt-html-injection
+        - elementalsouls/Claude-BugHunter@hunt-http-smuggling
+        - elementalsouls/Claude-BugHunter@hunt-idor
+        - elementalsouls/Claude-BugHunter@hunt-jwt-crypto
+        - elementalsouls/Claude-BugHunter@hunt-k8s
+        - elementalsouls/Claude-BugHunter@hunt-laravel
+        - elementalsouls/Claude-BugHunter@hunt-ldap
+        - elementalsouls/Claude-BugHunter@hunt-lfi
+        - elementalsouls/Claude-BugHunter@hunt-llm-ai
+        - elementalsouls/Claude-BugHunter@hunt-mfa-bypass
+        - elementalsouls/Claude-BugHunter@hunt-misc
+        - elementalsouls/Claude-BugHunter@hunt-nextjs
+        - elementalsouls/Claude-BugHunter@hunt-nodejs
+        - elementalsouls/Claude-BugHunter@hunt-nosqli
+        - elementalsouls/Claude-BugHunter@hunt-ntlm-info
+        - elementalsouls/Claude-BugHunter@hunt-oauth
+        - elementalsouls/Claude-BugHunter@hunt-open-redirect
+        - elementalsouls/Claude-BugHunter@hunt-race-condition
+        - elementalsouls/Claude-BugHunter@hunt-rag-vector
+        - elementalsouls/Claude-BugHunter@hunt-rce
+        - elementalsouls/Claude-BugHunter@hunt-saml
+        - elementalsouls/Claude-BugHunter@hunt-session
+        - elementalsouls/Claude-BugHunter@hunt-shadow-api
+        - elementalsouls/Claude-BugHunter@hunt-sharepoint
+        - elementalsouls/Claude-BugHunter@hunt-source-leak
+        - elementalsouls/Claude-BugHunter@hunt-spa-api
+        - elementalsouls/Claude-BugHunter@hunt-springboot
+        - elementalsouls/Claude-BugHunter@hunt-sqli
+        - elementalsouls/Claude-BugHunter@hunt-ssrf
+        - elementalsouls/Claude-BugHunter@hunt-ssti
+        - elementalsouls/Claude-BugHunter@hunt-subdomain
+        - elementalsouls/Claude-BugHunter@hunt-tls-network
+        - elementalsouls/Claude-BugHunter@hunt-websocket
+        - elementalsouls/Claude-BugHunter@hunt-xss
+        - elementalsouls/Claude-BugHunter@hunt-xxe
+        - elementalsouls/Claude-BugHunter@ios-redteam-pipeline
+        - elementalsouls/Claude-BugHunter@m365-entra-attack
+        - elementalsouls/Claude-BugHunter@meme-coin-audit
+        - elementalsouls/Claude-BugHunter@mid-engagement-ir-detection
+        - elementalsouls/Claude-BugHunter@offensive-osint
+        - elementalsouls/Claude-BugHunter@okta-attack
+        - elementalsouls/Claude-BugHunter@osint-methodology
+        - elementalsouls/Claude-BugHunter@recon-scope-triage
+        - elementalsouls/Claude-BugHunter@redteam-mindset
+        - elementalsouls/Claude-BugHunter@redteam-report-template
+        - elementalsouls/Claude-BugHunter@report-writing
+        - elementalsouls/Claude-BugHunter@security-arsenal
+        - elementalsouls/Claude-BugHunter@supply-chain-attack-recon
+        - elementalsouls/Claude-BugHunter@triage-validation
+        - elementalsouls/Claude-BugHunter@vmware-vcenter-attack
+        - elementalsouls/Claude-BugHunter@web2-recon
+        - elementalsouls/Claude-BugHunter@web3-audit
     # Regulated domains and licensing, apart from the security tooling.
     compliance:
       subagents: [hipaa-compliance, risk-manager, license-engineer, legal-advisor]

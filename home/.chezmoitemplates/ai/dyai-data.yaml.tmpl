@@ -21,6 +21,9 @@ marketplaces:
     source: { source: github, repo: trilwu/secskills }
   trailofbits:
     source: { source: github, repo: trailofbits/skills }
+  # 83 offensive bug-bounty skills; vetted at v2.1: no hooks, no MCP servers.
+  elementalsouls:
+    source: { source: github, repo: elementalsouls/Claude-BugHunter, ref: v2.1 }
   thedotmack:
     source: { source: github, repo: thedotmack/claude-mem, ref: v16.0.0 }
   ponytail:
@@ -63,6 +66,7 @@ optional_plugins:
   - duckdb-skills@claude-plugins-official
   - understand-anything@understand-anything
   - claude-security@claude-plugins-official
+  - claude-bughunter@elementalsouls
   - differential-review@trailofbits
   - audit-context-building@trailofbits
   - insecure-defaults@trailofbits
