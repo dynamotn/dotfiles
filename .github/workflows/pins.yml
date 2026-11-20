@@ -1,0 +1,40 @@
+name: Pins
+
+# Renovate bumps the versions and commits of age, yq and the delta theme, but
+# not the sha256 pinned beside them: a bump alone would stop setup.sh or every
+# chezmoi apply. This downloads each pinned asset and fails on a stale digest,
+# printing the one to write. Only when a pin, or the check, changes: it
+# downloads about 25 MB.
+on:
+  push:
+    branches: [main]
+    paths: &pins
+      - scripts/setup.sh
+      - scripts/pins.sh
+      - scripts/lib/pins.sh
+      - home/.chezmoitemplates/dytoy/age.yaml.tmpl
+      - home/.chezmoiexternals/catppuccin.yaml.tmpl
+      - .github/workflows/pins.yml
+  pull_request:
+    paths: *pins
+  workflow_dispatch:
+
+# Nothing here writes to the repository, so the token can only read it.
+permissions:
+  contents: read
+
+jobs:
+  pins:
+    name: Pinned digests
+    runs-on: ubuntu-latest
+    steps:
+      # secrets/data is a private submodule; never ask CI for it.
+      - uses: actions/checkout@v7
+        with:
+          submodules: false
+
+      - name: Fetch dybatpho
+        run: git submodule update --init --recursive scripts/lib/dybatpho
+
+      - name: Check every pinned digest
+        run: ./scripts/pins.sh

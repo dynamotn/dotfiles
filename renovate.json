@@ -52,6 +52,60 @@
         "repo: (?<depName>[\\w.-]+/[\\w.-]+), ref: (?<currentValue>[^ }]+)"
       ],
       "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "description": "age, fetched by setup.sh and installed by dytoy, each pinned with the sha256 of its archives: a bump fails the pins workflow until scripts/pins.sh shows the new digests written.",
+      "managerFilePatterns": [
+        "/^scripts/setup\\.sh$/",
+        "/^home/\\.chezmoitemplates/dytoy/age\\.yaml\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "AGE_VERSION=\"(?<currentValue>v[0-9.]+)\"",
+        "repo: FiloSottile/age\\n  version: (?<currentValue>v[0-9.]+)"
+      ],
+      "depNameTemplate": "FiloSottile/age",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "yq, fetched by setup.sh with the sha256 of each binary; checked by the pins workflow like age.",
+      "managerFilePatterns": [
+        "/^scripts/setup\\.sh$/"
+      ],
+      "matchStrings": [
+        "YQ_VERSION=\"(?<currentValue>v[0-9.]+)\""
+      ],
+      "depNameTemplate": "mikefarah/yq",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "description": "The delta theme git/config includes, at a commit with its sha256; checked by the pins workflow.",
+      "managerFilePatterns": [
+        "/^home/\\.chezmoiexternals/catppuccin\\.yaml\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "https://raw\\.githubusercontent\\.com/catppuccin/delta/(?<currentDigest>[0-9a-f]{40})/"
+      ],
+      "depNameTemplate": "catppuccin/delta",
+      "packageNameTemplate": "https://github.com/catppuccin/delta",
+      "currentValueTemplate": "main",
+      "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "description": "The bun-termux installer, piped into bash on Android at a commit: read the new script in the pull request before merging it.",
+      "managerFilePatterns": [
+        "/^home/\\.chezmoitemplates/dytoy/nodejs\\.yaml\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "https://raw\\.githubusercontent\\.com/Happ1ness-dev/bun-termux/(?<currentDigest>[0-9a-f]{40})/"
+      ],
+      "depNameTemplate": "Happ1ness-dev/bun-termux",
+      "packageNameTemplate": "https://github.com/Happ1ness-dev/bun-termux",
+      "currentValueTemplate": "main",
+      "datasourceTemplate": "git-refs"
     }
   ],
   "packageRules": [

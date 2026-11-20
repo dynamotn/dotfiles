@@ -52,8 +52,9 @@ PROMPT_ENTERPRISE="Which company's secrets do you want to decrypt"
 # nothing, as on Termux (`localhost`), the default name matches no entry.
 PROMPT_MACHINE="What is this machine's name"
 # age and yq are fetched before anything can vouch for them, so each is one
-# release whose archives were hashed, by OS and architecture. Bump a version
-# together with its digests (`shasum -a 256` of every asset).
+# release whose archives were hashed, by OS and architecture. Renovate bumps
+# the version; scripts/pins.sh, run by the Pins workflow, then fails and
+# prints the digests to write.
 AGE_VERSION="v1.3.2"
 declare -A AGE_SHA256=(
   [linux_amd64]="cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10"
