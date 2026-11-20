@@ -51,6 +51,25 @@ PROMPT_ENTERPRISE="Which company's secrets do you want to decrypt"
 # The machine name picks its entry of machines.yaml. Where the hostname says
 # nothing, as on Termux (`localhost`), the default name matches no entry.
 PROMPT_MACHINE="What is this machine's name"
+# age and yq are fetched before anything can vouch for them, so each is one
+# release whose archives were hashed, by OS and architecture. Bump a version
+# together with its digests (`shasum -a 256` of every asset).
+AGE_VERSION="v1.3.2"
+declare -A AGE_SHA256=(
+  [linux_amd64]="cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10"
+  [linux_arm64]="6b8dc4333c53a5a57c9e5834e3a48f92605d7154014cd07269ff3327db5d37f4"
+  [linux_arm]="0ceba62c92701b30b3336abf064714c1a6ea5fa0c75ee367ce36d4f9c0f8e6ce"
+  [darwin_arm64]="e2020b073c44f692685a24d6abc378817eb81ffaaf49fd0531ef8565f767f2f5"
+  [darwin_amd64]="1d1e4bc66e1427edad7739ae7616157de0e79db8b6d2a1497d7d9925fb06a539"
+)
+YQ_VERSION="v4.54.3"
+declare -A YQ_SHA256=(
+  [linux_amd64]="129534601871538efe0ba4c5e62a34fb1d5f469bcb975c4fddeb467d82974973"
+  [linux_arm64]="89f69310b61b68d1245065a1241d1fc843f7a36cd6103ffd77ad987613bd1b67"
+  [linux_arm]="71311f235a15772e3e520e696f9399a60fe43c56db2813400b288411c4ef617c"
+  [darwin_arm64]="a2aebb93b5bdcb61bb76f630e42a0ef6a3ee10842a6516cd7b9e4080786ec593"
+  [darwin_amd64]="96d5105ffd693d6845c54fbd825b2d1bbdb8619e0a2ce6af95e5654e841e0984"
+)
 
 #######################################
 # @description Spec of setup.sh
@@ -90,14 +109,33 @@ function _install_chezmoi {
 # @noargs
 #######################################
 function _install_age {
-  dybatpho::info "Installing age to ${BIN_DIR}"
+  dybatpho::info "Installing age ${AGE_VERSION} to ${BIN_DIR}"
   dybatpho::require "tar"
   local archive os arch
   os="$(dybatpho::goos)"
   arch="$(dybatpho::goarch)"
   dybatpho::create_temp archive ".tar.gz"
-  dybatpho::curl_download "https://dl.filippo.io/age/latest?for=${os}/${arch}" "${archive}"
+  local url="https://github.com/FiloSottile/age/releases/download/${AGE_VERSION}"
+  url+="/age-${AGE_VERSION}-${os}-${arch}.tar.gz"
+  dybatpho::curl_download "${url}" "${archive}"
+  _verify_pinned age "${archive}" "${AGE_SHA256[${os}_${arch}]:-}"
   dybatpho::archive_extract "${archive}" "${BIN_DIR}" 1
+}
+
+#######################################
+# @description Stop unless a downloaded file is the one that was pinned
+# @arg $1 string Name of the tool, for the message
+# @arg $2 string Downloaded file
+# @arg $3 string SHA256 digest pinned for this OS and architecture, empty when there is none
+#######################################
+function _verify_pinned {
+  local name file
+  dybatpho::expect_args name file -- "$@"
+  local digest="${3:-}"
+  [[ -n "${digest}" ]] \
+    || dybatpho::die "No ${name} is pinned for this OS and architecture, install it with the package manager"
+  dybatpho::verify_checksum "${file}" "sha256:${digest}" \
+    || dybatpho::die "The downloaded ${name} does not match its pinned checksum"
 }
 
 #######################################
@@ -106,15 +144,18 @@ function _install_age {
 # @noargs
 #######################################
 function _install_yq {
-  dybatpho::info "Installing yq to ${BIN_DIR}"
-  local yq_path os arch
+  dybatpho::info "Installing yq ${YQ_VERSION} to ${BIN_DIR}"
+  local yq_path os arch download
   yq_path=$(dybatpho::path_join "${BIN_DIR}" "yq")
   os="$(dybatpho::goos)"
   arch="$(dybatpho::goarch)"
-  local yq_url="https://github.com/mikefarah/yq/releases/latest/download"
+  local yq_url="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}"
   yq_url+="/yq_${os}_${arch}"
-  dybatpho::curl_download "${yq_url}" "${yq_path}"
-  chmod +x "${yq_path}"
+  # Checked before it lands on PATH.
+  dybatpho::create_temp download ".bin"
+  dybatpho::curl_download "${yq_url}" "${download}"
+  _verify_pinned yq "${download}" "${YQ_SHA256[${os}_${arch}]:-}"
+  install -m 0755 "${download}" "${yq_path}"
 }
 
 #######################################

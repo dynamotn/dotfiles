@@ -365,3 +365,19 @@ EOF
   assert_failure
   assert_stderr --partial "needs Bash 4.3 or newer"
 }
+
+@test "setup.sh installs only the age and yq it has a checksum for" {
+  # dyshellint disable=SC2016 the snippet is evaluated by run_setup, not here
+  run_setup '
+    printf payload > "${BATS_TEST_TMPDIR}/download"
+    _verify_pinned tool "${BATS_TEST_TMPDIR}/download" \
+      239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5 && echo verified
+    _verify_pinned tool "${BATS_TEST_TMPDIR}/download" "${AGE_SHA256[linux_amd64]}"'
+  assert_failure
+  assert_output --partial "verified"
+  assert_stderr --partial "does not match its pinned checksum"
+
+  run_setup '_verify_pinned tool /dev/null "${AGE_SHA256[plan9_mips]:-}"'
+  assert_failure
+  assert_stderr --partial "No tool is pinned for this OS and architecture"
+}

@@ -168,6 +168,7 @@ $defs:
           Checksum file filename pattern published alongside the release asset.
           Use %v for the full version tag, %1v for version without leading 'v'.
           The file must contain lines in 'sha256hash  filename' format (sha256sum/shasum output).
+          A 64 character hex digest instead pins the asset itself, for a release without such a file.
           When set, the downloaded asset is verified against the hash before extraction.
       artifact_host:
         type: string

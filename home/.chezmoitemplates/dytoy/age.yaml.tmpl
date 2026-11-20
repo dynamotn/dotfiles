@@ -29,9 +29,20 @@ macos:
     - name: age
 {{- else }}
 method: binary
+{{- /* The tool every secret goes through, and its releases publish no
+       checksum file: one release, whose archives were hashed. Bump the
+       version together with the digests, here and in scripts/setup.sh. */}}
+{{- $digests := dict
+      "amd64" "cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10"
+      "arm64" "6b8dc4333c53a5a57c9e5834e3a48f92605d7154014cd07269ff3327db5d37f4"
+      "arm" "0ceba62c92701b30b3336abf064714c1a6ea5fa0c75ee367ce36d4f9c0f8e6ce" }}
 github:
   repo: FiloSottile/age
+  version: v1.3.2
   release_asset: age-%v-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz
+  {{- with index $digests .chezmoi.arch }}
+  sha256: {{ . }}
+  {{- end }}
 archive:
   - path: age/age
     strip: 1

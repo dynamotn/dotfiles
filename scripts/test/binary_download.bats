@@ -526,3 +526,15 @@ function _inode {
   assert_output 'new'
   refute [ -e "${destination}/browser/browser" ]
 }
+
+@test "binary_download::verify_sha256 takes a digest in place of a checksum file" {
+  local asset="${BATS_TEST_TMPDIR}/asset" digest
+  printf 'payload\n' > "${asset}"
+  digest="$(dybatpho::file_hash "${asset}" sha256)"
+  function dybatpho::curl_download { fail "a pinned digest downloads no checksum file"; }
+  run binary_download::verify_sha256 tool "${asset}" "https://example.test/dl/asset" "${digest}"
+  assert_success
+  printf 'tampered\n' > "${asset}"
+  run binary_download::verify_sha256 tool "${asset}" "https://example.test/dl/asset" "${digest}"
+  assert_failure
+}

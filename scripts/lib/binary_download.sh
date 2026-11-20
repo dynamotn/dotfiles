@@ -69,6 +69,14 @@ function binary_download::verify_sha256 {
   # A dry run downloads nothing, so there is no checksum file to read.
   dybatpho::is true "${DRY_RUN}" && return 0
 
+  # A digest in place of a file name pins the asset itself: for a release
+  # that publishes no checksum file, and stronger than one from the same host.
+  if [[ "${sha256_asset}" =~ ^[0-9a-fA-F]{64}$ ]]; then
+    dybatpho::verify_checksum "${temp_file}" "sha256:${sha256_asset}" \
+      || dybatpho::die "SHA256 mismatch for ${name}"
+    return 0
+  fi
+
   local sha256_url="${url%/*}/${sha256_asset}"
   dybatpho::progress "Verifying SHA256 for ${name}"
 
