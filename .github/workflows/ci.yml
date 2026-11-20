@@ -107,13 +107,16 @@ jobs:
   smoke:
     name: Setup on ${{ matrix.image }}
     runs-on: ubuntu-latest
-    # shortcut: this job was written without a container runtime at hand, so
-    # it only reports until it has passed once; then drop this line.
-    continue-on-error: true
+    # Alpine and Ubuntu passed locally on arm64; Arch only reports until it
+    # has passed here once (its image is amd64 only), then drop its flag.
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
-        image: ["alpine:3.22.1", "ubuntu:24.04", "archlinux:base"]
+        include:
+          - {image: "alpine:3.22.1", experimental: false}
+          - {image: "ubuntu:24.04", experimental: false}
+          - {image: "archlinux:base", experimental: true}
     steps:
       - uses: actions/checkout@v7
         with:
