@@ -214,6 +214,17 @@ function _run_hook_without_tools {
   assert_failure
 }
 
+@test "a container with no identity to decrypt reads no age passphrase" {
+  local cfg="${BATS_TEST_TMPDIR}/alpine.yaml" rendered="${BATS_TEST_TMPDIR}/age-key.sh"
+  _write_container_config "${cfg}" linux-alpine none
+  _render_linux "${cfg}" home/private_dot_ssh/.chezmoiscripts/run_once_before_01-decrypt-age-key.sh.tmpl \
+    "${rendered}"
+  run "${BASH}" -n "${rendered}"
+  assert_success
+  run grep -F 'age_passphrases' "${rendered}"
+  assert_failure
+}
+
 @test "the rclone hook does nothing in a container" {
   local cfg="${BATS_TEST_TMPDIR}/alpine.yaml" rendered="${BATS_TEST_TMPDIR}/rclone.sh"
   _write_container_config "${cfg}" linux-alpine none

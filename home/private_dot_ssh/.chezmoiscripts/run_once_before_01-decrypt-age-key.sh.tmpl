@@ -20,7 +20,9 @@ dybatpho::register_common_handlers
 {{-   $types = printf "enterprise-%s" . | append $types }}
 # {{ . }} hash: {{ printf "../secrets/enterprise-%s.age" . | joinPath $.chezmoi.sourceDir | include | sha256sum }}
 {{- end }}
-{{- if eq .kind "container" }}
+{{- /* Only with an identity to decrypt: a container with none, as the
+       public image or a bare one, has no passphrase to read. */}}
+{{- if and (eq .kind "container") $types }}
 if dybatpho::is file "/run/secrets/age_passphrases"; then
   # Not dybatpho::privilege_run: it honors DRY_RUN, which would put its
   # "DRY RUN" line in place of the passphrases.
