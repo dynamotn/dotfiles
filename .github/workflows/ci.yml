@@ -99,3 +99,51 @@ jobs:
       # so the whole suite is safe to run without the private submodule.
       - name: Run tests
         run: ./scripts/test.sh --all
+
+  # The supported platforms table is otherwise checked by hand: bring a bare
+  # image of each distribution up with the two scripts of the README. The
+  # tools themselves are left out (DOTFILES_SKIP_TOOLS), which keeps the run
+  # to minutes; the hooks still render and run for a container.
+  smoke:
+    name: Setup on ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    # shortcut: this job was written without a container runtime at hand, so
+    # it only reports until it has passed once; then drop this line.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["alpine:3.22.1", "ubuntu:24.04", "archlinux:base"]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: false
+
+      - name: Fetch dybatpho
+        run: git submodule update --init --recursive scripts/lib/dybatpho
+
+      # As in the test job: the apply-time AI hook sources dyai.
+      - name: Fetch dyai
+        env:
+          DYAI_DEPLOY_KEY: ${{ secrets.DYAI_DEPLOY_KEY }}
+        run: |
+          [[ -n "${DYAI_DEPLOY_KEY}" ]] || { echo "::error::secret DYAI_DEPLOY_KEY is not set"; exit 1; }
+          install -d -m 700 ~/.ssh
+          trap 'rm -f ~/.ssh/dyai' EXIT
+          printf '%s\n' "${DYAI_DEPLOY_KEY}" > ~/.ssh/dyai
+          chmod 600 ~/.ssh/dyai
+          echo 'gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf' > ~/.ssh/known_hosts
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/dyai -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            git submodule update --init --recursive scripts/lib/dyai
+
+      # A copy owned by the container's root: git refuses a checkout another
+      # user owns, and the run must not write into the runner's.
+      - name: Run prerequisite.sh and setup.sh
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          docker run --rm -e CI=true -e DOTFILES_SKIP_TOOLS=1 \
+            -v "${PWD}:/src:ro" "${IMAGE}" sh -euc '
+              cp -R /src /root/Dotfiles
+              sh /root/Dotfiles/scripts/prerequisite.sh
+              bash /root/Dotfiles/scripts/setup.sh --use-default'

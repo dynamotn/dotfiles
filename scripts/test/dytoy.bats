@@ -1151,3 +1151,47 @@ EOF2
   assert_success
   refute [ -f "${called_file}" ]
 }
+
+@test "dytoy::install_release downloads the pinned asset of a release with its checksum" {
+  write_tools_yaml << 'EOF2'
+- name: sample
+  method: binary
+  github:
+    repo: owner/sample
+    version: v1.2.3
+    release_asset: sample-%v-linux-%1v.tar.gz
+    sha256: sample-%1v.sha256
+EOF2
+  . "${DOTFILES_DIR}/scripts/lib/misc.sh"
+  export ONLY_NOT_INSTALLED='false'
+  function dytoy::install_dependencies { true; }
+  function binary_download::get_latest_version { fail "a pinned version asks for no latest release"; }
+  function binary_download::download_and_extract { printf '%s\n' "$@"; }
+  run dytoy::install_release sample github
+  assert_success
+  assert_line "${HOME}/.local/bin"
+  assert_line 'https://github.com/owner/sample/releases/download/v1.2.3/sample-v1.2.3-linux-1.2.3.tar.gz'
+  assert_line 'v1.2.3'
+  assert_line 'sample-1.2.3.sha256'
+}
+
+@test "dytoy::install_release leaves a tool that is already there, unless told to check nothing" {
+  write_tools_yaml << 'EOF2'
+- name: sample
+  method: binary
+  github:
+    repo: owner/sample
+    version: v1.2.3
+    release_asset: sample
+EOF2
+  printf '#!/bin/sh\n' > "${HOME}/.local/bin/sample"
+  chmod +x "${HOME}/.local/bin/sample"
+  . "${DOTFILES_DIR}/scripts/lib/misc.sh"
+  function dytoy::install_dependencies { true; }
+  function binary_download::download_and_extract { printf 'downloaded\n'; }
+  run dytoy::install_release sample github
+  assert_success
+  refute_output --partial 'downloaded'
+  ONLY_NOT_INSTALLED='false' run dytoy::install_release sample github
+  assert_output --partial 'downloaded'
+}
