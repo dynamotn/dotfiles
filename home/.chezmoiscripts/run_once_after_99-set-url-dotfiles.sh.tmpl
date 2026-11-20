@@ -2,11 +2,13 @@
 # @file 99-set-url-dotfiles.sh
 # @brief Point the dotfiles remotes at GitLab and GitHub
 # @description Set the origin remote of the dotfiles repository to GitLab and add GitHub
-# as a second remote. Skipped on container machines.
+# as a second remote. Skipped on container machines, and on a machine without
+# the personal secrets: it has no key for these SSH remotes, and would no
+# longer be able to pull.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules git
 dybatpho::register_common_handlers
 
-{{- if ne .kind "container" }}
+{{- if and (ne .kind "container") .decryptPersonal }}
 dybatpho::header "Setup remote url of dotfiles"
 repo_root="$(dybatpho::git_root "{{ .chezmoi.sourceDir }}/..")"
 git -C "${repo_root}" remote set-url origin git@gitlab.com:dynamo-config/dotfiles

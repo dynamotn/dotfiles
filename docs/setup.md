@@ -25,6 +25,7 @@ How a machine goes from bare to fully configured, and the knobs along the way.
 | `-l`, `--log-level`     | Log level, default `info`                                      |
 | `-d`, `--use-default`   | Take the default answer of every question                      |
 | `-i`, `--identities`    | Identities to decrypt, comma separated: `personal` and/or company codes |
+| `-m`, `--machine`       | Name of this machine, which picks its entry of `machines.yaml` |
 | `-s`, `--system`        | Apply the system layer even inside a container                 |
 
 Without a terminal (CI, container builds), every question takes its default.

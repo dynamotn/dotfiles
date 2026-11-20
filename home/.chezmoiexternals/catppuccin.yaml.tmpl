@@ -13,8 +13,12 @@
   refreshPeriod: 168h
 .config/git/delta:
   type: file
-  url: https://raw.githubusercontent.com/catppuccin/delta/main/catppuccin.gitconfig
-  refreshPeriod: 168h
+  # git/config includes this file, so it could set a pager or an alias: it is
+  # pinned to a commit that was read, and checked, instead of following a
+  # branch. Bump the two together.
+  url: https://raw.githubusercontent.com/catppuccin/delta/011516f5d14f66b771b3e716f29c77231e008c74/catppuccin.gitconfig
+  checksum:
+    sha256: f0580ada6b1e3767b718b25116a2ababec314474a12d1a796c917ef93d63b455
 .config/glamour/catppuccin.json:
   type: file
   url: https://raw.githubusercontent.com/catppuccin/glamour/refs/heads/main/themes/catppuccin-{{ $theme }}.json
@@ -46,7 +50,7 @@
   url: https://raw.githubusercontent.com/catppuccin/termux/main/themes/catppuccin-{{ $theme }}.properties
   refreshPeriod: 168h
 {{- end }}
-{{- if eq .guiServer "W" }}
+{{- if eq .guiServer "W" "X" }}
 .local/share/fcitx5/themes/catppuccin:
   type: archive
   url: https://github.com/catppuccin/fcitx5/archive/refs/heads/main.zip

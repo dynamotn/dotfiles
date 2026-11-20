@@ -13,7 +13,10 @@ is_essential: true
 {{- if eq .chezmoi.os "android" }}
 method: shell
 content: |-
-  curl -fsSL "https://raw.githubusercontent.com/Happ1ness-dev/bun-termux/main/helper_scripts/bun-termux-manager" | bash -s install
+  # shortcut: only the manager is pinned to a commit that was read; it still
+  # clones and builds the head of its repository. Vendor the build when
+  # that repository changes hands.
+  curl -fsSL "https://raw.githubusercontent.com/Happ1ness-dev/bun-termux/8b20b0e5aa52ff890c6758e883e925ee1301f9d7/helper_scripts/bun-termux-manager" | bash -s install
 {{- else }}
 method: mise
 backend: bun

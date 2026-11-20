@@ -30,7 +30,9 @@ runs again next time */}}
 {{- if eq .kind "container" }}
 {{-   $onFailure = " || dybatpho::warn \"git failed, the submodules may be out of date\"" }}
 {{- end }}
-git -C "${repo_root}" add .gitmodules{{ $onFailure }}
+# The index keeps the committed .gitmodules: staged, the one rendered for this
+# machine would go into its next commit and drop the submodules of the others.
+git -C "${repo_root}" reset --quiet -- .gitmodules{{ $onFailure }}
 git -C "${repo_root}" submodule sync --recursive{{ $onFailure }}
 git -C "${repo_root}" update-index --assume-unchanged .gitmodules{{ $onFailure }}
 git -C "${repo_root}" submodule update --init \

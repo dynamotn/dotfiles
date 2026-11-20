@@ -39,3 +39,11 @@
 
 # Old SSH keys
 .ssh/key
+
+# Functions dropped from the fish config, whose links were left dangling.
+.config/fish/functions/__caran_expand_bang.fish
+.config/fish/functions/__caran_expand_dot.fish
+.config/fish/functions/__caran_expand_lastarg.fish
+
+# A Qt4 settings cache from 2016, with a palette that is not Catppuccin.
+.config/Trolltech.conf

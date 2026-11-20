@@ -27,6 +27,10 @@ init_system::enable_systemd_user_units
 {{- range $jobs }} \
   dybrain-{{ . }}.timer
 {{- end }}
+# A machine that moved here from a crontab block would run the jobs twice.
+if dybatpho::is command crontab; then
+  cron::set_block dybrain < /dev/null
+fi
 dybatpho::success "Schedule DyBrain jobs"
 {{- else if eq .chezmoi.os "darwin" }}
 
@@ -36,6 +40,10 @@ for job in{{ range $jobs }} {{ . }}{{ end }}; do
   plist="$(dybatpho::path_join "${agents_dir}" "com.dybrain.${job}.plist")"
   init_system::bootstrap_launchd_agent "${plist}"
 done
+# A machine that moved here from a crontab block would run the jobs twice.
+if dybatpho::is command crontab; then
+  cron::set_block dybrain < /dev/null
+fi
 dybatpho::success "Schedule DyBrain jobs"
 {{- else if ne .kind "container" }}
 

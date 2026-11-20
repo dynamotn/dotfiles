@@ -16,7 +16,8 @@
 .config/fontconfig
 .config/gtk-3.0
 .config/gtk-4.0
-.config/Trolltech.conf
+.config/qt5ct
+.config/qt6ct
 .config/user-dirs.dirs
 .local/bin/xdg-*
 {{- end }}
@@ -36,7 +37,8 @@ Library/thunderbird
 {{- if ne .browser "F" }}
 .mozilla
 Library/Application Support/Firefox
-{{- else if ne .browser "Z" }}
+{{- end }}
+{{- if ne .browser "Z" }}
 .zen
 Library/Application Support/zen
 {{- end }}
@@ -91,6 +93,10 @@ Library/thunderbird
 {{- end }}
 
 {{/* Other GUI tools */}}
+{{/* Steam comes from flatpak only there (dytoy/steam.yaml.tmpl) */}}
+{{- if not (eq .osid "linux-gentoo" "linux-arch") }}
+.local/bin/steam
+{{- end }}
 {{- if eq .guiServer "0" }}
 .local/bin/obsidian-app
 .config/kitty
