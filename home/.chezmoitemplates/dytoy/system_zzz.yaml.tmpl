@@ -30,7 +30,6 @@ gentoo:
     - name: sys-devel/gcc
     # Build gentoo optimization tools
     - name: dev-util/ccache
-    - name: dev-util/sccache
     - name: sys-devel/distcc
     # Misc tools
     {{- if eq .guiServer "W" }}
@@ -47,13 +46,6 @@ gentoo:
     {{- if eq .kind "pc" "laptop" }}
     - name: sys-apps/usbutils
     {{- end }}
-  hook:
-    after: |-
-      # Initial setup sccache
-      sccache_dir="/var/cache/sccache"
-      sudo mkdir -p "$sccache_dir"
-      sudo chown root:portage "$sccache_dir"
-      sudo chmod 2775 "$sccache_dir"
 arch:
   packages:
     # System tools

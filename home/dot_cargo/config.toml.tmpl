@@ -1,0 +1,5 @@
+{{- /* Only once sccache is installed (dytoy), or every cargo build fails. */ -}}
+{{- if lookPath "sccache" }}
+[build]
+rustc-wrapper = "sccache"
+{{- end }}
