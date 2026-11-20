@@ -208,6 +208,8 @@ PY
   GIT_PREFIX="sub/" run "${BASH}" "${BATS_TEST_TMPDIR}/sdiff.sh" --exit-code -- file
   assert_failure 1
   assert_output --partial '+two'
+  # The status is git's answer: no trace of an error on top of it.
+  refute_output --partial 'Aborting'
   GIT_PREFIX="sub/" run "${BASH}" "${BATS_TEST_TMPDIR}/sdiff.sh" --exit-code -- missing
   assert_success
   assert_output ""

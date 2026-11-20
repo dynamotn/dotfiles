@@ -19,14 +19,21 @@ function _main {
   local color="never" pager="" output status=0
   if [[ -t 1 ]]; then
     color="always"
-    pager="$(git var GIT_PAGER)"
+    # The pager `git diff` itself would take: pager.diff first.
+    pager="$(git config pager.diff 2> /dev/null)" || pager=""
+    case "${pager}" in
+      false | no | off | 0) pager="cat" ;;
+      "" | true | yes | on | 1) pager="$(git var GIT_PAGER)" ;;
+      *) ;;
+    esac
   fi
   output="$(git --no-pager -c "include.path=~/.config/git/diff-secret" diff "--color=${color}" "$@")" \
     || status=$?
   if [[ -n "${output}" ]]; then
     if [[ -n "${pager}" && "${pager}" != "cat" ]]; then
-      # A shell command line, which git itself hands to `sh -c`.
-      printf '%s\n' "${output}" | sh -c "${pager}"
+      # A shell command line, which git itself hands to `sh -c`, with the
+      # LESS git sets. A pager quit before the end is no failure.
+      printf '%s\n' "${output}" | LESS="${LESS-FRX}" sh -c "${pager}" || true
     else
       printf '%s\n' "${output}"
     fi
@@ -34,4 +41,6 @@ function _main {
   return "${status}"
 }
 
-_main "$@"
+# The status of `git diff --exit-code` is an answer, not an error to report.
+# dyshellint disable=SC2310 errexit off inside _main is the point: it returns git's status
+_main "$@" || exit $?

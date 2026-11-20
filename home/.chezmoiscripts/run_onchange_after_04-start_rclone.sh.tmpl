@@ -37,8 +37,10 @@ if ((${#remotes[@]} == 0)); then
 fi
 
 {{- if eq .initSystem "systemd" }}
-if ! dybatpho::is dir /run/systemd/system; then
-  dybatpho::warn "systemd is not running, skipping the rclone services"
+# A user manager, not only systemd: an apply under `su`, from cron or over
+# an ssh without pam_systemd has none to reach.
+if ! dybatpho::is dir /run/systemd/system || ! systemctl --user show-environment &> /dev/null; then
+  dybatpho::warn "The systemd user manager is not running, skipping the rclone services"
   exit 0
 fi
 systemctl --user daemon-reload
