@@ -126,10 +126,15 @@ EOF
   _stub_agent copilot
   _stub_agent codex
   dybatpho::ensure_dir "${HOME}/.config/dyai" > /dev/null
-  printf 'global:\n  skills: []\n  mcp: {}\n  policy:\n    guard: true\nagents:\n  claude: {}\n' \
+  # dyshellint disable=SC2088 the glob is text for dyai, which reads ~ itself
+  printf 'global:\n  skills: []\n  mcp: {}\n  policy:\n    guard: true\n    permissions:\n      deny:\n        - "Read(~/.ssh/**)"\n        - "Bash(age -d *)"\nagents:\n  claude: {}\n' \
     > "${HOME}/.config/dyai/config.yaml"
   run bash "${HOOK}"
   assert_success
+  # The Read denies, for dyai-guard to hold in the shell of the agents
+  # that cannot hold a path rule.
+  run cat "${HOME}/.config/dyai/guard-deny-read"
+  assert_output '~/.ssh/**'
   local gemini="${HOME}/.gemini/settings.json" copilot="${HOME}/.copilot/hooks/dyai-guard.json"
   local codex="${HOME}/.codex/config.toml"
   jq -e '.hooks.BeforeTool == [{matcher: "run_shell_command",
@@ -137,8 +142,9 @@ EOF
   jq -e '.hooks.preToolUse == [{type: "command", matcher: "bash", bash: "dyai-guard copilot"}]' \
     "${copilot}" > /dev/null
   local pre before after
-  pre="$(yq -p=toml -o=json -I=0 '.hooks.PreToolUse' "${codex}")"
-  assert_equal "${pre}" '[{"matcher":"^Bash$","hooks":[{"type":"command","command":"dyai-guard codex"}]}]'
+  # Key order is the TOML writer's, not part of the rule.
+  pre="$(yq -p=toml -o=json -I=0 '.hooks.PreToolUse' "${codex}" | jq -cS .)"
+  assert_equal "${pre}" "$(jq -cS . <<< '[{"matcher":"^Bash$","hooks":[{"type":"command","command":"dyai-guard codex"}]}]')"
   before="$(cat "${gemini}" "${copilot}" "${codex}")"
   run bash "${HOOK}"
   assert_success
