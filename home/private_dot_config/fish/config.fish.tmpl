@@ -149,7 +149,6 @@ if status is-interactive
         $FZF_COLOR_OPTS \
         --cycle --layout=reverse --preview-window=wrap \
         --marker=\"*\" --prompt=\" \" --pointer=\"=>\""
-    type -q tmux; and test -n "$TMUX"; and set -g FZF_TMUX 1
     if type -q fdfind
         alias fd fdfind
     end

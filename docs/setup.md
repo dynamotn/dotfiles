@@ -55,7 +55,7 @@ bash scripts/setup.sh -d -i personal,F1
 | `browserEnterpriseProfiles`  | Company browser profiles to decrypt         |
 | `mailClient`                 | `B` Betterbird, `T` Thunderbird, or none    |
 | `mailEnterpriseProfiles`     | Company mail profiles to decrypt            |
-| `terminalMultiplexer`        | `Z` Zellij, `T` tmux                        |
+| `terminalMultiplexer`        | `Z` Zellij                                  |
 | `hasSound`, `hasBluetooth`, `hasWifi` | Hardware present                  |
 | `preferGitSSH`               | Clone over SSH instead of HTTPS             |
 | `darkMode`                   | Dark theme                                  |

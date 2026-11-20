@@ -41,7 +41,7 @@ chezmoi apply, so running it again is safe:
    (see [Machine data](#machine-data)); `--identities` answers which secrets
    to decrypt.
 3. **Submodules.** Applies `cascadeur/` to render `.gitmodules`, so a machine
-   only clones the submodules it uses (tmux only with the tmux multiplexer,
+   only clones the submodules it uses (the icons only with a Linux GUI,
    awesome only on X...).
 4. **SSH, then the network.** Applies `~/.ssh`, then `~/.config/dynet` and the
    git config. `network::detect` (`scripts/lib/network.sh`) picks git mirrors
@@ -113,7 +113,7 @@ name says when and in which order:
 | `run_once_before_01-` | before the first apply: the submodules |
 | `run_onchange_after_01-` | network detection |
 | `run_onchange_after_02-install-*` | tool installs through dytoy, one hook per method: `os`, `binary`, `shell`, `mise` |
-| `run_*_after_03-`     | per-tool setup: fish, nvim, tmux, AI agents, SSH known hosts... |
+| `run_*_after_03-`     | per-tool setup: fish, nvim, AI agents, SSH known hosts... |
 | `run_*_after_04-`     | services and jobs: rclone, cron, dyai node, notes |
 | `run_onchange_after_05-reload-*` | reload a running program after its config changed |
 | `run_once_after_99-`  | last: point the repository remote at its final URL |

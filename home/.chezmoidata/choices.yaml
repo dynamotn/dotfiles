@@ -47,7 +47,6 @@ choices:
       T: Thunderbird
       B: Betterbird
   terminalMultiplexer:
-    options: [Z, T]
+    options: [Z]
     labels:
-      T: tmux
       Z: Zellij

@@ -58,7 +58,7 @@ function _render_all_profiles {
   local out="${1}"
   : > "${out}"
   local multiplexer guiServer browser
-  for multiplexer in "T" "Z"; do
+  for multiplexer in "Z"; do
     for guiServer in "X" "W" "0"; do
       for browser in "F" "Z"; do
         local cfg="${BATS_TEST_TMPDIR}/cfg-${multiplexer}-${guiServer}-${browser}.yaml"

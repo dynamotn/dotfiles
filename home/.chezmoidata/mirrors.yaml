@@ -12,8 +12,6 @@ gitMirrors:
     github: dynamotn/neovim-config
   - gitlab: dynamo-tools/dyai
     github: dynamotn/dyai
-  - gitlab: dynamo-config/tmux
-    github: dynamotn/tmux-config
   - gitlab: dynamo-config/awesome
     github: dynamotn/awesomewm-config
   - gitlab: dynamo-config/wallpaper

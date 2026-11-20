@@ -54,7 +54,7 @@ templates render only what fits it.
 |-|-|
 | Shell | [fish](https://fishshell.com) with a custom prompt, abbreviations and helper functions |
 | Editor | [Neovim](https://neovim.io), kept in its own submodule, with LSP, DAP and linters from Mason |
-| Terminal | [kitty](https://sw.kovidgoyal.net/kitty/) and [Zellij](https://zellij.dev) (or tmux) |
+| Terminal | [kitty](https://sw.kovidgoyal.net/kitty/) and [Zellij](https://zellij.dev) |
 | Linux desktop | [niri](https://github.com/YaLTeR/niri) or [Hyprland](https://hyprland.org) on Wayland, with the [Noctalia](https://github.com/noctalia-dev/noctalia-shell) shell |
 | macOS desktop | [AeroSpace](https://github.com/nikitabobko/AeroSpace) or OmniWM, with [SketchyBar](https://github.com/FelixKratz/SketchyBar) and Hammerspoon |
 | Apps | Zen Browser or Firefox and Betterbird or Thunderbird, each with separate personal and work profiles; [yazi](https://yazi-rs.github.io), lazygit, btop, k9s, mpv... |
@@ -179,7 +179,7 @@ are described in [setup](docs/setup.md).
 | Window manager | Hyprland, niri, AeroSpace, OmniWM, GNOME |
 | Browser | Zen Browser, Firefox, none |
 | Mail client | Betterbird, Thunderbird, none |
-| Terminal multiplexer | Zellij, tmux |
+| Terminal multiplexer | Zellij |
 
 The full list, with defaults, is in
 [`home/.chezmoidata/choices.yaml`](home/.chezmoidata/choices.yaml).

@@ -111,7 +111,6 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[rbw](https://github.com/doy/rbw)|Bitwarden CLI tool|
 |[pinentry](https://www.gnupg.org/related_software/pinentry/)|Prompt for the rbw master password, as pinentry-mac, pinentry-gnome3 or pinentry-curses to match the machine|
 |[fish](https://github.com/fish-shell/fish-shell)|Smart command line shell|
-|[tmux](https://github.com/tmux/tmux)|Terminal multiplexer|
 |[zellij](https://github.com/zellij-org/zellij)|Terminal multiplexer|
 |[zj-herdr](https://github.com/dynamotn/zj-herdr)|Agent runtime for Zellij, with hook-free agent state, a socket API and a picker of every agent|
 |[grc](https://github.com/garabik/grc)|Colorise for some GNU/Linux commands|
@@ -136,7 +135,6 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[btop](https://github.com/aristocratos/btop)|Alternative to `htop` and `glances`|
 |[witr](https://github.com/pranshuparmar/witr)|Trace process, port, container and file locks on CLI|
 |[himalaya](https://github.com/soywod/himalaya)|Email CLI tool|
-|[smug](https://github.com/ivaaaan/smug)|Tmux session manager|
 |[projekt](https://github.com/dynamotn/projekt)|Smart CLI command to manage project folder|
 |[pomodoro](https://github.com/open-pomodoro/openpomodoro-cli)|CLI command for Pomodoro tracker|
 |[procs](https://github.com/dalance/procs)|Alternative to `ps` with colours, tree view...|
@@ -396,7 +394,6 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |[qrify](https://github.com/alexanderepstein/Bash-Snippets)|Show QR of text|
 |[tmpmail](https://github.com/sdushantha/tmpmail)|Create temp mail address and receive emails|
 |[trans](https://github.com/soimort/translate-shell)|Translate|
-|[xpanes](https://github.com/greymd/tmux-xpanes)|Terminal divider with tmux|
 |[cava](https://github.com/karlstav/cava)|Audio visualizer|
 |[git-quick-stats](https://github.com/arzzen/git-quick-stats)|Show statistics of Git repository|
 |[playerctl](https://github.com/altdesktop/playerctl)|Control media players that implement the MPRIS|

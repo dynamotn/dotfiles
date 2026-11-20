@@ -46,17 +46,3 @@
     sha256: "4169d50782fddd648eb390fe853e55ecb6580777761ca25e9d84eb1b77dbf7bb"
   executable: true
 {{- end }}
-{{- if eq .terminalMultiplexer "T" }}
-.local/bin/fzf-tmux:
-  type: file
-  url: 'https://raw.githubusercontent.com/junegunn/fzf/55c122f1a0e1340546c8709682bea5561fe0e8fd/bin/fzf-tmux'
-  checksum:
-    sha256: "d6f25d7ed61fab3c4d14920bd211d9efbb5beafd2cc4dcbe9accb6a441dcdabc"
-  executable: true
-.local/bin/xpanes:
-  type: file
-  url: 'https://raw.githubusercontent.com/greymd/tmux-xpanes/384b12780759f53056f58fb05645dfac89688da8/bin/xpanes'
-  checksum:
-    sha256: "80646af86d09ed0c337b1cb6df953a2fae8090d6f63b866a6545d3ff50048c69"
-  executable: true
-{{- end }}

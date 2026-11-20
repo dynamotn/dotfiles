@@ -84,12 +84,6 @@
   category: Miscellaneous applications
   subcategory: Fun and helpers
   order: 80
-- name: xpanes
-  url: "https://github.com/greymd/tmux-xpanes"
-  description: Terminal divider with tmux
-  category: Miscellaneous applications
-  subcategory: Fun and helpers
-  order: 90
 - name: git-quick-stats
   url: "https://github.com/arzzen/git-quick-stats"
   description: Show statistics of Git repository

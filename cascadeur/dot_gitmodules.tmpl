@@ -14,11 +14,6 @@
 [submodule "neovim"]
   path = home/private_dot_config/nvim
   url = https://github.com/dynamotn/neovim-config.git
-{{- if eq .terminalMultiplexer "T" }}
-[submodule "tmux"]
-  path = silos/tmux
-  url = https://github.com/dynamotn/tmux-config.git
-{{- end }}
 {{- if eq .guiServer "X" }}
 [submodule "awesome"]
   path = home/private_dot_config/awesome

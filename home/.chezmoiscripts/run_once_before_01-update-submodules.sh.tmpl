@@ -62,9 +62,6 @@ git -C "${repo_root}" submodule update --init \
   home/private_dot_config/thunderbird/profiles/enterprise-{{ . }} \
   {{-   end }}
   {{- end }}
-  {{- if eq .terminalMultiplexer "T" }}
-  silos/tmux \
-  {{- end }}
   {{- if ne .guiServer "0" }}
   home/Multimedia/Pictures/Wallpaper \
   {{- end }}

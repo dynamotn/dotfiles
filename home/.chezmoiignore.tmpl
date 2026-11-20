@@ -141,11 +141,7 @@ Library/thunderbird
 {{- end }}
 
 {{/* Terminal multiplexer files */}}
-{{- if ne .terminalMultiplexer "T" }}
-.tmux.conf
-.config/tmux
-.config/smug
-{{- else if ne .terminalMultiplexer "Z" }}
+{{- if ne .terminalMultiplexer "Z" }}
 .config/zellij
 .config/zj-herdr
 {{- end }}

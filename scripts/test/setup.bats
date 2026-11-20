@@ -207,7 +207,7 @@ machines:
     browserEnterpriseProfiles: [T1]
     mailClient: ""
     mailEnterpriseProfiles: []
-    terminalMultiplexer: "T"
+    terminalMultiplexer: "Z"
     hasSound: true
     hasBluetooth: false
     hasWifi: true
@@ -221,7 +221,7 @@ EOF
   local query='.data | [.place, .kind, .company, .guiWinManager, .browser, .mailClient,'
   query+=' .terminalMultiplexer, .darkMode, .hasWifi]'
   run yq -o=j -I=0 "${query}" <<< "${config}"
-  assert_output '["office","laptop","T1","N","F","","T",false,true]'
+  assert_output '["office","laptop","T1","N","F","","Z",false,true]'
   run yq -o=j -I=0 '.data.decryptEnterprise' <<< "${config}"
   assert_output '["T1"]'
   run yq -r '.age.identities[]' <<< "${config}"

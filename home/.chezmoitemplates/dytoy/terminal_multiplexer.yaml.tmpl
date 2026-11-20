@@ -1,42 +1,11 @@
 {{- /* doc
-name: tmux
-url: "https://github.com/tmux/tmux"
-description: Terminal multiplexer
-category: Everyday terminal applications
-subcategory: Core
-order: 50
-*/ -}}
-{{- /* doc
 name: zellij
 description: Terminal multiplexer
 category: Everyday terminal applications
 subcategory: Core
 order: 60
 */ -}}
-{{- if eq .terminalMultiplexer "T" }}
-name: tmux
-method: os
-# https://repology.org/project/tmux/versions
-is_essential: true
-gentoo:
-  packages:
-    - name: app-misc/tmux
-arch:
-  packages:
-    - name: tmux
-ubuntu:
-  packages:
-    - name: tmux
-alpine:
-  packages:
-    - name: tmux
-termux:
-  packages:
-    - name: tmux
-macos:
-  packages:
-    - name: tmux
-{{- else if eq .terminalMultiplexer "Z" }}
+{{- if eq .terminalMultiplexer "Z" }}
 name: zellij
 is_essential: true
 {{-   if ne .osid "linux-ubuntu" }}

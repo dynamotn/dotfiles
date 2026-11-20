@@ -47,3 +47,11 @@
 
 # A Qt4 settings cache from 2016, with a palette that is not Catppuccin.
 .config/Trolltech.conf
+
+# tmux and its helpers, dropped for zellij.
+.tmux.conf
+.config/tmux
+.config/smug
+.local/bin/fzf-tmux
+.local/bin/xpanes
+.local/share/tmux

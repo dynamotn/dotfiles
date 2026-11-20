@@ -101,7 +101,7 @@ which ones ran.
 - There is deliberately no `CHANGELOG.md` here. Do not create one; the history
   lives in commit messages.
 - Do not commit inside a submodule (`home/private_dot_config/nvim`,
-  `silos/tmux`, the browser profiles, `secrets/data`, …) unless asked. A
+  `silos/icon`, the browser profiles, `secrets/data`, …) unless asked. A
   submodule pointer bump is its own commit.
 - `secrets/data/` holds live credentials and is off limits — see the
   credentials section of the machine-wide agent rules.
