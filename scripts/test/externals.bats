@@ -35,3 +35,26 @@ function _render_mozilla {
   assert_failure
   assert_stderr --partial 'no add-on ID for the Thunderbird theme catppuccin-macchiato-pink'
 }
+
+@test "chezmoi reads every external as rendered for a machine" {
+  local cfg="${BATS_TEST_TMPDIR}/config.yaml" home="${BATS_TEST_TMPDIR}/empty-home"
+  local source="${BATS_TEST_TMPDIR}/source" template name
+  yq ".sourceDir = \"${DOTFILES_DIR}\" | .data.mailClient = \"T\"" \
+    "${DOTFILES_DIR}/scripts/test/fixtures/chezmoi.yaml" > "${cfg}"
+  mkdir -p "${home}" "${source}/.chezmoiexternals" "${BATS_TEST_TMPDIR}/destination"
+  cd "${DOTFILES_DIR}" || fail "no repository"
+  for template in home/.chezmoiexternals/*.tmpl; do
+    name="${template##*/}"
+    # The real home: the Mozilla externals name the source relative to it.
+    env HOME="${DOTFILES_REAL_HOME}" XDG_CONFIG_HOME="${home}/.config" \
+      chezmoi --config "${cfg}" execute-template --source "${DOTFILES_DIR}" \
+      < "${template}" > "${source}/.chezmoiexternals/${name%.tmpl}" \
+      || fail "${name} does not render"
+  done
+  # A bare digest renders as valid YAML yet stops every apply.
+  : > "${BATS_TEST_TMPDIR}/empty.yaml"
+  run --separate-stderr chezmoi --config "${BATS_TEST_TMPDIR}/empty.yaml" --source "${source}" \
+    --destination "${BATS_TEST_TMPDIR}/destination" \
+    --persistent-state "${BATS_TEST_TMPDIR}/state.boltdb" managed
+  assert_success
+}

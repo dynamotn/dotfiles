@@ -41,7 +41,7 @@ github:
   version: v1.3.2
   release_asset: age-%v-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz
   {{- with index $digests .chezmoi.arch }}
-  sha256: {{ . }}
+  sha256: {{ . | quote }}
   {{- end }}
 archive:
   - path: age/age
