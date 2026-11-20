@@ -6,21 +6,24 @@ export const DyaiGuard = async ({ $, directory }) => ({
   "tool.execute.before": async (input, output) => {
     if (input?.tool !== "bash" || typeof output?.args?.command !== "string") return;
     const hook = JSON.stringify({ tool_input: { command: output.args.command }, cwd: directory });
-    let verdict = "";
+    // A guard that is missing or answers nonsense refuses the command: a
+    // guard that fails open is switched off without anyone being told.
+    const broken = (why) => new Error(`dyai-guard ${why}; refusing the command`);
+    const script = "command -v dyai-guard > /dev/null 2>&1 || exit 127; dyai-guard opencode";
+    let run;
     try {
-      const script = "command -v dyai-guard > /dev/null 2>&1 && dyai-guard opencode; true";
-      const run = await $`bash -c ${script} < ${Buffer.from(hook)}`.cwd(directory).quiet().nothrow();
-      verdict = run.stdout.toString().trim();
-    } catch {
-      // A missing or broken guard leaves opencode's own rules in charge.
-      return;
+      run = await $`bash -c ${script} < ${Buffer.from(hook)}`.cwd(directory).quiet().nothrow();
+    } catch (error) {
+      throw broken(`could not run (${error?.message ?? error})`);
     }
+    if (run.exitCode === 127) throw broken("is not on PATH");
+    const verdict = run.stdout.toString().trim();
     if (!verdict) return;
     let parsed;
     try {
       parsed = JSON.parse(verdict);
     } catch {
-      return;
+      throw broken("gave an answer that is not JSON");
     }
     if (parsed?.decision === "deny") throw new Error(parsed.reason || "dyai-guard refused this command");
   },

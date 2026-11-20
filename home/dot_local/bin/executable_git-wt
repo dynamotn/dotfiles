@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# @file git-wt
+# @brief Create a worktree for a new branch under `.worktrees/` of the main checkout
+# @description `git wt <branch>`, from the main checkout or any of its
+# worktrees. A command rather than an alias: git runs an external `git-wt`
+# before it looks up aliases, so the `alias.wt` of a repository cannot take
+# over the `git wt *` rule the agents may run unasked.
+# @arg $1 string Name of the new branch
+set -euo pipefail
+
+branch="${1:?Usage: git wt <branch>}"
+unset GIT_DIR GIT_WORK_TREE
+common_dir="$(git rev-parse --path-format=absolute --git-common-dir)"
+# Inside `.git` there is no top level to ask for; the checkout is its parent.
+repo="$(git -C "${common_dir}" rev-parse --path-format=absolute --show-toplevel 2> /dev/null)" || repo=""
+[[ -n "${repo}" ]] || repo="$(dirname "${common_dir}")"
+mkdir -p "${repo}/.worktrees"
+git -C "${repo}" worktree add -b "${branch}" "${repo}/.worktrees/${branch//\//-}"

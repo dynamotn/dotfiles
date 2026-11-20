@@ -254,8 +254,8 @@
         unshallow = "!_() { git fetch --unshallow; git config remote.$1.fetch "+refs/heads/*:refs/remotes/$1/*"; git fetch $1; }; _"
         # Generate patch from git diff
         gen-patch = "!_() { git -c diff.noprefix=false diff --output $1; }; _"
-        # Create worktree with new branch, in the repository itself even inside a submodule
-        wt = "!_() { branch=$1; branch_safe=${branch//\\//-}; unset GIT_DIR GIT_WORK_TREE; c=$(git rev-parse --path-format=absolute --git-common-dir); repo=$(git -C \"$c\" rev-parse --path-format=absolute --show-toplevel 2>/dev/null); [ -n \"$repo\" ] || repo=$(dirname \"$c\"); mkdir -p \"${repo}/.worktrees\"; git -C \"$repo\" worktree add -b \"$branch\" \"${repo}/.worktrees/${branch_safe}\"; }; _"
+        # `git wt <branch>` is the command ~/.local/bin/git-wt, not an alias: a
+        # repository's own alias.wt would otherwise run under the agents' allow rule
 {{- /* Hooks from config (git 2.54+) run in every repository, before its own
        hooks; an older git ignores them. Each event runs its hooks in the
        order listed here. */}}

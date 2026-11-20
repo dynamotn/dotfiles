@@ -309,12 +309,17 @@
 {{- /*
   Every hook, git hook, chezmoi script and dyai-guard sources these from the
   checkout and runs outside the sandbox, the root ones under `scz` too: a
-  session working in the checkout must not change them unasked.
+  session working in the checkout must not change them unasked. The last
+  three are plain sources that `mode: symlink` links into the home, where
+  fish, opencode and Copilot run them with no apply in between.
 */ -}}
 {{- $denyWrite := concat $static.sandbox.filesystem.denyWrite (list
       (joinPath $wt "scripts/lib")
       (joinPath $wt "scripts/*.sh")
-      (joinPath $wt ".pre-commit-config.yaml")) -}}
+      (joinPath $wt ".pre-commit-config.yaml")
+      (joinPath $wt "home/private_dot_config/fish")
+      (joinPath $wt "home/private_dot_config/opencode/plugins")
+      (joinPath $wt "home/private_dot_copilot")) -}}
 {{- $derived := dict
       "permissions" $perms
       "sandbox" (dict "filesystem" (dict "denyRead" $denyRead "denyWrite" $denyWrite))
