@@ -216,6 +216,10 @@ policy:
       - "Bash(rtk git sdiff*)"
       - "Bash(git -c include.path*)"
       - "Bash(rtk git -c include.path*)"
+      # What `git sdiff` runs, and the driver itself: each asks on the
+      # terminal before it decrypts, which an agent owning a pty can answer.
+      - "Bash(bash ~/.config/git/scripts/sdiff.sh*)"
+      - "Bash(bash ~/.config/git/scripts/decrypt_chezmoi.sh*)"
       - "Bash(age -d *)"
       - "Bash(age --decrypt *)"
       - "Bash(sops -d *)"

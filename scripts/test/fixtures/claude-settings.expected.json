@@ -262,6 +262,8 @@
       "Bash(rtk git sdiff*)",
       "Bash(git -c include.path*)",
       "Bash(rtk git -c include.path*)",
+      "Bash(bash ~/.config/git/scripts/sdiff.sh*)",
+      "Bash(bash ~/.config/git/scripts/decrypt_chezmoi.sh*)",
       "Bash(age -d *)",
       "Bash(age --decrypt *)",
       "Bash(sops -d *)",
