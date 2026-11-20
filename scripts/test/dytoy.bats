@@ -1195,3 +1195,20 @@ EOF2
   ONLY_NOT_INSTALLED='false' run dytoy::install_release sample github
   assert_output --partial 'downloaded'
 }
+
+@test "dytoy::iterate remembers nothing from a dry run" {
+  write_tools_yaml << 'EOF2'
+- name: first
+  method: binary
+EOF2
+  METHOD='binary'
+  TOOL='@empty'
+  local output_file="${BATS_TEST_TMPDIR}/tools"
+  function install_tool { printf '%s:%s\n' "$1" "${DRY_RUN}" >> "${output_file}"; }
+  DRY_RUN='true' run dytoy::iterate install_tool
+  assert_success
+  # The real run that follows a rehearsal still installs.
+  DRY_RUN='false' run dytoy::iterate install_tool
+  run cat "${output_file}"
+  assert_output $'first:true\nfirst:false'
+}

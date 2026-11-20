@@ -145,8 +145,14 @@ function _decrypt_setup {
 
 @test "decrypt_chezmoi prints a placeholder, not the secret, without a terminal" {
   _decrypt_setup
-  # setsid drops the controlling terminal, as an agent's shell has none
-  run setsid -w bash "${BATS_TEST_TMPDIR}/decrypt.sh" _normal personal "${BATS_TEST_TMPDIR}/secret.age"
+  # A new session drops the controlling terminal, as an agent's shell has
+  # none: setsid(1), or Python's on macOS, which has no setsid command.
+  local -a detach=(setsid -w)
+  if ! command -v setsid > /dev/null; then
+    command -v python3 > /dev/null || skip "neither setsid nor python3 can drop the terminal"
+    detach=(python3 -I -c 'import os, sys; os.setsid(); os.execvp(sys.argv[1], sys.argv[1:])')
+  fi
+  run "${detach[@]}" bash "${BATS_TEST_TMPDIR}/decrypt.sh" _normal personal "${BATS_TEST_TMPDIR}/secret.age"
   assert_success
   assert_output '<encrypted: decrypting a diff needs a terminal>'
 }
