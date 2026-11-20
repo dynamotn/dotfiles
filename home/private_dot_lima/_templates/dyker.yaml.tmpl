@@ -65,7 +65,17 @@ provision:
       # Upgrade the whole system with docker: `-Sy` alone is a partial upgrade,
       # which breaks once the cloud image is older than the repos (e.g. the
       # gcc-libs/libgcc split conflicts on /usr/lib/libgcc_s.so)
-      command -v docker >/dev/null 2>&1 || pacman -Syu --noconfirm docker
+      # The upgrade may replace the kernel, deleting the running one's modules:
+      # dockerd then cannot load netfilter until a reboot, so put them back.
+      # shortcut: they stay after the new kernel boots (~100MB), as with
+      # kernel-modules-hook; remove them by hand if the root disk gets tight.
+      if ! command -v docker >/dev/null 2>&1; then
+        running="/usr/lib/modules/$(uname -r)"
+        keep="/var/tmp/modules-$(uname -r)"
+        cp -a "$running" "$keep"
+        pacman -Syu --noconfirm docker
+        if [ -d "$running" ]; then rm -rf "$keep"; else mv "$keep" "$running"; fi
+      fi
       # Start dockerd at boot, not only on the first socket connection,
       # otherwise the probe below never sees it and `limactl start` times out
       systemctl enable --now docker.socket docker.service
