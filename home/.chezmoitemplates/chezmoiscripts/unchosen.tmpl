@@ -1,0 +1,24 @@
+{{- /*
+  The config of the window managers this machine did not choose, one target
+  path per line. `.chezmoiignore` leaves them out of the apply, and the
+  06-remove-unchosen hook removes what an earlier choice left there: an
+  ignored path is one `.chezmoiremove` does not touch.
+*/ -}}
+{{- if ne .guiWinManager "H" }}
+.config/hypr
+.config/hyprshade
+{{- end }}
+{{- if ne .guiWinManager "N" }}
+.config/niri
+{{- end }}
+{{- if not (has .guiWinManager (list "H" "N")) }}
+.wayland_init.fish
+.config/noctalia
+{{- end }}
+{{- if ne .guiWinManager "A" }}
+.config/aerospace
+.config/sketchybar
+{{- end }}
+{{- if ne .guiWinManager "O" }}
+.config/omniwm
+{{- end }}

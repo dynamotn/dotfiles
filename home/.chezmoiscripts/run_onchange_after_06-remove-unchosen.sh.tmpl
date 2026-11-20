@@ -1,0 +1,17 @@
+#!{{ .bash }}
+# @file 06-remove-unchosen.sh
+# @brief Remove the config of the window managers this machine did not choose
+# @description Changing a choice only stops chezmoi applying the config of
+# the old one; this removes what it left in the home. The hook carries the
+# list itself, so it runs again whenever a choice changes it. Only config
+# this repository wrote goes: no profile, no state, no package.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh" --modules safety
+dybatpho::register_common_handlers
+
+{{- /* noctalia keeps its own state next to the one file chezmoi writes */}}
+{{- $paths := includeTemplate "chezmoiscripts/unchosen.tmpl" . | trim | replace ".config/noctalia" ".config/noctalia/config.toml" }}
+{{- range splitList "\n" $paths }}
+{{-   if . }}
+dybatpho::safe_rm --force --recursive {{ joinPath $.chezmoi.homeDir . | quote }}
+{{-   end }}
+{{- end }}

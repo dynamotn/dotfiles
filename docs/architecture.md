@@ -116,6 +116,7 @@ name says when and in which order:
 | `run_*_after_03-`     | per-tool setup: fish, nvim, AI agents, SSH known hosts... |
 | `run_*_after_04-`     | services and jobs: rclone, cron, dyai node, notes |
 | `run_onchange_after_05-reload-*` | reload a running program after its config changed |
+| `run_onchange_after_06-` | remove the config of the window managers the machine no longer chooses |
 | `run_once_after_99-`  | last: point the repository remote at its final URL |
 
 A `run_onchange_` script embeds a hash of what it depends on in a comment, so
