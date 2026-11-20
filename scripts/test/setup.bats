@@ -381,3 +381,17 @@ EOF
   assert_failure
   assert_stderr --partial "No tool is pinned for this OS and architecture"
 }
+
+@test "the config template turns a stored answer it no longer offers into the default" {
+  dybatpho::is command chezmoi || skip "chezmoi is not installed"
+  write_machines_yaml <<< 'machines: {test0: {kind: "laptop"}}'
+  # What a machine set up with tmux, before it was dropped, has stored.
+  local stored="${BATS_TEST_TMPDIR}/stored.yaml"
+  printf 'data:\n  terminalMultiplexer: "T"\n' > "${stored}"
+  run --separate-stderr chezmoi execute-template --init --no-tty --config "${stored}" \
+    --source "${SANDBOX}" --promptString "What is this machine's name=other" \
+    --file "${SANDBOX}/home/.chezmoi.yaml.tmpl" < /dev/null
+  assert_success
+  run yq -r '.data.terminalMultiplexer' <<< "${output}"
+  assert_output 'Z'
+}

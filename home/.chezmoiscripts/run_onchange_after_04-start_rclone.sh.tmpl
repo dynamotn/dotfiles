@@ -1,14 +1,16 @@
 #!{{ .bash }}
 # @file 04-start_rclone.sh
 # @brief Start the rclone mounts
-# @description Start the rclone mounts after their configuration changes. The
-# configuration only exists on machines set up with an enterprise's secrets, and
-# a container has no service manager to keep the mounts, so both skip it.
+# @description Start the rclone mounts after their configuration changes, and
+# stop those of the remotes that left it. The configuration only exists on
+# machines set up with an enterprise's secrets; without one, every mount an
+# earlier setup enabled is stopped. A container has no service manager to
+# keep the mounts, so it skips the hook.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh"
 
-{{- if and (not (empty .decryptEnterprise)) (ne .kind "container") }}
+{{- if ne .kind "container" }}
 {{- $rcloneConf := joinPath .chezmoi.homeDir ".config/rclone/rclone.conf" }}
 {{- /*
   The inputs of rclone.conf, not the file: this renders before the apply

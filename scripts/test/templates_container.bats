@@ -201,7 +201,20 @@ function _run_hook_without_tools {
   assert_output --partial "nvim is not installed"
 }
 
-@test "the rclone hook does nothing without an enterprise's secrets" {
+@test "the rclone hook stops the mounts of a machine that lost its enterprise's secrets" {
+  local cfg="${BATS_TEST_TMPDIR}/pc.yaml" rendered="${BATS_TEST_TMPDIR}/rclone-pc.sh"
+  _write_container_config "${cfg}" linux-arch systemd
+  yq -i '.data.kind = "pc"' "${cfg}"
+  _render_linux "${cfg}" home/.chezmoiscripts/run_onchange_after_04-start_rclone.sh.tmpl "${rendered}"
+  run "${BASH}" -n "${rendered}"
+  assert_success
+  run grep -c -e 'init_system::stale_instances' -e 'systemctl --user disable --now' "${rendered}"
+  assert_output 2
+  run grep -F 'secrets hash' "${rendered}"
+  assert_failure
+}
+
+@test "the rclone hook does nothing in a container" {
   local cfg="${BATS_TEST_TMPDIR}/alpine.yaml" rendered="${BATS_TEST_TMPDIR}/rclone.sh"
   _write_container_config "${cfg}" linux-alpine none
   _render_linux "${cfg}" home/.chezmoiscripts/run_onchange_after_04-start_rclone.sh.tmpl "${rendered}"
