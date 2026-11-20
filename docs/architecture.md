@@ -42,7 +42,7 @@ chezmoi apply, so running it again is safe:
    to decrypt.
 3. **Submodules.** Applies `cascadeur/` to render `.gitmodules`, so a machine
    only clones the submodules it uses (tmux only with the tmux multiplexer,
-   the icons only with a Linux GUI...).
+   awesome only on X...).
 4. **SSH, then the network.** Applies `~/.ssh`, then `~/.config/dynet` and the
    git config. `network::detect` (`scripts/lib/network.sh`) picks git mirrors
    and a proxy for the network the machine is on, so the clones that follow

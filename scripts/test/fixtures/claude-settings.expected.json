@@ -331,7 +331,11 @@
         "@DOTFILES@/.pre-commit-config.yaml",
         "@DOTFILES@/home/private_dot_config/fish",
         "@DOTFILES@/home/private_dot_config/opencode/plugins",
-        "@DOTFILES@/home/private_dot_copilot"
+        "@DOTFILES@/home/private_dot_copilot",
+        "@DOTFILES@/.git/config",
+        "@DOTFILES@/.git/hooks",
+        "@DOTFILES@/.git/modules/*/config",
+        "@DOTFILES@/.git/modules/*/hooks"
       ]
     },
     "network": {

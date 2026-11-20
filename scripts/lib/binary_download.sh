@@ -246,7 +246,7 @@ function __binary_download_copy_selection {
   local match relative_path stripped_path destination_path destination_dir
   for match in "${matches[@]}"; do
     relative_path="${match#"${extracted_root}"/}"
-    stripped_path="$(__binary_download_strip_path "${relative_path}" "${strip}")"
+    stripped_path="$(__binary_download_strip_path "${relative_path}" "${strip}")" || return
     [[ -n "${stripped_path}" ]] || continue
     if [[ "${layout}" == "flat" ]]; then
       stripped_path="$(dybatpho::path_basename "${stripped_path}")"
@@ -258,9 +258,14 @@ function __binary_download_copy_selection {
       __binary_download_replace "${match}" "${destination_path}"
     else
       # The contents, not the directory: over an earlier install `cp -R dir`
-      # would nest the new copy inside the old one.
-      dybatpho::ensure_dir "${destination_path}" > /dev/null
-      cp -R "${match}/." "${destination_path}"
+      # would nest the new copy inside the old one. `-f` replaces a file that
+      # cannot be written, as a program that is running. A link stays a link.
+      if [[ -L "${match}" ]]; then
+        cp -R "${match}" "${destination_path}"
+      else
+        dybatpho::ensure_dir "${destination_path}" > /dev/null
+        cp -Rf "${match}/." "${destination_path}"
+      fi
     fi
   done
 

@@ -1,14 +1,19 @@
 #!{{ .bash }}
 # @file 03-setup-nvim.sh
 # @brief Sync the neovim plugins
-# @description Sync the neovim plugins with Lazy, headless, whenever the
-# plugin lock of the configuration changes.
+# @description Bring the neovim plugins to the versions of the plugin lock,
+# headless, whenever a lock of the configuration changes. `restore`, not
+# `sync`: an update would rewrite the lock, which is linked into the source,
+# and so run this hook again on every apply.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
-{{- /* A submodule, so absent until the submodules are updated */}}
-{{- $lock := joinPath .chezmoi.sourceDir "private_dot_config/nvim/lazy-lock.json" }}
-{{- if stat $lock }}
-# plugins hash: {{ include $lock | sha256sum }}
+{{- /* A submodule, so absent until the submodules are updated. Both locks:
+       which one a machine follows is the configuration's own choice. */}}
+{{- range list "lazy-lock.json" "lazy-lock.stable.json" }}
+{{-   $lock := joinPath $.chezmoi.sourceDir "private_dot_config/nvim" . }}
+{{-   if stat $lock }}
+# {{ . }} hash: {{ include $lock | sha256sum }}
+{{-   end }}
 {{- end }}
 
 if ! dybatpho::is command nvim; then
@@ -17,5 +22,5 @@ if ! dybatpho::is command nvim; then
 fi
 
 dybatpho::header "Setup neovim"
-nvim --headless "+Lazy! sync" +qa
+nvim --headless "+Lazy! restore" +qa
 dybatpho::success "Setup neovim"

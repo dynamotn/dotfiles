@@ -19,6 +19,11 @@
   path = silos/tmux
   url = https://github.com/dynamotn/tmux-config.git
 {{- end }}
+{{- if eq .guiServer "X" }}
+[submodule "awesome"]
+  path = home/private_dot_config/awesome
+  url = https://github.com/dynamotn/awesomewm-config.git
+{{- end }}
 {{- if ne .guiServer "0" }}
 [submodule "wallpaper"]
   path = home/Multimedia/Pictures/Wallpaper
