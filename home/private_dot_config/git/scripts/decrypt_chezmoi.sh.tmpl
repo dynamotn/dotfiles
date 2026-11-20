@@ -50,11 +50,14 @@ function _sops {
 
 #######################################
 # @description Run the decoder named by the first argument, only for a
-# process with a controlling terminal: git runs outside the agents' sandbox,
-# and an agent has no terminal, however it got git to load this driver.
+# process with a controlling terminal and after a `y` typed there: git runs
+# outside the agents' sandbox, and an agent that got git to load this driver
+# has no terminal, or one nobody answers on.
+# shortcut: an agent that can type into its own terminal still gets through;
+# keep the identity keys away from such an agent to close that.
 # @arg $1 string Decoder to use, `_normal`, `_sqlite` or `_sops`
 # @arg $@ string Arguments of that decoder
-# @stdout Decrypted content, or a placeholder line without a terminal
+# @stdout Decrypted content, or a placeholder line when it was not allowed
 #######################################
 function _main {
   local decoder
@@ -62,6 +65,16 @@ function _main {
   shift
   if ! (exec 3< /dev/tty) 2> /dev/null; then
     printf '<encrypted: decrypting a diff needs a terminal>\n'
+    return 0
+  fi
+  # One key, read from the terminal itself: stdin belongs to git. The file
+  # is the last argument of every decoder.
+  local answer=""
+  printf 'Decrypt %s for this diff? [y/N] ' "${!#}" > /dev/tty
+  read -r -n 1 answer < /dev/tty || answer=""
+  printf '\n' > /dev/tty
+  if [[ "${answer}" != [yY] ]]; then
+    printf '<encrypted: decrypting was not confirmed>\n'
     return 0
   fi
   case "${decoder}" in

@@ -151,9 +151,39 @@ function _decrypt_setup {
   assert_output '<encrypted: decrypting a diff needs a terminal>'
 }
 
-@test "decrypt_chezmoi decrypts for a process with a terminal" {
-  command -v script > /dev/null || skip "script(1) gives the terminal"
+# Run the driver on a terminal of its own, where the given keys are typed.
+function _decrypt_on_terminal {
+  command -v python3 > /dev/null || skip "python3 gives the terminal"
+  run python3 -I - "$1" "${BATS_TEST_TMPDIR}/decrypt.sh" "${BATS_TEST_TMPDIR}/secret.age" << 'PY'
+import os, pty, sys
+keys, script, secret = sys.argv[1:4]
+pid, fd = pty.fork()
+if pid == 0:
+    os.execvp("bash", ["bash", script, "_normal", "personal", secret])
+os.write(fd, keys.encode())
+out = b""
+while True:
+    try:
+        chunk = os.read(fd, 4096)
+    except OSError:
+        break
+    if not chunk:
+        break
+    out += chunk
+os.waitpid(pid, 0)
+sys.stdout.write(out.decode(errors="replace"))
+PY
+}
+
+@test "decrypt_chezmoi decrypts once y is typed on the terminal" {
   _decrypt_setup
-  run script -qec "bash '${BATS_TEST_TMPDIR}/decrypt.sh' _normal personal '${BATS_TEST_TMPDIR}/secret.age'" /dev/null
+  _decrypt_on_terminal y
   assert_output --partial PLAINTEXT
+}
+
+@test "decrypt_chezmoi keeps the secret when the terminal does not answer y" {
+  _decrypt_setup
+  _decrypt_on_terminal n
+  refute_output --partial PLAINTEXT
+  assert_output --partial '<encrypted: decrypting was not confirmed>'
 }
