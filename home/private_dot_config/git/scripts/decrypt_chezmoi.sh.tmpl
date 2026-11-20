@@ -68,10 +68,11 @@ function _main {
     return 0
   fi
   # One key, read from the terminal itself: stdin belongs to git. The file
-  # is the last argument of every decoder.
+  # is the last argument of every decoder. A terminal nobody watches gets the
+  # placeholder after a minute instead of holding git for ever.
   local answer=""
   printf 'Decrypt %s for this diff? [y/N] ' "${!#}" > /dev/tty
-  read -r -n 1 answer < /dev/tty || answer=""
+  read -r -t 60 -n 1 answer < /dev/tty || answer=""
   printf '\n' > /dev/tty
   if [[ "${answer}" != [yY] ]]; then
     printf '<encrypted: decrypting was not confirmed>\n'

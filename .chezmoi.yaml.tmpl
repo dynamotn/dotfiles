@@ -341,6 +341,12 @@ data:
   {{-   end }}
   {{- else }}
   {{-   $terminalMultiplexer = promptChoiceOnce . "terminalMultiplexer" (printf "Which terminal multiplexer do you use%s" (index $hints "terminalMultiplexer")) $terminalMultiplexers (index $defaults "terminalMultiplexer") }}
+  {{- /* promptChoiceOnce hands a stored answer back unchecked: one that is
+           no longer offered, as tmux, becomes the default instead of leaving
+           the machine with no multiplexer at all. */}}
+  {{-   if not (has $terminalMultiplexer $terminalMultiplexers) }}
+  {{-     $terminalMultiplexer = index $defaults "terminalMultiplexer" }}
+  {{-   end }}
   {{- end }}
   terminalMultiplexer: {{ $terminalMultiplexer | quote }}
 

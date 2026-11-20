@@ -243,6 +243,15 @@ function _validate_profile {
   local cfg="${BATS_TEST_TMPDIR}/gentoo-pc.yaml"
   _write_profile_config "${cfg}" "linux-gentoo" "pc" "openrc" "W" "A" "H"
   _validate_profile "gentoo-pc" "${cfg}"
+  # age guards every secret and publishes no checksum file: it is one
+  # release, with the digest of the archive for this architecture.
+  local age="${BATS_TEST_TMPDIR}/gentoo-pc/age.yaml"
+  # chezmoi.os is the one of the machine running the test: on macOS age
+  # comes from Homebrew, and there is no release to pin.
+  run yq -r '.method' "${age}"
+  [[ "${output}" == "binary" ]] || return 0
+  run yq -r '[.github.version, (.github.sha256 | test("^[0-9a-f]{64}$"))] | join(" ")' "${age}"
+  assert_output --regexp '^v[0-9]+\.[0-9]+\.[0-9]+ true$'
 }
 
 @test "rendered templates valid for profile: macos-laptop" {

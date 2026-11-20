@@ -164,6 +164,12 @@ function init_system::stale_instances {
     name="${link##*/}"
     name="${name#"${prefix}"}"
     name="${name%.service}"
+    # systemd writes a character a unit name cannot hold, as the space of a
+    # remote called `my drive`, as `\x20`: read it back, or that instance
+    # would never match the name it was enabled from.
+    if [[ "${name}" == *\\x* ]]; then
+      name="$(printf '%b' "${name}")"
+    fi
     for wanted in "$@"; do
       [[ "${wanted}" != "${name}" ]] || continue 2
     done

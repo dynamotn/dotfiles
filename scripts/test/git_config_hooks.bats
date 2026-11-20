@@ -187,3 +187,22 @@ PY
   refute_output --partial PLAINTEXT
   assert_output --partial '<encrypted: decrypting was not confirmed>'
 }
+
+@test "sdiff gives the diff of the directory it was called from, with the status of git diff" {
+  render_template "home/private_dot_config/git/scripts/sdiff.sh.tmpl" "${BATS_TEST_TMPDIR}/sdiff.sh"
+  local repo="${BATS_TEST_TMPDIR}/sdiff-repo"
+  git init -q -b main "${repo}"
+  mkdir "${repo}/sub"
+  printf 'one\n' > "${repo}/sub/file"
+  git -C "${repo}" add sub/file
+  git -C "${repo}" -c user.name=tester -c user.email=tester@example.com commit -q -m init
+  printf 'two\n' > "${repo}/sub/file"
+  cd "${repo}" || fail "no repository"
+  # As git runs an alias: from the top, with the caller's directory in GIT_PREFIX.
+  GIT_PREFIX="sub/" run "${BASH}" "${BATS_TEST_TMPDIR}/sdiff.sh" --exit-code -- file
+  assert_failure 1
+  assert_output --partial '+two'
+  GIT_PREFIX="sub/" run "${BASH}" "${BATS_TEST_TMPDIR}/sdiff.sh" --exit-code -- missing
+  assert_success
+  assert_output ""
+}

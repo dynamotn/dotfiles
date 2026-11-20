@@ -1,0 +1,37 @@
+#!{{ .bash }}
+# @file sdiff.sh
+# @brief Diff that decrypts age and sops files, asking before each
+# @description `git sdiff`, with the arguments of `git diff`. The drivers of
+# ~/.config/git/diff-secret ask on the terminal before they decrypt a file,
+# so the whole diff is taken before the pager starts: a pager that already
+# owned the terminal would swallow the answers, and the diff would hang.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+
+#######################################
+# @description Take the diff, then show it as `git diff` would
+# @arg $@ string Arguments of `git diff`
+# @exitcode The status of `git diff`, which `--exit-code` sets to 1 for a difference
+#######################################
+function _main {
+  # git runs an alias from the top of the repository; paths are the caller's.
+  cd "${GIT_PREFIX:-.}" || dybatpho::die "Cannot return to ${GIT_PREFIX:-}"
+  local color="never" pager="" output status=0
+  if [[ -t 1 ]]; then
+    color="always"
+    pager="$(git var GIT_PAGER)"
+  fi
+  output="$(git --no-pager -c "include.path=~/.config/git/diff-secret" diff "--color=${color}" "$@")" \
+    || status=$?
+  if [[ -n "${output}" ]]; then
+    if [[ -n "${pager}" && "${pager}" != "cat" ]]; then
+      # A shell command line, which git itself hands to `sh -c`.
+      printf '%s\n' "${output}" | sh -c "${pager}"
+    else
+      printf '%s\n' "${output}"
+    fi
+  fi
+  return "${status}"
+}
+
+_main "$@"

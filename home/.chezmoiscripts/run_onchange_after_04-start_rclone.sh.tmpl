@@ -22,13 +22,13 @@ dybatpho::register_common_handlers
 
 dybatpho::header "Start rclone"
 rclone_conf="{{ $rcloneConf }}"
-if ! dybatpho::is file "${rclone_conf}"; then
-  dybatpho::warn "No rclone config at ${rclone_conf}, skipping"
-  exit 0
+# No config is a config without a remote: chezmoi removes the file once the
+# last remote left, and its mount must still be stopped below. A config
+# without any remote section makes grep fail, which is the same empty case.
+remotes=()
+if dybatpho::is file "${rclone_conf}"; then
+  readarray -t remotes < <(grep '^\[' "${rclone_conf}" | tr -d '[]' || true)
 fi
-# A config without any remote section makes grep fail, which is the empty case
-# handled below rather than an error.
-readarray -t remotes < <(grep '^\[' "${rclone_conf}" | tr -d '[]' || true)
 # Not the end of the hook: the mounts of the remotes that left still go.
 if ((${#remotes[@]} == 0)); then
   dybatpho::warn "No rclone remotes configured"

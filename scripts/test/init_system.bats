@@ -166,6 +166,10 @@ bootstrap gui/${uid} /tmp/com.sample.plist"
   # Every remote left: every instance is stale. No instance: nothing is.
   run init_system::stale_instances "${wants}" "rclone@"
   assert_output $'gone\nkept'
+  # A name systemd escaped is the remote it was enabled from.
+  ln -s /nowhere "${wants}/rclone@my\\x20drive.service"
+  run init_system::stale_instances "${wants}" "rclone@" kept gone "my drive"
+  assert_output ""
   run init_system::stale_instances "${BATS_TEST_TMPDIR}/missing" "rclone@" kept
   assert_success
   assert_output ""
