@@ -143,3 +143,30 @@ function init_system::bootstrap_launchd_agent {
   launchctl bootout "${domain}" "${plist}" &> /dev/null || true
   launchctl bootstrap "${domain}" "${plist}"
 }
+
+#######################################
+# @description Print the instances of a service that are still enabled
+# although nothing wants them any more, such as the mount of a remote that
+# left the configuration
+# @arg $1 string Directory holding one link per enabled instance
+# @arg $2 string What precedes the instance in the name of a link, such as `rclone@`
+# @arg $@ string Instances still wanted
+# @stdout One stale instance per line, without the prefix and a `.service` suffix
+#######################################
+function init_system::stale_instances {
+  local dir prefix
+  dybatpho::expect_args dir prefix -- "$@"
+  shift 2
+  local link name wanted
+  for link in "${dir}/${prefix}"*; do
+    # An unmatched glob stays as written; a dangling link is still enabled.
+    [[ -e "${link}" || -L "${link}" ]] || continue
+    name="${link##*/}"
+    name="${name#"${prefix}"}"
+    name="${name%.service}"
+    for wanted in "$@"; do
+      [[ "${wanted}" != "${name}" ]] || continue 2
+    done
+    printf '%s\n' "${name}"
+  done
+}

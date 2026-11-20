@@ -6,6 +6,7 @@
 # a container has no service manager to keep the mounts, so both skip it.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh"
 
 {{- if and (not (empty .decryptEnterprise)) (ne .kind "container") }}
 {{- $rcloneConf := joinPath .chezmoi.homeDir ".config/rclone/rclone.conf" }}
@@ -28,9 +29,9 @@ fi
 # A config without any remote section makes grep fail, which is the empty case
 # handled below rather than an error.
 readarray -t remotes < <(grep '^\[' "${rclone_conf}" | tr -d '[]' || true)
+# Not the end of the hook: the mounts of the remotes that left still go.
 if ((${#remotes[@]} == 0)); then
-  dybatpho::warn "No rclone remotes configured, skipping"
-  exit 0
+  dybatpho::warn "No rclone remotes configured"
 fi
 
 {{- if eq .initSystem "systemd" }}
@@ -39,16 +40,23 @@ if ! dybatpho::is dir /run/systemd/system; then
   exit 0
 fi
 systemctl --user daemon-reload
-for remote in "${remotes[@]}"; do
+for remote in ${remotes[@]+"${remotes[@]}"}; do
   dybatpho::progress "Enable rclone for remote: ${remote}"
   dybatpho::ensure_dir "{{ .chezmoi.homeDir }}/Sync/${remote}" > /dev/null
   systemctl --user enable --now "rclone@${remote}.service" || true
 done
+stale="$(init_system::stale_instances "{{ .chezmoi.homeDir }}/.config/systemd/user/default.target.wants" \
+  "rclone@" ${remotes[@]+"${remotes[@]}"})"
+while IFS= read -r remote; do
+  [[ -n "${remote}" ]] || continue
+  dybatpho::progress "Disable rclone for a remote no longer configured: ${remote}"
+  systemctl --user disable --now "rclone@${remote}.service" || true
+done <<< "${stale}"
 {{- else if eq .initSystem "openrc" }}
 openrc_initd="{{ .chezmoi.homeDir }}/.config/openrc/init.d"
 openrc_default="{{ .chezmoi.homeDir }}/.config/openrc/runlevels/default"
 dybatpho::ensure_dir "${openrc_default}" > /dev/null
-for remote in "${remotes[@]}"; do
+for remote in ${remotes[@]+"${remotes[@]}"}; do
   dybatpho::progress "Enable rclone for remote: ${remote}"
   dybatpho::ensure_dir "{{ .chezmoi.homeDir }}/Sync/${remote}" > /dev/null
   # Create per-remote symlink if not exists
@@ -62,6 +70,14 @@ for remote in "${remotes[@]}"; do
   rc-service --user "rclone.${remote}" start 2> /dev/null \
     || rc-service "rclone.${remote}" start || true
 done
+stale="$(init_system::stale_instances "${openrc_default}" "rclone." ${remotes[@]+"${remotes[@]}"})"
+while IFS= read -r remote; do
+  [[ -n "${remote}" ]] || continue
+  dybatpho::progress "Disable rclone for a remote no longer configured: ${remote}"
+  rc-service --user "rclone.${remote}" stop 2> /dev/null \
+    || rc-service "rclone.${remote}" stop || true
+  rm -f "${openrc_default}/rclone.${remote}" "${openrc_initd}/rclone.${remote}"
+done <<< "${stale}"
 {{- end }}
 
 dybatpho::success "Start rclone"

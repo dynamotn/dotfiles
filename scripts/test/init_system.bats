@@ -153,3 +153,20 @@ EOF
   assert_output "bootout gui/${uid} /tmp/com.sample.plist
 bootstrap gui/${uid} /tmp/com.sample.plist"
 }
+
+@test "init_system::stale_instances lists the enabled instances nothing wants" {
+  local wants="${BATS_TEST_TMPDIR}/default.target.wants"
+  mkdir -p "${wants}"
+  ln -s /nowhere "${wants}/rclone@kept.service"
+  ln -s /nowhere "${wants}/rclone@gone.service"
+  ln -s /nowhere "${wants}/other@gone.service"
+  run init_system::stale_instances "${wants}" "rclone@" kept
+  assert_success
+  assert_output "gone"
+  # Every remote left: every instance is stale. No instance: nothing is.
+  run init_system::stale_instances "${wants}" "rclone@"
+  assert_output $'gone\nkept'
+  run init_system::stale_instances "${BATS_TEST_TMPDIR}/missing" "rclone@" kept
+  assert_success
+  assert_output ""
+}
