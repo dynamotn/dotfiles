@@ -20,7 +20,9 @@ ubuntu:
   packages:
     - name: mise
       repo: https://mise.jdx.dev/deb
-      components: stable
+      suite: stable
+      components: main
+      key: https://mise.jdx.dev/gpg-key.pub
 alpine:
   packages:
     - name: mise

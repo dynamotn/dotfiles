@@ -257,7 +257,10 @@ function __binary_download_copy_selection {
     if dybatpho::is file "${match}"; then
       __binary_download_replace "${match}" "${destination_path}"
     else
-      cp -R "${match}" "${destination_path}"
+      # The contents, not the directory: over an earlier install `cp -R dir`
+      # would nest the new copy inside the old one.
+      dybatpho::ensure_dir "${destination_path}" > /dev/null
+      cp -R "${match}/." "${destination_path}"
     fi
   done
 

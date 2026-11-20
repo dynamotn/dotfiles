@@ -1068,3 +1068,86 @@ function _plain_packages {
   run _plain_packages "${dir}"
   assert_output 'go.yaml:     - golang'
 }
+
+@test "dytoy::iterate installs an edited tool over the one in place, an expired one not" {
+  write_tools_yaml << 'EOF2'
+- name: first
+  method: binary
+EOF2
+  METHOD='binary'
+  TOOL='@empty'
+  local output_file="${BATS_TEST_TMPDIR}/tools"
+  function install_tool { printf '%s:%s\n' "$1" "${ONLY_NOT_INSTALLED}" >> "${output_file}"; }
+
+  run dytoy::iterate install_tool
+  # The state expired, the definition did not change: the installed check stays.
+  DYTOY_STATE_TTL=0 run dytoy::iterate install_tool
+  write_tools_yaml << 'EOF2'
+- name: first
+  method: binary
+  version: v2
+EOF2
+  run dytoy::iterate install_tool
+  assert_success
+  run cat "${output_file}"
+  assert_output $'first:true\nfirst:true\nfirst:false'
+}
+
+@test "dytoy::iterate stops on a tools.yaml it cannot read" {
+  write_tools_yaml <<< 'bad: [unclosed'
+  export TOOL='@empty' METHOD='binary'
+  function _install { printf 'install:%s\n' "$1"; }
+  run --separate-stderr dytoy::iterate _install
+  assert_failure
+  assert_stderr --partial 'Cannot read the tools'
+  refute_output --partial 'Installed all'
+}
+
+@test "dytoy::iterate tries again a tool whose store was left out" {
+  write_tools_yaml << 'EOF2'
+- name: first
+  method: os
+  fdroid:
+    packages:
+      - name: org.example.app
+EOF2
+  METHOD='os'
+  TOOL='@empty'
+  local output_file="${BATS_TEST_TMPDIR}/tools"
+  function misc::install_tool { true; }
+  function package_manager::init_fdroid { return 2; }
+  function install_tool {
+    printf '%s\n' "$1" >> "${output_file}"
+    __dytoy_install_store_section "$1" fdroid fdroidcl
+  }
+
+  run dytoy::iterate install_tool
+  assert_success
+  run dytoy::iterate install_tool
+  assert_success
+  run cat "${output_file}"
+  assert_output $'first\nfirst'
+}
+
+@test "dytoy::add_apt_repo refuses a repository without a key" {
+  local yaml='{"name":"sample","repo":"https://packages.example/deb","suite":"stable",'
+  yaml+='"components":"main","key":"null","repo_name":"null"}'
+  function package_manager::add_apt_repo { printf 'called\n'; }
+  run --separate-stderr dytoy::add_apt_repo "$yaml" "ubuntu"
+  assert_failure
+  assert_stderr --partial 'has no key'
+  refute_output --partial 'called'
+}
+
+@test "dytoy::add_apt_repo adds nothing on a release without a suite" {
+  local yaml='{"name":"sample","repo":"https://ppa.example/ubuntu","suite":"null",'
+  yaml+='"components":"main","key":"ABCD1234","repo_name":"null"}'
+  local called_file="${BATS_TEST_TMPDIR}/called"
+  function package_manager::add_apt_repo { printf 'called\n' > "${called_file}"; }
+  function package_manager::sync_apt_repo { printf 'called\n' > "${called_file}"; }
+  export DYBATPHO_OS_RELEASE="${BATS_TEST_TMPDIR}/os-release"
+  printf 'ID=debian\nVERSION_ID="13"\n' > "${DYBATPHO_OS_RELEASE}"
+  run dytoy::add_apt_repo "$yaml" "ubuntu"
+  assert_success
+  refute [ -f "${called_file}" ]
+}

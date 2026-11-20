@@ -254,6 +254,11 @@ $defs:
       url:
         type: string
         description: Repository URL to add (PPA URL, Gentoo overlay git URL, etc.)
+      suite:
+        type: string
+        description: >-
+          Suite of an APT repository (e.g. 'stable'). Defaults to the codename
+          of the running Ubuntu release.
       components:
         type: string
         description: Repository components string (e.g. 'main', 'stable')

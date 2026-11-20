@@ -10,6 +10,13 @@ dybatpho::load json os semver cache
 # Seconds the state of a tool installed by a whole-method run stays valid, so
 # a run that failed half way resumes after the last tool that succeeded.
 DYTOY_STATE_TTL="${DYTOY_STATE_TTL:-604800}"
+# Seconds the definition a tool was last installed from is remembered, to tell
+# an edited tool from one whose state only expired: ten years, so in effect
+# for as long as the cache lives.
+DYTOY_SEEN_TTL="${DYTOY_SEEN_TTL:-315360000}"
+# Set by an installer that left a part of the tool out, so that the run does
+# not remember the tool as installed.
+__DYTOY_SKIPPED=false
 # The key of this OS in a tool's YAML, such as `gentoo` or `macos`, empty when
 # no package manager is known for it; the installed `dytoy` sets it.
 DYTOY_OS="${DYTOY_OS:-}"
@@ -440,7 +447,12 @@ function dytoy::iterate {
   # dyshellint disable=BSG015 the installers it runs are meant to read this cache
   local DYTOY_TOOLS_JSON="" __dytoy_iterate_file
   __dytoy_iterate_file="$(dytoy::yaml_file)"
-  DYTOY_TOOLS_JSON="$(dybatpho::yaml_to_json "${__dytoy_iterate_file}" 2> /dev/null)" || DYTOY_TOOLS_JSON=""
+  # A missing file has no tool to install; one that is there and cannot be
+  # read must not end as "Installed all", which chezmoi would record as done.
+  if [[ -f "${__dytoy_iterate_file}" ]]; then
+    DYTOY_TOOLS_JSON="$(dybatpho::yaml_to_json "${__dytoy_iterate_file}")" \
+      || dybatpho::die "Cannot read the tools from ${__dytoy_iterate_file}"
+  fi
   if [[ "${TOOL}" == "@empty" ]]; then
     dybatpho::info "Install ${METHOD} tools"
     local __dytoy_iterate_yaml_file __dytoy_iterate_tool
@@ -451,17 +463,37 @@ function dytoy::iterate {
       '.[] | select(.method == $method and .enabled != false and .enabled != "false") | .name' \
       --arg method "${METHOD}" \
       || dybatpho::debug "Can't read tools from ${__dytoy_iterate_yaml_file}"
-    local __dytoy_iterate_state
+    local __dytoy_iterate_state __dytoy_iterate_seen __dytoy_iterate_previous
     for __dytoy_iterate_tool in "${__dytoy_iterate_tools[@]}"; do
       __dytoy_iterate_state="$(__dytoy_state_key "${__dytoy_iterate_tool}")"
+      # The state the tool was last installed in, kept by its name: when the
+      # definition has changed since, the tool is installed over the one in
+      # place, which an installer would otherwise skip as already there. An
+      # expired state alone leaves that check on.
+      __dytoy_iterate_seen="$(dybatpho::cache_key "${METHOD}" "${__dytoy_iterate_tool}" "${ONLY_ESSENTIAL}" seen)"
+      __dytoy_iterate_previous="$(DYBATPHO_CACHE_NAMESPACE=dytoy dybatpho::cache_get \
+        "${__dytoy_iterate_seen}" "${DYTOY_SEEN_TTL}")" || __dytoy_iterate_previous=""
       # `--no-check-installed` asks to install everything again.
       if dybatpho::is true "${ONLY_NOT_INSTALLED}" \
         && DYBATPHO_CACHE_NAMESPACE=dytoy dybatpho::cache_has "${__dytoy_iterate_state}" "${DYTOY_STATE_TTL}"; then
         dybatpho::debug "Skip ${__dytoy_iterate_tool}, installed by an earlier run"
         continue
       fi
-      __dytoy_install_one "${__dytoy_iterate_command}" "${__dytoy_iterate_tool}"
+      __DYTOY_SKIPPED=false
+      if [[ -n "${__dytoy_iterate_previous}" && "${__dytoy_iterate_previous}" != "${__dytoy_iterate_state}" ]]; then
+        dybatpho::debug "The definition of ${__dytoy_iterate_tool} changed, installing it again"
+        ONLY_NOT_INSTALLED=false __dytoy_install_one "${__dytoy_iterate_command}" "${__dytoy_iterate_tool}"
+      else
+        __dytoy_install_one "${__dytoy_iterate_command}" "${__dytoy_iterate_tool}"
+      fi
+      # A part left out, such as a store that cannot be reached now, is tried
+      # again by the next run instead of being remembered as installed.
+      if dybatpho::is true "${__DYTOY_SKIPPED}"; then
+        continue
+      fi
       printf 'done\n' | DYBATPHO_CACHE_NAMESPACE=dytoy dybatpho::cache_set "${__dytoy_iterate_state}"
+      printf '%s\n' "${__dytoy_iterate_state}" \
+        | DYBATPHO_CACHE_NAMESPACE=dytoy dybatpho::cache_set "${__dytoy_iterate_seen}"
     done
     dybatpho::success "Installed all ${METHOD} tools"
   else
@@ -768,6 +800,14 @@ function dytoy::add_apt_repo {
       *) ;;
     esac
   fi
+  [[ "${key}" != "null" ]] || dybatpho::die "APT repository of ${name} has no key"
+  # Debian has no UBUNTU_CODENAME and a PPA does not serve it: a line written
+  # without a suite would break every later `apt update`, so the distribution's
+  # own package is installed instead.
+  if [[ -z "${suite}" && "${os}" == "ubuntu" ]]; then
+    dybatpho::warn "No suite for the APT repository of ${name} on this release, skip adding it"
+    return 0
+  fi
   local url="${repo//%v/${suite}}"
   package_manager::add_apt_repo "${repo_name}" "${url}" "${suite}" "${components}" "${key}"
   package_manager::sync_apt_repo
@@ -921,6 +961,7 @@ function __dytoy_install_store_section {
   local init_status=0
   "package_manager::init_${section}" || init_status=$?
   if ((init_status == 2)); then
+    __DYTOY_SKIPPED=true
     return 0
   fi
   ((init_status == 0)) || return "${init_status}"

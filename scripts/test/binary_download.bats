@@ -513,3 +513,16 @@ function _inode {
   assert_success
   assert_output "🧪 DRY RUN: $(printf '%q ' cp -R "${root}/bin/*" "${destination}" | sed 's/ $//')"
 }
+
+@test "a reinstall of a directory replaces its files instead of nesting a copy" {
+  local root="${BATS_TEST_TMPDIR}/extracted" destination="${BATS_TEST_TMPDIR}/opt"
+  mkdir -p "${root}/app/browser" "${destination}/browser"
+  printf 'new\n' > "${root}/app/browser/omni"
+  printf 'old\n' > "${destination}/browser/omni"
+  export DRY_RUN='false'
+  run __binary_download_copy_selection "${root}" 'app/*' "${destination}" 1 tree ''
+  assert_success
+  run cat "${destination}/browser/omni"
+  assert_output 'new'
+  refute [ -e "${destination}/browser/browser" ]
+}
