@@ -1,0 +1,4 @@
+{{- $theme := includeTemplate "thunderbird/catppuccin-theme.tmpl" . | splitList " " }}
+/* The Catppuccin theme of the machine's flavour: with both flavours'
+   files in the profile, the one installed first would stay active. */
+user_pref("extensions.activeThemeID", {{ index $theme 1 | quote }});

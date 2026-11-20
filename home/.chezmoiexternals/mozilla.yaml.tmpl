@@ -156,20 +156,10 @@
   type: file
   url: "https://addons.thunderbird.net/thunderbird/downloads/latest/darkreader/addon-988018-latest.xpi"
   refreshPeriod: 168h
-{{- /* The Catppuccin flavour of the rest of the machine. The file must be
-       named by the add-on ID of its manifest, one per flavour and accent:
-       read it there (`unzip -p x.xpi manifest.json`) to add an accent. */}}
-{{-         $flavor := ternary "macchiato" "latte" $.darkMode }}
-{{-         $theme := printf "%s-%s" $flavor $.catppuccin.variant }}
-{{-         $themeIds := dict
-              "macchiato-teal" "{d3f3abb5-21aa-57fd-80e3-a9a1887b1d16}"
-              "latte-teal" "{85d64947-5410-5a95-8967-886c5a613ce3}" }}
-{{-         if not (hasKey $themeIds $theme) }}
-{{-           fail (printf "mozilla.yaml.tmpl: no add-on ID for the Thunderbird theme catppuccin-%s" $theme) }}
-{{-         end }}
-.config/thunderbird/profiles/{{ . }}/extensions/{{ index $themeIds $theme }}.xpi:
+{{-         $theme := includeTemplate "thunderbird/catppuccin-theme.tmpl" $ | splitList " " }}
+.config/thunderbird/profiles/{{ . }}/extensions/{{ index $theme 1 }}.xpi:
   type: file
-  url: 'https://github.com/catppuccin/thunderbird/raw/refs/heads/main/themes/{{ $flavor }}/{{ $theme }}.xpi'
+  url: 'https://github.com/catppuccin/thunderbird/raw/refs/heads/main/themes/{{ index $theme 0 | splitList "-" | first }}/{{ index $theme 0 }}.xpi'
   refreshPeriod: 168h
 .config/thunderbird/profiles/{{ . }}/extensions/languagetool-mailextension@languagetool.org.xpi:
   type: file

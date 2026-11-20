@@ -1,0 +1,15 @@
+{{- /*
+  The Catppuccin theme of Thunderbird for this machine, as `<flavour>-<accent>
+  <add-on ID>`: the flavour of the rest of the machine, the accent of
+  catppuccin.yaml. The ID is the one in the manifest of the theme's xpi, the
+  name its file must take in a profile; read it there
+  (`unzip -p x.xpi manifest.json`) to add an accent.
+*/ -}}
+{{- $theme := printf "%s-%s" (ternary "macchiato" "latte" .darkMode) .catppuccin.variant -}}
+{{- $ids := dict
+      "macchiato-teal" "{d3f3abb5-21aa-57fd-80e3-a9a1887b1d16}"
+      "latte-teal" "{85d64947-5410-5a95-8967-886c5a613ce3}" -}}
+{{- if not (hasKey $ids $theme) -}}
+{{-   fail (printf "thunderbird/catppuccin-theme.tmpl: no add-on ID for the Thunderbird theme catppuccin-%s" $theme) -}}
+{{- end -}}
+{{- printf "%s %s" $theme (index $ids $theme) -}}

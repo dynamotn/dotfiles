@@ -36,6 +36,18 @@ function _render_mozilla {
   assert_stderr --partial 'no add-on ID for the Thunderbird theme catppuccin-macchiato-pink'
 }
 
+@test "Thunderbird turns on the theme of the machine's flavour" {
+  local cfg="${BATS_TEST_TMPDIR}/config.yaml" home="${BATS_TEST_TMPDIR}/empty-home"
+  yq ".sourceDir = \"${DOTFILES_DIR}\" | .data.mailClient = \"T\" | .data.darkMode = false" \
+    "${DOTFILES_DIR}/scripts/test/fixtures/chezmoi.yaml" > "${cfg}"
+  mkdir -p "${home}"
+  cd "${DOTFILES_DIR}" || fail "no repository"
+  run env HOME="${home}" chezmoi --config "${cfg}" execute-template --source "${DOTFILES_DIR}" \
+    < "${DOTFILES_DIR}/home/.chezmoitemplates/thunderbird/prefs/05-catppuccin.js.tmpl"
+  assert_success
+  assert_line 'user_pref("extensions.activeThemeID", "{85d64947-5410-5a95-8967-886c5a613ce3}");'
+}
+
 @test "chezmoi reads every external as rendered for a machine" {
   local cfg="${BATS_TEST_TMPDIR}/config.yaml" home="${BATS_TEST_TMPDIR}/empty-home"
   local source="${BATS_TEST_TMPDIR}/source" template name
