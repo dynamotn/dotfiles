@@ -13,8 +13,9 @@ name: dybw
 is_essential: true
 method: shell
 # The dybw-cli commit to build, from its public GitHub mirror (the GitLab
-# repository is private). The chezmoi hook skips a dybw already
-# installed, so after bumping it run `dytoy shell -t dybw`.
+# repository is private). Bumping it changes this definition, so the next
+# apply builds dybw again (`dytoy shell --no-check-installed -t dybw` by
+# hand); then restart the agent service so it runs the new binary.
 version: 66617f2a07bef29c5660412a4f18867ef1f8c4a6
 dependencies:
   - rust
@@ -27,12 +28,17 @@ content: |-
   # dybw-peer builds its Secure Enclave code with the Command Line Tools' swiftc
   xcrun --find swiftc &> /dev/null || dybatpho::die "swiftc is missing, run: xcode-select --install"
   {{- end }}
+  dybw_root="{{ includeTemplate "dybw/root.tmpl" . }}"
+  # Fail before a build of minutes when the root cannot take the binaries,
+  # such as a Mac without /opt/homebrew or with it owned by another user
+  mkdir -p "${dybw_root}" 2> /dev/null || true
+  [[ -w "${dybw_root}" ]] || dybatpho::die "${dybw_root} is not writable, dybw cannot be installed there"
   # Both binaries into one directory, see dybw/root.tmpl. Both repositories
   # are public over HTTPS, but dynet may rewrite https://github.com/ and
   # https://gitlab.com/ to SSH, and cargo's built-in git follows that rewrite
   # too; only the git CLI then reads ~/.ssh/config (ssh.github.com:443).
   CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install --locked \
-    --root "{{ includeTemplate "dybw/root.tmpl" . }}" \
+    --root "${dybw_root}" \
     --git https://github.com/dynamotn/dybw.git --rev "${DYTOY_VERSION}" \
     dybw dybw-agent
 {{- end }}

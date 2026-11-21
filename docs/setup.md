@@ -136,8 +136,12 @@ from its own install prefix, never from one inside the home (dybw ADR 0008).
 The `rbw` link and the agent service wait until the build is there, so the
 apply after the one that built dybw adds them.
 
-To move to a newer dybw-cli, bump `version` in `dytoy/dybw.yaml.tmpl`, apply,
-then `dytoy shell -t dybw`: the apply hook skips a dybw already installed.
+To move to a newer dybw-cli, bump `version` in `dytoy/dybw.yaml.tmpl` and
+apply: the changed definition makes dytoy build dybw again
+(`dytoy shell --no-check-installed -t dybw` does it by hand). Then restart the
+agent service on the new binary: `launchctl kickstart -k
+gui/$(id -u)/org.dybw.agent` on macOS, `systemctl --user restart dybw-agent`
+on Linux, or `dybw agent stop` where none runs (the next `dybw` starts it).
 
 ### Switching a machine from rbw
 
@@ -153,7 +157,8 @@ Once per machine, in a terminal (not from an AI agent):
    service. `command -v rbw` gives `~/.local/bin/rbw`, `rbw --version` prints
    `rbw 1.15.0`.
 4. Log in once per profile with the API key (client id and secret, from the
-   web vault's account security settings), then unlock:
+   web vault's account security settings): `dybw login` asks for both in its
+   pinentry, so never put them on a command line. Then unlock:
    `dybw -p default login`, `dybw -p default unlock`; on an F1 machine also
    `dybw -p enterprise-f1 login` and `unlock`.
 5. `dybw doctor` passes: socket, agent, config, and the pinentry, which on

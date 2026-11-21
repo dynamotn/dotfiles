@@ -4,14 +4,22 @@
        rbw.yaml.age holds its account (schemas/secrets/rbw.schema.yaml).
        rbw's `lock_timeout` is in seconds, dybw's in minutes, rounded up.
        dybw has no identity_url: it derives the identity server from
-       server_url, so a different one cannot be carried over. */ -}}
+       server_url (<server_url>/identity, or identity.bitwarden.<tld> for
+       Bitwarden's cloud), so a different one fails the render. */ -}}
 {{- $profiles := dict }}
 {{- range .dybwProfiles }}
 {{-   $secret := printf "../secrets/data/%s/rbw.yaml.age" .identity | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
 {{-   $base := trimSuffix "/" $secret.base_url }}
 {{-   $identity := get $secret "identity_url" | default "" | trimSuffix "/" }}
-{{-   if and $identity (ne $identity (printf "%s/identity" $base)) (not (regexMatch "^https://(vault\\.)?bitwarden\\.(com|eu)$" $base)) }}
-{{-     fail (printf "dybw profile %s: identity_url in %s/rbw.yaml is not <base_url>/identity, which dybw cannot express; remove it or fix it" .name .identity) }}
+{{- /* The identity server dybw will use: the cloud's own host for
+       Bitwarden's servers, as dybw-core's resolve_server_urls does */}}
+{{-   $derived := printf "%s/identity" $base }}
+{{-   $cloud := regexFind "^https://(vault\\.)?bitwarden\\.(com|eu)$" $base }}
+{{-   if $cloud }}
+{{-     $derived = printf "https://identity.bitwarden.%s" (regexReplaceAll ".*\\." $cloud "") }}
+{{-   end }}
+{{-   if and $identity (ne $identity $derived) }}
+{{-     fail (printf "dybw profile %s: identity_url in %s/rbw.yaml is not the identity server dybw derives from base_url; remove it or fix it" .name .identity) }}
 {{-   end }}
 {{-   $profiles = set $profiles .name (dict
         "server_url" $secret.base_url

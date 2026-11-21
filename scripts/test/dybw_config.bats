@@ -146,6 +146,33 @@ EOF
   assert_line '    lock_timeout_minutes = 1'
 }
 
+@test "dybw config refuses an identity_url that is not the Bitwarden cloud's" {
+  write_account personal << 'EOF'
+email: me@example.org
+base_url: https://vault.bitwarden.com
+identity_url: https://identity.elsewhere.example
+lock_timeout: 60
+EOF
+  write_config true '[]' W
+  render_config
+  assert_failure
+  assert_stderr --partial "dybw profile default: identity_url in personal/rbw.yaml"
+  refute_stderr --partial "identity.elsewhere.example"
+}
+
+@test "dybw config takes the Bitwarden cloud's identity server" {
+  write_account personal << 'EOF'
+email: me@example.org
+base_url: https://vault.bitwarden.eu
+identity_url: https://identity.bitwarden.eu
+lock_timeout: 60
+EOF
+  write_config true '[]' W
+  render_config
+  assert_success
+  assert_line '    server_url = "https://vault.bitwarden.eu"'
+}
+
 # Checks the config names the program the pinentry manifest installs.
 # @arg $1 string chezmoi.os
 # @arg $2 string guiServer
