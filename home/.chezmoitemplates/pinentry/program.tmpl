@@ -1,0 +1,12 @@
+{{- /* The pinentry program of this machine, the one dytoy/pinentry.yaml.tmpl
+       installs and dybw/config.toml.tmpl names: pinentry-mac on macOS, the
+       GNOME one wherever a GUI runs (a hotkey can ask for the master password
+       with no terminal; Gentoo builds it with the gtk USE flag, Alpine's
+       pinentry-gnome and Arch's pinentry ship it), else pinentry-curses. */ -}}
+{{- if eq .chezmoi.os "darwin" -}}
+pinentry-mac
+{{- else if ne .guiServer "0" -}}
+pinentry-gnome3
+{{- else -}}
+pinentry-curses
+{{- end -}}

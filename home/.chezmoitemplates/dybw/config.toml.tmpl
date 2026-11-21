@@ -18,15 +18,10 @@
         "email" $secret.email
         "lock_timeout_minutes" (div (add (int $secret.lock_timeout) 59) 60)) }}
 {{- end }}
-{{- /* The pinentry is the machine's, not the account's: a GUI one wherever a
-       hotkey can run rbw-pick without a terminal (dytoy/pinentry.yaml.tmpl).
-       A name is looked up in /opt/homebrew/bin, /usr/local/bin, /usr/bin and
-       /bin only, and must be a program dybw trusts (see dybw/root.tmpl). */}}
-{{- $pinentry := "pinentry-curses" }}
-{{- if eq .chezmoi.os "darwin" }}
-{{-   $pinentry = "pinentry-mac" }}
-{{- else if ne .guiServer "0" }}
-{{-   $pinentry = "pinentry-gtk" }}
-{{- end }}
+{{- /* The pinentry is the machine's, not the account's: the one dytoy
+       installs (pinentry/program.tmpl). A name is looked up in
+       /opt/homebrew/bin, /usr/local/bin, /usr/bin and /bin only, and must be
+       a program dybw trusts (see dybw/root.tmpl). */}}
+{{- $pinentry := includeTemplate "pinentry/program.tmpl" . }}
 {{- /* The first profile is the default, the one `rbw` without RBW_PROFILE uses */}}
 {{- dict "default" (index .dybwProfiles 0).name "pinentry" $pinentry "profiles" $profiles | toToml }}

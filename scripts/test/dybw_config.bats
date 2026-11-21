@@ -9,7 +9,10 @@ setup() {
   # encrypted to a throwaway key: the real secrets are never read here.
   SANDBOX="${BATS_TEST_TMPDIR}/dotfiles"
   mkdir -p "${SANDBOX}/home/.chezmoitemplates" "${SANDBOX}/home/private_dot_config"
-  cp -R "${DOTFILES_DIR}/home/.chezmoitemplates/dybw" "${SANDBOX}/home/.chezmoitemplates/"
+  cp -R "${DOTFILES_DIR}/home/.chezmoitemplates/dybw" "${DOTFILES_DIR}/home/.chezmoitemplates/pinentry" \
+    "${SANDBOX}/home/.chezmoitemplates/"
+  mkdir -p "${SANDBOX}/home/.chezmoitemplates/dytoy"
+  cp "${DOTFILES_DIR}/home/.chezmoitemplates/dytoy/pinentry.yaml.tmpl" "${SANDBOX}/home/.chezmoitemplates/dytoy/"
   cp -R "${DOTFILES_DIR}/home/private_dot_config/dybw" "${SANDBOX}/home/private_dot_config/"
   KEY="${BATS_TEST_TMPDIR}/test.key"
   age-keygen -o "${KEY}" 2> /dev/null
@@ -46,11 +49,24 @@ data:
 EOF
 }
 
-# Renders the config file as on a Linux machine.
+# Renders the config file, as on Linux unless an OS is given.
+# @arg $1 string chezmoi.os, default linux
 function render_config {
   run --separate-stderr chezmoi execute-template --config "${CONFIG}" --source "${SANDBOX}/home" \
-    --override-data '{"chezmoi":{"os":"linux"}}' \
+    --override-data "{\"chezmoi\":{\"os\":\"${1:-linux}\"}}" \
     --file "${SANDBOX}/home/private_dot_config/dybw/private_config.toml.tmpl"
+}
+
+# Prints the packages the pinentry manifest installs from one section.
+# @arg $1 string chezmoi.os
+# @arg $2 string Section of the manifest, such as macos or ubuntu
+function manifest_packages {
+  local os section manifest
+  dybatpho::expect_args os section -- "$@"
+  manifest="$(chezmoi execute-template --config "${CONFIG}" --source "${SANDBOX}/home" \
+    --override-data "{\"chezmoi\":{\"os\":\"${os}\"}}" \
+    '{{ includeTemplate "dytoy/pinentry.yaml.tmpl" . }}')"
+  yq -r ".${section}.packages[].name" <<< "${manifest}"
 }
 
 @test "dybw config has a profile per rbw account, in minutes rounded up" {
@@ -70,7 +86,7 @@ EOF
   render_config
   assert_success
   assert_line 'default = "default"'
-  assert_line 'pinentry = "pinentry-gtk"'
+  assert_line 'pinentry = "pinentry-gnome3"'
   assert_line '  [profiles.default]'
   assert_line '    server_url = "https://vault.example.org/"'
   assert_line '    lock_timeout_minutes = 61'
@@ -128,4 +144,36 @@ EOF
   render_config
   assert_success
   assert_line '    lock_timeout_minutes = 1'
+}
+
+# Checks the config names the program the pinentry manifest installs.
+# @arg $1 string chezmoi.os
+# @arg $2 string guiServer
+# @arg $3 string Program the config must name
+# @arg $4 string Manifest section that installs it
+# @arg $5 string Package of that section that ships it
+function assert_pinentry {
+  local os gui program section package
+  dybatpho::expect_args os gui program section package -- "$@"
+  write_account personal <<< $'email: e@example.org\nbase_url: https://v.example.org\nlock_timeout: 60'
+  write_config true '[]' "${gui}"
+  render_config "${os}"
+  assert_success
+  assert_line "pinentry = \"${program}\""
+  run manifest_packages "${os}" "${section}"
+  assert_success
+  assert_output "${package}"
+}
+
+@test "dybw config names pinentry-mac on macOS, as dytoy installs it" {
+  assert_pinentry darwin M pinentry-mac macos pinentry-mac
+}
+
+@test "dybw config names pinentry-gnome3 on a Linux desktop, as dytoy installs it" {
+  assert_pinentry linux W pinentry-gnome3 ubuntu pinentry-gnome3
+  assert_pinentry linux X pinentry-gnome3 alpine pinentry-gnome
+}
+
+@test "dybw config names pinentry-curses on a headless Linux, as dytoy installs it" {
+  assert_pinentry linux 0 pinentry-curses ubuntu pinentry-curses
 }

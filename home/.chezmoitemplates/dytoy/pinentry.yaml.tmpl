@@ -6,6 +6,8 @@ category: Everyday terminal applications
 subcategory: Core
 order: 30
 */ -}}
+{{- /* The program is chosen once for this and dybw's config */ -}}
+{{- $program := includeTemplate "pinentry/program.tmpl" . }}
 name: pinentry
 is_essential: true
 method: os
@@ -22,14 +24,10 @@ arch:
     - name: pinentry
 ubuntu:
   packages:
-    {{- if ne .guiServer "0" }}
-    - name: pinentry-gnome3
-    {{- else }}
-    - name: pinentry-curses
-    {{- end }}
+    - name: {{ $program }}
 alpine:
   packages:
-    {{- if ne .guiServer "0" }}
+    {{- if eq $program "pinentry-gnome3" }}
     - name: pinentry-gnome
     {{- else }}
     - name: pinentry
