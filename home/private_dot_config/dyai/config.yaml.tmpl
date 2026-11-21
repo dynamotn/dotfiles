@@ -296,6 +296,17 @@ global:
       - ":(glob)**/.chezmoitemplates/ai/**"
       - ":(glob)**/.chezmoitemplates/dyai/**"
       - ":(glob)**/dyai*.sh"
+      # What hooks, git and the shell run outside the sandbox, as the
+      # denyWrite list of Claude's settings names it: a worker that changes
+      # them changes code every agent runs unsandboxed.
+      - ":(glob)scripts/lib/**"
+      - ":(glob)scripts/*.sh"
+      - ":(glob).pre-commit-config.yaml"
+      - ":(glob)mise.toml"
+      - ":(glob).gitmodules"
+      - ":(glob)cascadeur/**"
+      - ":(glob)**/private_dot_config/git/**"
+      - ":(glob)**/private_dot_config/fish/**"
 # Roots whose mise config moves an agent's home (CLAUDE_CONFIG_DIR,
 # COPILOT_HOME, ...): dyai installs the same setup into each moved home. Read
 # off those mise configs, so moving a home there is all a new context takes.
