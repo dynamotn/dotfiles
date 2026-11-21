@@ -118,7 +118,7 @@ AI agent started.
 
 ## Password manager (dybw)
 
-[dybw](https://gitlab.com/dynamo-tools/dybw-cli) holds the Bitwarden vault, and
+[dybw](https://github.com/dynamotn/dybw) holds the Bitwarden vault, and
 `~/.local/bin/rbw` is a link to it: called as `rbw`, it answers as rbw 1.15
 does, so `rbw-pick`, himalaya, `scripts/docker.sh`, `scz` and the fish
 completion keep calling `rbw`. It is not installed on Termux nor in
@@ -126,7 +126,7 @@ containers, which keep no vault.
 
 | Piece | Where |
 |-------|-------|
-| `dybw`, `dybw-agent` | built from source by `dytoy` (`dytoy/dybw.yaml.tmpl`, pinned to a dybw-cli commit) into `/opt/homebrew/bin` on macOS, `~/.cargo/bin` on Linux |
+| `dybw`, `dybw-agent` | built from source by `dytoy` (`dytoy/dybw.yaml.tmpl`, pinned to a dybw-cli commit, fetched from its public GitHub mirror) into `/opt/homebrew/bin` on macOS, `~/.cargo/bin` on Linux |
 | `~/.config/dybw/config.toml` | `dybw/config.toml.tmpl`: profile `default` from `secrets/data/personal/rbw.yaml.age`, `enterprise-f1` from `enterprise-F1/rbw.yaml.age` (what `RBW_PROFILE=enterprise-f1` picks), and the machine's pinentry |
 | the agent at login | `org.dybw.agent` LaunchAgent on macOS (log in `~/Library/Logs/dybw-agent.log`), `dybw-agent.service` with the graphical session on systemd; `04-setup-dybw-agent` loads it. Elsewhere, and whenever none runs, `dybw` starts it on demand |
 
@@ -146,8 +146,8 @@ Once per machine, in a terminal (not from an AI agent):
 1. Stop rbw's agent while `rbw` is still rbw: `rbw stop-agent`.
 2. `chezmoi diff`, then `chezmoi apply`. It installs Rust and the pinentry,
    builds dybw (minutes) and writes `~/.config/dybw/config.toml`. A failed
-   build says why (no `cargo`, no `swiftc`: `xcode-select --install`, no git
-   access to dybw-cli) and leaves rbw as it was; fix it and run
+   build says why (no `cargo`, no `swiftc`: `xcode-select --install`, no
+   network to GitHub or GitLab) and leaves rbw as it was; fix it and run
    `dytoy shell -t dybw`.
 3. `chezmoi apply` again: it adds the `rbw` link and loads the agent
    service. `command -v rbw` gives `~/.local/bin/rbw`, `rbw --version` prints

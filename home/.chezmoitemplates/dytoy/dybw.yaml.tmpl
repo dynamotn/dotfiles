@@ -1,6 +1,6 @@
 {{- /* doc
 name: dybw
-url: "https://gitlab.com/dynamo-tools/dybw-cli"
+url: "https://github.com/dynamotn/dybw"
 description: "Bitwarden CLI and agent; `rbw` is a link to its rbw shim"
 category: Everyday terminal applications
 subcategory: Core
@@ -12,7 +12,8 @@ order: 20
 name: dybw
 is_essential: true
 method: shell
-# The dybw-cli commit to build. The chezmoi hook skips a dybw already
+# The dybw-cli commit to build, from its public GitHub mirror (the GitLab
+# repository is private). The chezmoi hook skips a dybw already
 # installed, so after bumping it run `dytoy shell -t dybw`.
 version: 66617f2a07bef29c5660412a4f18867ef1f8c4a6
 dependencies:
@@ -26,10 +27,12 @@ content: |-
   # dybw-peer builds its Secure Enclave code with the Command Line Tools' swiftc
   xcrun --find swiftc &> /dev/null || dybatpho::die "swiftc is missing, run: xcode-select --install"
   {{- end }}
-  # Both binaries into one directory, see dybw/root.tmpl. The git CLI fetches,
-  # so the user's git URL rewrites and SSH keys reach the repository.
+  # Both binaries into one directory, see dybw/root.tmpl. Both repositories
+  # are public over HTTPS, but dynet may rewrite https://github.com/ and
+  # https://gitlab.com/ to SSH, and cargo's built-in git follows that rewrite
+  # too; only the git CLI then reads ~/.ssh/config (ssh.github.com:443).
   CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install --locked \
     --root "{{ includeTemplate "dybw/root.tmpl" . }}" \
-    --git https://gitlab.com/dynamo-tools/dybw-cli.git --rev "${DYTOY_VERSION}" \
+    --git https://github.com/dynamotn/dybw.git --rev "${DYTOY_VERSION}" \
     dybw dybw-agent
 {{- end }}

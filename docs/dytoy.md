@@ -108,7 +108,7 @@ again once its definition changes, after a week, or with `--no-check-installed`.
 |Tool|Purpose|
 |----|-------|
 |[neovim](https://github.com/neovim/neovim)|My love editor, and IDE in my eyes|
-|[dybw](https://gitlab.com/dynamo-tools/dybw-cli)|Bitwarden CLI and agent; `rbw` is a link to its rbw shim|
+|[dybw](https://github.com/dynamotn/dybw)|Bitwarden CLI and agent; `rbw` is a link to its rbw shim|
 |[pinentry](https://www.gnupg.org/related_software/pinentry/)|Prompt for the dybw master password, as pinentry-mac, pinentry-gnome3 or pinentry-curses to match the machine|
 |[fish](https://github.com/fish-shell/fish-shell)|Smart command line shell|
 |[zellij](https://github.com/zellij-org/zellij)|Terminal multiplexer|
