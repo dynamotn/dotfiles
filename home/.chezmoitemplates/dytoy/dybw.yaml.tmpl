@@ -1,0 +1,35 @@
+{{- /* doc
+name: dybw
+url: "https://gitlab.com/dynamo-tools/dybw-cli"
+description: "Bitwarden CLI and agent; `rbw` is a link to its rbw shim"
+category: Everyday terminal applications
+subcategory: Core
+order: 20
+*/ -}}
+{{- /* Not on Termux nor in containers: dybw needs macOS or Linux with a
+       pinentry, and those machines keep no vault at all. */ -}}
+{{- if and (ne .chezmoi.os "android") (ne .kind "container") }}
+name: dybw
+is_essential: true
+method: shell
+# The dybw-cli commit to build. The chezmoi hook skips a dybw already
+# installed, so after bumping it run `dytoy shell -t dybw`.
+version: 66617f2a07bef29c5660412a4f18867ef1f8c4a6
+dependencies:
+  - rust
+  - pinentry
+content: |-
+  # mise's rust installs cargo through rustup, into ~/.cargo/bin
+  PATH="${HOME}/.cargo/bin:${PATH}"
+  dybatpho::is command cargo || dybatpho::die "cargo is not installed, run: dytoy mise -t rust"
+  {{- if eq .chezmoi.os "darwin" }}
+  # dybw-peer builds its Secure Enclave code with the Command Line Tools' swiftc
+  xcrun --find swiftc &> /dev/null || dybatpho::die "swiftc is missing, run: xcode-select --install"
+  {{- end }}
+  # Both binaries into one directory, see dybw/root.tmpl. The git CLI fetches,
+  # so the user's git URL rewrites and SSH keys reach the repository.
+  CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install --locked \
+    --root "{{ includeTemplate "dybw/root.tmpl" . }}" \
+    --git https://gitlab.com/dynamo-tools/dybw-cli.git --rev "${DYTOY_VERSION}" \
+    dybw dybw-agent
+{{- end }}

@@ -18,8 +18,8 @@ abbr -a scza 'scz apply'
 abbr -a sczA 'scz add'
 abbr -a sczAe 'scz add --encrypt'
 abbr -a scze 'scz edit'
-# Scripts stay out of the system diff: rendering them reads secrets (the Wi-Fi
-# script asks rbw for passwords) and the diff would print those in clear.
+# Scripts stay out of the system diff: rendering them may read secrets and the
+# diff would print those in clear.
 abbr -a sczd 'scz diff --recursive --exclude scripts'
 abbr -a sczu 'scz update'
 abbr -a sczs 'scz status'

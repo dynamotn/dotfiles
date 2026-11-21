@@ -1,0 +1,32 @@
+{{- /* dybw's config file (ADR 0008 of dybw), one profile per account.
+       Called with the template data plus `dybwProfiles`, a list of
+       {name, identity}: the profile, and the secrets identity whose
+       rbw.yaml.age holds its account (schemas/secrets/rbw.schema.yaml).
+       rbw's `lock_timeout` is in seconds, dybw's in minutes, rounded up.
+       dybw has no identity_url: it derives the identity server from
+       server_url, so a different one cannot be carried over. */ -}}
+{{- $profiles := dict }}
+{{- range .dybwProfiles }}
+{{-   $secret := printf "../secrets/data/%s/rbw.yaml.age" .identity | joinPath $.chezmoi.sourceDir | include | decrypt | fromYaml }}
+{{-   $base := trimSuffix "/" $secret.base_url }}
+{{-   $identity := get $secret "identity_url" | default "" | trimSuffix "/" }}
+{{-   if and $identity (ne $identity (printf "%s/identity" $base)) (not (regexMatch "^https://(vault\\.)?bitwarden\\.(com|eu)$" $base)) }}
+{{-     fail (printf "dybw profile %s: identity_url in %s/rbw.yaml is not <base_url>/identity, which dybw cannot express; remove it or fix it" .name .identity) }}
+{{-   end }}
+{{-   $profiles = set $profiles .name (dict
+        "server_url" $secret.base_url
+        "email" $secret.email
+        "lock_timeout_minutes" (div (add (int $secret.lock_timeout) 59) 60)) }}
+{{- end }}
+{{- /* The pinentry is the machine's, not the account's: a GUI one wherever a
+       hotkey can run rbw-pick without a terminal (dytoy/pinentry.yaml.tmpl).
+       A name is looked up in /opt/homebrew/bin, /usr/local/bin, /usr/bin and
+       /bin only, and must be a program dybw trusts (see dybw/root.tmpl). */}}
+{{- $pinentry := "pinentry-curses" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{-   $pinentry = "pinentry-mac" }}
+{{- else if ne .guiServer "0" }}
+{{-   $pinentry = "pinentry-gtk" }}
+{{- end }}
+{{- /* The first profile is the default, the one `rbw` without RBW_PROFILE uses */}}
+{{- dict "default" (index .dybwProfiles 0).name "pinentry" $pinentry "profiles" $profiles | toToml }}

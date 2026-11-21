@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  dybw-cli's contrib/macos/org.dybw.agent.plist, rendered: dybw-agent started
+  at login in the GUI session, so its pinentry-mac and Touch ID prompts show for
+  hotkeys and launchers that have no terminal. dybw still starts the agent on
+  demand when none runs; a second agent finds the lock held and exits 1, which
+  launchd does not retry. Loaded by the 04-setup-dybw-agent hook.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>org.dybw.agent</string>
+  <key>ProgramArguments</key>
+  <array>
+    <!-- Next to dybw: dybw starts the agent beside itself, and the agent trusts the dybw beside it. -->
+    <string>{{ template "dybw/root.tmpl" . }}/bin/dybw-agent</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- The TMPDIR of the shells: dybw finds the agent's socket in $TMPDIR/dybw-<uid>. -->
+    <key>TMPDIR</key>
+    <string>{{ output "getconf" "DARWIN_USER_TEMP_DIR" | trim }}</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <!-- Restart after a crash only: `dybw agent stop` (exit 0) stays stopped until the next dybw call or login. -->
+  <key>KeepAlive</key>
+  <dict>
+    <key>Crashed</key>
+    <true/>
+  </dict>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>LimitLoadToSessionType</key>
+  <string>Aqua</string>
+  <!-- Metadata only (profiles, ops, decisions), never a value. -->
+  <key>StandardOutPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/dybw-agent.log</string>
+  <key>StandardErrorPath</key>
+  <string>{{ .chezmoi.homeDir }}/Library/Logs/dybw-agent.log</string>
+</dict>
+</plist>

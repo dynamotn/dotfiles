@@ -1,0 +1,14 @@
+{{- /* rbw's two configs become two dybw profiles: rbw's default one is
+       `default`, rbw-enterprise-f1 is `enterprise-f1` (the profile the rbw
+       shim picks for RBW_PROFILE=enterprise-f1). Empty, so not written, on a
+       machine that decrypts neither. */ -}}
+{{- $profiles := list }}
+{{- if .decryptPersonal }}
+{{-   $profiles = append $profiles (dict "name" "default" "identity" "personal") }}
+{{- end }}
+{{- if has "F1" .decryptEnterprise }}
+{{-   $profiles = append $profiles (dict "name" "enterprise-f1" "identity" "enterprise-F1") }}
+{{- end }}
+{{- if $profiles }}
+{{-   includeTemplate "dybw/config.toml.tmpl" (merge (dict "dybwProfiles" $profiles) .) }}
+{{- end }}

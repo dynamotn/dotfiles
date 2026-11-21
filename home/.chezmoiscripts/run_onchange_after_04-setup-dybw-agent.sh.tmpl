@@ -1,0 +1,33 @@
+#!{{ .bash }}
+# @file 04-setup-dybw-agent.sh
+# @brief Start the dybw agent with the graphical session
+# @description Enable the systemd user unit on Linux, or load the launchd
+# agent on macOS, that runs `dybw-agent` in the graphical session, so a hotkey
+# with no terminal behind it still gets a GUI pinentry. The hook carries one
+# hash over both unit files, so it re-runs whenever one changes. It waits,
+# with a warning, until dytoy has built dybw-agent. Other init systems get
+# nothing: dybw starts its agent on demand there.
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
+dybatpho::register_common_handlers
+. "{{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh"
+# units hash: {{ list (include "private_dot_config/systemd/user/dybw-agent.service") (include "Library/LaunchAgents/org.dybw.agent.plist.tmpl") | join "\n" | sha256sum }}
+{{- $agent := printf "%s/bin/dybw-agent" (includeTemplate "dybw/root.tmpl" .) }}
+{{- /* Changes once dytoy has built it, so an apply that found none runs again */}}
+# dybw-agent built: {{ if stat $agent }}yes{{ else }}no{{ end }}
+{{- if and (ne .kind "container") (eq .initSystem "systemd" "launchd") }}
+
+agent="{{ $agent }}"
+if ! dybatpho::is executable "${agent}"; then
+  dybatpho::warn "${agent} is not built yet, run: dytoy shell -t dybw"
+  exit 0
+fi
+
+dybatpho::header "Start the dybw agent"
+{{-   if eq .initSystem "systemd" }}
+init_system::enable_systemd_user_units dybw-agent.service
+{{-   else }}
+plist="$(dybatpho::path_join "${HOME}" "Library" "LaunchAgents" "org.dybw.agent.plist")"
+init_system::bootstrap_launchd_agent "${plist}"
+{{-   end }}
+dybatpho::success "Start the dybw agent"
+{{- end }}

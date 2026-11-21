@@ -23,16 +23,13 @@ env_args=(env
   "PATH=${PATH}"
   "HOME=${HOME}"
 )
-# Templates that read secrets call rbw, which reaches the caller's unlocked
-# agent through its socket under XDG_RUNTIME_DIR. Unlock it here, as the
-# caller, where pinentry has a terminal: root finding no agent there starts
-# its own, which cannot prompt and leaves a root-owned rbw directory in the
-# caller's runtime dir that breaks the caller's rbw until removed.
+# rbw is dybw's shim, which refuses to run as root, and its agent answers only
+# its own user: root gets no agent, so no XDG_RUNTIME_DIR. Unlock here, as the
+# caller, where pinentry has a terminal; a template under root/ that ever needs
+# a secret must have it rendered as the user first (none does today).
 if dybatpho::is command rbw && ! rbw unlocked &> /dev/null \
   && ! rbw unlock; then
   dybatpho::warn "rbw is locked, templates reading secrets will fail"
-elif [[ -n "${XDG_RUNTIME_DIR:-}" ]]; then
-  env_args+=("XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-}")
 fi
 chezmoi_args=(chezmoi --destination /
   --source "${dotfiles}/root"

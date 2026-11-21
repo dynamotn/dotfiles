@@ -259,6 +259,27 @@ EOF
   assert_success
 }
 
+@test "scz unlocks rbw as the caller and hands root no agent" {
+  local rendered="${BATS_TEST_TMPDIR}/executable_scz" bin="${BATS_TEST_TMPDIR}/bin"
+  local log="${BATS_TEST_TMPDIR}/calls"
+  render_template "home/dot_local/bin/executable_scz.tmpl" "${rendered}"
+  mkdir -p "${bin}"
+  # A locked vault: `unlocked` fails, `unlock` succeeds
+  # dyshellint disable=SC2016 $1 and $* belong to the fake script being written
+  printf '#!/bin/sh\nprintf "rbw %%s\\n" "$*" >> %s\n[ "$1" != unlocked ]\n' "${log}" > "${bin}/rbw"
+  printf '#!/bin/sh\nprintf "sudo %%s\\n" "$*" >> %s\n' "${log}" > "${bin}/sudo"
+  chmod +x "${bin}/rbw" "${bin}/sudo"
+
+  DYBATPHO_PRIVILEGE_REFRESH=1 PATH="${bin}:${PATH}" XDG_RUNTIME_DIR=/run/user/1000 \
+    run bash "${rendered}" status
+  assert_success
+  run cat "${log}"
+  assert_line "rbw unlocked"
+  assert_line "rbw unlock"
+  assert_line --partial "chezmoi --destination / "
+  refute_output --partial "XDG_RUNTIME_DIR"
+}
+
 @test "dytoy dry-run runs every installer method, os first" {
   local rendered="${BATS_TEST_TMPDIR}/executable_dytoy"
   render_template "home/dot_local/bin/executable_dytoy.tmpl" "${rendered}"

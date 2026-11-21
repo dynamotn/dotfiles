@@ -1,0 +1,28 @@
+# dybw-agent as a systemd user service, started with the graphical session so its pinentry (pinentry-gtk, -qt)
+# gets the session's WAYLAND_DISPLAY / DISPLAY / XAUTHORITY / DBUS_SESSION_BUS_ADDRESS. The compositor must put them
+# in the user manager before graphical-session.target starts; niri-session and uwsm do, otherwise run at its start:
+#   systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS
+# dybw still starts the agent on demand when none runs (no graphical session, an OpenRC machine); the two never fight:
+# the second agent finds the lock held and exits 1, which is not retried.
+#
+# Install: cp dybw-agent.service ~/.config/systemd/user/ && systemctl --user enable --now dybw-agent.service
+# The socket is $XDG_RUNTIME_DIR/dybw/agent.sock: your shells must see the manager's XDG_RUNTIME_DIR (/run/user/<uid>).
+
+[Unit]
+Description=dybw agent (holds the unlocked vault for dybw and the rbw shim)
+Documentation=https://gitlab.com/dynamo-tools/dybw-cli
+PartOf=graphical-session.target
+After=graphical-session.target
+# Skipped, not started display-less (holding agent.lock, so no on-demand agent could show a pinentry either), until
+# the compositor imported a display (systemd 246+).
+ConditionEnvironment=|WAYLAND_DISPLAY
+ConditionEnvironment=|DISPLAY
+
+[Service]
+# Next to dybw: dybw starts the agent beside itself, and the agent trusts the dybw beside it.
+ExecStart=%h/.cargo/bin/dybw-agent
+# A crash only: `dybw agent stop` (exit 0) stays stopped until the next dybw call or login.
+Restart=on-abnormal
+
+[Install]
+WantedBy=graphical-session.target

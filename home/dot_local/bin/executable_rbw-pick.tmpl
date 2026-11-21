@@ -19,6 +19,9 @@ export RBW_PROFILE="enterprise-{{ .company | lower }}"
 # Hammerspoon starts this from launchd, whose PATH has no Homebrew
 export PATH="/opt/homebrew/bin:${PATH}"
 {{- end }}
+# `rbw` is the link to dybw's rbw shim in ~/.local/bin; it goes first, ahead
+# of a real rbw left elsewhere, and is there even where launchd started this
+export PATH="{{ .chezmoi.homeDir }}/.local/bin:${PATH}"
 
 #######################################
 # @description Spec of rbw-pick
@@ -88,9 +91,9 @@ function _pick {
   dybatpho::expect_args kind -- "$@"
   dybatpho::is command rbw || dybatpho::die "rbw is not installed"
 
-  # Unlock first so the listing below never fails on a locked vault. rbw asks
-  # through the pinentry its config names, a GUI one wherever a hotkey can start
-  # this script: there is no terminal behind it
+  # Unlock first so the listing below never fails on a locked vault. The dybw
+  # agent asks through the pinentry its config names, a GUI one wherever a
+  # hotkey can start this script: there is no terminal behind it
   rbw unlocked &> /dev/null || rbw unlock
 
   # The id is what rbw gets asked for afterwards: names repeat across folders

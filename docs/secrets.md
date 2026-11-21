@@ -55,6 +55,13 @@ stamp under `~/.local/state/dyai/` so later applies skip it. Until then, or
 while GitLab is away, it only warns. Agents are denied reading
 `~/.config/dyai/node/`.
 
+The Bitwarden account of an identity, `secrets/data/<identity>/rbw.yaml.age`
+(`schemas/secrets/rbw.schema.yaml`; it keeps rbw's name), becomes a profile in
+dybw's `~/.config/dybw/config.toml`: `personal` as `default`, `enterprise-F1`
+as `enterprise-f1` (see [setup](./setup.md#password-manager-dybw)). The file
+holds no credential; each profile's API key is entered on the machine with
+`dybw login`.
+
 ## `chezmoi-dycrypt`
 
 Encrypts and decrypts with a single identity. It handles two layouts:

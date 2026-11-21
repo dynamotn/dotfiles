@@ -112,6 +112,78 @@ the environment.
 | `personal-arch`   | Arch   | `personal` identity           |
 | `enterprise-<CODE>` | Alpine | that company's identity and SSL certificate |
 
+The age passphrase comes from the vault through `rbw` (dybw's shim, see
+below). Run it from your own terminal: dybw denies a value to a script that an
+AI agent started.
+
+## Password manager (dybw)
+
+[dybw](https://gitlab.com/dynamo-tools/dybw-cli) holds the Bitwarden vault, and
+`~/.local/bin/rbw` is a link to it: called as `rbw`, it answers as rbw 1.15
+does, so `rbw-pick`, himalaya, `scripts/docker.sh`, `scz` and the fish
+completion keep calling `rbw`. It is not installed on Termux nor in
+containers, which keep no vault.
+
+| Piece | Where |
+|-------|-------|
+| `dybw`, `dybw-agent` | built from source by `dytoy` (`dytoy/dybw.yaml.tmpl`, pinned to a dybw-cli commit) into `/opt/homebrew/bin` on macOS, `~/.cargo/bin` on Linux |
+| `~/.config/dybw/config.toml` | `dybw/config.toml.tmpl`: profile `default` from `secrets/data/personal/rbw.yaml.age`, `enterprise-f1` from `enterprise-F1/rbw.yaml.age` (what `RBW_PROFILE=enterprise-f1` picks), and the machine's pinentry |
+| the agent at login | `org.dybw.agent` LaunchAgent on macOS (log in `~/Library/Logs/dybw-agent.log`), `dybw-agent.service` with the graphical session on systemd; `04-setup-dybw-agent` loads it. Elsewhere, and whenever none runs, `dybw` starts it on demand |
+
+On macOS dybw sits in the Homebrew prefix on purpose: pinentry-mac is a
+Homebrew program the user can write to, and dybw trusts such a pinentry only
+from its own install prefix, never from one inside the home (dybw ADR 0008).
+The `rbw` link and the agent service wait until the build is there, so the
+apply after the one that built dybw adds them.
+
+To move to a newer dybw-cli, bump `version` in `dytoy/dybw.yaml.tmpl`, apply,
+then `dytoy shell -t dybw`: the apply hook skips a dybw already installed.
+
+### Switching a machine from rbw
+
+Once per machine, in a terminal (not from an AI agent):
+
+1. Stop rbw's agent while `rbw` is still rbw: `rbw stop-agent`.
+2. `chezmoi diff`, then `chezmoi apply`. It installs Rust and the pinentry,
+   builds dybw (minutes) and writes `~/.config/dybw/config.toml`. A failed
+   build says why (no `cargo`, no `swiftc`: `xcode-select --install`, no git
+   access to dybw-cli) and leaves rbw as it was; fix it and run
+   `dytoy shell -t dybw`.
+3. `chezmoi apply` again: it adds the `rbw` link and loads the agent
+   service. `command -v rbw` gives `~/.local/bin/rbw`, `rbw --version` prints
+   `rbw 1.15.0`.
+4. Log in once per profile with the API key (client id and secret, from the
+   web vault's account security settings), then unlock:
+   `dybw -p default login`, `dybw -p default unlock`; on an F1 machine also
+   `dybw -p enterprise-f1 login` and `unlock`.
+5. `dybw doctor` passes: socket, agent, config, and the pinentry, which on
+   macOS must be accepted by the install-prefix rule.
+6. The agent is the service's: `dybw agent stop` in a terminal stops the
+   process `launchctl print gui/$(id -u)/org.dybw.agent` or
+   `systemctl --user status dybw-agent` shows (`dybw` starts it again on
+   demand).
+7. Run each caller once and answer the confirmation pinentry asks for:
+   - the password and TOTP hotkeys (`rbw-pick`) with no terminal open: the
+     unlock and the confirmation must show as GUI prompts;
+   - himalaya: `himalaya envelope list`;
+   - `scripts/docker.sh personal` up to the build;
+   - `scz status`, which unlocks as you and hands root no agent;
+   - fish: `rbw <Tab>` and `dybw <Tab>`;
+   - a chezmoi template through the shim:
+     `chezmoi execute-template '{{ (rbw "<item>").name }}'` prints the item's
+     name.
+8. Remove rbw: `brew uninstall rbw` on macOS; on Linux
+   `rm ~/.local/bin/rbw-agent` (dytoy's rbw binary was replaced by the link);
+   `pkg uninstall rbw` on Termux.
+9. Remove rbw's leftovers: `~/.config/rbw`, `~/.config/rbw-enterprise-f1`,
+   rbw's cache and data directories (`~/.cache/rbw*` and
+   `~/.local/share/rbw*` on Linux, `~/Library/Caches/rbw*` on macOS) and, on
+   macOS, the links `~/Library/Application Support/rbw` and
+   `~/Library/Application Support/rbw-enterprise-f1`.
+10. Optional: `dybw unlock add pin`, and on Linux with `pam_bwss` in the PAM
+    stack `dybw unlock add login` (the PAM lines are in the bwss README). The
+    dotfiles enable neither: enrolment stays on the device.
+
 ## Lima image
 
 `scripts/lima-image.sh` builds an Arch Linux ARM (aarch64) cloud image for the

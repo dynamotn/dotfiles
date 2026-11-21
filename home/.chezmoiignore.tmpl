@@ -92,6 +92,20 @@ Library/thunderbird
 .termux
 {{- end }}
 
+{{/* dybw is not installed on Termux nor in containers (dytoy/dybw.yaml.tmpl) */}}
+{{- if or (eq .chezmoi.os "android") (eq .kind "container") }}
+.config/dybw
+.config/systemd/user/dybw-agent.service
+.local/bin/rbw-pick
+{{- else if not (or .decryptPersonal (has "F1" .decryptEnterprise)) }}
+{{/* No account to render a profile from (dybw/config.toml.tmpl) */}}
+.config/dybw
+{{- end }}
+{{/* The rbw link waits until dytoy has built the dybw it points to */}}
+{{- if not (stat (printf "%s/bin/dybw" (includeTemplate "dybw/root.tmpl" .))) }}
+.local/bin/rbw
+{{- end }}
+
 {{/* Other GUI tools */}}
 {{/* Steam comes from flatpak only there (dytoy/steam.yaml.tmpl) */}}
 {{- if not (eq .osid "linux-gentoo" "linux-arch") }}
@@ -171,8 +185,6 @@ Multimedia
 .config/firefox/profiles/personal
 .config/firefox/startpage/profiles/personal
 .config/thunderbird/profiles/personal
-.config/rbw
-Library/Application Support/rbw
 .config/tstruct/auth.json
 .kube/config
 .docker/config.json
@@ -180,8 +192,6 @@ Library/Application Support/rbw
 {{- if empty .decryptEnterprise }}
 .ssh/config.d/enterprise.config
 .ssh/keys/enterprise-shared_*
-Library/Application Support/rbw-*
-.config/rbw-*
 {{- end }}
 {{- range .companies }}
 {{-   if not (has . $.decryptEnterprise) }}
@@ -190,7 +200,5 @@ Working/enterprise/{{ . }}
 .config/firefox/profiles/enterprise-{{ . }}
 .config/firefox/startpage/profiles/enterprise-{{ . }}
 .config/thunderbird/profiles/enterprise-{{ . }}
-.config/rbw-enterprise-{{ . | lower }}
-Library/Application Support/rbw-enterprise-{{ . | lower }}
 {{-   end }}
 {{- end }}
