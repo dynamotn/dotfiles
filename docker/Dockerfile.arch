@@ -1,4 +1,6 @@
-FROM archlinux:base-devel
+# Pinned by digest: the build mounts the age passphrases, so a re-tagged base
+# image would run beside them. Renovate bumps the digest.
+FROM archlinux:base-devel@sha256:fa2d4ce3310ddd90a4208e5168be8ad367da5129af1245f38fd2d803bcbe3239
 
 ENV USER=dynamo
 ENV UID=1000
