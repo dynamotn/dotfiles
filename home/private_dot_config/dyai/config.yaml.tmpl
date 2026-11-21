@@ -352,53 +352,55 @@ agents:
 # so every name below is coupled to global.subagents[0].ref. A missing name
 # only warns at install time, never fails; re-verify these whenever that ref is
 # bumped. The "registry subagent names exist" bats test guards this when the
-# pinned repo is cached.
+# pinned repo is cached. A skill is pinned to a commit by a GitHub tree URL,
+# whose last part must be the skill's name; the `owner/repo@name` ones left
+# follow upstream, as their repository has no single directory of that name.
 registry:
   languages:
     go:
       subagents: [golang-pro]
       skills:
-        - samber/cc-skills-golang@golang-code-style
-        - samber/cc-skills-golang@golang-testing
-        - samber/cc-skills-golang@golang-error-handling
-        - samber/cc-skills-golang@golang-grpc
-        - samber/cc-skills-golang@golang-security
+        - https://github.com/samber/cc-skills-golang/tree/d68d80aec298e1b74b37c2a472c002b5217248b3/skills/golang-code-style
+        - https://github.com/samber/cc-skills-golang/tree/d68d80aec298e1b74b37c2a472c002b5217248b3/skills/golang-testing
+        - https://github.com/samber/cc-skills-golang/tree/d68d80aec298e1b74b37c2a472c002b5217248b3/skills/golang-error-handling
+        - https://github.com/samber/cc-skills-golang/tree/d68d80aec298e1b74b37c2a472c002b5217248b3/skills/golang-grpc
+        - https://github.com/samber/cc-skills-golang/tree/d68d80aec298e1b74b37c2a472c002b5217248b3/skills/golang-security
     python:
       subagents: [python-pro]
       plugins:
         - modern-python@trailofbits
       skills:
-        - mindrally/skills@fastapi-python
+        - https://github.com/mindrally/skills/tree/7682ca77710e0971eab4e0ae5dddfa281aea0ba5/fastapi-python
         - affaan-m/ecc@python-patterns
         - affaan-m/ecc@python-testing
     rust:
       subagents: [rust-engineer]
       skills:
-        - apollographql/skills@rust-best-practices
+        - https://github.com/apollographql/skills/tree/9dda1397730370aeb8df4ff8f2015c34c86b5003/skills/rust-best-practices
         - affaan-m/ecc@rust-patterns
         - affaan-m/ecc@rust-testing
-        - mohitmishra786/low-level-dev-skills@cargo-workflows
-        - mohitmishra786/low-level-dev-skills@rust-async-internals
-        - mohitmishra786/low-level-dev-skills@rust-build-times
-        - mohitmishra786/low-level-dev-skills@rust-cross
-        - mohitmishra786/low-level-dev-skills@rust-debugging
-        - mohitmishra786/low-level-dev-skills@rust-ffi
-        - mohitmishra786/low-level-dev-skills@rust-no-std
-        - mohitmishra786/low-level-dev-skills@rust-profiling
-        - mohitmishra786/low-level-dev-skills@rust-sanitizers-miri
-        - mohitmishra786/low-level-dev-skills@rust-security
-        - mohitmishra786/low-level-dev-skills@rust-unsafe
-        - mohitmishra786/low-level-dev-skills@rustc-basics
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/cargo-workflows
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-async-internals
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-build-times
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-cross
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-debugging
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-ffi
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-no-std
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-profiling
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-sanitizers-miri
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-security
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rust-unsafe
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/rust/rustc-basics
     # Skills-only: no VoltAgent subagent for Zig.
     zig:
       skills:
-        - mohitmishra786/low-level-dev-skills@zig-build-system
-        - mohitmishra786/low-level-dev-skills@zig-cinterop
-        - mohitmishra786/low-level-dev-skills@zig-compiler
-        - mohitmishra786/low-level-dev-skills@zig-comptime
-        - mohitmishra786/low-level-dev-skills@zig-cross
-        - mohitmishra786/low-level-dev-skills@zig-debugging
-        - mohitmishra786/low-level-dev-skills@zig-testing
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/zig/zig-build-system
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/zig/zig-cinterop
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/zig/zig-compiler
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/zig/zig-comptime
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/zig/zig-cross
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/zig/zig-debugging
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/zig/zig-testing
     typescript:
       subagents: [typescript-pro]
       skills:
@@ -412,92 +414,92 @@ registry:
       skills:
         - vercel-labs/agent-skills@vercel-react-best-practices
         - vercel-labs/agent-skills@vercel-composition-patterns
-        - vercel-labs/agent-skills@web-design-guidelines
+        - https://github.com/vercel-labs/agent-skills/tree/5a37a6329fbad3666c3207392a6a7c0110e92efb/skills/web-design-guidelines
         - leonxlnx/taste-skill@design-taste-frontend
         # Product UI (apps, dashboards); design-taste-frontend covers marketing pages.
         - pbakaus/impeccable@impeccable
         # Searchable style, palette and font-pairing data behind a design choice.
-        - nextlevelbuilder/ui-ux-pro-max-skill@ui-ux-pro-max
-        - addyosmani/agent-skills@frontend-ui-engineering
-        - anthropics/skills@theme-factory
-        - anthropics/skills@canvas-design
-        - addyosmani/web-quality-skills@accessibility
-        - addyosmani/web-quality-skills@core-web-vitals
-        - addyosmani/web-quality-skills@performance
+        - https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/tree/f76d1653d7467fc11fb9d9d79295a421c92ab958/.claude/skills/ui-ux-pro-max
+        - https://github.com/addyosmani/agent-skills/tree/8c99fa36d90068c82d547f7c12a9d67a3e95f4ee/skills/frontend-ui-engineering
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/theme-factory
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/canvas-design
+        - https://github.com/addyosmani/web-quality-skills/tree/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/accessibility
+        - https://github.com/addyosmani/web-quality-skills/tree/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/core-web-vitals
+        - https://github.com/addyosmani/web-quality-skills/tree/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/performance
         - affaan-m/ecc@react-testing
         - affaan-m/ecc@react-performance
     vue:
       subagents: [vue-expert]
       skills:
-        - vuejs-ai/skills@vue-best-practices
-        - vuejs-ai/skills@vue-pinia-best-practices
-        - vuejs-ai/skills@vue-router-best-practices
+        - https://github.com/vuejs-ai/skills/tree/198f0cd8f7f9c0a3d9b566ccc16de6677519ee78/skills/vue-best-practices
+        - https://github.com/vuejs-ai/skills/tree/198f0cd8f7f9c0a3d9b566ccc16de6677519ee78/skills/vue-pinia-best-practices
+        - https://github.com/vuejs-ai/skills/tree/198f0cd8f7f9c0a3d9b566ccc16de6677519ee78/skills/vue-router-best-practices
         - affaan-m/ecc@nuxt4-patterns
     angular:
       subagents: [angular-architect]
       skills:
-        - angular/skills@angular-developer
-        - angular/skills@angular-new-app
+        - https://github.com/angular/skills/tree/97c663a02b376a19eccc60f75909f20f15a2c9c1/angular-developer
+        - https://github.com/angular/skills/tree/97c663a02b376a19eccc60f75909f20f15a2c9c1/angular-new-app
     java:
       subagents: [java-architect, spring-boot-engineer]
       skills:
-        - github/awesome-copilot@java-springboot
+        - https://github.com/github/awesome-copilot/tree/f10fdb8b2660ce85c98f220b2f1ca24653768a5c/skills/java-springboot
         - affaan-m/ecc@java-coding-standards
         - affaan-m/ecc@springboot-security
         - affaan-m/ecc@jpa-patterns
     csharp:
       subagents: [csharp-developer, dotnet-core-expert]
       skills:
-        - github/awesome-copilot@csharp-async
-        - github/awesome-copilot@csharp-xunit
-        - github/awesome-copilot@csharp-docs
+        - https://github.com/github/awesome-copilot/tree/f10fdb8b2660ce85c98f220b2f1ca24653768a5c/skills/csharp-async
+        - https://github.com/github/awesome-copilot/tree/f10fdb8b2660ce85c98f220b2f1ca24653768a5c/skills/csharp-xunit
+        - https://github.com/github/awesome-copilot/tree/f10fdb8b2660ce85c98f220b2f1ca24653768a5c/skills/csharp-docs
         - affaan-m/ecc@dotnet-patterns
     cpp:
       subagents: [cpp-pro]
       skills:
         - affaan-m/ecc@cpp-coding-standards
         - affaan-m/ecc@cpp-testing
-        - mohitmishra786/low-level-dev-skills@cpp-coroutines
-        - mohitmishra786/low-level-dev-skills@cpp-modules
-        - mohitmishra786/low-level-dev-skills@cpp-templates
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/cpp-coroutines
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compilers/cpp-modules
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compilers/cpp-templates
     php:
       subagents: [php-pro, laravel-specialist]
       skills:
-        - jeffallan/claude-skills@laravel-specialist
-        - jeffallan/claude-skills@php-pro
+        - https://github.com/jeffallan/claude-skills/tree/4b94d98605baf742b751bb82832ace5caf942271/skills/laravel-specialist
+        - https://github.com/jeffallan/claude-skills/tree/4b94d98605baf742b751bb82832ace5caf942271/skills/php-pro
         - affaan-m/ecc@laravel-tdd
         - affaan-m/ecc@laravel-security
     ruby:
       subagents: [rails-expert]
       skills:
-        - jeffallan/claude-skills@rails-expert
+        - https://github.com/jeffallan/claude-skills/tree/4b94d98605baf742b751bb82832ace5caf942271/skills/rails-expert
         - affaan-m/ecc@rails-patterns
     swift:
       subagents: [swift-expert]
       skills:
-        - emilkowalski/skills@write-swift
-        - avdlee/swiftui-agent-skill@swiftui-expert-skill
-        - avdlee/swift-concurrency-agent-skill@swift-concurrency
+        - https://github.com/emilkowalski/skills/tree/64eb3deb9a5fbfa041faf783e0bc3fd635872e9c/skills/write-swift
+        - https://github.com/avdlee/swiftui-agent-skill/tree/62bd760f005093d1e2e4de5db156e456a5f96400/skills/swiftui-expert-skill
+        - https://github.com/avdlee/swift-concurrency-agent-skill/tree/3b1580d8398e0b5408b3bf0bada0e941a1cfc642/skills/swift-concurrency
         - affaan-m/ecc@swift-protocol-di-testing
     dart:
       subagents: [flutter-expert]
       skills:
-        - flutter/agent-plugins@flutter-apply-architecture-best-practices
-        - dart-lang/skills@dart-add-unit-test
+        - https://github.com/flutter/agent-plugins/tree/ff6d472ee66dbed566c4500edee460c94fde0a02/skills/flutter-apply-architecture-best-practices
+        - https://github.com/dart-lang/skills/tree/f84b16872b5d186f4e877511b49b93c204a1c4ef/skills/dart-add-unit-test
         - affaan-m/ecc@dart-flutter-patterns
-        - flutter/skills@flutter-add-widget-test
-        - flutter/skills@flutter-fix-layout-issues
+        - https://github.com/flutter/skills/tree/ff6d472ee66dbed566c4500edee460c94fde0a02/skills/flutter-add-widget-test
+        - https://github.com/flutter/skills/tree/ff6d472ee66dbed566c4500edee460c94fde0a02/skills/flutter-fix-layout-issues
   infra:
     terraform:
       subagents: [terraform-engineer]
       skills:
-        - hashicorp/agent-skills@terraform-style-guide
-        - hashicorp/agent-skills@terraform-test
-        - hashicorp/agent-skills@refactor-module
-        - hashicorp/agent-skills@terraform-search-import
-        - hashicorp/agent-skills@terraform-stacks
-        - hashicorp/agent-skills@terraform-policy
-        - wshobson/agents@terraform-module-library
+        - https://github.com/hashicorp/agent-skills/tree/5e30fa5c867ba6777c37e4206babfd08049c396f/plugins/terraform/skills/terraform-style-guide
+        - https://github.com/hashicorp/agent-skills/tree/5e30fa5c867ba6777c37e4206babfd08049c396f/plugins/terraform/skills/terraform-test
+        - https://github.com/hashicorp/agent-skills/tree/5e30fa5c867ba6777c37e4206babfd08049c396f/plugins/terraform/skills/refactor-module
+        - https://github.com/hashicorp/agent-skills/tree/5e30fa5c867ba6777c37e4206babfd08049c396f/plugins/terraform/skills/terraform-search-import
+        - https://github.com/hashicorp/agent-skills/tree/5e30fa5c867ba6777c37e4206babfd08049c396f/plugins/terraform/skills/terraform-stacks
+        - https://github.com/hashicorp/agent-skills/tree/5e30fa5c867ba6777c37e4206babfd08049c396f/plugins/terraform/skills/terraform-policy
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cloud-infrastructure/skills/terraform-module-library
       # Registry and provider docs lookup; needs Docker, no credential.
       mcp:
         terraform:
@@ -507,13 +509,13 @@ registry:
     kubernetes:
       subagents: [kubernetes-specialist]
       skills:
-        - jeffallan/claude-skills@kubernetes-specialist
-        - wshobson/agents@helm-chart-scaffolding
+        - https://github.com/jeffallan/claude-skills/tree/4b94d98605baf742b751bb82832ace5caf942271/skills/kubernetes-specialist
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/kubernetes-operations/skills/helm-chart-scaffolding
         - affaan-m/ecc@kubernetes-patterns
-        - wshobson/agents@k8s-security-policies
-        - akin-ozer/cc-devops-skills@k8s-yaml-validator
-        - akin-ozer/cc-devops-skills@helm-validator
-        - akin-ozer/cc-devops-skills@k8s-debug
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/kubernetes-operations/skills/k8s-security-policies
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/k8s-yaml-validator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/helm-validator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/k8s-debug
       # Talks to the cluster of the current kubeconfig context.
       mcp:
         kubernetes:
@@ -528,9 +530,9 @@ registry:
       skills:
         - aws/agent-toolkit-for-aws@aws-iam
         - aws/agent-toolkit-for-aws@aws-observability
-        - aws/agent-toolkit-for-aws@creating-secrets-using-best-practices
-        - aws/agent-toolkit-for-aws@aws-secrets-manager
-        - aws/agent-toolkit-for-aws@investigating-incidents-with-aws-devops-agent
+        - https://github.com/aws/agent-toolkit-for-aws/tree/947a491774eed33d2a117bbecea50debc6ac1a20/skills/specialized-skills/security-and-identity-skills/creating-secrets-using-best-practices
+        - https://github.com/aws/agent-toolkit-for-aws/tree/947a491774eed33d2a117bbecea50debc6ac1a20/plugins/aws-core/skills/aws-secrets-manager
+        - https://github.com/aws/agent-toolkit-for-aws/tree/947a491774eed33d2a117bbecea50debc6ac1a20/plugins/aws-agents-for-devsecops/skills/investigating-incidents-with-aws-devops-agent
         - aws/agent-toolkit-for-aws@amazon-bedrock
       # Docs, list prices and architecture diagrams; none reads the account.
       mcp:
@@ -551,9 +553,9 @@ registry:
     azure:
       subagents: [azure-infra-engineer]
       skills:
-        - hashicorp/agent-skills@azure-verified-modules
-        - akin-ozer/cc-devops-skills@azure-pipelines-generator
-        - akin-ozer/cc-devops-skills@azure-pipelines-validator
+        - https://github.com/hashicorp/agent-skills/tree/5e30fa5c867ba6777c37e4206babfd08049c396f/plugins/terraform/skills/azure-verified-modules
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/azure-pipelines-generator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/azure-pipelines-validator
         - microsoft/azure-skills@azure-observability
       # Signs in through the az CLI session; no credential stored here.
       mcp:
@@ -583,8 +585,8 @@ registry:
     # ARGOCD_API_TOKEN from the runtime env.
     gitops:
       skills:
-        - fluxcd/agent-skills@gitops-knowledge
-        - fluxcd/agent-skills@gitops-cluster-debug
+        - https://github.com/fluxcd/agent-skills/tree/25da0ed5bfdd1d8f779ef79c2c7e336781978d87/skills/gitops-knowledge
+        - https://github.com/fluxcd/agent-skills/tree/25da0ed5bfdd1d8f779ef79c2c7e336781978d87/skills/gitops-cluster-debug
       mcp:
         argocd:
           command: bunx
@@ -594,36 +596,36 @@ registry:
     # into it from Terraform, CDK, CloudFormation and ARM.
     pulumi:
       skills:
-        - pulumi/agent-skills@pulumi-best-practices
-        - pulumi/agent-skills@pulumi-component
-        - pulumi/agent-skills@pulumi-esc
-        - pulumi/agent-skills@pulumi-automation-api
-        - pulumi/agent-skills@pulumi-terraform-to-pulumi
-        - pulumi/agent-skills@pulumi-cdk-to-pulumi
-        - pulumi/agent-skills@cloudformation-to-pulumi
-        - pulumi/agent-skills@pulumi-arm-to-pulumi
+        - https://github.com/pulumi/agent-skills/tree/cd1011fcefe65a980b09a4810bf8506df436d572/pulumi/skills/pulumi-best-practices
+        - https://github.com/pulumi/agent-skills/tree/cd1011fcefe65a980b09a4810bf8506df436d572/pulumi/skills/pulumi-component
+        - https://github.com/pulumi/agent-skills/tree/cd1011fcefe65a980b09a4810bf8506df436d572/pulumi/skills/pulumi-esc
+        - https://github.com/pulumi/agent-skills/tree/cd1011fcefe65a980b09a4810bf8506df436d572/pulumi/skills/pulumi-automation-api
+        - https://github.com/pulumi/agent-skills/tree/cd1011fcefe65a980b09a4810bf8506df436d572/migration/skills/pulumi-terraform-to-pulumi
+        - https://github.com/pulumi/agent-skills/tree/cd1011fcefe65a980b09a4810bf8506df436d572/migration/skills/pulumi-cdk-to-pulumi
+        - https://github.com/pulumi/agent-skills/tree/cd1011fcefe65a980b09a4810bf8506df436d572/migration/skills/cloudformation-to-pulumi
+        - https://github.com/pulumi/agent-skills/tree/cd1011fcefe65a980b09a4810bf8506df436d572/migration/skills/pulumi-arm-to-pulumi
     # Data platform, one preset per tool; the data-engineering subagents
     # ride with dbt, the transformation layer most stacks share.
     dbt:
       subagents: [data-engineer, data-analyst, database-optimizer]
       skills:
-        - dbt-labs/dbt-agent-skills@using-dbt-for-analytics-engineering
-        - dbt-labs/dbt-agent-skills@adding-dbt-unit-test
-        - dbt-labs/dbt-agent-skills@building-dbt-semantic-layer
-        - dbt-labs/dbt-agent-skills@working-with-dbt-mesh
-        - dbt-labs/dbt-agent-skills@troubleshooting-dbt-job-errors
-        - wshobson/agents@dbt-transformation-patterns
+        - https://github.com/dbt-labs/dbt-agent-skills/tree/b8facde20b7a92c40ce3e6b86b71c4b92aa44040/skills/dbt/skills/using-dbt-for-analytics-engineering
+        - https://github.com/dbt-labs/dbt-agent-skills/tree/b8facde20b7a92c40ce3e6b86b71c4b92aa44040/skills/dbt/skills/adding-dbt-unit-test
+        - https://github.com/dbt-labs/dbt-agent-skills/tree/b8facde20b7a92c40ce3e6b86b71c4b92aa44040/skills/dbt/skills/building-dbt-semantic-layer
+        - https://github.com/dbt-labs/dbt-agent-skills/tree/b8facde20b7a92c40ce3e6b86b71c4b92aa44040/skills/dbt/skills/working-with-dbt-mesh
+        - https://github.com/dbt-labs/dbt-agent-skills/tree/b8facde20b7a92c40ce3e6b86b71c4b92aa44040/skills/dbt/skills/troubleshooting-dbt-job-errors
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/data-engineering/skills/dbt-transformation-patterns
     airflow:
       skills:
-        - astronomer/agents@airflow
-        - astronomer/agents@migrating-airflow-2-to-3
-        - wshobson/agents@airflow-dag-patterns
+        - https://github.com/astronomer/agents/tree/f38c558471cea720957a9a25adfab7584a8ceb4f/skills/airflow
+        - https://github.com/astronomer/agents/tree/f38c558471cea720957a9a25adfab7584a8ceb4f/skills/migrating-airflow-2-to-3
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/data-engineering/skills/airflow-dag-patterns
     dagster:
       skills: [dagster-io/skills@dagster-expert]
     clickhouse:
       skills:
-        - clickhouse/agent-skills@clickhouse-best-practices
-        - clickhouse/agent-skills@clickhouse-architecture-advisor
+        - https://github.com/clickhouse/agent-skills/tree/1008fd74c0912e2f4819d52324af8a2fac2b74c1/skills/clickhouse-best-practices
+        - https://github.com/clickhouse/agent-skills/tree/1008fd74c0912e2f4819d52324af8a2fac2b74c1/skills/clickhouse-architecture-advisor
     databricks:
       skills:
         - databricks/databricks-agent-skills@databricks-core
@@ -634,24 +636,24 @@ registry:
     temporal:
       skills:
         - temporalio/skill-temporal-developer@temporal-developer
-        - wshobson/agents@temporal-python-testing
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/backend-development/skills/temporal-python-testing
     cicd:
       subagents: [deployment-engineer]
       skills:
-        - wshobson/agents@github-actions-templates
-        - wshobson/agents@gitlab-ci-patterns
-        - wshobson/agents@gitops-workflow
-        - openai/skills@gh-fix-ci
-        - openai/skills@gh-address-comments
-        - addyosmani/agent-skills@ci-cd-and-automation
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cicd-automation/skills/github-actions-templates
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cicd-automation/skills/gitlab-ci-patterns
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/kubernetes-operations/skills/gitops-workflow
+        - https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/gh-fix-ci
+        - https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/gh-address-comments
+        - https://github.com/addyosmani/agent-skills/tree/8c99fa36d90068c82d547f7c12a9d67a3e95f4ee/skills/ci-cd-and-automation
     database:
       subagents: [postgres-pro]
       plugins:
         - redis-development@claude-plugins-official
         - duckdb-skills@claude-plugins-official
       skills:
-        - supabase/agent-skills@supabase-postgres-best-practices
-        - wshobson/agents@sql-optimization-patterns
+        - https://github.com/supabase/agent-skills/tree/c9be0e931b7930f7d02126d04774d904c381e7d7/skills/supabase-postgres-best-practices
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/developer-essentials/skills/sql-optimization-patterns
         - affaan-m/ecc@postgres-patterns
         - affaan-m/ecc@prisma-patterns
         - affaan-m/ecc@redis-patterns
@@ -670,20 +672,20 @@ registry:
     terragrunt:
       subagents: [terragrunt-expert]
       skills:
-        - akin-ozer/cc-devops-skills@terragrunt-generator
-        - akin-ozer/cc-devops-skills@terragrunt-validator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/terragrunt-generator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/terragrunt-validator
     ansible:
       subagents: [devops-engineer]
       skills:
-        - akin-ozer/cc-devops-skills@ansible-validator
-        - akin-ozer/cc-devops-skills@ansible-generator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/ansible-validator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/ansible-generator
     # Workers, Wrangler and Durable Objects, from Cloudflare's own skills repo.
     cloudflare:
       skills:
-        - cloudflare/skills@cloudflare
-        - cloudflare/skills@workers-best-practices
-        - cloudflare/skills@wrangler
-        - cloudflare/skills@durable-objects
+        - https://github.com/cloudflare/skills/tree/5108325ecceabc899c761e07aa617b09c02445ee/skills/cloudflare
+        - https://github.com/cloudflare/skills/tree/5108325ecceabc899c761e07aa617b09c02445ee/skills/workers-best-practices
+        - https://github.com/cloudflare/skills/tree/5108325ecceabc899c761e07aa617b09c02445ee/skills/wrangler
+        - https://github.com/cloudflare/skills/tree/5108325ecceabc899c761e07aa617b09c02445ee/skills/durable-objects
     # Document databases sit apart from the SQL-focused database preset.
     mongodb:
       skills:
@@ -697,11 +699,11 @@ registry:
         - playwright@claude-plugins-official
         - chrome-devtools-mcp@claude-plugins-official
       skills:
-        - currents-dev/playwright-best-practices-skill@playwright-best-practices
-        - wshobson/agents@e2e-testing-patterns
+        - https://github.com/currents-dev/playwright-best-practices-skill/tree/0b75b5835a87de1fdd202ba965f3bc5a27738fdf/playwright-best-practices
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/developer-essentials/skills/e2e-testing-patterns
         - affaan-m/ecc@tdd-workflow
-        - cypress-io/ai-toolkit@cypress-author
-        - vercel-labs/agent-browser@agent-browser
+        - https://github.com/cypress-io/ai-toolkit/tree/e40f7be90bf1c09de6064ddaa36f0cefc3a59df0/skills/cypress-author
+        - https://github.com/vercel-labs/agent-browser/tree/d2dfc782ccdd79d25a9b4f0acced9321789cecb8/skills/agent-browser
     # Skills-only: the 04-quality-security subagents stay in the global
     # baseline, so this opt-in collection does not duplicate them.
     security:
@@ -728,138 +730,141 @@ registry:
         - supply-chain-risk-auditor@trailofbits
         - trailmark@trailofbits
       skills:
-        - openai/skills@security-threat-model
-        - openai/skills@security-best-practices
-        - addyosmani/agent-skills@security-and-hardening
-        - openai/skills@security-ownership-map
-        - wshobson/agents@stride-analysis-patterns
-        - Eyadkelleh/awesome-skills-security@llm-testing
-        - Eyadkelleh/awesome-skills-security@security-fuzzing
-        - Eyadkelleh/awesome-skills-security@security-passwords
-        - Eyadkelleh/awesome-skills-security@security-patterns
-        - Eyadkelleh/awesome-skills-security@security-payloads
-        - Eyadkelleh/awesome-skills-security@security-usernames
+        - https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/security-threat-model
+        - https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/security-best-practices
+        - https://github.com/addyosmani/agent-skills/tree/8c99fa36d90068c82d547f7c12a9d67a3e95f4ee/skills/security-and-hardening
+        - https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/security-ownership-map
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/security-scanning/skills/stride-analysis-patterns
+        - https://github.com/Eyadkelleh/awesome-skills-security/tree/ae26985eb60c2b9e1f1b95f7af0e5c438ff85e6d/skills/llm-testing
+        - https://github.com/Eyadkelleh/awesome-skills-security/tree/ae26985eb60c2b9e1f1b95f7af0e5c438ff85e6d/skills/security-fuzzing
+        - https://github.com/Eyadkelleh/awesome-skills-security/tree/ae26985eb60c2b9e1f1b95f7af0e5c438ff85e6d/skills/security-passwords
+        - https://github.com/Eyadkelleh/awesome-skills-security/tree/ae26985eb60c2b9e1f1b95f7af0e5c438ff85e6d/skills/security-patterns
+        - https://github.com/Eyadkelleh/awesome-skills-security/tree/ae26985eb60c2b9e1f1b95f7af0e5c438ff85e6d/skills/security-payloads
+        - https://github.com/Eyadkelleh/awesome-skills-security/tree/ae26985eb60c2b9e1f1b95f7af0e5c438ff85e6d/skills/security-usernames
         # SecOpsAgentKit's plugin manifest is broken, so take only the tools
         # the secskills plugins do not cover, straight from its repo.
-        - AgentSecOps/SecOpsAgentKit@api-spectral
-        - AgentSecOps/SecOpsAgentKit@sca-blackduck
-        - AgentSecOps/SecOpsAgentKit@vuln-defectdojo
-        - AgentSecOps/SecOpsAgentKit@reviewdog
-        - AgentSecOps/SecOpsAgentKit@sast-horusec
-        - AgentSecOps/SecOpsAgentKit@pytm
-        - AgentSecOps/SecOpsAgentKit@policy-opa
+        - https://github.com/AgentSecOps/SecOpsAgentKit/tree/6e25a4bc57432437889bda57da52ce4c414b9e82/skills/appsec/api-spectral
+        - https://github.com/AgentSecOps/SecOpsAgentKit/tree/6e25a4bc57432437889bda57da52ce4c414b9e82/skills/appsec/sca-blackduck
+        - https://github.com/AgentSecOps/SecOpsAgentKit/tree/6e25a4bc57432437889bda57da52ce4c414b9e82/skills/devsecops/vuln-defectdojo
+        - https://github.com/AgentSecOps/SecOpsAgentKit/tree/6e25a4bc57432437889bda57da52ce4c414b9e82/skills/secsdlc/reviewdog
+        - https://github.com/AgentSecOps/SecOpsAgentKit/tree/6e25a4bc57432437889bda57da52ce4c414b9e82/skills/secsdlc/sast-horusec
+        - https://github.com/AgentSecOps/SecOpsAgentKit/tree/6e25a4bc57432437889bda57da52ce4c414b9e82/skills/threatmodel/pytm
+        - https://github.com/AgentSecOps/SecOpsAgentKit/tree/6e25a4bc57432437889bda57da52ce4c414b9e82/skills/compliance/policy-opa
         # Vets a third-party skill before it is trusted; its scanner is offline.
-        - superagent-ai/skills@skill-security
+        - https://github.com/superagent-ai/skills/tree/0da315b873ed141025fa601ed6e0ebe0c878d5af/skills/skill-security
         # Claude gets these two as trailofbits plugins; listed so the other
         # agents get them too.
-        - trailofbits/skills@audit-context-building
-        - trailofbits/skills@agentic-actions-auditor
-        - Eyadkelleh/awesome-skills-security@security-webshells
+        - https://github.com/trailofbits/skills/tree/149d7b21f4067765b82e67029730b42d228ef4b4/plugins/audit-context-building/skills/audit-context-building
+        - https://github.com/trailofbits/skills/tree/149d7b21f4067765b82e67029730b42d228ef4b4/plugins/agentic-actions-auditor/skills/agentic-actions-auditor
+        - https://github.com/Eyadkelleh/awesome-skills-security/tree/ae26985eb60c2b9e1f1b95f7af0e5c438ff85e6d/skills/security-webshells
         - affaan-m/ecc@security-review
         - affaan-m/ecc@security-scan
-        - wshobson/agents@attack-tree-construction
-        - wshobson/agents@threat-mitigation-mapping
-        - wshobson/agents@security-requirement-extraction
-        - wshobson/agents@sast-configuration
-        - wshobson/agents@pci-compliance
-        - wshobson/agents@gdpr-data-handling
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/security-scanning/skills/attack-tree-construction
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/security-scanning/skills/threat-mitigation-mapping
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/security-scanning/skills/security-requirement-extraction
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/security-scanning/skills/sast-configuration
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/payment-processing/skills/pci-compliance
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/hr-legal-compliance/skills/gdpr-data-handling
         - ghostsecurity/skills@ghost-scan-secrets
-        - github/awesome-copilot@agent-supply-chain
-        - samber/cc-skills@snyk-agent-scan-compliance
+        - https://github.com/github/awesome-copilot/tree/f10fdb8b2660ce85c98f220b2f1ca24653768a5c/skills/agent-supply-chain
+        - https://github.com/samber/cc-skills/tree/50a33836b20f690c668af557bd9ef9d07a8c7ef2/skills/snyk-agent-scan-compliance
         # Claude already has these through the trailofbits plugins; listed so
         # the other agents get them too.
-        - trailofbits/skills@codeql
-        - trailofbits/skills@supply-chain-risk-auditor
+        - https://github.com/trailofbits/skills/tree/149d7b21f4067765b82e67029730b42d228ef4b4/plugins/static-analysis/skills/codeql
+        - https://github.com/trailofbits/skills/tree/149d7b21f4067765b82e67029730b42d228ef4b4/plugins/supply-chain-risk-auditor/skills/supply-chain-risk-auditor
     # Authorized bug-bounty hunting: 83 offensive, dual-use skills from
     # elementalsouls/Claude-BugHunter. Claude loads them as a plugin; the other
     # agents take the skills. Vetted at v2.1 (2026-11-18): no hooks, no MCP.
+    # Each skill is pinned to the commit of v2.1, except the 12 added after it
+    # (hunt-captcha-bypass to recon-scope-triage), pinned to a later commit
+    # that was never vetted: read them before trusting them.
     bugbounty:
       plugins:
         - claude-bughunter@elementalsouls
       skills:
-        - elementalsouls/Claude-BugHunter@apk-redteam-pipeline
-        - elementalsouls/Claude-BugHunter@bb-local-toolkit
-        - elementalsouls/Claude-BugHunter@bb-methodology
-        - elementalsouls/Claude-BugHunter@bug-bounty
-        - elementalsouls/Claude-BugHunter@bugcrowd-reporting
-        - elementalsouls/Claude-BugHunter@cloud-iam-deep
-        - elementalsouls/Claude-BugHunter@enterprise-vpn-attack
-        - elementalsouls/Claude-BugHunter@evidence-hygiene
-        - elementalsouls/Claude-BugHunter@hunt-api-misconfig
-        - elementalsouls/Claude-BugHunter@hunt-aspnet
-        - elementalsouls/Claude-BugHunter@hunt-ato
-        - elementalsouls/Claude-BugHunter@hunt-auth-bypass
-        - elementalsouls/Claude-BugHunter@hunt-brute-force
-        - elementalsouls/Claude-BugHunter@hunt-business-logic
-        - elementalsouls/Claude-BugHunter@hunt-cache-poison
-        - elementalsouls/Claude-BugHunter@hunt-captcha-bypass
-        - elementalsouls/Claude-BugHunter@hunt-cicd
-        - elementalsouls/Claude-BugHunter@hunt-clickjacking
-        - elementalsouls/Claude-BugHunter@hunt-cloud-misconfig
-        - elementalsouls/Claude-BugHunter@hunt-cors
-        - elementalsouls/Claude-BugHunter@hunt-csrf
-        - elementalsouls/Claude-BugHunter@hunt-deserialization
-        - elementalsouls/Claude-BugHunter@hunt-dispatch
-        - elementalsouls/Claude-BugHunter@hunt-dom
-        - elementalsouls/Claude-BugHunter@hunt-exceptional-conditions
-        - elementalsouls/Claude-BugHunter@hunt-file-upload
-        - elementalsouls/Claude-BugHunter@hunt-fintech-graphql
-        - elementalsouls/Claude-BugHunter@hunt-forgot-password
-        - elementalsouls/Claude-BugHunter@hunt-graphql
-        - elementalsouls/Claude-BugHunter@hunt-grpc
-        - elementalsouls/Claude-BugHunter@hunt-host-header
-        - elementalsouls/Claude-BugHunter@hunt-html-injection
-        - elementalsouls/Claude-BugHunter@hunt-http-smuggling
-        - elementalsouls/Claude-BugHunter@hunt-idor
-        - elementalsouls/Claude-BugHunter@hunt-jwt-crypto
-        - elementalsouls/Claude-BugHunter@hunt-k8s
-        - elementalsouls/Claude-BugHunter@hunt-laravel
-        - elementalsouls/Claude-BugHunter@hunt-ldap
-        - elementalsouls/Claude-BugHunter@hunt-lfi
-        - elementalsouls/Claude-BugHunter@hunt-llm-ai
-        - elementalsouls/Claude-BugHunter@hunt-mfa-bypass
-        - elementalsouls/Claude-BugHunter@hunt-misc
-        - elementalsouls/Claude-BugHunter@hunt-nextjs
-        - elementalsouls/Claude-BugHunter@hunt-nodejs
-        - elementalsouls/Claude-BugHunter@hunt-nosqli
-        - elementalsouls/Claude-BugHunter@hunt-ntlm-info
-        - elementalsouls/Claude-BugHunter@hunt-oauth
-        - elementalsouls/Claude-BugHunter@hunt-open-redirect
-        - elementalsouls/Claude-BugHunter@hunt-race-condition
-        - elementalsouls/Claude-BugHunter@hunt-rag-vector
-        - elementalsouls/Claude-BugHunter@hunt-rce
-        - elementalsouls/Claude-BugHunter@hunt-saml
-        - elementalsouls/Claude-BugHunter@hunt-session
-        - elementalsouls/Claude-BugHunter@hunt-shadow-api
-        - elementalsouls/Claude-BugHunter@hunt-sharepoint
-        - elementalsouls/Claude-BugHunter@hunt-source-leak
-        - elementalsouls/Claude-BugHunter@hunt-spa-api
-        - elementalsouls/Claude-BugHunter@hunt-springboot
-        - elementalsouls/Claude-BugHunter@hunt-sqli
-        - elementalsouls/Claude-BugHunter@hunt-ssrf
-        - elementalsouls/Claude-BugHunter@hunt-ssti
-        - elementalsouls/Claude-BugHunter@hunt-subdomain
-        - elementalsouls/Claude-BugHunter@hunt-tls-network
-        - elementalsouls/Claude-BugHunter@hunt-websocket
-        - elementalsouls/Claude-BugHunter@hunt-xss
-        - elementalsouls/Claude-BugHunter@hunt-xxe
-        - elementalsouls/Claude-BugHunter@ios-redteam-pipeline
-        - elementalsouls/Claude-BugHunter@m365-entra-attack
-        - elementalsouls/Claude-BugHunter@meme-coin-audit
-        - elementalsouls/Claude-BugHunter@mid-engagement-ir-detection
-        - elementalsouls/Claude-BugHunter@offensive-osint
-        - elementalsouls/Claude-BugHunter@okta-attack
-        - elementalsouls/Claude-BugHunter@osint-methodology
-        - elementalsouls/Claude-BugHunter@recon-scope-triage
-        - elementalsouls/Claude-BugHunter@redteam-mindset
-        - elementalsouls/Claude-BugHunter@redteam-report-template
-        - elementalsouls/Claude-BugHunter@report-writing
-        - elementalsouls/Claude-BugHunter@security-arsenal
-        - elementalsouls/Claude-BugHunter@supply-chain-attack-recon
-        - elementalsouls/Claude-BugHunter@triage-validation
-        - elementalsouls/Claude-BugHunter@vmware-vcenter-attack
-        - elementalsouls/Claude-BugHunter@web2-recon
-        - elementalsouls/Claude-BugHunter@web3-audit
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/apk-redteam-pipeline
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/bb-local-toolkit
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/bb-methodology
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/bug-bounty
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/bugcrowd-reporting
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/cloud-iam-deep
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/enterprise-vpn-attack
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/evidence-hygiene
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-api-misconfig
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-aspnet
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-ato
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-auth-bypass
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-brute-force
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-business-logic
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-cache-poison
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-captcha-bypass
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-cicd
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-clickjacking
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-cloud-misconfig
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-cors
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-csrf
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-deserialization
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-dispatch
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-dom
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-exceptional-conditions
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-file-upload
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-fintech-graphql
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-forgot-password
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-graphql
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-grpc
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-host-header
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-html-injection
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-http-smuggling
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-idor
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-jwt-crypto
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-k8s
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-laravel
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-ldap
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-lfi
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-llm-ai
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-mfa-bypass
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-misc
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-nextjs
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-nodejs
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-nosqli
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-ntlm-info
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-oauth
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-open-redirect
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-race-condition
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-rag-vector
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-rce
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-saml
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-session
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-shadow-api
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-sharepoint
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-source-leak
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/hunt-spa-api
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-springboot
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-sqli
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-ssrf
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-ssti
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-subdomain
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-tls-network
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-websocket
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-xss
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/hunt-xxe
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/ios-redteam-pipeline
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/m365-entra-attack
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/meme-coin-audit
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/mid-engagement-ir-detection
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/offensive-osint
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/okta-attack
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/osint-methodology
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/8258d29726804f5b954a09c625caedc183f7130d/skills/recon-scope-triage
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/redteam-mindset
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/redteam-report-template
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/report-writing
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/security-arsenal
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/supply-chain-attack-recon
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/triage-validation
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/vmware-vcenter-attack
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/web2-recon
+        - https://github.com/elementalsouls/Claude-BugHunter/tree/e975080a30c11e19ab6adda7c04037adc8163a9c/skills/web3-audit
     # Regulated domains and licensing, apart from the security tooling.
     compliance:
       subagents: [hipaa-compliance, risk-manager, license-engineer, legal-advisor]
@@ -869,17 +874,17 @@ registry:
     datascience:
       subagents: [data-scientist]
       skills:
-        - openai/skills@jupyter-notebook
-        - posit-dev/skills@quarto-authoring
-        - posit-dev/skills@r-tidyverse-style
-        - K-Dense-AI/scientific-agent-skills@statistical-analysis
-        - K-Dense-AI/scientific-agent-skills@exploratory-data-analysis
+        - https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/jupyter-notebook
+        - https://github.com/posit-dev/skills/tree/951959403f4ecc9d0274adf35538fc67153b6f31/quarto/quarto-authoring
+        - https://github.com/posit-dev/skills/tree/951959403f4ecc9d0274adf35538fc67153b6f31/r-lib/r-tidyverse-style
+        - https://github.com/K-Dense-AI/scientific-agent-skills/tree/ec59a29a03d5c40f73ab40878df04860bc00e876/skills/statistical-analysis
+        - https://github.com/K-Dense-AI/scientific-agent-skills/tree/ec59a29a03d5c40f73ab40878df04860bc00e876/skills/exploratory-data-analysis
     # Authoring: LaTeX, Typst, academic writing.
     docs:
       subagents: [technical-writer]
       skills:
-        - bahayonghang/academic-writing-skills@latex-paper-en
-        - lucifer1004/claude-skill-typst@typst
+        - https://github.com/bahayonghang/academic-writing-skills/tree/08a7b34a3575cbd7de9cfd442e01e38dfd9719d6/academic-writing-skills/latex-paper-en
+        - https://github.com/lucifer1004/claude-skill-typst/tree/3540b897b79c053b6cd822e307ffa691066fec19/skills/typst
     # Product and market analysis: experiments, cohorts, competitors, trends;
     # appraising evidence and pulling YouTube transcripts as sources.
     research:
@@ -892,17 +897,17 @@ registry:
         - trend-analyst
         - scientific-literature-researcher
       skills:
-        - K-Dense-AI/scientific-agent-skills@scientific-critical-thinking
-        - intellectronica/agent-skills@youtube-transcript
+        - https://github.com/K-Dense-AI/scientific-agent-skills/tree/ec59a29a03d5c40f73ab40878df04860bc00e876/skills/scientific-critical-thinking
+        - https://github.com/intellectronica/agent-skills/tree/9b0e00ad1b941165e2506545bbfddafa34cf2cb8/skills/youtube-transcript
     # Shell scripting (bash, fish): defensive patterns, shellcheck, bats, and
     # the rules of our own bash-coding-style guide that dyshellint checks.
     shell:
       subagents: [cli-developer]
       skills:
-        - wshobson/agents@bash-defensive-patterns
-        - wshobson/agents@shellcheck-configuration
-        - wshobson/agents@bats-testing-patterns
-        - dynamotn/bash-coding-style@bash-coding-style
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/shell-scripting/skills/bash-defensive-patterns
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/shell-scripting/skills/shellcheck-configuration
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/shell-scripting/skills/bats-testing-patterns
+        - https://github.com/dynamotn/bash-coding-style/tree/ae2453dd935230c69f937ce36170f44e94744532/skills/bash-coding-style
     # Perl (nvim supports it; no VoltAgent subagent, so skills-only).
     perl:
       skills:
@@ -914,139 +919,139 @@ registry:
     # skills live in those language presets. Vetted at bdc5847 (2026-06-27).
     kernel:
       skills:
-        - mohitmishra786/low-level-dev-skills@linux-kernel-architecture
-        - mohitmishra786/low-level-dev-skills@linux-kernel-modules
-        - mohitmishra786/low-level-dev-skills@kernel-internals
-        - mohitmishra786/low-level-dev-skills@kernel-concurrency
-        - mohitmishra786/low-level-dev-skills@kernel-memory-management
-        - mohitmishra786/low-level-dev-skills@kernel-debugging
-        - mohitmishra786/low-level-dev-skills@kernel-debugging-advanced
-        - mohitmishra786/low-level-dev-skills@kernel-testing
-        - mohitmishra786/low-level-dev-skills@kernel-security
-        - mohitmishra786/low-level-dev-skills@device-drivers
-        - mohitmishra786/low-level-dev-skills@writing-char-drivers
-        - mohitmishra786/low-level-dev-skills@bus-drivers-i2c-spi
-        - mohitmishra786/low-level-dev-skills@device-tree
-        - mohitmishra786/low-level-dev-skills@platform-device-model
-        - mohitmishra786/low-level-dev-skills@os-dev-scratch
-        - mohitmishra786/low-level-dev-skills@qemu-for-kernel-development
-        - mohitmishra786/low-level-dev-skills@qemu-kvm
-        - mohitmishra786/low-level-dev-skills@hypervisor-internals
-        - mohitmishra786/low-level-dev-skills@containers-internals
-        - mohitmishra786/low-level-dev-skills@ebpf
-        - mohitmishra786/low-level-dev-skills@ebpf-rust
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/linux-kernel-architecture
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/linux-kernel-modules
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel/kernel-internals
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/kernel-concurrency
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/kernel-memory-management
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel/kernel-debugging
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/kernel-debugging-advanced
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel/kernel-testing
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/security/kernel-security
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel/device-drivers
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/writing-char-drivers
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/bus-drivers-i2c-spi
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/device-tree
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/platform-device-model
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel/os-dev-scratch
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/kernel-dev/qemu-for-kernel-development
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/virtualization/qemu-kvm
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/virtualization/hypervisor-internals
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/virtualization/containers-internals
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/observability/ebpf
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/observability/ebpf-rust
     embedded:
       skills:
-        - mohitmishra786/low-level-dev-skills@baremetal-startup
-        - mohitmishra786/low-level-dev-skills@bootloaders-embedded
-        - mohitmishra786/low-level-dev-skills@linker-scripts
-        - mohitmishra786/low-level-dev-skills@interrupts-and-exceptions-baremetal
-        - mohitmishra786/low-level-dev-skills@mmio-and-bit-manipulation
-        - mohitmishra786/low-level-dev-skills@gpio-baremetal
-        - mohitmishra786/low-level-dev-skills@uart-serial-baremetal
-        - mohitmishra786/low-level-dev-skills@spi-i2c-baremetal
-        - mohitmishra786/low-level-dev-skills@adc-dac-baremetal
-        - mohitmishra786/low-level-dev-skills@dma-baremetal
-        - mohitmishra786/low-level-dev-skills@timers-pwm-baremetal
-        - mohitmishra786/low-level-dev-skills@low-power-embedded
-        - mohitmishra786/low-level-dev-skills@stm32-baremetal
-        - mohitmishra786/low-level-dev-skills@datasheet-and-refmanual-reading
-        - mohitmishra786/low-level-dev-skills@peripherals-from-datasheet
-        - mohitmishra786/low-level-dev-skills@protocol-analysis
-        - mohitmishra786/low-level-dev-skills@resource-optimization-lowend
-        - mohitmishra786/low-level-dev-skills@verilog-basics-for-lowlevel
-        - mohitmishra786/low-level-dev-skills@qemu-embedded-simulation
-        - mohitmishra786/low-level-dev-skills@openocd-jtag
-        - mohitmishra786/low-level-dev-skills@freertos
-        - mohitmishra786/low-level-dev-skills@zephyr
-        - mohitmishra786/low-level-dev-skills@embedded-rust
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/baremetal-startup
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/bootloaders-embedded
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/embedded/linker-scripts
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/interrupts-and-exceptions-baremetal
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/mmio-and-bit-manipulation
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/gpio-baremetal
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/uart-serial-baremetal
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/spi-i2c-baremetal
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/adc-dac-baremetal
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/dma-baremetal
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/timers-pwm-baremetal
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/low-power-embedded
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/stm32-baremetal
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/datasheet-and-refmanual-reading
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/baremetal/peripherals-from-datasheet
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/qemu/protocol-analysis
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/qemu/resource-optimization-lowend
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/qemu/verilog-basics-for-lowlevel
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/qemu/qemu-embedded-simulation
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/embedded/openocd-jtag
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/embedded/freertos
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/embedded/zephyr
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/embedded/embedded-rust
     # Compilers, build systems and binary tooling for C/C++-family code.
     toolchain:
       skills:
-        - mohitmishra786/low-level-dev-skills@gcc
-        - mohitmishra786/low-level-dev-skills@cross-gcc
-        - mohitmishra786/low-level-dev-skills@clang
-        - mohitmishra786/low-level-dev-skills@msvc-cl
-        - mohitmishra786/low-level-dev-skills@llvm
-        - mohitmishra786/low-level-dev-skills@llvm-ir-and-passes
-        - mohitmishra786/low-level-dev-skills@llvm-passes
-        - mohitmishra786/low-level-dev-skills@mlir
-        - mohitmishra786/low-level-dev-skills@compiler-frontend
-        - mohitmishra786/low-level-dev-skills@code-generation-and-backends
-        - mohitmishra786/low-level-dev-skills@compiler-optimizations-deep
-        - mohitmishra786/low-level-dev-skills@jit-compilation
-        - mohitmishra786/low-level-dev-skills@interpreters
-        - mohitmishra786/low-level-dev-skills@pgo
-        - mohitmishra786/low-level-dev-skills@make
-        - mohitmishra786/low-level-dev-skills@cmake
-        - mohitmishra786/low-level-dev-skills@meson
-        - mohitmishra786/low-level-dev-skills@ninja
-        - mohitmishra786/low-level-dev-skills@bazel
-        - mohitmishra786/low-level-dev-skills@conan-vcpkg
-        - mohitmishra786/low-level-dev-skills@build-acceleration
-        - mohitmishra786/low-level-dev-skills@include-what-you-use
-        - mohitmishra786/low-level-dev-skills@static-analysis
-        - mohitmishra786/low-level-dev-skills@binutils
-        - mohitmishra786/low-level-dev-skills@elf-inspection
-        - mohitmishra786/low-level-dev-skills@dynamic-linking
-        - mohitmishra786/low-level-dev-skills@linkers-lto
-        - mohitmishra786/low-level-dev-skills@carbon-lang
-        - mohitmishra786/low-level-dev-skills@hare-lang
-        - mohitmishra786/low-level-dev-skills@wasm-emscripten
-        - mohitmishra786/low-level-dev-skills@wasm-wasmtime
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compilers/gcc
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compilers/cross-gcc
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compilers/clang
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compilers/msvc-cl
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compilers/llvm
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compiler-internals/llvm-ir-and-passes
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compiler-internals/llvm-passes
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compiler-internals/mlir
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compiler-internals/compiler-frontend
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compiler-internals/code-generation-and-backends
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compiler-internals/compiler-optimizations-deep
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compiler-internals/jit-compilation
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/interpreters
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/compilers/pgo
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/make
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/cmake
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/meson
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/ninja
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/bazel
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/conan-vcpkg
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/build-acceleration
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/include-what-you-use
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/build-systems/static-analysis
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/binaries/binutils
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/binaries/elf-inspection
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/binaries/dynamic-linking
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/binaries/linkers-lto
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/languages/carbon-lang
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/languages/hare-lang
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/runtimes/wasm-emscripten
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/runtimes/wasm-wasmtime
     # Debuggers, profilers and the hardware behaviour behind the numbers.
     profiling:
       skills:
-        - mohitmishra786/low-level-dev-skills@gdb
-        - mohitmishra786/low-level-dev-skills@lldb
-        - mohitmishra786/low-level-dev-skills@core-dumps
-        - mohitmishra786/low-level-dev-skills@debug-optimized-builds
-        - mohitmishra786/low-level-dev-skills@dwarf-debug-format
-        - mohitmishra786/low-level-dev-skills@concurrency-debugging
-        - mohitmishra786/low-level-dev-skills@sanitizers
-        - mohitmishra786/low-level-dev-skills@valgrind
-        - mohitmishra786/low-level-dev-skills@heaptrack
-        - mohitmishra786/low-level-dev-skills@strace-ltrace
-        - mohitmishra786/low-level-dev-skills@linux-perf
-        - mohitmishra786/low-level-dev-skills@flamegraphs
-        - mohitmishra786/low-level-dev-skills@hardware-counters
-        - mohitmishra786/low-level-dev-skills@intel-vtune-amd-uprof
-        - mohitmishra786/low-level-dev-skills@cpu-pipelines-and-hazards
-        - mohitmishra786/low-level-dev-skills@branch-prediction-and-speculation
-        - mohitmishra786/low-level-dev-skills@memory-hierarchy-and-caches
-        - mohitmishra786/low-level-dev-skills@virtual-memory-paging-and-tlb
-        - mohitmishra786/low-level-dev-skills@abi-and-calling-conventions
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/debuggers/gdb
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/debuggers/lldb
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/debuggers/core-dumps
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/debuggers/debug-optimized-builds
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/debuggers/dwarf-debug-format
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/debuggers/concurrency-debugging
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/runtimes/sanitizers
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/profilers/valgrind
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/profilers/heaptrack
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/profilers/strace-ltrace
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/profilers/linux-perf
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/profilers/flamegraphs
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/profilers/hardware-counters
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/profilers/intel-vtune-amd-uprof
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/computer-architecture/cpu-pipelines-and-hazards
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/computer-architecture/branch-prediction-and-speculation
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/computer-architecture/memory-hierarchy-and-caches
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/computer-architecture/virtual-memory-paging-and-tlb
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/computer-architecture/abi-and-calling-conventions
     # Hand-tuned systems code: assembly, SIMD, memory, I/O and HPC.
     lowlevel:
       skills:
-        - mohitmishra786/low-level-dev-skills@assembly-x86
-        - mohitmishra786/low-level-dev-skills@assembly-arm
-        - mohitmishra786/low-level-dev-skills@assembly-riscv
-        - mohitmishra786/low-level-dev-skills@riscv-privileged
-        - mohitmishra786/low-level-dev-skills@arm-sve
-        - mohitmishra786/low-level-dev-skills@apple-silicon
-        - mohitmishra786/low-level-dev-skills@simd-intrinsics
-        - mohitmishra786/low-level-dev-skills@cpu-cache-opt
-        - mohitmishra786/low-level-dev-skills@memory-model
-        - mohitmishra786/low-level-dev-skills@custom-allocators
-        - mohitmishra786/low-level-dev-skills@numa-programming
-        - mohitmishra786/low-level-dev-skills@io-uring
-        - mohitmishra786/low-level-dev-skills@af-xdp
-        - mohitmishra786/low-level-dev-skills@dpdk
-        - mohitmishra786/low-level-dev-skills@rdma-verbs
-        - mohitmishra786/low-level-dev-skills@mpi
-        - mohitmishra786/low-level-dev-skills@openmp
-        - mohitmishra786/low-level-dev-skills@binary-hardening
-        - mohitmishra786/low-level-dev-skills@fuzzing
-        - mohitmishra786/low-level-dev-skills@reverse-engineering
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/assembly-x86
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/assembly-arm
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/assembly-riscv
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/platform/riscv-privileged
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/platform/arm-sve
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/platform/apple-silicon
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/simd-intrinsics
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/cpu-cache-opt
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/low-level-programming/memory-model
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/allocators/custom-allocators
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/allocators/numa-programming
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/async-io/io-uring
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/async-io/af-xdp
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/async-io/dpdk
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/hpc/rdma-verbs
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/hpc/mpi
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/hpc/openmp
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/runtimes/binary-hardening
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/runtimes/fuzzing
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/security/reverse-engineering
     gpu:
       skills:
-        - mohitmishra786/low-level-dev-skills@cuda
-        - mohitmishra786/low-level-dev-skills@cuda-debugging
-        - mohitmishra786/low-level-dev-skills@cuda-profiling
-        - mohitmishra786/low-level-dev-skills@gpu-memory-model
-        - mohitmishra786/low-level-dev-skills@hip-rocm
-        - mohitmishra786/low-level-dev-skills@triton-lang
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/gpu/cuda
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/gpu/cuda-debugging
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/gpu/cuda-profiling
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/gpu/gpu-memory-model
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/gpu/hip-rocm
+        - https://github.com/mohitmishra786/low-level-dev-skills/tree/18f29518a47fda070e6ec1268cb577692fae9a10/skills/gpu/triton-lang
     # REA (rea.tools): binaries, Electron/JS, .NET and websites through MCP.
     # Native analysis needs Hopper, Ghidra, IDA or Kuna installed; Linux
     # needs a procps `ps` on PATH.
@@ -1065,84 +1070,84 @@ registry:
     mobile:
       subagents: [mobile-developer]
       skills:
-        - expo/skills@expo-native-ui
-        - expo/skills@expo-router
-        - expo/skills@expo-data-fetching
-        - expo/skills@expo-upgrade
-        - callstackincubator/agent-skills@react-native-best-practices
+        - https://github.com/expo/skills/tree/88d9bd79f3fa8452a778fbac65bae162c0b32ce4/plugins/expo/skills/expo-native-ui
+        - https://github.com/expo/skills/tree/88d9bd79f3fa8452a778fbac65bae162c0b32ce4/plugins/expo/skills/expo-router
+        - https://github.com/expo/skills/tree/88d9bd79f3fa8452a778fbac65bae162c0b32ce4/plugins/expo/skills/expo-data-fetching
+        - https://github.com/expo/skills/tree/88d9bd79f3fa8452a778fbac65bae162c0b32ce4/plugins/expo/skills/expo-upgrade
+        - https://github.com/callstackincubator/agent-skills/tree/59e9d17446a248b21d86f078fcd0bd2d36db1ca4/skills/react-native-best-practices
     graphql:
       subagents: [graphql-architect]
       skills:
-        - apollographql/skills@graphql-schema
-        - apollographql/skills@graphql-operations
-        - apollographql/skills@apollo-server
-        - apollographql/skills@apollo-client
+        - https://github.com/apollographql/skills/tree/9dda1397730370aeb8df4ff8f2015c34c86b5003/skills/graphql-schema
+        - https://github.com/apollographql/skills/tree/9dda1397730370aeb8df4ff8f2015c34c86b5003/skills/graphql-operations
+        - https://github.com/apollographql/skills/tree/9dda1397730370aeb8df4ff8f2015c34c86b5003/skills/apollo-server
+        - https://github.com/apollographql/skills/tree/9dda1397730370aeb8df4ff8f2015c34c86b5003/skills/apollo-client
     realtime:
       subagents: [websocket-engineer, webhook-engineer]
     # Games: engine-neutral design in gamedev, then one preset per engine.
     gamedev:
       subagents: [game-developer]
       skills:
-        - gamedev-skills/awesome-gamedev-agent-skills@game-feel
-        - gamedev-skills/awesome-gamedev-agent-skills@game-ai
-        - gamedev-skills/awesome-gamedev-agent-skills@level-design
-        - gamedev-skills/awesome-gamedev-agent-skills@save-systems
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/disciplines/game-feel
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/disciplines/game-ai
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/disciplines/level-design
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/disciplines/save-systems
     godot:
       skills:
-        - wshobson/agents@godot-gdscript-patterns
-        - gamedev-skills/awesome-gamedev-agent-skills@godot-gdscript
-        - gamedev-skills/awesome-gamedev-agent-skills@godot-nodes-scenes
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/game-development/skills/godot-gdscript-patterns
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/godot/godot-gdscript
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/godot/godot-nodes-scenes
     unity:
       skills:
-        - unity-technologies/skills@unity-cli
-        - unity-technologies/skills@unity-package-management
-        - wshobson/agents@unity-ecs-patterns
-        - gamedev-skills/awesome-gamedev-agent-skills@unity-csharp-scripting
+        - https://github.com/unity-technologies/skills/tree/8974588c0d76745c7eb9bee530b4053451bfc1aa/skills/unity-cli
+        - https://github.com/unity-technologies/skills/tree/8974588c0d76745c7eb9bee530b4053451bfc1aa/skills/unity-package-management
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/game-development/skills/unity-ecs-patterns
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/unity/unity-csharp-scripting
     unreal:
       skills:
-        - gamedev-skills/awesome-gamedev-agent-skills@unreal-cpp-gameplay
-        - gamedev-skills/awesome-gamedev-agent-skills@unreal-blueprints
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/unreal/unreal-cpp-gameplay
+        - https://github.com/gamedev-skills/awesome-gamedev-agent-skills/tree/c6ca6c41c839b68319ffc08430b99ab768debc32/skills/unreal/unreal-blueprints
     bevy:
       skills: [gamedev-skills/awesome-gamedev-agent-skills@bevy-ecs]
     # Geospatial: PostGIS and GeoPandas in gis, the Mapbox web SDK apart.
     gis:
       skills:
-        - postgis/postgis@postgis
-        - K-Dense-AI/scientific-agent-skills@geopandas
+        - https://github.com/postgis/postgis/tree/58fb58832c49c47cf5834f71eaec7e5dea49631f/doc/skills/postgis
+        - https://github.com/K-Dense-AI/scientific-agent-skills/tree/ec59a29a03d5c40f73ab40878df04860bc00e876/skills/geopandas
     mapbox:
       skills:
-        - mapbox/mapbox-agent-skills@mapbox-web-integration-patterns
-        - mapbox/mapbox-agent-skills@mapbox-geospatial-operations
-        - mapbox/mapbox-agent-skills@mapbox-data-visualization-patterns
+        - https://github.com/mapbox/mapbox-agent-skills/tree/84d991e36ad5ac7195796ff9e9fdc378155f470c/skills/mapbox-web-integration-patterns
+        - https://github.com/mapbox/mapbox-agent-skills/tree/84d991e36ad5ac7195796ff9e9fdc378155f470c/skills/mapbox-geospatial-operations
+        - https://github.com/mapbox/mapbox-agent-skills/tree/84d991e36ad5ac7195796ff9e9fdc378155f470c/skills/mapbox-data-visualization-patterns
     # Error tracking and vendor-neutral telemetry, one preset per tool.
     sentry:
       skills:
-        - getsentry/sentry-for-ai@sentry-sdk-setup
-        - getsentry/sentry-for-ai@sentry-fix-issues
-        - getsentry/sentry-for-ai@sentry-sdk-upgrade
+        - https://github.com/getsentry/sentry-for-ai/tree/149b144b2ba2ad2987ac637a811d82e48c0b2560/skills-legacy/sentry-sdk-setup
+        - https://github.com/getsentry/sentry-for-ai/tree/149b144b2ba2ad2987ac637a811d82e48c0b2560/skills-legacy/sentry-fix-issues
+        - https://github.com/getsentry/sentry-for-ai/tree/149b144b2ba2ad2987ac637a811d82e48c0b2560/skills-legacy/sentry-sdk-upgrade
     opentelemetry:
       skills:
-        - ollygarden/opentelemetry-agent-skills@otel-collector
-        - ollygarden/opentelemetry-agent-skills@otel-semantic-conventions
-        - ollygarden/opentelemetry-agent-skills@otel-ottl
-        - addyosmani/agent-skills@observability-and-instrumentation
+        - https://github.com/ollygarden/opentelemetry-agent-skills/tree/c902846a75eef3b94384abee5e20107008698e92/skills/otel-collector
+        - https://github.com/ollygarden/opentelemetry-agent-skills/tree/c902846a75eef3b94384abee5e20107008698e92/skills/otel-semantic-conventions
+        - https://github.com/ollygarden/opentelemetry-agent-skills/tree/c902846a75eef3b94384abee5e20107008698e92/skills/otel-ottl
+        - https://github.com/addyosmani/agent-skills/tree/8c99fa36d90068c82d547f7c12a9d67a3e95f4ee/skills/observability-and-instrumentation
     # SLOs, incidents, on-call and the Prometheus/Loki stack; Grafana itself
     # has its own preset. prometheus reads PROMETHEUS_URL from the runtime env.
     sre:
       subagents: [sre-engineer, incident-responder, devops-incident-responder]
       skills:
-        - wshobson/agents@slo-implementation
-        - wshobson/agents@incident-runbook-templates
-        - wshobson/agents@postmortem-writing
-        - wshobson/agents@on-call-handoff-patterns
-        - wshobson/agents@prometheus-configuration
-        - wshobson/agents@grafana-dashboards
-        - wshobson/agents@distributed-tracing
-        - akin-ozer/cc-devops-skills@promql-generator
-        - akin-ozer/cc-devops-skills@promql-validator
-        - akin-ozer/cc-devops-skills@logql-generator
-        - akin-ozer/cc-devops-skills@loki-config-generator
-        - anthropics/knowledge-work-plugins@incident-response
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/observability-monitoring/skills/slo-implementation
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/incident-response/skills/incident-runbook-templates
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/incident-response/skills/postmortem-writing
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/incident-response/skills/on-call-handoff-patterns
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/observability-monitoring/skills/prometheus-configuration
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/observability-monitoring/skills/grafana-dashboards
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/observability-monitoring/skills/distributed-tracing
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/promql-generator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/promql-validator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/logql-generator
+        - https://github.com/akin-ozer/cc-devops-skills/tree/276af751e659315aaf56d3ad13d7c26f4e72e28a/devops-skills-plugin/skills/loki-config-generator
+        - https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/engineering/skills/incident-response
       mcp:
         prometheus:
           command: uvx
@@ -1153,12 +1158,12 @@ registry:
     # and GRAFANA_SERVICE_ACCOUNT_TOKEN from the runtime env.
     grafana:
       skills:
-        - grafana/skills@dashboarding
-        - grafana/skills@promql
-        - grafana/skills@loki
-        - grafana/skills@alerting-irm
-        - grafana/skills@alloy
-        - grafana/skills@opentelemetry
+        - https://github.com/grafana/skills/tree/8fb72a527961f05e708f53d2a0500709e12d7970/skills/grafana-core/dashboarding
+        - https://github.com/grafana/skills/tree/8fb72a527961f05e708f53d2a0500709e12d7970/skills/grafana-core/promql
+        - https://github.com/grafana/skills/tree/8fb72a527961f05e708f53d2a0500709e12d7970/skills/grafana-lgtm/loki
+        - https://github.com/grafana/skills/tree/8fb72a527961f05e708f53d2a0500709e12d7970/skills/grafana-core/alerting-irm
+        - https://github.com/grafana/skills/tree/8fb72a527961f05e708f53d2a0500709e12d7970/skills/grafana-core/alloy
+        - https://github.com/grafana/skills/tree/8fb72a527961f05e708f53d2a0500709e12d7970/skills/grafana-core/opentelemetry
       mcp:
         grafana:
           command: docker
@@ -1185,19 +1190,19 @@ registry:
     platform:
       subagents: [platform-engineer, network-engineer, dx-optimizer, build-engineer]
       skills:
-        - wshobson/agents@istio-traffic-management
-        - wshobson/agents@linkerd-patterns
-        - wshobson/agents@mtls-configuration
-        - wshobson/agents@service-mesh-observability
-        - wshobson/agents@deployment-pipeline-design
-        - wshobson/agents@secrets-management
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cloud-infrastructure/skills/istio-traffic-management
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cloud-infrastructure/skills/linkerd-patterns
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cloud-infrastructure/skills/mtls-configuration
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cloud-infrastructure/skills/service-mesh-observability
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cicd-automation/skills/deployment-pipeline-design
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cicd-automation/skills/secrets-management
     # Cloud cost and multi-cloud placement. cost-explorer queries the billing
     # API with the AWS credentials of the runtime env, and is billed per call.
     finops:
       skills:
-        - wshobson/agents@cost-optimization
-        - wshobson/agents@multi-cloud-architecture
-        - wshobson/agents@hybrid-cloud-networking
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cloud-infrastructure/skills/cost-optimization
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cloud-infrastructure/skills/multi-cloud-architecture
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/cloud-infrastructure/skills/hybrid-cloud-networking
       mcp:
         aws-cost-explorer:
           command: uvx
@@ -1206,11 +1211,11 @@ registry:
     # Distributed-system patterns beyond the baseline architecture skills.
     architecture:
       skills:
-        - wshobson/agents@microservices-patterns
-        - wshobson/agents@saga-orchestration
-        - wshobson/agents@cqrs-implementation
-        - wshobson/agents@event-store-design
-        - wshobson/agents@projection-patterns
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/backend-development/skills/microservices-patterns
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/backend-development/skills/saga-orchestration
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/backend-development/skills/cqrs-implementation
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/backend-development/skills/event-store-design
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/backend-development/skills/projection-patterns
     # Business analysis and product ownership: PRDs, stories, roadmaps, and
     # BPMN/UML process models. The trackers have their own presets.
     product:
@@ -1223,30 +1228,30 @@ registry:
         - backlog-grooming
         - assumption-mapping
       skills:
-        - phuryn/pm-skills@create-prd
-        - phuryn/pm-skills@user-stories
-        - phuryn/pm-skills@job-stories
-        - phuryn/pm-skills@prioritize-features
-        - phuryn/pm-skills@outcome-roadmap
-        - phuryn/pm-skills@stakeholder-map
-        - phuryn/pm-skills@pre-mortem
-        - phuryn/pm-skills@north-star-metric
-        - phuryn/pm-skills@opportunity-solution-tree
-        - phuryn/pm-skills@sprint-plan
-        - phuryn/pm-skills@test-scenarios
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/create-prd
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/user-stories
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/job-stories
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-product-discovery/skills/prioritize-features
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/outcome-roadmap
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/stakeholder-map
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/pre-mortem
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-marketing-growth/skills/north-star-metric
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-product-discovery/skills/opportunity-solution-tree
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/sprint-plan
+        - https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/test-scenarios
         - deanpeters/Product-Manager-Skills@user-story-splitting
         - deanpeters/Product-Manager-Skills@user-story-mapping
         - deanpeters/Product-Manager-Skills@epic-breakdown-advisor
         - deanpeters/Product-Manager-Skills@prd-development
         - deanpeters/Product-Manager-Skills@problem-statement
-        - wshobson/agents@kpi-dashboard-design
-        - wshobson/agents@data-storytelling
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/business-analytics/skills/kpi-dashboard-design
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/business-analytics/skills/data-storytelling
         - mattpocock/skills@to-prd
-        - refoundai/lenny-skills@writing-prds
+        - https://github.com/refoundai/lenny-skills/tree/13598cc54e09399bc1bc1398b0fca284110efb2f/skills/writing-prds
         - refoundai/lenny-skills@setting-okrs-goals
-        - github/awesome-copilot@breakdown-feature-prd
-        - github/awesome-copilot@create-github-issues-for-unmet-specification-requirements
-        - jwynia/agent-skills@requirements-analysis
+        - https://github.com/github/awesome-copilot/tree/f10fdb8b2660ce85c98f220b2f1ca24653768a5c/skills/breakdown-feature-prd
+        - https://github.com/github/awesome-copilot/tree/f10fdb8b2660ce85c98f220b2f1ca24653768a5c/skills/create-github-issues-for-unmet-specification-requirements
+        - https://github.com/jwynia/agent-skills/tree/e02ec7e226a6e4f8419fd3b88a1d8e472d421b32/skills/tech/development/architecture/requirements-analysis
         - markdown-viewer/skills@bpmn
         - markdown-viewer/skills@uml
     # Prose and content: co-authoring docs, copy, editing out AI tells,
@@ -1254,13 +1259,13 @@ registry:
     writing:
       subagents: [content-marketer]
       skills:
-        - anthropics/skills@doc-coauthoring
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/doc-coauthoring
         - blader/humanizer@humanizer
-        - ComposioHQ/awesome-claude-skills@content-research-writer
-        - coreyhaines31/marketingskills@copywriting
-        - coreyhaines31/marketingskills@copy-editing
-        - coreyhaines31/marketingskills@content-strategy
-        - coreyhaines31/marketingskills@social
+        - https://github.com/ComposioHQ/awesome-claude-skills/tree/be2a406907dbc61b73e6827ded415c96139d13a2/content-research-writer
+        - https://github.com/coreyhaines31/marketingskills/tree/5b2b400eec1e7e1cec76245a715d0b0d4fd2a9c1/skills/copywriting
+        - https://github.com/coreyhaines31/marketingskills/tree/5b2b400eec1e7e1cec76245a715d0b0d4fd2a9c1/skills/copy-editing
+        - https://github.com/coreyhaines31/marketingskills/tree/5b2b400eec1e7e1cec76245a715d0b0d4fd2a9c1/skills/content-strategy
+        - https://github.com/coreyhaines31/marketingskills/tree/5b2b400eec1e7e1cec76245a715d0b0d4fd2a9c1/skills/social
     # Growth marketing from coreyhaines31/marketingskills: SEO, conversion,
     # launch and pricing, email and ads, analytics and competitors. Its
     # channel-specific skills (sms, aso, video, events, PR, outreach) are left out.
@@ -1273,22 +1278,22 @@ registry:
     # Office deliverables (Word, PowerPoint, Excel, PDF) from Anthropic.
     office:
       skills:
-        - anthropics/skills@docx
-        - anthropics/skills@pptx
-        - anthropics/skills@xlsx
-        - anthropics/skills@pdf
-        - anthropics/skills@internal-comms
-        - ComposioHQ/awesome-claude-skills@meeting-insights-analyzer
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/docx
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/pptx
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/xlsx
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/pdf
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/internal-comms
+        - https://github.com/ComposioHQ/awesome-claude-skills/tree/be2a406907dbc61b73e6827ded415c96139d13a2/meeting-insights-analyzer
     # Google Workspace through Google's own gws CLI; the user installs it and
     # runs its OAuth sign-in, which keeps the token itself.
     gworkspace:
       skills:
-        - googleworkspace/cli@gws-shared
-        - googleworkspace/cli@gws-gmail
-        - googleworkspace/cli@gws-drive
-        - googleworkspace/cli@gws-calendar
-        - googleworkspace/cli@gws-sheets
-        - googleworkspace/cli@gws-docs
+        - https://github.com/googleworkspace/cli/tree/cd3697e07eb520056dcf142d0c7439bbb9ba32e9/skills/gws-shared
+        - https://github.com/googleworkspace/cli/tree/cd3697e07eb520056dcf142d0c7439bbb9ba32e9/skills/gws-gmail
+        - https://github.com/googleworkspace/cli/tree/cd3697e07eb520056dcf142d0c7439bbb9ba32e9/skills/gws-drive
+        - https://github.com/googleworkspace/cli/tree/cd3697e07eb520056dcf142d0c7439bbb9ba32e9/skills/gws-calendar
+        - https://github.com/googleworkspace/cli/tree/cd3697e07eb520056dcf142d0c7439bbb9ba32e9/skills/gws-sheets
+        - https://github.com/googleworkspace/cli/tree/cd3697e07eb520056dcf142d0c7439bbb9ba32e9/skills/gws-docs
     # Issue trackers and wikis, one preset per tool. Hosted servers go through
     # mcp-remote, which runs the OAuth sign-in and keeps the token itself.
     jira:
@@ -1308,9 +1313,9 @@ registry:
           env: {}
     notion:
       skills:
-        - makenotion/skills@notion-cli
-        - openai/skills@notion-spec-to-implementation
-        - openai/skills@notion-meeting-intelligence
+        - https://github.com/makenotion/skills/tree/10e976aa591995fd60c75ef13beba1a8aa827fcc/skills/notion-cli
+        - https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/notion-spec-to-implementation
+        - https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/notion-meeting-intelligence
       mcp:
         notion:
           command: bunx
@@ -1334,11 +1339,11 @@ registry:
         - mcp-server-dev@claude-plugins-official
         - agent-sdk-dev@claude-plugins-official
       skills:
-        - wshobson/agents@rag-implementation
-        - wshobson/agents@llm-evaluation
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/llm-application-dev/skills/rag-implementation
+        - https://github.com/wshobson/agents/tree/91ff75307f5668916f3eb77d5ba556266c961376/plugins/llm-application-dev/skills/llm-evaluation
         - axiomhq/skills@writing-evals
         - arize-ai/phoenix@phoenix-evals
-        - anthropics/skills@claude-api
+        - https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/claude-api
         - openai/skills@openai-docs
     langchain:
       skills:
@@ -1348,9 +1353,9 @@ registry:
         - langchain-ai/langchain-skills@langchain-rag
     huggingface:
       skills:
-        - huggingface/skills@huggingface-datasets
-        - huggingface/skills@huggingface-llm-trainer
-        - huggingface/skills@huggingface-community-evals
+        - https://github.com/huggingface/skills/tree/5291c2b9365e06b175dc04817610c778623f4836/skills/huggingface-datasets
+        - https://github.com/huggingface/skills/tree/5291c2b9365e06b175dc04817610c778623f4836/skills/huggingface-llm-trainer
+        - https://github.com/huggingface/skills/tree/5291c2b9365e06b175dc04817610c778623f4836/skills/huggingface-community-evals
     # Leftover VoltAgent developer-experience agents, opt in per project.
     modernization:
       subagents: [legacy-modernizer, refactoring-specialist, dependency-manager, git-workflow-manager]
@@ -1373,7 +1378,7 @@ registry:
       plugins:
         - understand-anything@understand-anything
       skills:
-        - tt-a1i/archify@archify
+        - https://github.com/tt-a1i/archify/tree/8509a3d63e763b4d454ea9aafa1f939545fcb1ea/archify
     # Spec-driven changes (propose, apply, archive under openspec/). The skills
     # drive the `openspec` CLI (dytoy openspec); run `openspec init` in the
     # project first. OPENSPEC_TELEMETRY=0 turns its usage stats off.
