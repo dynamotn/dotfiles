@@ -538,3 +538,19 @@ function _inode {
   run binary_download::verify_sha256 tool "${asset}" "https://example.test/dl/asset" "${digest}"
   assert_failure
 }
+
+@test "a tool whose after-hook fails is removed, so the next run installs it again" {
+  function dytoy::get_yaml { printf 'null\n'; }
+  function dybatpho::curl_download { printf 'binary-data' > "$2"; }
+  # The after-hook stops the run, as a refused `sudo setcap` does.
+  function dytoy::run_hook { [[ "$2" != "after" ]] || exit 1; }
+  mkdir -p "${BATS_TEST_TMPDIR}/out"
+  run binary_download::download_and_extract sample "${BATS_TEST_TMPDIR}/out" "https://example.com/tool" "v1.0.0"
+  assert_failure
+  assert_file_not_exist "${BATS_TEST_TMPDIR}/out/sample"
+  # A hook that goes through keeps it.
+  function dytoy::run_hook { :; }
+  run binary_download::download_and_extract sample "${BATS_TEST_TMPDIR}/out" "https://example.com/tool" "v1.0.0"
+  assert_success
+  assert_file_exist "${BATS_TEST_TMPDIR}/out/sample"
+}

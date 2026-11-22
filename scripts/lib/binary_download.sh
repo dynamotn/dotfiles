@@ -408,7 +408,30 @@ function binary_download::download_and_extract {
     dybatpho::dry_run chmod +x "${output_path}"
   fi
 
+  # A tool whose after-hook stops the run (a `setcap` refused) must not look
+  # installed: the next run would find the command and never run the hook.
+  # Until the hook is through, leaving takes the command away.
+  if ! dybatpho::is true "${DRY_RUN}" && [[ -f "${output_path}" || -L "${output_path}" ]]; then
+    __BINARY_DOWNLOAD_PENDING="${output_path}"
+    if [[ -z "${__BINARY_DOWNLOAD_TRAPPED:-}" ]]; then
+      dybatpho::trap __binary_download_abandon EXIT
+      __BINARY_DOWNLOAD_TRAPPED=1
+    fi
+  fi
   dytoy::run_hook "${name}" after "" "${version}"
+  __BINARY_DOWNLOAD_PENDING=""
 
   dybatpho::success "Installed binary tool: ${name}"
+}
+
+#######################################
+# @description Remove the command whose after-hook did not finish, on exit
+# @noargs
+# @env __BINARY_DOWNLOAD_PENDING string The command installed, empty once its hook is through
+#######################################
+function __binary_download_abandon {
+  [[ -n "${__BINARY_DOWNLOAD_PENDING:-}" ]] || return 0
+  dybatpho::warn "The after-hook of ${__BINARY_DOWNLOAD_PENDING##*/} failed;" \
+    "removing it so the next run installs it again"
+  rm -f -- "${__BINARY_DOWNLOAD_PENDING}"
 }
