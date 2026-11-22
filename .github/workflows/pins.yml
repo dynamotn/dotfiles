@@ -1,8 +1,8 @@
 name: Pins
 
-# Renovate bumps the versions and commits of age, yq and the delta theme, but
-# not the sha256 pinned beside them: a bump alone would stop setup.sh or every
-# chezmoi apply. This downloads each pinned asset and fails on a stale digest,
+# Renovate bumps the versions and commits of age, yq, the externals fetched at
+# a commit and the tridactyl installer, but not the sha256 pinned beside them:
+# a bump alone would stop setup.sh or every chezmoi apply. This downloads each pinned asset and fails on a stale digest,
 # printing the one to write. Only when a pin, or the check, changes: it
 # downloads about 25 MB.
 on:
@@ -13,7 +13,8 @@ on:
       - scripts/pins.sh
       - scripts/lib/pins.sh
       - home/.chezmoitemplates/dytoy/age.yaml.tmpl
-      - home/.chezmoiexternals/catppuccin.yaml.tmpl
+      - home/.chezmoiexternals/*.tmpl
+      - home/.chezmoiscripts/run_once_after_03-setup-tridactyl.sh.tmpl
       - .github/workflows/pins.yml
   pull_request:
     paths: *pins

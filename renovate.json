@@ -108,6 +108,44 @@
       "packageNameTemplate": "https://github.com/Happ1ness-dev/bun-termux",
       "currentValueTemplate": "main",
       "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "description": "Scripts and files the externals fetch at a commit of a master branch, each with its sha256; checked by the pins workflow.",
+      "managerFilePatterns": [
+        "/^home/\\.chezmoiexternals/[^/]+\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "https://raw\\.githubusercontent\\.com/(?<depName>GeorgeFilipkin/pulsemixer|alexanderepstein/Bash-Snippets|aminomancer/uc\\.css\\.js|apankrat/now\\.sh|arzzen/git-quick-stats|pipeseroni/pipes\\.sh|sdushantha/tmpmail)/(?<currentDigest>[0-9a-f]{40})/"
+      ],
+      "packageNameTemplate": "https://github.com/{{{depName}}}",
+      "currentValueTemplate": "master",
+      "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "description": "translate-shell, fetched at a commit of its develop branch with its sha256; checked by the pins workflow.",
+      "managerFilePatterns": [
+        "/^home/\\.chezmoiexternals/[^/]+\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "https://raw\\.githubusercontent\\.com/(?<depName>soimort/translate-shell)/(?<currentDigest>[0-9a-f]{40})/"
+      ],
+      "packageNameTemplate": "https://github.com/{{{depName}}}",
+      "currentValueTemplate": "develop",
+      "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "description": "The tridactyl native messenger installer, at a release tag with its sha256; checked by the pins workflow.",
+      "managerFilePatterns": [
+        "/^home/\\.chezmoiscripts/run_once_after_03-setup-tridactyl\\.sh\\.tmpl$/"
+      ],
+      "matchStrings": [
+        "installer_version=\"(?<currentValue>[0-9.]+)\""
+      ],
+      "depNameTemplate": "tridactyl/native_messenger",
+      "datasourceTemplate": "github-tags"
     }
   ],
   "packageRules": [

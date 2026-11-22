@@ -8,8 +8,13 @@ setup() {
 @test "pins::list finds every pin of the repository, each with a digest" {
   run pins::list "${DOTFILES_DIR}"
   assert_success
-  # Ten in setup.sh, three in age.yaml.tmpl, the delta theme.
-  assert_equal "${#lines[@]}" 14
+  # Ten in setup.sh, three in age.yaml.tmpl, the tridactyl installer, and
+  # every external fetched at a commit.
+  local externals
+  externals="$(grep -chE 'raw\.githubusercontent\.com/[^/]+/[^/]+/[0-9a-f]{40}/' \
+    "${DOTFILES_DIR}"/home/.chezmoiexternals/*.tmpl | awk '{ n += $1 } END { print n }')"
+  ((externals > 0)) || fail "no external pinned at a commit"
+  assert_equal "${#lines[@]}" "$((14 + externals))"
   local file key url digest
   while IFS=$'\t' read -r file key url digest; do
     [[ "${url}" == https://* ]] || fail "${file} ${key}: no URL"
@@ -39,8 +44,14 @@ setup() {
     > "${root}/scripts/setup.sh"
   printf '      "amd64" "%s" }}\n  version: v1.0.0\n' "${good}" \
     > "${root}/home/.chezmoitemplates/dytoy/age.yaml.tmpl"
-  printf '  url: https://raw.githubusercontent.com/catppuccin/delta/%s/x\n  checksum:\n    sha256: "%s"\n' \
-    "$(printf 'a%.0s' {1..40})" "${good}" > "${root}/home/.chezmoiexternals/catppuccin.yaml.tmpl"
+  local commit
+  commit="$(printf 'a%.0s' {1..40})"
+  printf '.config/git/delta:\n  url: %s\n  checksum:\n    sha256: "%s"\n' \
+    "https://raw.githubusercontent.com/catppuccin/delta/${commit}/x" "${good}" \
+    > "${root}/home/.chezmoiexternals/catppuccin.yaml.tmpl"
+  mkdir -p "${root}/home/.chezmoiscripts"
+  printf 'installer_version="0.1.0"\ninstaller_sha256="%s"\n' "${good}" \
+    > "${root}/home/.chezmoiscripts/run_once_after_03-setup-tridactyl.sh.tmpl"
   run pins::check "${root}"
   assert_success
   assert_output ""

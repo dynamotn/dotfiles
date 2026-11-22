@@ -17,7 +17,6 @@ function pins::list {
   local root
   dybatpho::expect_args root -- "$@"
   local setup="scripts/setup.sh" age="home/.chezmoitemplates/dytoy/age.yaml.tmpl"
-  local delta="home/.chezmoiexternals/catppuccin.yaml.tmpl"
   local version table key digest url tables digests
   # setup.sh: AGE_VERSION, YQ_VERSION, and a table of `[os_arch]="digest"`
   # lines for each.
@@ -49,10 +48,28 @@ function pins::list {
     url="https://github.com/FiloSottile/age/releases/download/${version}/age-${version}-linux-${key}.tar.gz"
     printf '%s\t%s\t%s\t%s\n' "${age}" "${key}" "${url}" "${digest}"
   done <<< "${digests}"
-  # catppuccin.yaml.tmpl: the delta theme, at a commit, with its checksum.
-  url="$(sed -n 's|^  url: \(https://raw.githubusercontent.com/catppuccin/delta/.*\)$|\1|p' "${root}/${delta}")"
-  digest="$(sed -n '/catppuccin\/delta\//,/sha256:/s/^ *sha256: "\([0-9a-f]*\)"$/\1/p' "${root}/${delta}")"
-  printf '%s\t%s\t%s\t%s\n' "${delta}" ".config/git/delta" "${url}" "${digest}"
+  # The externals fetched at a commit with their checksum, the delta theme
+  # among them: each target, then its url, then its sha256.
+  local external
+  for external in "${root}"/home/.chezmoiexternals/*.tmpl; do
+    [[ -e "${external}" ]] || continue
+    awk -v file="${external#"${root}/"}" '
+      /^[^ ].*:$/ && !/^\{\{-/ { key = $0; sub(/:$/, "", key); url = ""; next }
+      /^  url: .*raw\.githubusercontent\.com\/[^\/]+\/[^\/]+\/[0-9a-f]{40}\// {
+        url = $0; sub(/^  url: /, "", url); gsub(/[\047"]/, "", url); next
+      }
+      url && /^ +sha256: / {
+        digest = $0; sub(/^ +sha256: /, "", digest); gsub(/"/, "", digest)
+        # Never an empty field: read takes a run of tabs for one.
+        printf "%s\t%s\t%s\t%s\n", file, (key == "" ? "-" : key), url, digest; url = ""
+      }' "${external}"
+  done
+  # The tridactyl installer, at a release tag, with its checksum.
+  local tridactyl="home/.chezmoiscripts/run_once_after_03-setup-tridactyl.sh.tmpl"
+  version="$(sed -n 's/^installer_version="\(.*\)"$/\1/p' "${root}/${tridactyl}")"
+  digest="$(sed -n 's/^installer_sha256="\(.*\)"$/\1/p' "${root}/${tridactyl}")"
+  url="https://raw.githubusercontent.com/tridactyl/native_messenger/${version}/installers/install.sh"
+  printf '%s\t%s\t%s\t%s\n' "${tridactyl}" "installer" "${url}" "${digest}"
 }
 
 #######################################
