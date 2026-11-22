@@ -772,7 +772,7 @@ function dytoy::install_arch_package {
 #######################################
 # @description Add an APT repository from the YAML file
 # @arg $1 string YAML content
-# @arg $2 string OS type, "ubuntu" or "termux"
+# @arg $2 string OS type, "ubuntu", the only one with APT repositories here
 #######################################
 function dytoy::add_apt_repo {
   local yaml os
@@ -782,23 +782,14 @@ function dytoy::add_apt_repo {
   repo=$(dytoy::get_field "${yaml}" "repo")
   [[ "${repo}" == "null" ]] && return
 
-  local repo_name components suite key
-  repo_name=$(dytoy::get_field "${yaml}" "repo_name")
+  local components suite key
   components=$(dytoy::get_field "${yaml}" "components")
   suite=$(dytoy::get_field "${yaml}" "suite")
   key=$(dytoy::get_field "${yaml}" "key")
 
-  [[ "${repo_name}" == "null" ]] && repo_name=${name}
   if [[ "${suite}" == "null" ]]; then
-    case "${os}" in
-      ubuntu)
-        suite=$(dybatpho::os_release UBUNTU_CODENAME) || suite=""
-        ;;
-      termux)
-        suite=""
-        ;;
-      *) ;;
-    esac
+    suite=""
+    [[ "${os}" != "ubuntu" ]] || suite=$(dybatpho::os_release UBUNTU_CODENAME) || suite=""
   fi
   [[ "${key}" != "null" ]] || dybatpho::die "APT repository of ${name} has no key"
   # Debian has no UBUNTU_CODENAME and a PPA does not serve it: a line written
@@ -809,7 +800,7 @@ function dytoy::add_apt_repo {
     return 0
   fi
   local url="${repo//%v/${suite}}"
-  package_manager::add_apt_repo "${repo_name}" "${url}" "${suite}" "${components}" "${key}"
+  package_manager::add_apt_repo "${name}" "${url}" "${suite}" "${components}" "${key}"
   package_manager::sync_apt_repo
 }
 

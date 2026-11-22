@@ -42,21 +42,6 @@ setup() {
   assert_failure
 }
 
-@test "package_manager::add_apt_repo finds Termux's prefix when PREFIX is not set" {
-  # Termux exports PREFIX, but a shell that has the Termux tools without it --
-  # a proot, or a stripped environment -- stopped on `PREFIX: unbound variable`.
-  export DRY_RUN='true'
-  printf '#!/bin/sh\n' > "${HOME}/.local/bin/termux-setup-storage"
-  chmod +x "${HOME}/.local/bin/termux-setup-storage"
-  unset PREFIX
-
-  run --separate-stderr package_manager::add_apt_repo sample https://packages.example stable main ABCD1234
-  assert_success
-  refute_stderr --partial "unbound variable"
-  assert_output --partial '/data/data/com.termux/files/usr/etc/apt/sources.list.d/sample.list'
-  assert_output --partial '/data/data/com.termux/files/usr/etc/apt/trusted.gpg.d/sample.gpg'
-}
-
 @test "package_manager::add_apt_repo dearmors an armored key and keeps a binary one" {
   export DRY_RUN='true'
   local gpg_calls="${BATS_TEST_TMPDIR}/gpg-calls"

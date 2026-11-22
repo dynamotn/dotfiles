@@ -321,7 +321,7 @@ EOF
 }
 
 #######################################
-# @description Add repository of APT (include PPA) to Ubuntu, Debian, Termux...
+# @description Add repository of APT (include PPA) to Ubuntu or Debian
 # @arg $1 string Name of repository
 # @arg $2 string URL of repository
 # @arg $3 string Suite of repository (e.g., bionic, focal, stable)
@@ -332,11 +332,6 @@ function package_manager::add_apt_repo {
   local name url suite components key
   dybatpho::expect_args name url suite components key -- "$@"
   local apt_dir="/etc/apt"
-  if dybatpho::is command termux-setup-storage; then
-    # Termux exports PREFIX; a shell that has its tools without it falls back to
-    # the prefix Termux installs into, rather than stopping on an unset name.
-    apt_dir="$(dybatpho::path_join "${PREFIX:-/data/data/com.termux/files/usr}" "etc" "apt")"
-  fi
   local path gpg_path
   path="$(dybatpho::path_join "${apt_dir}" "sources.list.d" "${name}.list")"
   gpg_path="$(dybatpho::path_join "${apt_dir}" "trusted.gpg.d" "${name}.gpg")"
