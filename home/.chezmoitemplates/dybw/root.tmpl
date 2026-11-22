@@ -2,11 +2,11 @@
        side by side, as each trusts only the other one beside it. On macOS it
        is the Homebrew prefix: pinentry-mac is a Homebrew program, writable by
        the user, and dybw trusts such a pinentry only from its own install
-       prefix, never from one inside the home (ADR 0008), so ~/.cargo would
-       refuse it. Elsewhere the pinentry is a system package, and ~/.cargo is
-       cargo's own default. */ -}}
+       prefix, never from one inside the home (ADR 0008), so ~/.local would
+       refuse it. Elsewhere the pinentry is a root-owned system package, which
+       dybw trusts from anywhere, and ~/.local/bin is dytoy's own default. */ -}}
 {{- if eq .chezmoi.os "darwin" -}}
 /opt/homebrew
 {{- else -}}
-{{ .chezmoi.homeDir }}/.cargo
+{{ .chezmoi.homeDir }}/.local
 {{- end -}}

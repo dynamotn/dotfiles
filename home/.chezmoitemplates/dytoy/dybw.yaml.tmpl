@@ -9,36 +9,44 @@ order: 20
 {{- /* Not on Termux nor in containers: dybw needs macOS or Linux with a
        pinentry, and those machines keep no vault at all. */ -}}
 {{- if and (ne .chezmoi.os "android") (ne .kind "container") }}
+{{- /* The release builds there are: Linux (musl, static) on amd64 and
+       arm64, macOS on Apple silicon only. */}}
+{{- $target := "" }}
+{{- if eq .chezmoi.os "linux" }}
+{{-   with includeTemplate "dytoy_lib/arch.tmpl" (dict "ctx" . "arm" "aarch64") }}
+{{-     $target = printf "%s-linux-musl" . }}
+{{-   end }}
+{{- else if and (eq .chezmoi.os "darwin") (eq .chezmoi.arch "arm64") }}
+{{-   $target = "aarch64-apple-darwin" }}
+{{- end }}
 name: dybw
 is_essential: true
-method: shell
-# The dybw-cli commit to build, from its public GitHub mirror (the GitLab
-# repository is private). Bumping it changes this definition, so the next
-# apply builds dybw again (`dytoy shell --no-check-installed -t dybw` by
-# hand); then restart the agent service so it runs the new binary.
-version: 66617f2a07bef29c5660412a4f18867ef1f8c4a6
+{{- if $target }}
+method: binary
 dependencies:
-  - rust
   - pinentry
+# Both binaries into one directory, see dybw/root.tmpl: /opt/homebrew/bin on
+# macOS, ~/.local/bin on Linux.
+location: {{ includeTemplate "dybw/root.tmpl" . }}/bin
+github:
+  repo: dynamotn/dybw
+  # Pinned to a tag, so dytoy never asks for the latest release (which would
+  # skip this prerelease). To bump: set the new tag here and apply; the
+  # changed definition makes dytoy download dybw again
+  # (`dytoy binary --no-check-installed -t dybw` by hand). Then restart the
+  # agent service so it runs the new binary.
+  version: v1.0.0-rc.1
+  release_asset: dybw-%1v-{{ $target }}.tar.gz
+  # Each asset has its own `<asset>.sha256` next to it
+  sha256: dybw-%1v-{{ $target }}.tar.gz.sha256
+archive:
+  - path: dybw
+  - path: dybw-agent
+{{- else }}
+# No dybw release for {{ .chezmoi.os }}/{{ .chezmoi.arch }}: fail the install
+# rather than leave the vault behind without a word.
+method: shell
 content: |-
-  # mise's rust installs cargo through rustup, into ~/.cargo/bin
-  PATH="${HOME}/.cargo/bin:${PATH}"
-  dybatpho::is command cargo || dybatpho::die "cargo is not installed, run: dytoy mise -t rust"
-  {{- if eq .chezmoi.os "darwin" }}
-  # dybw-peer builds its Secure Enclave code with the Command Line Tools' swiftc
-  xcrun --find swiftc &> /dev/null || dybatpho::die "swiftc is missing, run: xcode-select --install"
-  {{- end }}
-  dybw_root="{{ includeTemplate "dybw/root.tmpl" . }}"
-  # Fail before a build of minutes when the root cannot take the binaries,
-  # such as a Mac without /opt/homebrew or with it owned by another user
-  mkdir -p "${dybw_root}" 2> /dev/null || true
-  [[ -w "${dybw_root}" ]] || dybatpho::die "${dybw_root} is not writable, dybw cannot be installed there"
-  # Both binaries into one directory, see dybw/root.tmpl. Both repositories
-  # are public over HTTPS, but dynet may rewrite https://github.com/ and
-  # https://gitlab.com/ to SSH, and cargo's built-in git follows that rewrite
-  # too; only the git CLI then reads ~/.ssh/config (ssh.github.com:443).
-  CARGO_NET_GIT_FETCH_WITH_CLI=true cargo install --locked \
-    --root "${dybw_root}" \
-    --git https://github.com/dynamotn/dybw.git --rev "${DYTOY_VERSION}" \
-    dybw dybw-agent
+  dybatpho::die "dybw publishes no build for {{ .chezmoi.os }}/{{ .chezmoi.arch }}, only Linux amd64/arm64 and macOS arm64"
+{{- end }}
 {{- end }}

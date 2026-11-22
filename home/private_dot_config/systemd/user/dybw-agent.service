@@ -20,7 +20,7 @@ ConditionEnvironment=|DISPLAY
 
 [Service]
 # Next to dybw: dybw starts the agent beside itself, and the agent trusts the dybw beside it.
-ExecStart=%h/.cargo/bin/dybw-agent
+ExecStart=%h/.local/bin/dybw-agent
 # A crash only: `dybw agent stop` (exit 0) stays stopped until the next dybw call or login.
 Restart=on-abnormal
 

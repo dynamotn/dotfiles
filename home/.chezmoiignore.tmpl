@@ -101,7 +101,7 @@ Library/thunderbird
 {{/* No account to render a profile from (dybw/config.toml.tmpl) */}}
 .config/dybw
 {{- end }}
-{{/* The rbw link waits until dytoy has built the dybw it points to */}}
+{{/* The rbw link waits until dytoy has installed the dybw it points to */}}
 {{- if not (stat (printf "%s/bin/dybw" (includeTemplate "dybw/root.tmpl" .))) }}
 .local/bin/rbw
 {{- end }}

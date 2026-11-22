@@ -5,20 +5,20 @@
 # agent on macOS, that runs `dybw-agent` in the graphical session, so a hotkey
 # with no terminal behind it still gets a GUI pinentry. The hook carries one
 # hash over both unit files, so it re-runs whenever one changes. It waits,
-# with a warning, until dytoy has built dybw-agent. Other init systems get
+# with a warning, until dytoy has installed dybw-agent. Other init systems get
 # nothing: dybw starts its agent on demand there.
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/dybatpho/init.sh"
 dybatpho::register_common_handlers
 . "{{ .chezmoi.sourceDir }}/../scripts/lib/init_system.sh"
 # units hash: {{ list (include "private_dot_config/systemd/user/dybw-agent.service") (include "Library/LaunchAgents/org.dybw.agent.plist.tmpl") | join "\n" | sha256sum }}
 {{- $agent := printf "%s/bin/dybw-agent" (includeTemplate "dybw/root.tmpl" .) }}
-{{- /* Changes once dytoy has built it, so an apply that found none runs again */}}
-# dybw-agent built: {{ if stat $agent }}yes{{ else }}no{{ end }}
+{{- /* Changes once dytoy has installed it, so an apply that found none runs again */}}
+# dybw-agent installed: {{ if stat $agent }}yes{{ else }}no{{ end }}
 {{- if and (ne .kind "container") (eq .initSystem "systemd" "launchd") }}
 
 agent="{{ $agent }}"
 if ! dybatpho::is executable "${agent}"; then
-  dybatpho::warn "${agent} is not built yet, run: dytoy shell -t dybw"
+  dybatpho::warn "${agent} is not installed yet, run: dytoy binary -t dybw"
   exit 0
 fi
 

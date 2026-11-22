@@ -126,33 +126,38 @@ containers, which keep no vault.
 
 | Piece | Where |
 |-------|-------|
-| `dybw`, `dybw-agent` | built from source by `dytoy` (`dytoy/dybw.yaml.tmpl`, pinned to a dybw-cli commit, fetched from its public GitHub mirror) into `/opt/homebrew/bin` on macOS, `~/.cargo/bin` on Linux |
+| `dybw`, `dybw-agent` | downloaded by `dytoy` (`dytoy/dybw.yaml.tmpl`) from a pinned [GitHub release](https://github.com/dynamotn/dybw/releases), checked against its `.sha256`, into `/opt/homebrew/bin` on macOS, `~/.local/bin` on Linux. Builds exist for Linux amd64/arm64 and Apple silicon; an Intel Mac fails the install |
 | `~/.config/dybw/config.toml` | `dybw/config.toml.tmpl`: profile `default` from `secrets/data/personal/rbw.yaml.age`, `enterprise-f1` from `enterprise-F1/rbw.yaml.age` (what `RBW_PROFILE=enterprise-f1` picks), and the machine's pinentry |
 | the agent at login | `org.dybw.agent` LaunchAgent on macOS (log in `~/Library/Logs/dybw-agent.log`), `dybw-agent.service` with the graphical session on systemd; `04-setup-dybw-agent` loads it. Elsewhere, and whenever none runs, `dybw` starts it on demand |
 
 On macOS dybw sits in the Homebrew prefix on purpose: pinentry-mac is a
 Homebrew program the user can write to, and dybw trusts such a pinentry only
 from its own install prefix, never from one inside the home (dybw ADR 0008).
-The `rbw` link and the agent service wait until the build is there, so the
-apply after the one that built dybw adds them.
+The `rbw` link and the agent service wait until dybw is there, so the apply
+after the one that installed dybw adds them.
 
-To move to a newer dybw-cli, bump `version` in `dytoy/dybw.yaml.tmpl` and
-apply: the changed definition makes dytoy build dybw again
-(`dytoy shell --no-check-installed -t dybw` does it by hand). Then restart the
+To move to a newer dybw, set `github.version` in `dytoy/dybw.yaml.tmpl` to
+the new release tag and apply: the changed definition makes dytoy download
+dybw again (`dytoy binary --no-check-installed -t dybw` does it by hand). The
+tag is pinned, so a prerelease works as well as a release. Then restart the
 agent service on the new binary: `launchctl kickstart -k
 gui/$(id -u)/org.dybw.agent` on macOS, `systemctl --user restart dybw-agent`
 on Linux, or `dybw agent stop` where none runs (the next `dybw` starts it).
+
+A machine that built dybw from source before keeps that build, as dytoy skips
+a tool already on `PATH`: run `dytoy binary --no-check-installed -t dybw`
+once, then remove the build's leftovers, `/opt/homebrew/.crates.toml` and
+`/opt/homebrew/.crates2.json` on macOS, `cargo uninstall dybw` on Linux.
 
 ### Switching a machine from rbw
 
 Once per machine, in a terminal (not from an AI agent):
 
 1. Stop rbw's agent while `rbw` is still rbw: `rbw stop-agent`.
-2. `chezmoi diff`, then `chezmoi apply`. It installs Rust and the pinentry,
-   builds dybw (minutes) and writes `~/.config/dybw/config.toml`. A failed
-   build says why (no `cargo`, no `swiftc`: `xcode-select --install`, no
-   network to GitHub or GitLab) and leaves rbw as it was; fix it and run
-   `dytoy shell -t dybw`.
+2. `chezmoi diff`, then `chezmoi apply`. It installs the pinentry, downloads
+   dybw and writes `~/.config/dybw/config.toml`. A failed download says why
+   (no network to GitHub, a checksum mismatch, no build for this machine) and
+   leaves rbw as it was; fix it and run `dytoy binary -t dybw`.
 3. `chezmoi apply` again: it adds the `rbw` link and loads the agent
    service. `command -v rbw` gives `~/.local/bin/rbw`, `rbw --version` prints
    `rbw 1.15.0`.
