@@ -4,6 +4,7 @@
     "config:recommended",
     ":dependencyDashboard"
   ],
+  "minimumReleaseAge": "7 days",
   "enabledManagers": [
     "pre-commit",
     "github-actions",
@@ -109,6 +110,13 @@
     }
   ],
   "packageRules": [
+    {
+      "description": "git-refs gives no release timestamp, so a minimum release age would hold the submodule and commit-pinned bumps forever.",
+      "matchDatasources": [
+        "git-refs"
+      ],
+      "minimumReleaseAge": null
+    },
     {
       "description": "The dotfiles submodules follow their own branches; group their bumps into one pull request instead of one each.",
       "matchManagers": [
